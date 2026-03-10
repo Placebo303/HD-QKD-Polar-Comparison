@@ -31,14 +31,14 @@ python experiments/run_e2e_pipeline.py \
     --bws 150 \
     --acq-time 0.1
 Expected Output: The script will parse the time-tags, perform frame synchronization, call the C++ Polar decoder, and output the Secure Key Rate (SKR) and Practical Information Efficiency (PIE).
-
+```
 📊 Reproducing Paper Results
 To reproduce the full performance sweeps (Heatmaps, Dimension vs. PIE curves) across different attenuation levels (6dB, 10dB, 16dB, 20dB), use the provided sweeping drivers:
 
-Bash
+```Bash
 python experiments/run_golden_sweep_four_datasets.py
 (Note: Full sweeps require access to the complete raw .ttbin datasets and may take several hours depending on your CPU constraints).
-
+```
 📝 Citation
 If you find this code or our conceptual framework useful in your research, please consider citing our paper:
 
