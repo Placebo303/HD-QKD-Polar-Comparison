@@ -1,50 +1,59 @@
-# High-Dimensional QKD via Adaptive Polar Codes
+﻿# High-Dimensional QKD Polar Pipeline
 
-This repository contains the official End-to-End (E2E) decoding and reconciliation pipeline for our paper on **High-Dimensional Quantum Key Distribution (HD-QKD)**. 
+This repository contains the current end-to-end HD-QKD Polar-code workflow, including:
+- pairing/materialization from `.ttbin`
+- Polar-based information reconciliation evaluation
+- actual-IR replay auditing
+- finite-key calibrated Zhong-like security aggregation
 
-By leveraging 5G-standardized Polar codes (CA-SCL decoding) and an adaptive dimensionality framework, our system dynamically extracts secure keys across variable channel losses, achieving record-breaking Practical Information Efficiency (PIE) in ultra-high dimensions (up to $d=4096$).
+## Current Status
 
-## 🗂️ Repository Structure
+As of 2026-03-27, the current reporting line is:
+- `PRIMARY_REPORTING_MODE = actual_ir_finite_key`
+- `BETA_BASELINE_ROLE = comparison_only`
+- `NIU_2016_STATUS = not_supported_by_current_observables`
 
-- `src/`: Core algorithm modules.
-  - `qkd_io/`: High-performance time-tagger (`.ttbin`) parsing engines.
-  - `workflow/`: Joint sequence extraction and timing alignment (FFT-based).
-  - `reconciliation/`: Information reconciliation utilizing a highly optimized C++ Polar code wrapper (CA-SCL).
-- `experiments/`: Main drivers to reproduce the results presented in the paper.
-- `tools/`: Utility scripts for data visualization and metric aggregation.
+The authoritative latest results are **not** the older `_tmp_longrun_stage*` directories.
+Use these instead:
+- fresh full rerun root: [results/_tmp_longrun_fresh_rerun](/D:/Code/HD-QKD_Polar_Release/results/_tmp_longrun_fresh_rerun)
+- refined frame-accounting pass: [results/_tmp_minrerun_stageC_security_20dB](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageC_security_20dB)
+- refined cross-loss pack: [results/_tmp_minrerun_stageD_cross_loss](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageD_cross_loss)
 
-## ⚙️ Prerequisites
+## Main Documents
 
-- Python 3.9+
-- Standard data science stack: `numpy`, `pandas`, `scipy`
-- **C++ Decoder**: A pre-compiled `ca_scl.dll` (Windows) / `.so` (Linux) is included in `src/reconciliation/cpp_polar/`. Ensure you have the appropriate C++ redistributables installed.
+- latest workflow and run method:
+  - [docs/POLAR_CODE_MAINFLOW_20260327.md](/D:/Code/HD-QKD_Polar_Release/docs/POLAR_CODE_MAINFLOW_20260327.md)
+- latest results and authoritative output paths:
+  - [docs/LATEST_RESULTS_20260327.md](/D:/Code/HD-QKD_Polar_Release/docs/LATEST_RESULTS_20260327.md)
 
-## 🚀 Quick Start (Smoke Test)
+## Main Entry Points
 
-To verify that the E2E pipeline and the C++ Polar decoder are configured correctly, you can run a lightweight smoke test using a short acquisition time:
+Front half:
+- [experiments/run_e2e_pipeline.py](/D:/Code/HD-QKD_Polar_Release/experiments/run_e2e_pipeline.py)
+- [experiments/run_real_polar_max_pie.py](/D:/Code/HD-QKD_Polar_Release/experiments/run_real_polar_max_pie.py)
 
-```bash
-# Ensure you are in the root of the repository
-python experiments/run_e2e_pipeline.py \
-    --ttbin "PATH_TO_YOUR_DATA.ttbin" \
-    --dims 1024 \
-    --bws 150 \
-    --acq-time 0.1
-Expected Output: The script will parse the time-tags, perform frame synchronization, call the C++ Polar decoder, and output the Secure Key Rate (SKR) and Practical Information Efficiency (PIE).
+Replay / security:
+- [tools/longrun_build_replay_index.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_replay_index.py)
+- [tools/longrun_run_actual_ir_replay.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_run_actual_ir_replay.py)
+- [tools/longrun_build_finite_key_audit_table.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_finite_key_audit_table.py)
+- [tools/longrun_build_security_master_table.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_security_master_table.py)
 
-📊 Reproducing Paper Results
-To reproduce the full performance sweeps (Heatmaps, Dimension vs. PIE curves) across different attenuation levels (6dB, 10dB, 16dB, 20dB), use the provided sweeping drivers:
+Refined frame-accounting pass:
+- [tools/minrerun_audit_frame_accounting_inputs.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_audit_frame_accounting_inputs.py)
+- [tools/minrerun_run_frame_audit.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_run_frame_audit.py)
+- [tools/minrerun_rebuild_security_master_20dB.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_rebuild_security_master_20dB.py)
+- [tools/minrerun_build_cross_loss_refined_summary.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_build_cross_loss_refined_summary.py)
 
-Bash
-python experiments/run_golden_sweep_four_datasets.py
-(Note: Full sweeps require access to the complete raw .ttbin datasets and may take several hours depending on your CPU constraints).
+## Recommended Usage
 
-📝 Citation
-If you find this code or our conceptual framework useful in your research, please consider citing our paper:
+If you only need the current best result package, read the existing outputs and do not rerun the physics front half.
 
-(Citation details will be updated upon publication)
+If you need to reproduce the current workflow from raw data, use the split boundary flow described in [docs/POLAR_CODE_MAINFLOW_20260327.md](/D:/Code/HD-QKD_Polar_Release/docs/POLAR_CODE_MAINFLOW_20260327.md):
+1. extraction/materialization with `--skip-polar`
+2. Polar evaluation from cached `_tmp_grid_table.csv` and `_tmp_src_table.csv`
+3. actual-IR replay and security aggregation
+4. refined frame-accounting rebuild
 
-📜 License
-This project is licensed under the MIT License.
+## License
 
-***
+MIT

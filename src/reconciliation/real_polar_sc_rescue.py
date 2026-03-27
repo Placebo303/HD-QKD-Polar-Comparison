@@ -82,7 +82,13 @@ def polar_encode_non_systematic(u: np.ndarray, n: int) -> np.ndarray:
 
 @njit(cache=True)
 def polar_sc_decode(llr: np.ndarray, mask: np.ndarray, n: int) -> np.ndarray:
-    # mask[pos] == 1 => information bit, else frozen 0
+    frozen_values = np.zeros(llr.size, dtype=np.int8)
+    return polar_sc_decode_with_frozen(llr, mask, frozen_values, n)
+
+
+@njit(cache=True)
+def polar_sc_decode_with_frozen(llr: np.ndarray, mask: np.ndarray, frozen_values: np.ndarray, n: int) -> np.ndarray:
+    # mask[pos] == 1 => information bit, else frozen bit from frozen_values[pos]
     N = llr.size
     inter_llr = np.zeros((n + 1, N), dtype=np.float64)
     inter_bits = np.zeros((n + 1, N), dtype=np.int8)
@@ -115,7 +121,7 @@ def polar_sc_decode(llr: np.ndarray, mask: np.ndarray, n: int) -> np.ndarray:
         # Leaf decision
         decision = 1 if inter_llr[n, 0] < 0.0 else 0
         if mask[pos] == 0:
-            decision = 0
+            decision = int(frozen_values[pos] & 1)
         inter_bits[n, pos] = np.int8(decision)
 
         # Propagate partial sums upward

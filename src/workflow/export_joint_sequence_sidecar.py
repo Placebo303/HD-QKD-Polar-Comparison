@@ -144,6 +144,21 @@ def resolve_point_sources(point: str, *, merged_master: str | Path | None = None
         if merged_master is not None
         else REPO_ROOT / "results" / "fullgrid_20260220_1313" / "updated_merged_grid_master.csv"
     )
+    ttbin_override = str(os.getenv("HDQKD_TTBIN_FILE_OVERRIDE") or "").strip()
+    if ttbin_override:
+        arts = _load_artifacts(d, bw, mm)
+        cfg = _load_resolved_config(arts)
+        metrics_path = arts.get("metrics")
+        if metrics_path is None or (not Path(metrics_path).exists()):
+            raise FileNotFoundError("ttbin_metrics.json not found")
+        return {
+            "d": int(d),
+            "bw": int(bw),
+            "point_dir": Path(arts["point_dir"]),
+            "metrics_path": Path(metrics_path),
+            "resolved_config": cfg,
+        }
+
     point_dir = _find_point_dir_from_master(mm, d, bw)
     if point_dir is None:
         point_dir = _fallback_find_point_dir(d, bw)
@@ -152,7 +167,6 @@ def resolve_point_sources(point: str, *, merged_master: str | Path | None = None
     arts = _load_artifacts(d, bw, mm)
     cfg = _load_resolved_config(arts)
     # Optional runtime overrides for fast dataset switching without editing all point configs.
-    ttbin_override = str(os.getenv("HDQKD_TTBIN_FILE_OVERRIDE") or "").strip()
     ch_a_override = str(os.getenv("HDQKD_TTBIN_CH_A_OVERRIDE") or "").strip()
     ch_b_override = str(os.getenv("HDQKD_TTBIN_CH_B_OVERRIDE") or "").strip()
     if ttbin_override or ch_a_override or ch_b_override:
@@ -526,6 +540,149 @@ def write_materialize_diagnostics(sidecar_root: str, diag: dict) -> dict:
     return {"delta_hist_path": str(delta_csv), "seq_pair_stats_path": str(stats_json)}
 
 
+def _build_occupancy_filter_summary(
+    *,
+    d: int,
+    bw: int,
+    frame_period_ps: int,
+    pairing_mode: str,
+    threshold_ps: int | None,
+    filter_enabled: bool,
+    time_pairs: np.ndarray | None,
+    delay_ps: int,
+    n_candidates_fallback: int,
+) -> tuple[np.ndarray | None, dict[str, Any]]:
+    n_before = int(max(0, n_candidates_fallback))
+    keep_mask: np.ndarray | None = None
+    n_drop_occ = 0
+    n_drop_multi = 0
+    n_kept = int(n_before)
+    n_frames_total = 0
+    n_frames_clean_single_single = 0
+    n_frames_cross_frame = 0
+    n_frames_a_multi = 0
+    n_frames_b_multi = 0
+    n_frames_both_multi = 0
+    n_pairs_in_clean_frames = 0
+    n_pairs_in_ambiguous_frames = int(n_before)
+    frame_diag_available = 0
+
+    if time_pairs is not None:
+        tp = np.asarray(time_pairs, dtype=np.int64).reshape(-1, 2)
+        n_before = int(tp.shape[0])
+        n_kept = int(n_before)
+        n_pairs_in_ambiguous_frames = int(n_before)
+        frame_diag_available = 1
+        if n_before > 0:
+            frame_a = np.floor_divide(tp[:, 0], int(max(1, frame_period_ps))).astype(np.int64, copy=False)
+            frame_b = np.floor_divide(tp[:, 1] - int(delay_ps), int(max(1, frame_period_ps))).astype(np.int64, copy=False)
+            all_frames = np.union1d(frame_a, frame_b).astype(np.int64, copy=False)
+            n_frames_total = int(all_frames.size)
+            if all_frames.size > 0:
+                same_frame = frame_a == frame_b
+                uniq_a, counts_a = np.unique(frame_a, return_counts=True)
+                uniq_b, counts_b = np.unique(frame_b, return_counts=True)
+                uniq_same, counts_same = np.unique(frame_a[same_frame], return_counts=True)
+                count_a_map = {int(k): int(v) for k, v in zip(uniq_a, counts_a)}
+                count_b_map = {int(k): int(v) for k, v in zip(uniq_b, counts_b)}
+                count_same_map = {int(k): int(v) for k, v in zip(uniq_same, counts_same)}
+                clean_frames: list[int] = []
+                for fr in all_frames:
+                    fr_i = int(fr)
+                    ca = count_a_map.get(fr_i, 0)
+                    cb = count_b_map.get(fr_i, 0)
+                    same_here = count_same_map.get(fr_i, 0)
+                    if ca == 1 and cb == 1 and same_here == 1:
+                        n_frames_clean_single_single += 1
+                        clean_frames.append(fr_i)
+                    elif ca > 1 and cb > 1:
+                        n_frames_both_multi += 1
+                    elif ca > 1:
+                        n_frames_a_multi += 1
+                    elif cb > 1:
+                        n_frames_b_multi += 1
+                    else:
+                        n_frames_cross_frame += 1
+                clean_frame_mask = same_frame & np.isin(frame_a, np.asarray(clean_frames, dtype=np.int64))
+                n_pairs_in_clean_frames = int(np.count_nonzero(clean_frame_mask))
+                n_pairs_in_ambiguous_frames = int(n_before - n_pairs_in_clean_frames)
+            occ_keep = frame_a == frame_b
+            n_drop_occ = int(n_before - int(np.count_nonzero(occ_keep)))
+
+            keep_mask = np.asarray(occ_keep, dtype=bool)
+            occ_idx = np.flatnonzero(keep_mask).astype(np.int64, copy=False)
+            if occ_idx.size > 0:
+                occ_frames = frame_a[occ_idx]
+                uniq_frames, uniq_counts = np.unique(occ_frames, return_counts=True)
+                bad_frames = uniq_frames[uniq_counts > 1]
+                if bad_frames.size > 0:
+                    multi_bad = np.isin(occ_frames, bad_frames)
+                    n_drop_multi = int(np.count_nonzero(multi_bad))
+                    keep_mask[occ_idx[multi_bad]] = False
+            n_kept = int(np.count_nonzero(keep_mask))
+        else:
+            keep_mask = np.zeros((0,), dtype=bool)
+
+    summary = {
+        "dimension": int(d),
+        "bin_width_ps": int(bw),
+        "n_candidates_before": int(n_before),
+        "n_kept_after": int(n_kept),
+        "n_dropped_occupancy": int(n_drop_occ),
+        "drop_frac_occupancy": (float(n_drop_occ) / float(n_before)) if int(n_before) > 0 else 0.0,
+        "n_dropped_multievent": int(n_drop_multi),
+        "drop_frac_multievent": (float(n_drop_multi) / float(n_before)) if int(n_before) > 0 else 0.0,
+        "filter_enabled": int(bool(filter_enabled)),
+        "frame_period_ps": int(frame_period_ps),
+        "pairing_mode": str(pairing_mode),
+        "threshold_ps": int(threshold_ps) if threshold_ps is not None else "",
+        "frame_diag_available": int(frame_diag_available),
+        "n_frames_total": int(n_frames_total),
+        "n_frames_clean_single_single": int(n_frames_clean_single_single),
+        "n_frames_cross_frame": int(n_frames_cross_frame),
+        "n_frames_A_multi": int(n_frames_a_multi),
+        "n_frames_B_multi": int(n_frames_b_multi),
+        "n_frames_both_multi": int(n_frames_both_multi),
+        "n_pairs_in_clean_frames": int(n_pairs_in_clean_frames),
+        "n_pairs_in_ambiguous_frames": int(n_pairs_in_ambiguous_frames),
+    }
+    return keep_mask, summary
+
+
+def write_occupancy_filter_summary(sidecar_root: str, summary: dict[str, Any]) -> dict[str, Any]:
+    root = Path(sidecar_root)
+    root.mkdir(parents=True, exist_ok=True)
+    out_csv = root / "occupancy_filter_summary.csv"
+    cols = [
+        "dimension",
+        "bin_width_ps",
+        "n_candidates_before",
+        "n_kept_after",
+        "n_dropped_occupancy",
+        "drop_frac_occupancy",
+        "n_dropped_multievent",
+        "drop_frac_multievent",
+        "filter_enabled",
+        "frame_period_ps",
+        "pairing_mode",
+        "threshold_ps",
+        "frame_diag_available",
+        "n_frames_total",
+        "n_frames_clean_single_single",
+        "n_frames_cross_frame",
+        "n_frames_A_multi",
+        "n_frames_B_multi",
+        "n_frames_both_multi",
+        "n_pairs_in_clean_frames",
+        "n_pairs_in_ambiguous_frames",
+    ]
+    with out_csv.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=cols)
+        w.writeheader()
+        w.writerow({k: summary.get(k, "") for k in cols})
+    return {"occupancy_filter_summary_path": str(out_csv)}
+
+
 def build_joint_counts_sparse_from_sequences(a_eff: np.ndarray, b_eff: np.ndarray, d: int) -> list[dict[str, float]]:
     q = int(d)
     if q <= 0:
@@ -819,6 +976,9 @@ def materialize_real_sequences_for_point(
     shared_t0_ps: np.ndarray | None = None,
     shared_t1_ps: np.ndarray | None = None,
     global_peak_center_ps: int | None = None,
+    request_peak_diagnostics: bool = False,
+    occupancy_filter: int = 0,
+    processing_rule_version: str = "legacy_v1",
 ) -> dict:
     outp = Path(out_dir)
     outp.mkdir(parents=True, exist_ok=True)
@@ -874,6 +1034,9 @@ def materialize_real_sequences_for_point(
             t1 = np.sort(ts[ch == 1])
         pairing_mode_req = str(pairing_mode).strip().lower() or "nearest"
         pairing_mode_l = str(pairing_mode_req)
+        processing_rule_version_l = str(processing_rule_version).strip().lower() or "legacy_v1"
+        if processing_rule_version_l not in {"legacy_v1", "pairing_v2"}:
+            raise ValueError(f"invalid processing_rule_version={processing_rule_version}")
         align_debug = os.getenv("HDQKD_ALIGN_DEBUG", "0") == "1"
         nearest_threshold_ps = max(1, _to_int(os.getenv("HDQKD_NEAREST_FRAME_THRESHOLD_PS", "40000"), 40_000) or 40_000)
         frame_period_ps = int(max(1, int(d)) * max(1, int(bw)))
@@ -893,12 +1056,19 @@ def materialize_real_sequences_for_point(
         peak_scan_range_ps = 0
         peak_bin_ps = 0
         peak_status = "not_requested"
+        use_legacy_nearest = False
+        occupancy_keep_mask: np.ndarray | None = None
+        occupancy_summary: dict[str, Any] | None = None
+        effective_pairing_window_ps: int | None = None
+        pairing_window_source_tag = "legacy_not_applicable"
         auto_peak_delay_for_nearest = bool(pairing_mode_l == "nearest" and auto_force_nearest and delay_override_ps is None)
         need_peak_stats = (
+            bool(request_peak_diagnostics)
+            or
             (pairing_mode_l == "peak_gated" and (delay_override_ps is None or peak_gate_sigma is not None))
             or auto_peak_delay_for_nearest
             or align_debug
-        ) and (global_peak_center_ps is None)
+        )
         if need_peak_stats:
             peak_info = _estimate_peak_stats_from_timetags(
                 t0,
@@ -909,7 +1079,9 @@ def materialize_real_sequences_for_point(
                 max_hist_bins=400_001,
                 debug=bool(align_debug),
             )
-            peak_center_ps = _to_int(peak_info.get("peak_center_ps"), 0)
+            local_peak_center_ps = _to_int(peak_info.get("peak_center_ps"), 0) or 0
+            if global_peak_center_ps is None:
+                peak_center_ps = int(local_peak_center_ps)
             peak_sigma_ps = peak_info.get("peak_sigma_ps")
             peak_to_bg = peak_info.get("peak_to_bg")
             corr_bins = _to_int(peak_info.get("corr_bins"), 0) or 0
@@ -919,7 +1091,7 @@ def materialize_real_sequences_for_point(
             peak_scan_range_ps = _to_int(peak_info.get("scan_range_ps_used"), 0) or 0
             peak_bin_ps = _to_int(peak_info.get("bin_ps_used"), 0) or 0
             peak_status = str(peak_info.get("status") or "unknown")
-            if auto_peak_delay_for_nearest and peak_status == "ok":
+            if auto_peak_delay_for_nearest and peak_status == "ok" and global_peak_center_ps is None:
                 used_delay_ps = int(peak_center_ps)
         elif auto_peak_delay_for_nearest and global_peak_center_ps is not None:
             used_delay_ps = int(peak_center_ps)
@@ -927,14 +1099,37 @@ def materialize_real_sequences_for_point(
         gate_width_ps = None
         gate_width_fallback = False
 
+        # legacy_v1 freezes the historical accepted-sample semantics, including
+        # the implicit nearest/fallback split used by existing canonical results.
+        # pairing_v2 instead makes the public time_pairs path the explicit mainline.
+        # To keep v2 auditable and prevent silent semantic drift, the pairing
+        # window must be resolved in one place and recorded with provenance.
+        # The resolved window below is therefore the canonical v2 processing-rule
+        # input for all time_pairs-compatible pairing modes.
+        def _resolve_effective_pairing_window_ps(threshold_ps_candidate: int | None) -> tuple[int | None, str]:
+            if processing_rule_version_l != "pairing_v2":
+                return None, "legacy_not_applicable"
+            if coinc_window_override_ps is not None:
+                return int(max(1, int(coinc_window_override_ps))), "explicit_coinc_window_override"
+            threshold_ps_eff = _to_int(threshold_ps_candidate, None)
+            if threshold_ps_eff is not None:
+                return int(max(1, int(threshold_ps_eff))), "threshold_ps"
+            return int(max(1, int(bw))), "bw_fallback"
+
         if pairing_mode_l == "peak_gated":
             if delay_override_ps is None:
                 used_delay_ps = int(peak_center_ps)
             if peak_gate_sigma is not None and peak_sigma_ps is not None and math.isfinite(float(peak_sigma_ps)):
                 gate_width_ps = int(max(1, round(float(peak_gate_sigma) * float(peak_sigma_ps))))
             else:
-                gate_width_ps = int(max(1, _to_int(coinc_window_override_ps, _to_int(ttbin_cfg.get("coincidence_window_ps"), int(bw))) or int(bw)))
+                gate_width_ps = _to_int(ttbin_cfg.get("coincidence_window_ps"), None)
                 gate_width_fallback = True
+            effective_pairing_window_ps, pairing_window_source_tag = _resolve_effective_pairing_window_ps(gate_width_ps)
+            gate_width_ps = (
+                int(effective_pairing_window_ps)
+                if processing_rule_version_l == "pairing_v2"
+                else int(max(1, _to_int(coinc_window_override_ps, gate_width_ps) or int(bw)))
+            )
             time_pairs = _pair_timetags_with_delay_window(
                 t0,
                 t1,
@@ -950,6 +1145,21 @@ def materialize_real_sequences_for_point(
             )
             if time_pairs.size == 0:
                 raise RuntimeError("no coincidence pairs generated (peak_gated)")
+            occupancy_keep_mask, occupancy_summary = _build_occupancy_filter_summary(
+                d=int(d),
+                bw=int(bw),
+                frame_period_ps=int(frame_period_ps),
+                pairing_mode=str(pairing_mode_l),
+                threshold_ps=int(gate_width_ps) if gate_width_ps is not None else None,
+                filter_enabled=bool(int(occupancy_filter) == 1),
+                time_pairs=time_pairs,
+                delay_ps=int(used_delay_ps),
+                n_candidates_fallback=int(time_pairs.shape[0]),
+            )
+            if bool(int(occupancy_filter) == 1) and occupancy_keep_mask is not None:
+                time_pairs = np.asarray(time_pairs[occupancy_keep_mask], dtype=np.int64)
+                if time_pairs.size == 0:
+                    raise RuntimeError("no coincidence pairs generated after occupancy filter (peak_gated)")
             a_bin = np.floor_divide(time_pairs[:, 0], int(max(1, bw)))
             b_bin = np.floor_divide((time_pairs[:, 1] - int(used_delay_ps)), int(max(1, bw)))
             pairs = np.column_stack((np.mod(a_bin, int(d)), np.mod(b_bin, int(d)))).astype(np.int64, copy=False)
@@ -959,15 +1169,22 @@ def materialize_real_sequences_for_point(
             # but never use it when shared timetag arrays are injected (legacy path
             # relies on `tt` object that is not populated in shared-array mode).
             shared_arrays_supplied = (shared_t0_ps is not None) and (shared_t1_ps is not None)
-            use_legacy_nearest = (
-                pairing_mode_l == "nearest"
-                and delay_override_ps is None
-                and coinc_window_override_ps is None
-                and (not auto_force_nearest)
-                and (not shared_arrays_supplied)
-            )
+            if processing_rule_version_l == "legacy_v1":
+                use_legacy_nearest = (
+                    pairing_mode_l == "nearest"
+                    and delay_override_ps is None
+                    and coinc_window_override_ps is None
+                    and (not auto_force_nearest)
+                    and (not shared_arrays_supplied)
+                )
             if not use_legacy_nearest and pairing_mode_l in {"nearest", "greedy", "two_pointer"}:
-                gate_width_ps = int(max(1, _to_int(coinc_window_override_ps, _to_int(ttbin_cfg.get("coincidence_window_ps"), int(bw))) or int(bw)))
+                threshold_ps_candidate = _to_int(ttbin_cfg.get("coincidence_window_ps"), None)
+                effective_pairing_window_ps, pairing_window_source_tag = _resolve_effective_pairing_window_ps(threshold_ps_candidate)
+                gate_width_ps = (
+                    int(effective_pairing_window_ps)
+                    if processing_rule_version_l == "pairing_v2"
+                    else int(max(1, _to_int(coinc_window_override_ps, threshold_ps_candidate) or int(bw)))
+                )
                 time_pairs = _pair_timetags_with_delay_window(
                     t0,
                     t1,
@@ -983,6 +1200,21 @@ def materialize_real_sequences_for_point(
                 )
                 if time_pairs.size == 0:
                     raise RuntimeError(f"no coincidence pairs generated ({pairing_mode_l})")
+                occupancy_keep_mask, occupancy_summary = _build_occupancy_filter_summary(
+                    d=int(d),
+                    bw=int(bw),
+                    frame_period_ps=int(frame_period_ps),
+                    pairing_mode=str(pairing_mode_l),
+                    threshold_ps=int(gate_width_ps) if gate_width_ps is not None else None,
+                    filter_enabled=bool(int(occupancy_filter) == 1),
+                    time_pairs=time_pairs,
+                    delay_ps=int(used_delay_ps),
+                    n_candidates_fallback=int(time_pairs.shape[0]),
+                )
+                if bool(int(occupancy_filter) == 1) and occupancy_keep_mask is not None:
+                    time_pairs = np.asarray(time_pairs[occupancy_keep_mask], dtype=np.int64)
+                    if time_pairs.size == 0:
+                        raise RuntimeError(f"no coincidence pairs generated after occupancy filter ({pairing_mode_l})")
                 a_bin = np.floor_divide(time_pairs[:, 0], int(max(1, bw)))
                 b_bin = np.floor_divide((time_pairs[:, 1] - int(used_delay_ps)), int(max(1, bw)))
                 pairs = np.column_stack((np.mod(a_bin, int(d)), np.mod(b_bin, int(d)))).astype(np.int64, copy=False)
@@ -992,6 +1224,17 @@ def materialize_real_sequences_for_point(
                 pairs, pmeta = _pairs_from_sorted_bins(b0_sorted=b0, b1_sorted=b1, dimension=int(d))
                 if pairs.size == 0:
                     raise RuntimeError("no coincidence pairs generated")
+                _, occupancy_summary = _build_occupancy_filter_summary(
+                    d=int(d),
+                    bw=int(bw),
+                    frame_period_ps=int(frame_period_ps),
+                    pairing_mode=str(pairing_mode_l),
+                    threshold_ps=int(bw),
+                    filter_enabled=bool(int(occupancy_filter) == 1),
+                    time_pairs=None,
+                    delay_ps=int(used_delay_ps),
+                    n_candidates_fallback=int(pairs.shape[0]),
+                )
 
         pairs_eff = (np.asarray(pairs, dtype=np.int64) // int(factor)).astype(np.int64, copy=False)
         n_take = int(n_take_req)
@@ -1041,6 +1284,8 @@ def materialize_real_sequences_for_point(
             "nearest_threshold_ps": int(nearest_threshold_ps),
             "peak_gate_sigma": peak_gate_sigma,
             "gate_width_ps": gate_width_ps,
+            "effective_pairing_window_ps": effective_pairing_window_ps,
+            "pairing_window_source_tag": pairing_window_source_tag,
             "gate_width_fallback": bool(gate_width_fallback),
             "peak_center_ps": peak_center_ps,
             "peak_sigma_ps": peak_sigma_ps,
@@ -1059,6 +1304,39 @@ def materialize_real_sequences_for_point(
             "n_pairs_total_available": int(pmeta.get("n_pairs", 0)),
             "slice_start_pair": int(start),
             "slice_end_pair": int(end),
+            "processing_rule_version": processing_rule_version_l,
+            "pairing_path_tag": (
+                "legacy_nearest_fallback"
+                if bool(use_legacy_nearest)
+                else (
+                    f"time_pairs_{pairing_mode_l}"
+                    if pairing_mode_l in {"nearest", "greedy", "two_pointer", "peak_gated"}
+                    else "time_pairs_other"
+                )
+            ),
+            "occupancy_filter": occupancy_summary or {
+                "dimension": int(d),
+                "bin_width_ps": int(bw),
+                "n_candidates_before": int(pmeta.get("n_pairs", 0)),
+                "n_kept_after": int(pmeta.get("n_pairs", 0)),
+                "n_dropped_occupancy": 0,
+                "drop_frac_occupancy": 0.0,
+                "n_dropped_multievent": 0,
+                "drop_frac_multievent": 0.0,
+                "filter_enabled": int(bool(occupancy_filter)),
+                "frame_period_ps": int(frame_period_ps),
+                "pairing_mode": str(pairing_mode_l),
+                "threshold_ps": int(gate_width_ps) if gate_width_ps is not None else int(max(1, bw)),
+                "frame_diag_available": 0,
+                "n_frames_total": 0,
+                "n_frames_clean_single_single": 0,
+                "n_frames_cross_frame": 0,
+                "n_frames_A_multi": 0,
+                "n_frames_B_multi": 0,
+                "n_frames_both_multi": 0,
+                "n_pairs_in_clean_frames": 0,
+                "n_pairs_in_ambiguous_frames": int(pmeta.get("n_pairs", 0)),
+            },
         }
         meta = {
             "created_at": datetime.now().isoformat(),
@@ -1113,6 +1391,8 @@ def export_sidecar_for_point(
     materialize_shared_t0_ps: np.ndarray | None = None,
     materialize_shared_t1_ps: np.ndarray | None = None,
     materialize_global_peak_center_ps: int | None = None,
+    materialize_occupancy_filter: int = 0,
+    materialize_processing_rule_version: str = "legacy_v1",
 ) -> dict:
     root = Path(out_root)
     root.mkdir(parents=True, exist_ok=True)
@@ -1146,6 +1426,7 @@ def export_sidecar_for_point(
         "enabled": int(bool(materialize_diagnostics)),
         "delta_hist_path": None,
         "seq_pair_stats_path": None,
+        "occupancy_filter_summary_path": None,
         "n_pairs": None,
         "n_pairs_actual": None,
         "raw_ser": None,
@@ -1216,6 +1497,9 @@ def export_sidecar_for_point(
                 shared_t0_ps=materialize_shared_t0_ps,
                 shared_t1_ps=materialize_shared_t1_ps,
                 global_peak_center_ps=materialize_global_peak_center_ps,
+                request_peak_diagnostics=bool(int(materialize_diagnostics) == 1),
+                occupancy_filter=int(materialize_occupancy_filter),
+                processing_rule_version=str(materialize_processing_rule_version),
             )
             materialize_ok = 1 if bool(mat.get("ok")) else 0
             materialize_origin = mat.get("origin")
@@ -1357,6 +1641,11 @@ def export_sidecar_for_point(
                 "top_a_frac": float(diag.get("top_a_frac", float("nan"))),
                 "top_b_frac": float(diag.get("top_b_frac", float("nan"))),
             }
+        if isinstance(materialize_used_params, dict):
+            occ_summary = materialize_used_params.get("occupancy_filter")
+            if isinstance(occ_summary, dict):
+                occ_paths = write_occupancy_filter_summary(str(root), occ_summary)
+                diag_payload["occupancy_filter_summary_path"] = occ_paths.get("occupancy_filter_summary_path")
         np.save(root / "a_eff.npy", a_eff.astype(np.int64, copy=False))
         np.save(root / "b_eff.npy", b_eff.astype(np.int64, copy=False))
         np.save(root / "chan_ll_table.npy", chan_ll_table.astype(np.float64, copy=False))
@@ -1427,6 +1716,7 @@ def export_sidecar_for_point(
                 "frame_start_override_ps": materialize_frame_start_override_ps,
                 "coinc_window_override_ps": materialize_coinc_window_override_ps,
                 "pairing_mode": str(materialize_pairing_mode),
+                "processing_rule_version": str(materialize_processing_rule_version),
                 "peak_gate_sigma": materialize_peak_gate_sigma,
                 "delay_override_ps": materialize_delay_override_ps,
                 "used_params": materialize_used_params,
@@ -1485,6 +1775,7 @@ def export_sidecar_for_point(
                 "frame_start_override_ps": materialize_frame_start_override_ps,
                 "coinc_window_override_ps": materialize_coinc_window_override_ps,
                 "pairing_mode": str(materialize_pairing_mode),
+                "processing_rule_version": str(materialize_processing_rule_version),
                 "peak_gate_sigma": materialize_peak_gate_sigma,
                 "delay_override_ps": materialize_delay_override_ps,
                 "used_params": materialize_used_params,
@@ -1527,6 +1818,7 @@ def export_sidecar_for_point(
             "frame_start_override_ps": materialize_frame_start_override_ps,
             "coinc_window_override_ps": materialize_coinc_window_override_ps,
             "pairing_mode": str(materialize_pairing_mode),
+            "processing_rule_version": str(materialize_processing_rule_version),
             "peak_gate_sigma": materialize_peak_gate_sigma,
             "delay_override_ps": materialize_delay_override_ps,
             "used_params": materialize_used_params,
@@ -1549,8 +1841,10 @@ def main() -> int:
     ap.add_argument("--materialize-frame-start-override-ps", type=int, default=None)
     ap.add_argument("--materialize-coinc-window-override-ps", type=int, default=None)
     ap.add_argument("--materialize-pairing-mode", choices=["nearest", "greedy", "two_pointer", "peak_gated"], default="nearest")
+    ap.add_argument("--materialize-processing-rule-version", choices=["legacy_v1", "pairing_v2"], default="legacy_v1")
     ap.add_argument("--materialize-peak-gate-sigma", type=float, default=None)
     ap.add_argument("--materialize-delay-override-ps", type=int, default=None)
+    ap.add_argument("--materialize-occupancy-filter", type=int, choices=[0, 1], default=0)
     ap.add_argument("--out-root", required=True)
     args = ap.parse_args()
 
@@ -1568,8 +1862,10 @@ def main() -> int:
         materialize_frame_start_override_ps=args.materialize_frame_start_override_ps,
         materialize_coinc_window_override_ps=args.materialize_coinc_window_override_ps,
         materialize_pairing_mode=str(args.materialize_pairing_mode),
+        materialize_processing_rule_version=str(args.materialize_processing_rule_version),
         materialize_peak_gate_sigma=args.materialize_peak_gate_sigma,
         materialize_delay_override_ps=args.materialize_delay_override_ps,
+        materialize_occupancy_filter=int(args.materialize_occupancy_filter),
     )
     print(
         f"[SIDEcar] point=({res.get('d',0)},{res.get('bw',0)}) factor={res.get('factor',0)} "

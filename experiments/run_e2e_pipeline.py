@@ -33,8 +33,11 @@ _G_GRID_MAP: dict[tuple[int, int], dict[str, str]] | None = None
 _G_OUT_ROOT_S: str = ""
 _G_FORCE_ALIGN: bool = False
 _G_OFFSET_OVERRIDE_PS: int | None = None
+_G_COINC_WINDOW_OVERRIDE_PS: int | None = None
 _G_SHARED_BY_TTBIN: dict[str, dict[str, Any]] = {}
 _G_TTBIN_BY_POINT: dict[str, str] = {}
+_G_REPAIR_DIAGNOSTICS: bool = False
+_G_MATERIALIZE_PROCESSING_RULE_VERSION: str = "legacy_v1"
 
 
 def _progress(iterable, *, total: int, desc: str):
@@ -51,16 +54,22 @@ def _init_extract_worker(
     out_root_s: str,
     force_align: bool,
     offset_override_ps: int | None = None,
+    coinc_window_override_ps: int | None = None,
     shared_by_ttbin: dict[str, dict[str, Any]] | None = None,
     ttbin_by_point: dict[str, str] | None = None,
+    repair_diagnostics: bool = False,
+    materialize_processing_rule_version: str = "legacy_v1",
 ) -> None:
-    global _G_GRID_MAP, _G_OUT_ROOT_S, _G_FORCE_ALIGN, _G_OFFSET_OVERRIDE_PS, _G_SHARED_BY_TTBIN, _G_TTBIN_BY_POINT
+    global _G_GRID_MAP, _G_OUT_ROOT_S, _G_FORCE_ALIGN, _G_OFFSET_OVERRIDE_PS, _G_COINC_WINDOW_OVERRIDE_PS, _G_SHARED_BY_TTBIN, _G_TTBIN_BY_POINT, _G_REPAIR_DIAGNOSTICS, _G_MATERIALIZE_PROCESSING_RULE_VERSION
     _G_GRID_MAP = grid_map
     _G_OUT_ROOT_S = str(out_root_s)
     _G_FORCE_ALIGN = bool(force_align)
     _G_OFFSET_OVERRIDE_PS = int(offset_override_ps) if offset_override_ps is not None else None
+    _G_COINC_WINDOW_OVERRIDE_PS = int(coinc_window_override_ps) if coinc_window_override_ps is not None else None
     _G_SHARED_BY_TTBIN = dict(shared_by_ttbin or {})
     _G_TTBIN_BY_POINT = dict(ttbin_by_point or {})
+    _G_REPAIR_DIAGNOSTICS = bool(repair_diagnostics)
+    _G_MATERIALIZE_PROCESSING_RULE_VERSION = str(materialize_processing_rule_version or "legacy_v1").strip().lower() or "legacy_v1"
 
 
 def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
@@ -71,6 +80,7 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
         grid_map = _G_GRID_MAP
         out_root = _resolve_path(_G_OUT_ROOT_S)
         force_align = bool(_G_FORCE_ALIGN)
+        processing_rule_version_use = str(_G_MATERIALIZE_PROCESSING_RULE_VERSION or "legacy_v1").strip().lower() or "legacy_v1"
         key = (int(d), int(bw))
 
         grid_row = grid_map.get(key)
@@ -112,6 +122,7 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
                         "cond_A_missing_a_or_b": 1,
                         "cond_B_ttbin_newer_than_aeff": 0,
                         "cond_C_force_align": int(force_align),
+                        "cond_D_missing_diagnostics": 0,
                         "need_realign": 1,
                         "realign_ok": 0,
                         "realign_error": f"point_not_in_grid_mixed_full_table:{type(e).__name__}:{e}",
@@ -155,7 +166,13 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
         if (ttbin_path is not None) and ttbin_path.exists() and a_path.exists():
             cond_B_newer_ttbin = ttbin_path.stat().st_mtime > a_path.stat().st_mtime
         cond_C_force = bool(force_align)
-        need_realign = bool(cond_A_missing or cond_B_newer_ttbin or cond_C_force)
+        cond_D_diag_incomplete = False
+        if bool(_G_REPAIR_DIAGNOSTICS) and (not cond_A_missing) and meta:
+            diag_ok, diag_reason = _sidecar_diagnostics_complete(sidecar_root, meta)
+            cond_D_diag_incomplete = not bool(diag_ok)
+            if cond_D_diag_incomplete:
+                logs.append(f"[E2E][DIAG_REPAIR] point=({d},{bw}) reason={diag_reason}")
+        need_realign = bool(cond_A_missing or cond_B_newer_ttbin or cond_C_force or cond_D_diag_incomplete)
 
         re_align_ok = None
         re_align_reason = ""
@@ -175,6 +192,9 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
                 # User-forced delay/offset in ps to bypass peak-search/template constraints.
                 mparams["offset_override_ps"] = int(_G_OFFSET_OVERRIDE_PS)
                 mparams["delay_override_ps"] = int(_G_OFFSET_OVERRIDE_PS)
+            if _G_COINC_WINDOW_OVERRIDE_PS is not None:
+                mparams = dict(mparams)
+                mparams["coinc_window_override_ps"] = int(_G_COINC_WINDOW_OVERRIDE_PS)
             max_pairs_use = _materialize_max_pairs_for_dimension(d=int(d), requested=mparams.get("max_pairs"))
             frame_period_ps = int(max(1, int(d)) * max(1, int(bw)))
             nearest_threshold_ps = max(1, int(float(os.getenv("HDQKD_NEAREST_FRAME_THRESHOLD_PS", "40000"))))
@@ -233,7 +253,7 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
                     sequence_source_mode="strict",
                     materialize_missing_real_seq=1,
                     joint_source_mode="from_ttbin",
-                    materialize_diagnostics=0,
+                    materialize_diagnostics=1,
                     materialize_offset_override_ps=mparams.get("offset_override_ps"),
                     materialize_max_pairs=int(max_pairs_use),
                     materialize_frame_start_override_ps=mparams.get("frame_start_override_ps"),
@@ -241,6 +261,7 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
                     materialize_pairing_mode=str(pairing_mode_use),
                     materialize_peak_gate_sigma=mparams.get("peak_gate_sigma"),
                     materialize_delay_override_ps=delay_override_use,
+                    materialize_processing_rule_version=processing_rule_version_use,
                     materialize_shared_t0_ps=shared_t0,
                     materialize_shared_t1_ps=shared_t1,
                     materialize_global_peak_center_ps=global_peak_center_ps,
@@ -352,6 +373,7 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
             "cond_A_missing_a_or_b": int(cond_A_missing),
             "cond_B_ttbin_newer_than_aeff": int(cond_B_newer_ttbin),
             "cond_C_force_align": int(cond_C_force),
+            "cond_D_missing_diagnostics": int(cond_D_diag_incomplete),
             "need_realign": int(need_realign),
             "realign_ok": "" if re_align_ok is None else int(bool(re_align_ok)),
             "realign_error": re_align_reason,
@@ -372,10 +394,11 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
             "peak_status": align_dbg.get("peak_status", ""),
             "peak_scan_range_ps": align_dbg.get("peak_scan_range_ps", ""),
             "peak_bin_ps": align_dbg.get("peak_bin_ps", ""),
+            "materialize_processing_rule_version": processing_rule_version_use,
         }
         logs.append(
             f"[E2E] point=({d},{bw}) need_realign={int(need_realign)} "
-            f"A={int(cond_A_missing)} B={int(cond_B_newer_ttbin)} C={int(cond_C_force)} "
+            f"A={int(cond_A_missing)} B={int(cond_B_newer_ttbin)} C={int(cond_C_force)} D={int(cond_D_diag_incomplete)} "
             f"can_run={int(can_run)}"
         )
         return {
@@ -398,6 +421,7 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
                 "cond_A_missing_a_or_b": "",
                 "cond_B_ttbin_newer_than_aeff": "",
                 "cond_C_force_align": int(_G_FORCE_ALIGN),
+                "cond_D_missing_diagnostics": "",
                 "need_realign": "",
                 "realign_ok": 0,
                 "realign_error": f"worker_exception:{type(e).__name__}:{e}",
@@ -418,6 +442,7 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
                 "peak_status": "",
                 "peak_scan_range_ps": "",
                 "peak_bin_ps": "",
+                "materialize_processing_rule_version": str(_G_MATERIALIZE_PROCESSING_RULE_VERSION or "legacy_v1").strip().lower() or "legacy_v1",
             },
             "run_grid_row": None,
             "run_src_row": None,
@@ -438,6 +463,14 @@ def _parse_int_list(spec: str) -> list[int]:
 
 def _as_float(v: Any) -> float:
     return float(v)
+
+
+def _to_float_or_none(v: Any) -> float | None:
+    try:
+        fv = float(v)
+    except Exception:
+        return None
+    return fv if math.isfinite(fv) else None
 
 
 def _resolve_path(p: str | Path) -> Path:
@@ -547,6 +580,49 @@ def _read_json(path: Path) -> dict[str, Any]:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
+
+def _resolve_sidecar_artifact_path(sidecar_root: Path, path_text: Any, default_name: str) -> Path:
+    p = str(path_text or "").strip()
+    if p:
+        pp = Path(p)
+        if pp.is_absolute():
+            return pp
+        return (sidecar_root / pp).resolve()
+    return sidecar_root / default_name
+
+
+def _sidecar_diagnostics_complete(sidecar_root: Path, meta: dict[str, Any]) -> tuple[bool, str]:
+    mparams = meta.get("materialize_params") if isinstance(meta.get("materialize_params"), dict) else {}
+    used = mparams.get("used_params") if isinstance(mparams.get("used_params"), dict) else {}
+    peak_sigma_ps = _to_float_or_none(used.get("peak_sigma_ps"))
+    peak_to_bg = _to_float_or_none(used.get("peak_to_bg"))
+    if peak_sigma_ps is None:
+        return False, "missing_peak_sigma_ps"
+    if peak_to_bg is None:
+        return False, "missing_peak_to_bg"
+
+    diag = meta.get("diagnostics") if isinstance(meta.get("diagnostics"), dict) else {}
+    if int(diag.get("enabled") or 0) != 1:
+        return False, "diagnostics_disabled"
+
+    stats_path = _resolve_sidecar_artifact_path(sidecar_root, diag.get("seq_pair_stats_path"), "seq_pair_stats.json")
+    if not stats_path.exists():
+        return False, "missing_seq_pair_stats_json"
+    stats = _read_json(stats_path)
+    for key in (
+        "raw_ser",
+        "near_neighbor_frac",
+        "n_pairs_actual",
+        "n_unique_a",
+        "n_unique_b",
+        "top_a_frac",
+        "top_b_frac",
+    ):
+        v = stats.get(key)
+        if v is None or str(v).strip() == "":
+            return False, f"missing_{key}"
+    return True, ""
 
 
 def _extract_ttbin_from_meta(meta: dict[str, Any]) -> Path | None:
@@ -898,8 +974,11 @@ def _run_extract_batch(
     out_root: Path,
     force_align: bool,
     offset_override_ps: int | None = None,
+    coinc_window_override_ps: int | None = None,
     shared_by_ttbin: dict[str, dict[str, Any]] | None = None,
     ttbin_by_point: dict[str, str] | None = None,
+    repair_diagnostics: bool = False,
+    materialize_processing_rule_version: str = "legacy_v1",
 ) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     _init_extract_worker(
@@ -907,8 +986,11 @@ def _run_extract_batch(
         out_root_s=str(out_root),
         force_align=bool(force_align),
         offset_override_ps=offset_override_ps,
+        coinc_window_override_ps=coinc_window_override_ps,
         shared_by_ttbin=shared_by_ttbin,
         ttbin_by_point=ttbin_by_point,
+        repair_diagnostics=bool(repair_diagnostics),
+        materialize_processing_rule_version=str(materialize_processing_rule_version),
     )
     if extract_workers <= 1:
         iter_points = _progress(points_batch, total=len(points_batch), desc="E2E extract")
@@ -924,8 +1006,11 @@ def _run_extract_batch(
             str(out_root),
             bool(force_align),
             offset_override_ps,
+            coinc_window_override_ps,
             dict(shared_by_ttbin or {}),
             dict(ttbin_by_point or {}),
+            bool(repair_diagnostics),
+            str(materialize_processing_rule_version),
         ),
     ) as ex:
         fut_map: dict[concurrent.futures.Future[dict[str, Any]], tuple[int, int]] = {}
@@ -1032,11 +1117,27 @@ def main() -> int:
         default=None,
         help="manual delay/offset override in ps for sidecar extraction (applies to all requested points)",
     )
+    ap.add_argument(
+        "--coinc-window-override-ps",
+        type=float,
+        default=None,
+        help="override coincidence/pairing window in ps for sidecar materialization (applies to all requested points)",
+    )
     ap.add_argument("--N", type=int, default=4096)
     ap.add_argument("--frames", type=int, default=100)
     ap.add_argument("--visibility", type=float, default=0.95)
     ap.add_argument("--disable-scl", action="store_true")
     ap.add_argument("--acq-time", type=float, default=None, help="compat flag (currently unused)")
+    ap.add_argument(
+        "--skip-polar",
+        action="store_true",
+        help="complete sidecar repair/rematerialize and audit, but skip automatic polar refresh",
+    )
+    ap.add_argument(
+        "--repair-diagnostics",
+        action="store_true",
+        help="reuse existing sidecars in out-root and rematerialize only points with missing peak/stat diagnostics",
+    )
     ap.add_argument(
         "--ttbin",
         "--ttbin-override",
@@ -1056,6 +1157,12 @@ def main() -> int:
         type=int,
         default=None,
         help="override ttbin channel B id for all requested points (optional)",
+    )
+    ap.add_argument(
+        "--materialize-processing-rule-version",
+        choices=["legacy_v1", "pairing_v2"],
+        default="legacy_v1",
+        help="sidecar materialization processing rule version; use a dedicated --out-root for pairing_v2 batch runs",
     )
     args = ap.parse_args()
 
@@ -1083,10 +1190,17 @@ def main() -> int:
         os.environ.pop("HDQKD_TTBIN_CH_B_OVERRIDE", None)
     if args.offset_ps is not None:
         print(f"[E2E] manual offset override ps={int(args.offset_ps)}")
+    coinc_window_override_ps: int | None = None
+    if args.coinc_window_override_ps is not None:
+        coinc_window_override_ps = int(round(float(args.coinc_window_override_ps)))
+        if coinc_window_override_ps <= 0:
+            raise SystemExit("--coinc-window-override-ps must be > 0")
+        print(f"[E2E] coincidence window override ps={coinc_window_override_ps}")
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_root = _resolve_path(args.out_root) if str(args.out_root).strip() else (REPO_ROOT / "results" / f"e2e_pipeline_{ts}")
     out_root.mkdir(parents=True, exist_ok=True)
+    print(f"[E2E] materialize processing rule version={args.materialize_processing_rule_version}")
 
     grid_table = _resolve_path(args.grid_table)
     if grid_table.exists():
@@ -1140,8 +1254,11 @@ def main() -> int:
                 out_root=out_root,
                 force_align=bool(args.force_align),
                 offset_override_ps=args.offset_ps,
+                coinc_window_override_ps=coinc_window_override_ps,
                 shared_by_ttbin=shared_by_ttbin,
                 ttbin_by_point=ttbin_by_point,
+                repair_diagnostics=bool(args.repair_diagnostics),
+                materialize_processing_rule_version=str(args.materialize_processing_rule_version),
             )
             all_results.extend(batch_res)
         finally:
@@ -1166,8 +1283,11 @@ def main() -> int:
                 out_root=out_root,
                 force_align=bool(args.force_align),
                 offset_override_ps=args.offset_ps,
+                coinc_window_override_ps=coinc_window_override_ps,
                 shared_by_ttbin={},
                 ttbin_by_point={},
+                repair_diagnostics=bool(args.repair_diagnostics),
+                materialize_processing_rule_version=str(args.materialize_processing_rule_version),
             )
         )
 
@@ -1200,6 +1320,7 @@ def main() -> int:
             "cond_A_missing_a_or_b",
             "cond_B_ttbin_newer_than_aeff",
             "cond_C_force_align",
+            "cond_D_missing_diagnostics",
             "need_realign",
             "realign_ok",
             "realign_error",
@@ -1220,6 +1341,7 @@ def main() -> int:
             "peak_status",
             "peak_scan_range_ps",
             "peak_bin_ps",
+            "materialize_processing_rule_version",
         ],
     )
     print(f"[E2E] audit_csv={audit_csv}")
@@ -1236,6 +1358,12 @@ def main() -> int:
         run_src_rows,
         ["dimension", "bin_width_ps", "status", "input_status", "sidecar_verdict", "fail_reason", "map_ser"],
     )
+
+    if bool(args.skip_polar):
+        print("[E2E] skip polar refresh: enabled by --skip-polar")
+        print(f"[E2E] tmp_grid={tmp_grid}")
+        print(f"[E2E] tmp_src={tmp_src}")
+        return 0
 
     pts = ";".join(f"{d},{bw}" for (d, bw) in runnable_points)
     out_csv = out_root / "polar_e2e_results.csv"
