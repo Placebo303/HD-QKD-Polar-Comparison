@@ -30,7 +30,11 @@ def main() -> int:
     candidate_dir = fresh_candidate_dir(20)
     point_frame = candidate_point_frame(candidate_dir)
     frame_point = build_frame_audit_from_candidate(candidate_dir, point_frame[[*KEY_COLS, 'point_id']])
-    frame_point = frame_point.merge(aug_point[KEY_COLS + ['point_id', 'verification_bits_used_actual', 'verification_source_tag']], on=KEY_COLS + ['point_id'], how='left')
+    frame_point = frame_point.merge(
+        aug_point[KEY_COLS + ['point_id', 'verification_bits_used_actual', 'verification_source_tag', 'verification_pass_count', 'verification_fail_count', 'verification_outcome_source_tag', 'epsilon_EC', 'epsilon_EC_source_tag']],
+        on=KEY_COLS + ['point_id'],
+        how='left',
+    )
     frame_point.to_csv(out_dir / 'frame_audit_point_table.csv', index=False)
 
     frame_block = aug_block.merge(frame_point[KEY_COLS + ['point_id', 'candidate_frame_count', 'accepted_frame_count', 'rejected_frame_count', 'accepted_frame_fraction', 'rejected_frame_fraction', 'frame_success_count', 'frame_success_rate', 'accepted_frame_fraction_source_tag', 'frame_success_rate_source_tag']], on=KEY_COLS + ['point_id'], how='left')

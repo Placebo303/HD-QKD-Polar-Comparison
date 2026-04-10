@@ -45,6 +45,8 @@ def main() -> int:
     block_df["bin_width_ps"] = pd.to_numeric(block_df["bin_width_ps"], errors="coerce")
     for col in ("k_used", "total_leak_ec_bits", "block_success_flag", "decode_fail_flag"):
         block_df[col] = pd.to_numeric(block_df[col], errors="coerce")
+    if "verification_bits_revealed" in block_df.columns:
+        block_df["verification_bits_revealed"] = pd.to_numeric(block_df["verification_bits_revealed"], errors="coerce")
 
     point_rows = []
     for pid, grp in block_df.groupby("point_id"):
@@ -58,14 +60,24 @@ def main() -> int:
         fail_blocks = int(pd.to_numeric(ok_rows["decode_fail_flag"], errors="coerce").fillna(0).sum())
         total_leak = float(pd.to_numeric(ok_rows["total_leak_ec_bits"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
         total_kept_info_bits = float((pd.to_numeric(ok_rows["k_used"], errors="coerce").fillna(0) * pd.to_numeric(ok_rows["block_success_flag"], errors="coerce").fillna(0)).sum()) if audited_blocks > 0 else np.nan
+        verification_bits_used_actual = float(pd.to_numeric(ok_rows["verification_bits_revealed"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
         verification_tags = sorted(str(x) for x in ok_rows["verification_source_tag"].dropna().unique())
+        verification_pass_count = kept_blocks if audited_blocks > 0 else np.nan
+        verification_fail_count = fail_blocks if audited_blocks > 0 else np.nan
+        epsilon_ec = (float(fail_blocks) / float(audited_blocks)) if audited_blocks > 0 else np.nan
         if audited_blocks > 0:
             if verification_tags and verification_tags != ["actual_zero"]:
                 leak_tag = "actual_ir_replay_with_configured_verification"
             else:
                 leak_tag = "actual_ir_replay"
+            verification_source_tag = ";".join(verification_tags) if verification_tags else "missing"
+            verification_outcome_source_tag = "replay_oracle_from_block_success"
+            epsilon_ec_source_tag = "empirical_block_fail_rate_from_replay"
         else:
             leak_tag = "MISSING"
+            verification_source_tag = "missing"
+            verification_outcome_source_tag = "missing"
+            epsilon_ec_source_tag = "missing"
         blocked_reason = ";".join(sorted(str(x) for x in blocked_rows["blocked_reason"].dropna().unique() if str(x).strip()))
         point_rows.append(
             {
@@ -81,6 +93,13 @@ def main() -> int:
                 "dropped_block_count": (audited_blocks - kept_blocks) if audited_blocks > 0 else "MISSING",
                 "audited_block_count": audited_blocks,
                 "total_kept_info_bits": total_kept_info_bits,
+                "verification_bits_used_actual": verification_bits_used_actual,
+                "verification_source_tag": verification_source_tag,
+                "verification_pass_count": verification_pass_count,
+                "verification_fail_count": verification_fail_count,
+                "verification_outcome_source_tag": verification_outcome_source_tag,
+                "epsilon_EC": epsilon_ec,
+                "epsilon_EC_source_tag": epsilon_ec_source_tag,
                 "leak_ec_source_tag": leak_tag,
                 "replay_status": "ok" if audited_blocks > 0 else "blocked",
                 "blocked_reason": blocked_reason if blocked_reason else "",
@@ -113,6 +132,7 @@ def main() -> int:
         f"median_delta_actual_minus_surrogate: {pd.to_numeric(merged['delta_actual_minus_surrogate'], errors='coerce').median()}",
         "notes:",
         "- actual_ir_replay means syndrome bits came from replay; configured CRC verification budget may still be counted separately on some SCL points.",
+        "- epsilon_EC is currently an empirical replay audit quantity derived from block replay fail rate, not a strict composable verification bound.",
         "- frame_success_rate remains MISSING because a rigorous frame-level denominator is not currently emitted by the replay chain.",
     ]
     write_summary(output_dir / "round1b_summary.txt", summary_lines)

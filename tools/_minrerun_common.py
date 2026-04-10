@@ -271,6 +271,11 @@ def recompute_finite_key(master_old: pd.DataFrame, audit_old: pd.DataFrame, fram
         "frame_success_count",
         "verification_bits_used_actual",
         "verification_source_tag",
+        "verification_pass_count",
+        "verification_fail_count",
+        "verification_outcome_source_tag",
+        "epsilon_EC",
+        "epsilon_EC_source_tag",
     ]], on=KEY_COLS, how="left")
     out["accepted_frame_fraction"] = accepted
     out["rejected_frame_fraction"] = pd.to_numeric(df[rejected_col], errors="coerce")
@@ -283,6 +288,13 @@ def recompute_finite_key(master_old: pd.DataFrame, audit_old: pd.DataFrame, fram
     out["frame_success_count"] = df[frame_success_count_col]
     out["verification_bits_used_actual"] = pd.to_numeric(df[verification_bits_col], errors="coerce")
     out["verification_source_tag"] = df[verification_source_col].astype(str)
+    out["verification_pass_count"] = pd.to_numeric(df.get("verification_pass_count"), errors="coerce")
+    out["verification_fail_count"] = pd.to_numeric(df.get("verification_fail_count"), errors="coerce")
+    verification_outcome_source = df["verification_outcome_source_tag"] if "verification_outcome_source_tag" in df.columns else pd.Series(["missing"] * len(df), index=df.index)
+    epsilon_ec_source = df["epsilon_EC_source_tag"] if "epsilon_EC_source_tag" in df.columns else pd.Series(["missing"] * len(df), index=df.index)
+    out["verification_outcome_source_tag"] = verification_outcome_source.astype(str)
+    out["epsilon_EC"] = pd.to_numeric(df.get("epsilon_EC"), errors="coerce")
+    out["epsilon_EC_source_tag"] = epsilon_ec_source.astype(str)
     out["post_selection_correction"] = post_sel
     out["accepted_rate_proxy"] = accepted_rate_proxy
     out["n_eff_pairs"] = n_eff_pairs
