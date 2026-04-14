@@ -34,9 +34,10 @@ def main() -> int:
         f'point_count: {len(point_df)}',
         f'configured_budget_points: {int(point_df["verification_source_tag"].astype(str).str.contains("configured_budget").sum())}',
         f'actual_sidecar_frame_points: {int(point_df["accepted_frame_fraction_source_tag"].eq("actual_sidecar_occupancy_summary").sum())}',
-        f'empirical_epsilon_EC_points: {int(point_df["epsilon_EC_source_tag"].astype(str).eq("empirical_block_fail_rate_from_replay").sum()) if "epsilon_EC_source_tag" in point_df.columns else 0}',
+        f'empirical_epsilon_EC_points: {int(point_df["epsilon_EC_empirical_source_tag"].astype(str).eq("empirical_undetected_error_rate_from_replay").sum()) if "epsilon_EC_empirical_source_tag" in point_df.columns else 0}',
+        f'bounded_epsilon_EC_points: {int(point_df["epsilon_EC_bound_formula_tag"].astype(str).eq("union_bound_over_blocks_universal_hash").sum()) if "epsilon_EC_bound_formula_tag" in point_df.columns else 0}',
         'note: frame_success_rate is accepted as actual_sidecar_occupancy_summary in this refined pass because denominator and accepted count both come from persisted sidecar occupancy diagnostics.',
-        'note: epsilon_EC in this pass is an empirical replay-audit fail rate, carried with an explicit source tag and kept distinct from eps_sec / eps_cor.',
+        'note: epsilon_EC_empirical is the undetected-error empirical rate; epsilon_EC_bound is the universal-hash union bound used for correctness budgeting.',
     ]
     write_summary(out_dir / 'stageB_summary.txt', lines)
     return 0

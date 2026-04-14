@@ -25,13 +25,16 @@ def main() -> int:
     actual = pd.read_csv(Path(args.actual_ir_dir) / "actual_ir_finite_key_point_table.csv")
     beta = pd.read_csv(Path(args.beta_baseline_dir) / "beta_baseline_finite_key_point_table.csv")
     perf = pd.read_csv(output_dir / "finite_key_audit_point_table.csv")
+    for col in ("lambda_ver_bits_actual", "epsilon_EC_empirical", "epsilon_EC_bound", "decoder_fail_rate_oracle", "eps_cor_total", "eps_cor_budget_rule"):
+        if col not in perf.columns:
+            perf[col] = pd.NA
 
     merged = actual.merge(
         beta[["loss_db", "dimension", "bin_width_ps", "beta_baseline", "PIE_secure_beta_baseline", "SKR_secure_beta_baseline_bps"]],
         on=["loss_db", "dimension", "bin_width_ps"],
         how="left",
     ).merge(
-        perf[["loss_db", "dimension", "bin_width_ps", "PIE_practical", "SKR_measured_bps", "DeltaFK_calibrated", "franson_visibility_global", "leak_EC_source_tag"]],
+        perf[["loss_db", "dimension", "bin_width_ps", "PIE_practical", "SKR_measured_bps", "DeltaFK_calibrated", "franson_visibility_global", "leak_EC_source_tag", "lambda_ver_bits_actual", "epsilon_EC_empirical", "epsilon_EC_bound", "decoder_fail_rate_oracle", "eps_cor_total", "eps_cor_budget_rule"]],
         on=["loss_db", "dimension", "bin_width_ps"],
         how="left",
         suffixes=("", "_perf"),
@@ -53,6 +56,7 @@ def main() -> int:
         "3. post-selection sensitivity region: higher-bw / lower-clean-fraction points move most because post_selection_correction follows accepted_frame_fraction",
         f"4. mean_PIE_drop_actual_vs_performance: {perf_minus_actual.mean()}",
         f"5. beta_baseline_more_optimistic_rows: {int((beta_minus_actual > 0).sum())}; more_conservative_rows: {int((beta_minus_actual < 0).sum())}",
+        f"5b. formal_epsilon_bound_rows: {int(merged['eps_cor_budget_rule'].astype(str).eq('verification_only_shadow').sum()) if 'eps_cor_budget_rule' in merged.columns else 0}",
         "6. best_point_shift_by_loss:",
         *best_rows,
         f"7. positive_actual_secure_rows: {int((pd.to_numeric(merged['SKR_secure_actual_ir_bps'], errors='coerce') > 0).sum())}",

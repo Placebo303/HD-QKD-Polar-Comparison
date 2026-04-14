@@ -43,10 +43,21 @@ def main() -> int:
     block_df["loss_db"] = pd.to_numeric(block_df["loss_db"], errors="coerce")
     block_df["dimension"] = pd.to_numeric(block_df["dimension"], errors="coerce")
     block_df["bin_width_ps"] = pd.to_numeric(block_df["bin_width_ps"], errors="coerce")
-    for col in ("k_used", "total_leak_ec_bits", "block_success_flag", "decode_fail_flag"):
-        block_df[col] = pd.to_numeric(block_df[col], errors="coerce")
-    if "verification_bits_revealed" in block_df.columns:
-        block_df["verification_bits_revealed"] = pd.to_numeric(block_df["verification_bits_revealed"], errors="coerce")
+    for col in (
+        "k_used",
+        "total_leak_ec_bits",
+        "total_leak_ec_bits_legacy_crc",
+        "block_success_flag",
+        "decode_fail_flag",
+        "verification_invoked_flag",
+        "verification_bits_used_actual",
+        "verification_bits_revealed_legacy_crc",
+        "verification_pass_flag",
+        "verification_fail_flag",
+        "undetected_error_oracle_flag",
+        "block_match_oracle_flag",
+    ):
+        block_df[col] = pd.to_numeric(block_df.get(col), errors="coerce")
 
     point_rows = []
     for pid, grp in block_df.groupby("point_id"):
@@ -59,25 +70,38 @@ def main() -> int:
         kept_blocks = int(pd.to_numeric(ok_rows["block_success_flag"], errors="coerce").fillna(0).sum())
         fail_blocks = int(pd.to_numeric(ok_rows["decode_fail_flag"], errors="coerce").fillna(0).sum())
         total_leak = float(pd.to_numeric(ok_rows["total_leak_ec_bits"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
+        total_leak_legacy_crc = float(pd.to_numeric(ok_rows["total_leak_ec_bits_legacy_crc"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
         total_kept_info_bits = float((pd.to_numeric(ok_rows["k_used"], errors="coerce").fillna(0) * pd.to_numeric(ok_rows["block_success_flag"], errors="coerce").fillna(0)).sum()) if audited_blocks > 0 else np.nan
-        verification_bits_used_actual = float(pd.to_numeric(ok_rows["verification_bits_revealed"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
+        verification_bits_used_actual = float(pd.to_numeric(ok_rows["verification_bits_used_actual"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
+        verification_bits_used_actual_legacy_crc = float(pd.to_numeric(ok_rows["verification_bits_revealed_legacy_crc"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
+        lambda_ver_bits_actual = verification_bits_used_actual
+        lambda_ver_bits_legacy_crc = verification_bits_used_actual_legacy_crc
         verification_tags = sorted(str(x) for x in ok_rows["verification_source_tag"].dropna().unique())
-        verification_pass_count = kept_blocks if audited_blocks > 0 else np.nan
-        verification_fail_count = fail_blocks if audited_blocks > 0 else np.nan
-        epsilon_ec = (float(fail_blocks) / float(audited_blocks)) if audited_blocks > 0 else np.nan
+        verification_protocol_ids = sorted(str(x) for x in ok_rows.get("verification_protocol_id", pd.Series(dtype=str)).dropna().unique() if str(x).strip())
+        verification_families = sorted(str(x) for x in ok_rows.get("verification_family", pd.Series(dtype=str)).dropna().unique() if str(x).strip())
+        verification_invoked_block_count = int(pd.to_numeric(ok_rows.get("verification_invoked_flag"), errors="coerce").fillna(0).sum()) if audited_blocks > 0 else 0
+        verification_pass_count = int(pd.to_numeric(ok_rows.get("verification_pass_flag"), errors="coerce").fillna(0).sum()) if audited_blocks > 0 else 0
+        verification_fail_count = int(pd.to_numeric(ok_rows.get("verification_fail_flag"), errors="coerce").fillna(0).sum()) if audited_blocks > 0 else 0
+        undetected_error_count_empirical = int(pd.to_numeric(ok_rows.get("undetected_error_oracle_flag"), errors="coerce").fillna(0).sum()) if audited_blocks > 0 else 0
+        epsilon_ec_empirical = (float(undetected_error_count_empirical) / float(verification_invoked_block_count)) if verification_invoked_block_count > 0 else np.nan
+        verification_tag_bits = pd.to_numeric(ok_rows.get("verification_tag_bits"), errors="coerce").dropna()
+        tag_bits_used = int(verification_tag_bits.iloc[0]) if not verification_tag_bits.empty else 0
+        epsilon_ec_bound = min(1.0, float(verification_invoked_block_count) * (2.0 ** (-tag_bits_used))) if verification_invoked_block_count > 0 and tag_bits_used > 0 else np.nan
+        decoder_fail_rate_oracle = (float(fail_blocks) / float(audited_blocks)) if audited_blocks > 0 else np.nan
         if audited_blocks > 0:
-            if verification_tags and verification_tags != ["actual_zero"]:
-                leak_tag = "actual_ir_replay_with_configured_verification"
-            else:
-                leak_tag = "actual_ir_replay"
+            leak_tag = "actual_ir_replay_with_universal_hash_verification"
             verification_source_tag = ";".join(verification_tags) if verification_tags else "missing"
-            verification_outcome_source_tag = "replay_oracle_from_block_success"
-            epsilon_ec_source_tag = "empirical_block_fail_rate_from_replay"
+            verification_outcome_source_tag = "replay_oracle_and_universal_hash_transcript"
+            epsilon_ec_empirical_source_tag = "empirical_undetected_error_rate_from_replay"
+            epsilon_ec_bound_source_tag = "union_bound_over_blocks_universal_hash"
+            decoder_fail_rate_oracle_source_tag = "empirical_decode_fail_rate_from_replay"
         else:
             leak_tag = "MISSING"
             verification_source_tag = "missing"
             verification_outcome_source_tag = "missing"
-            epsilon_ec_source_tag = "missing"
+            epsilon_ec_empirical_source_tag = "missing"
+            epsilon_ec_bound_source_tag = "missing"
+            decoder_fail_rate_oracle_source_tag = "missing"
         blocked_reason = ";".join(sorted(str(x) for x in blocked_rows["blocked_reason"].dropna().unique() if str(x).strip()))
         point_rows.append(
             {
@@ -86,6 +110,7 @@ def main() -> int:
                 "dimension": d,
                 "bin_width_ps": bw,
                 "total_leak_ec_bits": total_leak,
+                "total_leak_ec_bits_legacy_crc": total_leak_legacy_crc,
                 "block_success_rate": (float(kept_blocks) / float(audited_blocks)) if audited_blocks > 0 else "MISSING",
                 "frame_success_rate": "MISSING",
                 "decode_fail_count": fail_blocks if audited_blocks > 0 else "MISSING",
@@ -94,12 +119,25 @@ def main() -> int:
                 "audited_block_count": audited_blocks,
                 "total_kept_info_bits": total_kept_info_bits,
                 "verification_bits_used_actual": verification_bits_used_actual,
+                "verification_bits_used_actual_legacy_crc": verification_bits_used_actual_legacy_crc,
+                "lambda_ver_bits_actual": lambda_ver_bits_actual,
+                "lambda_ver_source_tag": "universal_hash_transcript",
+                "lambda_ver_bits_legacy_crc": lambda_ver_bits_legacy_crc,
                 "verification_source_tag": verification_source_tag,
+                "verification_protocol_id": ";".join(verification_protocol_ids) if verification_protocol_ids else "missing",
+                "verification_family": ";".join(verification_families) if verification_families else "missing",
+                "verification_tag_bits": tag_bits_used if tag_bits_used > 0 else np.nan,
+                "verification_invoked_block_count": verification_invoked_block_count,
                 "verification_pass_count": verification_pass_count,
                 "verification_fail_count": verification_fail_count,
+                "undetected_error_count_empirical": undetected_error_count_empirical,
                 "verification_outcome_source_tag": verification_outcome_source_tag,
-                "epsilon_EC": epsilon_ec,
-                "epsilon_EC_source_tag": epsilon_ec_source_tag,
+                "epsilon_EC_empirical": epsilon_ec_empirical,
+                "epsilon_EC_empirical_source_tag": epsilon_ec_empirical_source_tag,
+                "epsilon_EC_bound": epsilon_ec_bound,
+                "epsilon_EC_bound_formula_tag": epsilon_ec_bound_source_tag,
+                "decoder_fail_rate_oracle": decoder_fail_rate_oracle,
+                "decoder_fail_rate_oracle_source_tag": decoder_fail_rate_oracle_source_tag,
                 "leak_ec_source_tag": leak_tag,
                 "replay_status": "ok" if audited_blocks > 0 else "blocked",
                 "blocked_reason": blocked_reason if blocked_reason else "",
@@ -131,8 +169,8 @@ def main() -> int:
         f"fields_still_missing: {'frame_success_rate' if True else 'none'}",
         f"median_delta_actual_minus_surrogate: {pd.to_numeric(merged['delta_actual_minus_surrogate'], errors='coerce').median()}",
         "notes:",
-        "- actual_ir_replay means syndrome bits came from replay; configured CRC verification budget may still be counted separately on some SCL points.",
-        "- epsilon_EC is currently an empirical replay audit quantity derived from block replay fail rate, not a strict composable verification bound.",
+        "- actual_ir_replay_with_universal_hash_verification means replay leakage is paired with a formal per-block universal-hash verification transcript.",
+        "- epsilon_EC_empirical is based on undetected-error oracle counts; epsilon_EC_bound is the union bound over per-block universal-hash tags.",
         "- frame_success_rate remains MISSING because a rigorous frame-level denominator is not currently emitted by the replay chain.",
     ]
     write_summary(output_dir / "round1b_summary.txt", summary_lines)

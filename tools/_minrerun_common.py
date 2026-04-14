@@ -211,6 +211,26 @@ def recompute_finite_key(master_old: pd.DataFrame, audit_old: pd.DataFrame, fram
             axis=1,
         )
     df = audit_old.merge(frame_point, on=KEY_COLS + ["point_id"], how="left", suffixes=("", "_frame"))
+    optional_cols = [
+        "total_leak_ec_bits",
+        "total_leak_ec_bits_legacy_crc",
+        "verification_bits_used_actual_legacy_crc",
+        "lambda_ver_bits_actual",
+        "lambda_ver_source_tag",
+        "lambda_ver_bits_legacy_crc",
+        "verification_pass_count",
+        "verification_fail_count",
+        "verification_outcome_source_tag",
+        "epsilon_EC_empirical",
+        "epsilon_EC_empirical_source_tag",
+        "epsilon_EC_bound",
+        "epsilon_EC_bound_formula_tag",
+        "decoder_fail_rate_oracle",
+        "decoder_fail_rate_oracle_source_tag",
+    ]
+    for col in optional_cols:
+        if col not in df.columns:
+            df[col] = np.nan
     accepted_col = "accepted_frame_fraction_frame" if "accepted_frame_fraction_frame" in df.columns else "accepted_frame_fraction"
     rejected_col = "rejected_frame_fraction_frame" if "rejected_frame_fraction_frame" in df.columns else "rejected_frame_fraction"
     accepted_source_col = "accepted_frame_fraction_source_tag_frame" if "accepted_frame_fraction_source_tag_frame" in df.columns else "accepted_frame_fraction_source_tag"
@@ -221,6 +241,8 @@ def recompute_finite_key(master_old: pd.DataFrame, audit_old: pd.DataFrame, fram
     frame_success_count_col = "frame_success_count"
     verification_bits_col = "verification_bits_used_actual"
     verification_source_col = "verification_source_tag"
+    total_leak_bits = pd.to_numeric(df.get("total_leak_ec_bits"), errors="coerce")
+    total_leak_bits_legacy_crc = pd.to_numeric(df.get("total_leak_ec_bits_legacy_crc"), errors="coerce")
 
     accepted = pd.to_numeric(df[accepted_col], errors="coerce")
     frame_rate = pd.to_numeric(df["frame_success_rate"], errors="coerce")
@@ -230,11 +252,13 @@ def recompute_finite_key(master_old: pd.DataFrame, audit_old: pd.DataFrame, fram
     layer_fraction = pd.to_numeric(df["layer_fraction"], errors="coerce")
     eps_sec = pd.to_numeric(df["eps_sec"], errors="coerce")
     eps_cor = pd.to_numeric(df["eps_cor"], errors="coerce")
+    eps_cor_bound = pd.to_numeric(df.get("epsilon_EC_bound"), errors="coerce")
+    eps_cor_total = eps_cor_bound.where(eps_cor_bound.notna(), eps_cor)
     accepted_rate_proxy = coincidence * accepted * block_rate
     n_eff_pairs = n_pairs * layer_fraction * accepted * block_rate
     delta_fk = np.where(
         (n_eff_pairs > 0) & np.isfinite(n_eff_pairs),
-        4.0 * np.sqrt(np.log2(2.0 / eps_sec) / n_eff_pairs) + 2.0 * np.log2(2.0 / eps_cor) / n_eff_pairs,
+        4.0 * np.sqrt(np.log2(2.0 / eps_sec) / n_eff_pairs) + 2.0 * np.log2(2.0 / eps_cor_total) / n_eff_pairs,
         np.nan,
     )
     post_sel = accepted
@@ -243,7 +267,7 @@ def recompute_finite_key(master_old: pd.DataFrame, audit_old: pd.DataFrame, fram
     pie_actual = np.maximum(
         0.0,
         pd.to_numeric(df["IAB_est"], errors="coerce")
-        - pd.to_numeric(df["leak_EC_actual_bits"], errors="coerce")
+        - pd.to_numeric(np.where((n_pairs > 0) & total_leak_bits.notna(), total_leak_bits / n_pairs, df["leak_EC_actual_bits"]), errors="coerce")
         - pd.to_numeric(df["chi_E_calibrated"], errors="coerce")
         - delta_fk
         - post_sel.fillna(0.0),
@@ -270,12 +294,20 @@ def recompute_finite_key(master_old: pd.DataFrame, audit_old: pd.DataFrame, fram
         "rejected_frame_count",
         "frame_success_count",
         "verification_bits_used_actual",
+        "verification_bits_used_actual_legacy_crc",
+        "lambda_ver_bits_actual",
+        "lambda_ver_source_tag",
+        "lambda_ver_bits_legacy_crc",
         "verification_source_tag",
         "verification_pass_count",
         "verification_fail_count",
         "verification_outcome_source_tag",
-        "epsilon_EC",
-        "epsilon_EC_source_tag",
+        "epsilon_EC_empirical",
+        "epsilon_EC_empirical_source_tag",
+        "epsilon_EC_bound",
+        "epsilon_EC_bound_formula_tag",
+        "decoder_fail_rate_oracle",
+        "decoder_fail_rate_oracle_source_tag",
     ]], on=KEY_COLS, how="left")
     out["accepted_frame_fraction"] = accepted
     out["rejected_frame_fraction"] = pd.to_numeric(df[rejected_col], errors="coerce")
@@ -287,18 +319,38 @@ def recompute_finite_key(master_old: pd.DataFrame, audit_old: pd.DataFrame, fram
     out["rejected_frame_count"] = df[rejected_count_col]
     out["frame_success_count"] = df[frame_success_count_col]
     out["verification_bits_used_actual"] = pd.to_numeric(df[verification_bits_col], errors="coerce")
+    out["verification_bits_used_actual_legacy_crc"] = pd.to_numeric(df.get("verification_bits_used_actual_legacy_crc"), errors="coerce")
+    out["lambda_ver_bits_actual"] = pd.to_numeric(df.get("lambda_ver_bits_actual"), errors="coerce")
+    out["lambda_ver_bits_legacy_crc"] = pd.to_numeric(df.get("lambda_ver_bits_legacy_crc"), errors="coerce")
+    lambda_ver_source = df["lambda_ver_source_tag"] if "lambda_ver_source_tag" in df.columns else pd.Series(["missing"] * len(df), index=df.index)
+    out["lambda_ver_source_tag"] = lambda_ver_source.astype(str)
     out["verification_source_tag"] = df[verification_source_col].astype(str)
     out["verification_pass_count"] = pd.to_numeric(df.get("verification_pass_count"), errors="coerce")
     out["verification_fail_count"] = pd.to_numeric(df.get("verification_fail_count"), errors="coerce")
     verification_outcome_source = df["verification_outcome_source_tag"] if "verification_outcome_source_tag" in df.columns else pd.Series(["missing"] * len(df), index=df.index)
-    epsilon_ec_source = df["epsilon_EC_source_tag"] if "epsilon_EC_source_tag" in df.columns else pd.Series(["missing"] * len(df), index=df.index)
+    epsilon_ec_empirical_source = df["epsilon_EC_empirical_source_tag"] if "epsilon_EC_empirical_source_tag" in df.columns else pd.Series(["missing"] * len(df), index=df.index)
+    epsilon_ec_bound_source = df["epsilon_EC_bound_formula_tag"] if "epsilon_EC_bound_formula_tag" in df.columns else pd.Series(["missing"] * len(df), index=df.index)
+    decoder_fail_source = df["decoder_fail_rate_oracle_source_tag"] if "decoder_fail_rate_oracle_source_tag" in df.columns else pd.Series(["missing"] * len(df), index=df.index)
     out["verification_outcome_source_tag"] = verification_outcome_source.astype(str)
-    out["epsilon_EC"] = pd.to_numeric(df.get("epsilon_EC"), errors="coerce")
-    out["epsilon_EC_source_tag"] = epsilon_ec_source.astype(str)
+    out["epsilon_EC_empirical"] = pd.to_numeric(df.get("epsilon_EC_empirical"), errors="coerce")
+    out["epsilon_EC_empirical_source_tag"] = epsilon_ec_empirical_source.astype(str)
+    out["epsilon_EC_bound"] = pd.to_numeric(df.get("epsilon_EC_bound"), errors="coerce")
+    out["epsilon_EC_bound_formula_tag"] = epsilon_ec_bound_source.astype(str)
+    out["decoder_fail_rate_oracle"] = pd.to_numeric(df.get("decoder_fail_rate_oracle"), errors="coerce")
+    out["decoder_fail_rate_oracle_source_tag"] = decoder_fail_source.astype(str)
+    epsilon_ec_bound_vals = pd.to_numeric(df.get("epsilon_EC_bound"), errors="coerce")
+    out["eps_cor_from_epsilon_EC"] = epsilon_ec_bound_vals
+    out["eps_cor_total"] = epsilon_ec_bound_vals.where(epsilon_ec_bound_vals.notna(), eps_cor)
+    out["eps_cor_budget_rule"] = np.where(epsilon_ec_bound_vals.notna(), "verification_only_shadow", "legacy_eps_cor")
+    out["epsilon_EC_in_budget_flag"] = np.where(epsilon_ec_bound_vals.notna(), 1, 0)
     out["post_selection_correction"] = post_sel
     out["accepted_rate_proxy"] = accepted_rate_proxy
     out["n_eff_pairs"] = n_eff_pairs
     out["DeltaFK_calibrated"] = delta_fk
+    out["leak_EC_actual_bits"] = pd.to_numeric(np.where((n_pairs > 0) & total_leak_bits.notna(), total_leak_bits / n_pairs, df["leak_EC_actual_bits"]), errors="coerce")
+    out["leak_EC_actual_bits_legacy_crc"] = pd.to_numeric(np.where((n_pairs > 0) & total_leak_bits_legacy_crc.notna(), total_leak_bits_legacy_crc / n_pairs, np.nan), errors="coerce")
+    out["leak_EC_total_bits"] = total_leak_bits
+    out["leak_EC_total_bits_legacy_crc"] = total_leak_bits_legacy_crc
     out["PIE_secure_actual_ir"] = pie_actual
     out["SKR_secure_actual_ir_bps"] = skr_actual
     out["PIE_secure_beta_baseline"] = pie_beta

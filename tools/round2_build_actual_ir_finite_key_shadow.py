@@ -46,11 +46,28 @@ def main() -> int:
         np.nan,
     )
     audit["actual_ir_model_tag"] = "strict_zhong_like_actual_ir_finite_key_calibrated"
+    optional_cols = [
+        "leak_EC_actual_bits_legacy_crc", "eps_cor_total", "eps_cor_from_epsilon_EC",
+        "eps_cor_budget_rule", "epsilon_EC_in_budget_flag", "verification_bits_used_actual",
+        "verification_bits_used_actual_legacy_crc", "lambda_ver_bits_actual", "lambda_ver_source_tag",
+        "lambda_ver_bits_legacy_crc", "verification_protocol_id", "verification_invoked_block_count",
+        "verification_pass_count", "verification_fail_count", "undetected_error_count_empirical",
+        "epsilon_EC_empirical", "epsilon_EC_empirical_source_tag", "epsilon_EC_bound",
+        "epsilon_EC_bound_formula_tag", "decoder_fail_rate_oracle", "decoder_fail_rate_oracle_source_tag",
+    ]
+    for col in optional_cols:
+        if col not in audit.columns:
+            audit[col] = np.nan
     keep = [
         "loss_db", "dimension", "bin_width_ps", "franson_visibility_global", "IAB_est", "leak_EC_actual_bits",
-        "leak_EC_source_tag", "eps_sec", "eps_cor", "n_eff_pairs", "clean_pair_fraction", "layer_fraction",
+        "leak_EC_actual_bits_legacy_crc", "leak_EC_source_tag", "eps_sec", "eps_cor", "eps_cor_total", "eps_cor_from_epsilon_EC",
+        "eps_cor_budget_rule", "epsilon_EC_in_budget_flag", "n_eff_pairs", "clean_pair_fraction", "layer_fraction",
         "accepted_frame_fraction", "rejected_frame_fraction", "exactly_one_click_fraction", "post_selection_correction",
         "DeltaFK_calibrated", "accepted_rate_proxy", "PIE_secure_actual_ir", "SKR_secure_actual_ir_bps", "beta_eff",
+        "verification_bits_used_actual", "verification_bits_used_actual_legacy_crc", "lambda_ver_bits_actual", "lambda_ver_source_tag",
+        "lambda_ver_bits_legacy_crc", "verification_protocol_id", "verification_invoked_block_count", "verification_pass_count",
+        "verification_fail_count", "undetected_error_count_empirical", "epsilon_EC_empirical", "epsilon_EC_empirical_source_tag",
+        "epsilon_EC_bound", "epsilon_EC_bound_formula_tag", "decoder_fail_rate_oracle", "decoder_fail_rate_oracle_source_tag",
         "processing_rule_version", "pairing_path_tag", "pairing_window_source_tag", "threshold_ps", "effective_pairing_window_ps",
         "threshold_ratio_to_bw", "best_hard_PIE", "PIE_practical", "SKR_measured_bps", "actual_ir_model_tag",
     ]
@@ -61,10 +78,11 @@ def main() -> int:
         f"point_count: {len(audit)}",
         f"actual_leak_rows: {int(audit['leak_EC_source_tag'].astype(str).str.startswith('actual_ir_replay').sum())}",
         f"surrogate_leak_rows: {int(audit['leak_EC_source_tag'].astype(str).str.startswith('surrogate').sum())}",
-        "DeltaFK_primary_inputs: n_pairs_actual, layer_fraction, accepted_frame_fraction, block_success_rate_used",
+        "DeltaFK_primary_inputs: n_pairs_actual, layer_fraction, accepted_frame_fraction, block_success_rate_used, eps_cor_total",
         f"mean_PIE_drop_vs_performance_proxy: {perf_drop.mean()}",
         f"large_bw_or_large_d_mean_PIE_drop: {pd.to_numeric(perf_drop[large_mask], errors='coerce').mean()}",
         f"beta_eff_range_p10_p90: {audit['beta_eff'].quantile(0.10)} .. {audit['beta_eff'].quantile(0.90)}",
+        f"formal_epsilon_bound_rows: {int(audit['epsilon_EC_bound_formula_tag'].astype(str).eq('union_bound_over_blocks_universal_hash').sum()) if 'epsilon_EC_bound_formula_tag' in audit.columns else 0}",
     ]
     write_summary(output_dir / "actual_ir_finite_key_summary.txt", lines)
     return 0

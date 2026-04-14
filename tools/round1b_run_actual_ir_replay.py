@@ -20,6 +20,15 @@ from src.reconciliation.real_polar_sc_rescue import (  # type: ignore
     polar_encode_non_systematic,
     polar_sc_decode_with_frozen,
 )
+from src.reconciliation.verification import (  # type: ignore
+    VERIFICATION_FAMILY,
+    VERIFICATION_PROTOCOL_ID,
+    VERIFICATION_PUBLIC_MESSAGE_RULE,
+    VERIFICATION_SCOPE,
+    VERIFICATION_SEED_POLICY,
+    VERIFICATION_TRANSCRIPT_SOURCE_TAG,
+    verification_transcript,
+)
 from _security_round_common import (
     bit_layer_from_symbols,
     ensure_output_dir,
@@ -88,6 +97,7 @@ def main() -> int:
     ap.add_argument("--replay-index-dir", default=str(_default_replay_index_dir()))
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--force-rebuild-decoder", action="store_true")
+    ap.add_argument("--verification-tag-bits", type=int, default=32)
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
 
@@ -137,9 +147,26 @@ def main() -> int:
                     "k_used": "",
                     "rate_used": "",
                     "crc_bits_used": "",
+                    "verification_protocol_id": "",
+                    "verification_family": "",
+                    "verification_scope": "",
+                    "verification_tag_bits": "",
+                    "verification_seed_policy": "",
+                    "verification_public_message_rule": "",
+                    "verification_invoked_flag": "",
+                    "verification_bits_budgeted": "",
+                    "verification_bits_used_actual": "",
+                    "verification_bits_revealed_legacy_crc": "",
+                    "verification_seed_index": "",
+                    "verification_pass_flag": "",
+                    "verification_fail_flag": "",
+                    "verification_transcript_source_tag": "",
                     "syndrome_bits_revealed": "",
                     "verification_bits_revealed": "",
+                    "total_leak_ec_bits_legacy_crc": "",
                     "total_leak_ec_bits": "",
+                    "block_match_oracle_flag": "",
+                    "undetected_error_oracle_flag": "",
                     "block_success_flag": "",
                     "decode_fail_flag": "",
                     "verification_source_tag": "",
@@ -167,9 +194,26 @@ def main() -> int:
                     "k_used": "",
                     "rate_used": "",
                     "crc_bits_used": "",
+                    "verification_protocol_id": "",
+                    "verification_family": "",
+                    "verification_scope": "",
+                    "verification_tag_bits": "",
+                    "verification_seed_policy": "",
+                    "verification_public_message_rule": "",
+                    "verification_invoked_flag": "",
+                    "verification_bits_budgeted": "",
+                    "verification_bits_used_actual": "",
+                    "verification_bits_revealed_legacy_crc": "",
+                    "verification_seed_index": "",
+                    "verification_pass_flag": "",
+                    "verification_fail_flag": "",
+                    "verification_transcript_source_tag": "",
                     "syndrome_bits_revealed": "",
                     "verification_bits_revealed": "",
+                    "total_leak_ec_bits_legacy_crc": "",
                     "total_leak_ec_bits": "",
+                    "block_match_oracle_flag": "",
+                    "undetected_error_oracle_flag": "",
                     "block_success_flag": "",
                     "decode_fail_flag": "",
                     "verification_source_tag": "",
@@ -200,9 +244,26 @@ def main() -> int:
                     "k_used": "",
                     "rate_used": "",
                     "crc_bits_used": "",
+                    "verification_protocol_id": "",
+                    "verification_family": "",
+                    "verification_scope": "",
+                    "verification_tag_bits": "",
+                    "verification_seed_policy": "",
+                    "verification_public_message_rule": "",
+                    "verification_invoked_flag": "",
+                    "verification_bits_budgeted": "",
+                    "verification_bits_used_actual": "",
+                    "verification_bits_revealed_legacy_crc": "",
+                    "verification_seed_index": "",
+                    "verification_pass_flag": "",
+                    "verification_fail_flag": "",
+                    "verification_transcript_source_tag": "",
                     "syndrome_bits_revealed": "",
                     "verification_bits_revealed": "",
+                    "total_leak_ec_bits_legacy_crc": "",
                     "total_leak_ec_bits": "",
+                    "block_match_oracle_flag": "",
+                    "undetected_error_oracle_flag": "",
                     "block_success_flag": "",
                     "decode_fail_flag": "",
                     "verification_source_tag": "",
@@ -245,9 +306,26 @@ def main() -> int:
                         "k_used": k_best,
                         "rate_used": lrow.get("rate_best"),
                         "crc_bits_used": crc_bits,
+                        "verification_protocol_id": "",
+                        "verification_family": "",
+                        "verification_scope": "",
+                        "verification_tag_bits": "",
+                        "verification_seed_policy": "",
+                        "verification_public_message_rule": "",
+                        "verification_invoked_flag": "",
+                        "verification_bits_budgeted": "",
+                        "verification_bits_used_actual": "",
+                        "verification_bits_revealed_legacy_crc": "",
+                        "verification_seed_index": "",
+                        "verification_pass_flag": "",
+                        "verification_fail_flag": "",
+                        "verification_transcript_source_tag": "",
                         "syndrome_bits_revealed": "",
                         "verification_bits_revealed": "",
+                        "total_leak_ec_bits_legacy_crc": "",
                         "total_leak_ec_bits": "",
+                        "block_match_oracle_flag": "",
+                        "undetected_error_oracle_flag": "",
                         "block_success_flag": "",
                         "decode_fail_flag": "",
                         "verification_source_tag": "",
@@ -281,19 +359,34 @@ def main() -> int:
                     x_hat = polar_encode_non_systematic(u_hat.astype(np.int8), n_log).astype(np.uint8)
                     block_success = int(np.array_equal(x_hat, x_a))
                     decode_fail = int(1 - block_success)
-                    verification_bits = int(crc_bits if decoder_mode == "scl" and crc_bits > 0 else 0)
-                    if verification_bits > 0:
+                    verification_bits_legacy_crc = int(crc_bits if decoder_mode == "scl" and crc_bits > 0 else 0)
+                    transcript = verification_transcript(
+                        reference_bits=x_a,
+                        candidate_bits=x_hat,
+                        point_id=pid,
+                        layer_id=layer_id,
+                        block_index=block_index,
+                        tag_bits=int(args.verification_tag_bits),
+                    )
+                    verification_bits = int(transcript["verification_bits_used_actual"])
+                    verification_source_tag = "actual_replay" if verification_bits_legacy_crc == 0 else "configured_crc_budget"
+                    if verification_bits_legacy_crc > 0:
                         replay_status = "ok_configured_crc_budget"
                 except Exception as exc:
                     block_success = 0
                     decode_fail = 1
                     verification_bits = 0
+                    verification_bits_legacy_crc = 0
                     verification_source_tag = ""
+                    transcript = {}
                     replay_status = "blocked"
                     blocked_reason = f"{type(exc).__name__}"
 
                 syndrome_bits = int(frozen_count)
                 total_leak = int(syndrome_bits + verification_bits) if replay_status.startswith("ok") else ""
+                total_leak_legacy_crc = int(syndrome_bits + verification_bits_legacy_crc) if replay_status.startswith("ok") else ""
+                block_match_oracle = block_success if replay_status.startswith("ok") else ""
+                undetected_error_oracle = int((1 - block_success) and int(transcript.get("verification_pass_flag", 0)) == 1) if replay_status.startswith("ok") else ""
                 block_rows.append(
                     {
                         "point_id": pid,
@@ -306,9 +399,26 @@ def main() -> int:
                         "k_used": k_best,
                         "rate_used": lrow.get("rate_best"),
                         "crc_bits_used": crc_bits,
+                        "verification_protocol_id": transcript.get("verification_protocol_id", ""),
+                        "verification_family": transcript.get("verification_family", ""),
+                        "verification_scope": transcript.get("verification_scope", ""),
+                        "verification_tag_bits": int(args.verification_tag_bits) if replay_status.startswith("ok") else "",
+                        "verification_seed_policy": transcript.get("verification_seed_policy", ""),
+                        "verification_public_message_rule": transcript.get("verification_public_message_rule", ""),
+                        "verification_invoked_flag": transcript.get("verification_invoked_flag", ""),
+                        "verification_bits_budgeted": transcript.get("verification_bits_budgeted", ""),
+                        "verification_bits_used_actual": transcript.get("verification_bits_used_actual", ""),
+                        "verification_bits_revealed_legacy_crc": verification_bits_legacy_crc if replay_status.startswith("ok") else "",
+                        "verification_seed_index": transcript.get("verification_seed_index", ""),
+                        "verification_pass_flag": transcript.get("verification_pass_flag", ""),
+                        "verification_fail_flag": transcript.get("verification_fail_flag", ""),
+                        "verification_transcript_source_tag": transcript.get("verification_transcript_source_tag", ""),
                         "syndrome_bits_revealed": syndrome_bits if replay_status.startswith("ok") else "",
                         "verification_bits_revealed": verification_bits if replay_status.startswith("ok") else "",
+                        "total_leak_ec_bits_legacy_crc": total_leak_legacy_crc,
                         "total_leak_ec_bits": total_leak,
+                        "block_match_oracle_flag": block_match_oracle,
+                        "undetected_error_oracle_flag": undetected_error_oracle,
                         "block_success_flag": block_success if replay_status.startswith("ok") else "",
                         "decode_fail_flag": decode_fail if replay_status.startswith("ok") else "",
                         "verification_source_tag": verification_source_tag,
@@ -325,9 +435,15 @@ def main() -> int:
         f"replay_index_dir: {replay_index_dir}",
         f"block_row_count: {len(block_df)}",
         f"points_with_actual_replay_rows: {ok_points}",
+        f"verification_protocol_id: {VERIFICATION_PROTOCOL_ID}",
+        f"verification_family: {VERIFICATION_FAMILY}",
+        f"verification_scope: {VERIFICATION_SCOPE}",
+        f"verification_seed_policy: {VERIFICATION_SEED_POLICY}",
+        f"verification_public_message_rule: {VERIFICATION_PUBLIC_MESSAGE_RULE}",
+        f"verification_tag_bits: {int(args.verification_tag_bits)}",
         "notes:",
         "- syndrome bits are actual replay outputs from frozen-value-aware decoding.",
-        "- SCL verification bits are currently counted from configured CRC budget, not a separately logged verification transcript.",
+        "- verification_bits_revealed now records universal-hash transcript leakage; legacy CRC budgeting is preserved in verification_bits_revealed_legacy_crc.",
         "- frame_success_rate remains unresolved at replay-run stage and is aggregated later as MISSING unless a rigorous denominator is available.",
     ]
     write_summary(output_dir / "round1b_summary.txt", summary_lines)

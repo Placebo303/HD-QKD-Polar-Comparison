@@ -27,11 +27,50 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     aug_block = pd.read_csv(out_dir / 'actual_ir_block_table_augmented.csv')
     aug_point = pd.read_csv(out_dir / 'actual_ir_point_table_augmented.csv')
+    formal_cols = [
+        'total_leak_ec_bits',
+        'total_leak_ec_bits_legacy_crc',
+        'verification_bits_used_actual_legacy_crc',
+        'lambda_ver_bits_actual',
+        'lambda_ver_source_tag',
+        'lambda_ver_bits_legacy_crc',
+        'verification_pass_count',
+        'verification_fail_count',
+        'verification_outcome_source_tag',
+        'epsilon_EC_empirical',
+        'epsilon_EC_empirical_source_tag',
+        'epsilon_EC_bound',
+        'epsilon_EC_bound_formula_tag',
+        'decoder_fail_rate_oracle',
+        'decoder_fail_rate_oracle_source_tag',
+    ]
+    for col in formal_cols:
+        if col not in aug_point.columns:
+            aug_point[col] = pd.NA
     candidate_dir = fresh_candidate_dir(20)
     point_frame = candidate_point_frame(candidate_dir)
     frame_point = build_frame_audit_from_candidate(candidate_dir, point_frame[[*KEY_COLS, 'point_id']])
     frame_point = frame_point.merge(
-        aug_point[KEY_COLS + ['point_id', 'verification_bits_used_actual', 'verification_source_tag', 'verification_pass_count', 'verification_fail_count', 'verification_outcome_source_tag', 'epsilon_EC', 'epsilon_EC_source_tag']],
+        aug_point[KEY_COLS + [
+            'point_id',
+            'total_leak_ec_bits',
+            'total_leak_ec_bits_legacy_crc',
+            'verification_bits_used_actual',
+            'verification_bits_used_actual_legacy_crc',
+            'lambda_ver_bits_actual',
+            'lambda_ver_source_tag',
+            'lambda_ver_bits_legacy_crc',
+            'verification_source_tag',
+            'verification_pass_count',
+            'verification_fail_count',
+            'verification_outcome_source_tag',
+            'epsilon_EC_empirical',
+            'epsilon_EC_empirical_source_tag',
+            'epsilon_EC_bound',
+            'epsilon_EC_bound_formula_tag',
+            'decoder_fail_rate_oracle',
+            'decoder_fail_rate_oracle_source_tag',
+        ]],
         on=KEY_COLS + ['point_id'],
         how='left',
     )
