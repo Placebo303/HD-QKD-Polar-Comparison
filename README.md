@@ -25,6 +25,13 @@ Use these instead:
   - [docs/POLAR_CODE_MAINFLOW_20260327.md](/D:/Code/HD-QKD_Polar_Release/docs/POLAR_CODE_MAINFLOW_20260327.md)
 - latest results and authoritative output paths:
   - [docs/LATEST_RESULTS_20260327.md](/D:/Code/HD-QKD_Polar_Release/docs/LATEST_RESULTS_20260327.md)
+- Route A correctness formalization:
+  - [docs/ROUTE_A_FORMAL_VERIFICATION_20260410.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_A_FORMAL_VERIFICATION_20260410.md)
+  - [docs/ROUTE_A_BIT_PLANE_INTERFACE_20260414.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_A_BIT_PLANE_INTERFACE_20260414.md)
+
+Route A correctness formalization uses per-block universal-hash verification
+for `epsilon_EC_bound` budgeting. This is not a strict Zhong 2015 or full Niu
+2016 proof instantiation.
 
 ## Main Entry Points
 

@@ -73,7 +73,7 @@ def main() -> int:
         f"blocked_reason_counts: {blocked_reason_counts if blocked_reason_counts else 'none'}",
         f"actual_coverage_sufficient_for_master: {'yes' if coverage_ratio >= 0.80 else 'partial'}",
         "notes:",
-        "- actual replay rows retain configured CRC verification budgeting on SCL points; this is tagged in leak_ec_source_tag and upstream summaries.",
+        "- formal Route A rows use universal-hash verification leakage; legacy CRC budgeting remains available only in legacy compare columns.",
         "- frame_success_rate remains MISSING unless a rigorous frame-level denominator becomes available.",
     ]
     write_text(output_dir / "stage1_summary.txt", "\n".join(lines))

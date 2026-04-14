@@ -50,9 +50,15 @@ def main() -> int:
 
     old_best = old_df.loc[pd.to_numeric(old_df["SKR_secure_actual_ir_bps"], errors="coerce").idxmax()]
     new_best = new_df.loc[pd.to_numeric(new_df["SKR_secure_actual_ir_bps"], errors="coerce").idxmax()]
+    old_best_key = (int(old_best["dimension"]), int(old_best["bin_width_ps"]))
+    new_best_key = (int(new_best["dimension"]), int(new_best["bin_width_ps"]))
+    best_changed = old_best_key != new_best_key
+    formal_rows = int(compare["epsilon_EC_bound_new"].notna().sum())
+    formal_ratio = (float(formal_rows) / float(len(compare))) if len(compare) > 0 else 0.0
     lines = [
         f"row_count: {len(compare)}",
-        f"formal_rows: {int(compare['epsilon_EC_bound_new'].notna().sum())}",
+        f"formal_rows: {formal_rows}",
+        f"formal_coverage_ratio: {formal_ratio:.6f}",
         f"mean_delta_leak_EC_actual_bits: {compare['delta_leak_EC_actual_bits'].mean()}",
         f"mean_delta_PIE_secure_actual_ir: {compare['delta_PIE_secure_actual_ir'].mean()}",
         f"mean_delta_SKR_secure_actual_ir_bps: {compare['delta_SKR_secure_actual_ir_bps'].mean()}",
@@ -60,8 +66,10 @@ def main() -> int:
         f"mean_decoder_fail_rate_oracle_new: {compare['decoder_fail_rate_oracle_new'].mean()}",
         f"mean_epsilon_EC_empirical_new: {compare['epsilon_EC_empirical_new'].mean()}",
         f"mean_epsilon_EC_bound_new: {compare['epsilon_EC_bound_new'].mean()}",
-        f"old_best_point: d={int(old_best['dimension'])}, bw={int(old_best['bin_width_ps'])}",
-        f"new_best_point: d={int(new_best['dimension'])}, bw={int(new_best['bin_width_ps'])}",
+        f"old_best_point: d={old_best_key[0]}, bw={old_best_key[1]}",
+        f"new_best_point: d={new_best_key[0]}, bw={new_best_key[1]}",
+        f"best_point_changed_flag: {1 if best_changed else 0}",
+        f"best_point_change_explanation: {'changed under formal universal-hash verification leakage and epsilon_EC_bound correctness budgeting; no error-model or q-ary protocol change is included' if best_changed else 'unchanged'}",
         "note: new route uses universal-hash verification leakage and epsilon_EC_bound correctness budgeting; empirical quantities remain audit-only.",
     ]
     (out_dir / "routeA_correctness_compare_summary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
