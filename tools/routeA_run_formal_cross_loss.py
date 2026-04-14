@@ -18,6 +18,7 @@ def main() -> int:
     ap.add_argument("--losses", default="20,16,10,6")
     ap.add_argument("--output-dir", default="results/_tmp_routeA_correctness_formal_stageD_cross_loss")
     ap.add_argument("--shards", type=int, default=121)
+    ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--verification-tag-bits", type=int, default=32)
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
@@ -31,6 +32,7 @@ def main() -> int:
         f"output_dir: {output_dir}",
         f"losses: {','.join(str(x) for x in losses)}",
         f"verification_tag_bits: {int(args.verification_tag_bits)}",
+        f"workers: {int(args.workers)}",
         "loss_runs:",
     ]
     for loss_db in losses:
@@ -49,6 +51,8 @@ def main() -> int:
             str(stage1_dir),
             "--shards",
             str(int(args.shards)),
+            "--workers",
+            str(int(args.workers)),
             "--verification-tag-bits",
             str(int(args.verification_tag_bits)),
             *(["--overwrite"] if bool(args.overwrite) else []),

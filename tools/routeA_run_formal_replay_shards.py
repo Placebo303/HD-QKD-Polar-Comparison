@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import pandas as pd
@@ -29,12 +30,37 @@ def _write_shard_index(
     shard_layer.to_csv(shard_index_dir / "replay_index_layer_table.csv", index=False)
 
 
+def _run_shard(
+    *,
+    candidate_dir: Path,
+    shard_index_dir: Path,
+    shard_output_dir: Path,
+    verification_tag_bits: int,
+    shard_key: str,
+    row_count: int,
+) -> str:
+    python_tool(
+        "round1b_run_actual_ir_replay.py",
+        "--input-dirs",
+        str(candidate_dir),
+        "--replay-index-dir",
+        str(shard_index_dir),
+        "--output-dir",
+        str(shard_output_dir),
+        "--verification-tag-bits",
+        str(int(verification_tag_bits)),
+        "--overwrite",
+    )
+    return f"{shard_key}: ran rows={row_count}"
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Route A serial/resumable formal replay shard runner.")
+    ap = argparse.ArgumentParser(description="Route A resumable formal replay shard runner.")
     ap.add_argument("--candidate-dir", required=True)
     ap.add_argument("--replay-index-dir", required=True)
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--shards", type=int, default=16)
+    ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--verification-tag-bits", type=int, default=32)
     ap.add_argument("--resume", dest="resume", action="store_true", default=True)
     ap.add_argument("--no-resume", dest="resume", action="store_false")
@@ -61,6 +87,7 @@ def main() -> int:
     shard_frames = shard_dataframe(point_df, int(args.shards))
     shard_output_dirs: list[Path] = []
     shard_status: list[str] = []
+    pending: list[tuple[str, Path, Path, int]] = []
 
     for shard_no, shard_points in enumerate(shard_frames):
         shard_key = f"shard_{shard_no:03d}"
@@ -75,19 +102,37 @@ def main() -> int:
             shard_status.append(f"{shard_key}: skipped_existing rows={len(shard_points)}")
             continue
 
-        python_tool(
-            "round1b_run_actual_ir_replay.py",
-            "--input-dirs",
-            str(candidate_dir),
-            "--replay-index-dir",
-            str(shard_index_dir),
-            "--output-dir",
-            str(shard_output_dir),
-            "--verification-tag-bits",
-            str(int(args.verification_tag_bits)),
-            "--overwrite",
-        )
-        shard_status.append(f"{shard_key}: ran rows={len(shard_points)}")
+        pending.append((shard_key, shard_index_dir, shard_output_dir, len(shard_points)))
+
+    max_workers = max(1, int(args.workers))
+    if max_workers == 1:
+        for shard_key, shard_index_dir, shard_output_dir, row_count in pending:
+            shard_status.append(
+                _run_shard(
+                    candidate_dir=candidate_dir,
+                    shard_index_dir=shard_index_dir,
+                    shard_output_dir=shard_output_dir,
+                    verification_tag_bits=int(args.verification_tag_bits),
+                    shard_key=shard_key,
+                    row_count=row_count,
+                )
+            )
+    else:
+        with ThreadPoolExecutor(max_workers=max_workers) as ex:
+            futures = [
+                ex.submit(
+                    _run_shard,
+                    candidate_dir=candidate_dir,
+                    shard_index_dir=shard_index_dir,
+                    shard_output_dir=shard_output_dir,
+                    verification_tag_bits=int(args.verification_tag_bits),
+                    shard_key=shard_key,
+                    row_count=row_count,
+                )
+                for shard_key, shard_index_dir, shard_output_dir, row_count in pending
+            ]
+            for fut in as_completed(futures):
+                shard_status.append(fut.result())
 
     block_frames = []
     missing_shards = []
@@ -132,10 +177,11 @@ def main() -> int:
         f"point_row_count: {len(point_actual)}",
         f"formal_point_rows: {formal_rows}",
         f"resume_enabled: {bool(args.resume)}",
+        f"workers: {max_workers}",
         "shard_status:",
         *[f"  - {s}" for s in shard_status],
         "notes:",
-        "- runner is serial and resumable; no multiprocessing Pipe is used.",
+        "- runner is resumable and uses thread-scheduled subprocesses when workers > 1; no multiprocessing Pipe is used.",
         "- universal-hash verification is produced by round1b_run_actual_ir_replay.py.",
     ]
     write_text(output_dir / "routeA_formal_replay_shards_summary.txt", "\n".join(summary_lines))
