@@ -79,6 +79,12 @@ def main() -> int:
         verification_tags = sorted(str(x) for x in ok_rows["verification_source_tag"].dropna().unique())
         verification_protocol_ids = sorted(str(x) for x in ok_rows.get("verification_protocol_id", pd.Series(dtype=str)).dropna().unique() if str(x).strip())
         verification_families = sorted(str(x) for x in ok_rows.get("verification_family", pd.Series(dtype=str)).dropna().unique() if str(x).strip())
+        channel_model_tags = sorted(str(x) for x in ok_rows.get("channel_model_tag", pd.Series(dtype=str)).dropna().unique() if str(x).strip())
+        model_fallback_tags = sorted(str(x) for x in ok_rows.get("model_fallback_tag", pd.Series(dtype=str)).dropna().unique() if str(x).strip())
+        p01_model_vals = pd.to_numeric(ok_rows.get("p01_model"), errors="coerce").dropna()
+        p10_model_vals = pd.to_numeric(ok_rows.get("p10_model"), errors="coerce").dropna()
+        llr_b0_vals = pd.to_numeric(ok_rows.get("llr_b0"), errors="coerce").dropna()
+        llr_b1_vals = pd.to_numeric(ok_rows.get("llr_b1"), errors="coerce").dropna()
         verification_invoked_block_count = int(pd.to_numeric(ok_rows.get("verification_invoked_flag"), errors="coerce").fillna(0).sum()) if audited_blocks > 0 else 0
         verification_pass_count = int(pd.to_numeric(ok_rows.get("verification_pass_flag"), errors="coerce").fillna(0).sum()) if audited_blocks > 0 else 0
         verification_fail_count = int(pd.to_numeric(ok_rows.get("verification_fail_flag"), errors="coerce").fillna(0).sum()) if audited_blocks > 0 else 0
@@ -126,6 +132,12 @@ def main() -> int:
                 "verification_source_tag": verification_source_tag,
                 "verification_protocol_id": ";".join(verification_protocol_ids) if verification_protocol_ids else "missing",
                 "verification_family": ";".join(verification_families) if verification_families else "missing",
+                "channel_model_tag": ";".join(channel_model_tags) if channel_model_tags else "missing",
+                "model_fallback_tag": ";".join(model_fallback_tags) if model_fallback_tags else "missing",
+                "p01_model": float(p01_model_vals.mean()) if not p01_model_vals.empty else np.nan,
+                "p10_model": float(p10_model_vals.mean()) if not p10_model_vals.empty else np.nan,
+                "llr_b0": float(llr_b0_vals.mean()) if not llr_b0_vals.empty else np.nan,
+                "llr_b1": float(llr_b1_vals.mean()) if not llr_b1_vals.empty else np.nan,
                 "verification_tag_bits": tag_bits_used if tag_bits_used > 0 else np.nan,
                 "verification_invoked_block_count": verification_invoked_block_count,
                 "verification_pass_count": verification_pass_count,

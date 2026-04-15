@@ -78,3 +78,22 @@ results/_tmp_routeB_lite_error_audit/routeB_ab_subset_manifest.csv
 ## Next Step Boundary
 
 Only implement model-aware replay after inspecting the B3 subset manifest. The first replay ablation should be LLR-only with fixed `k_best` and fixed polar-weight information-set order. LLR+k adaptation is only justified if the LLR-only subset improves replay outcomes.
+
+## B3 LLR-only Stop/Go Gate
+
+Run the current very-small subset gate with:
+
+```powershell
+python tools\routeB_run_b3_subset_ablation.py --audit-dir results\_tmp_routeB_lite_error_audit --routeA-cross-loss-dir results\_tmp_routeA_correctness_formal_stageD_cross_loss --output-dir results\_tmp_routeB_lite_b3_subset_ablation --workers 2
+```
+
+Outputs:
+
+```text
+results/_tmp_routeB_lite_b3_subset_ablation/routeB_b3_subset_compare.csv
+results/_tmp_routeB_lite_b3_subset_ablation/routeB_b3_subset_summary.md
+results/_tmp_routeB_lite_b3_subset_ablation/routeB_b3_subset_runtime.csv
+results/_tmp_routeB_lite_b3_subset_ablation/routeB_b3_subset_point_notes.csv
+```
+
+Current gate result from the 12-point subset is `GO_FULL_20DB`: proceed only to full 20 dB validation, not to immediate cross-loss promotion or mainline migration.

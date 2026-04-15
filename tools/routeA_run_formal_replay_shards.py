@@ -36,6 +36,8 @@ def _run_shard(
     shard_index_dir: Path,
     shard_output_dir: Path,
     verification_tag_bits: int,
+    channel_model_table: str,
+    channel_model_tag: str,
     shard_key: str,
     row_count: int,
 ) -> str:
@@ -49,6 +51,9 @@ def _run_shard(
         str(shard_output_dir),
         "--verification-tag-bits",
         str(int(verification_tag_bits)),
+        "--channel-model-tag",
+        str(channel_model_tag),
+        *(["--channel-model-table", str(channel_model_table)] if str(channel_model_table).strip() else []),
         "--overwrite",
     )
     return f"{shard_key}: ran rows={row_count}"
@@ -62,6 +67,8 @@ def main() -> int:
     ap.add_argument("--shards", type=int, default=16)
     ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--verification-tag-bits", type=int, default=32)
+    ap.add_argument("--channel-model-table", default="")
+    ap.add_argument("--channel-model-tag", default="bsc_legacy", choices=["bsc_legacy", "asym_binary_v1"])
     ap.add_argument("--resume", dest="resume", action="store_true", default=True)
     ap.add_argument("--no-resume", dest="resume", action="store_false")
     ap.add_argument("--overwrite", action="store_true")
@@ -113,6 +120,8 @@ def main() -> int:
                     shard_index_dir=shard_index_dir,
                     shard_output_dir=shard_output_dir,
                     verification_tag_bits=int(args.verification_tag_bits),
+                    channel_model_table=str(args.channel_model_table),
+                    channel_model_tag=str(args.channel_model_tag),
                     shard_key=shard_key,
                     row_count=row_count,
                 )
@@ -126,6 +135,8 @@ def main() -> int:
                     shard_index_dir=shard_index_dir,
                     shard_output_dir=shard_output_dir,
                     verification_tag_bits=int(args.verification_tag_bits),
+                    channel_model_table=str(args.channel_model_table),
+                    channel_model_tag=str(args.channel_model_tag),
                     shard_key=shard_key,
                     row_count=row_count,
                 )
@@ -173,6 +184,8 @@ def main() -> int:
         f"point_count: {len(point_df)}",
         f"shard_count: {len(shard_frames)}",
         f"verification_tag_bits: {int(args.verification_tag_bits)}",
+        f"channel_model_tag: {str(args.channel_model_tag)}",
+        f"channel_model_table: {str(args.channel_model_table) if str(args.channel_model_table).strip() else 'none'}",
         f"block_row_count: {len(block_df)}",
         f"point_row_count: {len(point_actual)}",
         f"formal_point_rows: {formal_rows}",

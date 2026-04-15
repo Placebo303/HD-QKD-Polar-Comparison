@@ -36,9 +36,10 @@ for `epsilon_EC_bound` budgeting. This is not a strict Zhong 2015 or full Niu
   - [docs/ROUTE_B_LITE_PLAN_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_PLAN_20260415.md)
 
 Route B-lite starts from the Route A formal cross-loss baseline and currently
-implements B1/B2/B3 planning outputs only: error audit, channel-model tables,
-and very-small A/B subset selection. It does not claim channel-aware Polar
-construction.
+implements B1/B2 audit outputs plus a B3 very-small LLR-only subset gate:
+error audit, channel-model tables, subset selection, and `bsc_legacy` vs
+`asym_binary_v1` replay comparison. It does not claim channel-aware Polar
+construction or mainline model migration.
 
 ## Main Entry Points
 
@@ -51,6 +52,14 @@ Replay / security:
 - [tools/longrun_run_actual_ir_replay.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_run_actual_ir_replay.py)
 - [tools/longrun_build_finite_key_audit_table.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_finite_key_audit_table.py)
 - [tools/longrun_build_security_master_table.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_security_master_table.py)
+
+Route B-lite:
+- [tools/routeB_build_error_audit.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_build_error_audit.py)
+- [tools/routeB_build_channel_model_table.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_build_channel_model_table.py)
+- [tools/routeB_select_ab_subset.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_select_ab_subset.py)
+- [tools/routeB_run_b3_subset_ablation.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_run_b3_subset_ablation.py)
+
+The current B3 gate output is [results/_tmp_routeB_lite_b3_subset_ablation](/D:/Code/HD-QKD_Polar_Release/results/_tmp_routeB_lite_b3_subset_ablation).
 
 Refined frame-accounting pass:
 - [tools/minrerun_audit_frame_accounting_inputs.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_audit_frame_accounting_inputs.py)
