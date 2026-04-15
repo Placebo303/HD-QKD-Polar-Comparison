@@ -34,12 +34,14 @@ for `epsilon_EC_bound` budgeting. This is not a strict Zhong 2015 or full Niu
 2016 proof instantiation.
 - Route B-lite error-model audit:
   - [docs/ROUTE_B_LITE_PLAN_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_PLAN_20260415.md)
+  - [docs/ROUTE_B_LITE_STATUS_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_STATUS_20260415.md)
 
 Route B-lite starts from the Route A formal cross-loss baseline and currently
-implements B1/B2 audit outputs plus a B3 very-small LLR-only subset gate:
-error audit, channel-model tables, subset selection, and `bsc_legacy` vs
-`asym_binary_v1` replay comparison. It does not claim channel-aware Polar
-construction or mainline model migration.
+implements B1/B2 audit outputs plus B3 LLR-only gates: error audit,
+channel-model tables, subset selection, `bsc_legacy` vs `asym_binary_v1`
+subset replay comparison, and the full 20dB validation entrypoint. It does
+not claim q-ary Polar, nonbinary decoding, channel-aware Polar construction,
+or mainline model migration.
 
 ## Main Entry Points
 
@@ -58,8 +60,10 @@ Route B-lite:
 - [tools/routeB_build_channel_model_table.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_build_channel_model_table.py)
 - [tools/routeB_select_ab_subset.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_select_ab_subset.py)
 - [tools/routeB_run_b3_subset_ablation.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_run_b3_subset_ablation.py)
+- [tools/routeB_run_full20dB_llr_ablation.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_run_full20dB_llr_ablation.py)
 
 The current B3 gate output is [results/_tmp_routeB_lite_b3_subset_ablation](/D:/Code/HD-QKD_Polar_Release/results/_tmp_routeB_lite_b3_subset_ablation).
+The full 20dB LLR-only validation output is [results/_tmp_routeB_lite_full20dB_llr_ablation](/D:/Code/HD-QKD_Polar_Release/results/_tmp_routeB_lite_full20dB_llr_ablation) when generated.
 
 Refined frame-accounting pass:
 - [tools/minrerun_audit_frame_accounting_inputs.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_audit_frame_accounting_inputs.py)

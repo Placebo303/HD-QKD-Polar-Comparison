@@ -97,3 +97,61 @@ results/_tmp_routeB_lite_b3_subset_ablation/routeB_b3_subset_point_notes.csv
 ```
 
 Current gate result from the 12-point subset is `GO_FULL_20DB`: proceed only to full 20 dB validation, not to immediate cross-loss promotion or mainline migration.
+
+## Full 20dB Validation Gate
+
+The next gate is full 20dB LLR-only validation over all 121 points. The only intended variable is the LLR model:
+
+```text
+baseline = bsc_legacy
+ablation = asym_binary_v1
+verification = uhv1_per_block
+epsilon_EC_bound = universal_hash_union_bound
+eps_cor_total = unchanged from Route A formal correctness
+frozen ordering = unchanged
+k_best = unchanged
+```
+
+Run:
+
+```powershell
+python tools\routeB_run_full20dB_llr_ablation.py --audit-dir results\_tmp_routeB_lite_error_audit --routeA-cross-loss-dir results\_tmp_routeA_correctness_formal_stageD_cross_loss --output-dir results\_tmp_routeB_lite_full20dB_llr_ablation --workers 4 --overwrite
+```
+
+The runner first tries `workers=4`, then falls back to `2`, then `1` if the replay output is incomplete or a child process fails. The output files are:
+
+```text
+results/_tmp_routeB_lite_full20dB_llr_ablation/routeB_full20dB_compare.csv
+results/_tmp_routeB_lite_full20dB_llr_ablation/routeB_full20dB_summary.md
+results/_tmp_routeB_lite_full20dB_llr_ablation/routeB_full20dB_runtime.csv
+results/_tmp_routeB_lite_full20dB_llr_ablation/routeB_full20dB_point_notes.csv
+```
+
+Stop/go is decided from the full 20dB result, not from the 12-point subset. The allowed final labels are:
+
+```text
+STOP_AT_FULL_20DB
+GO_EXPAND_LLR_ONLY
+GO_WIDER_VALIDATION_BUT_NOT_MAINLINE
+```
+
+Even if the full 20dB gate is positive, it only supports wider LLR-only validation. It does not support q-ary Polar, nonbinary decoding, channel-aware construction, or mainline migration.
+
+## Full 20dB Gate Result
+
+Completed output:
+
+```text
+results/_tmp_routeB_lite_full20dB_llr_ablation
+```
+
+Decision: `GO_WIDER_VALIDATION_BUT_NOT_MAINLINE`.
+
+The result is mixed globally (`47` improved, `46` degraded, `28` tied) with zero median deltas, but it has a clear bin-width structure. `50/180/200 ps` are positive at 20dB; `100/120 ps` are negative. This does not justify all-point application or mainline migration.
+
+Band-limited wider validation was attempted but is runtime-blocked in this turn:
+
+```text
+results/_tmp_routeB_lite_wider_llr_validation
+results/_tmp_routeB_lite_wider_llr_validation_10_16_20
+```
