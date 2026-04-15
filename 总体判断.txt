@@ -1,0 +1,169 @@
+总体判断
+主线建议固定为：
+
+Route A-complete
+Route B-lite
+Route C 作为独立长期分支
+不要把 Route C 混进当前主系统主线。
+
+一、完整拆解表
+
+路线	目标	当前匹配度	当前完成度	主要缺口	是否适合落回现系统	建议优先级
+Route A	bit-plane Polar-IR 跑通并可审计接入安全分析	高	中高	verification transcript、epsilon_EC、正式接口定义	是	1
+Route B-lite	在 bit-plane 框架上引入更真实误差模型	中高	低中	非 BSC 层模型、构造/冻结集适配、对照实验	是	2
+Route C	q 元 Polar 直接做高维符号层 IR	低	很低	码构造、译码、replay、security 接口全重写	否，不适合作为当前主线	3
+二、路线图
+
+Phase 0：冻结当前基线
+目标：把现在“最新版可复现实验包”固定住。
+
+任务：
+
+固定当前主结果口径
+PRIMARY_REPORTING_MODE = actual_ir_finite_key
+BETA_BASELINE_ROLE = comparison_only
+NIU_2016_STATUS = not_supported_by_current_observables
+固定当前权威结果目录
+固定当前主流程文档和结果文档
+产出一份“基线版本说明”
+产出：
+
+baseline result pack
+baseline workflow note
+baseline assumptions note
+Phase 1：Route A-complete 的工程补齐
+目标：把当前“隐式 bit-plane 工程线”变成正式主线。
+
+任务包 A1：bit-plane 接口正式化
+
+明确符号到 bit-plane 的映射定义
+明确 bit-plane 顺序、索引、命名
+明确每层输入输出表结构
+明确 leak_EC 统计口径
+明确 beta_eff 仅为 derived metric
+任务包 A2：verification 链路补齐
+
+补 verification_bits_used_actual
+补 verification_pass_flag
+补 verification_fail_flag
+把 configured budget 和 actual transcript 严格区分
+在 block-level / point-level 表中保留 source tag
+任务包 A3：epsilon_EC 口径补齐
+
+定义 reconciliation verification 失败概率口径
+给出可审计输入量
+明确与 eps_sec / eps_cor 的关系
+输出 epsilon_EC_source_tag
+任务包 A4：安全接口正式化
+
+把 bit-plane IR 输出对接当前 actual-IR finite-key security 主表
+保证每个点都有 provenance
+给出 old vs new compare 表
+出一版论文可写的方法小节
+完成标准：
+
+bit-plane 路线有独立文档
+leak_EC 可核算
+epsilon_EC 可核算
+verification 不再主要依赖 configured budget
+Phase 2：Route A 的结果论文化
+目标：让 Route A 不只是工程闭环，而是有论文说服力。
+
+任务：
+
+与现有 IR 基线做对比
+比较：
+leak_EC
+epsilon_EC
+SKR
+finite-key drop
+runtime
+分 loss / d / bw 做结果表
+提供 main text 和 supplementary 的图表建议
+核心问题要回答：
+
+bit-plane Polar-IR 比当前 IR 到底强在哪
+代价在哪
+哪些区间收益最大
+哪些区间不值得用
+完成标准：
+
+一组能直接进论文的 compare 图表
+一段方法说明
+一段结果说明
+一段局限性说明
+Phase 3：Route B-lite
+目标：不改主骨架，只把当前过于粗糙的 BSC 近似升级。
+
+任务包 B1：误差统计增强
+
+从现有 a_eff / b_eff / replay logs 提更细错误统计
+分 layer 建 confusion summary
+区分 substitution / erasure / offset-like mismatch
+任务包 B2：轻量模型升级
+
+从单 BER/BSC 升级到 asymmetric binary model
+或升级到 substitution+erasure 简化混合模型
+比较旧构造和新构造的性能差异
+任务包 B3：构造/冻结集适配
+
+让冻结集选择吃进新模型
+让译码配置吃进新模型
+评估收益是否稳定
+完成标准：
+
+保持 binary Polar 主骨架不变
+模型比当前更贴近实验
+有清晰 A/B 对照收益
+Phase 4：Route C 可行性研究
+目标：不是落地，而是判断值不值得另起分支。
+
+任务：
+
+梳理 q 元 Polar 对当前系统的改动面
+列出：
+encoder/decoder
+replay
+leak_EC
+verification
+security interface
+的重写范围
+做一份 feasibility note
+完成标准：
+
+明确 Route C 是否值得立项
+不影响当前主系统
+三、最现实的研究路线
+最现实版本就是：
+
+先做 Route A-complete
+然后做 Route B-lite
+Route C 只做 feasibility，不进入当前主线
+原因很简单：
+
+A 最贴近你们现有系统
+B 可以建立在 A 上
+C 需要另起体系
+四、建议的工作包拆分
+你可以按下面 6 个 WP 管：
+
+WP1：Baseline Freeze
+
+固定当前结果与文档
+固定权威输出目录
+WP2：Bit-plane Interface
+
+正式定义 symbol-to-bit-plane
+输出接口表和说明
+WP3：Verification / epsilon_EC
+
+补 transcript / pass-fail / epsilon_EC
+WP4：Security Integration
+
+把 A-complete 结果整合进主 security 线
+WP5：A vs Existing IR Compare
+
+做结果对照与论文图表
+WP6：B-lite Error Model
+
+做非 BSC 的轻量升级实验
