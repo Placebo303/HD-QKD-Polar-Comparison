@@ -32,6 +32,13 @@ Use these instead:
 Route A correctness formalization uses per-block universal-hash verification
 for `epsilon_EC_bound` budgeting. This is not a strict Zhong 2015 or full Niu
 2016 proof instantiation.
+- Route B-lite error-model audit:
+  - [docs/ROUTE_B_LITE_PLAN_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_PLAN_20260415.md)
+
+Route B-lite starts from the Route A formal cross-loss baseline and currently
+implements B1/B2/B3 planning outputs only: error audit, channel-model tables,
+and very-small A/B subset selection. It does not claim channel-aware Polar
+construction.
 
 ## Main Entry Points
 
