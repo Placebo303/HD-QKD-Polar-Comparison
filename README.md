@@ -35,13 +35,14 @@ for `epsilon_EC_bound` budgeting. This is not a strict Zhong 2015 or full Niu
 - Route B-lite error-model audit:
   - [docs/ROUTE_B_LITE_PLAN_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_PLAN_20260415.md)
   - [docs/ROUTE_B_LITE_STATUS_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_STATUS_20260415.md)
+  - [docs/ROUTE_B_LITE_FINAL_SUMMARY_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_FINAL_SUMMARY_20260415.md)
 
-Route B-lite starts from the Route A formal cross-loss baseline and currently
-implements B1/B2 audit outputs plus B3 LLR-only gates: error audit,
-channel-model tables, subset selection, `bsc_legacy` vs `asym_binary_v1`
-subset replay comparison, and the full 20dB validation entrypoint. It does
-not claim q-ary Polar, nonbinary decoding, channel-aware Polar construction,
-or mainline model migration.
+Route B-lite is completed as a diagnostic/validation route. It ran B1 error
+audit, B2 channel-model diagnostics, B3 subset LLR-only ablation, and full
+20dB LLR-only validation. The conclusion is a useful but limited/partial
+negative result: local bin-width-dependent signals exist, but there is no
+stable, broadly applicable gain. Do not expand it or migrate it to the
+mainline without a new plan.
 
 ## Main Entry Points
 
@@ -63,7 +64,7 @@ Route B-lite:
 - [tools/routeB_run_full20dB_llr_ablation.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_run_full20dB_llr_ablation.py)
 
 The current B3 gate output is [results/_tmp_routeB_lite_b3_subset_ablation](/D:/Code/HD-QKD_Polar_Release/results/_tmp_routeB_lite_b3_subset_ablation).
-The full 20dB LLR-only validation output is [results/_tmp_routeB_lite_full20dB_llr_ablation](/D:/Code/HD-QKD_Polar_Release/results/_tmp_routeB_lite_full20dB_llr_ablation) when generated.
+The full 20dB LLR-only validation output is [results/_tmp_routeB_lite_full20dB_llr_ablation](/D:/Code/HD-QKD_Polar_Release/results/_tmp_routeB_lite_full20dB_llr_ablation).
 
 Refined frame-accounting pass:
 - [tools/minrerun_audit_frame_accounting_inputs.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_audit_frame_accounting_inputs.py)

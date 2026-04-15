@@ -111,3 +111,27 @@ results/_tmp_routeB_lite_wider_llr_validation_10_16_20
 ```
 
 The authoritative completed decision for now remains the full 20dB gate: `GO_WIDER_VALIDATION_BUT_NOT_MAINLINE`.
+
+## Final Completed Status
+
+Route B-lite is now closed as a completed diagnostic/validation route.
+
+Final classification:
+
+```text
+B-lite = completed
+conclusion = limited / partial negative result
+next_action = stop expanding B-lite; return main effort to Route A / mainline
+```
+
+B-lite completed B1 error audit, B2 channel-model diagnostics, B3 subset LLR-only ablation, and B3 full 20dB LLR-only validation. Wider validation was attempted, but those runs timed out before complete loss-level point tables and are not scientific compare results.
+
+The completed scientific conclusion is stable enough to archive: bit-plane asymmetric binary mismatch is measurable but not the strong dominant structure; symbol-level offset-like structure is stronger and more widespread. Fixed-order `asym_binary_v1` LLR-only ablation has local value, especially in some 20dB bin-width regions, but full 20dB validation is mixed globally (`47` improved, `46` degraded, `28` tied; median deltas are zero). This does not support `GO_EXPAND_LLR_ONLY`, all-point application, or mainline migration.
+
+Correctness stayed clean throughout: `uhv1_per_block`, universal-hash `epsilon_EC_bound`, and unchanged `eps_cor_total`. Therefore the limited/partial negative result is attributable to the model hypothesis, not to correctness-budget contamination.
+
+For the final narrative and reusable status summary, read:
+
+```text
+docs/ROUTE_B_LITE_FINAL_SUMMARY_20260415.md
+```

@@ -155,3 +155,19 @@ Band-limited wider validation was attempted but is runtime-blocked in this turn:
 results/_tmp_routeB_lite_wider_llr_validation
 results/_tmp_routeB_lite_wider_llr_validation_10_16_20
 ```
+
+## Final Completed Status
+
+Route B-lite is complete and should no longer be treated as an active expansion track.
+
+Final classification:
+
+```text
+B-lite = completed
+conclusion = limited / partial negative result
+next_action = stop expanding B-lite; return main effort to Route A / mainline
+```
+
+The completed route includes B1 error audit, B2 channel-model diagnostics, B3 subset LLR-only ablation, and B3 full 20dB LLR-only validation. The final interpretation is that simple bit-plane `asym_binary_v1` LLR replacement under fixed polar-weight order has local value but is not stable enough for broad use. It does not justify `GO_EXPAND_LLR_ONLY`, all-point application, or mainline migration.
+
+Use `docs/ROUTE_B_LITE_FINAL_SUMMARY_20260415.md` as the authoritative short handoff page for future agents.
