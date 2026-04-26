@@ -30,7 +30,25 @@ python experiments/run_e2e_pipeline.py \
     --dims 1024 \
     --bws 150 \
     --acq-time 0.1
+```
+
 Expected Output: The script will parse the time-tags, perform frame synchronization, call the C++ Polar decoder, and output the Secure Key Rate (SKR) and Practical Information Efficiency (PIE).
+
+## Export ttbin Cross-Correlation CSV
+
+To generate a CSV table for plotting the channel cross-correlation from a `.ttbin` file:
+
+```bash
+python tools/export_ttbin_cross_correlation.py \
+    --ttbin "PATH_TO_YOUR_DATA.ttbin" \
+    --ch-a 1 \
+    --ch-b 5 \
+    --bin-width-ps 10 \
+    --max-lag-ps 10000 \
+    --out-csv results/cross_correlation.csv
+```
+
+The lag convention is `lag_ps = t_B - t_A`. The CSV columns are `lag_center_ps`, `lag_left_ps`, `lag_right_ps`, `count`, and `count_rate_hz`.
 
 📊 Reproducing Paper Results
 To reproduce the full performance sweeps (Heatmaps, Dimension vs. PIE curves) across different attenuation levels (6dB, 10dB, 16dB, 20dB), use the provided sweeping drivers:
