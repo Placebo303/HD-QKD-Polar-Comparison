@@ -14,13 +14,20 @@ import numpy as np
 class PolarSCLDecoder:
     """Thin ctypes wrapper for C++ CA-SCL batch decoder."""
 
-    def __init__(self, repo_root: Path | str | None = None, force_rebuild: bool = False) -> None:
+    def __init__(
+        self,
+        repo_root: Path | str | None = None,
+        force_rebuild: bool = False,
+        lib_stem: str = "ca_scl",
+    ) -> None:
         self._repo_root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[2]
         self._cpp_main = (self._repo_root / "src" / "reconciliation" / "cpp_polar" / "main.cpp").resolve()
+        self._lib_stem = str(lib_stem)
         self._lib_path = self._resolve_lib_path()
         self._dll_handles: list[Any] = []
         self._lib: ctypes.CDLL | None = None
         self._decode = None
+        self._decode_frozen = None
 
         self._build_if_needed(force=force_rebuild)
         self._configure_windows_dll_dirs(self._lib_path.parent)
@@ -32,13 +39,11 @@ class PolarSCLDecoder:
 
     def _resolve_lib_path(self) -> Path:
         ext = ".dll" if os.name == "nt" else ".so"
-        return (self._repo_root / "src" / "reconciliation" / "cpp_polar" / f"ca_scl{ext}").resolve()
+        return (self._repo_root / "src" / "reconciliation" / "cpp_polar" / f"{self._lib_stem}{ext}").resolve()
 
     def _build_if_needed(self, force: bool = False) -> None:
         self._lib_path.parent.mkdir(parents=True, exist_ok=True)
         need = force or (not self._lib_path.exists())
-        if not need and self._cpp_main.exists():
-            need = self._cpp_main.stat().st_mtime > self._lib_path.stat().st_mtime
         if not need:
             return
         self._compile_lib(self._cpp_main, self._lib_path)
@@ -94,6 +99,21 @@ class PolarSCLDecoder:
             ctypes.POINTER(ctypes.c_uint8),
         ]
         self._decode.restype = None
+        try:
+            self._decode_frozen = self._lib.decode_ca_scl_batch_frozen
+        except AttributeError:
+            self._decode_frozen = None
+        if self._decode_frozen is not None:
+            self._decode_frozen.argtypes = [
+                ctypes.c_int,
+                ctypes.c_int,
+                ctypes.c_int,
+                ctypes.POINTER(ctypes.c_uint8),
+                ctypes.POINTER(ctypes.c_uint8),
+                ctypes.POINTER(ctypes.c_float),
+                ctypes.POINTER(ctypes.c_uint8),
+            ]
+            self._decode_frozen.restype = None
 
     def decode_batch(
         self,
@@ -122,6 +142,41 @@ class PolarSCLDecoder:
             int(k),
             int(frames),
             mask_u8.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+            llr_f32.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+            out_bits.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+        )
+        return out_bits
+
+    def decode_batch_frozen(
+        self,
+        n: int,
+        k: int,
+        frames: int,
+        mask: np.ndarray,
+        frozen_values: np.ndarray,
+        llrs: np.ndarray,
+    ) -> np.ndarray:
+        if self._decode_frozen is None:
+            raise RuntimeError("Frozen-aware decoder function is not initialized")
+        if n <= 0 or k <= 0 or frames <= 0:
+            raise ValueError("n/k/frames must be positive")
+
+        mask_u8 = np.ascontiguousarray(mask, dtype=np.uint8).reshape(-1)
+        if mask_u8.size != int(n):
+            raise ValueError(f"mask size mismatch: expected {n}, got {mask_u8.size}")
+        if int(np.sum(mask_u8)) != int(k):
+            raise ValueError(f"mask popcount mismatch: expected {k}, got {int(np.sum(mask_u8))}")
+
+        frozen_u8 = np.ascontiguousarray(frozen_values, dtype=np.uint8).reshape(int(frames), int(n))
+        llr_f32 = np.ascontiguousarray(llrs, dtype=np.float32).reshape(int(frames), int(n))
+        out_bits = np.empty((int(frames), int(k)), dtype=np.uint8)
+
+        self._decode_frozen(
+            int(n),
+            int(k),
+            int(frames),
+            mask_u8.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+            frozen_u8.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
             llr_f32.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
             out_bits.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
         )

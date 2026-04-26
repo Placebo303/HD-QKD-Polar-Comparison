@@ -1,0 +1,9 @@
+dimension,bin_width_ps,point_label
+512,30,probe_d512_bw30
+512,50,probe_d512_bw50
+1024,20,probe_d1024_bw20
+1024,30,probe_d1024_bw30
+1024,40,probe_d1024_bw40
+1024,50,probe_d1024_bw50
+2048,20,probe_d2048_bw20
+2048,30,probe_d2048_bw30
