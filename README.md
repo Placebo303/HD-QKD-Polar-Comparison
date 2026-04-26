@@ -1,4 +1,4 @@
-﻿# High-Dimensional QKD Polar Pipeline
+# High-Dimensional QKD Polar Pipeline
 
 This repository contains the current end-to-end HD-QKD Polar-code workflow, including:
 - pairing/materialization from `.ttbin`
@@ -48,10 +48,10 @@ mainline without a new plan.
 
 ```bash
 # Ensure you are in the root of the repository
-python experiments/run_e2e_pipeline.py \\
-    --ttbin "PATH_TO_YOUR_DATA.ttbin" \\
-    --dims 1024 \\
-    --bws 150 \\
+python experiments/run_e2e_pipeline.py \
+    --ttbin "PATH_TO_YOUR_DATA.ttbin" \
+    --dims 1024 \
+    --bws 150 \
     --acq-time 0.1
 ```
 
@@ -62,12 +62,12 @@ Expected output: the script parses time-tags, performs frame synchronization, ca
 To generate a CSV table for plotting the channel cross-correlation from a `.ttbin` file:
 
 ```bash
-python tools/export_ttbin_cross_correlation.py \\
-    --ttbin "PATH_TO_YOUR_DATA.ttbin" \\
-    --ch-a 1 \\
-    --ch-b 5 \\
-    --bin-width-ps 10 \\
-    --max-lag-ps 10000 \\
+python tools/export_ttbin_cross_correlation.py \
+    --ttbin "PATH_TO_YOUR_DATA.ttbin" \
+    --ch-a 1 \
+    --ch-b 5 \
+    --bin-width-ps 10 \
+    --max-lag-ps 10000 \
     --out-csv results/cross_correlation.csv
 ```
 
