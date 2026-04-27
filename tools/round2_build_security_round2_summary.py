@@ -39,6 +39,22 @@ def main() -> int:
         how="left",
         suffixes=("", "_perf"),
     )
+    merged["PIE_main"] = pd.to_numeric(merged["PIE_secure_actual_ir"], errors="coerce")
+    merged["SKR_main_bps"] = pd.to_numeric(merged["SKR_secure_actual_ir_bps"], errors="coerce")
+    merged["main_result_source"] = "actual_ir_finite_key"
+    merged["performance_proxy_role"] = "diagnostic_only"
+    front_cols = [
+        "loss_db",
+        "dimension",
+        "bin_width_ps",
+        "PIE_main",
+        "SKR_main_bps",
+        "main_result_source",
+        "PIE_secure_actual_ir",
+        "SKR_secure_actual_ir_bps",
+    ]
+    rest_cols = [c for c in merged.columns if c not in front_cols]
+    merged = merged[[*front_cols, *rest_cols]]
     merged.to_csv(output_dir / "round2_security_master_table.csv", index=False)
 
     beta_minus_actual = pd.to_numeric(merged["PIE_secure_beta_baseline"], errors="coerce") - pd.to_numeric(merged["PIE_secure_actual_ir"], errors="coerce")
@@ -62,6 +78,9 @@ def main() -> int:
         f"7. positive_actual_secure_rows: {int((pd.to_numeric(merged['SKR_secure_actual_ir_bps'], errors='coerce') > 0).sum())}",
         f"8. surrogate_sensitive_rows: {int(merged['leak_EC_source_tag'].astype(str).str.startswith('surrogate').sum())}",
         "PRIMARY_REPORTING_MODE = actual_ir_finite_key",
+        "DEFAULT_MAIN_COLUMNS = PIE_main, SKR_main_bps",
+        "MAIN_COLUMNS_SOURCE = PIE_secure_actual_ir, SKR_secure_actual_ir_bps",
+        "PERFORMANCE_PROXY_ROLE = diagnostic_only",
         "BETA_BASELINE_ROLE = comparison_only",
         "NIU_2016_STATUS = not_supported_by_current_observables",
     ]

@@ -10,6 +10,9 @@ This repository contains the current end-to-end HD-QKD Polar-code workflow, incl
 
 As of 2026-03-27, the current reporting line is:
 - `PRIMARY_REPORTING_MODE = actual_ir_finite_key`
+- default main result columns: `PIE_main`, `SKR_main_bps`
+- default main result source: `PIE_secure_actual_ir`, `SKR_secure_actual_ir_bps`
+- `PIE_practical` and `SKR_measured_bps` are diagnostic performance proxies only
 - `BETA_BASELINE_ROLE = comparison_only`
 - `NIU_2016_STATUS = not_supported_by_current_observables`
 
