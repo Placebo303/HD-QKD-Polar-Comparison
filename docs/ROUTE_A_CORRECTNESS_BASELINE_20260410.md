@@ -1,9 +1,9 @@
 ﻿# Route A Correctness Baseline (2026-04-10)
 
 Current authoritative result roots remain:
-- `results/_tmp_longrun_fresh_rerun`
-- `results/_tmp_minrerun_stageC_security_20dB`
-- `results/_tmp_minrerun_stageD_cross_loss`
+- `results/authoritative/_tmp_longrun_fresh_rerun`
+- `results/authoritative/_tmp_minrerun_stageC_security_20dB`
+- `results/authoritative/_tmp_minrerun_stageD_cross_loss`
 
 Current correctness state before formal universal-hash verification:
 - `verification_bits_used_actual` is still mainly sourced from configured CRC budget on SCL rows
@@ -14,3 +14,4 @@ Current correctness state before formal universal-hash verification:
 
 Safe wording for the pre-formal baseline:
 - `actual replay leak + actual sidecar frame-level accounting + finite-key calibrated Zhong-like security`
+

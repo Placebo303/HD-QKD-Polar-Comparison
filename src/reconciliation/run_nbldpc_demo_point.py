@@ -30,12 +30,12 @@ def _parse_point(value: str) -> tuple[int, int]:
 
 
 def _find_point_dir_from_master(master_csv: Path, d: int, bw: int) -> Path | None:
-    p = REPO_ROOT / 'workspace' / 'override_points' / f'd{int(d)}_bw{int(bw)}'
+    p = REPO_ROOT / 'results' / 'archive' / 'workspace_override_points' / f'd{int(d)}_bw{int(bw)}'
     return p if p.exists() else None
 
 
 def _fallback_find_point_dir(d: int, bw: int) -> Path | None:
-    p = REPO_ROOT / 'workspace' / 'override_points' / f'd{int(d)}_bw{int(bw)}'
+    p = REPO_ROOT / 'results' / 'archive' / 'workspace_override_points' / f'd{int(d)}_bw{int(bw)}'
     return p if p.exists() else None
 
 
@@ -63,7 +63,7 @@ def _build_resolved_config(ttbin_file: Path, d: int, bw: int, ch_a: int, ch_b: i
 
 
 def _load_artifacts(d: int, bw: int, master_csv: Path) -> dict[str, Path]:
-    point_dir = REPO_ROOT / 'workspace' / 'override_points' / f'd{int(d)}_bw{int(bw)}'
+    point_dir = REPO_ROOT / 'results' / 'archive' / 'workspace_override_points' / f'd{int(d)}_bw{int(bw)}'
     attempt_dir = point_dir / 'results' / 'attempt_0'
     metrics_dir = attempt_dir / 'ttbin_parsing'
     metrics_dir.mkdir(parents=True, exist_ok=True)

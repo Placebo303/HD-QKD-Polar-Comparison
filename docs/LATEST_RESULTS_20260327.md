@@ -12,15 +12,15 @@ Current model layer:
 ## 2. Authoritative Result Directories
 
 Fresh rerun full chain:
-- [results/_tmp_longrun_fresh_rerun](/D:/Code/HD-QKD_Polar_Release/results/_tmp_longrun_fresh_rerun)
+- [results/authoritative/_tmp_longrun_fresh_rerun](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun)
 
 Refined 20 dB frame-accounting result:
-- [results/_tmp_minrerun_stageC_security_20dB/security_calibrated_master_table_20dB_refined.csv](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageC_security_20dB/security_calibrated_master_table_20dB_refined.csv)
-- [results/_tmp_minrerun_stageC_security_20dB/stageC_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageC_security_20dB/stageC_summary.txt)
+- [results/authoritative/_tmp_minrerun_stageC_security_20dB/security_calibrated_master_table_20dB_refined.csv](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageC_security_20dB/security_calibrated_master_table_20dB_refined.csv)
+- [results/authoritative/_tmp_minrerun_stageC_security_20dB/stageC_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageC_security_20dB/stageC_summary.txt)
 
 Refined cross-loss result:
-- [results/_tmp_minrerun_stageD_cross_loss/cross_loss_security_master_table_refined.csv](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageD_cross_loss/cross_loss_security_master_table_refined.csv)
-- [results/_tmp_minrerun_stageD_cross_loss/stageD_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageD_cross_loss/stageD_summary.txt)
+- [results/authoritative/_tmp_minrerun_stageD_cross_loss/cross_loss_security_master_table_refined.csv](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageD_cross_loss/cross_loss_security_master_table_refined.csv)
+- [results/authoritative/_tmp_minrerun_stageD_cross_loss/stageD_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageD_cross_loss/stageD_summary.txt)
 
 ## 3. Fresh Full Rerun Stage2 Results
 
@@ -32,15 +32,15 @@ Refined cross-loss result:
 | 20 dB | 121 | 0 | 2.438051531429902 | d=4096, bw=180 | 82 |
 
 Source summaries:
-- [full_6dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/_tmp_longrun_fresh_rerun/full_6dB/stage2_security/stage2_summary.txt)
-- [full_10dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/_tmp_longrun_fresh_rerun/full_10dB/stage2_security/stage2_summary.txt)
-- [full_16dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/_tmp_longrun_fresh_rerun/full_16dB/stage2_security/stage2_summary.txt)
-- [full_20dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/_tmp_longrun_fresh_rerun/full_20dB/stage2_security/stage2_summary.txt)
+- [full_6dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/full_6dB/stage2_security/stage2_summary.txt)
+- [full_10dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/full_10dB/stage2_security/stage2_summary.txt)
+- [full_16dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/full_16dB/stage2_security/stage2_summary.txt)
+- [full_20dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/full_20dB/stage2_security/stage2_summary.txt)
 
 ## 4. Refined 20 dB Frame-Accounting Result
 
 Refined summary:
-- [stageC_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageC_security_20dB/stageC_summary.txt)
+- [stageC_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageC_security_20dB/stageC_summary.txt)
 
 Key facts:
 - `fully_actual_rows = 121`
@@ -57,7 +57,7 @@ Interpretation:
 ## 5. Refined Cross-Loss Result
 
 Refined cross-loss summary:
-- [stageD_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageD_cross_loss/stageD_summary.txt)
+- [stageD_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageD_cross_loss/stageD_summary.txt)
 
 Current refined best points:
 - `6 dB`: `d=4096, bw=200`
@@ -95,3 +95,4 @@ Claims that still need caution:
 - any statement implying transcript-level verification accounting
 - any strict-composable proof wording
 - any wording that upgrades this to strict Zhong or Niu 2016
+

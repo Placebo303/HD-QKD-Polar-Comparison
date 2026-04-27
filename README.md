@@ -18,15 +18,18 @@ As of 2026-03-27, the current reporting line is:
 
 The authoritative latest results are **not** the older `_tmp_longrun_stage*` directories.
 Use these instead:
-- fresh full rerun root: [results/_tmp_longrun_fresh_rerun](/D:/Code/HD-QKD_Polar_Release/results/_tmp_longrun_fresh_rerun)
-- refined frame-accounting pass: [results/_tmp_minrerun_stageC_security_20dB](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageC_security_20dB)
-- refined cross-loss pack: [results/_tmp_minrerun_stageD_cross_loss](/D:/Code/HD-QKD_Polar_Release/results/_tmp_minrerun_stageD_cross_loss)
+- fresh full rerun root: [results/authoritative/_tmp_longrun_fresh_rerun](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun)
+- refined frame-accounting pass: [results/authoritative/_tmp_minrerun_stageC_security_20dB](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageC_security_20dB)
+- refined cross-loss pack: [results/authoritative/_tmp_minrerun_stageD_cross_loss](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageD_cross_loss)
 
 ## Main Documents
 
 - latest workflow and run method:
+  - [docs/CURRENT_MAINLINE.md](/D:/Code/HD-QKD_Polar_Release/docs/CURRENT_MAINLINE.md)
+  - [docs/PROJECT_CLASSIFICATION_20260427.md](/D:/Code/HD-QKD_Polar_Release/docs/PROJECT_CLASSIFICATION_20260427.md)
   - [docs/POLAR_CODE_MAINFLOW_20260327.md](/D:/Code/HD-QKD_Polar_Release/docs/POLAR_CODE_MAINFLOW_20260327.md)
 - latest results and authoritative output paths:
+  - [docs/RESULTS_MANIFEST_20260427.md](/D:/Code/HD-QKD_Polar_Release/docs/RESULTS_MANIFEST_20260427.md)
   - [docs/LATEST_RESULTS_20260327.md](/D:/Code/HD-QKD_Polar_Release/docs/LATEST_RESULTS_20260327.md)
 - Route A correctness formalization:
   - [docs/ROUTE_A_FORMAL_VERIFICATION_20260410.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_A_FORMAL_VERIFICATION_20260410.md)
@@ -36,9 +39,7 @@ Route A correctness formalization uses per-block universal-hash verification
 for `epsilon_EC_bound` budgeting. This is not a strict Zhong 2015 or full Niu
 2016 proof instantiation.
 - Route B-lite error-model audit:
-  - [docs/ROUTE_B_LITE_PLAN_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_PLAN_20260415.md)
-  - [docs/ROUTE_B_LITE_STATUS_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_STATUS_20260415.md)
-  - [docs/ROUTE_B_LITE_FINAL_SUMMARY_20260415.md](/D:/Code/HD-QKD_Polar_Release/docs/ROUTE_B_LITE_FINAL_SUMMARY_20260415.md)
+  - [docs/archived_studies/routeB_lite/README.md](/D:/Code/HD-QKD_Polar_Release/docs/archived_studies/routeB_lite/README.md)
 
 Route B-lite is completed as a diagnostic/validation route. It ran B1 error
 audit, B2 channel-model diagnostics, B3 subset LLR-only ablation, and full
@@ -65,7 +66,7 @@ Expected output: the script parses time-tags, performs frame synchronization, ca
 To generate a CSV table for plotting the channel cross-correlation from a `.ttbin` file:
 
 ```bash
-python tools/export_ttbin_cross_correlation.py \
+python tools/asenoise/export_ttbin_cross_correlation.py \
     --ttbin "PATH_TO_YOUR_DATA.ttbin" \
     --ch-a 1 \
     --ch-b 5 \
@@ -83,26 +84,16 @@ Front half:
 - [experiments/run_real_polar_max_pie.py](/D:/Code/HD-QKD_Polar_Release/experiments/run_real_polar_max_pie.py)
 
 Replay / security:
-- [tools/longrun_build_replay_index.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_replay_index.py)
-- [tools/longrun_run_actual_ir_replay.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_run_actual_ir_replay.py)
-- [tools/longrun_build_finite_key_audit_table.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_finite_key_audit_table.py)
-- [tools/longrun_build_security_master_table.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_security_master_table.py)
+- [pipelines/current/longrun_build_replay_index.py](/D:/Code/HD-QKD_Polar_Release/pipelines/current/longrun_build_replay_index.py)
+- [pipelines/current/longrun_run_actual_ir_replay.py](/D:/Code/HD-QKD_Polar_Release/pipelines/current/longrun_run_actual_ir_replay.py)
+- [tools/security_reports/longrun_build_finite_key_audit_table.py](/D:/Code/HD-QKD_Polar_Release/tools/security_reports/longrun_build_finite_key_audit_table.py)
+- [tools/security_reports/longrun_build_security_master_table.py](/D:/Code/HD-QKD_Polar_Release/tools/security_reports/longrun_build_security_master_table.py)
 
 Route B-lite:
-- [tools/routeB_build_error_audit.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_build_error_audit.py)
-- [tools/routeB_build_channel_model_table.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_build_channel_model_table.py)
-- [tools/routeB_select_ab_subset.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_select_ab_subset.py)
-- [tools/routeB_run_b3_subset_ablation.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_run_b3_subset_ablation.py)
-- [tools/routeB_run_full20dB_llr_ablation.py](/D:/Code/HD-QKD_Polar_Release/tools/routeB_run_full20dB_llr_ablation.py)
-
-The current B3 gate output is [results/_tmp_routeB_lite_b3_subset_ablation](/D:/Code/HD-QKD_Polar_Release/results/_tmp_routeB_lite_b3_subset_ablation).
-The full 20dB LLR-only validation output is [results/_tmp_routeB_lite_full20dB_llr_ablation](/D:/Code/HD-QKD_Polar_Release/results/_tmp_routeB_lite_full20dB_llr_ablation).
+Route B-lite has been archived under [tools/archive/routeB_lite](/D:/Code/HD-QKD_Polar_Release/tools/archive/routeB_lite) and [docs/archived_studies/routeB_lite](/D:/Code/HD-QKD_Polar_Release/docs/archived_studies/routeB_lite). It is not a mainline entry.
 
 Refined frame-accounting pass:
-- [tools/minrerun_audit_frame_accounting_inputs.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_audit_frame_accounting_inputs.py)
-- [tools/minrerun_run_frame_audit.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_run_frame_audit.py)
-- [tools/minrerun_rebuild_security_master_20dB.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_rebuild_security_master_20dB.py)
-- [tools/minrerun_build_cross_loss_refined_summary.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_build_cross_loss_refined_summary.py)
+The historical minrerun scripts are archived in [pipelines/archive](/D:/Code/HD-QKD_Polar_Release/pipelines/archive). Current recommended commands are listed in [docs/CURRENT_MAINLINE.md](/D:/Code/HD-QKD_Polar_Release/docs/CURRENT_MAINLINE.md).
 
 ## Recommended Usage
 
