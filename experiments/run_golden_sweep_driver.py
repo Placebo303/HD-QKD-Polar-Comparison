@@ -9,8 +9,11 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.runtime_paths import default_project_results_root, resolve_repo_path
 
 
 def _pump_binary_stream(stream, console, log_file) -> None:
@@ -57,9 +60,10 @@ def main() -> int:
     if str(args.out_root).strip():
         cmd.extend(["--out-root", str(args.out_root).strip()])
 
-    log_path = Path(args.log_file)
-    if not log_path.is_absolute():
-        log_path = (REPO_ROOT / log_path).resolve()
+    if str(args.log_file).strip():
+        log_path = resolve_repo_path(REPO_ROOT, args.log_file)
+    else:
+        log_path = default_project_results_root(REPO_ROOT) / "golden_sweep_execution.log"
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
     start = time.perf_counter()

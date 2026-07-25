@@ -1,10 +1,125 @@
 # High-Dimensional QKD Polar Pipeline
 
-This repository contains the current end-to-end HD-QKD Polar-code workflow, including:
-- pairing/materialization from `.ttbin`
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+
+> **End-to-end HD-QKD Polar-code workflow for high-dimensional quantum key distribution with time-bin encoding and Polar code error correction.**
+
+This repository contains the complete HD-QKD Polar-code workflow, including:
+- Pairing/materialization from `.ttbin` (Swabian TimeTagger)
 - Polar-based information reconciliation evaluation
-- actual-IR replay auditing
-- finite-key calibrated Zhong-like security aggregation
+- Actual-IR replay auditing
+- Finite-key calibrated Zhong-like security aggregation
+- Layered secure PIE (Photon Information Efficiency) accounting
+
+## Installation
+
+```bash
+# Clone repository
+git clone <repo-url>
+cd HD-QKD_Polar_Release
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Or install in development mode
+pip install -e .
+```
+
+### Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `numpy` | Array operations |
+| `pandas` | Data processing |
+| `scipy` | Scientific computing |
+| `polar-code` | Polar code encoder/decoder |
+| `yfinance` | Market data (for sample data) |
+
+### TimeTagger Setup
+
+For `.ttbin` file support, install Swabian TimeTagger Python bindings:
+
+```bash
+# After installing Swabian TimeTagger software:
+python -c "import TimeTagger; print('TimeTagger available')"
+```
+
+## Minimal Example
+
+```bash
+# Quick start with sample data
+python experiments/run_e2e_pipeline.py \
+    --data-provider sample \
+    --dims 256 \
+    --bws 150 \
+    --acq-time 0.1
+
+# With real data
+python experiments/run_e2e_pipeline.py \
+    --ttbin "PATH_TO_YOUR_DATA.ttbin" \
+    --dims 1024 \
+    --bws 150 \
+    --acq-time 0.1
+```
+
+Expected output: the script parses time-tags, performs frame synchronization, calls the Polar decoder, and reports Secure Key Rate (SKR) and Practical Information Efficiency (PIE).
+
+## Parameter Explanation
+
+### Core Parameters
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--dims` | 1024 | Number of time-bin dimensions. Higher = more information capacity |
+| `--bws` | 150 | Bin width in picoseconds. Smaller = higher resolution |
+| `--acq-time` | 0.1 | Acquisition time in seconds. Longer = more statistics |
+| `--data-provider` | yfinance | Data source: `sample`, `yfinance`, `local`, `stooq` |
+| `--ttbin` | None | Path to TimeTagger binary file |
+
+### Advanced Parameters
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--skip-llm` | False | Skip LLM analysis (faster execution) |
+| `--simulate` | False | Use simulated data |
+| `--forward-run` | False | Enable forward evaluation mode |
+| `--operator-gate` | False | Enable human-in-the-loop review |
+
+### How to Choose Values
+
+- **dims**: Start with 256 for testing, use 1024 for production results
+- **bws**: 150ps is typical. Reduce to 100ps for high-resolution analysis
+- **acq-time**: 0.1s for quick tests, 1.0s+ for publication-quality results
+
+## Known Issues
+
+### yfinance Cache Pollution
+
+The yfinance library may cache stale data, causing "No trading days after decision_date" errors.
+
+**Solution**:
+```bash
+# Clear yfinance cache
+rm -rf data/.yfinance-cache
+
+# Or use sample data provider
+python experiments/run_e2e_pipeline.py --data-provider sample
+```
+
+### MultiIndex Column Drift
+
+yfinance output may have MultiIndex columns that break downstream processing.
+
+**Solution**: The pipeline automatically normalizes columns to `Open/High/Low/Close/Volume`. If you encounter issues, check `src/data/yfinance_client.py`.
+
+### Deterministic Evaluation Date
+
+Historical fixture runs auto-adjust to the latest fixture trading date. If evaluation fails, pass an explicit date:
+
+```bash
+python experiments/run_e2e_pipeline.py --evaluation-date 2024-06-06
+```
 
 ## Current Status
 

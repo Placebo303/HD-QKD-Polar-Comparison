@@ -11,10 +11,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+from src.runtime_paths import default_project_results_root, map_data_path
 
 
 DEFAULT_DATASETS = [
@@ -23,6 +24,8 @@ DEFAULT_DATASETS = [
     r"D:\Data\2026.1.20\Type0_nofilter_500K_3s_2026-01-20_193050",
     r"D:\Data\2026.1.20\Type0_nofilter_1_5M_3s_2026-01-20_193255",
 ]
+
+DEFAULT_DATASETS = [str(map_data_path(path)) for path in DEFAULT_DATASETS]
 
 
 def _read_json(path: Path) -> dict[str, Any]:

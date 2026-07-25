@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,15 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ABS_EPS = 1e-9
+
+
+def results_root() -> Path:
+    env_root = str(os.getenv("PROJECT_RESULTS_ROOT") or "").strip()
+    if env_root:
+        return Path(env_root).expanduser()
+    if os.name == "posix":
+        return Path.home() / "var" / "results_hot" / REPO_ROOT.name
+    return REPO_ROOT / "results"
 
 
 def ensure_output_dir(path: Path, *, overwrite: bool) -> None:
