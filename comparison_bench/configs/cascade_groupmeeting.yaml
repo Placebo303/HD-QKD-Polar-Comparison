@@ -1,0 +1,25 @@
+# Group Meeting Cascade Sweep Config
+# Targets: 14 datasets (11 low-dim + 3 high-dim) at 64/128/256 frame lengths
+# Uses optimized configs from previous optimization report
+
+global:
+  output_dir: comparison_bench/outputs_comparison/group_meeting_ir_20260615
+
+dataset:
+  frame_batch_path: comparison_bench/outputs_comparison/group_meeting_ir_20260615/groupmeeting_subset.parquet
+
+cascade:
+  block_size_schedule:
+    - [16, 32, 64, 128]
+    - [12, 6, 24, 13]
+    - [8, 4, 16, 13]
+  num_passes: [3, 4]
+  permutation_mode: ["seeded_random"]
+  seed: [0]
+  mapping: ["gray"]
+  bisection_mode: ["recursive_binary"]
+  verify_mode: ["crc32"]
+  frame_caps: [4]
+  max_workers: 16
+  include_all_points: true
+  force: false

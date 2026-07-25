@@ -22,6 +22,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from src.runtime_paths import default_project_results_root, resolve_repo_path
 from src.workflow.export_joint_sequence_sidecar import (  # type: ignore
     _estimate_peak_stats_from_timetags,
     export_sidecar_for_point,
@@ -474,10 +475,7 @@ def _to_float_or_none(v: Any) -> float | None:
 
 
 def _resolve_path(p: str | Path) -> Path:
-    pp = Path(str(p))
-    if pp.is_absolute():
-        return pp
-    return (REPO_ROOT / pp).resolve()
+    return resolve_repo_path(REPO_ROOT, p)
 
 
 def _load_grid_rows(grid_table: Path) -> dict[tuple[int, int], dict[str, str]]:
@@ -1198,7 +1196,7 @@ def main() -> int:
         print(f"[E2E] coincidence window override ps={coinc_window_override_ps}")
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_root = _resolve_path(args.out_root) if str(args.out_root).strip() else (REPO_ROOT / "results" / f"e2e_pipeline_{ts}")
+    out_root = _resolve_path(args.out_root) if str(args.out_root).strip() else (default_project_results_root(REPO_ROOT) / f"e2e_pipeline_{ts}")
     out_root.mkdir(parents=True, exist_ok=True)
     print(f"[E2E] materialize processing rule version={args.materialize_processing_rule_version}")
 

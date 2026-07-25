@@ -1,0 +1,175 @@
+{
+  "benchmark_config_snapshot": {
+    "dataset": {
+      "frame_batch_path": "comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\groupmeeting_subset_flen128.parquet"
+    },
+    "global": {
+      "output_dir": "comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128"
+    },
+    "layered_ldpc": {
+      "bitplane_rate_mode": [
+        "uniform"
+      ],
+      "bp_method": [
+        "minimum_sum"
+      ],
+      "column_weight": [
+        3
+      ],
+      "force": false,
+      "frame_caps": [
+        4
+      ],
+      "include_all_points": true,
+      "llr_mode": [
+        "hard",
+        "bsc_estimated"
+      ],
+      "mapping": [
+        "gray"
+      ],
+      "max_iter": [
+        50
+      ],
+      "max_workers": 16,
+      "osd_order": [
+        0
+      ],
+      "parity_fraction": [
+        0.5,
+        0.67,
+        0.8,
+        0.9,
+        1.0
+      ],
+      "seed": [
+        20260428
+      ]
+    }
+  },
+  "completed_stages": [
+    "cascade_param_sweep",
+    "layered_ldpc_param_sweep"
+  ],
+  "failed_stages": [],
+  "git_commit": "b639e3d3cf1e2d3d784621d7f172baaec3853179",
+  "notes": "cascade tasks=84 representative_points=14; layered tasks=140 representative_points=14",
+  "output_files": {
+    "cascade_leakage_diagnostics.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128\\cascade_leakage_diagnostics.csv",
+    "cascade_param_sweep_frame_results.parquet": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128\\cascade_param_sweep_frame_results.parquet",
+    "cascade_param_sweep_results.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128\\cascade_param_sweep_results.csv",
+    "failed_frame_diagnostics.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128\\failed_frame_diagnostics.csv",
+    "layered_ldpc_param_sweep_frame_results.parquet": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128\\layered_ldpc_param_sweep_frame_results.parquet",
+    "layered_ldpc_param_sweep_results.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128\\layered_ldpc_param_sweep_results.csv",
+    "run_errors_ir_v3.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128\\run_errors_ir_v3.csv"
+  },
+  "per_stage_config_snapshots": {
+    "cascade_param_sweep": {
+      "cascade": {
+        "bisection_mode": [
+          "recursive_binary"
+        ],
+        "block_size_schedule": [
+          [
+            16,
+            32,
+            64,
+            128
+          ],
+          [
+            12,
+            6,
+            24,
+            13
+          ],
+          [
+            8,
+            4,
+            16,
+            13
+          ]
+        ],
+        "force": false,
+        "frame_caps": [
+          4
+        ],
+        "include_all_points": true,
+        "mapping": [
+          "gray"
+        ],
+        "max_workers": 16,
+        "num_passes": [
+          3,
+          4
+        ],
+        "permutation_mode": [
+          "seeded_random"
+        ],
+        "seed": [
+          0
+        ],
+        "verify_mode": [
+          "crc32"
+        ]
+      },
+      "dataset": {
+        "frame_batch_path": "comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\groupmeeting_subset_flen128.parquet"
+      },
+      "global": {
+        "output_dir": "comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128"
+      }
+    },
+    "layered_ldpc_param_sweep": {
+      "dataset": {
+        "frame_batch_path": "comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\groupmeeting_subset_flen128.parquet"
+      },
+      "global": {
+        "output_dir": "comparison_bench\\outputs_comparison\\group_meeting_ir_20260615\\flen128"
+      },
+      "layered_ldpc": {
+        "bitplane_rate_mode": [
+          "uniform"
+        ],
+        "bp_method": [
+          "minimum_sum"
+        ],
+        "column_weight": [
+          3
+        ],
+        "force": false,
+        "frame_caps": [
+          4
+        ],
+        "include_all_points": true,
+        "llr_mode": [
+          "hard",
+          "bsc_estimated"
+        ],
+        "mapping": [
+          "gray"
+        ],
+        "max_iter": [
+          50
+        ],
+        "max_workers": 16,
+        "osd_order": [
+          0
+        ],
+        "parity_fraction": [
+          0.5,
+          0.67,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "seed": [
+          20260428
+        ]
+      }
+    }
+  },
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:13:34) [MSC v.1944 64 bit (AMD64)]",
+  "runtime_total_s": 8.32931130003999,
+  "timestamp": "2026-06-15T08:52:19.291715+00:00"
+}

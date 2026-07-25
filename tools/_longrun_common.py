@@ -11,6 +11,11 @@ import pandas as pd
 
 from _security_round_common import REPO_ROOT, ensure_output_dir, infer_loss_db_from_path
 
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.runtime_paths import default_project_results_root, map_data_path
+
 DEFAULT_FRANSON_VISIBILITY = 0.95
 DEFAULT_EPS_SEC = 1e-10
 DEFAULT_EPS_COR = 1e-10
@@ -49,11 +54,16 @@ LOSS_INPUT_CONFIGS: dict[int, dict[str, str | int]] = {
 }
 
 
+for _cfg in LOSS_INPUT_CONFIGS.values():
+    _cfg["ttbin"] = str(map_data_path(str(_cfg["ttbin"])))
+    _cfg["grid_table"] = str(map_data_path(str(_cfg["grid_table"])))
+
+
 def candidate_dir_for_loss(loss_db: int) -> Path:
     stem = f"e2e_{int(loss_db)}dB_fullgrid_pairing_v2_candidate"
     if int(loss_db) == 20:
         stem += "_t15"
-    return REPO_ROOT / "results" / stem
+    return default_project_results_root(REPO_ROOT) / stem
 
 
 def point_table_sort(df: pd.DataFrame) -> pd.DataFrame:

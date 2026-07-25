@@ -1,0 +1,29 @@
+global:
+  output_dir: comparison_bench/outputs_comparison
+
+datasets:
+  - dataset_id: synthetic_d8_ser005
+    path: comparison_bench/outputs_comparison/synthetic_pairs.csv
+    dimension: 8
+    frame_len_symbols: 64
+    n_frames: 8
+    ser: 0.05
+
+methods:
+  - method: polar_existing
+    method_variant: read_existing
+  - method: cascade_lite
+    method_variant: gray
+    mapping: gray
+  - method: layered_ldpc_lite
+    method_variant: gray_hard_ldpc
+    mapping: gray
+    backend: ldpc_bposd
+    parity_check_source: deterministic_sparse
+    parity_fraction: 0.75
+    column_weight: 3
+    ldpc_seed: 20260414
+    max_iter: 20
+  - method: qldpc_reference
+    method_variant: offline_reference
+    qldpc_mode: offline_reference

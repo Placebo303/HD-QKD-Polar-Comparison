@@ -1,0 +1,26 @@
+global:
+  output_dir: comparison_bench/outputs_comparison
+
+synthetic:
+  q_values: [4, 8, 16, 32]
+  ser_values: [0.01, 0.03, 0.05, 0.08]
+  frame_len_symbols: [64, 128]
+  n_frames: 8
+  seed: 1234
+
+realdata:
+  frame_batch_path: comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet
+  dimensions: [4, 8, 16, 32, 64]
+  bin_width_ps: [100, 120, 150, 180]
+
+qldpc:
+  check_fraction: [0.33, 0.50]
+  row_weight: [3, 4]
+  max_iter: [20]
+  decoder: ["qary_hard_syndrome_bf"]
+  channel_model: ["qary_symmetric"]
+  frame_caps: [4]
+  seed: [0, 1]
+  max_workers: 8
+  max_q_for_realdata: 256
+  force: false

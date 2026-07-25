@@ -1,0 +1,66 @@
+{
+  "benchmark_config_path": "comparison_bench\\configs\\benchmark_synthetic_long.yaml",
+  "benchmark_config_snapshot": {
+    "datasets": [
+      {
+        "dataset_id": "synthetic_long_d16_ser003",
+        "dimension": 16,
+        "frame_len_symbols": 2048,
+        "path": "comparison_bench/outputs_comparison/real_ir_success_first/synthetic_long.csv"
+      }
+    ],
+    "global": {
+      "max_workers": 4,
+      "output_dir": "comparison_bench/outputs_comparison/real_ir_success_first/scalability_synth"
+    },
+    "methods": [
+      {
+        "backend": "internal_cascade_lite",
+        "block_size_schedule": [
+          16,
+          32,
+          64,
+          128
+        ],
+        "cascade_passes": 3,
+        "cascade_seed": 0,
+        "mapping": "gray",
+        "method": "cascade_lite",
+        "method_variant": "gray_opt"
+      },
+      {
+        "backend": "ldpc_bposd",
+        "bitplane_rate_mode": "uniform",
+        "column_weight": 3,
+        "ldpc_seed": 20260414,
+        "llr_mode": "bsc_estimated",
+        "mapping": "gray",
+        "max_iter": 50,
+        "method": "layered_ldpc_lite",
+        "method_variant": "gray_opt",
+        "osd_order": 0,
+        "parity_check_source": "deterministic_sparse",
+        "parity_fraction": 0.8,
+        "unverified_policy": "revert_to_bob_decode_failed"
+      }
+    ]
+  },
+  "comparison_bench_version": "0.1.0",
+  "git_commit": "b639e3d3cf1e2d3d784621d7f172baaec3853179",
+  "outputs": {
+    "frame_results": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\scalability_synth\\ir_frame_results.parquet",
+    "results_csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\scalability_synth\\ir_benchmark_results.csv"
+  },
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:13:34) [MSC v.1944 64 bit (AMD64)]",
+  "third_party_backend_availability": {
+    "cascade": "missing",
+    "cascade_cpp": "missing",
+    "cascade_python": "missing",
+    "ldpc": "available",
+    "pyarrow": "available",
+    "quantumgizmos_ldpc": "missing",
+    "sim_ldpc": "missing",
+    "yaml": "available"
+  }
+}

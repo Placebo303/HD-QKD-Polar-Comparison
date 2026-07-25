@@ -1,0 +1,8 @@
+method: cascade_lite
+method_variant: gray
+mapping: gray
+backend: internal_cascade_lite
+cascade_passes: 4
+cascade_seed: 20260415
+verify_mode: crc32
+notes: Runs an internal simplified Cascade-lite block parity/bisection baseline; not a full Cascade transcript implementation.

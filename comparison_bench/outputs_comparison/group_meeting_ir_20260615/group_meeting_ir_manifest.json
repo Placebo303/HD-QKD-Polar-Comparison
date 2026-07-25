@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-06-15T16:58:49",
+  "git_commit": "b639e3d freeze copied polar baseline",
+  "description": "Group-meeting IR large comparison \u2014 expanded sweeps on 14 datasets \u00d7 3 frame lengths",
+  "output_directory": "comparison_bench\\outputs_comparison\\group_meeting_ir_20260615",
+  "output_files": {
+    "success_rate_by_method.csv": "7be69262525fef0e",
+    "leakage_by_method.csv": "378a2575ebb1738c",
+    "runtime_by_method.csv": "b90d6ce4c3f5d2a8",
+    "cascade_best_config_by_dataset.csv": "ab63324ce7014262",
+    "ldpc_parity_threshold.csv": "cfe0768da7c8a2f8",
+    "qldpc_reference_feasibility.csv": "630aa86ec1983081",
+    "beta_by_frame_length.csv": "ac20d57afbc1d577",
+    "failure_region_summary.csv": "54da96351ffd350d",
+    "method_recommendation_matrix.csv": "0e65c5b147cb4882"
+  },
+  "source_sweep_files": {
+    "flen64\\cascade_leakage_diagnostics.csv": "97f1c34fb0dd48b9",
+    "flen64\\cascade_param_sweep_results.csv": "f89b29e3dc07f875",
+    "flen64\\failed_frame_diagnostics.csv": "2393d9761dbf8c5b",
+    "flen64\\layered_ldpc_param_sweep_results.csv": "06960c1ff388a18f",
+    "flen64\\qldpc_decoder_diagnostics.csv": "3067ae0843a8930e",
+    "flen64\\qldpc_param_sweep_results.csv": "7c7b734dde4649d2",
+    "flen64\\cascade_param_sweep_frame_results.parquet": "ae6d867f506ca514",
+    "flen64\\layered_ldpc_param_sweep_frame_results.parquet": "cd3b8011880b9f70",
+    "flen64\\qldpc_param_sweep_frame_results.parquet": "6d64479797a70b58",
+    "flen128\\cascade_leakage_diagnostics.csv": "f6618169d4bd8102",
+    "flen128\\cascade_param_sweep_results.csv": "5c3f0b8330a43d6e",
+    "flen128\\failed_frame_diagnostics.csv": "966268c9239fc94b",
+    "flen128\\layered_ldpc_param_sweep_results.csv": "a24658e746d92a4d",
+    "flen128\\cascade_param_sweep_frame_results.parquet": "cfb24f36b8450546",
+    "flen128\\layered_ldpc_param_sweep_frame_results.parquet": "e329ea4ae5d91a9f",
+    "flen256\\cascade_leakage_diagnostics.csv": "7b33681c4cc53e46",
+    "flen256\\cascade_param_sweep_results.csv": "ba2bfccd1d38a8e5",
+    "flen256\\failed_frame_diagnostics.csv": "e7de1029d28df778",
+    "flen256\\layered_ldpc_param_sweep_results.csv": "b5315b951a1f2b5d",
+    "flen256\\cascade_param_sweep_frame_results.parquet": "938413817fc43468",
+    "flen256\\layered_ldpc_param_sweep_frame_results.parquet": "57f7fadd8dccf46c"
+  },
+  "config_snapshots": {
+    "flen64": {
+      "config": {},
+      "stages": [
+        "cascade_param_sweep",
+        "layered_ldpc_param_sweep",
+        "qldpc_param_sweep"
+      ],
+      "notes": "cascade tasks=84 representative_points=14; cascade tasks=0 representative_points=14; layered tasks=140 representative_points=14; qldpc tasks=32 batches=32"
+    },
+    "flen128": {
+      "config": {},
+      "stages": [
+        "cascade_param_sweep",
+        "layered_ldpc_param_sweep"
+      ],
+      "notes": "cascade tasks=84 representative_points=14; layered tasks=140 representative_points=14"
+    },
+    "flen256": {
+      "config": {},
+      "stages": [
+        "cascade_param_sweep",
+        "layered_ldpc_param_sweep"
+      ],
+      "notes": "cascade tasks=84 representative_points=14; layered tasks=140 representative_points=14"
+    }
+  },
+  "method_notes": {
+    "cascade_lite": "preferred non-Polar candidate",
+    "layered_ldpc": "control baseline",
+    "qldpc_reference": "reference only \u2014 not industrial qLDPC",
+    "polar_historical": "historical imported baseline"
+  },
+  "known_limitations": [
+    "d=8/d=16/d=32 real data limited to 4 frames each (batch had only 4)",
+    "d=1024 data has 64 frames per dataset for scalability perspective",
+    "Longer frames (128, 256) built by regrouping \u2014 fewer frames at longer lengths",
+    "qLDPC only run on low-noise subset (bw >= 180ps)"
+  ],
+  "no_overwrite_confirmation": true
+}

@@ -1,0 +1,32 @@
+global:
+  output_dir: comparison_bench/outputs_comparison
+  max_workers: 16
+
+datasets:
+  - dataset_id: ""
+    frame_batch_path: comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet
+    polar_results_root: 'D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s'
+    data_mode: real_data
+    frame_len_symbols: 64
+    max_frames_per_dataset: 4
+
+methods:
+  - method: polar_existing
+    method_variant: read_existing_recursive
+  - method: cascade_lite
+    method_variant: gray
+    mapping: gray
+    backend: internal_cascade_lite
+    cascade_passes: 4
+    cascade_seed: 20260415
+  - method: layered_ldpc_lite
+    method_variant: gray_hard_ldpc_real_tuned
+    mapping: gray
+    backend: ldpc_bposd
+    parity_check_source: deterministic_sparse
+    parity_fraction: 1.0
+    column_weight: 3
+    ldpc_seed: 20260414
+    osd_order: 0
+    unverified_policy: revert_to_bob_decode_failed
+    max_iter: 50

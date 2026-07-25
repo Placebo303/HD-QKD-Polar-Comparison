@@ -17,6 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from src.runtime_paths import resolve_repo_path
 from src.reconciliation.cpp_scl_wrapper import PolarSCLDecoder  # type: ignore
 from src.reconciliation.real_polar_sc_rescue import (  # type: ignore
     _polar_weight_order,
@@ -930,10 +931,7 @@ def _parse_only_points(spec: str | None) -> set[tuple[int, int]]:
 
 
 def _resolve_path(repo_root: Path, p: str | Path) -> Path:
-    pp = Path(str(p))
-    if pp.is_absolute():
-        return pp
-    return (repo_root / pp).resolve()
+    return resolve_repo_path(repo_root, p)
 
 
 def _recover_rate_from_sidecar(repo_root: Path, sidecar_root: Path) -> float:
@@ -1062,9 +1060,9 @@ def main() -> int:
         raise SystemExit("N must be a power of two")
 
     repo_root = Path(__file__).resolve().parents[1]
-    in_csv = (repo_root / args.in_csv).resolve()
-    grid_table = (repo_root / args.grid_table).resolve()
-    out_csv = (repo_root / args.out_csv).resolve()
+    in_csv = _resolve_path(repo_root, args.in_csv)
+    grid_table = _resolve_path(repo_root, args.grid_table)
+    out_csv = _resolve_path(repo_root, args.out_csv)
     only_points = _parse_only_points(args.only_points)
     e_p = max(0.0, min(0.5, (1.0 - float(args.visibility)) / 2.0))
     scl_margins = tuple(float(x.strip()) for x in str(args.scl_margins).split(",") if x.strip())

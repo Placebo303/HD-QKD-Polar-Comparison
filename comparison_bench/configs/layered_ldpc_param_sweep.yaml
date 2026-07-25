@@ -1,0 +1,20 @@
+global:
+  output_dir: comparison_bench/outputs_comparison
+
+dataset:
+  frame_batch_path: comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet
+
+layered_ldpc:
+  parity_fraction: [0.33, 0.50, 0.67]
+  max_iter: [20, 50]
+  osd_order: [0]
+  bp_method: ["minimum_sum"]
+  mapping: ["gray"]
+  llr_mode: ["bsc_estimated", "empirical_bitplane"]
+  bitplane_rate_mode: ["uniform", "per_bitplane_raw_ber"]
+  column_weight: [3]
+  seed: [20260428]
+  frame_caps: [4, 16]
+  max_workers: 16
+  include_all_points: false
+  force: false

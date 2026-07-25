@@ -1,0 +1,63 @@
+{
+  "benchmark_config_path": "comparison_bench\\configs\\benchmark_synth.yaml",
+  "benchmark_config_snapshot": {
+    "datasets": [
+      {
+        "dataset_id": "synthetic_d8_ser005",
+        "dimension": 8,
+        "frame_len_symbols": 64,
+        "n_frames": 8,
+        "path": "comparison_bench/outputs_comparison/synthetic_pairs.csv",
+        "ser": 0.05
+      }
+    ],
+    "global": {
+      "output_dir": "comparison_bench/outputs_comparison"
+    },
+    "methods": [
+      {
+        "method": "polar_existing",
+        "method_variant": "read_existing"
+      },
+      {
+        "mapping": "gray",
+        "method": "cascade_lite",
+        "method_variant": "gray"
+      },
+      {
+        "backend": "ldpc_bposd",
+        "column_weight": 3,
+        "ldpc_seed": 20260414,
+        "mapping": "gray",
+        "max_iter": 20,
+        "method": "layered_ldpc_lite",
+        "method_variant": "gray_hard_ldpc",
+        "parity_check_source": "deterministic_sparse",
+        "parity_fraction": 0.75
+      },
+      {
+        "method": "qldpc_reference",
+        "method_variant": "offline_reference",
+        "qldpc_mode": "offline_reference"
+      }
+    ]
+  },
+  "comparison_bench_version": "0.1.0",
+  "git_commit": "b639e3d3cf1e2d3d784621d7f172baaec3853179",
+  "outputs": {
+    "frame_results": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\ir_frame_results.parquet",
+    "results_csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\ir_benchmark_results.csv"
+  },
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:13:34) [MSC v.1944 64 bit (AMD64)]",
+  "third_party_backend_availability": {
+    "cascade": "missing",
+    "cascade_cpp": "missing",
+    "cascade_python": "missing",
+    "ldpc": "available",
+    "pyarrow": "available",
+    "quantumgizmos_ldpc": "missing",
+    "sim_ldpc": "missing",
+    "yaml": "available"
+  }
+}

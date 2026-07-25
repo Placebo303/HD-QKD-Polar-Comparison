@@ -1,0 +1,20 @@
+global:
+  output_dir: comparison_bench/outputs_comparison
+
+dataset:
+  frame_batch_path: comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet
+
+cascade:
+  block_size_schedule:
+    - [8, 16, 32, 64]
+    - [16, 32, 64, 128]
+  num_passes: [4, 6]
+  permutation_mode: ["identity", "seeded_random"]
+  seed: [0, 1]
+  mapping: ["gray"]
+  bisection_mode: ["recursive_binary"]
+  verify_mode: ["crc32"]
+  frame_caps: [4, 16]
+  max_workers: 16
+  include_all_points: false
+  force: false
