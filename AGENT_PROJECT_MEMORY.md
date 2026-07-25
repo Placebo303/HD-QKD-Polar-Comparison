@@ -1,5 +1,9 @@
 # AGENT_PROJECT_MEMORY.md
 
+> Historical orientation only. This file mixes repo observations with
+> memory-derived and uncertain notes. Use `AGENT_HANDOFF.md` for current status,
+> and verify commands against the current CLI before execution.
+
 ## 1. Project Identity
 
 - Project name: High-Dimensional QKD Polar Pipeline. [repo-observed]

@@ -19,7 +19,10 @@ python tools/asenoise/run_asenoise_routeA_replay.py finalize-main --input-csv <f
 
 ## Outputs And Reporting
 
-ASENoise outputs are written under each raw data dataset directory and aggregate files are written under `D:\Data\Raw Data\ASENoise_Type0`.
+ASENoise outputs are written under the data root selected with `--data-root`;
+aggregate files are written at that root. The historical Windows data location
+is provenance only and is not a portable default. Always pass `--data-root` for
+new runs.
 
 Default reporting columns:
 

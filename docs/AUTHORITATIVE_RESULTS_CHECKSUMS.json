@@ -1,0 +1,62 @@
+{
+  "schema": "hdqkd-authoritative-pack-digest-v1",
+  "algorithm": "sha256",
+  "logical_root": "results/authoritative",
+  "generated_utc": "2026-07-25T08:45:24.072057+00:00",
+  "packs": [
+    {
+      "name": "_tmp_longrun_fresh_rerun",
+      "file_count": 5046,
+      "total_bytes": 11455636266,
+      "tree_sha256": "a67b152b480d2bd590cb7307e76c15a03df44ec2803051373c8ead64c9b7b72c"
+    },
+    {
+      "name": "_tmp_minrerun_stageC_security_20dB",
+      "file_count": 4,
+      "total_bytes": 292522,
+      "tree_sha256": "13952e25b9af979d89a4da82f091f454f0dda40d77e180a419036723ec6f3089"
+    },
+    {
+      "name": "_tmp_minrerun_stageD_cross_loss",
+      "file_count": 10,
+      "total_bytes": 1552454,
+      "tree_sha256": "4e91ba46e612f9bef803e33af1e0d1fae66f34282114cba1447ba8480fa38c49"
+    },
+    {
+      "name": "_tmp_routeA_correctness_formal_stageD_cross_loss",
+      "file_count": 2010,
+      "total_bytes": 139692460,
+      "tree_sha256": "0c5c0ad2617770a28575d231e3f016f53d47ceec70ac5c5763db4895f1813f6d"
+    },
+    {
+      "name": "e2e_10dB_fullgrid_pairing_v2_candidate",
+      "file_count": 1095,
+      "total_bytes": 2471437551,
+      "tree_sha256": "893d7f75cab8552b7c4eb1b06783d4f3bb7961a39896a2856bfb138b7c500047"
+    },
+    {
+      "name": "e2e_16dB_fullgrid_pairing_v2_candidate",
+      "file_count": 1095,
+      "total_bytes": 2431348460,
+      "tree_sha256": "c9876a29ad6c70c31add65a57584d2279f5208c6d2f0b068d008589eacd7c386"
+    },
+    {
+      "name": "e2e_20dB_fullgrid_pairing_v2_candidate",
+      "file_count": 1092,
+      "total_bytes": 2040355727,
+      "tree_sha256": "af38dad5b216a0dbb801d4014d261cf8cf8920dddebe008f5731b1950f608cf4"
+    },
+    {
+      "name": "e2e_20dB_fullgrid_pairing_v2_candidate_t15",
+      "file_count": 1095,
+      "total_bytes": 2040526093,
+      "tree_sha256": "2a9c750ef10b7c75b3cb7624c0d98010b602e73d7245aed67623b3b16eab92bf"
+    },
+    {
+      "name": "e2e_6dB_fullgrid_pairing_v2_candidate",
+      "file_count": 1095,
+      "total_bytes": 2889967000,
+      "tree_sha256": "a0be47b2d28f76b2e4ec196cffcb7004383949e6c1414fc97b768f36d6f1aa36"
+    }
+  ]
+}

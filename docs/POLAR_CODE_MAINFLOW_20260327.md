@@ -4,6 +4,9 @@
 
 This document describes the **current main Polar-code workflow** in this repository.
 It is the latest recommended run method and result interpretation as of 2026-03-27.
+For the maintained 2026-04-27 layout and Route A formal correctness entrypoints,
+start with [CURRENT_MAINLINE.md](CURRENT_MAINLINE.md). Paths below have been
+updated to the current layout, but the result discussion remains the 2026-03-27 baseline.
 
 Current reporting hierarchy:
 - `actual-IR finite-key calibrated`: main result
@@ -21,11 +24,11 @@ Current model layer:
 
 Latest authoritative outputs:
 - fresh rerun full chain:
-  - [results/authoritative/_tmp_longrun_fresh_rerun](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun)
+  - [results/authoritative/_tmp_longrun_fresh_rerun](../results/authoritative/_tmp_longrun_fresh_rerun)
 - refined 20 dB frame-accounting rebuild:
-  - [results/authoritative/_tmp_minrerun_stageC_security_20dB](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageC_security_20dB)
+  - [results/authoritative/_tmp_minrerun_stageC_security_20dB](../results/authoritative/_tmp_minrerun_stageC_security_20dB)
 - refined cross-loss pack:
-  - [results/authoritative/_tmp_minrerun_stageD_cross_loss](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageD_cross_loss)
+  - [results/authoritative/_tmp_minrerun_stageD_cross_loss](../results/authoritative/_tmp_minrerun_stageD_cross_loss)
 
 Older `_tmp_longrun_stage*` trees are legacy intermediate packs and should not be treated as the preferred latest baseline.
 
@@ -36,10 +39,10 @@ Purpose:
 - prove that the split-boundary wrapper preserves current logic before a full rerun
 
 Script:
-- [tools/longrun_validate_smoke_subset.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_validate_smoke_subset.py)
+- [pipelines/archive/longrun_validate_smoke_subset.py](../pipelines/archive/longrun_validate_smoke_subset.py)
 
 Validated result:
-- [results/authoritative/_tmp_longrun_fresh_rerun/smoke_20dB/validation/smoke_compare_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/smoke_20dB/validation/smoke_compare_summary.txt)
+- [results/authoritative/_tmp_longrun_fresh_rerun/smoke_20dB/validation/smoke_compare_summary.txt](../results/authoritative/_tmp_longrun_fresh_rerun/smoke_20dB/validation/smoke_compare_summary.txt)
 - exact agreement on the tested 40-point subset:
   - `max_abs_delta_map_ser = 0`
   - `max_abs_delta_PIE_practical = 0`
@@ -53,7 +56,7 @@ Purpose:
 - do **not** run Polar yet
 
 Primary entrypoint:
-- [experiments/run_e2e_pipeline.py](/D:/Code/HD-QKD_Polar_Release/experiments/run_e2e_pipeline.py)
+- [experiments/run_e2e_pipeline.py](../experiments/run_e2e_pipeline.py)
 
 Recommended mode:
 - `--skip-polar`
@@ -71,7 +74,7 @@ Purpose:
   - `polar_layer_metrics.csv`
 
 Primary entrypoint:
-- [experiments/run_real_polar_max_pie.py](/D:/Code/HD-QKD_Polar_Release/experiments/run_real_polar_max_pie.py)
+- [experiments/run_real_polar_max_pie.py](../experiments/run_real_polar_max_pie.py)
 
 Required replay metadata emitted by the current version:
 - `decoder_mode_best`
@@ -87,9 +90,9 @@ Purpose:
 - produce actual replay leak and block success/fail logs
 
 Primary tools:
-- [tools/longrun_build_replay_index.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_replay_index.py)
-- [tools/longrun_run_actual_ir_replay.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_run_actual_ir_replay.py)
-- [tools/longrun_build_actual_ir_logs_index.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_actual_ir_logs_index.py)
+- [pipelines/current/longrun_build_replay_index.py](../pipelines/current/longrun_build_replay_index.py)
+- [pipelines/current/longrun_run_actual_ir_replay.py](../pipelines/current/longrun_run_actual_ir_replay.py)
+- [tools/security_reports/longrun_build_actual_ir_logs_index.py](../tools/security_reports/longrun_build_actual_ir_logs_index.py)
 
 Current replay provenance tags:
 - `actual_ir_replay_with_configured_verification`
@@ -100,18 +103,18 @@ Purpose:
 - build the main security table from actual replay leak plus Zhong-like calibrated finite-key penalty
 
 Primary tools:
-- [tools/longrun_build_finite_key_audit_table.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_finite_key_audit_table.py)
-- [tools/longrun_build_actual_ir_finite_key_shadow.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_actual_ir_finite_key_shadow.py)
-- [tools/longrun_build_beta_baseline_shadow.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_beta_baseline_shadow.py)
-- [tools/longrun_build_security_master_table.py](/D:/Code/HD-QKD_Polar_Release/tools/longrun_build_security_master_table.py)
+- [tools/security_reports/longrun_build_finite_key_audit_table.py](../tools/security_reports/longrun_build_finite_key_audit_table.py)
+- [tools/security_reports/longrun_build_actual_ir_finite_key_shadow.py](../tools/security_reports/longrun_build_actual_ir_finite_key_shadow.py)
+- [tools/security_reports/longrun_build_beta_baseline_shadow.py](../tools/security_reports/longrun_build_beta_baseline_shadow.py)
+- [tools/security_reports/longrun_build_security_master_table.py](../tools/security_reports/longrun_build_security_master_table.py)
 
 Current 2026-03-27 result state:
 - all four losses have `121/121 actual replay leak`
 - current stage2 fresh summaries:
-  - [full_6dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/full_6dB/stage2_security/stage2_summary.txt)
-  - [full_10dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/full_10dB/stage2_security/stage2_summary.txt)
-  - [full_16dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/full_16dB/stage2_security/stage2_summary.txt)
-  - [full_20dB/stage2_security/stage2_summary.txt](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun/full_20dB/stage2_security/stage2_summary.txt)
+  - [full_6dB/stage2_security/stage2_summary.txt](../results/authoritative/_tmp_longrun_fresh_rerun/full_6dB/stage2_security/stage2_summary.txt)
+  - [full_10dB/stage2_security/stage2_summary.txt](../results/authoritative/_tmp_longrun_fresh_rerun/full_10dB/stage2_security/stage2_summary.txt)
+  - [full_16dB/stage2_security/stage2_summary.txt](../results/authoritative/_tmp_longrun_fresh_rerun/full_16dB/stage2_security/stage2_summary.txt)
+  - [full_20dB/stage2_security/stage2_summary.txt](../results/authoritative/_tmp_longrun_fresh_rerun/full_20dB/stage2_security/stage2_summary.txt)
 
 ### Stage 5: Minimal rerun refined frame-accounting pass
 Purpose:
@@ -120,11 +123,11 @@ Purpose:
 - upgrade frame accounting from surrogate clean-pair fraction to actual sidecar occupancy accounting
 
 Primary tools:
-- [tools/minrerun_audit_frame_accounting_inputs.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_audit_frame_accounting_inputs.py)
-- [tools/minrerun_patch_actual_ir_replay_logs.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_patch_actual_ir_replay_logs.py)
-- [tools/minrerun_run_frame_audit.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_run_frame_audit.py)
-- [tools/minrerun_rebuild_security_master_20dB.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_rebuild_security_master_20dB.py)
-- [tools/minrerun_build_cross_loss_refined_summary.py](/D:/Code/HD-QKD_Polar_Release/tools/minrerun_build_cross_loss_refined_summary.py)
+- [pipelines/archive/minrerun_audit_frame_accounting_inputs.py](../pipelines/archive/minrerun_audit_frame_accounting_inputs.py)
+- [pipelines/archive/minrerun_patch_actual_ir_replay_logs.py](../pipelines/archive/minrerun_patch_actual_ir_replay_logs.py)
+- [pipelines/archive/minrerun_run_frame_audit.py](../pipelines/archive/minrerun_run_frame_audit.py)
+- [pipelines/archive/minrerun_rebuild_security_master_20dB.py](../pipelines/archive/minrerun_rebuild_security_master_20dB.py)
+- [pipelines/archive/minrerun_build_cross_loss_refined_summary.py](../pipelines/archive/minrerun_build_cross_loss_refined_summary.py)
 
 Actual frame-accounting source:
 - sidecar `occupancy_filter_summary.csv`
@@ -141,8 +144,8 @@ Refined frame definitions currently used:
 
 ### A. If you need the current latest results only
 Do not rerun anything. Read:
-- [results/authoritative/_tmp_minrerun_stageC_security_20dB](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageC_security_20dB)
-- [results/authoritative/_tmp_minrerun_stageD_cross_loss](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageD_cross_loss)
+- [results/authoritative/_tmp_minrerun_stageC_security_20dB](../results/authoritative/_tmp_minrerun_stageC_security_20dB)
+- [results/authoritative/_tmp_minrerun_stageD_cross_loss](../results/authoritative/_tmp_minrerun_stageD_cross_loss)
 
 ### B. If you need a fresh full rerun from raw data
 Use the split-boundary flow:
@@ -152,9 +155,9 @@ Use the split-boundary flow:
 4. refined frame-accounting pass
 
 This was the exact strategy used to generate:
-- [results/authoritative/_tmp_longrun_fresh_rerun](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_longrun_fresh_rerun)
-- [results/authoritative/_tmp_minrerun_stageC_security_20dB](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageC_security_20dB)
-- [results/authoritative/_tmp_minrerun_stageD_cross_loss](/D:/Code/HD-QKD_Polar_Release/results/authoritative/_tmp_minrerun_stageD_cross_loss)
+- [results/authoritative/_tmp_longrun_fresh_rerun](../results/authoritative/_tmp_longrun_fresh_rerun)
+- [results/authoritative/_tmp_minrerun_stageC_security_20dB](../results/authoritative/_tmp_minrerun_stageC_security_20dB)
+- [results/authoritative/_tmp_minrerun_stageD_cross_loss](../results/authoritative/_tmp_minrerun_stageD_cross_loss)
 
 ### C. If you only need to refine frame accounting
 Do not touch raw ttbin or full Polar search.
@@ -162,7 +165,7 @@ Run only the `minrerun_*` tools against the fresh rerun outputs.
 
 ## 5. Runtime Notes
 
-The main hotspot is still fullgrid Polar evaluation in [run_real_polar_max_pie.py](/D:/Code/HD-QKD_Polar_Release/experiments/run_real_polar_max_pie.py).
+The main hotspot is still fullgrid Polar evaluation in [run_real_polar_max_pie.py](../experiments/run_real_polar_max_pie.py).
 
 The latest acceleration changes that are already in use are:
 - front-half / back-half cache boundary via `--skip-polar`

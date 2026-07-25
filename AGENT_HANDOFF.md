@@ -1,6 +1,6 @@
 # AGENT_HANDOFF
 
-最后更新：2026-07-25 16:30（Asia/Shanghai）
+最后更新：2026-07-25 16:47（Asia/Shanghai）
 
 本文件是本仓库当前状态的权威交接入口。`AGENT_PROJECT_MEMORY.md` 保留较长的背景与接口清单；如果两者对“当前状态”的描述不一致，以本文件和仓库内现有证据为准。
 
@@ -11,8 +11,10 @@
 - Route A 的 correctness-side verification v1 已完成：四个 loss 共 `484/484` 个 formal rows，四份 validation 均为 `ok`，无 errors / warnings。
 - Route B-lite 已完成并归档，结论是“局部有效、整体不稳定”的 limited / partial negative result；不得迁入主线。
 - Route C / q-ary Polar 没有形成完整可交付主线；仓库中只有 nonbinary LDPC demo 入口，若重启 Route C 应作为独立研究任务。
-- 项目还不是干净的可安装软件包：缺少自动化测试与打包元数据，README 有明显的跨项目内容污染，原始数据和约 39.1 GiB 本地结果不受 Git 管理。
-- 因此当前判断是：**科学主线与历史结果已可交接；严格安全证明、发布文档和可重复安装仍未收口。**
+- 项目明确定位为从仓库根目录运行的脚本仓库，不引入无用途的 Python package scaffolding。
+- P0/P1 工程收口已完成：README 和依赖已校正，维护文档使用相对路径，5 个 raw-data-free smoke tests 已建立，9 个 authoritative packs 已生成并复验 tree SHA-256。
+- 原始数据和约 39.1 GiB 本地结果仍不受 Git 管理；其中 authoritative packs 有 12,542 个文件，由 tracked checksum manifest 覆盖。
+- 因此当前判断是：**科学主线、历史结果与基础发布治理已可交接；严格安全证明和 raw-data 全量复现仍是更高阶段工作。**
 
 ## 当前进展
 
@@ -25,7 +27,7 @@
 | Route A formal cross-loss 结果 | 已完成 | formal pack 中 positive actual rows 为 `293` | 不要和 refined pre-formal 的 `312` 混用 |
 | Route B-lite | 已完成并归档 | 20 dB：47 improve / 46 degrade / 28 tie，中位改进为 0 | 停止扩展；除非有新的 symbol-offset / reliability-order 方案 |
 | Route C / q-ary Polar | 未形成完整主线 | 无完整 q-ary encoder / decoder / replay / security 接口闭环 | 仅在明确立项后独立推进 |
-| 工程发布质量 | 部分完成 | 源码可编译、入口可解析；无正式 test suite / package metadata | 先修 README、依赖声明和最小 smoke tests |
+| 工程发布质量 | P0/P1 已完成 | README/requirements 已校正；5 个 unittest smoke tests；9 个 authoritative pack digests 已复验 | 有 approved artifact host 后再发布大结果包 |
 
 ## 科学口径
 
@@ -75,6 +77,11 @@ epsilon_EC_bound = min(1, invoked_block_count * 2^-verification_tag_bits)
 - `results/authoritative/_tmp_minrerun_stageD_cross_loss`
 - `results/authoritative/_tmp_routeA_correctness_formal_stageD_cross_loss`
 
+完整的 9-pack 文件数、字节数与 tree SHA-256 位于：
+
+- `docs/AUTHORITATIVE_RESULTS_CHECKSUMS.json`
+- 生成/验证工具：`tools/verify_authoritative_results.py`
+
 主要当前入口：
 
 - 前半链：`experiments/run_e2e_pipeline.py`
@@ -119,21 +126,29 @@ epsilon_EC_bound = min(1, invoked_block_count * 2^-verification_tag_bits)
 通过：
 
 ```powershell
-python -m compileall -q src experiments pipelines tools analysis
-python -c "..."  # universal-hash verification transcript smoke
+python -m unittest discover -s tests -v
+python -m compileall -q src experiments pipelines tools analysis tests
 python experiments\run_e2e_pipeline.py --help
 python experiments\run_real_polar_max_pie.py --help
 python pipelines\current\routeA_run_formal_cross_loss.py --help
 python tools\security_reports\round2_build_finite_key_audit_table.py --help
 python tools\asenoise\export_ttbin_cross_correlation.py --help
+python tools\verify_authoritative_results.py --verify docs\AUTHORITATIVE_RESULTS_CHECKSUMS.json
 ```
+
+Smoke tests 覆盖：
+
+- portable results/runtime path；
+- universal-hash verification transcript；
+- deterministic authoritative pack digest；
+- 小型 finite-key security-table fixture；
+- active docs 的本机绝对仓库路径与跨项目 CLI 污染回归。
 
 环境：
 
 ```text
 Python 3.12.12
 numpy 2.4.0
-scipy 1.16.3
 ```
 
 本轮未运行：
@@ -146,31 +161,37 @@ scipy 1.16.3
 
 因此本轮验证证明“代码可解析、关键 correctness helper 可运行、历史结果证据齐全”，不证明在当前机器上完成了端到端全量复现。
 
-## 已知阻塞与风险
+## P0/P1 完成记录
 
-优先级 P0：
+P0：
 
-1. `README.md` 的 Installation / Minimal Example / Known Issues 段落混入了不属于本项目的 `yfinance`、trading day、`--skip-llm`、`--operator-gate` 等内容。
-2. README 写了 `pip install -e .`，但仓库没有 `pyproject.toml`、`setup.py` 或 `setup.cfg`。
-3. README 的 dependency table 与 `requirements.txt` 不一致；`.ttbin` 还依赖外部 `TimeTagger` runtime。
-4. `main` 尚未推送；在本 handoff 提交后预计相对 `origin/main` ahead 18。推送前用 `git status --short --branch` 重新确认。
+1. README 中的 `yfinance` / trading / LLM/operator-gate 污染已删除。
+2. 仓库已明确为 script repository；删除无效的 `pip install -e .`，未增加无用途的 package scaffolding。
+3. `requirements.txt` 与实际 tracked Python imports 对齐；`TimeTagger` 和 `g++` 作为外部/系统依赖单独说明。
+4. 统一 `main` 在本轮验证、提交后推送。
 
-优先级 P1：
+P1：
 
-1. 没有正式 test suite；目前只有 compileall、CLI help 与历史结果 validation。
-2. `results/` 完全被忽略；fresh clone 不含权威结果，发布时需要独立 artifact manifest / 校验和 / 下载方式。
-3. 文档仍含 Windows 绝对路径；新命令优先写 repo-relative path。
-4. `AGENT_PROJECT_MEMORY.md` 含一部分 memory-derived / uncertain 内容，不能替代本轮实测证据。
+1. `tests/test_smoke.py` 提供 5 个 raw-data-free unittest smoke tests。
+2. `docs/AUTHORITATIVE_RESULTS_CHECKSUMS.json` 覆盖 9 个 authoritative packs；生成后已立即完整复验。
+3. README、当前 mainflow 和 latest-results 文档已使用 repo-relative links；历史 raw-data path 只保留为 provenance，不作为新命令默认值。
+4. `AGENT_PROJECT_MEMORY.md` 顶部已明确标为 historical orientation；当前状态以本 handoff 为准。
+
+## 剩余外部边界
+
+这些不是未完成的 P0/P1 代码项：
+
+1. 仓库没有 approved artifact host，因此 authoritative results 仍通过受控文件传输获得；checksum 可验证完整性，但不提供虚构下载地址。
+2. 外部 ASENoise master CSV 不在 `results/authoritative/`，因此不在当前 checksum manifest 覆盖范围内。
+3. fresh clone 不含 raw `.ttbin`、Swabian `TimeTagger` runtime 或约 39.1 GiB 本地结果。
+4. 本轮未执行 raw-data E2E、full-grid Polar 或 full Route A replay。
+5. strict Zhong 2015 / full Niu 2016 proof instantiation 仍未完成。
 
 ## 下一步建议
 
-最短收口顺序：
-
-1. 清理 README 的跨项目内容，只保留真实 CLI 参数和安装前提。
-2. 决定项目是“脚本仓库”还是“可安装 package”；如果只是脚本仓库，删除 `pip install -e .`，无需增加打包框架。
-3. 补 2–3 个最小 smoke tests：runtime path、universal-hash transcript、一个不读 raw data 的 security-table fixture。
-4. 为 authoritative result pack 生成文件清单与 SHA-256；不要把 39.1 GiB 结果直接提交进 Git。
-5. 核对后推送统一 `main`；暂时没有继续保留活跃开发分支的必要。只有高风险实验、多人并行或 Route C 独立立项时再开新分支。
+1. 配置 approved artifact host 后发布 authoritative pack，并用现有 checksum 工具验证上传/下载副本。
+2. 在具备 raw data、TimeTagger 和 decoder toolchain 的机器上运行一个新输出目录 E2E smoke。
+3. 只有高风险实验、多人并行或 Route C 独立立项时再创建开发分支。
 
 推送前检查：
 
