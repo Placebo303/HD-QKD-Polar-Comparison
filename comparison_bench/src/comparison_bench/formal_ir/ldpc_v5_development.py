@@ -6,17 +6,20 @@ immutable failure retention).  Production entry points expose no test switch;
 private test helpers require explicit fakes and a test-owned workspace root.
 """
 from __future__ import annotations
-import hashlib, importlib.metadata, json, os, platform, secrets, time
+import hashlib, importlib.metadata, json, logging, os, platform, secrets, time
 from functools import cmp_to_key
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 import numpy as np
+
+logger = logging.getLogger("comparison_bench.ldpc_v5_development")
 from .codebook_v5_h2 import h2_manifest, verify_h2_manifest
 from .ldpc_v5 import (METHOD, run_ldpc_formal_v5, build_v5_policy_manifest,
                       verify_v5_policy_manifest, _selected_candidates,
                       validate_outcome_v5, verify_public_payload_v5,
                       encode_outcome_csv_v5, canonical_event_v5, OUTCOME_FIELDS)
-from .ldpc_v5_partition import development_arrays_for_frame, development_rows, validate_partition_lock
+from .ldpc_v4_10db_source import arrays_for_frame, build_source_lock
+from .ldpc_v5_partition import validate_partition_lock
 from .shared import seed_record
 
 RUN_ID = "binary_ldpc_v5_development_v1"
@@ -666,8 +669,13 @@ def _execute(out: Path, *, method_runner: Callable[..., Any], array_loader: Call
     if test_only:
         rows_by = {(row["stratum"][6:], int(row["role_rank"])): row for row in _static_development_rows(lock)}
     else:
+        # The whole partition lock is validated exactly once here.  The
+        # per-frame loader must not re-validate it: rebuild_partition_lock
+        # runs the five v4 predecessor verifiers (~100 s per call), which
+        # would turn the frozen 4608-attempt run into ~130 hours.
         validate_partition_lock(lock)
-        rows_by = {(row["stratum"][6:], int(row["role_rank"])): row for row in development_rows(lock)}
+        rows_by = {(row["stratum"][6:], int(row["role_rank"])): row
+                   for row in (dict(x) for x in lock["role_rows"] if x["role"] == "development")}
     method = _method_objects()
     if plan["method_bindings"] != method["bindings"]:
         raise ValueError("plan method binding drift")
@@ -684,8 +692,16 @@ def _execute(out: Path, *, method_runner: Callable[..., Any], array_loader: Call
     started = clock()
     current: str | None = None
     appended_current = False
+    attempt_ids = plan["execution"]["attempt_ids"]
+    total = len(attempt_ids)
     try:
-        for attempt_id in plan["execution"]["attempt_ids"]:
+        for attempt_idx, attempt_id in enumerate(attempt_ids):
+            if attempt_idx and attempt_idx % 512 == 0:
+                elapsed = clock() - started
+                rate = attempt_idx / elapsed if elapsed > 0 else 0.0
+                eta = (total - attempt_idx) / rate if rate > 0 else float("nan")
+                logger.info("execute progress: %d/%d attempts (%.0f%%) after %.1fs, %.0f/s, eta %.0fs",
+                            attempt_idx, total, 100.0 * attempt_idx / total, elapsed, rate, eta)
             if clock() - started > float(plan["caps"]["complete_run_s"]):
                 raise TimeoutError("complete_run_cap")
             candidate, stratum, rank_str = attempt_id.split("|")
@@ -758,9 +774,35 @@ def _execute(out: Path, *, method_runner: Callable[..., Any], array_loader: Call
         return {"run_status": "invalid_execution", "observed_outcomes": len(rows), "failure": failure}
 
 
+_SOURCE_LOCK_CACHE: dict[str, Any] | None = None
+
+
+def _production_arrays_for_frame(lock: Mapping, row: Mapping) -> tuple[np.ndarray, np.ndarray]:
+    """Production development array loader for the execute path.
+
+    Semantics match ``partition.development_arrays_for_frame``: exact locked
+    development-row membership enforced before any array load, same source
+    adapter, same array sanity checks.  The one difference is that the
+    partition lock is validated once by ``_execute`` up front and never
+    re-validated per frame.  Re-validation rebuilds the partition lock, which
+    re-runs the five v4 predecessor verifiers (~100 s per call); the frozen
+    4608-attempt run would take ~130 hours instead of minutes.
+    """
+    global _SOURCE_LOCK_CACHE
+    matches = [x for x in lock["role_rows"] if x["role"] == "development" and dict(x) == dict(row)]
+    if len(matches) != 1:
+        raise ValueError("development locked-row membership")
+    if _SOURCE_LOCK_CACHE is None:
+        _SOURCE_LOCK_CACHE = build_source_lock()
+    a, b = arrays_for_frame(_SOURCE_LOCK_CACHE, {"stratum": row["stratum"], "frame_id": row["frame_id"]})
+    if a.shape != (N,) or b.shape != (N,) or np.any(a < 0) or np.any(a >= Q) or np.any(b < 0) or np.any(b >= Q):
+        raise ValueError("development arrays")
+    return a.copy(), b.copy()
+
+
 def execute_plan(output_dir: Path) -> dict[str, Any]:
     return _execute(Path(output_dir), method_runner=run_ldpc_formal_v5,
-                    array_loader=development_arrays_for_frame, clock=time.monotonic, test_only=False)
+                    array_loader=_production_arrays_for_frame, clock=time.monotonic, test_only=False)
 
 
 def _execute_test_package(output_dir: Path, *, method_runner: Callable[..., Any],

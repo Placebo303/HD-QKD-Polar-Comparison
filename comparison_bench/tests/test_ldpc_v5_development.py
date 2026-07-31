@@ -10,6 +10,7 @@ explicit fakes; production entry points are never invoked with real data.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import uuid
 from pathlib import Path
@@ -17,7 +18,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+# Progress logs (execute/verify) are visible with:
+#   pytest -s -o log_cli=true comparison_bench/tests/test_ldpc_v5_development.py
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
 from comparison_bench.src.comparison_bench.formal_ir import ldpc_v5_development as core
+from comparison_bench.src.comparison_bench.formal_ir import ldpc_v4_10db_source as source
 from comparison_bench.src.comparison_bench.formal_ir.ldpc_v5 import (OUTCOME_FIELDS, METHOD,
                                                                      decode_outcome_csv_v5,
                                                                      encode_outcome_csv_v5)
@@ -328,6 +334,33 @@ def test_missing_fakes_fail_before_package_creation(fresh):
                                    array_loader=None, clock=None)
     # no artifact beyond the plan was written
     assert sorted(p.name for p in fresh.iterdir()) == ["pre_run_plan.json"]
+
+
+def test_production_array_loader_matches_locked_source():
+    """Production execute loader: exact membership + bytes identical to source.
+
+    Guards the perf fix: the production loader must not re-validate the
+    partition lock per frame (~100 s/frame) and must reject any row that is
+    not an exact locked development row.
+    """
+    lock = json.loads(core.PARTITION_LOCK.read_bytes())
+    dev = [x for x in lock["role_rows"] if x["role"] == "development"]
+    conf = [x for x in lock["role_rows"] if x["role"] == "confirmation"]
+    core._SOURCE_LOCK_CACHE = None
+    try:
+        a, b = core._production_arrays_for_frame(lock, dev[0])
+        src = source.build_source_lock()
+        ea, eb = source.arrays_for_frame(src, {"stratum": dev[0]["stratum"],
+                                               "frame_id": dev[0]["frame_id"]})
+        assert np.array_equal(a, ea) and np.array_equal(b, eb)
+        # confirmation rows and foreign rows never load arrays
+        with pytest.raises(ValueError, match="development locked-row membership"):
+            core._production_arrays_for_frame(lock, conf[0])
+        foreign = dict(dev[1]); foreign["frame_id"] = -1
+        with pytest.raises(ValueError, match="development locked-row membership"):
+            core._production_arrays_for_frame(lock, foreign)
+    finally:
+        core._SOURCE_LOCK_CACHE = None
 
 
 def time_now():

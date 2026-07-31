@@ -5,12 +5,15 @@ Exposes no test switch; test execution lives in the private test suite with
 explicit fakes and a test-owned workspace root.
 """
 from __future__ import annotations
-import argparse
+import argparse, logging, sys
 from pathlib import Path
 from ..formal_ir.ldpc_v5_development import execute_plan, prepare_plan
 
 
 def main() -> int:
+    # Progress logs go to stderr; stdout stays reserved for canonical output.
+    logging.basicConfig(level=logging.INFO, stream=sys.stderr,
+                        format="%(asctime)s %(levelname)s %(message)s")
     p = argparse.ArgumentParser(description="binary LDPC v5 sacrificed-development package runner")
     p.add_argument("--output-dir", type=Path, required=True)
     p.add_argument("--mode", choices=("prepare", "execute"), required=True)
