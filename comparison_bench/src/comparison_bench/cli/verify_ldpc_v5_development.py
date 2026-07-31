@@ -52,6 +52,7 @@ def _locked_alice(partition: dict[str, Any], row: dict[str, Any]) -> np.ndarray:
 def verify_output(output_dir: Path, *, _private_test_only: bool = False) -> dict[str, Any]:
     if not output_dir.is_dir() or {x.name for x in output_dir.iterdir()} != set(core.ARTIFACTS):
         raise ValueError("12 artifact contract")
+    before = {name: core._sha((output_dir / name).read_bytes()) for name in core.ARTIFACTS}
     plan = _json(output_dir / core.ARTIFACTS[0])
     core._validate_plan(plan, test_only=_private_test_only, output_dir=output_dir)
     partition = _json(output_dir / core.ARTIFACTS[1])
@@ -140,11 +141,16 @@ def verify_output(output_dir: Path, *, _private_test_only: bool = False) -> dict
         raise ValueError("run manifest")
     if not _hashed(report, "report_sha256") or report.get("schema") != (core.TEST_REPORT_SCHEMA if _private_test_only else core.REPORT_SCHEMA) or report.get("run_id") != manifest.get("run_id") or report.get("run_status") != manifest.get("run_status") or report.get("plan_sha256") != plan["plan_sha256"] or report.get("run_manifest_sha256") != manifest.get("run_manifest_sha256") or report.get("run_manifest_file_sha256") != core._sha((output_dir / core.ARTIFACTS[10]).read_bytes()) or report.get("selection_sha256") != selection_doc.get("selection_sha256"):
         raise ValueError("report DAG")
+    # contract §7 step 10: hashes files before and after; changes none
+    after = {name: core._sha((output_dir / name).read_bytes()) for name in core.ARTIFACTS}
+    if before != after:
+        raise ValueError("artifact immutability")
+    # contract §8: successful return contains exactly these six fields
     return {"status": "verified", "run_status": manifest["run_status"],
-            "observed_outcomes": len(rows), "expected_outcomes": core._expected_outcomes(plan),
-            "selection_status": selection_doc.get("selection_status"),
-            "decoder_reexecution": False,
-            "scope": "plan_partition_method_h2_policy_outcomes_transcript_selection_manifest_report"}
+            "outcomes": len(rows),
+            "selected_candidate_id": selection_doc.get("selected_candidate_id"),
+            "ready_for_synthetic_prepare": selection_doc.get("ready_for_synthetic_prepare"),
+            "decoder_reexecution": False}
 
 
 def main() -> int:

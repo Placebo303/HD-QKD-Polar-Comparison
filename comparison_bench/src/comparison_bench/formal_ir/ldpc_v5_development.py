@@ -770,3 +770,9 @@ def _execute_test_package(output_dir: Path, *, method_runner: Callable[..., Any]
         raise TypeError("test execution requires explicit fake dependencies")
     return _execute(Path(output_dir), method_runner=method_runner, array_loader=array_loader,
                     clock=clock, test_only=True)
+
+
+def _verify_test_package(output_dir: Path) -> dict[str, Any]:
+    """Private test verify (contract §9): strict read-only replay in test mode."""
+    from ..cli.verify_ldpc_v5_development import verify_output
+    return verify_output(Path(output_dir), _private_test_only=True)

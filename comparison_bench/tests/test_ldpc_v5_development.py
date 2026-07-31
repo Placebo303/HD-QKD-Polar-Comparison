@@ -319,6 +319,17 @@ def test_execute_requires_only_reviewed_plan(fresh):
                       array_loader=lambda *a, **k: None, clock=time_now, test_only=True)
 
 
+def test_missing_fakes_fail_before_package_creation(fresh):
+    """Contract §9: omitting method_runner/array_loader fails before creation."""
+    core._prepare_test_package(fresh, deterministic_roots=_roots())
+    assert sorted(p.name for p in fresh.iterdir()) == ["pre_run_plan.json"]
+    with pytest.raises(TypeError):
+        core._execute_test_package(fresh, method_runner=None,
+                                   array_loader=None, clock=None)
+    # no artifact beyond the plan was written
+    assert sorted(p.name for p in fresh.iterdir()) == ["pre_run_plan.json"]
+
+
 def time_now():
     return 0.0
 
@@ -341,10 +352,16 @@ def test_full_lifecycle_non_promoted(fresh):
     man = json.loads((fresh / core.ARTIFACTS[10]).read_bytes())
     assert man["run_status"] == "non_promoted_development"
     assert man["observed_outcomes"] == 4608
-    # strict read-only replay
-    out = verify_cli.verify_output(fresh, _private_test_only=True)
+    # strict read-only replay: contract §8 exact six-field return
+    out = core._verify_test_package(fresh)
+    assert set(out) == {"status", "run_status", "outcomes", "selected_candidate_id",
+                        "ready_for_synthetic_prepare", "decoder_reexecution"}
     assert out["status"] == "verified"
     assert out["run_status"] == "non_promoted_development"
+    assert out["outcomes"] == 4608
+    assert out["selected_candidate_id"] is None
+    assert out["ready_for_synthetic_prepare"] is False
+    assert out["decoder_reexecution"] is False
     # row identity: all non-attempted, canonical
     rows = decode_outcome_csv_v5((fresh / core.ARTIFACTS[7]).read_bytes())
     assert all(not r["attempted"] for r in rows)
@@ -363,7 +380,7 @@ def test_full_lifecycle_invalid_execution(fresh):
     assert sel["selected_candidate_id"] is None
     rows = decode_outcome_csv_v5((fresh / core.ARTIFACTS[7]).read_bytes())
     assert rows[0]["failure_reason"].startswith("package_internal:")
-    out = verify_cli.verify_output(fresh, _private_test_only=True)
+    out = core._verify_test_package(fresh)
     assert out["status"] == "verified" and out["run_status"] == "invalid_execution"
 
 
@@ -388,14 +405,14 @@ def test_tamper_outcome_row_rejected(fresh):
     assert tampered != raw
     csv_path.write_text(tampered, encoding="ascii")
     with pytest.raises(ValueError):
-        verify_cli.verify_output(fresh, _private_test_only=True)
+        core._verify_test_package(fresh)
 
 
 def test_tamper_frozen_artifact_rejected(fresh):
     _run_full(fresh)
     (fresh / core.ARTIFACTS[5]).write_bytes(b"{}")   # v5_h2_manifest.json
     with pytest.raises(ValueError):
-        verify_cli.verify_output(fresh, _private_test_only=True)
+        core._verify_test_package(fresh)
 
 
 def test_tamper_selection_rejected(fresh):
@@ -404,7 +421,7 @@ def test_tamper_selection_rejected(fresh):
     sel["selected_candidate_id"] = "V5-C1"
     (fresh / core.ARTIFACTS[9]).write_bytes(core._compact(sel))
     with pytest.raises(ValueError):
-        verify_cli.verify_output(fresh, _private_test_only=True)
+        core._verify_test_package(fresh)
 
 
 def test_verify_cli_main_rejects_test_package(fresh, capsys, monkeypatch):
@@ -437,6 +454,6 @@ def test_real_backend_full_completed(fresh):
     from comparison_bench.src.comparison_bench.formal_ir.ldpc_v5 import run_ldpc_formal_v5
     res = _run_full(fresh, runner=run_ldpc_formal_v5)
     assert res["run_status"] in {"completed", "non_promoted_development", "invalid_execution"}
-    out = verify_cli.verify_output(fresh, _private_test_only=True)
+    out = core._verify_test_package(fresh)
     assert out["status"] == "verified"
     assert out["run_status"] == res["run_status"]
