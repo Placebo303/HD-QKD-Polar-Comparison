@@ -129,6 +129,9 @@
   review; no official v5c output before plan creation.
 - [ ] 6.3 (V5-C3) Create the one no-overwrite Route C plan, review without
   decoding, execute once, strict read-only replay once.
+  (2026-08-01: plan created + read-only review passed — evidence
+  `v5c_acceptance_c1_c2.json` + Verification Notes below; execution and
+  strict replay pending explicit go-ahead.)
 - [ ] 6.4 (V5-C4) Readiness and promotion gates exactly as tasks 4.2 / 4.3;
   on promotion stop the change; on non-promotion retain the immutable package
   and proceed to Route D.
@@ -180,3 +183,21 @@
   v5c lane: parallel_run workers=2 -> non_promoted_development (256 rows,
   verify True) and crash+resume -> non_promoted_development (256 rows,
   verify True).  No official v5c output created (C3 plan not yet made).
+- Route C C3 plan created + read-only reviewed 2026-08-01:
+  - One no-overwrite plan at
+    `comparison_bench/outputs_comparison/formal_ir_methods/20260731_v5c_nbldpc_decoder_synthetic/`
+    (directory did not exist before; contains only `pre_run_plan.json`).
+  - Content: canonical_schema `NBLDPCQ5C`, run_id `20260731_v5c_nbldpc_decoder_synthetic`,
+    128 frames (64 per stratum), 640 development Toeplitz seeds
+    (2 policies x (64 x 2 slots at p=.20 + 64 x 3 slots at p=.30)),
+    policies `nbldpc_v5c_sched` + `nbldpc_v5c_ems`, git_commit `9340625`.
+  - NBLDPC5B identity: plan provenance codebook_sha256 equals live v5b
+    canonical `d1ee0a795261aabb...` (match).
+  - Wrapper source hash: plan source_sha256 for
+    `nonbinary_v5_exec_wrapper.py` = `478644ff...` matches disk; all 11
+    source_files hashes match disk (NONE mismatch).
+  - Freshness: identity_overlap empty (roots/frame_ids/array_sha256/
+    atomic_keys); seed_ids disjoint from all prior evidence
+    (`_prior_seed_ids(exclude=v5c_dir)` verified, own 640 seeds excluded).
+  - Execution NOT started; strict replay NOT run.  Next boundary: explicit
+    go-ahead for one wrapper parallel_run + one strict replay.
