@@ -28,8 +28,15 @@
 - [x] Implement the conditional synthetic package (P3-01--P3-09, T0--T2
   complete; independent main-thread acceptance pending review of the
   complete candidate and the official prepare).
-- [ ] Prepare once, main review, execute once, and verify once.
-- [ ] Require 126/128 nominal and stress with zero forbidden failures.
+- [x] Prepare once, main review, execute once, and verify once.
+
+  Plan sha256 `c91171dc…17c10ab` (2026-08-01), production dev verify passed,
+  execute 256/256 attempts (~45 s), read-only verify `status=verified`,
+  `run_status=completed`, `decoder_reexecution=false`.
+- [x] Require 126/128 nominal and stress with zero forbidden failures.
+
+  Met: nominal 128/128, stress 128/128, forbidden failures 0,
+  `promoted=true`, `ready_for_real_qualification=true`.
 
 ## Phase 4: Sealed real qualification
 
