@@ -127,15 +127,20 @@
   suite (damping-schedule bounds, EMS truncation/sorting determinism),
   complete fake qualification + strict fake replay, regression + independent
   review; no official v5c output before plan creation.
-- [ ] 6.3 (V5-C3) Create the one no-overwrite Route C plan, review without
+- [x] 6.3 (V5-C3) Create the one no-overwrite Route C plan, review without
   decoding, execute once, strict read-only replay once.
-  (2026-08-01: plan created + read-only review passed — evidence
-  `v5c_acceptance_c1_c2.json` + Verification Notes below; execution and
-  strict replay pending explicit go-ahead.)
-- [ ] 6.4 (V5-C4) Readiness and promotion gates exactly as tasks 4.2 / 4.3;
+  (2026-08-01: plan created + read-only review passed; executed once via
+  wrapper (run_status=completed, readiness true); strict read-only replay
+  completed with `{'verified': True, 'run_status': 'completed',
+  'promoted': False}` and no worktree changes — evidence
+  `v5c_acceptance_c3_c4.json` + Verification Notes below.)
+- [x] 6.4 (V5-C4) Readiness and promotion gates exactly as tasks 4.2 / 4.3;
   on promotion stop the change; on non-promotion retain the immutable package
   and proceed to Route D.
-- [ ] 6.5 (V5-C5) Update handoff / current task / decision log / project
+  (2026-08-01: readiness true both strata; confirmation materialized and
+  executed; promotion gates p=.20 128/128, p=.30 127/128 -> promoted=false;
+  immutable package retained; proceed to Route D.)
+- [x] 6.5 (V5-C5) Update handoff / current task / decision log / project
   memory with verified Route C facts.
 
 ## Phase 7: Route D (conditional on Routes A, B, C non-promotion)
@@ -201,3 +206,13 @@
     (`_prior_seed_ids(exclude=v5c_dir)` verified, own 640 seeds excluded).
   - Execution NOT started; strict replay NOT run.  Next boundary: explicit
     go-ahead for one wrapper parallel_run + one strict replay.
+- Route C: plan created once (128 frames, 64 per stratum, 640 development
+  Toeplitz seeds, identity_overlap empty, confirmation unmaterialized,
+  NBLDPC5B codebook identity; recorded git_commit per plan file). Executed
+  once: run_status=completed, readiness=true. Promotion gates: p=.20 128/128,
+  p=.30 127/128 -> promoted=false (same p=.30 tail pattern as v5a/v5b).
+  Strict read-only replay completed once:
+  {'verified': True, 'run_status': 'completed', 'promoted': False};
+  git status --porcelain unchanged. Immutable package retained; proceed to
+  Route D (`20260731_v5d_nbldpc_post_synthetic`, roots 202607840000-
+  202607870000).

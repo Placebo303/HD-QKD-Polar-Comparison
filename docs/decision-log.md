@@ -1066,3 +1066,45 @@ possible under out-of-distribution noise.
   recorded as OOD controls, not capability boundaries.
 
 ---
+
+### 2026-08-01: Retain nonbinary LDPC v5c Route C synthetic non-promotion
+
+**Decision**: Retain the sole completed v5c decoder-family package at
+`comparison_bench/outputs_comparison/formal_ir_methods/20260731_v5c_nbldpc_decoder_synthetic`
+as immutable non-promotion evidence. Do not rerun or tune confirmation.
+Continue to Route D (task 7.1) as pre-registered.
+
+**Context**: The frozen plan (NBLDPC5B codebook identity fixed at plan freeze
+because Route B ran and is non-promoted; dual policies `nbldpc_v5c_sched`
+damped FFT-QSPA lambda 0.5/0.75/0.9 per 4-iteration quartile and
+`nbldpc_v5c_ems` LLR min-sum nm=64 alpha=0.8; roots 202607800000-
+202607830000; 128 frames, 640 development Toeplitz seeds) executed once with
+`run_status=completed`. Readiness passed (both strata >= 63/64) and
+confirmation material was atomically materialized and executed. Promotion
+gates: p=.20 stratum 128/128, p=.30 stratum 127/128 (one retained tail
+miss), so `promoted=false` against the frozen 128/128 floor in both strata.
+Prohibited failures were zero.
+
+The pre-registered strict read-only replay completed once and returned
+`{'verified': True, 'run_status': 'completed', 'promoted': False}`; the
+repository worktree status was unchanged by the replay.
+
+**Alternatives considered**:
+- Promote on 127/128 in the p=.30 tail: rejected; the frozen floor is 128/128
+  in both strata and no-rerun/no-tuning rules remain intact.
+- Tune the decoder policies against confirmation outcomes: rejected;
+  confirmation is frozen evidence, not tuning data.
+- Treat the result as codebook or decoder failure: rejected; it is failure of
+  the promotion floor in the p=.30 tail only, the same pattern as v5a and v5b.
+
+**Consequences**:
+- The eight-artifact package is immutable; no rerun or confirmation tuning is
+  authorized (no-rerun/no-tuning rules intact).
+- Route D (`20260731_v5d_nbldpc_post_synthetic`, roots 202607840000-
+  202607870000) is next; the pre-registered list-stage + ADMM post stage is
+  the remaining lever after codebook redesign (v5b) and decoder-family change
+  (v5c) both left the p=.30 tail open.
+- The replay succeeded in this window; the strict replay remains an
+  at-most-once action.
+
+---

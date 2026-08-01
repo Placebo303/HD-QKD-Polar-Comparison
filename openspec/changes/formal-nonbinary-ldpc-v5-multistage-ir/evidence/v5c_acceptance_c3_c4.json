@@ -1,0 +1,53 @@
+{
+  "change": "formal-nonbinary-ldpc-v5-multistage-ir",
+  "milestone": "Route C acceptance C3-C4 (plan, execute, gates, strict replay)",
+  "date": "2026-08-01",
+  "tasks_evidenced": ["6.3", "6.4", "6.5"],
+  "identity": {
+    "codebook": "NBLDPC5B (Route B ran and is non-promoted; choice fixed at plan freeze)",
+    "run_id": "20260731_v5c_nbldpc_decoder_synthetic",
+    "roots": "development 202607800000/202607810000, confirmation 202607820000/202607830000",
+    "policies": "nbldpc_v5c_sched (damped FFT-QSPA lambda 0.5/0.75/0.90 per 4-iteration quartile), nbldpc_v5c_ems (LLR min-sum nm=64 alpha=0.8)",
+    "verification_caps": 3,
+    "protocol_epsilon_ec_bound": "2^-62",
+    "ladders": "p=.20 32->40, p=.30 40->48->56 (both policies, warm retention)"
+  },
+  "plan": {
+    "created_once": true,
+    "no_overwrite": true,
+    "location": "comparison_bench/outputs_comparison/formal_ir_methods/20260731_v5c_nbldpc_decoder_synthetic/",
+    "git_commit": "3fc94433c5b2a4bd10f69cf0f0201e4573b9c1b4",
+    "frames": 128,
+    "frames_per_stratum": 64,
+    "development_seeds": 640,
+    "identity_overlap": "empty",
+    "codebook_sha256_matches_live_v5b": true
+  },
+  "execute": {
+    "ran_once": true,
+    "run_status": "completed",
+    "readiness": true,
+    "confirmation_materialized": true,
+    "promotion_p20": "128/128",
+    "promotion_p30": "127/128",
+    "promoted": false,
+    "prohibited_failures": 0
+  },
+  "strict_replay": {
+    "command": "python -m comparison_bench.src.comparison_bench.cli.run_formal_nonbinary_v5c_qualification verify",
+    "ran_once": true,
+    "result": {"verified": true, "run_status": "completed", "promoted": false},
+    "git_status_porcelain_unchanged": true
+  },
+  "decision": {
+    "route_c_promoted": false,
+    "action": "retain immutable package; proceed to Route D",
+    "next_route": {"run_id": "20260731_v5d_nbldpc_post_synthetic", "roots": "202607840000-202607870000", "task": "7.1"}
+  },
+  "mechanical_review": {
+    "verify_added_no_git_entries": true,
+    "files_changed_by_verify": "none",
+    "no_official_v5c_output_modified": true
+  },
+  "remaining": ["7.1 Route D implementation", "7.2 Route D acceptance", "7.3 Route D plan/execute/replay", "7.4 Route D gates", "7.5 Route D documentation", "8.1 final handoff", "8.2 memory triage"]
+}
