@@ -119,7 +119,7 @@
 
 ## Phase 6: Route C (conditional on Route A and B non-promotion)
 
-- [ ] 6.1 (V5-C1) Fix Route C codebook identity at plan freeze (NBLDPC5B if B
+- [x] 6.1 (V5-C1) Fix Route C codebook identity at plan freeze (NBLDPC5B if B
   is non-promoted, else NBLDPC5A); implement `nonbinary_v5c_decoders.py`
   (sched + EMS), wrapper/CLI, and the pure in-memory equivalence test
   (constant lambda .75 matches v4 warm on identical inputs).
@@ -162,3 +162,21 @@
 - Route B implemented: NBLDPC5B mother (7-block frozen templates, disjoint-shift-difference, salt=0, w2=w3=0, K=8 candidates all zero-collision), v5b multistage core (identical 3-level warm state machine, policies nbldpc_v5b_ir56/ir48), lane + CLI. T0/T1/T2: 31/31 pass. T3: v5a 31/31 pass; v4 16/16 pass with v4 official package temporarily suspended (v4 test self-conflict with its own package, pre-existing, unrelated to v5b); v1-v3 29 failures pre-existing per 3.4. Mechanical review: 7 file hashes recorded, frozen dirs clean, no official v5b output.
 - Route B: plan created once (128 frames, 576 seeds, identity_overlap empty, confirmation unmaterialized, HEAD 3a5d96a). Executed once: 512 outcomes, run_status=completed, readiness=true. Promotion gates: p=.20 128/128, p=.30 127/128 -> promoted=false (same p=.30 tail pattern as v5a). Strict replay attempted once, blocked by external git HEAD drift (3a5d96a -> 4dd6b7e, unrelated ldpc_v5_development commit); v5b source hashes unchanged. Immutable package retained; proceed to Route C.
 - Decision log entry 2026-08-01 Route B added; CURRENT_TASK.md updated with v5a/v5b outcomes; Route C next with NBLDPC5B identity fixed.
+- Route C C1 implemented 2026-08-01: `nonbinary_v5c_decoders.py` (NBLDPC5B
+  identity, policies `nbldpc_v5c_sched` damped FFT-QSPA lambda .5/.75/.9 per
+  4-iteration quartile, `nbldpc_v5c_ems` LLR min-sum nm=64 alpha=0.8 with
+  deterministic top-nm truncation and full-domain convolution accumulator),
+  lane `nonbinary_v5c_ir_qualification.py` (run ID
+  `20260731_v5c_nbldpc_decoder_synthetic`, roots 202607800000-202607830000,
+  source provenance includes the exec wrapper per the speed-up handoff),
+  CLI `run_formal_nonbinary_v5c_qualification.py` (execute/resume via
+  `parallel_run`).
+  Equivalence test (pure in-memory, in `test_nonbinary_v5c_decoders.py`):
+  v5c_sched with constant lambda .75 is byte-identical (0/208 messages
+  differ) to v4 warm on identical inputs after one update round.
+  Core suite 10/10 passed; qualification lane suite 19/19 passed (fake
+  qualification, tamper matrix, strict replay, invalid boundaries,
+  production-API guards); v5b regression 12/12 passed; wrapper probe on the
+  v5c lane: parallel_run workers=2 -> non_promoted_development (256 rows,
+  verify True) and crash+resume -> non_promoted_development (256 rows,
+  verify True).  No official v5c output created (C3 plan not yet made).
