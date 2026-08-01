@@ -25,7 +25,9 @@
 
 ## Phase 3: Fresh synthetic confirmation
 
-- [ ] Implement and accept the conditional synthetic package.
+- [x] Implement the conditional synthetic package (P3-01--P3-09, T0--T2
+  complete; independent main-thread acceptance pending review of the
+  complete candidate and the official prepare).
 - [ ] Prepare once, main review, execute once, and verify once.
 - [ ] Require 126/128 nominal and stress with zero forbidden failures.
 
