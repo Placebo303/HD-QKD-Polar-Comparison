@@ -123,7 +123,7 @@
   is non-promoted, else NBLDPC5A); implement `nonbinary_v5c_decoders.py`
   (sched + EMS), wrapper/CLI, and the pure in-memory equivalence test
   (constant lambda .75 matches v4 warm on identical inputs).
-- [ ] 6.2 (V5-C2) Route C acceptance: structural checks, focused unit/tamper
+- [x] 6.2 (V5-C2) Route C acceptance: structural checks, focused unit/tamper
   suite (damping-schedule bounds, EMS truncation/sorting determinism),
   complete fake qualification + strict fake replay, regression + independent
   review; no official v5c output before plan creation.

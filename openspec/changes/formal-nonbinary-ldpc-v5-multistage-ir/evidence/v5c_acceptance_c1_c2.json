@@ -1,0 +1,49 @@
+{
+  "change": "formal-nonbinary-ldpc-v5-multistage-ir",
+  "milestone": "Route C acceptance C1-C2 (before plan creation)",
+  "date": "2026-08-01",
+  "tasks_evidenced": ["6.1", "6.2"],
+  "identity": {
+    "codebook": "NBLDPC5B (Route B ran and is non-promoted; choice fixed at plan freeze)",
+    "v5b_mother_canonical_sha256": "d1ee0a795261aabb... (recorded in lane source hash)",
+    "run_id": "20260731_v5c_nbldpc_decoder_synthetic",
+    "roots": "development 202607800000/202607810000, confirmation 202607820000/202607830000",
+    "policies": "nbldpc_v5c_sched (damped FFT-QSPA lambda 0.5/0.75/0.90 per 4-iteration quartile), nbldpc_v5c_ems (LLR min-sum nm=64 alpha=0.8)",
+    "verification_caps": 3,
+    "protocol_epsilon_ec_bound": "2^-62",
+    "ladders": "p=.20 32->40, p=.30 40->48->56 (both policies, warm retention)"
+  },
+  "equivalence_test": {
+    "contract": "nbldpc_v5c_sched with constant lambda .75 matches v4 warm on identical inputs",
+    "method": "same v3 matrices/bob/syndrome/priors; one update round; compare every stored message",
+    "result": "0 of 208 messages differ (byte-identical)",
+    "location": "comparison_bench/tests/test_nonbinary_v5c_decoders.py::test_sched_const_075_matches_v4_warm_bytewise"
+  },
+  "suite_results": {
+    "test_nonbinary_v5c_decoders.py": {"passed": 10, "failed": 0, "tier": "T0/T1"},
+    "test_nonbinary_v5c_ir_qualification.py": {"passed": 19, "failed": 0, "tier": "T1/T2"},
+    "v5c_total": {"passed": 29, "failed": 0},
+    "v5b_regression": {"passed": 12, "failed": 0, "note": "test_nonbinary_v5b_multistage.py + test_nonbinary_v5b_mother.py re-run green"},
+    "v5a_v5b_full_regression_earlier": {"passed": 62, "failed": 0, "note": "recorded in wrapper_acceptance_t0_t3.json (2026-08-01)"},
+    "v4_nbldpc_regression_earlier": {"passed": 20, "failed": 0, "note": "official v4 package temporarily suspended; pre-existing self-conflict"}
+  },
+  "wrapper_integration": {
+    "parallel_run_on_v5c_lane": {"workers": 2, "status": "non_promoted_development", "rows": 256, "verify": true},
+    "crash_then_resume_on_v5c_lane": {"crash_at": 10, "resume_status": "non_promoted_development", "rows": 256, "verify_after_resume": true}
+  },
+  "mechanical_review": {
+    "scoped_new_files": [
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v5c_decoders.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v5c_ir_qualification.py",
+      "comparison_bench/src/comparison_bench/cli/run_formal_nonbinary_v5c_qualification.py",
+      "comparison_bench/tests/test_nonbinary_v5c_decoders.py",
+      "comparison_bench/tests/test_nonbinary_v5c_ir_qualification.py"
+    ],
+    "frozen_files_modified": "none (git diff empty for v5_runtime / v5a / v5b / v4 / v3 sources)",
+    "source_files_hash_record": "workspace/t3_v5c_source_files_hash.json (11 files, all present)",
+    "no_official_v5c_output": true,
+    "baseline_frozen_commit": "34cdc53",
+    "route_c_commit": "9340625"
+  },
+  "remaining_before_execute": ["6.3 plan creation (no-overwrite, one)", "6.3 plan review (read-only)", "6.3 execute once via wrapper", "6.3 strict replay once", "6.4 gates", "6.5 documentation"]
+}
