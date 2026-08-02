@@ -899,3 +899,45 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - Polar numerical comparison remains blocked: results/ is empty in this
   checkout and polar_existing imports are historical, non-frame-identical,
   leakage NaN. No Polar-vs-v5 numeric claim is supportable. [repo-observed]
+
+## 32. Nonbinary LDPC v5 Multistage Change Terminated — Four Routes Non-Promoted (2026-08-02)
+- The v5 multistage change (formal-nonbinary-ldpc-v5-multistage-ir) ran all four
+  pre-registered routes A/B/C/D, each planned once, executed once, and strictly
+  replay-verified once; every route hit the same p=.30 tail pattern
+  (promotion gates p=.20 128/128, p=.30 127/128) and is `promoted=false`.
+  Per task 7.4 the change terminates with four immutable non-promoted
+  packages: 20260731_v5a_nbldpc_multistage_synthetic (three-level warm IR),
+  20260731_v5b_nbldpc_mother_synthetic (NBLDPC5B mother, zero w2/w3),
+  20260731_v5c_nbldpc_decoder_synthetic (sched/EMS decoders),
+  20260731_v5d_nbldpc_post_synthetic (list L=2 x top-8 + ADMM rho=1.0
+  <=50-iteration post-processing over the v5c decoders). [repo-observed]
+- Route D execution (HEAD 192f455): run_status=completed, readiness true,
+  512 outcomes; strict replay returned {'verified': True,
+  'run_status': 'completed', 'promoted': False} with an unchanged worktree.
+  Evidence: evidence/v5d_acceptance_d1_d2.json and v5d_acceptance_c3_c4.json. [repo-observed]
+- Route D implementation corrections (main-thread approved, recorded in the
+  module docstring and decision-log 2026-08-02): the frozen x-update prior
+  term sign was wrong (+prior/RHO; correct is x = z - lambda - prior/rho) —
+  a q=4 brute-force experiment showed recovery 0% -> 87-100% after the fix;
+  and the frozen z-update alternating projection onto {simplex AND
+  output-sum=e_s} is a strict subset of the GF(q) check polytope (it forces
+  all output symbols to s) and could not recover codewords — replaced by the
+  per-bit parity-relaxation projection (bitwise-XOR linearization), 100%
+  exact recovery in the same experiment. A _V5D_BY_V5C reverse map fixes the
+  production trigger (post.start delegates v5c and the state carries the v5c
+  policy id). [decision]
+- Procedural deviation recorded: the v5d 7.3 plan was created before the
+  D1/D2 acceptance evidence file; closed read-only at the same HEAD with the
+  plan unchanged (see v5d_acceptance_d1_d2.json). [repo-observed]
+- Bounds: list L=2, top-8 symbols, exactly 64 candidates, at most one round,
+  syndrome filter; ADMM rho=1.0, <=50 iterations, deterministic init, no
+  random source; verification cap 3; no additional syndrome/tag disclosure. [repo-observed]
+- N4, sidecar access, .ttbin processing, real-data qualification, and any
+  comparison claim remain locked. A nonbinary successor requires a new
+  OpenSpec change with fresh development and confirmation data; neither
+  codebook redesign (B), decoder-family change (C), nor list/ADMM post (D)
+  closed the p=.30 tail at the 128/128 floor. [decision]
+- Reusable process lesson (already recorded at section 30): official roots
+  existing in the shared output root make the same-run-id lane test suite
+  self-conflict on identity freshness; that is the designed anti-replay
+  guard, not a regression. [repo-observed]

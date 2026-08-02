@@ -188,7 +188,7 @@
   (2026-08-02: final handoff — Route A/B/C/D all non-promoted
   (p=.20 128/128, p=.30 127/128 pattern on every route); change terminates
   with four immutable non-promoted packages; N4/real-data remain locked.)
-- [ ] 8.2 (V5-M1) Perform mandatory memory triage.
+- [x] 8.2 (V5-M1) Perform mandatory memory triage.
 
 ## Verification Notes
 - Route A executed once (512 outcomes, run_status=completed). Readiness true (both strata >=63/64). Promotion p=.20 128/128, p=.30 127/128 -> promoted=false. Strict replay attempted once, blocked by external git HEAD drift (71bda20d -> 3a5d96a, unrelated commits); source hashes match. Decision logged 2026-08-01.
