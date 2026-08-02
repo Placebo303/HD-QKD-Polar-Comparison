@@ -1108,3 +1108,59 @@ repository worktree status was unchanged by the replay.
   at-most-once action.
 
 ---
+
+### 2026-08-02: Retain nonbinary LDPC v5d Route D synthetic non-promotion; v5 change terminates
+
+**Decision**: Retain the sole completed v5d post-processing package at
+`comparison_bench/outputs_comparison/formal_ir_methods/20260731_v5d_nbldpc_post_synthetic`
+as immutable non-promotion evidence. Do not rerun or tune. Per the frozen
+rule (task 7.4), with all four routes non-promoted the v5 multistage change
+terminates with four immutable non-promoted packages; N4, sidecars,
+`.ttbin`, real-data, and comparison claims remain locked.
+
+**Context**: The frozen plan (run ID `20260731_v5d_nbldpc_post_synthetic`,
+NBLDPC5B codebook via v5c delegation, dual policies
+`nbldpc_v5d_sched_post`/`nbldpc_v5d_ems_post`, roots 202607840000-
+202607870000, 128 frames, 640 development Toeplitz seeds, caps and gates
+unchanged from the shared v5 contract) executed once with
+`run_status=completed` and readiness true; confirmation material was
+atomically materialized and executed. Promotion gates: p=.20 128/128,
+p=.30 127/128 (one retained confirmation-frame `decode_failed`),
+prohibited failures zero, so `promoted=false`. The pre-registered strict
+read-only replay completed once and returned
+`{'verified': True, 'run_status': 'completed', 'promoted': False}` with an
+unchanged worktree.
+
+Implementation corrections were approved and recorded during D1/D2
+(module docstring + Verification Notes): the frozen x-update prior-term
+sign was wrong (`+ prior/RHO`; correct proximal is `x = z - lambda -
+prior/rho`) — a q=4 brute-force experiment showed codeword recovery jump
+from ~0% to 87-100% after the fix; and the frozen z-update alternating
+projection onto `{per-variable simplex AND output-sum = e_s}` is a strict
+subset of the GF(q) check polytope and could not recover codewords — it
+was replaced by the per-bit parity-relaxation projection (bitwise-XOR
+linearization), which reached 100% exact recovery in the same experiment
+(clean and noisy beliefs). A procedural deviation was also recorded: the
+7.3 plan was created before the D1/D2 acceptance evidence file; it was
+closed read-only at the same HEAD with the plan unchanged.
+
+**Alternatives considered**:
+- Promote on 127/128 in the p=.30 tail: rejected; the frozen floor is
+  128/128 in both strata and no-rerun/no-tuning rules remain intact.
+- Continue Route D tuning (larger list, more ADMM iterations): rejected;
+  the list and ADMM bounds are frozen and confirmation is sealed evidence.
+- Extend the change with a fifth route: rejected; the pre-registered
+  stop rule terminates at four non-promoted routes.
+
+**Consequences**:
+- The eight-artifact package is immutable; no rerun or confirmation tuning
+  is authorized.
+- The v5 multistage change terminates: Routes A, B, C, D are all
+  non-promoted with the same p=.30 tail pattern (127/128). Neither codebook
+  redesign (B), decoder-family change (C), nor list/ADMM post-processing
+  (D) closed the p=.30 tail at the 128/128 floor.
+- N4, sidecar access, `.ttbin` processing, real-data qualification, and any
+  comparison claim remain locked; a successor requires a new OpenSpec
+  change with fresh development and confirmation data.
+- The strict replay remains an at-most-once action; any later replay
+  requires a matching-HEAD window.

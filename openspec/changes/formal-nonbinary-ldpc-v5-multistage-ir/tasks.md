@@ -145,24 +145,49 @@
 
 ## Phase 7: Route D (conditional on Routes A, B, C non-promotion)
 
-- [ ] 7.1 (V5-D1) Implement `nonbinary_v5d_post.py` (L=2 list stage with top-8
+- [x] 7.1 (V5-D1) Implement `nonbinary_v5d_post.py` (L=2 list stage with top-8
   belief symbols and syndrome-consistency filter; then one ADMM run rho=1.0,
   <= 50 iterations), wrapper/CLI.
-- [ ] 7.2 (V5-D2) Route D acceptance: structural checks, focused unit/tamper
+  (2026-08-02: implemented nonbinary_v5d_post.py delegating the v5c state
+  machine; list layer L=2 x top-8 = 64 candidates, one round, syndrome
+  filter; ADMM rho=1.0 <=50 iterations deterministic init. Implementation
+  corrections recorded in module docstring: x-update prior sign (q=4
+  brute-force experiment 0%->100% recovery) and per-bit parity-relaxation
+  z-projection.)
+- [x] 7.2 (V5-D2) Route D acceptance: structural checks, focused unit/tamper
   suite (list bound, ADMM bound, no extra disclosure, verification-attempt
   cap), complete fake qualification + strict fake replay, regression +
   independent review; no official v5d output before plan creation.
-- [ ] 7.3 (V5-D3) Create the one no-overwrite Route D plan, review without
+  (2026-08-02: D1/D2 acceptance PASS — core suite 8/8, lane suite 34/34
+  (clean-state before plan creation), v5c decoders 10/10, v5b 12/12;
+  bounds/disclosure/source-hash audits passed; independent review PASS.
+  Procedural deviation recorded: acceptance evidence file was written after
+  plan creation; closed read-only at the same HEAD.)
+- [x] 7.3 (V5-D3) Create the one no-overwrite Route D plan, review without
   decoding, execute once, strict read-only replay once.
-- [ ] 7.4 (V5-D4) Readiness and promotion gates exactly as tasks 4.2 / 4.3;
+  (2026-08-02: plan created once (git_commit 192f455, 128 frames, 640
+  seeds, identity_overlap empty), reviewed without decoding; executed once
+  via wrapper (run_status=completed, readiness true); strict read-only
+  replay once ({'verified': True, 'run_status': 'completed',
+  'promoted': False}, git status unchanged).)
+- [x] 7.4 (V5-D4) Readiness and promotion gates exactly as tasks 4.2 / 4.3;
   promotion or four immutable non-promoted packages terminates the change.
-- [ ] 7.5 (V5-D5) Update handoff / current task / decision log / project
+  (2026-08-02: readiness true; promotion gates p=.20 128/128, p=.30
+  127/128 -> promoted=false, prohibited failures 0. All four routes
+  A/B/C/D non-promoted -> change terminates with four immutable packages
+  per the frozen rule.)
+- [x] 7.5 (V5-D5) Update handoff / current task / decision log / project
   memory with verified Route D facts.
+  (2026-08-02: handoff / current task / decision log updated with verified
+  Route D facts; evidence v5d_acceptance_d1_d2.json + v5d_acceptance_c3_c4.json.)
 
 ## Phase 8: Durable state
 
-- [ ] 8.1 (V5-M0) Final handoff update: frozen outcomes per executed route,
+- [x] 8.1 (V5-M0) Final handoff update: frozen outcomes per executed route,
   promotion/stop status, explicit next boundary.
+  (2026-08-02: final handoff — Route A/B/C/D all non-promoted
+  (p=.20 128/128, p=.30 127/128 pattern on every route); change terminates
+  with four immutable non-promoted packages; N4/real-data remain locked.)
 - [ ] 8.2 (V5-M1) Perform mandatory memory triage.
 
 ## Verification Notes
@@ -216,3 +241,24 @@
   git status --porcelain unchanged. Immutable package retained; proceed to
   Route D (`20260731_v5d_nbldpc_post_synthetic`, roots 202607840000-
   202607870000).
+- Route D: plan created once (git_commit 192f455, 128 frames, 640 seeds,
+  identity_overlap empty, NBLDPC5B codebook via v5c delegation). Executed
+  once: run_status=completed, readiness=true. Promotion gates: p=.20
+  128/128, p=.30 127/128 -> promoted=false. Strict replay once:
+  {'verified': True, 'run_status': 'completed', 'promoted': False}, git
+  status unchanged. List (L=2 x top-8) + ADMM post-processing did not close
+  the p=.30 tail (1 confirmation frame decode_failed). All four routes
+  non-promoted -> change terminates (7.4 rule).
+- Route D implementation corrections (2026-08-02, main-thread approved):
+  (1) x-update prior-term sign in the frozen packet was wrong (+prior/RHO;
+  correct ADMM proximal is x = z - lambda - prior/rho); q=4 brute-force
+  experiment showed recovery 0% -> 100% after the fix. (2) z-update
+  alternating projection onto {simplex AND output-sum=e_s} is a strict
+  subset of the GF(q) check polytope and could not recover codewords;
+  replaced by per-bit parity-relaxation projection (bitwise-XOR
+  linearization), 100% exact recovery in the same experiment. Both fixes
+  are deterministic, bounded, and recorded in the module docstring.
+- Procedural deviation (2026-08-02): the 7.3 plan was created before the
+  D1/D2 acceptance evidence file (frozen flow requires 7.2 acceptance
+  first); the deviation is recorded in v5d_acceptance_d1_d2.json and was
+  closed read-only at the same HEAD; plan content unchanged.

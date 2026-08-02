@@ -311,3 +311,28 @@ confirmation tuning is authorized. Route D is next
 (`20260731_v5d_nbldpc_post_synthetic`, roots 202607840000-202607870000,
 list stage L=2 + one ADMM run per task 1.6; implementation starts at
 task 7.1).
+
+## NBLDPC v5 Route D Final Outcome (2026-08-02)
+
+Change `formal-nonbinary-ldpc-v5-multistage-ir` executed Route D once:
+`20260731_v5d_nbldpc_post_synthetic` (NBLDPC5B via v5c delegation, dual
+policies `nbldpc_v5d_sched_post` / `nbldpc_v5d_ems_post`, list L=2 x top-8
++ ADMM rho=1.0 post-processing), `run_status=completed`, readiness true,
+`promoted=False`.
+
+- Promotion gates: p=.20 128/128, p=.30 127/128 (one retained
+  confirmation-frame `decode_failed`) — the same p=.30 tail pattern as
+  Routes A, B, C.
+- The pre-registered strict read-only replay completed once and returned
+  `{'verified': True, 'run_status': 'completed', 'promoted': False}`;
+  `git status --porcelain` unchanged.
+- Implementation corrections recorded: x-update prior sign and per-bit
+  parity-relaxation z-projection (q=4 brute-force verified; see
+  decision-log 2026-08-02 and module docstring).
+
+With all four routes non-promoted, the v5 multistage change **terminates**
+per task 7.4 with four immutable non-promoted packages
+(20260731_v5a/v5b/v5c/v5d_nbldpc_*_synthetic). No rerun, tuning, N4,
+sidecar, `.ttbin`, real-data, or comparison claim is authorized. A
+successor must be a new OpenSpec change with fresh development and
+confirmation data.

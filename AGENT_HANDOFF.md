@@ -1296,3 +1296,27 @@ Run only focused disposable tests/static checks for the new audit CLI, review th
   202607840000-202607870000 (list stage L=2 + one ADMM run, task 1.6),
   after Route D implementation and acceptance tasks 7.1-7.2.
 
+## Nonbinary LDPC v5 Route D Final Outcome; v5 Change Terminated (2026-08-02)
+
+- Immutable package:
+  `comparison_bench/outputs_comparison/formal_ir_methods/20260731_v5d_nbldpc_post_synthetic/`.
+  Plan, execute, and strict read-only replay each ran exactly once at HEAD
+  192f455; the replay returned `verified=True`, `run_status=completed`,
+  `promoted=False` and changed no worktree entries.
+- Promotion gates: p=.20 128/128, p=.30 127/128 (one retained
+  confirmation-frame `decode_failed`); prohibited failures zero.
+- Route D = list (L=2 least-certain x top-8 symbols = 64 candidates, one
+  round, syndrome filter) then one bounded ADMM (rho=1.0, <=50 iterations,
+  deterministic init) over the v5c decoders, with no additional syndrome
+  disclosure. Implementation corrections (x-update prior sign; per-bit
+  parity-relaxation z-projection) were approved and recorded; q=4
+  brute-force golden tests pass 100%.
+- All four v5 routes (A/B/C/D) are non-promoted with the same p=.30 tail
+  pattern (127/128); the v5 multistage change terminates with four
+  immutable non-promoted packages. N4, sidecars, `.ttbin`, real data, and
+  comparison claims remain locked. A successor requires a new OpenSpec
+  change with fresh development and confirmation data.
+- Evidence: openspec/changes/formal-nonbinary-ldpc-v5-multistage-ir/evidence/
+  v5d_acceptance_d1_d2.json and v5d_acceptance_c3_c4.json; decision-log
+  entry 2026-08-02.
+
