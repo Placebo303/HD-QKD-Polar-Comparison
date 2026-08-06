@@ -229,7 +229,7 @@ Only after V10-50 canary gate PASS — condition not met.
   tensions.
 - [x] **V10-70.7** S4 delta correction record (evidence/v10_s4_delta_correction.json; script build_evidence expression fixed)
 - [x] **V10-70.8** Establish precise Git provenance: scoped local commit of V10 artifacts (change dir, V10 modules, V10 tests), provenance evidence file; no push.
-- [ ] **V10-70.9** Archive the V10 change to openspec/changes/archive/2026-08-06-formal-nonbinary-ldpc-v10-de-peg-fftqspa/ (no spec sync; failed_ensemble).
+- [x] **V10-70.9** Archive the V10 change to openspec/changes/archive/2026-08-06-formal-nonbinary-ldpc-v10-de-peg-fftqspa/ (no spec sync; failed_ensemble).
 
 ---
 
