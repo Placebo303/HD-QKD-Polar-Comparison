@@ -1,0 +1,57 @@
+{
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "condition_arithmetic": {
+    "S1_robust_p20": "conservative >= 0.22",
+    "S2_target_p20": "conservative >= 0.215",
+    "S3_robust_p30": "conservative >= 0.32",
+    "S4_target_p30": "conservative >= 0.32",
+    "failed_ensemble_if": "S1 < 0.22 OR S3 < 0.32",
+    "robust_only_if": "S1 >= 0.22 AND S3 >= 0.32, but S2 < 0.215 OR S4 < 0.32",
+    "target_ready_if": "all four pass"
+  },
+  "final_confirmation_note": "Mechanical gate computation from the frozen v10a_plan gate reconstruction. final confirmation requires main-thread acceptance; acceptance is NOT self-granted by the implementation operator.",
+  "next_step": "ALL stop; ordinary_irregular_GF1024 = failed_v10a; NO finite codebook, NO PEG, NO decoder, NO canary; successor: new V11 NB-SC-LDPC change (fresh everything); write evidence and STOP",
+  "no_tuning_statement": "After formal V10A results exist, the budget MUST NOT change: no rerun, no parameter/budget/seed/gate/cap modification, no 'closest to gate' selection from a failed search. All failed evidence is retained immutably.",
+  "operator_role": "implementation operator (coder-fast)",
+  "overall_decision_branch": "failed_ensemble",
+  "per_search_gates": [
+    {
+      "arithmetic": "conservative >= gate",
+      "conservative_threshold": 0.21531250000000002,
+      "delta": -0.004687499999999983,
+      "gate": 0.22,
+      "reason": "conservative 0.21531250000000002 < gate 0.22",
+      "search_id": "S1",
+      "verdict": "FAIL"
+    },
+    {
+      "arithmetic": "conservative >= gate",
+      "conservative_threshold": 0.19843750000000002,
+      "delta": -0.01656249999999998,
+      "gate": 0.215,
+      "reason": "conservative 0.19843750000000002 < gate 0.215",
+      "search_id": "S2",
+      "verdict": "FAIL"
+    },
+    {
+      "arithmetic": "conservative >= gate",
+      "conservative_threshold": 0.31656249999999997,
+      "delta": -0.0034375000000000377,
+      "gate": 0.32,
+      "reason": "conservative 0.31656249999999997 < gate 0.32",
+      "search_id": "S3",
+      "verdict": "FAIL"
+    },
+    {
+      "arithmetic": "conservative >= gate",
+      "conservative_threshold": null,
+      "delta": false,
+      "gate": 0.32,
+      "reason": "no eligible (tier-1 converged) candidate at the gate p",
+      "search_id": "S4",
+      "verdict": "FAIL"
+    }
+  ],
+  "schema": "v10a_gate_v1",
+  "stage": "V10A ensemble gate (mechanical; main-thread acceptance required)"
+}

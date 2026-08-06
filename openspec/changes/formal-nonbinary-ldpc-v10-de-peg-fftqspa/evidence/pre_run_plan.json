@@ -1,0 +1,120 @@
+{
+  "schema": "v10_pre_run_plan_v1",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "frozen_at_utc": "2026-08-05T14:56:39Z",
+  "frozen_by": "implementation operator (coder-fast) per AMEND-2026-08-05-01; main-thread plan review required before formal execution",
+  "amendment_ref": "AMEND-2026-08-05-01",
+  "freeze_statement": "Frozen BEFORE any formal scientific result (V10-10). This plan must NOT be modified after any formal result exists. Budgets, seeds, gates, caps and objective are immutable once formal data arrive. Revised per main-thread plan review REJECT (pop_size/max_gen raised from microbenchmark timing config to a scientifically adequate search using the full 600-evaluation screen budget); frozen again before any formal result.",
+  "de_variant": "DE/rand/1/bin",
+  "pop_size": 20,
+  "max_gen": 29,
+  "F": 0.5,
+  "CR": 0.9,
+  "K": 8,
+  "degree_range": [2, 40],
+  "min_weight": 0.01,
+  "screen_n_samples": 500,
+  "screen_max_iter": 100,
+  "refinement_n_samples": 2000,
+  "refinement_max_iter": 100,
+  "threshold_p_tol": 0.002,
+  "threshold_p_lo": 0.01,
+  "threshold_p_hi": 0.49,
+  "search_seeds": {
+    "S1": 2026100201,
+    "S2": 2026100202,
+    "S3": 2026100203,
+    "S4": 2026100204
+  },
+  "validation_seeds": [2026100211, 2026100212, 2026100213, 2026100214, 2026100215],
+  "max_total_evaluations": 2400,
+  "screen_cap_per_search": 600,
+  "refinement_cap": 12,
+  "peak_rss_cap_b": 3221225472,
+  "workers": 1,
+  "objective": "hierarchical_6tier_lexicographic",
+  "gates": {
+    "S1_robust_p20": 0.22,
+    "S2_target_p20": 0.215,
+    "S3_robust_p30": 0.32,
+    "S4_target_p30": 0.32
+  },
+  "v10_0_gate_parameters": {
+    "q": 4,
+    "rate": 0.75,
+    "det_target": 0.069,
+    "tolerance": 0.012,
+    "n_samples": 100000,
+    "max_iter": 150,
+    "p_lo": 0.01,
+    "p_hi": 0.12,
+    "p_tol": 0.0025,
+    "entropy_tol": 0.01,
+    "streak": 20
+  },
+  "hard_stop_rules": [
+    "V10-S01: V10-0 fails q=4 reference recovery (|threshold-0.069| > 0.012)",
+    "V10-S02: V10A robust gates fail (S1 < 0.22 or S3 < 0.32)",
+    "V10-S03: planned or formal seed overlap detected",
+    "V10-S04: tuning after formal results needed",
+    "V10-S05: peak process-tree RSS > 3 GiB",
+    "V10-S06: single execute > 24 h predicted (this plan estimates 7.7 h worst-case)",
+    "V10-S07: production decoder accesses Alice truth",
+    "V10-S08: evidence overwritten",
+    "V10-S09: reviewer-go REJECT",
+    "V10-S10: canary stratum < 3/4 verified",
+    "V10-S11: development stratum < 15/16 verified"
+  ],
+  "output_paths": {
+    "evidence_root": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/",
+    "v10_0_q4_reference_recovery": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_0_q4_reference_recovery.json",
+    "v10a_plan": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_plan.json",
+    "v10a_execute_results": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_execute_results.json",
+    "v10a_replay_evidence": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_replay_evidence.json",
+    "v10a_gate_decision": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_gate_decision.json",
+    "workspace_root": "workspace/v10a_execute/<uuid>/",
+    "search_checkpoints": "workspace/v10a_execute/<uuid>/search_{S1,S2,S3,S4}/checkpoint_gen_*.json",
+    "search_complete_marker": "workspace/v10a_execute/<uuid>/search_{S1,S2,S3,S4}/run_complete.json"
+  },
+  "estimated_execute_hours": 7.7,
+  "estimation_arithmetic": {
+    "base_seconds_per_eval_at_500_30": 1.181153864999942,
+    "measured_at": "v10_microbenchmark2.json (numba njit kernels, AMEND-2026-08-05-01)",
+    "scaling_formula": "eval_sec(ns, mi) = base * (ns/500) * (mi/30), worst-case (every eval runs the full max_iter)",
+    "screen": {
+      "evals": 2400,
+      "detail": "4 searches x screen_cap_per_search 600 (hard cap; includes DE init/generations + post-screen threshold probes)",
+      "config": "(n_samples=500, max_iter=100)",
+      "eval_seconds": 3.9372,
+      "hours": 2.625
+    },
+    "refinement": {
+      "evals": 288,
+      "detail": "4 searches x up to 12 refinement candidates x 6 binary-search probes (approved task arithmetic)",
+      "config": "(n_samples=2000, max_iter=100)",
+      "eval_seconds": 15.7487,
+      "hours": 1.260
+    },
+    "validation": {
+      "evals": 864,
+      "detail": "4 searches x up to 12 refinement candidates x 3 validation seeds x 6 binary-search probes (approved task arithmetic)",
+      "config": "(n_samples=2000, max_iter=100)",
+      "eval_seconds": 15.7487,
+      "hours": 3.780
+    },
+    "total_seconds": 27591.8,
+    "total_hours": 7.664,
+    "headroom_vs_24h": "16.3 h"
+  },
+  "budget_rationale": {
+    "screen_n_samples_500": "Microbenchmark-validated screen resolution (v10_microbenchmark.json #1 and #2); 500 samples at q=1024 fit the RSS cap with wide margin (measured peak 222 MiB)",
+    "screen_max_iter_100": "Scientific sufficiency bottom line per approved task: GF(1024) p=.20 MC-DE measured convergence ~55-80 iterations at n_samples=500 (amendment trigger); max_iter=100 gives >=25% margin over the 80-iteration observation",
+    "refinement_n_samples_2000": "Final threshold estimates feed the S1-S4 gate decision, so they use 4x the screen sample count (2000) for statistical reliability; 2000x1024x8B = 16 MiB per message array, RSS-safe",
+    "refinement_max_iter_100": "Same convergence margin as the screen",
+    "threshold_p_tol_0.002": "Frozen binary-search tolerance (0.002 < V10-0 q=4 tolerance 0.012; gate decisions at 0.22/0.215/0.32 require finer-than-gate resolution)",
+    "pop_gen_F_CR": "pop=20, gen=29, F=0.5, CR=0.9: 20 (init) + 20x29 (offspring) = 600 evaluations per search, exactly the screen_cap_per_search=600 hard cap; DE/rand/1/bin (requires pop>=4, 20 satisfies); 16-dim search space (8 degree + 8 weight logit) at 600 evals is the practical maximum under the cap",
+    "max_total_evaluations_2400": "Screen budget = 600 x 4 searches (hard cap). Refinement (<=288 worst-case) and validation (<=864 worst-case) evaluations are separately bounded by refinement_cap 12 and the validation-seed pool",
+    "sensitivity_notes": "Using all 5 validation seeds instead of 3 raises the estimate to ~10.2 h; using the full default-range binary search (8 probes, p_lo=0.01 p_hi=0.49) raises it to ~9.3 h; both remain below the 24 h hard limit",
+    "peak_rss_headroom": "Measured process-tree peak RSS 233,103,360 B (222 MiB) at (500,30); screen (500,100) and refinement (2000,100) stay far below the frozen 3 GiB cap"
+  }
+}

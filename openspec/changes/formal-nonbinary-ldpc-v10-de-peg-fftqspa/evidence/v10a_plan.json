@@ -1,0 +1,205 @@
+{
+  "schema": "v10_v10a_plan_v1",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "frozen_at_utc": "2026-08-05T23:00:00Z",
+  "frozen_by": "implementation operator (coder-fast); main-thread review required before formal execution",
+  "stage": "V10-20 (V10A GF(1024) four-search ensemble gate)",
+  "precondition": "V10-0 gate PASS per evidence/v10_0_gate_main_thread_acceptance.json (verdict PASS 2026-08-05T22:00:00Z; advance to V10-20 authorized)",
+  "freeze_statement": "Plan-only package freezing all four V10A searches, per-design budgets, disjoint optimization/validation seeds, screen/refinement protocol and gate reconstruction, per V10-20.2. Formal execution runs ONLY after independent read-only plan review ACCEPT (V10-20.3). This plan must NOT be modified after any formal V10A result exists (no_tuning_statement below).",
+
+  "pre_run_plan_ref": {
+    "path": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/pre_run_plan.json",
+    "sha256": "3c99c08395c7c192f32708ce1a6f5a2b9794a64de0cabe3c3188fc9f65145726",
+    "binding": "Execution scripts MUST verify pre_run_plan.json sha256 equals the frozen value above and refuse to run on mismatch. All budgets/seeds/gates/caps below are bound to that frozen document."
+  },
+
+  "scientific_contract": {
+    "q": 1024,
+    "n": 1024,
+    "rate_m_domain": "continuous (per V10A plan instruction): m_over_n = f * H_q(p), R = 1 - m_over_n, with H_q(p) = (h2(p) + p*log2(q-1)) / log2(q) — computed from the formula at plan time and frozen here; NEVER hard-coded.",
+    "m_formula_note": "Finite-length m for V10B (design section 8) remains m(f,p,n) = ceil(f * H_q(p) * n) at n=4096; the continuous q=1024/n=1024 values frozen here are the V10A gate/lane quantities.",
+    "de_variant": "DE/rand/1/bin",
+    "pop_size": 20,
+    "max_gen": 29,
+    "F": 0.5,
+    "CR": 0.9,
+    "K": 8,
+    "degree_range": [2, 40],
+    "min_weight": 0.01,
+    "objective": "hierarchical_6tier_lexicographic",
+    "entropy_tol": 0.01,
+    "entropy_streak": 20
+  },
+
+  "searches": [
+    {
+      "id": "S1",
+      "p": 0.2,
+      "f": 1.15,
+      "tier": "robust",
+      "gate": 0.22,
+      "seed": 2026100201,
+      "rate_m": {
+        "q": 1024,
+        "n": 1024,
+        "formula": "m_over_n = f * H_q(p); R = 1 - m_over_n; H_q(p) = (h2(p) + p*log2(q-1))/log2(q)",
+        "H_q_p": 0.27216461808364284,
+        "m_over_n": 0.31298931079618925,
+        "R": 0.6870106892038108
+      }
+    },
+    {
+      "id": "S2",
+      "p": 0.2,
+      "f": 1.08,
+      "tier": "target",
+      "gate": 0.215,
+      "seed": 2026100202,
+      "rate_m": {
+        "q": 1024,
+        "n": 1024,
+        "formula": "m_over_n = f * H_q(p); R = 1 - m_over_n; H_q(p) = (h2(p) + p*log2(q-1))/log2(q)",
+        "H_q_p": 0.27216461808364284,
+        "m_over_n": 0.2939377875303343,
+        "R": 0.7060622124696657
+      }
+    },
+    {
+      "id": "S3",
+      "p": 0.3,
+      "f": 1.15,
+      "tier": "robust",
+      "gate": 0.32,
+      "seed": 2026100203,
+      "rate_m": {
+        "q": 1024,
+        "n": 1024,
+        "formula": "m_over_n = f * H_q(p); R = 1 - m_over_n; H_q(p) = (h2(p) + p*log2(q-1))/log2(q)",
+        "H_q_p": 0.3880868028154292,
+        "m_over_n": 0.44629982323774353,
+        "R": 0.5537001767622565
+      }
+    },
+    {
+      "id": "S4",
+      "p": 0.3,
+      "f": 1.08,
+      "tier": "target",
+      "gate": 0.32,
+      "seed": 2026100204,
+      "rate_m": {
+        "q": 1024,
+        "n": 1024,
+        "formula": "m_over_n = f * H_q(p); R = 1 - m_over_n; H_q(p) = (h2(p) + p*log2(q-1))/log2(q)",
+        "H_q_p": 0.3880868028154292,
+        "m_over_n": 0.41913374704066353,
+        "R": 0.5808662529593365
+      }
+    }
+  ],
+
+  "validation_seeds": [2026100211, 2026100212, 2026100213, 2026100214, 2026100215],
+
+  "screen_protocol": {
+    "description": "Per search, one deterministic DE/rand/1/bin run evaluates candidates at the gate p (tier-1 eligibility screen).",
+    "de_budget": {
+      "variant": "DE/rand/1/bin",
+      "pop_size": 20,
+      "max_gen": 29,
+      "F": 0.5,
+      "CR": 0.9,
+      "evaluation_cap_per_search": 600,
+      "evaluation_arithmetic": "20 (initial population) + 20 x 29 (offspring) = 600 evaluations per search, exactly the frozen screen cap",
+      "screen_eval_config": {"n_samples": 500, "max_iter": 100}
+    },
+    "tier1_eligibility": {
+      "criterion": "entropy_converged at gate p: mean base-q check-message entropy < 0.01 for 20 consecutive iterations",
+      "ineligible_handling": "non-converged (or structurally invalid / NaN-Inf penalized) candidates receive sentinel maxima and are excluded from the gate screen; no threshold proxy is computed for them"
+    },
+    "refinement_budget": {
+      "n_samples": 2000,
+      "max_iter": 100,
+      "p_tol": 0.002,
+      "p_lo": 0.01,
+      "p_hi": 0.49
+    },
+    "refinement_selection": {
+      "cap": 12,
+      "rule": "only eligible candidates enter the threshold binary search; refinement candidates are the top 12 eligible candidates ranked by threshold proxy computed with the optimization seed (max), canonical (d0..d7, lambda0..lambda7) ascending tuple as tie-break"
+    }
+  },
+
+  "winner_selection": {
+    "rule": "search winner = refinement candidate with maximum threshold proxy (computed with the optimization seed); ties broken by canonical (d0..d7, lambda0..lambda7) ascending lexicographic tuple",
+    "no_closest_to_gate": "Do NOT select a 'closest to gate' candidate from a failed search (design section 8)"
+  },
+
+  "validation_protocol": {
+    "description": "The winner of each search is validated on all 5 independent validation seeds (V10-20.4 uses the full validation_seeds list; >= 3 required).",
+    "per_seed_procedure": "full deterministic binary search with the refinement budget (n_samples=2000, max_iter=100, p_tol=0.002, p_lo=0.01, p_hi=0.49), one frozen seed per validation run",
+    "conservative_threshold": "min over the per-seed threshold proxies of the seeds used (all 5 for V10-20.4)"
+  },
+
+  "gate_reconstruction": {
+    "rule": "For each search, compare the search's conservative threshold (winner, min over per-seed validation thresholds) against the per-search gate.",
+    "gates": {
+      "S1_robust_p20": 0.22,
+      "S2_target_p20": 0.215,
+      "S3_robust_p30": 0.32,
+      "S4_target_p30": 0.32
+    },
+    "decision_branches": [
+      {
+        "condition": "S1 < 0.22 OR S3 < 0.32",
+        "outcome": "failed_ensemble",
+        "action": "ALL stop; ordinary_irregular_GF1024 = failed_v10a; NO finite codebook, NO PEG, NO decoder, NO canary; successor: new V11 NB-SC-LDPC change (fresh everything); write evidence and STOP"
+      },
+      {
+        "condition": "S1 >= 0.22 AND S3 >= 0.32, but S2 < 0.215 OR S4 < 0.32",
+        "outcome": "robust_only",
+        "action": "Finite-length lane uses f=1.15 only; label all artifacts efficiency_target_not_met; forbid target_efficiency claims"
+      },
+      {
+        "condition": "all four pass (S1 >= 0.22 AND S2 >= 0.215 AND S3 >= 0.32 AND S4 >= 0.32)",
+        "outcome": "target_ready",
+        "action": "Finite-length lane uses f=1.08; f=1.15 backup frozen (not run)"
+      }
+    ],
+    "evidence": "per-search eligibility (all candidates, entropy at gate p), threshold proxy per refinement candidate, per-validation-seed threshold, conservative threshold, winner identity, timing/RSS"
+  },
+
+  "runtime_estimation": {
+    "ref": "pre_run_plan.json estimated_execute_hours = 7.7 (worst-case)",
+    "note": "Worst-case estimate bound covers screen (4 x 600 evals), refinement (4 x up to 12 candidates x binary-search probes) and validation (winner x 5 seeds x binary-search probes) under the frozen per-eval timings; remains below the V10-S06 24 h hard limit"
+  },
+
+  "hard_caps": {
+    "screen_evals_per_search": 600,
+    "refinement_candidates": 12,
+    "peak_rss_b": 3221225472,
+    "workers": 1,
+    "max_total_evaluations": 2400,
+    "note": "max_total_evaluations 2400 = 4 searches x 600 screen evals (hard cap); refinement (<= 288 worst-case) and validation evaluations are separately bounded by refinement_cap 12 and the validation-seed pool, per pre_run_plan budget_rationale"
+  },
+
+  "no_overlap_statement": {
+    "claim": "All V10A optimization seeds (2026100201..2026100204) and validation seeds (2026100211..2026100215) are disjoint from every prior V8, V9, V10-0 and microbenchmark seed.",
+    "v8": "V8 uses prefix 20260804xx (occupied: 2026080418); V10A range 20261002xx is strictly greater and disjoint",
+    "v9": "V9 uses prefix 20260901xx (occupied up to 2026090113); V10A range 20261002xx is strictly greater and disjoint",
+    "v10_0": "V10-0 q=4 uses optimization 2026100100 and validation 2026100101..2026100103; V10A range 20261002xx is disjoint",
+    "microbenchmark": "microbenchmark seeds 2026100000 (engineering_only_non_scientific); V10A range 20261002xx is disjoint"
+  },
+
+  "output_paths": {
+    "v10a_execute_results": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_execute_results.json",
+    "v10a_replay_evidence": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_replay_evidence.json",
+    "v10a_gate_decision": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_gate_decision.json",
+    "workspace_root": "workspace/v10a_execute/<uuid>/",
+    "search_checkpoints": "workspace/v10a_execute/<uuid>/search_{S1,S2,S3,S4}/checkpoint_gen_*.json",
+    "search_complete_marker": "workspace/v10a_execute/<uuid>/search_{S1,S2,S3,S4}/run_complete.json"
+  },
+
+  "no_tuning_statement": "After formal V10A results exist, the budget MUST NOT change: no rerun, no parameter/budget/seed/gate/cap modification, no 'closest to gate' selection from a failed search. All failed evidence is retained immutably (V10-S04, V10-S08).",
+
+  "review_gate": "V10-20.3: independent read-only plan review required; formal execute runs only after review ACCEPT. On REJECT: revise and re-freeze."
+}

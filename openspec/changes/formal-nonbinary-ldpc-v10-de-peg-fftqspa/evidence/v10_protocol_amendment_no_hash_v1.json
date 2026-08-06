@@ -1,0 +1,83 @@
+{
+  "schema": "v10_protocol_amendment_no_hash_v1",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "date": "2026-08-06",
+  "directive_source": "main-thread instruction to planner agent",
+  "scope": "methodological verification mechanisms only; scientific parameters and completed evidence are immutable",
+  "retained": {
+    "v10_seed": {
+      "status": "retained",
+      "reason": "Deterministic RNG stream derivation primitive, not a defensive hash mechanism. Used by nonbinary_v10_de.py (population init L594, mutation/crossover RNG L821) and nonbinary_v10_peg.py (edge-label seeding). Completed V10-0 and V10A scientific results depend on its exact output. Changing v10_seed would break byte-reproducibility of executed evidence."
+    },
+    "frozen_scientific_parameters": [
+      "all seed integers (2026100201-0204, 2026100211-0215, etc.)",
+      "all gate thresholds (0.22, 0.215, 0.32, 0.32)",
+      "all budgets (pop=20, gen=29, F=0.5, CR=0.9, screen=600, refinement=12)",
+      "all caps (RSS=3GiB, workers=1, n_samples, max_iter, p_tol)",
+      "V10A gate reconstruction logic",
+      "failed_ensemble conclusion (S1 0.2153<0.22, S2 0.1984<0.215, S3 0.3166<0.32, S4 zero eligible)"
+    ],
+    "completed_evidence": [
+      "evidence/v10_freeze_acceptance.json (immutable, contains historical hash annotations)",
+      "evidence/v10_literature_crosswalk.md (immutable)",
+      "evidence/v10_microbenchmark.json (immutable)",
+      "evidence/v10_microbenchmark2.json (immutable)",
+      "evidence/v10_0_q4_reference_recovery.json (immutable)",
+      "evidence/v10_0_gate_main_thread_acceptance.json (immutable)",
+      "evidence/v10_budget_amendment.json (immutable)",
+      "evidence/pre_run_plan.json (immutable)",
+      "evidence/v10a_plan.json (immutable)",
+      "workspace/v10a_execute/217aa87779de4953a5aeeed24f407b1e/execute/ (immutable)",
+      "workspace/v10a_execute/217aa87779de4953a5aeeed24f407b1e/replay/search_S1/ (immutable)"
+    ]
+  },
+  "removed": [
+    {
+      "location": "nonbinary_v10_peg.py L267-271, L511-528",
+      "item": "_tie_hash SHA-256 deterministic tie-break; peg_manifest self-hash and source-hash fields",
+      "replacement": "Seeded numpy RNG deterministic tie-break (rng.permutation); manifest with construction parameters only"
+    },
+    {
+      "location": "workspace/v10a_execute/217aa87779de4953a5aeeed24f407b1e/run_v10a_execute.py L99-100, L192-204, L774-775, L820-851, L854-959",
+      "item": "Hardcoded plan SHA-256 constants; check_plan_binding sha256_file comparisons; run_meta v10a_plan_sha256/pre_run_plan_sha256 fields; compare_dirs per-file sha256 comparison; build_evidence plan_binding hash fields",
+      "replacement": "Field-level plan-binding validation only (L206-311 preserved); run_meta without hash fields; compare_dirs using direct open() byte comparison; build_evidence without hash fields"
+    },
+    {
+      "location": "test_nonbinary_v10_gate.py L64-66, L196-217, L439-446",
+      "item": "_sha256_file helper; strict_replay sha256 comparison; test_t2_fake_promotion_byte_drift sha256 check",
+      "replacement": "Direct open() byte comparison"
+    },
+    {
+      "location": "test_nonbinary_v10_peg.py L187-202",
+      "item": "test_peg_manifest_self_hash: SHA-256 self-hash and source-hash assertions",
+      "replacement": "Parameter-only manifest assertion (verify fields present/absent, no hash keys)"
+    }
+  ],
+  "replacement_verification_mechanisms": {
+    "replay_byte_consistency": "Direct file-content comparison (open() + bytes equality), no intermediate SHA-256",
+    "frozen_baseline_t3": "git status --porcelain + git diff --name-only checking frozen directories (src/, experiments/, tools/, results/) and allowed file manifest",
+    "plan_binding": "Field-level JSON validation (check_plan_binding L206-311 already exists; sha256_file comparisons L195-204 removed)",
+    "tamper_raw_byte_drift": "Direct byte comparison (file content before/after tamper)",
+    "tamper_semantic": "Field-level recomputation: gate reconstruction disagreement, leakage accounting rederivation failure, winner reconstruction mismatch, plan-binding field validation rejection",
+    "tamper_fake_promotion": "Gate reconstruction from raw threshold data (not from hash)"
+  },
+  "new_evidence_no_hash_fields": [
+    "evidence/v10a_execute_results.json (to be created)",
+    "evidence/v10a_replay_evidence.json (to be created)",
+    "evidence/v10a_gate_decision.json (to be created)",
+    "evidence/v10_gate_decision.json (to be created in V10-70)",
+    "evidence/v10_protocol_amendment_no_hash_v1.json (this file)"
+  ],
+  "agents_md_10_1_tension": {
+    "issue": "AGENTS.md §10.1 items 7 and 11 reference hash-based verification ('local self-hashes recomputed', 'hashes for untracked files') which conflicts with the 2026-08-06 main-thread directive to remove defensive hash mechanisms per AGENTS.md §5.7 Research Code Engineering Policy.",
+    "handling": "This tension is noted but not resolved within this change. AGENTS.md revision is a separate change scope. The planner agent records this for main-thread awareness; coder agents implement per the revised tasks.md (no hash fields in new code/evidence). Until AGENTS.md is updated, §10.1 items 7/11 are interpreted as requiring git baseline verification and direct byte comparison — not SHA-256 hashing.",
+    "resolution_required": "Main thread should decide whether to create a separate OpenSpec change to update AGENTS.md §10.1 to remove hash references, or treat the existing text as already overridden by AGENTS.md §5.7."
+  },
+  "replay_handling": {
+    "status": "Pending V10-20.5'",
+    "process": "PID 21032 last polled 2026-08-06T11:50Z at workspace/v10a_execute/217aa87779de4953a5aeeed24f407b1e/replay/. If alive, wait for completion. If dead, restart replay in fresh output directory per interrupted_attempt.json precedent. S1 is byte-deterministic (same seed + same DE = same population trajectory → same transcript).",
+    "verification": "Direct byte comparison of execute/ vs replay/ scientific files. Provenance diffs allowed: run_meta.json (pid/utc/elapsed/peak_rss), search_S{1..4}/run_complete.json (wall_clock_seconds)."
+  },
+  "operator_role": "planner agent; plan artifacts only; no production code written",
+  "ratification": "Main thread must ACCEPT this amendment before coder-fast begins V10-20.CODE.x and V10-20.5'/20.7'/20.8'/20.9' tasks."
+}

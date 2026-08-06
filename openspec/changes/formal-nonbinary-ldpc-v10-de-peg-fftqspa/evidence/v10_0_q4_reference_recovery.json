@@ -1,0 +1,2365 @@
+{
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "gate": {
+    "checks": {
+      "at_least_two_seeds_pass": true,
+      "delta_within_tolerance": true,
+      "rate_error_within_tolerance": true
+    },
+    "conservative_threshold": 0.064140625,
+    "delta_vs_target": 0.004859374999999999,
+    "det_target": 0.069,
+    "passing_seed_count": 3,
+    "per_seed_passes": [
+      true,
+      true,
+      true
+    ],
+    "rate_error": 0.0,
+    "reason": "all gate checks passed",
+    "tolerance": 0.012,
+    "verdict": "PASS"
+  },
+  "gate_decision": {
+    "acceptance": "NOT self-granted; final gate decision requires main-thread confirmation",
+    "all_checks": {
+      "at_least_two_seeds_pass": true,
+      "delta_within_tolerance": true,
+      "rate_error_within_tolerance": true
+    },
+    "at_least_two_seeds_pass": true,
+    "conservative_threshold": 0.064140625,
+    "delta_vs_target": 0.004859374999999999,
+    "delta_within_tolerance": true,
+    "det_target": 0.069,
+    "passing_seed_count": 3,
+    "rate_error": 0.0,
+    "rate_error_within_tolerance": true,
+    "reason": "all gate checks passed",
+    "state_on_fail": "failed_reference (no GF(1024) work)",
+    "tolerance": 0.012,
+    "verdict": "PASS"
+  },
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "initial_population_non_injection": {
+    "assertion": "no initial population member decodes to the published Muller lambda {2:0.107,4:0.245,7:0.192,10:0.034,19:0.207,26:0.161,28:0.049}",
+    "note": "K=8 candidates carry exactly 8 unique degrees; the published lambda has 7 degrees, so structural equality is impossible; the assertion is still evaluated and recorded.",
+    "population_members_checked": 20,
+    "population_source": "init_population(pop_size=20, seed=2026100100)",
+    "published_lambda_entries": 7,
+    "result": "PASS"
+  },
+  "operator_role": "implementation operator (coder-fast); acceptance and scientific gates remain with the main thread; acceptance is NOT self-granted",
+  "per_generation_best": [
+    {
+      "best_index": 5,
+      "best_lambda": {
+        "10": 0.28192086797729776,
+        "11": 0.09923072104730599,
+        "14": 0.10411744116970043,
+        "18": 0.14268992529881225,
+        "2": 0.1273402157899413,
+        "20": 0.014246191757701266,
+        "30": 0.09351958389818793,
+        "4": 0.13693505306105308
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          10,
+          11,
+          14,
+          18,
+          20,
+          30,
+          0.1273402157899413,
+          0.13693505306105308,
+          0.28192086797729776,
+          0.09923072104730599,
+          0.10411744116970043,
+          0.14268992529881225,
+          0.014246191757701266,
+          0.09351958389818793
+        ],
+        "converged_iter": 45,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 7.67417262946847e-11,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 1
+    },
+    {
+      "best_index": 5,
+      "best_lambda": {
+        "10": 0.28192086797729776,
+        "11": 0.09923072104730599,
+        "14": 0.10411744116970043,
+        "18": 0.14268992529881225,
+        "2": 0.1273402157899413,
+        "20": 0.014246191757701266,
+        "30": 0.09351958389818793,
+        "4": 0.13693505306105308
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          10,
+          11,
+          14,
+          18,
+          20,
+          30,
+          0.1273402157899413,
+          0.13693505306105308,
+          0.28192086797729776,
+          0.09923072104730599,
+          0.10411744116970043,
+          0.14268992529881225,
+          0.014246191757701266,
+          0.09351958389818793
+        ],
+        "converged_iter": 45,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 7.67417262946847e-11,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 2
+    },
+    {
+      "best_index": 5,
+      "best_lambda": {
+        "10": 0.28192086797729776,
+        "11": 0.09923072104730599,
+        "14": 0.10411744116970043,
+        "18": 0.14268992529881225,
+        "2": 0.1273402157899413,
+        "20": 0.014246191757701266,
+        "30": 0.09351958389818793,
+        "4": 0.13693505306105308
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          10,
+          11,
+          14,
+          18,
+          20,
+          30,
+          0.1273402157899413,
+          0.13693505306105308,
+          0.28192086797729776,
+          0.09923072104730599,
+          0.10411744116970043,
+          0.14268992529881225,
+          0.014246191757701266,
+          0.09351958389818793
+        ],
+        "converged_iter": 45,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 7.67417262946847e-11,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 3
+    },
+    {
+      "best_index": 5,
+      "best_lambda": {
+        "10": 0.28192086797729776,
+        "11": 0.09923072104730599,
+        "14": 0.10411744116970043,
+        "18": 0.14268992529881225,
+        "2": 0.1273402157899413,
+        "20": 0.014246191757701266,
+        "30": 0.09351958389818793,
+        "4": 0.13693505306105308
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          10,
+          11,
+          14,
+          18,
+          20,
+          30,
+          0.1273402157899413,
+          0.13693505306105308,
+          0.28192086797729776,
+          0.09923072104730599,
+          0.10411744116970043,
+          0.14268992529881225,
+          0.014246191757701266,
+          0.09351958389818793
+        ],
+        "converged_iter": 45,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 7.67417262946847e-11,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 4
+    },
+    {
+      "best_index": 5,
+      "best_lambda": {
+        "10": 0.28192086797729776,
+        "11": 0.09923072104730599,
+        "14": 0.10411744116970043,
+        "18": 0.14268992529881225,
+        "2": 0.1273402157899413,
+        "20": 0.014246191757701266,
+        "30": 0.09351958389818793,
+        "4": 0.13693505306105308
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          10,
+          11,
+          14,
+          18,
+          20,
+          30,
+          0.1273402157899413,
+          0.13693505306105308,
+          0.28192086797729776,
+          0.09923072104730599,
+          0.10411744116970043,
+          0.14268992529881225,
+          0.014246191757701266,
+          0.09351958389818793
+        ],
+        "converged_iter": 45,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 7.67417262946847e-11,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 5
+    },
+    {
+      "best_index": 5,
+      "best_lambda": {
+        "10": 0.28192086797729776,
+        "11": 0.09923072104730599,
+        "14": 0.10411744116970043,
+        "18": 0.14268992529881225,
+        "2": 0.1273402157899413,
+        "20": 0.014246191757701266,
+        "30": 0.09351958389818793,
+        "4": 0.13693505306105308
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          10,
+          11,
+          14,
+          18,
+          20,
+          30,
+          0.1273402157899413,
+          0.13693505306105308,
+          0.28192086797729776,
+          0.09923072104730599,
+          0.10411744116970043,
+          0.14268992529881225,
+          0.014246191757701266,
+          0.09351958389818793
+        ],
+        "converged_iter": 45,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 7.67417262946847e-11,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 6
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "11": 0.15368603316210716,
+        "14": 0.0609357502882042,
+        "18": 0.05959164159976848,
+        "2": 0.0814896560846065,
+        "21": 0.1084677552559438,
+        "27": 0.13744871323243024,
+        "4": 0.18026189054267944,
+        "9": 0.21811855983426026
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          11,
+          14,
+          18,
+          21,
+          27,
+          0.0814896560846065,
+          0.18026189054267944,
+          0.21811855983426026,
+          0.15368603316210716,
+          0.0609357502882042,
+          0.05959164159976848,
+          0.1084677552559438,
+          0.13744871323243024
+        ],
+        "converged_iter": 39,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.6801801824329777e-10,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 7
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "11": 0.15368603316210716,
+        "14": 0.0609357502882042,
+        "18": 0.05959164159976848,
+        "2": 0.0814896560846065,
+        "21": 0.1084677552559438,
+        "27": 0.13744871323243024,
+        "4": 0.18026189054267944,
+        "9": 0.21811855983426026
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          11,
+          14,
+          18,
+          21,
+          27,
+          0.0814896560846065,
+          0.18026189054267944,
+          0.21811855983426026,
+          0.15368603316210716,
+          0.0609357502882042,
+          0.05959164159976848,
+          0.1084677552559438,
+          0.13744871323243024
+        ],
+        "converged_iter": 39,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.6801801824329777e-10,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 8
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "11": 0.15368603316210716,
+        "14": 0.0609357502882042,
+        "18": 0.05959164159976848,
+        "2": 0.0814896560846065,
+        "21": 0.1084677552559438,
+        "27": 0.13744871323243024,
+        "4": 0.18026189054267944,
+        "9": 0.21811855983426026
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          11,
+          14,
+          18,
+          21,
+          27,
+          0.0814896560846065,
+          0.18026189054267944,
+          0.21811855983426026,
+          0.15368603316210716,
+          0.0609357502882042,
+          0.05959164159976848,
+          0.1084677552559438,
+          0.13744871323243024
+        ],
+        "converged_iter": 39,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.6801801824329777e-10,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 9
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "15": 0.18979285113915448,
+        "18": 0.04661123548039875,
+        "2": 0.11633155802842227,
+        "22": 0.0710731990554551,
+        "29": 0.09151262637089086,
+        "31": 0.15100283976993706,
+        "4": 0.22505214341105106,
+        "9": 0.1086235467446904
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          15,
+          18,
+          22,
+          29,
+          31,
+          0.11633155802842227,
+          0.22505214341105106,
+          0.1086235467446904,
+          0.18979285113915448,
+          0.04661123548039875,
+          0.0710731990554551,
+          0.09151262637089086,
+          0.15100283976993706
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 9.935503410976356e-12,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 10
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "15": 0.18979285113915448,
+        "18": 0.04661123548039875,
+        "2": 0.11633155802842227,
+        "22": 0.0710731990554551,
+        "29": 0.09151262637089086,
+        "31": 0.15100283976993706,
+        "4": 0.22505214341105106,
+        "9": 0.1086235467446904
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          15,
+          18,
+          22,
+          29,
+          31,
+          0.11633155802842227,
+          0.22505214341105106,
+          0.1086235467446904,
+          0.18979285113915448,
+          0.04661123548039875,
+          0.0710731990554551,
+          0.09151262637089086,
+          0.15100283976993706
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 9.935503410976356e-12,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 11
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "15": 0.18979285113915448,
+        "18": 0.04661123548039875,
+        "2": 0.11633155802842227,
+        "22": 0.0710731990554551,
+        "29": 0.09151262637089086,
+        "31": 0.15100283976993706,
+        "4": 0.22505214341105106,
+        "9": 0.1086235467446904
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          15,
+          18,
+          22,
+          29,
+          31,
+          0.11633155802842227,
+          0.22505214341105106,
+          0.1086235467446904,
+          0.18979285113915448,
+          0.04661123548039875,
+          0.0710731990554551,
+          0.09151262637089086,
+          0.15100283976993706
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 9.935503410976356e-12,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 12
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "15": 0.18979285113915448,
+        "18": 0.04661123548039875,
+        "2": 0.11633155802842227,
+        "22": 0.0710731990554551,
+        "29": 0.09151262637089086,
+        "31": 0.15100283976993706,
+        "4": 0.22505214341105106,
+        "9": 0.1086235467446904
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          15,
+          18,
+          22,
+          29,
+          31,
+          0.11633155802842227,
+          0.22505214341105106,
+          0.1086235467446904,
+          0.18979285113915448,
+          0.04661123548039875,
+          0.0710731990554551,
+          0.09151262637089086,
+          0.15100283976993706
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 9.935503410976356e-12,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 13
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "15": 0.18979285113915448,
+        "18": 0.04661123548039875,
+        "2": 0.11633155802842227,
+        "22": 0.0710731990554551,
+        "29": 0.09151262637089086,
+        "31": 0.15100283976993706,
+        "4": 0.22505214341105106,
+        "9": 0.1086235467446904
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          15,
+          18,
+          22,
+          29,
+          31,
+          0.11633155802842227,
+          0.22505214341105106,
+          0.1086235467446904,
+          0.18979285113915448,
+          0.04661123548039875,
+          0.0710731990554551,
+          0.09151262637089086,
+          0.15100283976993706
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 9.935503410976356e-12,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 14
+    },
+    {
+      "best_index": 6,
+      "best_lambda": {
+        "15": 0.18979285113915448,
+        "18": 0.04661123548039875,
+        "2": 0.11633155802842227,
+        "22": 0.0710731990554551,
+        "29": 0.09151262637089086,
+        "31": 0.15100283976993706,
+        "4": 0.22505214341105106,
+        "9": 0.1086235467446904
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          15,
+          18,
+          22,
+          29,
+          31,
+          0.11633155802842227,
+          0.22505214341105106,
+          0.1086235467446904,
+          0.18979285113915448,
+          0.04661123548039875,
+          0.0710731990554551,
+          0.09151262637089086,
+          0.15100283976993706
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 9.935503410976356e-12,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 15
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 16
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 17
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 18
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 19
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 20
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 21
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 22
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 23
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 24
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 25
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 26
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 27
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 28
+    },
+    {
+      "best_index": 15,
+      "best_lambda": {
+        "2": 0.04829771573031651,
+        "25": 0.315005025934064,
+        "27": 0.17568690058992167,
+        "3": 0.23512419576137655,
+        "31": 0.08858617674472366,
+        "4": 0.06400915290370075,
+        "5": 0.014878192875241999,
+        "7": 0.058412639460654905
+      },
+      "best_objective": {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "penalty": 0.0,
+        "threshold_proxy": null
+      },
+      "generation": 29
+    }
+  ],
+  "plan_binding": {
+    "binding": "PASS",
+    "pre_run_plan_path": "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/pre_run_plan.json",
+    "pre_run_plan_sha256": "3c99c08395c7c192f32708ce1a6f5a2b9794a64de0cabe3c3188fc9f65145726"
+  },
+  "protocol": {
+    "CR": 0.9,
+    "F": 0.5,
+    "K": 8,
+    "de_variant": "DE/rand/1/bin",
+    "degree_range": [
+      2,
+      40
+    ],
+    "det_target": 0.069,
+    "entropy_tol": 0.01,
+    "main_thread_decisions": {
+      "p_gate_0_06": "screen gate p = 0.06 frozen by main-thread decision 2026-08-05 (below V8-60 measured reference threshold ~0.0624 so reference-class candidates are eligible)"
+    },
+    "max_evaluations": 600,
+    "max_gen": 29,
+    "min_weight": 0.01,
+    "objective": "hierarchical_6tier_lexicographic",
+    "p_gate": 0.06,
+    "pop_size": 20,
+    "q": 4,
+    "rate": 0.75,
+    "rate_tolerance": 1e-12,
+    "rss_cap_bytes": 3221225472,
+    "screen_max_iter": 100,
+    "screen_n_samples": 500,
+    "search_seed": 2026100100,
+    "streak": 20,
+    "threshold_p_hi": 0.12,
+    "threshold_p_lo": 0.01,
+    "threshold_p_tol": 0.0025,
+    "tolerance": 0.012,
+    "validation_max_iter": 150,
+    "validation_n_samples": 100000,
+    "validation_seeds": [
+      2026100101,
+      2026100102,
+      2026100103
+    ],
+    "workers": 1
+  },
+  "rate_reconstruction": {
+    "rate_error": 0.0,
+    "rate_reconstructed": 0.75,
+    "rate_target": 0.75,
+    "rho": {
+      "26": 0.6428166798640306,
+      "27": 0.35718332013596943
+    }
+  },
+  "replay": {
+    "execute_dir": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v10_q4_gate_74e12865e75643bdb8f68a1af310509a/execute",
+    "files_only_in_execute": [],
+    "files_only_in_replay": [],
+    "files_present_in_both": 33,
+    "pairs": [
+      {
+        "file": "results.json",
+        "identical": true,
+        "sha256_execute": "175c9efa66bdfb7cf1c9a83b4235ff73be8ec270b1f8fce8e166e3e08a519905",
+        "sha256_replay": "175c9efa66bdfb7cf1c9a83b4235ff73be8ec270b1f8fce8e166e3e08a519905"
+      },
+      {
+        "file": "run_meta.json",
+        "identical": false,
+        "sha256_execute": "ac56c8066de457df0146f0d0adc30e858156f30add7cbbadbf595ee40b952032",
+        "sha256_replay": "2548462806fa975a107a9f035c452899a3a3928a55a6e82e56e77f7dd69b6f90"
+      },
+      {
+        "file": "search/checkpoint_gen_0001.json",
+        "identical": true,
+        "sha256_execute": "986916f45fcae697c651e8c7e9898332ca3abe0195afe9c93e5a14499fa70e64",
+        "sha256_replay": "986916f45fcae697c651e8c7e9898332ca3abe0195afe9c93e5a14499fa70e64"
+      },
+      {
+        "file": "search/checkpoint_gen_0002.json",
+        "identical": true,
+        "sha256_execute": "d869b4ac831fca707fedb8e4bd90b97a648e1c7eb6e753c681927ede4afbf454",
+        "sha256_replay": "d869b4ac831fca707fedb8e4bd90b97a648e1c7eb6e753c681927ede4afbf454"
+      },
+      {
+        "file": "search/checkpoint_gen_0003.json",
+        "identical": true,
+        "sha256_execute": "c9a25df1fb1b97df5a8ed757ea0835f5f2759d50d0dae20cf0940aba4cd9c12f",
+        "sha256_replay": "c9a25df1fb1b97df5a8ed757ea0835f5f2759d50d0dae20cf0940aba4cd9c12f"
+      },
+      {
+        "file": "search/checkpoint_gen_0004.json",
+        "identical": true,
+        "sha256_execute": "f747523c67fd2009a1b03d4a47428d8558d73b5fe5deef4e2c2ec78d039e13a5",
+        "sha256_replay": "f747523c67fd2009a1b03d4a47428d8558d73b5fe5deef4e2c2ec78d039e13a5"
+      },
+      {
+        "file": "search/checkpoint_gen_0005.json",
+        "identical": true,
+        "sha256_execute": "117ed86578b66aec066af403e1017a906a50ea357de39d0c86065d8f4056bc51",
+        "sha256_replay": "117ed86578b66aec066af403e1017a906a50ea357de39d0c86065d8f4056bc51"
+      },
+      {
+        "file": "search/checkpoint_gen_0006.json",
+        "identical": true,
+        "sha256_execute": "732de259b608605bc4f01b7440405c61d35a0ac9f26cd8d43c801dfadaef5960",
+        "sha256_replay": "732de259b608605bc4f01b7440405c61d35a0ac9f26cd8d43c801dfadaef5960"
+      },
+      {
+        "file": "search/checkpoint_gen_0007.json",
+        "identical": true,
+        "sha256_execute": "70a88581fcfa104f9badab55d35f31823921f72d16c51708b8d7fc0dc1fcefc3",
+        "sha256_replay": "70a88581fcfa104f9badab55d35f31823921f72d16c51708b8d7fc0dc1fcefc3"
+      },
+      {
+        "file": "search/checkpoint_gen_0008.json",
+        "identical": true,
+        "sha256_execute": "281a3443e08cd56c3920fa0d18a1dc6a6246644be096003a0b9daed45308209d",
+        "sha256_replay": "281a3443e08cd56c3920fa0d18a1dc6a6246644be096003a0b9daed45308209d"
+      },
+      {
+        "file": "search/checkpoint_gen_0009.json",
+        "identical": true,
+        "sha256_execute": "d199872f808fe8079875a607e20451971014e0ad0e22f6a1924bf63b1a124c3a",
+        "sha256_replay": "d199872f808fe8079875a607e20451971014e0ad0e22f6a1924bf63b1a124c3a"
+      },
+      {
+        "file": "search/checkpoint_gen_0010.json",
+        "identical": true,
+        "sha256_execute": "fd14b25fb67f3b1281f2b75665aa86e1da035e12ad33f4449908001925c74619",
+        "sha256_replay": "fd14b25fb67f3b1281f2b75665aa86e1da035e12ad33f4449908001925c74619"
+      },
+      {
+        "file": "search/checkpoint_gen_0011.json",
+        "identical": true,
+        "sha256_execute": "329c4d6473d726d44d6c2dc9c8605709952e58aae0c7debcd83dab1d62974f06",
+        "sha256_replay": "329c4d6473d726d44d6c2dc9c8605709952e58aae0c7debcd83dab1d62974f06"
+      },
+      {
+        "file": "search/checkpoint_gen_0012.json",
+        "identical": true,
+        "sha256_execute": "018139dd78f6d9d919a840a5c4d7422b7738ab4cb85a3bef6606957d3c167329",
+        "sha256_replay": "018139dd78f6d9d919a840a5c4d7422b7738ab4cb85a3bef6606957d3c167329"
+      },
+      {
+        "file": "search/checkpoint_gen_0013.json",
+        "identical": true,
+        "sha256_execute": "294ca39d41aaad0c8550ead7c8e53b5606eec9edb5debd57bda5fcfe031cf978",
+        "sha256_replay": "294ca39d41aaad0c8550ead7c8e53b5606eec9edb5debd57bda5fcfe031cf978"
+      },
+      {
+        "file": "search/checkpoint_gen_0014.json",
+        "identical": true,
+        "sha256_execute": "379745ca0c7f22c811b335b45afb035871c7a2eed4f9d263a2b8100fae4ce3b1",
+        "sha256_replay": "379745ca0c7f22c811b335b45afb035871c7a2eed4f9d263a2b8100fae4ce3b1"
+      },
+      {
+        "file": "search/checkpoint_gen_0015.json",
+        "identical": true,
+        "sha256_execute": "713fe82bdce62518440dc1ced45207d6a52c4200875a15efce96dbaac43420c6",
+        "sha256_replay": "713fe82bdce62518440dc1ced45207d6a52c4200875a15efce96dbaac43420c6"
+      },
+      {
+        "file": "search/checkpoint_gen_0016.json",
+        "identical": true,
+        "sha256_execute": "6c47b391c9927f3778d71b927bdf7914cfaee6b7163beb8a2f12c0ac787a422d",
+        "sha256_replay": "6c47b391c9927f3778d71b927bdf7914cfaee6b7163beb8a2f12c0ac787a422d"
+      },
+      {
+        "file": "search/checkpoint_gen_0017.json",
+        "identical": true,
+        "sha256_execute": "2e453d079dc6dd112913f82491838a748a37b8174eebb3f9d49c60cec820d448",
+        "sha256_replay": "2e453d079dc6dd112913f82491838a748a37b8174eebb3f9d49c60cec820d448"
+      },
+      {
+        "file": "search/checkpoint_gen_0018.json",
+        "identical": true,
+        "sha256_execute": "0d4f2bcab01f4844d910dde3291838a4044432895f4455de2009b2d5d97b8693",
+        "sha256_replay": "0d4f2bcab01f4844d910dde3291838a4044432895f4455de2009b2d5d97b8693"
+      },
+      {
+        "file": "search/checkpoint_gen_0019.json",
+        "identical": true,
+        "sha256_execute": "7c3a954c80be3f27bfba0b80a50450e8d88c1e6b05e00c5b7a2b9ec7ea83e97d",
+        "sha256_replay": "7c3a954c80be3f27bfba0b80a50450e8d88c1e6b05e00c5b7a2b9ec7ea83e97d"
+      },
+      {
+        "file": "search/checkpoint_gen_0020.json",
+        "identical": true,
+        "sha256_execute": "e624ff766b573efeea001b361fc9df879e0d5c781b6670fef1e01abf3300e2ee",
+        "sha256_replay": "e624ff766b573efeea001b361fc9df879e0d5c781b6670fef1e01abf3300e2ee"
+      },
+      {
+        "file": "search/checkpoint_gen_0021.json",
+        "identical": true,
+        "sha256_execute": "b355140f143b077a1b4805afa865b2437278a3c3c5e75b8f92925fab2d08bc60",
+        "sha256_replay": "b355140f143b077a1b4805afa865b2437278a3c3c5e75b8f92925fab2d08bc60"
+      },
+      {
+        "file": "search/checkpoint_gen_0022.json",
+        "identical": true,
+        "sha256_execute": "87659a80aa44f08f5a4c663e453a962cbd53924ca618530e23c42943c0975903",
+        "sha256_replay": "87659a80aa44f08f5a4c663e453a962cbd53924ca618530e23c42943c0975903"
+      },
+      {
+        "file": "search/checkpoint_gen_0023.json",
+        "identical": true,
+        "sha256_execute": "52cabbc4737eeffeeea79df0f655f9b6bc92e7b37eba3c0a8101f6d5de82a290",
+        "sha256_replay": "52cabbc4737eeffeeea79df0f655f9b6bc92e7b37eba3c0a8101f6d5de82a290"
+      },
+      {
+        "file": "search/checkpoint_gen_0024.json",
+        "identical": true,
+        "sha256_execute": "84fdc14921f048bdca6bbad7425370cf19a4e13ac9a57e874c70aac0bdcba372",
+        "sha256_replay": "84fdc14921f048bdca6bbad7425370cf19a4e13ac9a57e874c70aac0bdcba372"
+      },
+      {
+        "file": "search/checkpoint_gen_0025.json",
+        "identical": true,
+        "sha256_execute": "8f22379e7088a22b71bdd63f6f53a1a0faf08e2d254b0269fcb09a50f90394d8",
+        "sha256_replay": "8f22379e7088a22b71bdd63f6f53a1a0faf08e2d254b0269fcb09a50f90394d8"
+      },
+      {
+        "file": "search/checkpoint_gen_0026.json",
+        "identical": true,
+        "sha256_execute": "5fee307897fb6798b52932edb3cfac31b16c70d00608612930b23aaec5a7903a",
+        "sha256_replay": "5fee307897fb6798b52932edb3cfac31b16c70d00608612930b23aaec5a7903a"
+      },
+      {
+        "file": "search/checkpoint_gen_0027.json",
+        "identical": true,
+        "sha256_execute": "89744bf863e56a5203cadce19657fac6c71ac1b97f8762c456fbaf82b752e167",
+        "sha256_replay": "89744bf863e56a5203cadce19657fac6c71ac1b97f8762c456fbaf82b752e167"
+      },
+      {
+        "file": "search/checkpoint_gen_0028.json",
+        "identical": true,
+        "sha256_execute": "e520eff1ffd2b94a3315a1292678ce3607e1a9d3ffcf1cfb1ff3ca518d84cc5e",
+        "sha256_replay": "e520eff1ffd2b94a3315a1292678ce3607e1a9d3ffcf1cfb1ff3ca518d84cc5e"
+      },
+      {
+        "file": "search/checkpoint_gen_0029.json",
+        "identical": true,
+        "sha256_execute": "b6424c0ed7f9015139777dc51a96c1933a02eed2b37ac1d7733724efef285a4c",
+        "sha256_replay": "b6424c0ed7f9015139777dc51a96c1933a02eed2b37ac1d7733724efef285a4c"
+      },
+      {
+        "file": "search/run_complete.json",
+        "identical": false,
+        "sha256_execute": "d6a4fb30002da5ddf57458ac658d9a6a25134defdfeacb126e93259f4ebece50",
+        "sha256_replay": "3e9bac064442cae9d0aaa563a71d6fc20fc21bc37e4afcad038a4c8e4704f883"
+      },
+      {
+        "file": "transcript.json",
+        "identical": true,
+        "sha256_execute": "b5c65910554de16cb2f20b08f63e10d07dde1e96a4d1153c0974563196dbde1f",
+        "sha256_replay": "b5c65910554de16cb2f20b08f63e10d07dde1e96a4d1153c0974563196dbde1f"
+      }
+    ],
+    "provenance_allowed_diffs": [
+      "run_meta.json (pid/utc/elapsed/peak_rss)",
+      "search/run_complete.json (wall_clock_seconds, mean_seconds_per_generation)"
+    ],
+    "replay_dir": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v10_q4_gate_74e12865e75643bdb8f68a1af310509a/replay",
+    "run_complete_diff_keys_verified": [
+      "wall_clock_seconds only (execute vs replay)"
+    ],
+    "scientific_files_byte_identical": true
+  },
+  "schema": "v10_0_q4_reference_recovery_v1",
+  "search": {
+    "best_index": 15,
+    "best_lambda": {
+      "2": 0.04829771573031651,
+      "25": 0.315005025934064,
+      "27": 0.17568690058992167,
+      "3": 0.23512419576137655,
+      "31": 0.08858617674472366,
+      "4": 0.06400915290370075,
+      "5": 0.014878192875241999,
+      "7": 0.058412639460654905
+    },
+    "best_objective": {
+      "canonical_tuple": [
+        2,
+        3,
+        4,
+        5,
+        7,
+        25,
+        27,
+        31,
+        0.04829771573031651,
+        0.23512419576137655,
+        0.06400915290370075,
+        0.014878192875241999,
+        0.058412639460654905,
+        0.315005025934064,
+        0.17568690058992167,
+        0.08858617674472366
+      ],
+      "converged_iter": 33,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 1.4948676426993133e-297,
+      "penalty": 0.0,
+      "threshold_proxy": null
+    },
+    "checkpoint_count": 29,
+    "death_pool_size": 0,
+    "eligible_candidates": [
+      {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          25,
+          27,
+          31,
+          0.04829771573031651,
+          0.23512419576137655,
+          0.06400915290370075,
+          0.014878192875241999,
+          0.058412639460654905,
+          0.315005025934064,
+          0.17568690058992167,
+          0.08858617674472366
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "lambda": {
+          "2": 0.04829771573031651,
+          "25": 0.315005025934064,
+          "27": 0.17568690058992167,
+          "3": 0.23512419576137655,
+          "31": 0.08858617674472366,
+          "4": 0.06400915290370075,
+          "5": 0.014878192875241999,
+          "7": 0.058412639460654905
+        },
+        "penalty": 0.0,
+        "population_index": 15,
+        "threshold_proxy": 0.07273437499999999
+      },
+      {
+        "canonical_tuple": [
+          2,
+          3,
+          7,
+          13,
+          15,
+          18,
+          33,
+          40,
+          0.0978520054703757,
+          0.22415521001659297,
+          0.12174967390871497,
+          0.18885695586815665,
+          0.10890263011269115,
+          0.07181028982390233,
+          0.09152164225536294,
+          0.09515159254420333
+        ],
+        "converged_iter": 59,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 7.425701939081512e-15,
+        "lambda": {
+          "13": 0.18885695586815665,
+          "15": 0.10890263011269115,
+          "18": 0.07181028982390233,
+          "2": 0.0978520054703757,
+          "3": 0.22415521001659297,
+          "33": 0.09152164225536294,
+          "40": 0.09515159254420333,
+          "7": 0.12174967390871497
+        },
+        "penalty": 0.0,
+        "population_index": 3,
+        "threshold_proxy": 0.07273437499999999
+      },
+      {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          5,
+          18,
+          23,
+          24,
+          34,
+          0.05348405059568303,
+          0.2156289423297606,
+          0.23703943116691387,
+          0.025661967202195397,
+          0.15040442217520497,
+          0.1703230661549758,
+          0.04197430085978204,
+          0.1054838195154843
+        ],
+        "converged_iter": 47,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "lambda": {
+          "18": 0.15040442217520497,
+          "2": 0.05348405059568303,
+          "23": 0.1703230661549758,
+          "24": 0.04197430085978204,
+          "3": 0.2156289423297606,
+          "34": 0.1054838195154843,
+          "4": 0.23703943116691387,
+          "5": 0.025661967202195397
+        },
+        "penalty": 0.0,
+        "population_index": 14,
+        "threshold_proxy": 0.071015625
+      },
+      {
+        "canonical_tuple": [
+          2,
+          3,
+          7,
+          11,
+          13,
+          25,
+          34,
+          37,
+          0.0887579935261786,
+          0.38592597278269325,
+          0.08246123349924865,
+          0.04341634932512753,
+          0.044794219260133356,
+          0.22134204965642093,
+          0.07921703173009999,
+          0.05408515022009773
+        ],
+        "converged_iter": 63,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "lambda": {
+          "11": 0.04341634932512753,
+          "13": 0.044794219260133356,
+          "2": 0.0887579935261786,
+          "25": 0.22134204965642093,
+          "3": 0.38592597278269325,
+          "34": 0.07921703173009999,
+          "37": 0.05408515022009773,
+          "7": 0.08246123349924865
+        },
+        "penalty": 0.0,
+        "population_index": 9,
+        "threshold_proxy": 0.071015625
+      },
+      {
+        "canonical_tuple": [
+          2,
+          4,
+          8,
+          9,
+          13,
+          26,
+          28,
+          33,
+          0.17205042030929843,
+          0.25443833534945276,
+          0.0143333922080998,
+          0.02461793828048294,
+          0.2610921529348626,
+          0.1528586425517616,
+          0.09269304919153175,
+          0.027916069174510123
+        ],
+        "converged_iter": 57,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 2.67890620718418e-07,
+        "lambda": {
+          "13": 0.2610921529348626,
+          "2": 0.17205042030929843,
+          "26": 0.1528586425517616,
+          "28": 0.09269304919153175,
+          "33": 0.027916069174510123,
+          "4": 0.25443833534945276,
+          "8": 0.0143333922080998,
+          "9": 0.02461793828048294
+        },
+        "penalty": 0.0,
+        "population_index": 11,
+        "threshold_proxy": 0.071015625
+      },
+      {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          15,
+          18,
+          22,
+          29,
+          31,
+          0.11633155802842227,
+          0.22505214341105106,
+          0.1086235467446904,
+          0.18979285113915448,
+          0.04661123548039875,
+          0.0710731990554551,
+          0.09151262637089086,
+          0.15100283976993706
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 9.935503410976356e-12,
+        "lambda": {
+          "15": 0.18979285113915448,
+          "18": 0.04661123548039875,
+          "2": 0.11633155802842227,
+          "22": 0.0710731990554551,
+          "29": 0.09151262637089086,
+          "31": 0.15100283976993706,
+          "4": 0.22505214341105106,
+          "9": 0.1086235467446904
+        },
+        "penalty": 0.0,
+        "population_index": 6,
+        "threshold_proxy": 0.071015625
+      },
+      {
+        "canonical_tuple": [
+          3,
+          5,
+          8,
+          9,
+          27,
+          29,
+          30,
+          31,
+          0.2638511503335281,
+          0.1268142350621353,
+          0.116704933390702,
+          0.07318503472180976,
+          0.126253068224233,
+          0.09130014536029747,
+          0.03470312991966074,
+          0.16718830298763365
+        ],
+        "converged_iter": 33,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "lambda": {
+          "27": 0.126253068224233,
+          "29": 0.09130014536029747,
+          "3": 0.2638511503335281,
+          "30": 0.03470312991966074,
+          "31": 0.16718830298763365,
+          "5": 0.1268142350621353,
+          "8": 0.116704933390702,
+          "9": 0.07318503472180976
+        },
+        "penalty": 0.0,
+        "population_index": 17,
+        "threshold_proxy": 0.071015625
+      },
+      {
+        "canonical_tuple": [
+          2,
+          4,
+          9,
+          11,
+          14,
+          15,
+          32,
+          35,
+          0.1597560983139663,
+          0.18669961986022357,
+          0.16039180313857182,
+          0.10595998843169126,
+          0.06447341078511563,
+          0.11425666474086552,
+          0.09191059794766582,
+          0.11655181678190007
+        ],
+        "converged_iter": 48,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.5249717712411735e-09,
+        "lambda": {
+          "11": 0.10595998843169126,
+          "14": 0.06447341078511563,
+          "15": 0.11425666474086552,
+          "2": 0.1597560983139663,
+          "32": 0.09191059794766582,
+          "35": 0.11655181678190007,
+          "4": 0.18669961986022357,
+          "9": 0.16039180313857182
+        },
+        "penalty": 0.0,
+        "population_index": 7,
+        "threshold_proxy": 0.06929687500000001
+      },
+      {
+        "canonical_tuple": [
+          2,
+          5,
+          12,
+          13,
+          15,
+          23,
+          26,
+          31,
+          0.22110652208463158,
+          0.3191915772378535,
+          0.02208989504996195,
+          0.08520475507013565,
+          0.06732189098561521,
+          0.16080338841109565,
+          0.11044553836553109,
+          0.013836432795175355
+        ],
+        "converged_iter": 64,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 3.332179101950444e-06,
+        "lambda": {
+          "12": 0.02208989504996195,
+          "13": 0.08520475507013565,
+          "15": 0.06732189098561521,
+          "2": 0.22110652208463158,
+          "23": 0.16080338841109565,
+          "26": 0.11044553836553109,
+          "31": 0.013836432795175355,
+          "5": 0.3191915772378535
+        },
+        "penalty": 0.0,
+        "population_index": 1,
+        "threshold_proxy": 0.06929687500000001
+      },
+      {
+        "canonical_tuple": [
+          2,
+          3,
+          4,
+          7,
+          16,
+          18,
+          35,
+          40,
+          0.11751958972319254,
+          0.2445998704913787,
+          0.2412144014696332,
+          0.14393431830662534,
+          0.07846818487390422,
+          0.040360611536794426,
+          0.06393267223676592,
+          0.0699703513617056
+        ],
+        "converged_iter": 51,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 9.019823770997541e-16,
+        "lambda": {
+          "16": 0.07846818487390422,
+          "18": 0.040360611536794426,
+          "2": 0.11751958972319254,
+          "3": 0.2445998704913787,
+          "35": 0.06393267223676592,
+          "4": 0.2412144014696332,
+          "40": 0.0699703513617056,
+          "7": 0.14393431830662534
+        },
+        "penalty": 0.0,
+        "population_index": 12,
+        "threshold_proxy": 0.06757812499999999
+      },
+      {
+        "canonical_tuple": [
+          2,
+          4,
+          10,
+          11,
+          14,
+          18,
+          20,
+          30,
+          0.1273402157899413,
+          0.13693505306105308,
+          0.28192086797729776,
+          0.09923072104730599,
+          0.10411744116970043,
+          0.14268992529881225,
+          0.014246191757701266,
+          0.09351958389818793
+        ],
+        "converged_iter": 45,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 7.67417262946847e-11,
+        "lambda": {
+          "10": 0.28192086797729776,
+          "11": 0.09923072104730599,
+          "14": 0.10411744116970043,
+          "18": 0.14268992529881225,
+          "2": 0.1273402157899413,
+          "20": 0.014246191757701266,
+          "30": 0.09351958389818793,
+          "4": 0.13693505306105308
+        },
+        "penalty": 0.0,
+        "population_index": 5,
+        "threshold_proxy": 0.06242187500000001
+      },
+      {
+        "canonical_tuple": [
+          2,
+          4,
+          14,
+          16,
+          20,
+          22,
+          23,
+          25,
+          0.035567259437988503,
+          0.38699729077129924,
+          0.10700989659367462,
+          0.13906089056265997,
+          0.026788822422034116,
+          0.13451234925383687,
+          0.11525294660636407,
+          0.0548105443521426
+        ],
+        "converged_iter": 51,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "lambda": {
+          "14": 0.10700989659367462,
+          "16": 0.13906089056265997,
+          "2": 0.035567259437988503,
+          "20": 0.026788822422034116,
+          "22": 0.13451234925383687,
+          "23": 0.11525294660636407,
+          "25": 0.0548105443521426,
+          "4": 0.38699729077129924
+        },
+        "penalty": 0.0,
+        "population_index": 19,
+        "threshold_proxy": 0.06242187500000001
+      },
+      {
+        "canonical_tuple": [
+          2,
+          3,
+          7,
+          12,
+          19,
+          20,
+          31,
+          32,
+          0.05192442773331201,
+          0.21031760247392092,
+          0.03833876376141728,
+          0.035047964532303535,
+          0.05919077898836012,
+          0.2520822884292095,
+          0.12300420229178775,
+          0.23009397178968893
+        ],
+        "converged_iter": 45,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "lambda": {
+          "12": 0.035047964532303535,
+          "19": 0.05919077898836012,
+          "2": 0.05192442773331201,
+          "20": 0.2520822884292095,
+          "3": 0.21031760247392092,
+          "31": 0.12300420229178775,
+          "32": 0.23009397178968893,
+          "7": 0.03833876376141728
+        },
+        "penalty": 0.0,
+        "population_index": 2,
+        "threshold_proxy": 0.060703125000000004
+      },
+      {
+        "canonical_tuple": [
+          2,
+          4,
+          8,
+          11,
+          14,
+          16,
+          29,
+          30,
+          0.2609653701094817,
+          0.3185982509503117,
+          0.02106629459992535,
+          0.1128867979832966,
+          0.14846903214417143,
+          0.024522757939893454,
+          0.035052112053958674,
+          0.0784393842189611
+        ],
+        "converged_iter": 89,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 5.117634715081538e-07,
+        "lambda": {
+          "11": 0.1128867979832966,
+          "14": 0.14846903214417143,
+          "16": 0.024522757939893454,
+          "2": 0.2609653701094817,
+          "29": 0.035052112053958674,
+          "30": 0.0784393842189611,
+          "4": 0.3185982509503117,
+          "8": 0.02106629459992535
+        },
+        "penalty": 0.0,
+        "population_index": 13,
+        "threshold_proxy": 0.060703125000000004
+      },
+      {
+        "canonical_tuple": [
+          2,
+          5,
+          6,
+          10,
+          19,
+          29,
+          30,
+          36,
+          0.11154184549233488,
+          0.20865988389850257,
+          0.017501331075493655,
+          0.013063739870622492,
+          0.381800718360785,
+          0.07027613953196794,
+          0.18610266499065747,
+          0.011053676779636035
+        ],
+        "converged_iter": 98,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 3.908066376361819e-09,
+        "lambda": {
+          "10": 0.013063739870622492,
+          "19": 0.381800718360785,
+          "2": 0.11154184549233488,
+          "29": 0.07027613953196794,
+          "30": 0.18610266499065747,
+          "36": 0.011053676779636035,
+          "5": 0.20865988389850257,
+          "6": 0.017501331075493655
+        },
+        "penalty": 0.0,
+        "population_index": 8,
+        "threshold_proxy": 0.060703125000000004
+      },
+      {
+        "canonical_tuple": [
+          2,
+          5,
+          6,
+          16,
+          20,
+          21,
+          23,
+          27,
+          0.07871813707627874,
+          0.5406907386858925,
+          0.07606456444670896,
+          0.029526540325852304,
+          0.0892795222410126,
+          0.031276349623634764,
+          0.12999333018610662,
+          0.024450817414513517
+        ],
+        "converged_iter": 96,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "lambda": {
+          "16": 0.029526540325852304,
+          "2": 0.07871813707627874,
+          "20": 0.0892795222410126,
+          "21": 0.031276349623634764,
+          "23": 0.12999333018610662,
+          "27": 0.024450817414513517,
+          "5": 0.5406907386858925,
+          "6": 0.07606456444670896
+        },
+        "penalty": 0.0,
+        "population_index": 16,
+        "threshold_proxy": 0.060703125000000004
+      },
+      {
+        "canonical_tuple": [
+          3,
+          4,
+          9,
+          13,
+          18,
+          20,
+          34,
+          40,
+          0.17076000938862484,
+          0.17196404048699143,
+          0.339506211816861,
+          0.028297597134201536,
+          0.09061727110777884,
+          0.02621376812285884,
+          0.13231521720579836,
+          0.04032588473688515
+        ],
+        "converged_iter": 37,
+        "entropy_converged": true,
+        "error_prob": 0.0,
+        "final_entropy": 1.4948676426993133e-297,
+        "lambda": {
+          "13": 0.028297597134201536,
+          "18": 0.09061727110777884,
+          "20": 0.02621376812285884,
+          "3": 0.17076000938862484,
+          "34": 0.13231521720579836,
+          "4": 0.17196404048699143,
+          "40": 0.04032588473688515,
+          "9": 0.339506211816861
+        },
+        "penalty": 0.0,
+        "population_index": 10,
+        "threshold_proxy": 0.060703125000000004
+      }
+    ],
+    "evaluations": 600,
+    "generations_completed": 29,
+    "stop_reason": "max_evaluations_reached"
+  },
+  "stage": "V10-0",
+  "timing": {
+    "execute_elapsed_seconds": 168.365363,
+    "execute_peak_rss_bytes": 247603200,
+    "peak_rss_cap_bytes": 3221225472,
+    "replay_elapsed_seconds": 170.07588,
+    "replay_peak_rss_bytes": 237039616,
+    "rss_cap_exceeded_execute": false,
+    "rss_cap_exceeded_replay": false,
+    "workers": 1
+  },
+  "validation": {
+    "conservative_threshold": 0.064140625,
+    "rule": "conservative = min of per-seed threshold proxies",
+    "seeds": [
+      {
+        "converged_at_lo": true,
+        "probes": [
+          {
+            "converged": false,
+            "final_entropy": 0.9817922491820738,
+            "final_error": 0.06261,
+            "p": 0.065
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.0375
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.051250000000000004
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.058125
+          },
+          {
+            "converged": true,
+            "final_entropy": 5.906294811268226e-17,
+            "final_error": 0.0,
+            "p": 0.061562500000000006
+          },
+          {
+            "converged": true,
+            "final_entropy": 2.1543026377660397e-16,
+            "final_error": 0.0,
+            "p": 0.06328125000000001
+          }
+        ],
+        "seed": 2026100101,
+        "threshold_proxy": 0.064140625
+      },
+      {
+        "converged_at_lo": true,
+        "probes": [
+          {
+            "converged": false,
+            "final_entropy": 0.9807849955835647,
+            "final_error": 0.0627,
+            "p": 0.065
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.0375
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.051250000000000004
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.058125
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.061562500000000006
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.06328125000000001
+          }
+        ],
+        "seed": 2026100102,
+        "threshold_proxy": 0.064140625
+      },
+      {
+        "converged_at_lo": true,
+        "probes": [
+          {
+            "converged": false,
+            "final_entropy": 0.9823123331731245,
+            "final_error": 0.0624,
+            "p": 0.065
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.0375
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.051250000000000004
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.058125
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.4948676426993133e-297,
+            "final_error": 0.0,
+            "p": 0.061562500000000006
+          },
+          {
+            "converged": true,
+            "final_entropy": 1.3797885223258504e-15,
+            "final_error": 0.0,
+            "p": 0.06328125000000001
+          }
+        ],
+        "seed": 2026100103,
+        "threshold_proxy": 0.064140625
+      }
+    ]
+  },
+  "winner": {
+    "canonical_tuple": [
+      2,
+      3,
+      4,
+      5,
+      7,
+      25,
+      27,
+      31,
+      0.04829771573031651,
+      0.23512419576137655,
+      0.06400915290370075,
+      0.014878192875241999,
+      0.058412639460654905,
+      0.315005025934064,
+      0.17568690058992167,
+      0.08858617674472366
+    ],
+    "lambda": {
+      "2": 0.04829771573031651,
+      "25": 0.315005025934064,
+      "27": 0.17568690058992167,
+      "3": 0.23512419576137655,
+      "31": 0.08858617674472366,
+      "4": 0.06400915290370075,
+      "5": 0.014878192875241999,
+      "7": 0.058412639460654905
+    },
+    "objective": {
+      "canonical_tuple": [
+        2,
+        3,
+        4,
+        5,
+        7,
+        25,
+        27,
+        31,
+        0.04829771573031651,
+        0.23512419576137655,
+        0.06400915290370075,
+        0.014878192875241999,
+        0.058412639460654905,
+        0.315005025934064,
+        0.17568690058992167,
+        0.08858617674472366
+      ],
+      "converged_iter": 33,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 1.4948676426993133e-297,
+      "penalty": 0.0,
+      "threshold_proxy": 0.07273437499999999
+    },
+    "population_index": 15,
+    "threshold_proxy": 0.07273437499999999
+  }
+}
