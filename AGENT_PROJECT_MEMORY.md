@@ -1,5 +1,33 @@
 # AGENT_PROJECT_MEMORY.md
 
+## 2026-08-12 Formal IR accumulation commit, branch, and push
+
+- Current working branch is `formal-ir-accumulation`, HEAD =
+  `189d6c31aa445d0666bd78d32490041a8b14092c` ("feat(formal-ir): accumulate
+  formal IR source, tests, CLIs, OpenSpec changes, and agent docs", 342 files,
+  +60736/−109), pushed to origin
+  (https://github.com/Placebo303/HD-QKD-Polar-pipeline.git) with upstream
+  tracking set and remote hash identical. This commit was previously a
+  detached-HEAD chain (2bb0d5b → 921d002 → 9666eec → 189d6c3) and is now
+  mounted on the new branch; develop (b039dfb), main (2f496c0), and
+  codex/feat/polar-diagnostics-occupancy (7085f0b) were not touched.
+  [repo-observed]
+- Commit contents: `comparison_bench/src/comparison_bench/formal_ir/` (63
+  modules: cascade, ldpc, ldpc_v2-v5, codebook_*, nonbinary field/qspa/v2-v11,
+  real_qualification.py, long_v3_*), 37 CLIs under `cli/`, `data_lock.py`,
+  `final_selection_audit.py`, 79 test files, `requirements-formal-ir.txt`, 2
+  comparison_bench docs, 4 root docs, OpenSpec 4 archived + 16 active changes +
+  2 new merged spec dirs (`openspec/specs/final-ir-method-selection/`,
+  `openspec/specs/formal-ir-methods/`). Frozen baseline `src/`, `experiments/`,
+  `tools/`, `results/` zero change; the 111 tracked
+  `outputs_comparison/` files zero change. [repo-observed]
+- Deliberately NOT committed (untracked, per repo output/scratch policy): all
+  `workspace/` scratch roots (145 tracked files exist under them), the
+  `outputs_comparison/final_ir_method_selection/` and
+  `outputs_comparison/formal_ir_methods/` output directories, and the root
+  `新建卷 (D).lnk` Windows shortcut leftover. Do not commit or delete these
+  unprompted. [repo-observed]
+
 ## 2026-08-11 Nonbinary LDPC V11 spatial-coupling DE gate — failed_coupling, successor guidance
 
 - Change: `formal-nonbinary-ldpc-v11-sc-de-gate`. Final state
@@ -305,6 +333,7 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - Known environment constraints:
   - PowerShell profile loading emits execution-policy warnings in this environment. [memory-derived]
   - git commit/stage operations may fail due to `.git/index.lock` permission issues. [memory-derived]
+  - git push over HTTPS to GitHub can fail with `SSL certificate OpenSSL verify result: unable to get local issuer certificate (20)`; fixed on this host via `git config --global http.sslBackend schannel` (global host-level config, not repo content — other hosts may need the same fix). [memory-derived]
   - pytest cache/temp directories can trigger permission-denied warnings. [memory-derived]
   - some outputs may fall back from parquet to pickle if parquet support is missing. [repo-observed]
 - WSL migration notes:

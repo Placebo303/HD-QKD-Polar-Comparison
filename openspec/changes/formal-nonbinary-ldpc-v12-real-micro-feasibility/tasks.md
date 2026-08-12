@@ -23,23 +23,23 @@ implemented code, prepared a real partition, or executed a decoder.
 
 ## Implementation — Initially Authorized After V12-P07
 
-- [ ] **V12-I01** Add immutable V7 R1 reconstruction/binding checks.
-- [ ] **V12-I02** Add the V12 method wrapper and prove the decoder cannot
+- [x] **V12-I01** Add immutable V7 R1 reconstruction/binding checks.
+- [x] **V12-I02** Add the V12 method wrapper and prove the decoder cannot
   access Alice truth, frame-specific SER, or verification feedback.
-- [ ] **V12-I03** Add partition and exclusion-inventory preparation APIs that
+- [x] **V12-I03** Add partition and exclusion-inventory preparation APIs that
   cannot call a decoder or expose production confirmation roles.
-- [ ] **V12-I04** Add transcript, Toeplitz verification, leakage accounting,
+- [x] **V12-I04** Add transcript, Toeplitz verification, leakage accounting,
   denominator, failure, and terminal-state logic.
-- [ ] **V12-I05** Add separate plan/execute/read-only-verify lifecycle APIs;
+- [x] **V12-I05** Add separate plan/execute/read-only-verify lifecycle APIs;
   test-only execution requires an explicit fake runner.
 
 ## Engineering Acceptance — Initially Authorized After V12-P07
 
-- [ ] **V12-T0** Run compile/import, exact constants/reconstruction, and tiny
+- [x] **V12-T0** Run compile/import, exact constants/reconstruction, and tiny
   syndrome/Toeplitz/accounting checks.
-- [ ] **V12-T1** Run focused unit, boundary, Alice-information, role,
+- [x] **V12-T1** Run focused unit, boundary, Alice-information, role,
   no-overwrite, failure, and tamper tests.
-- [ ] **V12-T2** Run a complete four-frame fake lifecycle and decoder-free
+- [x] **V12-T2** Run a complete four-frame fake lifecycle and decoder-free
   replay under a fresh writable workspace root with pytest cache disabled.
 
 > Stop and return to the main thread after V12-T2. Real-source access,
