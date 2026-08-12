@@ -1,0 +1,1213 @@
+{
+  "abort_reason": null,
+  "cap_bytes": 3221225472,
+  "cap_exceeded": false,
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "downstream_tier_selection": {
+    "p20_stratum": null,
+    "p30_stratum": null
+  },
+  "elapsed_seconds": 3968.475655,
+  "end_utc": "2026-08-04T11:42:28.067916Z",
+  "environment": {
+    "hostname": "DESKTOP-T0AMTLE",
+    "numpy": "2.4.0",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.12"
+  },
+  "gates": {
+    "robust": {
+      "S1": {
+        "arithmetic": "robust S1: NO eligible candidate; every screen run at p=0.22 did not converge (recorded '< gate'); conservative threshold undefined => 0.22 gate FAIL",
+        "conservative_threshold": null,
+        "gate": 0.22,
+        "verdict": "FAIL"
+      },
+      "S3": {
+        "arithmetic": "robust S3: NO eligible candidate; every screen run at p=0.32 did not converge (recorded '< gate'); conservative threshold undefined => 0.32 gate FAIL",
+        "conservative_threshold": null,
+        "gate": 0.32,
+        "verdict": "FAIL"
+      }
+    },
+    "target": {
+      "S2": {
+        "arithmetic": "target S2: NO eligible candidate; every screen run at p=0.215 did not converge (recorded '< gate'); conservative threshold undefined => 0.215 gate FAIL",
+        "conservative_threshold": null,
+        "gate": 0.215,
+        "verdict": "FAIL"
+      },
+      "S4": {
+        "arithmetic": "target S4: NO eligible candidate; every screen run at p=0.32 did not converge (recorded '< gate'); conservative threshold undefined => 0.32 gate FAIL",
+        "conservative_threshold": null,
+        "gate": 0.32,
+        "verdict": "FAIL"
+      }
+    }
+  },
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "git_head_verified": true,
+  "next_step": "STOP before any finite codebook: robust V9A gate failed; freeze immutable evidence; V9B/V9C unreachable",
+  "overall": {
+    "robust_verdict": "FAIL",
+    "target_verdict": "FAIL"
+  },
+  "peak_rss_bytes": 428273664,
+  "per_search": {
+    "S1": {
+      "capacity_context_pstar": 0.23445300924647078,
+      "capped_eligible_not_searched": [],
+      "conservative_threshold": null,
+      "design_rate_R": 0.6870106892038108,
+      "eligible_candidates": [],
+      "eligible_search_protocol": "binary search over [gate, p_hi], p_tol, first 4 eligible in canonical order searched; further eligible recorded '>= gate' not searched",
+      "gate_conservative": 0.22,
+      "gate_failed_no_eligible": true,
+      "gate_verdict": {
+        "arithmetic": "robust S1: NO eligible candidate; every screen run at p=0.22 did not converge (recorded '< gate'); conservative threshold undefined => 0.22 gate FAIL",
+        "conservative_threshold": null,
+        "gate": 0.22,
+        "verdict": "FAIL"
+      },
+      "m_over_n_continuous": 0.31298931079618925,
+      "max_iter": 150,
+      "n_samples": 1000,
+      "optimization_seed": 2026090101,
+      "p_tol": 0.002,
+      "per_candidate": [
+        {
+          "candidate": "C1",
+          "converged_at_lo": null,
+          "dc_hi": 11,
+          "dc_lo": 10,
+          "eligible": false,
+          "lambda": {
+            "2": 0.35,
+            "20": 0.35,
+            "3": 0.3
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "10": 0.07043107486738556,
+            "11": 0.9295689251326145
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.6986367570243042,
+            "final_error": 0.114,
+            "iterations": 150,
+            "p": 0.22
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.9295689251326145,
+          "w_lo": 0.07043107486738556
+        },
+        {
+          "candidate": "C2",
+          "converged_at_lo": null,
+          "dc_hi": 11,
+          "dc_lo": 10,
+          "eligible": false,
+          "lambda": {
+            "2": 0.4,
+            "3": 0.25,
+            "30": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "10": 0.1565031353363381,
+            "11": 0.8434968646636619
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7526304766489084,
+            "final_error": 0.132,
+            "iterations": 150,
+            "p": 0.22
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.8434968646636619,
+          "w_lo": 0.1565031353363381
+        },
+        {
+          "candidate": "C3",
+          "converged_at_lo": null,
+          "dc_hi": 11,
+          "dc_lo": 10,
+          "eligible": false,
+          "lambda": {
+            "2": 0.45,
+            "3": 0.2,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "10": 0.34299259968573553,
+            "11": 0.6570074003142645
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7834757034777902,
+            "final_error": 0.126,
+            "iterations": 150,
+            "p": 0.22
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.6570074003142645,
+          "w_lo": 0.34299259968573553
+        },
+        {
+          "candidate": "C4",
+          "converged_at_lo": null,
+          "dc_hi": 12,
+          "dc_lo": 11,
+          "eligible": false,
+          "lambda": {
+            "2": 0.3,
+            "20": 0.35,
+            "3": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "11": 0.7402290479650538,
+            "12": 0.25977095203494616
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7269881998334586,
+            "final_error": 0.089,
+            "iterations": 150,
+            "p": 0.22
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.25977095203494616,
+          "w_lo": 0.7402290479650538
+        },
+        {
+          "candidate": "C5",
+          "converged_at_lo": null,
+          "dc_hi": 10,
+          "dc_lo": 9,
+          "eligible": false,
+          "lambda": {
+            "3": 1.0
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "10": 0.6103206761143252,
+            "9": 0.3896793238856748
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.9111661131451988,
+            "final_error": 0.212,
+            "iterations": 150,
+            "p": 0.22
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.6103206761143252,
+          "w_lo": 0.3896793238856748
+        },
+        {
+          "candidate": "C6",
+          "converged_at_lo": null,
+          "dc_hi": 12,
+          "dc_lo": 11,
+          "eligible": false,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.4,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "11": 0.03443815211965103,
+            "12": 0.9655618478803489
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8336275008033915,
+            "final_error": 0.119,
+            "iterations": 150,
+            "p": 0.22
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.9655618478803489,
+          "w_lo": 0.03443815211965103
+        },
+        {
+          "candidate": "C7",
+          "converged_at_lo": null,
+          "dc_hi": 11,
+          "dc_lo": 10,
+          "eligible": false,
+          "lambda": {
+            "2": 0.5,
+            "3": 0.15,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "10": 0.6298994679155733,
+            "11": 0.3701005320844267
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7790862251003016,
+            "final_error": 0.127,
+            "iterations": 150,
+            "p": 0.22
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.3701005320844267,
+          "w_lo": 0.6298994679155733
+        },
+        {
+          "candidate": "C8",
+          "converged_at_lo": null,
+          "dc_hi": 13,
+          "dc_lo": 12,
+          "eligible": false,
+          "lambda": {
+            "2": 0.2,
+            "3": 0.45,
+            "30": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "12": 0.7762236667004417,
+            "13": 0.22377633329955826
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8321479519240176,
+            "final_error": 0.118,
+            "iterations": 150,
+            "p": 0.22
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.22377633329955826,
+          "w_lo": 0.7762236667004417
+        }
+      ],
+      "probe_range": [
+        0.15,
+        0.26
+      ],
+      "rate_reconstruction": {
+        "all_within_1e-12": true,
+        "max_abs_error": 0.0
+      },
+      "run_count": 8,
+      "schema": "v9a_search_result_v2_v1",
+      "screen_protocol": "one full-budget run_mcde per candidate at p=gate; converged => eligible ('>= gate'), else '< gate' (no search)",
+      "search_id": "S1",
+      "searched_eligible": [],
+      "stratum_p": 0.2,
+      "tier_f": 1.15,
+      "tier_label": "robust",
+      "validation": [],
+      "validation_seeds": [
+        2026090111,
+        2026090112,
+        2026090113
+      ],
+      "winner": null,
+      "winner_threshold_proxy_optimization_seed": null
+    },
+    "S2": {
+      "capacity_context_pstar": 0.21826911930204423,
+      "capped_eligible_not_searched": [],
+      "conservative_threshold": null,
+      "design_rate_R": 0.7060622124696657,
+      "eligible_candidates": [],
+      "eligible_search_protocol": "binary search over [gate, p_hi], p_tol, first 4 eligible in canonical order searched; further eligible recorded '>= gate' not searched",
+      "gate_conservative": 0.215,
+      "gate_failed_no_eligible": true,
+      "gate_verdict": {
+        "arithmetic": "target S2: NO eligible candidate; every screen run at p=0.215 did not converge (recorded '< gate'); conservative threshold undefined => 0.215 gate FAIL",
+        "conservative_threshold": null,
+        "gate": 0.215,
+        "verdict": "FAIL"
+      },
+      "m_over_n_continuous": 0.2939377875303343,
+      "max_iter": 150,
+      "n_samples": 1000,
+      "optimization_seed": 2026090102,
+      "p_tol": 0.002,
+      "per_candidate": [
+        {
+          "candidate": "C1",
+          "converged_at_lo": null,
+          "dc_hi": 12,
+          "dc_lo": 11,
+          "eligible": false,
+          "lambda": {
+            "2": 0.35,
+            "20": 0.35,
+            "3": 0.3
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "11": 0.3489379765462058,
+            "12": 0.6510620234537943
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7920417313953415,
+            "final_error": 0.126,
+            "iterations": 150,
+            "p": 0.215
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.6510620234537943,
+          "w_lo": 0.3489379765462058
+        },
+        {
+          "candidate": "C2",
+          "converged_at_lo": null,
+          "dc_hi": 12,
+          "dc_lo": 11,
+          "eligible": false,
+          "lambda": {
+            "2": 0.4,
+            "3": 0.25,
+            "30": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "11": 0.44593744643121624,
+            "12": 0.5540625535687838
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.774311016277645,
+            "final_error": 0.1,
+            "iterations": 150,
+            "p": 0.215
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.5540625535687838,
+          "w_lo": 0.44593744643121624
+        },
+        {
+          "candidate": "C3",
+          "converged_at_lo": null,
+          "dc_hi": 12,
+          "dc_lo": 11,
+          "eligible": false,
+          "lambda": {
+            "2": 0.45,
+            "3": 0.2,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "11": 0.6561029645154065,
+            "12": 0.3438970354845935
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7938115340677582,
+            "final_error": 0.091,
+            "iterations": 150,
+            "p": 0.215
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.3438970354845935,
+          "w_lo": 0.6561029645154065
+        },
+        {
+          "candidate": "C4",
+          "converged_at_lo": null,
+          "dc_hi": 12,
+          "dc_lo": 11,
+          "eligible": false,
+          "lambda": {
+            "2": 0.3,
+            "20": 0.35,
+            "3": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "11": 0.02560641026283753,
+            "12": 0.9743935897371625
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8121608553088407,
+            "final_error": 0.127,
+            "iterations": 150,
+            "p": 0.215
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.9743935897371625,
+          "w_lo": 0.02560641026283753
+        },
+        {
+          "candidate": "C5",
+          "converged_at_lo": null,
+          "dc_hi": 11,
+          "dc_lo": 10,
+          "eligible": false,
+          "lambda": {
+            "3": 1.0
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "10": 0.777718876112256,
+            "11": 0.22228112388774401
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.9290536048413413,
+            "final_error": 0.224,
+            "iterations": 150,
+            "p": 0.215
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.22228112388774401,
+          "w_lo": 0.777718876112256
+        },
+        {
+          "candidate": "C6",
+          "converged_at_lo": null,
+          "dc_hi": 13,
+          "dc_lo": 12,
+          "eligible": false,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.4,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "12": 0.24691791745137853,
+            "13": 0.7530820825486215
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8052234462744551,
+            "final_error": 0.108,
+            "iterations": 150,
+            "p": 0.215
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.7530820825486215,
+          "w_lo": 0.24691791745137853
+        },
+        {
+          "candidate": "C7",
+          "converged_at_lo": null,
+          "dc_hi": 12,
+          "dc_lo": 11,
+          "eligible": false,
+          "lambda": {
+            "2": 0.5,
+            "3": 0.15,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "11": 0.979434530798773,
+            "12": 0.020565469201227038
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7742457295195857,
+            "final_error": 0.083,
+            "iterations": 150,
+            "p": 0.215
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.020565469201227038,
+          "w_lo": 0.979434530798773
+        },
+        {
+          "candidate": "C8",
+          "converged_at_lo": null,
+          "dc_hi": 14,
+          "dc_lo": 13,
+          "eligible": false,
+          "lambda": {
+            "2": 0.2,
+            "3": 0.45,
+            "30": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "13": 0.998297234819618,
+            "14": 0.0017027651803820376
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8594268611189343,
+            "final_error": 0.142,
+            "iterations": 150,
+            "p": 0.215
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.0017027651803820376,
+          "w_lo": 0.998297234819618
+        }
+      ],
+      "probe_range": [
+        0.15,
+        0.26
+      ],
+      "rate_reconstruction": {
+        "all_within_1e-12": true,
+        "max_abs_error": 1.1102230246251565e-16
+      },
+      "run_count": 8,
+      "schema": "v9a_search_result_v2_v1",
+      "screen_protocol": "one full-budget run_mcde per candidate at p=gate; converged => eligible ('>= gate'), else '< gate' (no search)",
+      "search_id": "S2",
+      "searched_eligible": [],
+      "stratum_p": 0.2,
+      "tier_f": 1.08,
+      "tier_label": "target",
+      "validation": [],
+      "validation_seeds": [
+        2026090111,
+        2026090112,
+        2026090113
+      ],
+      "winner": null,
+      "winner_threshold_proxy_optimization_seed": null
+    },
+    "S3": {
+      "capacity_context_pstar": 0.35270359472062474,
+      "capped_eligible_not_searched": [],
+      "conservative_threshold": null,
+      "design_rate_R": 0.5537001767622565,
+      "eligible_candidates": [],
+      "eligible_search_protocol": "binary search over [gate, p_hi], p_tol, first 4 eligible in canonical order searched; further eligible recorded '>= gate' not searched",
+      "gate_conservative": 0.32,
+      "gate_failed_no_eligible": true,
+      "gate_verdict": {
+        "arithmetic": "robust S3: NO eligible candidate; every screen run at p=0.32 did not converge (recorded '< gate'); conservative threshold undefined => 0.32 gate FAIL",
+        "conservative_threshold": null,
+        "gate": 0.32,
+        "verdict": "FAIL"
+      },
+      "m_over_n_continuous": 0.44629982323774353,
+      "max_iter": 150,
+      "n_samples": 1000,
+      "optimization_seed": 2026090103,
+      "p_tol": 0.002,
+      "per_candidate": [
+        {
+          "candidate": "C1",
+          "converged_at_lo": null,
+          "dc_hi": 8,
+          "dc_lo": 7,
+          "eligible": false,
+          "lambda": {
+            "2": 0.35,
+            "20": 0.35,
+            "3": 0.3
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "7": 0.31039110463423947,
+            "8": 0.6896088953657605
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.6871112152899516,
+            "final_error": 0.114,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.6896088953657605,
+          "w_lo": 0.31039110463423947
+        },
+        {
+          "candidate": "C2",
+          "converged_at_lo": null,
+          "dc_hi": 8,
+          "dc_lo": 7,
+          "eligible": false,
+          "lambda": {
+            "2": 0.4,
+            "3": 0.25,
+            "30": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "7": 0.372873079887523,
+            "8": 0.627126920112477
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.6862093050914466,
+            "final_error": 0.144,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.627126920112477,
+          "w_lo": 0.372873079887523
+        },
+        {
+          "candidate": "C3",
+          "converged_at_lo": null,
+          "dc_hi": 8,
+          "dc_lo": 7,
+          "eligible": false,
+          "lambda": {
+            "2": 0.45,
+            "3": 0.2,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "7": 0.508250692936306,
+            "8": 0.491749307063694
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7194103963849254,
+            "final_error": 0.14,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.491749307063694,
+          "w_lo": 0.508250692936306
+        },
+        {
+          "candidate": "C4",
+          "converged_at_lo": null,
+          "dc_hi": 8,
+          "dc_lo": 7,
+          "eligible": false,
+          "lambda": {
+            "2": 0.3,
+            "20": 0.35,
+            "3": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "7": 0.10211785378995701,
+            "8": 0.897882146210043
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.6642272362367103,
+            "final_error": 0.114,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.897882146210043,
+          "w_lo": 0.10211785378995701
+        },
+        {
+          "candidate": "C5",
+          "converged_at_lo": null,
+          "dc_hi": 7,
+          "dc_lo": 6,
+          "eligible": false,
+          "lambda": {
+            "3": 1.0
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "6": 0.248197525328409,
+            "7": 0.751802474671591
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8920188135328133,
+            "final_error": 0.305,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.751802474671591,
+          "w_lo": 0.248197525328409
+        },
+        {
+          "candidate": "C6",
+          "converged_at_lo": null,
+          "dc_hi": 9,
+          "dc_lo": 8,
+          "eligible": false,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.4,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "8": 0.5823456008618082,
+            "9": 0.4176543991381918
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8115218823928166,
+            "final_error": 0.17,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.4176543991381918,
+          "w_lo": 0.5823456008618082
+        },
+        {
+          "candidate": "C7",
+          "converged_at_lo": null,
+          "dc_hi": 8,
+          "dc_lo": 7,
+          "eligible": false,
+          "lambda": {
+            "2": 0.5,
+            "3": 0.15,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "7": 0.7165239437805854,
+            "8": 0.28347605621941463
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7232080698204324,
+            "final_error": 0.137,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.28347605621941463,
+          "w_lo": 0.7165239437805854
+        },
+        {
+          "candidate": "C8",
+          "converged_at_lo": null,
+          "dc_hi": 9,
+          "dc_lo": 8,
+          "eligible": false,
+          "lambda": {
+            "2": 0.2,
+            "3": 0.45,
+            "30": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "8": 0.40828866979908834,
+            "9": 0.5917113302009116
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7542325376043274,
+            "final_error": 0.16,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.5917113302009116,
+          "w_lo": 0.40828866979908834
+        }
+      ],
+      "probe_range": [
+        0.24,
+        0.36
+      ],
+      "rate_reconstruction": {
+        "all_within_1e-12": true,
+        "max_abs_error": 0.0
+      },
+      "run_count": 8,
+      "schema": "v9a_search_result_v2_v1",
+      "screen_protocol": "one full-budget run_mcde per candidate at p=gate; converged => eligible ('>= gate'), else '< gate' (no search)",
+      "search_id": "S3",
+      "searched_eligible": [],
+      "stratum_p": 0.3,
+      "tier_f": 1.15,
+      "tier_label": "robust",
+      "validation": [],
+      "validation_seeds": [
+        2026090111,
+        2026090112,
+        2026090113
+      ],
+      "winner": null,
+      "winner_threshold_proxy_optimization_seed": null
+    },
+    "S4": {
+      "capacity_context_pstar": 0.3279030142035134,
+      "capped_eligible_not_searched": [],
+      "conservative_threshold": null,
+      "design_rate_R": 0.5808662529593365,
+      "eligible_candidates": [],
+      "eligible_search_protocol": "binary search over [gate, p_hi], p_tol, first 4 eligible in canonical order searched; further eligible recorded '>= gate' not searched",
+      "gate_conservative": 0.32,
+      "gate_failed_no_eligible": true,
+      "gate_verdict": {
+        "arithmetic": "target S4: NO eligible candidate; every screen run at p=0.32 did not converge (recorded '< gate'); conservative threshold undefined => 0.32 gate FAIL",
+        "conservative_threshold": null,
+        "gate": 0.32,
+        "verdict": "FAIL"
+      },
+      "m_over_n_continuous": 0.41913374704066353,
+      "max_iter": 150,
+      "n_samples": 1000,
+      "optimization_seed": 2026090104,
+      "p_tol": 0.002,
+      "per_candidate": [
+        {
+          "candidate": "C1",
+          "converged_at_lo": null,
+          "dc_hi": 9,
+          "dc_lo": 8,
+          "eligible": false,
+          "lambda": {
+            "2": 0.35,
+            "20": 0.35,
+            "3": 0.3
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "8": 0.8269567126763733,
+            "9": 0.17304328732362673
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7918406484955647,
+            "final_error": 0.176,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.17304328732362673,
+          "w_lo": 0.8269567126763733
+        },
+        {
+          "candidate": "C2",
+          "converged_at_lo": null,
+          "dc_hi": 9,
+          "dc_lo": 8,
+          "eligible": false,
+          "lambda": {
+            "2": 0.4,
+            "3": 0.25,
+            "30": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "8": 0.9024007871436933,
+            "9": 0.09759921285630668
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8193892824543082,
+            "final_error": 0.164,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.09759921285630668,
+          "w_lo": 0.9024007871436933
+        },
+        {
+          "candidate": "C3",
+          "converged_at_lo": null,
+          "dc_hi": 8,
+          "dc_lo": 7,
+          "eligible": false,
+          "lambda": {
+            "2": 0.45,
+            "3": 0.2,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "7": 0.05122673771409627,
+            "8": 0.9487732622859038
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7493735807137377,
+            "final_error": 0.177,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.9487732622859038,
+          "w_lo": 0.05122673771409627
+        },
+        {
+          "candidate": "C4",
+          "converged_at_lo": null,
+          "dc_hi": 9,
+          "dc_lo": 8,
+          "eligible": false,
+          "lambda": {
+            "2": 0.3,
+            "20": 0.35,
+            "3": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "8": 0.5754764644519745,
+            "9": 0.42452353554802547
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7996717183393524,
+            "final_error": 0.177,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.42452353554802547,
+          "w_lo": 0.5754764644519745
+        },
+        {
+          "candidate": "C5",
+          "converged_at_lo": null,
+          "dc_hi": 8,
+          "dc_lo": 7,
+          "eligible": false,
+          "lambda": {
+            "3": 1.0
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "7": 0.8238299447590524,
+            "8": 0.17617005524094764
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.9209519004008266,
+            "final_error": 0.309,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.17617005524094764,
+          "w_lo": 0.8238299447590524
+        },
+        {
+          "candidate": "C6",
+          "converged_at_lo": null,
+          "dc_hi": 9,
+          "dc_lo": 8,
+          "eligible": false,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.4,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "8": 0.05994195559196033,
+            "9": 0.9400580444080396
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8262726912222781,
+            "final_error": 0.176,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.9400580444080396,
+          "w_lo": 0.05994195559196033
+        },
+        {
+          "candidate": "C7",
+          "converged_at_lo": null,
+          "dc_hi": 8,
+          "dc_lo": 7,
+          "eligible": false,
+          "lambda": {
+            "2": 0.5,
+            "3": 0.15,
+            "40": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "7": 0.24682248633307247,
+            "8": 0.7531775136669275
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.7399004968509791,
+            "final_error": 0.178,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.7531775136669275,
+          "w_lo": 0.24682248633307247
+        },
+        {
+          "candidate": "C8",
+          "converged_at_lo": null,
+          "dc_hi": 10,
+          "dc_lo": 9,
+          "eligible": false,
+          "lambda": {
+            "2": 0.2,
+            "3": 0.45,
+            "30": 0.35
+          },
+          "probe_count": 0,
+          "probes": [],
+          "rho": {
+            "10": 0.12940025719237347,
+            "9": 0.8705997428076265
+          },
+          "screen": {
+            "converged": false,
+            "final_entropy": 0.8246570607883531,
+            "final_error": 0.203,
+            "iterations": 150,
+            "p": 0.32
+          },
+          "screen_label": "< gate",
+          "searched": false,
+          "threshold_proxy": null,
+          "w_hi": 0.12940025719237347,
+          "w_lo": 0.8705997428076265
+        }
+      ],
+      "probe_range": [
+        0.24,
+        0.36
+      ],
+      "rate_reconstruction": {
+        "all_within_1e-12": true,
+        "max_abs_error": 0.0
+      },
+      "run_count": 8,
+      "schema": "v9a_search_result_v2_v1",
+      "screen_protocol": "one full-budget run_mcde per candidate at p=gate; converged => eligible ('>= gate'), else '< gate' (no search)",
+      "search_id": "S4",
+      "searched_eligible": [],
+      "stratum_p": 0.3,
+      "tier_f": 1.08,
+      "tier_label": "target",
+      "validation": [],
+      "validation_seeds": [
+        2026090111,
+        2026090112,
+        2026090113
+      ],
+      "winner": null,
+      "winner_threshold_proxy_optimization_seed": null
+    }
+  },
+  "phase": "V9-20.2/V9-20.3 official single deterministic execute (Round 2a, plan v2 budget protocol)",
+  "plan_v2": {
+    "binding": "execute refuses to run on recomputed-sha256 mismatch",
+    "path": "openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/v9a_plan_v2.json",
+    "sha256": "4bd6380f19008c9c893b1114fbab94a60d37acb77e3fbdf7a0d03d347092ddf2"
+  },
+  "run_counts": {
+    "S1": 8,
+    "S2": 8,
+    "S3": 8,
+    "S4": 8
+  },
+  "schema": "v9a_execute_results_v1",
+  "start_utc": "2026-08-04T10:36:19.592261Z",
+  "status": "completed"
+}

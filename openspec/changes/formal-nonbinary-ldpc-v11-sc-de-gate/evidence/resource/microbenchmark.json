@@ -1,0 +1,236 @@
+{
+  "engineering_only_non_scientific": true,
+  "environment": {
+    "clock": {
+      "implementation": "QueryPerformanceCounter()",
+      "monotonic": true,
+      "resolution_seconds": 1e-07
+    },
+    "cpu": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "cpu_count": 20,
+    "numpy": "2.4.0",
+    "os": "Windows-11-10.0.26200-SP0",
+    "platform": "Windows",
+    "python": "3.12.12",
+    "total_ram_bytes": 33693757440
+  },
+  "extrapolation": {
+    "assumptions": {
+      "A1_frozen_matrix": "2 strata x 3 geometries x 5 seeds x 2 arms = 60 runs (design.md \u00a74, V11-A07; NEVER shrunk by the microbenchmark)",
+      "A2_binary_search": "p in [0.1, 0.4], tol <= 0.001 -> 9 probes/run",
+      "A3_full_budget_per_probe": "every probe runs the full 150-iteration budget (V9/V10 convention upper bound; no early-convergence savings)",
+      "A4_measured_per_iteration": "per-iteration wall time at N=2000 taken directly from the measured N=2000 cells (same w, W)",
+      "A5_control": "uncoupled control = single-position run (w=0, W=1) with the same per-run budget (design.md \u00a74)",
+      "A6_sequential": "sequential execution, one process tree (workers=1, V9/V10 convention)",
+      "A7_peak_rss": "peak RSS = largest measured single-run peak (G3 at N=2000); sequential runs do not sum RSS",
+      "conservative": "synthetic lambda max degree 40 bounds the frozen winners' max degrees (S1 28, S3 40); no threshold/winner/gate claims"
+    },
+    "engineering_only_non_scientific": true,
+    "iterations_per_run": 1350,
+    "n_probes_per_run": 9,
+    "n_runs_total": 60,
+    "peak_rss_bytes": 2835525632,
+    "per_geometry": {
+      "G1": {
+        "control_per_iteration_seconds": 2.610341739997966,
+        "control_wall_seconds": 35239.613489972544,
+        "coupled_per_iteration_seconds": 28.021599179995246,
+        "coupled_wall_seconds": 378291.5889299358,
+        "geometry": {
+          "W": 8,
+          "w": 1
+        },
+        "iterations_per_run": 1350,
+        "n_runs": 10,
+        "total_wall_seconds": 413531.20241990837
+      },
+      "G2": {
+        "control_per_iteration_seconds": 2.610341739997966,
+        "control_wall_seconds": 35239.613489972544,
+        "coupled_per_iteration_seconds": 58.20990200000233,
+        "coupled_wall_seconds": 785833.6770000315,
+        "geometry": {
+          "W": 16,
+          "w": 2
+        },
+        "iterations_per_run": 1350,
+        "n_runs": 10,
+        "total_wall_seconds": 821073.290490004
+      },
+      "G3": {
+        "control_per_iteration_seconds": 2.610341739997966,
+        "control_wall_seconds": 35239.613489972544,
+        "coupled_per_iteration_seconds": 113.22555000000284,
+        "coupled_wall_seconds": 1528544.9250000385,
+        "geometry": {
+          "W": 32,
+          "w": 2
+        },
+        "iterations_per_run": 1350,
+        "n_runs": 10,
+        "total_wall_seconds": 1563784.538490011
+      }
+    },
+    "rss_cap_bytes": 3221225472,
+    "schema": "v11_microbench_extrapolation_v1",
+    "status": "resource_blocked",
+    "total_wall_hours": 777.3302864999787,
+    "total_wall_seconds": 2798389.0313999234,
+    "verdict": {
+      "reasons": {
+        "peak_rss_over_3gib": false,
+        "predicted_wall_over_24h": true
+      },
+      "resource_blocked": true,
+      "resource_ok": false
+    },
+    "wall_limit_seconds": 86400.0
+  },
+  "measurements": {
+    "CTRL_2000": {
+      "L": 32,
+      "W": 1,
+      "cap_exceeded": false,
+      "converged": false,
+      "iterations_executed": 5,
+      "label": "CTRL_2000",
+      "max_iter": 5,
+      "n_samples": 2000,
+      "p": 0.15,
+      "peak_rss_bytes": 230076416,
+      "per_iteration_seconds": 2.610341739997966,
+      "per_sample_per_iteration_seconds": 0.001305170869998983,
+      "q": 1024,
+      "rss_cap_bytes": 3221225472,
+      "w": 0,
+      "wall_seconds": 13.051708699989831
+    },
+    "CTRL_500": {
+      "L": 32,
+      "W": 1,
+      "cap_exceeded": false,
+      "converged": false,
+      "iterations_executed": 10,
+      "label": "CTRL_500",
+      "max_iter": 10,
+      "n_samples": 500,
+      "p": 0.15,
+      "peak_rss_bytes": 125132800,
+      "per_iteration_seconds": 0.5985447999992175,
+      "per_sample_per_iteration_seconds": 0.001197089599998435,
+      "q": 1024,
+      "rss_cap_bytes": 3221225472,
+      "w": 0,
+      "wall_seconds": 5.985447999992175
+    },
+    "G1_2000": {
+      "L": 32,
+      "W": 8,
+      "cap_exceeded": false,
+      "converged": false,
+      "iterations_executed": 5,
+      "label": "G1_2000",
+      "max_iter": 5,
+      "n_samples": 2000,
+      "p": 0.15,
+      "peak_rss_bytes": 836112384,
+      "per_iteration_seconds": 28.021599179995246,
+      "per_sample_per_iteration_seconds": 0.014010799589997623,
+      "q": 1024,
+      "rss_cap_bytes": 3221225472,
+      "w": 1,
+      "wall_seconds": 140.10799589997623
+    },
+    "G1_500": {
+      "L": 32,
+      "W": 8,
+      "cap_exceeded": false,
+      "converged": false,
+      "iterations_executed": 10,
+      "label": "G1_500",
+      "max_iter": 10,
+      "n_samples": 500,
+      "p": 0.15,
+      "peak_rss_bytes": 275984384,
+      "per_iteration_seconds": 6.444179529999383,
+      "per_sample_per_iteration_seconds": 0.012888359059998767,
+      "q": 1024,
+      "rss_cap_bytes": 3221225472,
+      "w": 1,
+      "wall_seconds": 64.44179529999383
+    },
+    "G2_2000": {
+      "L": 32,
+      "W": 16,
+      "cap_exceeded": false,
+      "converged": false,
+      "iterations_executed": 5,
+      "label": "G2_2000",
+      "max_iter": 5,
+      "n_samples": 2000,
+      "p": 0.15,
+      "peak_rss_bytes": 1523187712,
+      "per_iteration_seconds": 58.20990200000233,
+      "per_sample_per_iteration_seconds": 0.029104951000001166,
+      "q": 1024,
+      "rss_cap_bytes": 3221225472,
+      "w": 2,
+      "wall_seconds": 291.04951000001165
+    },
+    "G2_500": {
+      "L": 32,
+      "W": 16,
+      "cap_exceeded": false,
+      "converged": false,
+      "iterations_executed": 10,
+      "label": "G2_500",
+      "max_iter": 10,
+      "n_samples": 500,
+      "p": 0.15,
+      "peak_rss_bytes": 449044480,
+      "per_iteration_seconds": 12.995422059998964,
+      "per_sample_per_iteration_seconds": 0.025990844119997927,
+      "q": 1024,
+      "rss_cap_bytes": 3221225472,
+      "w": 2,
+      "wall_seconds": 129.95422059998964
+    },
+    "G3_2000": {
+      "L": 32,
+      "W": 32,
+      "cap_exceeded": false,
+      "converged": false,
+      "iterations_executed": 5,
+      "label": "G3_2000",
+      "max_iter": 5,
+      "n_samples": 2000,
+      "p": 0.15,
+      "peak_rss_bytes": 2835525632,
+      "per_iteration_seconds": 113.22555000000284,
+      "per_sample_per_iteration_seconds": 0.05661277500000142,
+      "q": 1024,
+      "rss_cap_bytes": 3221225472,
+      "w": 2,
+      "wall_seconds": 566.1277500000142
+    },
+    "G3_500": {
+      "L": 32,
+      "W": 32,
+      "cap_exceeded": false,
+      "converged": false,
+      "iterations_executed": 10,
+      "label": "G3_500",
+      "max_iter": 10,
+      "n_samples": 500,
+      "p": 0.15,
+      "peak_rss_bytes": 779264000,
+      "per_iteration_seconds": 26.059825030001228,
+      "per_sample_per_iteration_seconds": 0.05211965006000246,
+      "q": 1024,
+      "rss_cap_bytes": 3221225472,
+      "w": 2,
+      "wall_seconds": 260.5982503000123
+    }
+  },
+  "schema": "v11_microbenchmark_v1"
+}

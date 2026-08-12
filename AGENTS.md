@@ -77,6 +77,38 @@ These rules apply to all agents operating in this repository.
 - Full real-data benchmark or v3 master sweep in a fresh environment without confirming output policy first.
 - Safe smoke commands are listed in `AGENT_PROJECT_MEMORY.md` §4.
 
+### 5.7 Research Code Engineering Policy
+
+- This repository contains local research and data-analysis code, not a production service.
+- Use the simplest implementation that is scientifically correct, readable, and reproducible.
+- Do not add the following unless the task explicitly requires them:
+  - SHA-256, MD5, checksums, signatures, or integrity manifests
+  - atomic file replacement or transactional writes
+  - backup and rollback systems
+  - file locking or concurrency protection
+  - elaborate schema validation
+  - retry frameworks
+  - security hardening for untrusted input
+  - compatibility layers for hypothetical environments
+  - custom caching or artifact versioning
+  - excessive exception handling that hides errors
+- Assume:
+  - inputs are trusted local research files;
+  - the user controls the execution environment;
+  - scripts are run manually on a single machine;
+  - failed computations can normally be rerun;
+  - Git is used for source-code version control.
+- Prioritize:
+  1. scientific and numerical correctness;
+  2. explicit units, assumptions, and parameter definitions;
+  3. readable calculations;
+  4. reproducible random seeds where relevant;
+  5. validation against known limits or small test cases;
+  6. clear error messages for realistic input mistakes;
+  7. minimal dependencies and minimal abstraction.
+- Before adding any defensive mechanism, identify the concrete failure mode it prevents. If no realistic failure mode exists in this repository, omit it.
+- Do not generalize a one-off research script into a production framework unless explicitly requested.
+
 ---
 
 ## 6. OpenSpec Workflow
@@ -187,6 +219,63 @@ When handing off work between agents, reference:
 3. What outputs/manifests already exist
 4. Any blockers or unknowns discovered
 5. This `AGENTS.md` for project rules
+
+### 10.1 Project-Wide Delegation And Acceptance Workflow
+
+This workflow is the default for all substantial delegated implementation:
+
+1. **Freeze one complete task packet before delegation.** The main thread
+   specifies allowed and forbidden files, exact functionality, the complete
+   test/evidence matrix, commands, artifacts, stop rules, and return
+   conditions. Give acceptance items stable IDs; subagents report those IDs
+   instead of restating the specification. Do not add foreseeable acceptance
+   requirements one at a time during implementation.
+2. **Keep ownership separated.** The main thread owns planning, requirements,
+   thresholds, OpenSpec, acceptance, and scientific conclusions. A designated
+   implementation subagent is an operator only and must not change those
+   decisions or mark its own work accepted.
+3. **Use only two operator return conditions.** The operator returns after all
+   frozen items are complete, or on a concrete blocker with the failing
+   command, exact error/traceback, attempted remedies, and the single decision
+   needed from the main thread. “Still incomplete” is not a completion report.
+4. **Review three times by default.** Main-thread review occurs at
+   specification freeze, complete candidate delivery, and independent
+   acceptance. Avoid repeated full-file review after each small increment.
+5. **Reuse before rebuilding.** A successor starts from the nearest accepted
+   predecessor contract and an explicit delta list. Preserve unchanged
+   artifact, transcript, provenance, invalid-run, replay, and no-overwrite
+   semantics instead of creating a thinner replacement.
+6. **Run tests in four tiers.** T0 is compile/import/structural/tiny-math
+   checks; T1 is focused unit and tamper tests; T2 is complete fake/test-only
+   qualification plus strict replay; T3 is cross-version or broad regression.
+   Run T2/T3 only at milestones. Main acceptance also checks frozen
+   directories/source hashes and absence of unauthorized production output.
+7. **Freeze layered tamper evidence up front.** When verifiers are in scope,
+   cover raw byte drift, semantic changes with local self-hashes recomputed,
+   manifest/index links recomputed, and deep source/transcript/public-payload/
+   leakage/accounting/gate reconstruction.
+8. **Never invoke production work implicitly from tests.** Test-only
+   execute/verify calls must explicitly pass a fake runner. A default
+   production decoder, raw-data pipeline, long run, or evidence-output path
+   must not be entered accidentally.
+9. **Use a known writable test root on Windows.** Use a fresh additive
+   `workspace/<task>/<uuid>` root and `pytest -p no:cacheprovider` when ACL
+   failures are known. Do not spend task time deleting inaccessible legacy
+   temp/cache directories. Test paths remain separate from production roots.
+10. **Own long-running processes.** Record command/cell IDs. Terminate only a
+    process launched and positively identified by the current task.
+11. **Review dirty worktrees by scope.** Preserve unrelated changes. Check the
+    explicit task-file manifest, hashes for untracked files, frozen-directory
+    diffs, and official output-root existence; unscoped `git diff` is not
+    sufficient.
+12. **Report deltas only.** Handoffs and subagent messages state changed files,
+   commands/results, concrete blockers, and remaining frozen items; do not
+   repeat the full project history.
+
+These efficiency rules never merge or weaken scientific lifecycle gates.
+Qualification still requires separate prepare, main-thread review, execute,
+and read-only verify stages, with immutable failure retention and all
+pre-registered no-rerun/no-tuning rules intact.
 
 ---
 

@@ -1,0 +1,89 @@
+{
+  "schema": "v8_reproduction_trace_corrected_v1",
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "frozen_parameters": {
+    "q": 4,
+    "rate": 0.75,
+    "lambda_published": {
+      "1": 0.107,
+      "3": 0.245,
+      "6": 0.192,
+      "9": 0.034,
+      "18": 0.207,
+      "25": 0.161,
+      "27": 0.049
+    },
+    "lambda_degrees": {
+      "2": 0.107,
+      "4": 0.245,
+      "7": 0.192,
+      "10": 0.034,
+      "19": 0.207,
+      "26": 0.161,
+      "28": 0.049
+    },
+    "rho_degrees": {
+      "24": 0.662342394447661,
+      "25": 0.33765760555233904
+    },
+    "dc_mean": 24.32858932876873,
+    "integral_lambda": 0.1644156159629844,
+    "integral_rho": 0.0411039039907461,
+    "rate_reconstructed": 0.75,
+    "n_samples": 100000,
+    "max_iter": 150,
+    "seed": 2026080418,
+    "p_lo": 0.01,
+    "p_hi": 0.12,
+    "p_tol": 0.0025,
+    "entropy_tol": 0.01,
+    "streak": 20,
+    "det_published": 0.069,
+    "tolerance": 0.012,
+    "tolerance_arithmetic": "0.0005 (3-decimal published rounding of DET 0.069) + 0.00125 (binary-search half-step p_tol/2) + 0.005 (our MC-DE finite-sample threshold-estimate error at 100000 nodes) + 0.005 (paper MC-DE estimate error at its 100000 nodes) = 0.01175 <= 0.012 (frozen)",
+    "convergence_rule": "entropy < entropy_tol for streak consecutive iterations"
+  },
+  "threshold_proxy": 0.06242187500000001,
+  "delta_vs_published": 0.006578124999999997,
+  "verdict": "PASS",
+  "elapsed_seconds": 260.5,
+  "run_utc": "2026-08-04T03:42:50Z",
+  "probes": [
+    {
+      "p": 0.065,
+      "converged": false,
+      "final_entropy": 0.973446552667866,
+      "final_error": 0.06333
+    },
+    {
+      "p": 0.0375,
+      "converged": true,
+      "final_entropy": 1.3393244219991612e-11,
+      "final_error": 0.0
+    },
+    {
+      "p": 0.051250000000000004,
+      "converged": true,
+      "final_entropy": 4.0453176327728596e-08,
+      "final_error": 0.0
+    },
+    {
+      "p": 0.058125,
+      "converged": true,
+      "final_entropy": 0.000673073818141285,
+      "final_error": 0.0
+    },
+    {
+      "p": 0.061562500000000006,
+      "converged": true,
+      "final_entropy": 2.72383754877138e-05,
+      "final_error": 0.0
+    },
+    {
+      "p": 0.06328125000000001,
+      "converged": false,
+      "final_entropy": 0.9644739322589687,
+      "final_error": 0.05865
+    }
+  ]
+}

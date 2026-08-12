@@ -19,6 +19,7 @@
 
 ## 5. Scalability Sweep
 - [x] Run benchmark sweeps on larger frame sizes (`frame_len_symbols = 128, 256, 2048`).
+  - Reconciliation note: this proves the task wording, but does not fulfill the separate spec requirement for 512/1024-symbol support.
 - [x] Verify and analyze empirical efficiency ($\beta_{eff}$) behavior (confirmed that it remains clamped to 0.0 due to verification/CRC overhead on short/medium blocks, as detailed in Section 6 of the report).
 
 ## 6. Polar Baseline Reference Alignment

@@ -1,0 +1,1405 @@
+{
+  "schema": "v11_replay_evidence_v1",
+  "change": "formal-nonbinary-ldpc-v11-sc-de-gate",
+  "task_ref": "V11-40.3",
+  "metadata": {
+    "compared_at_utc": "2026-08-11T21:49:55+00:00",
+    "execute_root": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de",
+    "replay_root": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62",
+    "plan_ref": "evidence/formal_plan.json (schema v11_formal_plan_v1, plan_version 1.0.0, frozen 2026-08-06)",
+    "method": "V10-precedent direct byte comparison (no hashes). Level 1: threshold_search.json compared byte-for-byte for each of 60 runs. Level 2: run_measurement.json scientific fields compared by JSON value with explicit exclusion of non-deterministic timing/resource fields (wall_seconds, per_iteration_seconds, per_sample_per_iteration_seconds, peak_rss_bytes, cap_exceeded) and the per-root output_dir path. Level 3: formal_matrix_results.json scientific result fields (conservative, paired_gains, gate, rate_contract, seeds_ok, runs science fields keyed by run_id) compared, excluding bookkeeping (session wall, heartbeat/progress paths), executed_at, execution_root, runs[*].wall_seconds, runs[*].peak_rss_bytes."
+  },
+  "excluded_fields": {
+    "threshold_search.json": [],
+    "run_measurement.json": [
+      "cap_exceeded",
+      "output_dir",
+      "peak_rss_bytes",
+      "per_iteration_seconds",
+      "per_sample_per_iteration_seconds",
+      "wall_seconds"
+    ],
+    "formal_matrix_results.json": [
+      "bookkeeping.heartbeat_file",
+      "bookkeeping.progress_file",
+      "bookkeeping.session_batch_wall_seconds",
+      "executed_at",
+      "execution_root",
+      "resource.batch_wall_seconds",
+      "resource.peak_rss_bytes",
+      "runs[*].peak_rss_bytes",
+      "runs[*].wall_seconds"
+    ]
+  },
+  "per_run": [
+    {
+      "run_id": "S1_G1_seed1222026398_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2015,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2735.7496207999648,
+          "replay": 2729.4324928999413
+        },
+        "peak_rss_bytes": {
+          "execute": 924221440,
+          "replay": 922476544
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed1222026398_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed1222026398_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed197472535_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1985,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 287.9742406999576,
+          "replay": 285.04809089994524
+        },
+        "peak_rss_bytes": {
+          "execute": 238264320,
+          "replay": 219877376
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed197472535_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed197472535_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed2005000629_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1988,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 214.67594119999558,
+          "replay": 212.66890669998247
+        },
+        "peak_rss_bytes": {
+          "execute": 348971008,
+          "replay": 348856320
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed2005000629_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed2005000629_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed2660679541_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1970,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 214.73597510001855,
+          "replay": 212.60476929997094
+        },
+        "peak_rss_bytes": {
+          "execute": 343560192,
+          "replay": 348020736
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed2660679541_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed2660679541_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed2959007440_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1975,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 229.017101800011,
+          "replay": 229.1392227000324
+        },
+        "peak_rss_bytes": {
+          "execute": 237613056,
+          "replay": 224260096
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed2959007440_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed2959007440_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed3301261827_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1991,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2560.69338240003,
+          "replay": 2579.7552907000063
+        },
+        "peak_rss_bytes": {
+          "execute": 923766784,
+          "replay": 921960448
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed3301261827_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed3301261827_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed3441440341_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1987,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 301.2197464000201,
+          "replay": 307.175738299964
+        },
+        "peak_rss_bytes": {
+          "execute": 350138368,
+          "replay": 348753920
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed3441440341_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed3441440341_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed4222513407_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2025,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2712.945603,
+          "replay": 2715.3025391000556
+        },
+        "peak_rss_bytes": {
+          "execute": 923942912,
+          "replay": 922591232
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed4222513407_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed4222513407_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed4272195966_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2026,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2678.997977299965,
+          "replay": 2675.021314100013
+        },
+        "peak_rss_bytes": {
+          "execute": 923869184,
+          "replay": 922800128
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed4272195966_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed4272195966_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G1_seed762539858_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2018,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2525.017618599988,
+          "replay": 4579.550263100071
+        },
+        "peak_rss_bytes": {
+          "execute": 819765248,
+          "replay": 799240192
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G1_seed762539858_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G1_seed762539858_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed1105888531_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1988,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 6024.147320000047,
+          "replay": 14203.967461399967
+        },
+        "peak_rss_bytes": {
+          "execute": 1510817792,
+          "replay": 1488510976
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed1105888531_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed1105888531_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed1451501760_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2033,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 5754.223305599997,
+          "replay": 14136.543258900056
+        },
+        "peak_rss_bytes": {
+          "execute": 1510428672,
+          "replay": 1431588864
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed1451501760_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed1451501760_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed1522090265_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1972,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 199.92602120002266,
+          "replay": 265.00802399998065
+        },
+        "peak_rss_bytes": {
+          "execute": 230780928,
+          "replay": 223006720
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed1522090265_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed1522090265_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed1582603594_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1974,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 206.25481020001462,
+          "replay": 526.9320070999674
+        },
+        "peak_rss_bytes": {
+          "execute": 250462208,
+          "replay": 168792064
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed1582603594_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed1582603594_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed302933967_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2004,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 218.39071290002903,
+          "replay": 218.51755059999414
+        },
+        "peak_rss_bytes": {
+          "execute": 220692480,
+          "replay": 218779648
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed302933967_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed302933967_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed3663636734_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2000,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 5891.533847300045,
+          "replay": 14738.39103040006
+        },
+        "peak_rss_bytes": {
+          "execute": 1504636928,
+          "replay": 1485561856
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed3663636734_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed3663636734_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed3774424946_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2012,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 257.9320472999825,
+          "replay": 663.5856437000912
+        },
+        "peak_rss_bytes": {
+          "execute": 248328192,
+          "replay": 169082880
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed3774424946_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed3774424946_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed4001332335_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1997,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 6025.149810699979,
+          "replay": 14625.443524100003
+        },
+        "peak_rss_bytes": {
+          "execute": 1512849408,
+          "replay": 1487204352
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed4001332335_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed4001332335_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed4138641662_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2002,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 6238.970071299991,
+          "replay": 16033.585952599999
+        },
+        "peak_rss_bytes": {
+          "execute": 1508888576,
+          "replay": 1488056320
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed4138641662_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed4138641662_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G2_seed949613946_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1979,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 296.73557790002087,
+          "replay": 811.5726747999433
+        },
+        "peak_rss_bytes": {
+          "execute": 243437568,
+          "replay": 225595392
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G2_seed949613946_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G2_seed949613946_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed1028646838_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2010,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 11901.869978700008,
+          "replay": 13376.827761800028
+        },
+        "peak_rss_bytes": {
+          "execute": 2727063552,
+          "replay": 2819723264
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed1028646838_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed1028646838_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed1299160519_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2006,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 11512.612851999991,
+          "replay": 22899.232692699996
+        },
+        "peak_rss_bytes": {
+          "execute": 2775130112,
+          "replay": 2738417664
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed1299160519_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed1299160519_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed1506741124_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1988,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 229.75480599998264,
+          "replay": 561.6991140999598
+        },
+        "peak_rss_bytes": {
+          "execute": 200900608,
+          "replay": 165642240
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed1506741124_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed1506741124_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed1976747491_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1993,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 11850.354496199987,
+          "replay": 29642.495341500035
+        },
+        "peak_rss_bytes": {
+          "execute": 2782867456,
+          "replay": 2739417088
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed1976747491_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed1976747491_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed2109324390_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2010,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 11491.902989899972,
+          "replay": 26761.31818140007
+        },
+        "peak_rss_bytes": {
+          "execute": 2776596480,
+          "replay": 2743382016
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed2109324390_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed2109324390_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed2307418581_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1978,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 282.4494606999797,
+          "replay": 505.23183469998185
+        },
+        "peak_rss_bytes": {
+          "execute": 152825856,
+          "replay": 162476032
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed2307418581_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed2307418581_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed2765619946_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1985,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 284.6609001000179,
+          "replay": 714.5911493999884
+        },
+        "peak_rss_bytes": {
+          "execute": 250155008,
+          "replay": 167972864
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed2765619946_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed2765619946_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed3992260457_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2008,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 11949.792051800003,
+          "replay": 30008.309665299952
+        },
+        "peak_rss_bytes": {
+          "execute": 2816012288,
+          "replay": 2745077760
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed3992260457_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed3992260457_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed4036769515_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1978,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 229.8695965000079,
+          "replay": 459.15394230000675
+        },
+        "peak_rss_bytes": {
+          "execute": 144715776,
+          "replay": 160641024
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed4036769515_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed4036769515_control"
+        }
+      }
+    },
+    {
+      "run_id": "S1_G3_seed693545339_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1999,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 294.31055529997684,
+          "replay": 707.5470915000187
+        },
+        "peak_rss_bytes": {
+          "execute": 203788288,
+          "replay": 170405888
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S1_G3_seed693545339_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S1_G3_seed693545339_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed148926513_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1987,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 206.03631310001947,
+          "replay": 210.51313310000114
+        },
+        "peak_rss_bytes": {
+          "execute": 152002560,
+          "replay": 163553280
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed148926513_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed148926513_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed2586418385_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2028,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 249.66643169999588,
+          "replay": 256.9005800000159
+        },
+        "peak_rss_bytes": {
+          "execute": 152973312,
+          "replay": 164450304
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed2586418385_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed2586418385_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed3101754375_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2042,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2467.3555503999814,
+          "replay": 2941.9260318001034
+        },
+        "peak_rss_bytes": {
+          "execute": 727605248,
+          "replay": 739020800
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed3101754375_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed3101754375_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed3294282856_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2035,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2368.501009200001,
+          "replay": 3397.1200378000503
+        },
+        "peak_rss_bytes": {
+          "execute": 728502272,
+          "replay": 737083392
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed3294282856_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed3294282856_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed3696755679_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2031,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2261.5854205000214,
+          "replay": 2280.391991099925
+        },
+        "peak_rss_bytes": {
+          "execute": 728039424,
+          "replay": 739414016
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed3696755679_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed3696755679_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed4266052623_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2025,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 251.94109719997505,
+          "replay": 257.66107279993594
+        },
+        "peak_rss_bytes": {
+          "execute": 152813568,
+          "replay": 162426880
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed4266052623_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed4266052623_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed600249577_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2003,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 245.2177991999779,
+          "replay": 350.8130509000039
+        },
+        "peak_rss_bytes": {
+          "execute": 152834048,
+          "replay": 165052416
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed600249577_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed600249577_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed732969838_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2024,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2427.6478491000016,
+          "replay": 2445.4730885999743
+        },
+        "peak_rss_bytes": {
+          "execute": 727203840,
+          "replay": 739192832
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed732969838_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed732969838_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed75123851_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2049,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 2365.3111961999675,
+          "replay": 2679.8486976999557
+        },
+        "peak_rss_bytes": {
+          "execute": 727445504,
+          "replay": 737226752
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed75123851_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed75123851_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G1_seed90306507_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 1997,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 234.85615449998295,
+          "replay": 296.0276431000093
+        },
+        "peak_rss_bytes": {
+          "execute": 148062208,
+          "replay": 163516416
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G1_seed90306507_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G1_seed90306507_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed1003283467_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2025,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 260.97720510000363,
+          "replay": 248.00636250001844
+        },
+        "peak_rss_bytes": {
+          "execute": 155627520,
+          "replay": 245616640
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed1003283467_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed1003283467_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed1371758077_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2030,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 263.0255257000099,
+          "replay": 249.89979569998104
+        },
+        "peak_rss_bytes": {
+          "execute": 155316224,
+          "replay": 244662272
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed1371758077_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed1371758077_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed1456786342_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2025,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 5964.033363100025,
+          "replay": 5697.303549499949
+        },
+        "peak_rss_bytes": {
+          "execute": 1418649600,
+          "replay": 1507545088
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed1456786342_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed1456786342_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed2265290548_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2005,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 6010.03486449999,
+          "replay": 5729.618483199971
+        },
+        "peak_rss_bytes": {
+          "execute": 1416855552,
+          "replay": 1508179968
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed2265290548_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed2265290548_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed2716543585_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2026,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 229.1113666999736,
+          "replay": 221.24128069996368
+        },
+        "peak_rss_bytes": {
+          "execute": 152530944,
+          "replay": 164978688
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed2716543585_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed2716543585_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed2819376759_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2026,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 241.0699720000266,
+          "replay": 237.81235220003873
+        },
+        "peak_rss_bytes": {
+          "execute": 152727552,
+          "replay": 164257792
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed2819376759_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed2819376759_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed329195505_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2027,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 5876.38320479996,
+          "replay": 5595.913053199998
+        },
+        "peak_rss_bytes": {
+          "execute": 1419608064,
+          "replay": 1510285312
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed329195505_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed329195505_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed3831670887_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2031,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 256.90773390000686,
+          "replay": 244.3440384999849
+        },
+        "peak_rss_bytes": {
+          "execute": 155254784,
+          "replay": 241373184
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed3831670887_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed3831670887_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed4161882935_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2029,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 5876.808811799972,
+          "replay": 5655.502875200007
+        },
+        "peak_rss_bytes": {
+          "execute": 1417420800,
+          "replay": 1509105664
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed4161882935_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed4161882935_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G2_seed795614139_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2028,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 6212.725088800013,
+          "replay": 6084.817600199953
+        },
+        "peak_rss_bytes": {
+          "execute": 1418227712,
+          "replay": 1507454976
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G2_seed795614139_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G2_seed795614139_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed1237583460_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2055,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 11622.995645299961,
+          "replay": 11325.365256899968
+        },
+        "peak_rss_bytes": {
+          "execute": 2729750528,
+          "replay": 2820714496
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed1237583460_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed1237583460_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed1449336257_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2032,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 11404.222421400016,
+          "replay": 11397.712850999902
+        },
+        "peak_rss_bytes": {
+          "execute": 2730000384,
+          "replay": 2818621440
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed1449336257_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed1449336257_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed1558752836_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2005,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 258.8267374999705,
+          "replay": 243.48026749992277
+        },
+        "peak_rss_bytes": {
+          "execute": 150294528,
+          "replay": 241332224
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed1558752836_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed1558752836_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed2588231339_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2004,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 241.42784750001738,
+          "replay": 228.21383489994332
+        },
+        "peak_rss_bytes": {
+          "execute": 156225536,
+          "replay": 244568064
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed2588231339_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed2588231339_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed2819034846_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2040,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 12103.056425700022,
+          "replay": 11768.787608199986
+        },
+        "peak_rss_bytes": {
+          "execute": 2728501248,
+          "replay": 2819325952
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed2819034846_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed2819034846_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed3198668028_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2060,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 11716.96002259996,
+          "replay": 11675.944541099947
+        },
+        "peak_rss_bytes": {
+          "execute": 2730532864,
+          "replay": 2821468160
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed3198668028_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed3198668028_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed335849802_coupled",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2021,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 9923.798731899995,
+          "replay": 10016.92264210002
+        },
+        "peak_rss_bytes": {
+          "execute": 2813677568,
+          "replay": 2734641152
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed335849802_coupled",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed335849802_coupled"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed575023286_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2022,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 229.83658289996674,
+          "replay": 216.65171100001317
+        },
+        "peak_rss_bytes": {
+          "execute": 153358336,
+          "replay": 238542848
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed575023286_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed575023286_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed660002917_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2012,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 252.76889700000174,
+          "replay": 260.304318999988
+        },
+        "peak_rss_bytes": {
+          "execute": 149057536,
+          "replay": 165859328
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed660002917_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed660002917_control"
+        }
+      }
+    },
+    {
+      "run_id": "S3_G3_seed894708125_control",
+      "threshold_search_byte_match": true,
+      "threshold_search_bytes": 2027,
+      "measurement_science_fields_match": true,
+      "measurement_mismatch_fields": [],
+      "measurement_excluded_diff_observed": {
+        "wall_seconds": {
+          "execute": 234.17198700003792,
+          "replay": 236.90120730001945
+        },
+        "peak_rss_bytes": {
+          "execute": 156663808,
+          "replay": 166416384
+        },
+        "cap_exceeded": {},
+        "output_dir": {
+          "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de\\S3_G3_seed894708125_control",
+          "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62\\S3_G3_seed894708125_control"
+        }
+      }
+    }
+  ],
+  "matrix_comparison": {
+    "science_fields_match": true,
+    "mismatch_fields": [],
+    "gate_state_execute": "failed_reference",
+    "gate_state_replay": "failed_reference",
+    "gate_state_match": true,
+    "runs_list_order_identical": true,
+    "excluded_fields_observed": {
+      "executed_at": {
+        "execute": "2026-08-08T09:13:53+0800",
+        "replay": "2026-08-12T01:48:01+0800"
+      },
+      "execution_root": {
+        "execute": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_execute_002d51de",
+        "replay": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\nbldpc_v11_replay_8e63bf62"
+      },
+      "bookkeeping.session_batch_wall_seconds": {
+        "execute": 56994.68914959999,
+        "replay": 85335.0761063
+      },
+      "resource.batch_wall_seconds": {
+        "execute": 56994.68914959999,
+        "replay": 85335.0761063
+      },
+      "resource.peak_rss_bytes": {
+        "execute": 2816012288,
+        "replay": 2821468160
+      }
+    }
+  },
+  "summary": {
+    "n_runs": 60,
+    "n_threshold_search_byte_identical": 60,
+    "n_measurement_science_identical": 60,
+    "matrix_science_fields_match": true,
+    "replay_ok": true
+  },
+  "integrity_checks": {
+    "replay_threshold_search_missing": [],
+    "replay_threshold_search_not_valid": [],
+    "replay_threshold_search_all_present_and_valid": true,
+    "n_replay_threshold_valid": 60,
+    "progress_done_execute": 60,
+    "progress_done_replay": 60,
+    "run_id_sets_identical": true,
+    "n_run_dirs_execute": 60,
+    "n_run_dirs_replay": 60,
+    "matrix_runs_list_order_identical": true
+  }
+}

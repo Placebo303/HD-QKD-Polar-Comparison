@@ -1,0 +1,60 @@
+{
+  "schema": "v8_source_manifest_v1",
+  "files": {
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_error_domain.py": "f422c39435479554251369bbf10d25f1f65c6b26ab8d50ac4b5c8a9340910e53",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_reference.py": "d747f0d58e218297c515ab3cdd7cd9e17c79aabf29350cbb5ce4e9fbcefbb96b",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_mcde.py": "2c84a5ee76d09f4d6cea537289ff82d88ab19abd31d1a41951a7d24acdd66543",
+    "comparison_bench/tests/test_nonbinary_v8_error_domain.py": "50397c0d0e1cd6d8497cab315679215b48802000b340f91a4f01c290cea17b7d",
+    "comparison_bench/tests/test_nonbinary_v8_reference.py": "258b67b4c7c1fcb2cc2e4220852016e64291750d4632bec59b86f7776b72a568",
+    "comparison_bench/tests/test_nonbinary_v8_mcde.py": "a508a4228ee06114424db2242b4db784bfa1b9cabcbae54f4cd7172ed988a81f"
+  },
+  "frozen_reproduction_parameters": {
+    "q": 4,
+    "rate": 0.75,
+    "lambda_published": {
+      "1": 0.107,
+      "3": 0.245,
+      "6": 0.192,
+      "9": 0.034,
+      "18": 0.207,
+      "25": 0.161,
+      "27": 0.049
+    },
+    "lambda_degrees": {
+      "2": 0.107,
+      "4": 0.245,
+      "7": 0.192,
+      "10": 0.034,
+      "19": 0.207,
+      "26": 0.161,
+      "28": 0.049
+    },
+    "det_published": 0.069,
+    "tolerance": 0.012,
+    "n_samples": 100000,
+    "max_iter": 150,
+    "seed": 2026080418,
+    "p_lo": 0.01,
+    "p_hi": 0.12,
+    "p_tol": 0.0025,
+    "entropy_tol": 0.01,
+    "streak": 20
+  },
+  "created_before_tests": true,
+  "manifest_regeneration_delta": {
+    "note": "test_nonbinary_v8_reference.py changed AFTER the first manifest write (added the fail-closed None-path assertions for oracle_variable_update/oracle_belief); no source module changed; the manifest was regenerated and the delta recorded",
+    "changed_files": {
+      "comparison_bench/tests/test_nonbinary_v8_reference.py": {
+        "before": "6a250b4d0535642cf0fff26693d44362ffee6f5c8d81a6abdccb43a72959967d",
+        "after": "258b67b4c7c1fcb2cc2e4220852016e64291750d4632bec59b86f7776b72a568"
+      }
+    }
+  },
+  "v8_60_delta": {
+    "changed_files": [
+      "nonbinary_v8_mcde.py",
+      "test_nonbinary_v8_mcde.py"
+    ],
+    "note": "two files changed by the V8-60 correction; old hashes recorded in evidence/v8_engineering_acceptance.json and v8_60_correction_evidence.json; the four other files are unchanged"
+  }
+}

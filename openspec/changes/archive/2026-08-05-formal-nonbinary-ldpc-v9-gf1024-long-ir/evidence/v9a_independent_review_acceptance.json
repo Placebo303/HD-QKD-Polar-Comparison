@@ -1,0 +1,197 @@
+{
+  "schema": "v9a_independent_review_acceptance_v1",
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "acceptance_recorded_at_utc": "2026-08-04T16:00:00Z",
+  "reviewer": "reviewer-go",
+  "verdict": "ACCEPT",
+  "scope": "independent read-only review of the complete V9A evidence package; no files edited or created by reviewer",
+
+  "review_checklist": {
+    "matches_openspec_spec": true,
+    "tests_pass": true,
+    "no_scope_creep": true,
+    "decision_log_updated": true,
+    "v9b_v9c_artifacts_absent": true,
+    "scientific_wording_scoped": true
+  },
+
+  "execute_replay_sha256": {
+    "execute_dir": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_execute",
+    "replay_dir": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_replay",
+    "per_file": [
+      {
+        "filename": "S1.json",
+        "category": "scientific",
+        "execute_sha256": "64132083e932a2d142c17b0f8de3ecae19c5eacd44f24cb743edd33067fd2040",
+        "replay_sha256": "64132083e932a2d142c17b0f8de3ecae19c5eacd44f24cb743edd33067fd2040",
+        "byte_identical": true
+      },
+      {
+        "filename": "S1.progress.jsonl",
+        "category": "scientific",
+        "execute_sha256": "06f1c938ad6efff205fe2eca15af8d7aaf84308e3600d5069059dc84f584e2f2",
+        "replay_sha256": "06f1c938ad6efff205fe2eca15af8d7aaf84308e3600d5069059dc84f584e2f2",
+        "byte_identical": true
+      },
+      {
+        "filename": "S2.json",
+        "category": "scientific",
+        "execute_sha256": "a42a6e6953d2d88fa699e7e11b1290a6b37e322398f3bd043473542d65fafb7b",
+        "replay_sha256": "a42a6e6953d2d88fa699e7e11b1290a6b37e322398f3bd043473542d65fafb7b",
+        "byte_identical": true
+      },
+      {
+        "filename": "S2.progress.jsonl",
+        "category": "scientific",
+        "execute_sha256": "2a5a39431d848082415e0f7caaa428fb4711c2e4cac9aad8f4bfdee8df304d1b",
+        "replay_sha256": "2a5a39431d848082415e0f7caaa428fb4711c2e4cac9aad8f4bfdee8df304d1b",
+        "byte_identical": true
+      },
+      {
+        "filename": "S3.json",
+        "category": "scientific",
+        "execute_sha256": "8043043b4f8c462db49d52f0348af0e803c77157aab5b06394b83b3676c3de33",
+        "replay_sha256": "8043043b4f8c462db49d52f0348af0e803c77157aab5b06394b83b3676c3de33",
+        "byte_identical": true
+      },
+      {
+        "filename": "S3.progress.jsonl",
+        "category": "scientific",
+        "execute_sha256": "e7d9d18f87859bfc983a4b66daebd933bd8efb2d439fecafe6c99df79b3e5a44",
+        "replay_sha256": "e7d9d18f87859bfc983a4b66daebd933bd8efb2d439fecafe6c99df79b3e5a44",
+        "byte_identical": true
+      },
+      {
+        "filename": "S4.json",
+        "category": "scientific",
+        "execute_sha256": "7ca0c802a4fa4ad8ea9fe17fa9bbcc0663fcaf57c88546d5f7793b9332bcadb0",
+        "replay_sha256": "7ca0c802a4fa4ad8ea9fe17fa9bbcc0663fcaf57c88546d5f7793b9332bcadb0",
+        "byte_identical": true
+      },
+      {
+        "filename": "S4.progress.jsonl",
+        "category": "scientific",
+        "execute_sha256": "80ee59eb194c60a897ac43d4b09a5d1fd4ff76c8bd0a7394a155606e7cfc632a",
+        "replay_sha256": "80ee59eb194c60a897ac43d4b09a5d1fd4ff76c8bd0a7394a155606e7cfc632a",
+        "byte_identical": true,
+        "known_hash_verified": true
+      },
+      {
+        "filename": "summary_science.json",
+        "category": "scientific",
+        "execute_sha256": "190580dd06855b8e0c38c257c1f4fcd128db2eed23473ee71d22fb765900a877",
+        "replay_sha256": "190580dd06855b8e0c38c257c1f4fcd128db2eed23473ee71d22fb765900a877",
+        "byte_identical": true
+      },
+      {
+        "filename": "evidence_v9a_execute_results.json",
+        "category": "scientific_payload_identical",
+        "execute_sha256": "540295123a8a19f3f335f727339df14f4c1106fc01cccab46ecb644dd1eedb8c",
+        "replay_sha256": "db855d984fca3aafb334e9262ccacd0899e59b1fe395243046ad734dc1941b29",
+        "byte_identical": false,
+        "provenance_only_differences": ["start_utc", "end_utc", "elapsed_seconds", "peak_rss_bytes"],
+        "all_other_fields_identical": true
+      },
+      {
+        "filename": "run_meta.json",
+        "category": "provenance",
+        "execute_sha256": "d6396b93768f299a1c4ecf2f4a32d726dfd9afefbbbc6afc748f194baac54f32",
+        "replay_sha256": "c012e27db549065d52f0ed4d9cd2422b8a639d7f6055ca7ece0905d1107a5d02",
+        "byte_identical": false,
+        "differing_fields": ["pid", "start_utc", "end_utc", "elapsed_seconds", "peak_rss_bytes", "command[1]"],
+        "all_other_fields_identical": true
+      }
+    ],
+    "scientific_files_byte_identical_overall": true,
+    "provenance_files_expected_differences": true,
+    "9_of_11_files_byte_identical": true,
+    "verdict": "REPLAY CONFIRMED"
+  },
+
+  "evidence_v9a_execute_results_json_diff": {
+    "differing_fields_only": [
+      {"field": "start_utc", "execute": "2026-08-04T10:36:19.592261Z", "replay": "2026-08-04T12:38:48.385737Z"},
+      {"field": "end_utc", "execute": "2026-08-04T11:42:28.067916Z", "replay": "2026-08-04T13:59:26.883438Z"},
+      {"field": "elapsed_seconds", "execute": 3968.475655, "replay": 4838.497701},
+      {"field": "peak_rss_bytes", "execute": 428273664, "replay": 473600000}
+    ],
+    "all_other_fields_identical": true,
+    "structural_check": "PASS"
+  },
+
+  "run_meta_json_diff": {
+    "differing_fields_only": [
+      {"field": "pid", "execute": 5084, "replay": 29340},
+      {"field": "start_utc", "execute": "2026-08-04T10:36:19.592261Z", "replay": "2026-08-04T12:38:48.385737Z"},
+      {"field": "end_utc", "execute": "2026-08-04T11:42:28.067916Z", "replay": "2026-08-04T13:59:26.883438Z"},
+      {"field": "elapsed_seconds", "execute": 3968.475655, "replay": 4838.497701},
+      {"field": "peak_rss_bytes", "execute": 428273664, "replay": 473600000},
+      {"field": "command[1]", "execute": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_execute", "replay": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_replay"}
+    ],
+    "all_other_fields_identical": true,
+    "structural_check": "PASS"
+  },
+
+  "known_hash_verification": {
+    "S4_progress_jsonl_execute": "80ee59eb194c60a897ac43d4b09a5d1fd4ff76c8bd0a7394a155606e7cfc632a",
+    "S4_progress_jsonl_replay": "80ee59eb194c60a897ac43d4b09a5d1fd4ff76c8bd0a7394a155606e7cfc632a",
+    "match_expected": true,
+    "previous_replay_evidence_correction": "v9a_replay_evidence.json line 75 contained 'TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER' for S4.progress.jsonl replay hash; this file provides the actual hash. The execute hash was correct in state_check.json and v9a_replay_evidence.json line 74."
+  },
+
+  "evidence_overwrite_incident": {
+    "description": "The replay script (run_v9a_execute_v2.py) writes to the shared path evidence/v9a_execute_results.json without guarding against overwrite. The replay run (pid 29340) therefore overwrote the official execute evidence with replay provenance fields.",
+    "scientific_impact": "none — the scientific payload (gates, per_search, overall) is identical between execute and replay; only provenance fields (start/end/elapsed/peak_rss) changed",
+    "recovery": "The original execute evidence was preserved in workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_execute/evidence_v9a_execute_results.json (sha256 540295123a8a19f3f335f727339df14f4c1106fc01cccab46ecb644dd1eedb8c). The orchestrator restored this file to the official evidence path.",
+    "lifecycle_defect": "The execute script should guard EVIDENCE_OUT_PATH to prevent overwrite on replay. This is a process improvement, not a scientific defect.",
+    "official_execute_hash_matches_v2_execute_copy": true
+  },
+
+  "interrupted_trials": {
+    "pid_17948": {
+      "protocol": "v1-protocol",
+      "status": "non-decisional interrupted trial",
+      "freeze_file": "evidence/v9a_interrupted_trial_freeze.json",
+      "zero_searches_completed": true,
+      "excluded_from_gate_decision": true
+    },
+    "pid_23652": {
+      "protocol": "v2-protocol attempt B",
+      "status": "non-decisional interrupted attempt, killed externally by agent harness",
+      "freeze_file": "evidence/v9a_interrupted_v2_attempt_freeze.json",
+      "zero_searches_completed": true,
+      "excluded_from_gate_decision": true
+    }
+  },
+
+  "no_unauthorized_artifacts": {
+    "v9_b_v9_c_codebooks": false,
+    "v9_b_v9_c_decoders": false,
+    "v9_b_v9_c_canaries": false,
+    "v9_b_v9_c_development": false,
+    "v9_b_v9_c_qualification": false,
+    "v9_b_v9_c_real_n4": false,
+    "v9_b_v9_c_promotion": false,
+    "v9_b_v9_c_formal_comparison": false,
+    "official_output_in_formal_ir_methods": false,
+    "git_status_frozen_dirs_clean": true,
+    "tasks_v9_30_plus_all_unchecked": true
+  },
+
+  "gate_verdict_summary": {
+    "S1": {"tier": "robust", "gate": 0.22, "eligible": 0, "verdict": "FAIL"},
+    "S2": {"tier": "target", "gate": 0.215, "eligible": 0, "verdict": "FAIL"},
+    "S3": {"tier": "robust", "gate": 0.32, "eligible": 0, "verdict": "FAIL"},
+    "S4": {"tier": "target", "gate": 0.32, "eligible": 0, "verdict": "FAIL"},
+    "overall_robust": "FAIL",
+    "overall_target": "FAIL",
+    "stop_declared": true
+  },
+
+  "scientific_boundary": "Frozen 8-candidate V9A bounded enumeration failed its preregistered gates. This is not a general negation of GF(1024) LDPC or a claim that complete ensemble optimization has been exhausted. A successor requires a new OpenSpec change with fresh roots, a different ensemble family, and new development/confirmation data.",
+
+  "non_blocking_suggestions": [
+    "Replay SHA256s were computed by the independent hash verification task; the previous placeholder values in v9a_replay_evidence.json are now superseded by this acceptance record.",
+    "The execute script's shared evidence path guard should be added for future changes (not a V9 issue — V9 is STOP)."
+  ]
+}

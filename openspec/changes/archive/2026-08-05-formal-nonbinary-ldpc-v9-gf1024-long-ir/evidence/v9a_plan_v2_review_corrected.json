@@ -1,0 +1,54 @@
+{
+  "schema": "v9a_plan_v2_review_corrected_v1",
+  "reviewer": "reviewer-go (independent re-review of the corrected V9A plan amendment v2)",
+  "date": "2026-08-04",
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "reviews": ["evidence/v9a_plan_v2_review.json (prior, BLOCKED)", "evidence/v9a_plan_v2.json (corrected)", "evidence/v9a_plan.json (v1, immutable)", "evidence/v9a_plan_review.json", "evidence/v9_00_freeze.json"],
+  "review_scope": "Read-only re-verification of evidence/v9a_plan_v2.json (schema v9a_plan_v2_v1) after the main thread added execution_history_correction. Checks A-D exactly as instructed: (A) correction present with main_thread_decision and bound artifacts, false claims gone; (B) scientific parameters identical to v1, budget amendment unchanged; (C) v1 byte-identical SHA256 2e0a68807ca80ac92693b1829e02d6ef92828b01016e78a737d9fbe9ef1a8389, interrupted-trial artifacts on disk, pid 17948 not alive; (D) HEAD/frozen dirs/staging/v9* scope. Nothing executed; nothing killed.",
+  "checks": {
+    "A_correction_present": {
+      "method": "Read v9a_plan_v2.json; grep for the false claims ('nothing was executed', 'never executed', 'No scientific result').",
+      "result": "execution_history_correction present with finding, main_thread_decision (FROZEN NON-DECISIONAL INTERRUPTED TRIAL; no gate verdict; not the official execute; not used to change any candidate/seed/gate/target), bound_artifacts (3 entries), and process_cleanup (verify/terminate pid 17948 at v2 execute). Grep for 'nothing was executed|never executed|No scientific result' returns ZERO matches: the earlier false claims are gone. FAILURE NOTE: bound_artifacts[2] cites workspace/v9a_bench_707a1e29d4ba4a46a059a4d3c38ff64e/results.jsonl which DOES NOT EXIST on disk; the actual artifact is workspace/v9a_bench_707a1e2912124baf93d5bad919fc051b/results.jsonl (6 runs, verified). The correction binds a path that cannot be verified.",
+      "pass": false
+    },
+    "B_scientific_params_and_budget_unchanged": {
+      "method": "Side-by-side comparison of v1 (evidence/v9a_plan.json) vs v2 (unchanged_from_v1 + amended_budget_v2).",
+      "result": "All scientific parameters identical: S1 (p=.20 f=1.15 seed 2026090101 gate .22), S2 (p=.20 f=1.08 seed 2026090102 gate .215), S3 (p=.30 f=1.15 seed 2026090103 gate .32), S4 (p=.30 f=1.08 seed 2026090104 gate .32); validation seeds 2026090111/112/113 with min-over-3-seeds conservative rule; candidates C1..C8 byte-identical; rho rule (harmonic-exact concentrated two-point, reconstructed-rate error <=1e-12); gates .22/.32/.215/.32 with identical failure semantics; selection rule (max threshold proxy, ties C1..C8); validation rule unchanged; resource (ctypes RSS watcher, 3 GiB, aborted_resource_limit), rank (rank(H)=m, <=5 relabels then blocker), leakage (L_recon=10*m, 64-bit tag, L_total=10*m+64, Toeplitz public_control n*10+63) policies restated identically; max_iter 150, entropy_tol 0.01, streak 20, floor 1e-300, probe ranges [0.15,0.26]/[0.24,0.36], p_tol 0.002 unchanged. Budget amendment unchanged from the previously reviewed v2: n_samples=1000 (v1 2000), max_iter=150, p_tol=0.002, screen-then-search, 4-eligible cap, run-count cap 60/search. Only the execution_history_correction section was added; no scientific element drifted.",
+      "pass": true
+    },
+    "C_v1_immutability_artifacts_pid": {
+      "method": "Recomputed SHA256 of evidence/v9a_plan.json; Test-Path on the interrupted-trial artifacts; Get-CimInstance/Get-Process for pid 17948 (no kill).",
+      "result": "v1 plan SHA256 recomputes EXACTLY to 2E0A68807CA80AC92693B1829E02D6EF92828B01016E78A737D9FBE9EF1A8389 (byte-identical; immutability holds). Interrupted-trial artifacts exist: workspace/v9a_04c9e7d25d7145659685415084d6fac7/execute.stdout.log (plan_hash_ok=2e0a68807ca80ac9; proxies C1=0.192109375 C2=0.173203125 C3=0.174921875 C4=0.198984375 C5=0.185234375 AND C6=0.195546875) and execute.pid.txt (content '17948'). Bench results.jsonl exists with exactly 6 q=1024 runs at workspace/v9a_bench_707a1e2912124baf93d5bad919fc051b/ (NOT at the hash the v2 plan binds). FAIL: pid 17948 IS ALIVE at review time 2026-08-04 18:03:50: python.exe, StartTime 2026-08-04 15:31:01 (exactly the interrupted-trial start), command line run_v9a_execute.py workspace/v9a_04c9e7d25d7145659685415084d6fac7/execute, accumulated 9098.75 s CPU. The process was never actually terminated; the execute.stdout.log shows progress through C6, i.e. it has moved beyond the C1..C5 the correction documents, so the bound evidence is still MUTABLE (still being written) and the 'interrupted ~17:34:56 / C1..C5' narrative is stale. Check fails: the plan requires pid 17948 not alive and its own correction claims an interrupted session, but the process is still running at review time.",
+      "pass": false
+    },
+    "D_scope": {
+      "method": "git rev-parse HEAD; git status --porcelain (frozen dirs src/experiments/tools/results); git diff --cached --stat (staged); formal_ir_methods listing for v9*.",
+      "result": "HEAD = a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344 (matches frozen). Frozen dirs src/experiments/tools/results porcelain EMPTY. Nothing staged (git diff --cached empty; only unstaged tracked modifications in the known 12 files from v9_00_freeze.json plus untracked workspace/comparison_bench scratch). No v9* entry under comparison_bench/outputs_comparison/formal_ir_methods/ (V1-V5 era packages only).",
+      "pass": true
+    }
+  },
+  "findings": [
+    {
+      "id": 1,
+      "severity": "blocking",
+      "text": "pid 17948 is STILL ALIVE at re-review time (2026-08-04 18:03:50; python.exe started 15:31:01, exactly the interrupted trial, command line run_v9a_execute.py .../execute, 9098.75 s CPU). The correction claims the operator interrupted the session at ~17:34:56 and binds the trial as FROZEN immutable evidence, but the process was never terminated and its execute.stdout.log has advanced past the documented C1..C5 (C6 proxy=0.195546875 now present). The bound evidence is still being written (mutable), and the v2 execute round must NOT start while a v1-protocol process is still alive and consuming resources. Required before READY_FOR_SINGLE_EXECUTION: the main thread/operator must positively terminate pid 17948, then re-check it is dead, then update the correction's factual narrative (interruption time and computed candidates) to match the final log state."
+    },
+    {
+      "id": 2,
+      "severity": "blocking",
+      "text": "bound_artifacts[2] cites workspace/v9a_bench_707a1e29d4ba4a46a059a4d3c38ff64e/results.jsonl, which does NOT exist on disk. The real artifact is workspace/v9a_bench_707a1e2912124baf93d5bad919fc051b/results.jsonl (verified: 6 q=1024 MC-DE runs, bench_v9a.py present). The correction binds a non-existent path for one of its three immutable artifacts; the path must be corrected to the actual hash before the plan can be trusted."
+    },
+    {
+      "id": 3,
+      "severity": "non-blocking",
+      "text": "The correction documents 'computing S1 candidates C1..C5 ... before the operator interrupted the session', but the live log already contains C6 (0.195546875) and the process is still running; after pid termination the final log content (number of candidates and proxies) must be re-recorded so the bound narrative matches the bound artifact."
+    },
+    {
+      "id": 4,
+      "severity": "non-blocking",
+      "text": "Confirmed (as in the prior review): the 4-eligible cap makes the winner a subset-max over the first 4 eligible in canonical order; conservative direction only, but the execution must record the eligible count and the searched subset. selection_rule wording amended ('among searched eligible') is fully described in amended_budget_v2; labeling nit only."
+    }
+  ],
+  "blocking_findings_count": 2,
+  "overall_verdict": "BLOCKED"
+}

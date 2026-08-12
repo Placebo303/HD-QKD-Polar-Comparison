@@ -1,0 +1,130 @@
+{
+  "schema": "v8_60_correction_v1",
+  "change": "formal-nonbinary-ldpc-v8-reference-reproduction",
+  "phase": "V8-60 audit-correction close-out",
+  "date": "2026-08-04",
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "operator_role": "implementation operator (coder-fast); acceptance and scientific gates remain with the main thread; acceptance is NOT self-granted",
+  "audit_finding": {
+    "formula": "concentrated_check_distribution matched the two-point MEAN check degree (w_lo = dc_hi - dc_mean), which does not satisfy the edge-perspective rate condition sum_j rho_j/j = (1-R) * sum_i lambda_i/i exactly (relative error ~1e-4); the concentrated rho used by the reproduction was therefore biased. Non-tuning formula correction.",
+    "citation": "REPRODUCTION_CITATION listed the first author with the wrong given name ('Rasmus T. Mueller' instead of 'Ronny Mueller') and 'Leif K. Oxenl\u00f8we' instead of the full 'Leif Katsuo Oxenl\u00f8we'; corrected to the exact arXiv:2307.02225v2 author list.",
+    "tolerance_arithmetic": "the frozen tolerance justification 0.005+0.003+0.0025 = 0.015 was arithmetically invalid; replaced by 0.0005 + 0.00125 + 0.005 + 0.005 = 0.01175 <= 0.012."
+  },
+  "formula_old_to_new": {
+    "old": "dc_mean = 1 / ((1 - rate) * integral_lambda); d_lo = max(2, floor(dc_mean)); w_lo = dc_hi - dc_mean; w_hi = dc_mean - dc_lo; the two-point mean equals dc_mean (approximation; sum_j rho_j/j = 1/dc_mean + O(1e-4 relative))",
+    "new": "integral = sum_i lambda_i/i; target = (1 - rate) * integral; dc = 1/target; d_lo = floor(dc); d_hi = d_lo + 1; integer dc degenerates to {d_lo: 1.0}; else w_lo = (target - 1/d_hi) / (1/d_lo - 1/d_hi), w_hi = 1 - w_lo; sum_j rho_j/j = target exactly; rate_reconstructed = 1 - target/integral",
+    "new_helper": "reconstructed_rate(lambda_edge, rho_edge) = 1 - (sum_j rho_j/j) / (sum_i lambda_i/i); added to __all__; per-entry validation identical to edge_mean_inverse",
+    "reproduction_weights": {
+      "old": {"24": 0.6714106712312713, "25": 0.3285893287687287},
+      "new": {"24": 0.662342394447661, "25": 0.33765760555233904},
+      "dc_mean_unchanged": 24.32858932876873,
+      "integral_lambda_unchanged": 0.1644156159629844,
+      "target": 0.0411039039907461
+    }
+  },
+  "constants_old_to_new": {
+    "REPRODUCTION_N_SAMPLES": {"old": 20000, "new": 100000, "reason": "paper's own MC-DE node budget"},
+    "REPRODUCTION_MAX_ITER": {"old": 200, "new": 150, "reason": "paper's own MC-DE iteration budget"},
+    "REPRODUCTION_TOL": {"old": 0.015, "new": 0.012, "reason": "auditable tolerance arithmetic (see below); old 0.015 claim arithmetic was invalid"},
+    "REPRODUCTION_CITATION.authors": {
+      "old": ["Rasmus T. Müller", "Domenico Ribezzo", "Mujtaba Zahidy", "Leif K. Oxenløwe", "Davide Bacco", "Søren Forchhammer"],
+      "new": ["Ronny Müller", "Domenico Ribezzo", "Mujtaba Zahidy", "Leif Katsuo Oxenløwe", "Davide Bacco", "Søren Forchhammer"]
+    },
+    "unchanged": ["REPRODUCTION_SEED 2026080418", "REPRODUCTION_P_LO 0.01", "REPRODUCTION_P_HI 0.12", "REPRODUCTION_P_TOL 0.0025", "REPRODUCTION_ENTROPY_TOL 0.01", "REPRODUCTION_STREAK 20", "REPRODUCTION_DET_PUBLISHED 0.069", "REPRODUCTION_LAMBDA_PUBLISHED", "REPRODUCTION_Q 4", "REPRODUCTION_RATE 0.75"]
+  },
+  "tolerance_arithmetic": {
+    "terms": [
+      {"value": 0.0005, "meaning": "3-decimal published rounding of DET 0.069"},
+      {"value": 0.00125, "meaning": "binary-search half-step p_tol/2"},
+      {"value": 0.005, "meaning": "our MC-DE finite-sample threshold-estimate error at 100000 nodes (conservative bound, explicit constant)"},
+      {"value": 0.005, "meaning": "paper MC-DE estimate error at its 100000 nodes (same bound)"}
+    ],
+    "sum": 0.01175,
+    "frozen_tolerance": 0.012,
+    "relation": "0.01175 <= 0.012",
+    "invalid_prior_claim": "0.005+0.003+0.0025 = 0.015 (not reused)"
+  },
+  "original_trace_preservation": {
+    "file": "evidence/v8_reproduction_trace.json",
+    "sha256_recorded_before_correction": "dd5678fd2d77b67dd7f3fc7ee221a49b0d33eab37ab5d226d96e6d243b071de3",
+    "status": "preserved byte-identical; marked pre-correction approximate trace via evidence/v8_reproduction_trace_precorrection_annotation.json",
+    "sidecar": "evidence/v8_reproduction_trace_precorrection_annotation.json (schema v8_reproduction_trace_precorrection_annotation_v1)"
+  },
+  "corrected_trace": {
+    "file": "evidence/v8_reproduction_trace_corrected.json",
+    "schema": "v8_reproduction_trace_corrected_v1",
+    "run_command": "python -c (single corrective threshold_binary_search; q=4, REPRODUCTION_LAMBDA_DEGREES, rho = concentrated_check_distribution(0.75, lam) dropping zero weight, n_samples=100000, max_iter=150, seed=2026080418, p_lo=0.01, p_hi=0.12, p_tol=0.0025)",
+    "threshold_proxy": 0.06242187500000001,
+    "delta_vs_published": 0.006578124999999997,
+    "det_published": 0.069,
+    "verdict": "PASS",
+    "verdict_rule": "PASS iff delta <= 0.012",
+    "n_probes": 6,
+    "elapsed_seconds": 260.5,
+    "run_utc": "2026-08-04T03:42:50Z",
+    "note": "executed exactly once; no rerun, no tuning; a FAIL outcome would still have been recorded"
+  },
+  "golden_re_recording": {
+    "q4": {
+      "config": "q=4, lambda {2:0.5,3:0.5}, rho concentrated(0.5, lam) -> {4: 1/6, 5: 5/6}, p=0.1, n_samples=500, max_iter=60, seed=2026080420",
+      "recorded": "re-recorded 2026-08-04 under the V8-60 harmonic-exact weights (old values were mean-matched); converged=True, iterations=33",
+      "tamper_modes": "omitted-channel and fixed-max runs both differ from the frozen canonical trace (old R2 regression detection preserved)"
+    },
+    "q8": {
+      "config": "q=8, lambda {3:1.0}, rho concentrated(0.5, lam) -> integer dc degenerates to {6:1.0} unchanged, p=0.05, n_samples=500, max_iter=60, seed=2026080421",
+      "recorded": "byte-identical to the existing GOLDEN_Q8_* trace (confirmed; no unintended behavior change)"
+    }
+  },
+  "tiers": {
+    "compile": {
+      "command": "python -m py_compile comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_mcde.py comparison_bench/tests/test_nonbinary_v8_mcde.py",
+      "exit_code": 0
+    },
+    "T0": {
+      "command": "python -c structural check (REPRODUCTION_CITATION authors == arXiv:2307.02225v2 list; corrected constants N_SAMPLES/MAX_ITER/TOL/SEED/P_LO/P_HI/P_TOL/ENTROPY_TOL/STREAK/DET_PUBLISHED; reconstructed_rate in __all__) + python -m pytest comparison_bench/tests/test_nonbinary_v8_error_domain.py comparison_bench/tests/test_nonbinary_v8_reference.py comparison_bench/tests/test_nonbinary_v8_mcde.py -q -p no:cacheprovider --basetemp workspace/nbldpc_v8_60_7e8d2ae6221c4bdf942498e008489044/pytest_t0 -k 'concentrated_check_distribution_reproduction or reconstructed_rate_exact or golden_q4 or golden_q8 or precorrection_trace_preserved or no_production_runner_bound or exhaustive_q4 or qsc_channel or degree_conversion or assert_oracle_independent or forbidden_import or reconstruction_roundtrip or coefficient_order or xor_conv_pairwise_hand or direct_syndrome_row_order or determinism'",
+      "exit_code": 0,
+      "passed": 17,
+      "failed": 0,
+      "deselected": 19
+    },
+    "T1": {
+      "command": "python -m pytest comparison_bench/tests/test_nonbinary_v8_error_domain.py comparison_bench/tests/test_nonbinary_v8_reference.py comparison_bench/tests/test_nonbinary_v8_mcde.py -q -p no:cacheprovider --basetemp workspace/nbldpc_v8_60_7e8d2ae6221c4bdf942498e008489044/pytest_t1 -k 'not test_reproduction_muller2024 and not test_v8_source_manifest_readonly and not test_v8_no_production_runner_bound and not test_v8_precorrection_trace_preserved_readonly'",
+      "exit_code": 0,
+      "passed": 32,
+      "failed": 0,
+      "deselected": 4
+    },
+    "T2": {
+      "command": "python -m pytest comparison_bench/tests/test_nonbinary_v8_error_domain.py comparison_bench/tests/test_nonbinary_v8_reference.py comparison_bench/tests/test_nonbinary_v8_mcde.py -q -p no:cacheprovider --basetemp workspace/nbldpc_v8_60_7e8d2ae6221c4bdf942498e008489044/pytest_t2 -k 'test_reproduction_muller2024 or test_v8_source_manifest_readonly or test_v8_no_production_runner_bound or test_v8_precorrection_trace_preserved_readonly'",
+      "exit_code": 0,
+      "passed": 4,
+      "failed": 0,
+      "deselected": 32,
+      "note": "reads evidence/v8_reproduction_trace_corrected.json (reproduction), the regenerated v8_source_manifest.json (manifest), and the sidecar annotation + byte-identical original trace (precorrection preservation) read-only"
+    },
+    "T3": {
+      "note": "intentionally NOT rerun (V8-60.8 scope: compile + T0/T1/T2 only); frozen V1-V7 regression untouched"
+    }
+  },
+  "source_manifest_old_to_new": {
+    "file": "evidence/v8_source_manifest.json",
+    "schema": "v8_source_manifest_v1",
+    "created_before_tests": true,
+    "changed": {
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_mcde.py": {"old": "bbc19cb345ea8c6ff9a6d3726e16ea1485c5f79ae3285eeaa7b3733e6452a9d2", "new": "2c84a5ee76d09f4d6cea537289ff82d88ab19abd31d1a41951a7d24acdd66543"},
+      "comparison_bench/tests/test_nonbinary_v8_mcde.py": {"old": "a89541799fb8ba2d7accf03a4a951e30c075cecefc149f95560f1f784cc076c7", "new": "a508a4228ee06114424db2242b4db784bfa1b9cabcbae54f4cd7172ed988a81f"}
+    },
+    "unchanged": {
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_error_domain.py": "f422c39435479554251369bbf10d25f1f65c6b26ab8d50ac4b5c8a9340910e53",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_reference.py": "d747f0d58e218297c515ab3cdd7cd9e17c79aabf29350cbb5ce4e9fbcefbb96b",
+      "comparison_bench/tests/test_nonbinary_v8_error_domain.py": "50397c0d0e1cd6d8497cab315679215b48802000b340f91a4f01c290cea17b7d",
+      "comparison_bench/tests/test_nonbinary_v8_reference.py": "258b67b4c7c1fcb2cc2e4220852016e64291750d4632bec59b86f7776b72a568"
+    },
+    "delta_field": "v8_60_delta records the two changed files; old hashes remain in evidence/v8_engineering_acceptance.json (NOT rewritten) and here; the manifest was regenerated BEFORE any tier run in this phase"
+  },
+  "tasks_state": {
+    "done": ["V8-60.1", "V8-60.2", "V8-60.3", "V8-60.4", "V8-60.5", "V8-60.6", "V8-60.7", "V8-60.8"],
+    "pending": ["V8-60.9 (independent read-only review, reviewer-go)", "V8-60.10 (main-thread acceptance close-out addendum)", "V8-60.11 (docs/memory update)"]
+  },
+  "acceptance_statement": "Acceptance is NOT self-granted by the implementation operator. V8-A12 remains 'blocked' in evidence/v8_engineering_acceptance.json (byte-identical); it is resolved only by the independent V8-60.9 review and the main-thread V8-60.10 close-out addendum."
+}

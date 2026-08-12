@@ -55,13 +55,13 @@ Running twice produces identical outputs (same content, same hashes).
 
 ## Acceptance Criteria
 
-- [ ] AC1: `cascade_optimized_summary.csv` contains only `real_ir_success=True` rows with minimum `leak_EC_actual_bits` per `dataset_id`
-- [ ] AC2: `ldpc_optimized_summary.csv` contains only `real_ir_success=True` rows with minimum `leak_EC_actual_bits` per `dataset_id`
-- [ ] AC3: `qldpc_reference_summary.csv` preserves `success_classification` from source
-- [ ] AC4: `scalability_summary.csv` merges real and synthetic scalability data
-- [ ] AC5: `method_comparison_by_frame_len.csv` groups by `frame_len_symbols` with success counts and average metrics
-- [ ] AC6: `failure_region_analysis.csv` counts failures by method/dimension/bin_width
-- [ ] AC7: `expanded_evidence_manifest.json` contains source hashes and config snapshots
-- [ ] AC8: pytest passes with ≥3 test cases covering selection correctness
-- [ ] AC9: No source files are modified
-- [ ] AC10: CLI runs without errors on existing real_ir_success_first data
+- [x] AC1: `cascade_optimized_summary.csv` contains only `real_ir_success=True` rows with minimum `leak_EC_actual_bits` per `dataset_id`
+- [x] AC2: `ldpc_optimized_summary.csv` contains only `real_ir_success=True` rows with minimum `leak_EC_actual_bits` per `dataset_id`
+- [x] AC3: `qldpc_reference_summary.csv` preserves `success_classification` from source
+- [x] AC4: `scalability_summary.csv` merges real and synthetic scalability data
+- [x] AC5: `method_comparison_by_frame_len.csv` groups by `frame_len_symbols` with success counts and average metrics
+- [x] AC6: `failure_region_analysis.csv` counts failures by method/dimension/bin_width
+- [x] AC7: `expanded_evidence_manifest.json` contains source hashes and config snapshots
+- [ ] AC8: pytest passes with ≥3 test cases covering selection correctness — test source has the cases, but its fixed tracked workspace fixture was not safely rerun.
+- [ ] AC9: No source files are modified — current matching manifest hashes establish provenance after generation, not a before/after non-modification proof.
+- [x] AC10: CLI runs without errors on existing real_ir_success_first data

@@ -1,6 +1,218 @@
 # AGENT_HANDOFF.md
 
-Last verified: **2026-07-30**
+Last verified: **2026-08-12**
+
+## Current State — Binary LDPC v5 Phase 4 REAL PROMOTED (2026-08-12)
+
+Change: `openspec/changes/binary-ldpc-v5-incremental-redundancy/`
+
+Binary LDPC v5 sealed real qualification completed and PROMOTED on the real
+10 dB Type-II capture — the first real-data promotion for binary LDPC.
+
+- Official package (ten files, run_id `binary_ldpc_v5_real_qualification_v1`,
+  plan_sha256
+  `a79cd16f19b968364a4c46fb4887f933eeb472e45c19d098a938ae5dc58ad01b`):
+  `comparison_bench/outputs_comparison/formal_ir_methods/20260801_v2_binary_ldpc_v5_real/`
+- Result: 384/384 verified_success — bw120/bw180/bw200 each 128/128, zero
+  forbidden failures; report `promoted=true`, `run_status=completed`,
+  `decoder_reexecution=false`. Execute ~5m12s, verify ~4m29s, run in a
+  detached background process (2026-08-12).
+- Promotion domain: 10 dB Type-II, q=1024, Gray, 256-symbol,
+  bw120/bw180/bw200, V5-C2 strategy only. v4 (16 dB 125/128, 10 dB 125/128)
+  and all other domains/methods remain non-promoted.
+- Chain: 20260731 partition lock → 20260731 v5 development (V5-C2,
+  1536/1536) → 20260801 v5 synthetic (256/256 promoted) → 20260801_v2 real
+  (384/384 promoted), each once with read-only verification.
+- tasks.md: Phase 4 all checked with the official result; Phase 5 item 1
+  (handoff/decision-log/memory/eligibility/parallel status) checked;
+  Phase 5 item 2 (mandatory memory triage) remains for the memory agent.
+
+Next: Phase 5 memory triage (memory agent); then the user decides whether to
+open a separate rate-adaptive successor OpenSpec change. Comparison
+eligibility: v5 10 dB domain only; other domains/methods unchanged.
+
+---
+
+## Previous State — Nonbinary V11 spatially coupled DE gate: PLAN FROZEN (2026-08-06)
+
+Change: `openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/`
+
+V11 is a plan-only successor to the terminated V10 ensemble search. The
+literature-backed contract uses a direct QSC SMP threshold reproduction at
+q=4/q=16, followed by an independently validated full-vector GF(1024)
+spatially coupled MC-DE. It reuses frozen V10 S1/S3 ensembles, compensates
+termination rate loss to match the uncoupled effective rate, and evaluates
+only G1 `(w=1,L=32,W=8)`, G2 `(w=2,L=32,W=16)`, and G3
+`(w=2,L=32,W=32)`. Passing requires absolute .22/.32 robust gates plus at
+least .002 paired gain in both strata.
+
+Next: V11-P04 independent read-only freeze review of V11-A01..V11-A16. No
+implementation or scientific execution is authorized yet. Even a passing V11
+state is only `ready_for_finite_length`; protograph lifting, PEG, FFT-QSPA,
+4+4 canary, development, real data, qualification, and promotion require a
+new successor OpenSpec change.
+
+Detailed plan: `docs/nonbinary-ldpc-v11-sc-de-plan.md`.
+
+---
+
+## Previous State — Nonbinary V10 DE-PEG-FFT-QSPA: failed_ensemble TERMINATED (2026-08-06)
+
+Change: `openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/`
+
+V10 is TERMINATED with final state **failed_ensemble**. The V10A GF(1024)
+four-search density-evolution ensemble gate FAILED (hard stop V10-S02);
+V10-30 (PEG), V10-40 (FFT-QSPA), V10-50 (canary), and V10-60 (development)
+are all HALTED. There is no "closest to gate", no rerun, and no tuning; no
+codebook, decoder, canary, development, qualification, real-data, or
+promotion output was produced. The successor is a brand-new V11 NB-SC-LDPC
+OpenSpec change (fresh everything), pending user decision.
+
+Gate results:
+- V10-0 q=4 reference recovery: PASS — conservative 0.06414,
+  |δ| = 0.00486 ≤ 0.012; main-thread accepted 2026-08-05.
+- S1 (p=.20, f=1.15): conservative 0.2153 < 0.22 → FAIL.
+- S2 (p=.20, f=1.08): conservative 0.1984 < 0.215 → FAIL.
+- S3 (p=.30, f=1.15): conservative 0.3166 < 0.32 → FAIL.
+- S4 (p=.30, f=1.08): no eligible candidate → FAIL.
+
+Evidence (all under the change's `evidence/`):
+- `v10_gate_decision.json` — final gate decision (schema
+  `v10_gate_decision_v1`, `final_state=failed_ensemble`)
+- `v10a_execute_results.json` — official execute (~10470 s, peak RSS
+  335 MB < 3 GiB)
+- `v10a_replay_evidence.json` — first replay attempt interrupted (PID 21032
+  died, S1 only); `replay_attempt2/` completed 04:36–07:07Z (RSS 339 MB);
+  129-file direct byte comparison PASS, scientific files byte-identical,
+  only provenance normalization differs (plan_binding digest key and
+  run_complete role/stage)
+- `v10a_gate_decision.json` — per-search gate decisions
+- `v10_t3_regression.json` — git baseline PASS, frozen directories zero
+  change, no new output under
+  `comparison_bench/outputs_comparison/formal_ir_methods/`
+- `v10_protocol_amendment_no_hash_v1.json` — 2026-08-06 amendment record
+
+2026-08-06 protocol amendment (main-thread): defensive SHA-256/checksum/
+integrity-manifest mechanisms (plan-bound digest, manifest self/source
+hash, per-file compare sha256) were removed per AGENTS.md §5.7; the
+replacements are git baseline checks, direct byte comparison, structured
+field validation, and semantic recomputation. `v10_seed` is RETAINED as a
+deterministic RNG derivation primitive — DE population initialization and
+mutation RNG streams depend on it and completed results depend on its byte
+reproduction. V10-30.DESIGN (PEG no-hash design note) remains unchecked and
+is left for V11 inheritance.
+
+Correction + close-out (2026-08-06): `evidence/v10_s4_delta_correction.json`
+(schema `v10_s4_delta_correction_v1`) records that the S4 `delta` field in
+`evidence/v10a_gate_decision.json` was boolean false (build_evidence
+short-circuit bug) — correct semantics is null; evidence untouched, script
+expression fixed for future reuse; S4 verdict FAIL and `failed_ensemble`
+unaffected. Independent reviewer-go final review ACCEPT
+(`evidence/v10_independent_review_acceptance.json`, schema
+`v10_independent_review_acceptance_v1`, 2026-08-06, 89 tests pass).
+Archive plan: V10 moves to
+`openspec/changes/archive/2026-08-06-formal-nonbinary-ldpc-v10-de-peg-fftqspa/`
+without delta-spec merge (failed_ensemble); a scoped local git commit first,
+no push; V11 NB-SC-LDPC successor pending main-thread decision.
+
+Tests: full V10 suite 89 passed (common 23 / de 24 / gate 13 / peg 12 /
+fftqspa 17). Frozen baseline: git HEAD
+`a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344`; `src/`, `experiments/`,
+`tools/`, `results/` unchanged; the 12 tracked modifications are
+pre-existing dirty-worktree entries of other workflows.
+
+Archived (2026-08-06): moved to
+`openspec/changes/archive/2026-08-06-formal-nonbinary-ldpc-v10-de-peg-fftqspa/`
+via equivalent rename (archive.js incompatible with the custom V10-xx.y task-ID
+schema, fail-closed, no partial state); delta specs NOT merged (V9 precedent);
+local commit only, not pushed — archive-move commit 2 =
+`921d0020f5fea9bc4452c17453365e2a1a7683f4`.
+
+Next: the user decides whether to start the new V11 NB-SC-LDPC change.
+Nothing further is authorized under V10.
+
+---
+
+## Previous State — Nonbinary V9A GF(1024) Long-Block IR: FROZEN STOP (2026-08-04)
+
+Change: `openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/`
+
+V9A executed once under the v2 budget protocol (pid 5084, 3968.5 s, peak RSS
+428.3 MiB) and strict-replayed once (pid 29340, 4838.5 s). All four frozen
+searches (S1 robust .22, S2 target .215, S3 robust .32, S4 target .32) recorded
+zero eligible candidates; every gate FAILS. The change is frozen STOP before any
+finite codebook. V9B/V9C are unreachable.
+
+Evidence:
+- `evidence/v9a_plan_v2.json` (sha256 `4bd6380f19008c9c893b1114fbab94a60d37acb77e3fbdf7a0d03d347092ddf2`)
+- `evidence/v9a_execute_results.json` — official execute (restored from
+  `workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_execute/` after the replay
+  overwrote the shared evidence path)
+- `evidence/v9a_replay_evidence.json` — scientific files byte-identical; only
+  `run_meta.json` differs in provenance
+- `evidence/v9a_gate_decision.json` — STOP decision
+- `evidence/v9a_interrupted_trial_freeze.json` — v1-protocol interrupted trial
+  (pid 17948)
+- `evidence/v9a_interrupted_v2_attempt_freeze.json` — v2-protocol attempt B
+  interruption freeze (pid 23652)
+
+Close-out complete (2026-08-04): independent reviewer-go ACCEPT, SHA256
+verification (9/11 byte-identical; 2 provenance-only diffs), acceptance
+record `evidence/v9a_independent_review_acceptance.json`.
+
+ARCHIVED (2026-08-05): moved to
+`openspec/changes/archive/2026-08-05-formal-nonbinary-ldpc-v9-gf1024-long-ir/`.
+Delta spec NOT synced to main specs (per user choice). No V9B/V9C work was
+produced. A successor nonbinary LDPC lane requires a NEW OpenSpec change with
+fresh roots, a different ensemble family, and new development/confirmation
+data.
+
+---
+
+## Previous State — Nonbinary v7 Successor Ladder COMPLETE: `ladder_exhausted` (2026-08-04)
+
+Change: `openspec/changes/formal-nonbinary-ldpc-v7-successor-ladder/`
+(proposal/design/specs/tasks/opencode-autonomous-packet all frozen). Route
+ladder R1A -> R1B -> R2 -> R3; per route: engineering T0-T3 + independent
+acceptance -> sacrificed 4+4 canary (plan -> read-only review -> execute once
+-> strict replay once) -> 0/4 in either stratum freezes and advances; else
+16+16 development -> readiness gate (>=15/16 per stratum, zero forbidden,
+strict replay, disclosure <=8.75 bits/symbol excluding tag, median <=120
+s/frame) -> stop at first ready route.
+
+- **R1A** `(2,3)` mother GF(1024) n=256 m=170, flooding FFT-QSPA: accepted
+  (T0 19/T1 64/T2 11/T3 97); canary 0/4+0/4 -> `failed_canary`, frozen.
+- **R1B** one multiplicative repetition (rate 1/6): accepted (T0 15/T1 76/
+  T2 17/T3 119); canary 3/4+0/4 -> `failed_canary` (p=.30 tail), frozen.
+- **R2** QSC density-evolution ensemble n=1024 (321/458 checks, DE validated
+  vs published BSC/BEC vectors): accepted (T0 32/T1 100/T2 24/T3 142); canary
+  0/4+0/4 -> `failed_canary`, frozen.
+- **R3** GF(32)xGF(32) multilevel EMS nm=32 (m0=m1=404/558, disclosure
+  4040/5580 bits excl. tag, 3.945/5.449 bits/symbol): accepted (T0 19/T1 105/
+  T2 33/T3 179, 10/10 review PASS); canary plan reviewed
+  READY-FOR-SINGLE-EXECUTION, minimal canary-only authorization edit applied,
+  executed once (668.8 s) + strict-replayed once (663.4 s), canary 0/4+0/4 ->
+  `failed_canary`, frozen.
+
+**CLOSEOUT (V7-40 done)**: all four routes `failed_canary`; no route reached
+development-ready -> first-ready route NONE, **`ladder_exhausted`** TRUE.
+Ladder report: `evidence/v7_ladder_report.md`. Every failed artifact retained
+immutably under `workspace/nbldpc_v7_*`; NO official
+`comparison_bench/outputs_comparison/formal_ir_methods/` v7 directory exists;
+HEAD `a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344` (no commits during the
+ladder). No fourth route invented; a successor requires a NEW OpenSpec change
+with fresh development/confirmation data and new roots; current confirmation
+rows are not tuning data; qualification/promotion/comparison claims remain
+unauthorized. Remaining: V7-41 acceptance + memory triage, V7-42 finalize.
+Predecessors: v6 long-block stopped (canary 0/4+0/4), v5 terminated
+(4 non-promoted packages). Memory: AGENT_PROJECT_MEMORY.md sections 33-35;
+decision-log entries 2026-08-02 (R1A/R1B/R2 canary non-promotion) and
+2026-08-04 (R3 canary non-promotion + ladder_exhausted + closeout).
+
+Session-instability note: the Task tool intermittently returned empty
+results/cancelled mid-session; every completed stage was verified on disk
+before acceptance. Do not treat empty subagent returns as completion — check
+the frozen file inventory on disk and retry with a fresh session.
 
 ## Project-Wide Agent Workflow (2026-07-29)
 
@@ -1319,4 +1531,115 @@ Run only focused disposable tests/static checks for the new audit CLI, review th
 - Evidence: openspec/changes/formal-nonbinary-ldpc-v5-multistage-ir/evidence/
   v5d_acceptance_d1_d2.json and v5d_acceptance_c3_c4.json; decision-log
   entry 2026-08-02.
+
+## Nonbinary V8 Handoff — V8-60 Audit-Correction Close-out (2026-08-04)
+
+- Change: `openspec/changes/formal-nonbinary-ldpc-v8-reference-reproduction/`.
+- Status: IMPLEMENTED, then corrected by V8-60 (non-tuning formula correction
+  from an independent audit), corrective reference run executed once, and
+  INDEPENDENTLY REVIEWED ACCEPTED (reviewer-go, read-only, 2026-08-04, HEAD
+  `a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344`). V8-A01..V8-A11 pass; V8-A12
+  resolved pass by the V8-60 review (operator did not self-accept).
+- Done: additive `nonbinary_v8_error_domain.py` (error-domain contract
+  d = H*(x+y), x_hat = y + e_hat, pure field-tables-only helpers),
+  `nonbinary_v8_reference.py` (independent probability-domain oracle: pairwise
+  XOR convolution + sparse support enumeration + brute-force tiny-code
+  coset/MAP, GF2mField-only import boundary enforced), `nonbinary_v8_mcde.py`
+  (full-vector QSC MC-DE: edge-perspective degrees with tested node/edge
+  conversion, exact sampled degrees, fresh channel message per variable
+  update, direct convolution without FWHT, base-q mean entropy convergence,
+  seeded deterministic, fail-closed), plus 3 tests and 7 evidence files.
+  Tiers (`pytest -q -p no:cacheprovider`, fresh workspace
+  `nbldpc_v8_reference_9c3f51e2a74b48d9b6c0a5f8e1d23a4b` root): T0 11/0,
+  T1 31/0, T2 3/0 (read-only reproduction-trace + source-manifest +
+  no-production-runner verification), T3 179/0 (frozen 16-file
+  v5+v6+v7-R1A/R1B/R2 regression subset); reviewer re-ran T0/T1/T2: identical.
+- Reproduction (one frozen run, no rerun/tuning): Muller et al., Quantum Inf
+  Process 23, 195 (2024), arXiv:2307.02225v2, Table 1 row "0.75" (q=4,
+  rate 0.75, DET 0.069, EEff 1.053); threshold_proxy 0.062421875, delta
+  0.006578 <= 0.015 -> PASS. Provenance:
+  `evidence/v8_literature_provenance.json`,
+  `evidence/v8_muller2024_table1_extract.txt` (SHA256
+  `d343f0204e87994e64efd32531bc12490fb4e7125cd90b52cfaf2397279b57bd`);
+  full trace: `evidence/v8_reproduction_trace.json`.
+- Evidence: `v8_engineering_acceptance.json` (schema v8_engineering_v1,
+  source manifest with SHA256 of the 6 additive files),
+  `v8_source_manifest.json` (pre-test manifest re-verified read-only),
+  `v8_v7_interpretation_audit.md` (R1B = out-of-contract extra-observation
+  diagnostic; R2 = unvalidated scalar-DE surrogate result; V7 T0-T3
+  engineering PASS distinct from canary failures), and `v8_v9_recommendation.md`
+  (V9 lead: paper-faithful syndrome reconciliation with a reproduced ensemble
+  and blind puncturing/shortening, fresh roots, separate OpenSpec change;
+  NOT implemented).
+- Output policy: no V8 directory under
+  `comparison_bench/outputs_comparison/formal_ir_methods/`; no
+  canary/development/confirmation/real/N4/comparison execution; frozen
+  `src/`/`experiments/`/`tools/`/`results/` and all V1-V7 files unchanged
+  (git status/diff empty); nothing staged.
+- Remaining: nothing for V8 except the V8-60.11 memory-agent close-out
+  (AGENT_PROJECT_MEMORY.md section 39 pending). The only successor is a
+  separate future V9 OpenSpec proposal — NOT implemented. V8 is
+  engineering/reference-only and authorizes no
+  FER/readiness/qualification/promotion/comparison claim.
+
+**V8-60 correction close-out (2026-08-04)** — non-tuning formula correction
+discovered by an independent audit of the accepted V8 candidate:
+- (a) `concentrated_check_distribution` fixed from the mean-matched
+  `w_lo = dc_hi - dc_mean` approximation to an exact solve of
+  `sum_j rho_j/j = (1-R)*sum_i lambda_i/i` over adjacent check degrees
+  `{floor(dc), ceil(dc)}` (`w_lo = (target - 1/d_hi)/(1/d_lo - 1/d_hi)`,
+  `w_hi = 1 - w_lo`, `target = (1-R)*integral_lambda`, `dc = 1/target`);
+  new `reconstructed_rate(lambda_edge, rho_edge)` helper; tests assert
+  `|reconstructed_rate - rate| <= 1e-12` (5 configs).
+- (b) Citation first author corrected to Ronny Müller (arXiv:2307.02225v2
+  author list). (c) Invalid tolerance arithmetic `0.005+0.003+0.0025=0.015`
+  replaced by 0.0005 + 0.00125 + 0.005 + 0.005 = 0.01175 <= 0.012; frozen
+  tolerance 0.012.
+- Corrective run (once, frozen before run): q=4 R=0.75 Table 1 row 0.75, rho
+  {24: 0.6623423944, 25: 0.3376576056} (dc_mean 24.3285893 unchanged),
+  n_samples 100000, max_iter 150 (paper MC-DE budget), seed 2026080418,
+  p [0.01,0.12] step 0.0025, entropy < 0.01 base-q x20: threshold_proxy
+  0.062421875, delta 0.006578125 <= 0.012 -> PASS
+  (`evidence/v8_reproduction_trace_corrected.json`). No rerun, no tuning.
+- History: `v8_reproduction_trace.json` byte-identical (SHA256
+  `dd5678fd2d77b67dd7f3fc7ee221a49b0d33eab37ab5d226d96e6d243b071de3`) +
+  `v8_reproduction_trace_precorrection_annotation.json`;
+  `v8_engineering_acceptance.json` not rewritten (A12=blocked resolved by
+  `v8_acceptance_closeout_addendum.json`); provenance/extract/audit/
+  recommendation files unchanged; q=4 golden re-recorded ({4: 1/6, 5: 5/6},
+  recording not tuning), q=8 golden byte-identical (regular {6:1.0}), old-R2
+  tamper modes still differ.
+- Tiers (V8-60.8, no T3): compile exit 0; T0 17/0, T1 32/0, T2 4/0
+  (reproduction-trace + source-manifest + no-production-runner +
+  precorrection-preservation, all read-only); reviewer re-ran T1 32/0 and
+  T2 4/0: identical.
+- Evidence (new in V8-60): `v8_reproduction_trace_corrected.json`,
+  `v8_reproduction_trace_precorrection_annotation.json`,
+  `v8_60_correction_evidence.json` (only `nonbinary_v8_mcde.py` and
+  `test_nonbinary_v8_mcde.py` changed: hashes
+  `2c84a5ee76d09f4d6cea537289ff82d88ab19abd31d1a41951a7d24acdd66543` /
+  `a508a4228ee06114424db2242b4db784bfa1b9cabcbae54f4cd7172ed988a81f`),
+  `v8_independent_review_acceptance.json`, `v8_acceptance_closeout_addendum.json`;
+  `v8_source_manifest.json` regenerated with `v8_60_delta` field (old hashes
+  remain in the original acceptance).
+
+## Nonbinary V9 Handoff — Frozen for OpenCode Execution (2026-08-04)
+
+- Active change: `formal-nonbinary-ldpc-v9-gf1024-long-ir`; next V9-00.
+- Read `proposal.md`, `design.md`, `specs/spec.md`, `tasks.md`, and
+  `opencode-autonomous-packet.md` in that change before action.
+- Frozen route: V9A GF(1024) multi-seed MC-DE (.22/.32 robust gates) -> V9B
+  n=4096 4+4 -> V9C n=16384 4+4 -> n=32768 4+4 -> fresh 16+16 development.
+- Each scientific phase is prepare/read-only review/one execute/one strict
+  replay. First failed gate stops and preserves evidence; no tuning/rerun.
+- V8 q=4 is method-only evidence. V9 target f=1.08 is used only where its DE
+  gate passes; otherwise robust f=1.15 with `efficiency_target_not_met`.
+- Hard boundary: stop after V9C development. No qualification, confirmation,
+  real/N4, official comparison output, install/clone, or Git mutation.
+- Independent freeze review corrections are already merged into the packet:
+  robust DE gates .22/.32 and target .215/.32; one V9A reviewed/once-executed/
+  replayed package; n=4096/16384/32768 use 4/16/32 disjoint constituents;
+  every finite matrix has `rank(H)=m`; n=32768 canary timeout 24h and median
+  <=16h; V9C fixed-rate leakage is syndrome `10*m` plus a separate 64-bit tag.
+  Blind adaptation is forbidden in V9 and deferred to V10.
 

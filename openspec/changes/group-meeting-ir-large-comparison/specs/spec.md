@@ -77,11 +77,11 @@ All under `comparison_bench/outputs_comparison/group_meeting_ir_20260615/`:
 
 - [ ] AC1: Expanded subset has ≥10 datasets (d=8,d=16,d=32, ≥3 noise regimes, ≥16 frames each)
 - [ ] AC2: Longer-frame subsets at 128, 256 exist for all expanded datasets
-- [ ] AC3: Cascade sweep runs on all datasets at all frame lengths
-- [ ] AC4: LDPC sweep runs on all datasets at all frame lengths
-- [ ] AC5: qLDPC reference runs on low-noise subset
-- [ ] AC6: All 9 CSVs are generated with correct columns
-- [ ] AC7: Manifest has source hashes, config snapshots, timestamp
-- [ ] AC8: Group meeting report covers all 16 sections
+- [x] AC3: Cascade sweep runs on all datasets at all frame lengths
+- [x] AC4: LDPC sweep runs on all datasets at all frame lengths
+- [x] AC5: qLDPC reference runs on low-noise subset
+- [x] AC6: All 9 CSVs are generated with correct columns
+- [x] AC7: Manifest has source hashes, config snapshots, timestamp
+- [x] AC8: Group meeting report covers all 16 sections
 - [ ] AC9: All 39 existing tests pass
 - [ ] AC10: No modifications to src/, experiments/, tools/

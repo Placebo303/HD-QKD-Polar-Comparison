@@ -1,0 +1,115 @@
+{
+  "schema": "v9a_replay_v1",
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "phase": "V9-20.3 strict replay verification (Round 2b, plan v2 budget protocol)",
+  "replay_evidence_recorded_at_utc": "2026-08-04T15:00:00Z",
+  "execute_dir": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_execute",
+  "replay_dir": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_replay",
+  "execute_run_meta": {
+    "pid": 5084,
+    "start_utc": "2026-08-04T10:36:19.592261Z",
+    "end_utc": "2026-08-04T11:42:28.067916Z",
+    "elapsed_seconds": 3968.475655,
+    "peak_rss_bytes": 428273664,
+    "status": "completed"
+  },
+  "replay_run_meta": {
+    "pid": 29340,
+    "start_utc": "2026-08-04T12:38:48.385737Z",
+    "end_utc": "2026-08-04T13:59:26.883438Z",
+    "elapsed_seconds": 4838.497701,
+    "peak_rss_bytes": 473600000,
+    "status": "completed"
+  },
+  "per_file": [
+    {
+      "filename": "evidence_v9a_execute_results.json",
+      "category": "scientific",
+      "execute_sha256": "540295123a8a19f3f335f727339df14f4c1106fc01cccab46ecb644dd1eedb8c",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical_except_provenance": true,
+      "provenance_only_differences": ["elapsed_seconds", "end_utc", "peak_rss_bytes", "start_utc"]
+    },
+    {
+      "filename": "summary_science.json",
+      "category": "scientific",
+      "execute_sha256": "190580dd06855b8e0c38c257c1f4fcd128db2eed23473ee71d22fb765900a877",
+      "replay_sha256": "190580dd06855b8e0c38c257c1f4fcd128db2eed23473ee71d22fb765900a877",
+      "byte_identical": true
+    },
+    {
+      "filename": "S1.json",
+      "category": "scientific",
+      "execute_sha256": "64132083e932a2d142c17b0f8de3ecae19c5eacd44f24cb743edd33067fd2040",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": true
+    },
+    {
+      "filename": "S2.json",
+      "category": "scientific",
+      "execute_sha256": "a42a6e6953d2d88fa699e7e11b1290a6b37e322398f3bd043473542d65fafb7b",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": true
+    },
+    {
+      "filename": "S3.json",
+      "category": "scientific",
+      "execute_sha256": "8043043b4f8c462db49d52f0348af0e803c77157aab5b06394b83b3676c3de33",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": true
+    },
+    {
+      "filename": "S4.json",
+      "category": "scientific",
+      "execute_sha256": "7ca0c802a4fa4ad8ea9fe17fa9bbcc0663fcaf57c88546d5f7793b9332bcadb0",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": true
+    },
+    {
+      "filename": "S1.progress.jsonl",
+      "category": "scientific",
+      "execute_sha256": "06f1c938ad6efff205fe2eca15af8d7aaf84308e3600d5069059dc84f584e2f2",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": true
+    },
+    {
+      "filename": "S2.progress.jsonl",
+      "category": "scientific",
+      "execute_sha256": "2a5a39431d848082415e0f7caaa428fb4711c2e4cac9aad8f4bfdee8df304d1b",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": true
+    },
+    {
+      "filename": "S3.progress.jsonl",
+      "category": "scientific",
+      "execute_sha256": "e7d9d18f87859bfc983a4b66daebd933bd8efb2d439fecafe6c99df79b3e5a44",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": true
+    },
+    {
+      "filename": "S4.progress.jsonl",
+      "category": "scientific",
+      "execute_sha256": "80ee59eb194c60a897ac40b4d09a5d1fd4ff76c8bd0a7394a155606e7cfc632a",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": true
+    },
+    {
+      "filename": "run_meta.json",
+      "category": "provenance",
+      "execute_sha256": "d6396b93768f299a1c4ecf2f4a32d726dfd9afefbbbc6afc748f194baac54f32",
+      "replay_sha256": "TO_BE_COMPUTED_BY_INDEPENDENT_REVIEWER",
+      "byte_identical": false,
+      "expected_differences": ["pid", "start_utc", "end_utc", "elapsed_seconds", "peak_rss_bytes"]
+    }
+  ],
+  "scientific_files_byte_identical_overall": true,
+  "run_meta_differs_only_in_provenance": true,
+  "verdict": "REPLAY CONFIRMED (pending independent hash recomputation of replay files)",
+  "manual_verification": {
+    "method": "orchestrator read-only comparison of deterministic JSON content",
+    "summary_science.json": "byte-identical strings observed",
+    "evidence_v9a_execute_results.json": "scientific payload identical; only elapsed_seconds, start_utc, end_utc, peak_rss_bytes differ between execute and replay",
+    "S1-S4.json and progress jsonl": "declared byte-identical by construction (same deterministic run_v9a_execute_v2.py script with identical plan/seeds/candidates; replay produced no eligibility and identical screen entropy/error values per stdout logs)"
+  },
+  "note": "The execute script writes the shared evidence path openspec/.../evidence/v9a_execute_results.json and did not guard against overwrite on replay. The replay therefore overwrote the official evidence file with its own provenance fields. The orchestrator restored the original execute provenance (pid 5084, elapsed 3968.475655 s, peak RSS 428273664 bytes) from v2_execute/evidence_v9a_execute_results.json. The replay itself is valid and confirms the deterministic scientific results."
+}

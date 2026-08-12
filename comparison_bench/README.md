@@ -4,6 +4,9 @@ This directory is an additive comparison layer. It is not the original Polar mai
 
 The benchmark connects to Polar only by reading existing result files or, when explicitly configured, calling the existing Polar CLI from an outer wrapper. It does not move, rename, rewrite, or inject benchmark logic into the Polar implementation.
 
+For the bounded frame-identical final executable-candidate workflow, see
+[`docs/final_ir_method_selection_runbook.md`](docs/final_ir_method_selection_runbook.md).
+
 ## Method Status
 
 - `polar_existing`: production baseline wrapper. It first reads existing Polar outputs such as `real_polar_max_pie_grid.csv`, `polar_e2e_results.csv`, `actual_ir_point_table.csv`, or `polar_diag_summary.csv`.
@@ -47,3 +50,18 @@ python -m comparison_bench.src.comparison_bench.cli.compare_methods --input comp
 ## Merge With Security CSV
 
 Use `comparison_bench.src.comparison_bench.pipeline.merge_with_security.merge_ir_with_security`. The merge is read-only with respect to the old security pipeline and joins on available shared keys including `dataset_id`, `loss_db`, `dimension`, `bin_width_ps`, `threshold_ps`, and `effective_pairing_window_ps`.
+# Formal nonbinary N3 evidence note
+
+The `nbldpc_formal_v1` synthetic N3 package is non-promoted (18/32 at p=.20,
+5/32 at p=.30; gate 31/32). Its official strict verifier is unverifiable after
+execution because live worktree provenance drifted. This is not real-data,
+production, or cross-method evidence; N4 remains unauthorized.
+
+## Formal nonbinary v2 evidence note
+
+`nbldpc_formal_v2` stopped at development readiness. Its selected
+tempered+damped QC48 policy achieved 0/24 at p=.20 and 5/24 at p=.30, below
+the frozen 22/24 floor in both strata. The immutable eight-artifact package
+passed strict full replay, but confirmation was never generated or executed.
+This is not confirmation FER, real-data, production, or comparison evidence;
+N4, sidecar reads, and raw `.ttbin` processing remain forbidden.
