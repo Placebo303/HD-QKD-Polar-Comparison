@@ -1,0 +1,129 @@
+{
+  "schema": "v7_r3_canary_execution_v1",
+  "change": "formal-nonbinary-ldpc-v7-successor-ladder",
+  "phase": "V7-32 (second half)",
+  "route": "r3",
+  "record_kind": "sacrificed_canary_execution",
+  "note": "V7-32 second-half R3 sacrificed canary. The V7-32 first-half plan passed read-only review READY-FOR-SINGLE-EXECUTION (evidence/v7_r3_canary_plan_evidence.json, plan file sha256 1308c7074d2d7f51fc1a2a50d4479600f6086fc82fa828ebc17ed03fa353dedb) and the main thread pre-authorized per-route canary execution; this execution completes that gate (mirroring R1A/R1B/R2 authorization). The frozen run() lifecycle gate still hard-blocked every R3 execute before this edit (prior_record below). A minimal canary-only authorization edit (mirroring the R2 second-half edit exactly) was applied: run() authorizes production execution ONLY when production_authorized=True AND config is the R3 CANARY config (CANARY_R3) AND an explicit non-official workspace output AND an explicit production runner (production_runner_r3); R3 DEVELOPMENT production run still raises; official root still locked. The first-half plan was backed up (bound pre-edit source_sha256; run() provenance validation rejects any plan not binding the executing code) and re-created in the same plan directory with identical deterministic frames/roots/caps and fresh 10303-bit seed records. Execution ran EXACTLY ONCE and strict read-only replay ran EXACTLY ONCE. Outcomes: 8/8 decode_failed at max_iter=100 (layer-0 failed on every frame), verification never invoked; per_stratum_verified_success {0.20: 0, 0.30: 0}; both strata are 0/4 so the frozen canary gate fires -> failed_canary -> freeze R3. The R3 16+16 development eligibility is a separate main-thread decision and is not claimed here either way beyond the frozen rule. No official root was created before or after.",
+  "operator_role": "implementation operator (coder-fast); acceptance and scientific gates remain with the main thread",
+  "head_git_sha256": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "environment": {"python": "3.12.12", "numpy": "2.4.0", "os": "win32"},
+  "main_thread_decision": {
+    "decision": "AUTHORIZED",
+    "text": "the sacrificed R3 4+4 canary execution IS authorized; the V7-32 plan passed read-only review READY-FOR-SINGLE-EXECUTION (evidence/v7_r3_canary_plan_evidence.json); the user pre-registered per-route canary execution and directed to proceed; mirrors the accepted R1A/R1B/R2/v6 canary pattern"
+  },
+  "prior_record": {
+    "record_kind": "canary_execution_gate_blocked_pre_authorization",
+    "execute_attempt": "none: the main thread pre-authorized per-route canary execution, so no blocked execute attempt was run. The frozen gate state before the authorization edit is proven by the V7-32 first-half staging record (evidence/v7_r3_canary_plan_evidence.json): r3_run_never_authorized=true, guards_proven.r3_production_execution_still_blocked=true, execution_status=NOT_EXECUTED, and by the pre-edit source itself (run() raised for EVERY R3 config and the CLI hard-stopped every --r3 execute, both before any frame/decoder call or artifact write)",
+    "blocker_gate_source": "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v7_development.py run(): the pre-edit R3 engineering gate raised 'R3 development execution is blocked until V7-30 main-thread canary plan review' for EVERY R3 config (canary AND development) before this second-half edit; CLI execute also hard-stopped every --r3 execute. Proven in the first-half record: r3_run_never_authorized=true, guards_proven"
+  },
+  "authorization_edit": {
+    "rationale": "mirror the R2 second-half edit exactly: extend run() so production execution is authorized ONLY when production_authorized=True AND config is the R3 CANARY config (CANARY_R3) AND an explicit non-official workspace output AND an explicit production runner (production_runner_r3); every R3 DEVELOPMENT production run still raises (R3-specific gate kept for DEVELOPMENT_R3); official root still locked; no other behavioral change. CLI passes the flag only on the --r3 --canary execute path (runner=production_runner_r3); R3 DEVELOPMENT execute remains a hard stop. Two tests were updated to the second-half state (mirror of R2): test_r3_plan_gate_canary_only_and_r3_development_run_still_blocked asserts DEVELOPMENT_R3 production still blocked and bare CANARY_R3 still not authorized; test_v7_32_r3_canary_production_execution_authorization_is_canary_only (renamed from test_v7_30_r3_engineering_gate_blocks_all_production_execution) asserts DEVELOPMENT_R3 still raises, CANARY_R3 requires explicit workspace output and an explicit production runner, bare CANARY_R3 still raises 'not authorized', and CANARY_R3 with production_authorized + explicit output + explicit fake runner is NOT blocked by the R3 gate.",
+    "edited_files": {
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v7_development.py": "dd8ebe416ce512c8f3310b057cfac74f3bb8ce72b62e49fc039c34fe4295abf2",
+      "comparison_bench/src/comparison_bench/cli/run_formal_nonbinary_v7_development.py": "68a17e921ccd629e01e2e3b890631f4632db4feabc36660aa0cfa78e6e9f0061",
+      "comparison_bench/tests/test_nonbinary_v7_development.py": "ad603eabb9cef0d351424d7d2f843780f4a83980768d8526ae12469e4afbf1ea"
+    },
+    "guards_after_edit": {
+      "development_production_run_still_raises": true,
+      "r3_development_production_run_still_raises": true,
+      "official_root_locked": true,
+      "canary_production_run_requires_explicit_output": true,
+      "canary_production_run_requires_explicit_production_runner": true,
+      "cli_development_execute_is_hard_stop": true
+    }
+  },
+  "plan_recreation": {
+    "reason": "the V7-32 first-half plan bound pre-second-half-edit source_sha256 of nonbinary_v7_development.py and the CLI; run() provenance validation rejects any plan not binding the executing code, so the plan was re-created in the same plan directory after the authorization edit (mirrors R1A/R1B/R2)",
+    "frames_identical": "deterministic PCG64 generation from the same canary roots -> identical alice/bob arrays, array_sha256, frame_ids, atomic_keys, caps, roots; identity_overlap all empty",
+    "fresh_seed_records": "8 fresh 10303-bit Toeplitz seed records (seed_id values), unique within the plan and disjoint from the first-half plan seed_id values and from all 10744 prior evidence seed_ids (re-verified: prior_seed_count 10744, new_seed_id_count 8, unique true, disjoint_from_first_half true, disjoint_from_prior true)",
+    "first_half_plan_backup": "workspace/nbldpc_v7_r3_canary_d006ec637ecb4b1e9463a7f4462eebf3/canary_plan_first_half_backup/pre_run_plan.json sha256 1308c7074d2d7f51fc1a2a50d4479600f6086fc82fa828ebc17ed03fa353dedb (preserved for audit; not under any official root; matches v7_r3_canary_plan_evidence.json)",
+    "recreated_plan_file_sha256": "4337935498f6dfea0a138dd0af8f404e3b03dd7229984f1b627e454ddb69fca2",
+    "recreated_plan_in_memory_compact_sha256": "446ab11b822e440d324bf66e7c250b1eff67059cf2ec39a87e16abd4563503af"
+  },
+  "run_id": "20260802_v1_nbldpc_v7_r3_canary",
+  "method": "nbldpc_formal_v7_r3_gf32x2",
+  "plan_directory": "workspace/nbldpc_v7_r3_canary_d006ec637ecb4b1e9463a7f4462eebf3/canary_plan",
+  "artifacts": {
+    "pre_run_plan.json": "4337935498f6dfea0a138dd0af8f404e3b03dd7229984f1b627e454ddb69fca2",
+    "formal_frame_outcomes.csv": "887697fc832ce772b5293246cc263e82b14807f47c20aed579e1ed2e279b0b0c",
+    "formal_transcript.jsonl": "17025e0b43a3c42642128f3c1d0c0bd3823085f705eec8dd0a0bbaf9230ad906",
+    "formal_run_manifest.json": "91a1f5e47096d743d288b4f4c89128196e90603ee379076447389df110260be1",
+    "formal_codebook_manifest.json": "f3bea92962f3b73aac3f4c254f73d56ce3f307c6645ab61d5094812b9b2d2221",
+    "formal_candidate_manifest.json": "9314bb5e7a6f4be5d439c562786a7faca37c7a87423b927e84a98566c3f669ff",
+    "formal_policy_manifest.json": "9fc4cd33016024c788100b0d93d95df528d6a78c47b5c3ba65bc60e12d4b63bb",
+    "formal_qualification_report.json": "f32e390306a11bfbf11847010599fd1f833c94f5239b27ee2f14a3d1b3ef3238"
+  },
+  "execute": {
+    "command": "python -m comparison_bench.src.comparison_bench.cli.run_formal_nonbinary_v7_development execute --r3 --canary --output workspace/nbldpc_v7_r3_canary_d006ec637ecb4b1e9463a7f4462eebf3/canary_plan",
+    "exit_code": 0,
+    "stdout": "{\"outcome_count\": 8, \"promoted\": false, \"run_status\": \"development_completed\"}",
+    "wall_time_ms": 668808,
+    "ran_exactly_once": true,
+    "note": "no blocked attempt preceded this run (main thread pre-authorized); the authorized execution ran exactly once against the re-created post-edit plan"
+  },
+  "replay": {
+    "command": "python -m comparison_bench.src.comparison_bench.cli.run_formal_nonbinary_v7_development verify --r3 --canary --output workspace/nbldpc_v7_r3_canary_d006ec637ecb4b1e9463a7f4462eebf3/canary_plan",
+    "exit_code": 0,
+    "stdout": "{\"promoted\": false, \"run_status\": \"development_completed\", \"verified\": true}",
+    "full_replay_json": {"verified": true, "run_status": "development_completed", "promoted": false},
+    "wall_time_ms": 663412,
+    "ran_exactly_once": true,
+    "read_only": true
+  },
+  "per_frame_outcomes": [
+    {"frame_id": "nbldpc_formal_v7_r3_gf32x2_q1024_p20_development_000", "stratum_p": 0.2, "status": "decode_failed", "iterations": 100, "verification_invoked": false},
+    {"frame_id": "nbldpc_formal_v7_r3_gf32x2_q1024_p20_development_001", "stratum_p": 0.2, "status": "decode_failed", "iterations": 100, "verification_invoked": false},
+    {"frame_id": "nbldpc_formal_v7_r3_gf32x2_q1024_p20_development_002", "stratum_p": 0.2, "status": "decode_failed", "iterations": 100, "verification_invoked": false},
+    {"frame_id": "nbldpc_formal_v7_r3_gf32x2_q1024_p20_development_003", "stratum_p": 0.2, "status": "decode_failed", "iterations": 100, "verification_invoked": false},
+    {"frame_id": "nbldpc_formal_v7_r3_gf32x2_q1024_p30_development_000", "stratum_p": 0.3, "status": "decode_failed", "iterations": 100, "verification_invoked": false},
+    {"frame_id": "nbldpc_formal_v7_r3_gf32x2_q1024_p30_development_001", "stratum_p": 0.3, "status": "decode_failed", "iterations": 100, "verification_invoked": false},
+    {"frame_id": "nbldpc_formal_v7_r3_gf32x2_q1024_p30_development_002", "stratum_p": 0.3, "status": "decode_failed", "iterations": 100, "verification_invoked": false},
+    {"frame_id": "nbldpc_formal_v7_r3_gf32x2_q1024_p30_development_003", "stratum_p": 0.3, "status": "decode_failed", "iterations": 100, "verification_invoked": false}
+  ],
+  "per_stratum_verified_success": {
+    "0.20": 0,
+    "0.30": 0
+  },
+  "forbidden_status_scan": {
+    "forbidden_statuses_defined": ["decoder_error", "codebook_invalid", "invalid_input", "unsupported_domain", "aborted_resource_limit", "verify_failed"],
+    "statuses_observed": ["decode_failed"],
+    "counts": {"decode_failed": 8},
+    "forbidden_statuses_found": [],
+    "scan_result": "clean: no forbidden status; decode_failed is an honest capacity miss at max_iter=100 (layer-0 failed on every frame)"
+  },
+  "transcript_summary": {
+    "total_events": 24,
+    "events_per_frame": 3,
+    "exactly_once_property": "each of the 8 frames has exactly 3 canonical events (SYNDROME_INITIAL, DECODER_STAGE1, STAGE_DECISION_STAGE1); every frame failed at layer 0 so SYNDROME_INITIAL_LAYER1 / DECODER_STAGE2 / VERIFICATION_TAG_STAGE1 never occur (failed layer-0 = 3 events/frame); no frame appears more than once in the transcript; verification never invoked"
+  },
+  "no_official_root": {
+    "official_canary_root": "comparison_bench/outputs_comparison/formal_ir_methods/20260802_v1_nbldpc_v7_r3_canary",
+    "existed_before_execution": false,
+    "existed_after_replay": false,
+    "official_development_root_exists": false,
+    "recursive_v7_scan_under_formal_ir_methods": "none found"
+  },
+  "exactly_once_confirmation": {
+    "authorized_execute_runs": 1,
+    "replay_runs": 1,
+    "never_rerun": true,
+    "no_workaround_attempted": true
+  },
+  "frozen_dirs_unchanged": {
+    "src": true,
+    "experiments": true,
+    "tools": true,
+    "results": true,
+    "git_status_porcelain_src_experiments_tools_results": "empty"
+  },
+  "nothing_staged": true,
+  "existing_evidence_files_untouched": {
+    "v7_r3_canary_plan_evidence.json": "unchanged (first-half staging record; recreated plan documented here)",
+    "v7_r3_engineering_acceptance.json": "unchanged"
+  },
+  "execution_status": "COMPLETED_EXACTLY_ONCE",
+  "outcome": "EXECUTED",
+  "promoted": false,
+  "gate_implication": "canary gate fires: per_stratum_verified_success {0.20: 0, 0.30: 0} -> both strata 0/4 -> failed_canary -> freeze R3; the R3 16+16 development eligibility is a separate main-thread decision — this record does not claim eligibility either way beyond the frozen rule (the canary gate must not fire for development eligibility)"
+}

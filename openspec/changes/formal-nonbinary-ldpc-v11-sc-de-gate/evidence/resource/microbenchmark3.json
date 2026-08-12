@@ -1,0 +1,122 @@
+{
+  "amendment_ref": "AMEND-2026-08-06-02",
+  "change": "formal-nonbinary-ldpc-v11-sc-de-gate",
+  "engineering_only_non_scientific": true,
+  "microbenchmark_number": 3,
+  "environment": {
+    "clock": {
+      "implementation": "QueryPerformanceCounter()",
+      "monotonic": true,
+      "resolution_seconds": 1e-07
+    },
+    "cpu": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "cpu_count": 20,
+    "numpy": "2.4.0",
+    "os": "Windows-11-10.0.26200-SP0",
+    "platform": "Windows",
+    "python": "3.12.12",
+    "total_ram_bytes": 33693757440
+  },
+  "workers": 4,
+  "batch_wall_seconds": 61.77327179998974,
+  "serial_cell_sum_seconds": 126.06548209997709,
+  "parallel_speedup": 2.0407771585768266,
+  "per_worker_efficiency": 0.5101942896442067,
+  "measurements": {
+    "G1_500": {
+      "label": "G1_500", "q": 1024, "p": 0.15, "L": 32, "w": 1, "W": 8,
+      "n_samples": 500, "max_iter": 10, "iterations_executed": 10,
+      "converged": false, "wall_seconds": 5.71, "peak_rss_bytes": 360456192,
+      "cap_exceeded": false
+    },
+    "G2_500": {
+      "label": "G2_500", "q": 1024, "p": 0.15, "L": 32, "w": 2, "W": 16,
+      "n_samples": 500, "max_iter": 10, "iterations_executed": 10,
+      "converged": false, "wall_seconds": 12.97, "peak_rss_bytes": 516947968,
+      "cap_exceeded": false
+    },
+    "G3_500": {
+      "label": "G3_500", "q": 1024, "p": 0.15, "L": 32, "w": 2, "W": 32,
+      "n_samples": 500, "max_iter": 10, "iterations_executed": 10,
+      "converged": false, "wall_seconds": 24.90, "peak_rss_bytes": 866385920,
+      "cap_exceeded": false
+    },
+    "G1_2000": {
+      "label": "G1_2000", "q": 1024, "p": 0.15, "L": 32, "w": 1, "W": 8,
+      "n_samples": 2000, "max_iter": 5, "iterations_executed": 5,
+      "converged": false, "wall_seconds": 13.68, "peak_rss_bytes": 879742976,
+      "cap_exceeded": false
+    },
+    "G2_2000": {
+      "label": "G2_2000", "q": 1024, "p": 0.15, "L": 32, "w": 2, "W": 16,
+      "n_samples": 2000, "max_iter": 5, "iterations_executed": 5,
+      "converged": false, "wall_seconds": 28.27, "peak_rss_bytes": 1557346304,
+      "cap_exceeded": false
+    },
+    "G3_2000": {
+      "label": "G3_2000", "q": 1024, "p": 0.15, "L": 32, "w": 2, "W": 32,
+      "n_samples": 2000, "max_iter": 5, "iterations_executed": 5,
+      "converged": false, "wall_seconds": 48.80, "peak_rss_bytes": 2895589376,
+      "cap_exceeded": false
+    },
+    "CTRL_500": {
+      "label": "CTRL_500", "q": 1024, "p": 0.15, "L": 32, "w": 0, "W": 1,
+      "n_samples": 500, "max_iter": 10, "iterations_executed": 10,
+      "converged": false, "wall_seconds": 0.53, "peak_rss_bytes": 227500032,
+      "cap_exceeded": false
+    },
+    "CTRL_2000": {
+      "label": "CTRL_2000", "q": 1024, "p": 0.15, "L": 32, "w": 0, "W": 1,
+      "n_samples": 2000, "max_iter": 5, "iterations_executed": 5,
+      "converged": false, "wall_seconds": 1.36, "peak_rss_bytes": 276447232,
+      "cap_exceeded": false
+    }
+  },
+  "extrapolation": {
+    "schema": "v11_parallel_microbench_extrapolation_v1",
+    "engineering_only_non_scientific": true,
+    "status": "resource_blocked",
+    "verdict": {
+      "resource_blocked": true,
+      "resource_ok": false,
+      "reasons": {
+        "predicted_parallel_wall_over_24h": true,
+        "single_run_peak_rss_over_3gib": false
+      }
+    },
+    "predicted_parallel_wall_hours": 32.69367152338844,
+    "predicted_parallel_wall_seconds": 117697.21748419838,
+    "wall_limit_seconds": 86400.0,
+    "serial_total_hours": 66.72049807494477,
+    "parallel_speedup": 2.0407771585768266,
+    "per_worker_efficiency": 0.5101942896442067,
+    "workers": 4,
+    "serial_cell_sum_seconds": 126.06548209997709,
+    "parallel_batch_wall_seconds": 61.77327179998974,
+    "peak_rss_bytes": 2895589376,
+    "rss_cap_bytes": 3221225472,
+    "n_runs_total": 60,
+    "n_probes_per_run": 9,
+    "iterations_per_run": 1350,
+    "assumptions": {
+      "A1_serial_basis": "serial total 66.72 h and per-cell walls from frozen #2 evidence (microbenchmark2.json); extrapolation basis identical to #1/#2 (60 runs, 9 probes, max_iter 150, N=2000)",
+      "A2_measured_speedup": "parallel speedup measured on the identical 8-cell #1/#2 synthetic batch (q=1024, L=32, p=0.15, lambda max-degree 40, seed 2026110000) run concurrently with 4 workers; batch wall excludes the one-time per-worker numba warmup",
+      "A3_wall_scaling": "predicted parallel wall = serial total / measured parallel speedup; each run stays single-threaded and deterministic (bit-identical to serial)",
+      "A4_per_run_rss": "single-run peak RSS measured per run in the worker process tree; 3 GiB cap unchanged, judged per single run",
+      "A5_summed_rss": "summed RSS across parallel processes recorded as evidence only, NOT a gate item (host 33.69 GiB measured to accommodate)",
+      "A6_frozen_matrix": "matrix 2x3x5x2 never shrunk; no tuning, no rerun; #1/#2 evidence unchanged"
+    }
+  },
+  "comparison_vs_prior": {
+    "microbenchmark1_total_wall_hours": 777.33,
+    "microbenchmark2_total_wall_hours": 66.72,
+    "microbenchmark2_speedup_vs_1": 11.65,
+    "microbenchmark3_predicted_parallel_wall_hours": 32.69,
+    "microbenchmark3_parallel_speedup_vs_2": 2.04,
+    "microbenchmark3_per_worker_efficiency": 0.51,
+    "interpretation": "4-worker parallel gives 2.04x speedup over serial, reducing projected wall from 66.72h to 32.69h; still above the 24h limit (resource_blocked); per-worker efficiency 0.51 reflects contention and the overhead of serial-warmup/serialization for small cells; peak RSS 2.70 GiB remains under 3 GiB cap"
+  },
+  "raw_evidence_path": "workspace/nbldpc_v11_parallel_2c787ccf/microbench3_parallel_raw.json",
+  "note": "Exactly-once parallel re-measurement (#3) authorized by AMEND-2026-08-06-02: same synthetic non-gating parameters as #1/#2 (q=1024, L=32, p=0.15, lambda max-degree 40, seed 2026110000, same 8 cells). #1/#2 evidence unchanged. NO threshold/winner/gate claims. The formal matrix (2x3x5x2) is never shrunk.",
+  "schema": "v11_parallel_microbench3_v1"
+}

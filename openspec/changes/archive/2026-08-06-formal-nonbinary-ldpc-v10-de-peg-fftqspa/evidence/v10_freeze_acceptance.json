@@ -1,0 +1,235 @@
+{
+  "schema": "v10_freeze_acceptance_v1",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "frozen_at_utc": "2026-08-05T20:00:00Z",
+  "frozen_by": "planner",
+  "role": "planning only; no production code written",
+
+  "starting_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "prior_evidence_inventory": {
+    "v8_keys": {
+      "change": "formal-nonbinary-ldpc-v8-reference-reproduction",
+      "evidence_root": "openspec/changes/formal-nonbinary-ldpc-v8-reference-reproduction/evidence/",
+      "status": "INDEPENDENTLY_REVIEWED_ACCEPTED",
+      "head_at_acceptance": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+      "key_evidence": [
+        "v8_reproduction_trace_corrected.json",
+        "v8_60_correction_evidence.json",
+        "v8_independent_review_acceptance.json",
+        "v8_acceptance_closeout_addendum.json",
+        "v8_reproduction_trace.json (byte-identical pre-correction, sha256 dd5678fd2d77b67dd7f3fc7ee221a49b0d33eab37ab5d226d96e6d243b071de3)",
+        "v8_reproduction_trace_precorrection_annotation.json"
+      ],
+      "key_source_files": [
+        "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_error_domain.py",
+        "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_reference.py",
+        "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_mcde.py",
+        "comparison_bench/tests/test_nonbinary_v8_error_domain.py",
+        "comparison_bench/tests/test_nonbinary_v8_reference.py",
+        "comparison_bench/tests/test_nonbinary_v8_mcde.py"
+      ],
+      "v8_reproduction_trace_corrected_sha256": "caaaf1f39ca518b0d76aa356a279e9dbea4c31c99bbcd2e77faca466e64e9b8",
+      "v8_60_correction_evidence_sha256": "7f8a033bae1e73bed06b79621c0810656cbac989e1e8d281957a319170625f9c",
+      "v8_mcde_source_sha256": "2c84a5ee76d09f4d6cea537289ff82d88ab19abd31d1a41951a7d24acdd66543",
+      "v8_mcde_test_sha256": "a508a4228ee06114424db2242b4db784bfa1b9cabcbae54f4cd7172ed988a81f"
+    },
+    "v9_keys": {
+      "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+      "archive_root": "openspec/changes/archive/2026-08-05-formal-nonbinary-ldpc-v9-gf1024-long-ir/",
+      "status": "ARCHIVED_FROZEN_STOP",
+      "evidence_root": "openspec/changes/archive/2026-08-05-formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/",
+      "key_evidence": [
+        "v9a_plan_v2.json (sha256 4bd6380f19008c9c893b1114fbab94a60d37acb77e3fbdf7a0d03d347092ddf2)",
+        "v9a_execute_results.json (sha256 540295123a8a19f3f335f727339df14f4c1106fc01cccab46ecb644dd1eedb8c)",
+        "v9a_replay_evidence.json",
+        "v9a_gate_decision.json",
+        "v9a_independent_review_acceptance.json",
+        "v9a_interrupted_trial_freeze.json",
+        "v9a_interrupted_v2_attempt_freeze.json"
+      ],
+      "key_source_files": [
+        "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_common.py",
+        "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_mcde.py",
+        "comparison_bench/tests/test_nonbinary_v9_common.py",
+        "comparison_bench/tests/test_nonbinary_v9_mcde.py"
+      ]
+    }
+  },
+
+  "v10_seed_derivation": {
+    "prefix": "202610",
+    "proof_of_disjointness": {
+      "v8_prefix": "20260804",
+      "v9_prefix": "20260901",
+      "v10_prefix": "202610",
+      "numeric_proof": "202610 > 202609 > 202608 → prefixes are lexicographically non-overlapping. V8 uses 20260804xx (8-digit), V9 uses 20260901xx/202609011x (9-10 digit), V10 uses 202610xx (8-digit). All ranges disjoint.",
+      "v8_seeds_occupied": [2026080418],
+      "v9_seeds_occupied": {
+        "optimization": [2026090101, 2026090102, 2026090103, 2026090104],
+        "validation": [2026090111, 2026090112, 2026090113]
+      }
+    },
+    "v10_seed_allocations": {
+      "microbenchmark": "2026100000",
+      "v10_0_q4_optimization": "2026100100",
+      "v10_0_q4_validation": ["2026100101", "2026100102", "2026100103"],
+      "v10a_S1_optimization": "2026100201",
+      "v10a_S2_optimization": "2026100202",
+      "v10a_S3_optimization": "2026100203",
+      "v10a_S4_optimization": "2026100204",
+      "v10a_validation": ["2026100211", "2026100212", "2026100213", "2026100214", "2026100215"],
+      "v10b_peg_seed": "2026100300",
+      "v10b_edge_label_seed": "2026100301",
+      "v10b_canary_roots": "20261004xx (range reserved)",
+      "v10c_development_roots": "20261005xx (range reserved)"
+    },
+    "mutual_disjointness": "All V10 seeds use mutually exclusive numeric ranges. Microbenchmark 2026100000 is outside 20261001-05 ranges. Optimization seeds (20261001xx, 20261002xx) are distinct from validation (202610021x). Canary (20261004xx) and development (20261005xx) are distinct ranges.",
+    "no_overlap_with_prior": "202610xxxx > 2026090113 (highest V9 seed). V8 range ends at 2026080418. All V10 seeds are strictly greater than the highest prior seed."
+  },
+
+  "v10_allowed_files": {
+    "additive_source_modules": [
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_common.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_de.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_peg.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_fftqspa.py"
+    ],
+    "additive_test_modules": [
+      "comparison_bench/tests/test_nonbinary_v10_common.py",
+      "comparison_bench/tests/test_nonbinary_v10_de.py",
+      "comparison_bench/tests/test_nonbinary_v10_peg.py",
+      "comparison_bench/tests/test_nonbinary_v10_fftqspa.py"
+    ],
+    "additive_evidence_paths": [
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_freeze_acceptance.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_literature_crosswalk.md",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_microbenchmark.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/pre_run_plan.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_0_q4_reference_recovery.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_plan.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_execute_results.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_replay_evidence.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_gate_decision.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10b_peg_evidence.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10b_decoder_evidence.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10b_canary_plan.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10b_canary_results.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10b_canary_replay.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10b_canary_gate.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10c_development_plan.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10c_development_results.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10c_development_replay.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10c_development_gate.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_gate_decision.json",
+      "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_independent_review_acceptance.json"
+    ],
+    "allowed_imports": {
+      "production": ["stdlib", "numpy", "numba (nonbinary_v10_de.py hot kernels only, amendment 2026-08-05)", "nonbinary_field.GF2mField"],
+      "test_only": ["nonbinary_v8_mcde", "nonbinary_v8_reference", "nonbinary_v8_error_domain"],
+      "forbidden": ["scipy", "ldpc", "nonbinary_v9_* (unless explicitly listed)", "nonbinary_v[1-7]_*"]
+    }
+  },
+
+  "frozen_constants": {
+    "q": 1024,
+    "n": 4096,
+    "K": 8,
+    "degree_range": [2, 40],
+    "min_weight": 0.01,
+    "weight_sum_tolerance": 1e-12,
+    "rate_tolerance": 1e-12,
+    "entropy_tol": 0.01,
+    "entropy_streak": 20,
+    "probability_floor": 1e-15,
+    "peak_rss_cap_b": 3221225472,
+    "workers": 1,
+    "max_peg_trials": "TO_BE_FROZEN_IN_PRE_RUN_PLAN",
+    "v10_0_q4_tolerance": 0.012,
+    "v10_0_q4_target": 0.069,
+    "v10_0_q4_rate": 0.75,
+    "v10a_gates": {
+      "S1_robust_p20": 0.22,
+      "S2_target_p20": 0.215,
+      "S3_robust_p30": 0.32,
+      "S4_target_p30": 0.32
+    },
+    "canary_frames_per_stratum": 4,
+    "canary_gate_per_stratum": 3,
+    "development_frames_per_stratum": 16,
+    "development_gate_per_stratum": 15,
+    "tag_bits": 64,
+    "syndrome_bits_per_symbol": 10
+  },
+
+  "frozen_decisions": {
+    "de_variant": "DE/rand/1/bin",
+    "k8_representation": "8 ordered (degree, weight_logit) pairs; softmax normalization; canonical ascending degree order",
+    "objective": "6-tier hierarchical lexicographic: (1) entropy convergence gate, (2) converged_iter, (3) final_entropy, (4) symbol_error_prob, (5) threshold_proxy, (6) canonical tuple tie-break",
+    "pegging_primary": "local girth maximization",
+    "pegging_secondary": "ACE-like score",
+    "pegging_tie_break": "SHA256 deterministic hash lexicographic",
+    "edge_labels": "uniform nonzero GF(1024), seeded",
+    "decoder_schedule": "flooding only (scientific lane)",
+    "decoder_forbidden": "EMS, ADMM, list decoding, Alice truth fallback, layered schedule (science lane)",
+    "leakage": "L_recon = 10·m, L_total = 10·m + 64, exact hard caps",
+    "rss_cap": "3 GiB process-tree RSS",
+    "microbenchmark_label": "engineering_only_non_scientific",
+    "microbenchmark_rules": "Non-scientific seed; no threshold/winner/gate claims; must not use S1-S4 formal roots",
+    "budget_immutability": "pre_run_plan.json frozen before formal results; must not change after formal data exist"
+  },
+
+  "hard_stop_rules_summary": [
+    "V10-S01: V10-0 fails q=4 reference recovery",
+    "V10-S02: V10A robust gates (S1 < .22 or S3 < .32) fail",
+    "V10-S03: Planned or formal seed overlap detected",
+    "V10-S04: Tuning after formal results needed",
+    "V10-S05: Peak RSS > 3 GiB",
+    "V10-S06: Single execute > 24 h predicted before plan review",
+    "V10-S07: Production decoder accesses Alice truth",
+    "V10-S08: Evidence overwritten",
+    "V10-S09: Reviewer-go REJECT",
+    "V10-S10: Canary stratum < 3/4 verified",
+    "V10-S11: Development stratum < 15/16 verified"
+  ],
+
+  "state_machine_order": [
+    "V10-00 (freeze/audit)",
+    "V10-05 (microbenchmark)",
+    "V10-10 (DE kernel + T0/T1 + pre_run_plan freeze)",
+    "V10-0 (q=4 reference gate)",
+    "V10-20 (V10A 4-search + ensemble gate)",
+    "V10-30 (PEG codebook)",
+    "V10-40 (FFT-QSPA decoder)",
+    "V10-50 (canary 4+4)",
+    "V10-60 (development 16+16)",
+    "V10-70 (close-out)"
+  ],
+
+  "valid_final_states": [
+    "failed_reference",
+    "failed_ensemble",
+    "robust_only_failed_canary",
+    "target_failed_canary",
+    "development_not_ready",
+    "development_ready_not_qualified"
+  ],
+
+  "documentation_outputs_required": [
+    "docs/decision-log.md (additive entry)",
+    "CURRENT_TASK.md (update)",
+    "AGENT_HANDOFF.md (update)",
+    "AGENT_PROJECT_MEMORY.md (update via memory agent)"
+  ],
+
+  "amendments": [
+    {
+      "id": "AMEND-2026-08-05-01",
+      "approved_by": "main thread (user decision)",
+      "date": "2026-08-05",
+      "record": "evidence/v10_budget_amendment.json",
+      "trigger": "V10-S06 budget blocker: worst-case V10A execute estimated 31.3h > 24h from microbenchmark #1 (19.03 s/eval at n_samples=500, max_iter=30; GF(1024) convergence ~80 iterations)",
+      "change": "allow numba (already a root requirements.txt dependency) as a production import for nonbinary_v10_de.py hot-loop kernels only; authorize one re-measurement microbenchmark; njit kernels must be bit-identical to the numpy reference semantics (tests: allclose <= 1e-12 + known-answer butterfly case)",
+      "unchanged": "all scientific parameters: seeds, gates, K=8 representation, 6-tier objective, hard caps (600 screen evals/search, 12 refinement, 3 GiB RSS, workers=1), validation semantics"
+    }
+  ]
+}

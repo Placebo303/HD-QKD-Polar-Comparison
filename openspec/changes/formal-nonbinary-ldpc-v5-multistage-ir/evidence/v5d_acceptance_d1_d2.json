@@ -1,0 +1,41 @@
+{
+  "change": "formal-nonbinary-ldpc-v5-multistage-ir",
+  "milestone": "Route D acceptance D1-D2 (completed read-only after plan creation; deviation recorded)",
+  "date": "2026-08-02",
+  "tasks_evidenced": ["7.1", "7.2"],
+  "procedural_deviation": {
+    "issue": "plan was created before the D1/D2 acceptance evidence file existed (frozen flow: 7.2 acceptance must precede 7.3 plan creation)",
+    "detected_at": "2026-08-02 main-thread review",
+    "resolution": "acceptance completed read-only at the same HEAD 192f455; plan content unchanged; execution authorized only after acceptance PASS; deviation recorded here and in tasks.md Verification Notes"
+  },
+  "identity": {
+    "run_id": "20260731_v5d_nbldpc_post_synthetic",
+    "canonical_schema": "NBLDPCQ5D",
+    "method": "nbldpc_formal_v5d_post",
+    "roots": "development 202607840000/202607850000, confirmation 202607860000/202607870000",
+    "policies": "nbldpc_v5d_sched_post, nbldpc_v5d_ems_post",
+    "caps": "workers 1, checks<=56, row_weight<=8, stage_iterations<=12, total_iterations<=36, decoder_stages<=3, verification_attempts<=3, dense_bytes<=24MiB",
+    "seed_bits": 703,
+    "max_stages": 3,
+    "plan_git_commit": "192f455734fa436b08a2fd95c08250a69df0f236"
+  },
+  "suite_results": {
+    "test_nonbinary_v5d_post.py": {"passed": 8, "failed": 0},
+    "test_nonbinary_v5d_ir_qualification.py": {"passed": 3, "failed": 31, "note": "expected 34 passed only in the pre-plan state; all 31 failures are create_plan -> ValueError: identity freshness because the official v5d package (pre_run_plan.json with the same roots) already exists in the shared root, so _identity_overlap(exclude=None) in _validate_plan (nonbinary_v5_runtime.py:203-205) flags the plan's own identity as prior evidence. Same official-package anti-replay self-conflict mechanism as v5c_lane (18 failed/1 passed), v4, v5b history; it is the direct consequence of the recorded procedural deviation (plan created before acceptance), not a code regression at HEAD 192f455. The 3 passing tests are the create_plan-avoiding guards (production runner/verify rejection, official-root requirement, invalid-policy fail-closed)."},
+    "v5d_total": {"passed": 11, "failed": 31, "note": "expected 42 passed in the clean pre-plan state; see v5d_ir_qualification note for the identity-freshness mechanism"},
+    "v5c_decoders_regression": {"passed": 10, "failed": 0},
+    "v5b_regression": {"passed": 12, "failed": 0},
+    "v5c_lane_regression": {"passed": 1, "failed": 18, "note": "pre-existing official-package anti-replay self-conflict (same run_id exists in shared root -> identity freshness); same pattern as v4/v5b history; not a v5d regression"}
+  },
+  "bounds_audit": {
+    "list": "L=2 least-certain variables, top-8 symbols each, exactly 64 candidates, at most one round, syndrome-consistency filter, deterministic tie-breaks",
+    "admm": "rho=1.0, <=50 outer iterations, residual tol 1e-6, deterministic argmax one-hot init, per-bit parity-relaxation projection, no random source, fail-closed decoder_error",
+    "verification_cap": 3
+  },
+  "disclosure_audit": "no materialize_seed_record/locked_seed_bits/toeplitz_tag imports; post-processing reads only the already-disclosed syndrome",
+  "source_hash_audit": {"source_files": 13, "mismatches": [], "git_commit_matches_plan": true, "contract_sha256_matches": true},
+  "no_official_execution_output": true,
+  "output_directory": "comparison_bench/outputs_comparison/formal_ir_methods/20260731_v5d_nbldpc_post_synthetic/ contains only pre_run_plan.json",
+  "head_unchanged": "192f455734fa436b08a2fd95c08250a69df0f236",
+  "remaining_before_execute": ["7.3 execute once via wrapper", "7.3 strict read-only replay once (same HEAD)", "7.4 readiness/promotion gates", "7.5 documentation"]
+}

@@ -1,0 +1,20 @@
+global:
+  output_dir: comparison_bench/outputs_comparison/real_ir_success_first
+
+dataset:
+  frame_batch_path: comparison_bench/outputs_comparison/real_ir_success_first/representative_subset.parquet
+
+layered_ldpc:
+  parity_fraction: [1.0, 0.9, 0.8, 0.67, 0.50]
+  max_iter: [20, 50]
+  osd_order: [0]
+  bp_method: ["minimum_sum"]
+  mapping: ["gray"]
+  llr_mode: ["bsc_estimated", "hard"]
+  bitplane_rate_mode: ["uniform", "per_bitplane_raw_ber"]
+  column_weight: [3]
+  seed: [20260428]
+  frame_caps: [4]
+  max_workers: 16
+  include_all_points: true
+  force: true

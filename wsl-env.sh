@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 export PROJECT_DATA_ROOT="${PROJECT_DATA_ROOT:-/mnt/d/Data}"
-export PROJECT_RESULTS_ROOT="${PROJECT_RESULTS_ROOT:-$HOME/var/results_hot/HD-QKD_Polar_Release}"
+export PROJECT_RESULTS_ROOT="${PROJECT_RESULTS_ROOT:-$HOME/var/results_hot/HD-QKD_Polar_Comparison}"
 export TMPDIR="${TMPDIR:-$HOME/var/tmp}"
 export PIP_CACHE_DIR="${PIP_CACHE_DIR:-$HOME/.cache/pip}"
 

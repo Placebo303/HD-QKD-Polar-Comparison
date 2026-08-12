@@ -1,0 +1,35 @@
+{
+  "schema": "v8_literature_provenance_v1",
+  "paper": {
+    "title": "Efficient Information Reconciliation for High-Dimensional Quantum Key Distribution",
+    "authors": [
+      "Ronny M\u00fcller",
+      "Domenico Ribezzo",
+      "Mujtaba Zahidy",
+      "Leif Katsuo Oxenl\u00f8we",
+      "Davide Bacco",
+      "S\u00f8ren Forchhammer"
+    ],
+    "year": 2024,
+    "venue": "Quantum Inf Process 23, 195 (2024)",
+    "arxiv": "arXiv:2307.02225v2",
+    "url": "https://arxiv.org/abs/2307.02225"
+  },
+  "exact_coordinates": {
+    "section": "Section 3.1",
+    "table": "Table 1",
+    "row": "0.75",
+    "eq": "eq. 13 (lambda(x) = sum lambda_i x^(i-1)), eq. 1 (QSC transition)"
+  },
+  "channel_convention": "q-ary symmetric (QSC), p = QBER symbol error rate, all-zero codeword; P(y|x) = 1-p if y==x else p/(q-1)",
+  "perspective": "lambda is the node degree distribution in edge view = EDGE perspective (Table 1 caption)",
+  "check_distribution": "concentrated, implied by code rate (inference, documented): dc_mean = 1/((1-R)*sum(lambda_d/degree_d)) over effective degrees {2,4,7,10,19,26,28} = 24.328589328768736, two-point {24: 0.6714106712, 25: 0.3285893288}",
+  "rate": 0.75,
+  "target_det": 0.069,
+  "target_eeff": 1.053,
+  "frozen_tolerance": 0.015,
+  "tolerance_justification": "paper 20-step QBER sweep precision ~0.005 + seeded MC-DE finite-sample error at 20000 nodes ~0.003 + binary-search step 0.0025",
+  "mcde_conventions_verbatim": "We used 100000 nodes with a maximum of 150 iterations for the MC-DE, the QBER was swept in 20 steps in a short range below the best possible threshold.",
+  "retrieval_date": "2026-08-04",
+  "extract_sha256": "d343f0204e87994e64efd32531bc12490fb4e7125cd90b52cfaf2397279b57bd"
+}

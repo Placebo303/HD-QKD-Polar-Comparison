@@ -1,0 +1,51 @@
+{
+  "schema": "v9a_interrupted_trial_freeze_v1",
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "trial": "v9a_04c9e7d25d7145659685415084d6fac7",
+  "reason": "interrupted v1-protocol execute attempt launched 2026-08-04 15:31:01 by a cancelled agent session; terminated as required by the frozen packet (own and terminate only V9 processes)",
+  "process": {
+    "pid": 17948,
+    "name": "python.exe",
+    "start_local": "2026-08-04T15:31:01",
+    "start_utc": "2026-08-04T07:31:01.882310Z",
+    "terminated_at_utc": "2026-08-04T18:07:06Z",
+    "termination_command": "taskkill /PID 17948 /T /F",
+    "termination_result": "SUCCESS - terminated PID 17948 and child PID 17128; parent PID 27068 not touched",
+    "final_cpu_seconds": 9242.265625,
+    "final_working_set_bytes": 178872320,
+    "verified_absent": true,
+    "note": "terminated_at_utc is the freeze capture timestamp; process was verified absent via tasklist /FI \"PID eq 17948\" immediately before capture"
+  },
+  "trial_workspace": {
+    "path": "workspace/v9a_04c9e7d25d7145659685415084d6fac7",
+    "stdout_log": {
+      "path": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/execute.stdout.log",
+      "sha256": "525B7D092700C868543E44D27ADF915FD656AB202879ADB2D2E601A6DF3C1DEA",
+      "total_lines": 7,
+      "last_logged_line": "[S1] C6 opt-seed proxy=0.195546875 probes=6 dc=(11.0,12.0)",
+      "last_probed_candidates": [
+        "[S1] C1 opt-seed proxy=0.19210937500000003 probes=6 dc=(10.0,11.0)",
+        "[S1] C2 opt-seed proxy=0.173203125 probes=6 dc=(10.0,11.0)",
+        "[S1] C3 opt-seed proxy=0.174921875 probes=6 dc=(10.0,11.0)",
+        "[S1] C4 opt-seed proxy=0.198984375 probes=6 dc=(11.0,12.0)",
+        "[S1] C5 opt-seed proxy=0.185234375 probes=6 dc=(9.0,10.0)",
+        "[S1] C6 opt-seed proxy=0.195546875 probes=6 dc=(11.0,12.0)"
+      ]
+    },
+    "execute_dir": {
+      "path": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/execute",
+      "file_count": 0,
+      "files": []
+    }
+  },
+  "bench_workspace": {
+    "path": "workspace/v9a_bench_707a1e2912124baf93d5bad919fc051b",
+    "results_jsonl": {
+      "path": "workspace/v9a_bench_707a1e2912124baf93d5bad919fc051b/results.jsonl",
+      "sha256": "6E1CFE37501CA85DEA8514D29025AF6943D9ADD3EADE21852ADD058D56C540F7",
+      "total_lines": 6
+    }
+  },
+  "status_statement": "This trial is frozen immutable evidence. It was interrupted before completing the v1-protocol execute stage (log stops at the [S1] opt-seed probing block, probes=6 per candidate, no output files written to the execute dir). It is NEVER to be used for any gate decision.",
+  "freeze_recorded_at_utc": "2026-08-04T18:07:06Z"
+}

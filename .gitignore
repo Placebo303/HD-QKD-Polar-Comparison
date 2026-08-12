@@ -5,6 +5,11 @@ __pycache__/
 *.nbi
 *.nbc
 .pytest_cache/
+pytest-cache-files-*/
+.opencode/
+comparison_bench/outputs_comparison/pytest-cache-files-*/
+comparison_bench/outputs_comparison/pytest_tmp/
+comparison_bench/outputs_comparison/pytest_tmp2/
 
 results/
 workspace/

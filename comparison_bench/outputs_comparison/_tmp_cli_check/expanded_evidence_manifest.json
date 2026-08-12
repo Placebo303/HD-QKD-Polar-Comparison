@@ -1,0 +1,98 @@
+{
+  "git_commit": "b639e3d",
+  "source_files": {
+    "cascade_sweep": {
+      "path": "cascade_param_sweep_results.csv",
+      "sha256": "0592d69863a6ce5017a96846e6afef0b34d6e127c50a3add82b99a1c555d71e9"
+    },
+    "ldpc_sweep": {
+      "path": "layered_ldpc_param_sweep_results.csv",
+      "sha256": "a2e52f5c068cfbb85ea446790ea4e3a2813f7faea3f94d94a629228cb14caadb"
+    },
+    "qldpc_sweep": {
+      "path": "qldpc_param_sweep_results.csv",
+      "sha256": "3bb20fb49a91c0af1e003a7d1c256776de65ffac6a0110f521afedb1be22585f"
+    },
+    "scalability_real": {
+      "path": "scalability/ir_benchmark_results.csv",
+      "sha256": "dc4b801c05b0f59c07af462cccd523c730a7c6ed04ce33e054a4caa3c20c99bb"
+    },
+    "scalability_synth": {
+      "path": "scalability_synth/ir_benchmark_results.csv",
+      "sha256": "35fa0d56ec73a8775c279ac8c7db3421428907fae7330e748bebcf5e23d0f377"
+    },
+    "source_manifest": {
+      "path": "ir_v3_run_manifest.json",
+      "sha256": "d0967b3e512b54bb31af5c7b41a84b93def3699941486c440cdbcf0bdace683c"
+    }
+  },
+  "source_manifest_config_snapshots": {
+    "global": {
+      "output_dir": "comparison_bench/outputs_comparison/real_ir_success_first"
+    },
+    "qldpc": {
+      "channel_model": [
+        "qary_symmetric"
+      ],
+      "check_fraction": [
+        0.33,
+        0.4,
+        0.5
+      ],
+      "decoder": [
+        "qary_hard_syndrome_bf"
+      ],
+      "force": true,
+      "frame_caps": [
+        4
+      ],
+      "max_iter": [
+        20
+      ],
+      "max_q_for_realdata": 256,
+      "max_workers": 8,
+      "row_weight": [
+        3,
+        4
+      ],
+      "seed": [
+        0,
+        1
+      ]
+    },
+    "realdata": {
+      "bin_width_ps": [
+        120,
+        180
+      ],
+      "dimensions": [
+        8,
+        16
+      ],
+      "frame_batch_path": "comparison_bench/outputs_comparison/real_ir_success_first/representative_subset.parquet"
+    },
+    "synthetic": {
+      "frame_len_symbols": [
+        64
+      ],
+      "n_frames": 4,
+      "q_values": [
+        8,
+        16
+      ],
+      "seed": 1234,
+      "ser_values": [
+        0.01,
+        0.03
+      ]
+    }
+  },
+  "output_files": [
+    "cascade_optimized_summary.csv",
+    "ldpc_optimized_summary.csv",
+    "qldpc_reference_summary.csv",
+    "scalability_summary.csv",
+    "method_comparison_by_frame_len.csv",
+    "failure_region_analysis.csv"
+  ]
+}

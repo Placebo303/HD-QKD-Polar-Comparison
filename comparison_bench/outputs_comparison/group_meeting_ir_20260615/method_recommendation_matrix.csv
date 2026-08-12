@@ -1,0 +1,168 @@
+dataset_id,dimension,bin_width_ps,recommended_method,max_success_rate,recommendation_classification,note
+polar_row_0,4,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_1,4,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_10,4,200.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_100,2048,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_101,2048,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_102,2048,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_103,2048,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_104,2048,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_105,2048,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_106,2048,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_107,2048,150.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_108,2048,180.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_109,2048,200.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_11,8,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_110,4096,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_111,4096,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_112,4096,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_113,4096,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_114,4096,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_115,4096,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_116,4096,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_117,4096,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_118,4096,150.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_119,4096,180.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_12,8,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_120,4096,200.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_13,8,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_14,8,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_15,8,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_16,8,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_17,8,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_18,8,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_19,8,150.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_2,4,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_20,8,180.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_21,8,200.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_22,16,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_23,16,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_24,16,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_25,16,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_26,16,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_27,16,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_28,16,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_29,16,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_3,4,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_30,16,150.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_31,16,180.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_32,16,200.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_33,32,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_34,32,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_35,32,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_36,32,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_37,32,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_38,32,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_39,32,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_4,4,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_40,32,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_41,32,150.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_42,32,180.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_43,32,200.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_44,64,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_45,64,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_46,64,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_47,64,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_48,64,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_49,64,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_5,4,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_50,64,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_51,64,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_52,64,150.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_53,64,180.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_54,64,200.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_55,128,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_56,128,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_57,128,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_58,128,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_59,128,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_6,4,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_60,128,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_61,128,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_62,128,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_63,128,150.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_64,128,180.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_65,128,200.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_66,256,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_67,256,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_68,256,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_69,256,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_7,4,120.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_70,256,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_71,256,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_72,256,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_73,256,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_74,256,150.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_75,256,180.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_76,256,200.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_77,512,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_78,512,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_79,512,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_8,4,150.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_80,512,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_81,512,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_82,512,80.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_83,512,100.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_84,512,120.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_85,512,150.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_86,512,180.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_87,512,200.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_88,1024,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_89,1024,30.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_9,4,180.0,polar_historical,1.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_90,1024,40.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_91,1024,50.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_92,1024,60.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_93,1024,80.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_94,1024,100.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_95,1024,120.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_96,1024,150.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_97,1024,180.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_98,1024,200.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+polar_row_99,2048,20.0,polar_historical,0.0,historical_baseline,"Polar: historical imported baseline, not same-run rerun"
+qldpc_synth_q16_ser0p01_flen128,16,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q16_ser0p01_flen64,16,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q16_ser0p03_flen128,16,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q16_ser0p03_flen64,16,,qldpc_reference,0.75,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q16_ser0p05_flen128,16,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q16_ser0p05_flen64,16,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q16_ser0p08_flen128,16,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q16_ser0p08_flen64,16,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q32_ser0p01_flen128,32,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q32_ser0p01_flen64,32,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q32_ser0p03_flen128,32,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q32_ser0p03_flen64,32,,qldpc_reference,0.75,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q32_ser0p05_flen128,32,,qldpc_reference,0.75,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q32_ser0p05_flen64,32,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q32_ser0p08_flen128,32,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q32_ser0p08_flen64,32,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q4_ser0p01_flen128,4,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q4_ser0p01_flen64,4,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q4_ser0p03_flen128,4,,qldpc_reference,0.75,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q4_ser0p03_flen64,4,,qldpc_reference,0.75,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q4_ser0p05_flen128,4,,qldpc_reference,0.75,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q4_ser0p05_flen64,4,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q4_ser0p08_flen128,4,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q4_ser0p08_flen64,4,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q8_ser0p01_flen128,8,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q8_ser0p01_flen64,8,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q8_ser0p03_flen128,8,,qldpc_reference,1.0,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q8_ser0p03_flen64,8,,qldpc_reference,0.75,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q8_ser0p05_flen128,8,,qldpc_reference,0.75,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q8_ser0p05_flen64,8,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q8_ser0p08_flen128,8,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+qldpc_synth_q8_ser0p08_flen64,8,,qldpc_reference,0.5,reference_only,qLDPC reference: not industrial-grade; feasibility only
+real_typeii_20db_d1024_bw100_blk0,1024,100.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d1024_bw180_blk0,1024,180.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d1024_bw200_blk0,1024,200.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d16_bw100_blk0,16,100.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d16_bw180_blk0,16,180.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d16_bw60_blk0,16,60.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d32_bw100_blk0,32,100.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d32_bw180_blk0,32,180.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d32_bw40_blk0,32,40.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d32_bw60_blk0,32,60.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d8_bw120_blk0,8,120.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d8_bw180_blk0,8,180.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d8_bw200_blk0,8,200.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting
+real_typeii_20db_d8_bw50_blk0,8,50.0,cascade_lite,1.0,preferred_non_polar,Cascade: preferred non-Polar candidate for group meeting

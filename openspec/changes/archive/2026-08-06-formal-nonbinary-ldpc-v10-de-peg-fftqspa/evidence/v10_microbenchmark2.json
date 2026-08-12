@@ -1,0 +1,51 @@
+{
+  "CR": 0.9,
+  "F": 0.5,
+  "amendment_ref": "AMEND-2026-08-05-01",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "de_variant": "DE/rand/1/bin",
+  "engineering_only_non_scientific": true,
+  "environment": {
+    "numba": "0.64.0",
+    "numpy": "2.4.0",
+    "os": "Windows-11-10.0.26200-SP0",
+    "platform": "Windows",
+    "python": "3.12.12"
+  },
+  "estimation_inputs_for_v10a": {
+    "base_seconds_per_eval_at_500_30": 1.181153864999942,
+    "scaling_formula": "eval_sec(ns,mi) = base * (ns/500) * (mi/30)"
+  },
+  "f_for_rate": 1.15,
+  "max_gen": 3,
+  "n_evaluations": 20,
+  "n_for_rate": 1024,
+  "no_threshold_winner_gate_claims": true,
+  "note": "Engineering-only re-measurement (V10-10, exactly-once per AMEND-2026-08-05-01) with numba njit hot kernels integrated into nonbinary_v10_de.py. Same config as microbenchmark #1. NO threshold/winner/gate claims.",
+  "p_gate": 0.2,
+  "peak_rss_bytes": 233103360,
+  "peak_rss_cap_bytes": 3221225472,
+  "pop_size": 5,
+  "q": 1024,
+  "rate": 0.6865234375,
+  "run_utc": "2026-08-05T14:55:29Z",
+  "schema": "v10_microbenchmark_v2",
+  "screen_max_iter": 30,
+  "screen_n_samples": 500,
+  "seconds_per_evaluation": 1.181153864999942,
+  "seconds_per_generation": 5.288396596908569,
+  "seed": 2026100000,
+  "single_eval_100_converged": true,
+  "single_eval_100_converged_iterations": 55,
+  "single_evaluation_seconds_standalone_100_mean": 2.4273098333311887,
+  "single_evaluation_seconds_standalone_100_min": 2.4110869000141975,
+  "single_evaluation_seconds_standalone_30_mean": 1.295154000011583,
+  "single_evaluation_seconds_standalone_30_min": 1.2897527000168338,
+  "speedup_vs_microbenchmark_1": {
+    "microbenchmark1_seconds_per_evaluation": 19.02614645499998,
+    "microbenchmark1_standalone_seconds": 20.116085600020597,
+    "speedup_seconds_per_evaluation": 16.108101593521784
+  },
+  "wall_clock_seconds_total": 23.62307729999884,
+  "workers": 1
+}

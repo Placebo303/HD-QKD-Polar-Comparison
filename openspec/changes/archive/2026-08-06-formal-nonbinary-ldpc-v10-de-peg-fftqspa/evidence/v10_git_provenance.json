@@ -1,0 +1,133 @@
+{
+  "schema": "v10_git_provenance_v1",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "date": "2026-08-06",
+  "authorization": "Main-thread explicit one-time grant for local scoped commit (V10-A18 commit prohibition lifted for this commit only); push remains prohibited.",
+  "commit_message": "V10 formal nonbinary LDPC DE-PEG-FFTQSPA: failed_ensemble close-out (2026-08-06 no-hash amendment)",
+  "pre_commit_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "post_commit_head": "2bb0d5bcda2be0942dc5e2752c6dd8f08ad5e7b2",
+  "committed_paths": [
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_common.py",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_de.py",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_fftqspa.py",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_peg.py",
+    "comparison_bench/tests/test_nonbinary_v10_common.py",
+    "comparison_bench/tests/test_nonbinary_v10_de.py",
+    "comparison_bench/tests/test_nonbinary_v10_fftqspa.py",
+    "comparison_bench/tests/test_nonbinary_v10_gate.py",
+    "comparison_bench/tests/test_nonbinary_v10_peg.py",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/design.md",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/pre_run_plan.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_0_gate_main_thread_acceptance.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_0_q4_reference_recovery.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_budget_amendment.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_freeze_acceptance.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_gate_decision.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_independent_review_acceptance.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_literature_crosswalk.md",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_microbenchmark.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_microbenchmark2.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_protocol_amendment_no_hash_v1.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_s4_delta_correction.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10_t3_regression.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_execute_results.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_gate_decision.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_plan.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/evidence/v10a_replay_evidence.json",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/opencode-autonomous-packet.md",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/proposal.md",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/specs/spec.md",
+    "openspec/changes/formal-nonbinary-ldpc-v10-de-peg-fftqspa/tasks.md"
+  ],
+  "committed_paths_count": 31,
+  "excluded_paths": [
+    {
+      "path": "workspace/",
+      "reason": "Scratch area; contents are referenced by path from evidence files and are not version-controlled. Explicitly excluded per task directive."
+    },
+    {
+      "path": "docs/decision-log.md",
+      "reason": "Pre-existing mixed dirty changes from other workflows; V10 content cannot be precisely isolated from other-workflow content in this file."
+    },
+    {
+      "path": "CURRENT_TASK.md",
+      "reason": "Pre-existing mixed dirty changes from other workflows; not V10-scoped."
+    },
+    {
+      "path": "AGENT_HANDOFF.md",
+      "reason": "Pre-existing mixed dirty changes from other workflows; not V10-scoped."
+    },
+    {
+      "path": "AGENT_PROJECT_MEMORY.md",
+      "reason": "Pre-existing mixed dirty changes from other workflows; V10 memory triage content is interleaved with other-workflow updates; not committed in this scoped commit."
+    },
+    {
+      "path": "AGENTS.md",
+      "reason": "Pre-existing dirty tracked file with other-workflow content; excluded per task directive."
+    },
+    {
+      "path": "comparison_bench/README.md",
+      "reason": "Pre-existing dirty tracked file from another workflow; not V10-scoped."
+    },
+    {
+      "path": "openspec/changes/consolidate-real-ir-evidence-package/specs/spec.md",
+      "reason": "Pre-existing dirty tracked file from another workflow; not V10-scoped."
+    },
+    {
+      "path": "openspec/changes/expand-real-ir-optimized-evidence/tasks.md",
+      "reason": "Pre-existing dirty tracked file from another workflow; not V10-scoped."
+    },
+    {
+      "path": "openspec/changes/group-meeting-ir-large-comparison/specs/spec.md",
+      "reason": "Pre-existing dirty tracked file from another workflow; not V10-scoped."
+    },
+    {
+      "path": "openspec/changes/group-meeting-ir-large-comparison/tasks.md",
+      "reason": "Pre-existing dirty tracked file from another workflow; not V10-scoped."
+    },
+    {
+      "path": "openspec/changes/optimize-real-ir-methods-after-success/tasks.md",
+      "reason": "Pre-existing dirty tracked file from another workflow; not V10-scoped."
+    },
+    {
+      "path": "openspec/changes/real-ir-success-first/tasks.md",
+      "reason": "Pre-existing dirty tracked file from another workflow; not V10-scoped."
+    },
+    {
+      "path": "comparison_bench/src/comparison_bench/formal_ir/ (non-V10 untracked files)",
+      "reason": "Untracked modules of other versions/workflows (cascade.py, codebook_*.py, ldpc*.py, nonbinary_qualification.py, nonbinary_v6/v7/v8/v9_*.py, etc.); not part of this V10 change. Only the 4 nonbinary_v10_*.py files were staged."
+    },
+    {
+      "path": "comparison_bench/tests/ (non-V10 untracked tests)",
+      "reason": "Untracked tests of other versions/workflows (test_cascade_formal.py, test_ldpc_*.py, test_nonbinary_v6/v7/v8/v9_*.py, etc.); not part of this V10 change. Only the 5 test_nonbinary_v10_*.py files were staged."
+    },
+    {
+      "path": "comparison_bench/outputs_comparison/ (untracked outputs)",
+      "reason": "Production comparison outputs; append-only policy; not part of this V10 scoped commit."
+    }
+  ],
+  "frozen_dirs_clean": {
+    "result": true,
+    "command": "git diff --name-only -- src experiments tools results",
+    "output": "(empty; exit 0)",
+    "command_status": "git status --porcelain -- src experiments tools results",
+    "status_output": "(empty; exit 0)"
+  },
+  "check_ignore": {
+    "command": "git check-ignore -v workspace/ comparison_bench/src/comparison_bench/formal_ir/",
+    "result": "exit 1 (neither path ignored)",
+    "conclusion": "workspace/ and comparison_bench/src/comparison_bench/formal_ir/ are NOT gitignored; exclusion from this commit was enforced by scoped git add, not by .gitignore."
+  },
+  "git_config": {
+    "user_name": "Placebo303",
+    "user_email": "karel.yangkai303@gmail.com",
+    "note": "Both set globally; no local repo config present; no config modification performed."
+  },
+  "no_push_declaration": true,
+  "notes": [
+    "Git HEAD identifiers (full commit SHAs) are provenance identifiers and are permitted; this file computes NO content hashes (no sha256/md5 fields), consistent with the 2026-08-06 no-hash protocol amendment.",
+    "tasks.md V10-70.8 was checked to [x] BEFORE staging, so the commit content is self-consistent.",
+    "This provenance evidence file itself (v10_git_provenance.json) is created AFTER the scoped commit and is not part of commit 2bb0d5b; it is captured by the subsequent archive-move commit (V10-70.9, out of this task's scope).",
+    "Repository was in detached HEAD state at commit time; no branch operations performed."
+  ]
+}

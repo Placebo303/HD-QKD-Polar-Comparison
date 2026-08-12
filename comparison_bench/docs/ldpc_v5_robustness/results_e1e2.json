@@ -1,0 +1,120 @@
+{
+ "e1_seed_independence": {
+  "bw120": {
+   "verified_success": 256,
+   "frames": 256,
+   "fallback_frames": 0,
+   "windows": [
+    {
+     "ranks": "128-191",
+     "verified_success": 64
+    },
+    {
+     "ranks": "192-255",
+     "verified_success": 64
+    },
+    {
+     "ranks": "256-319",
+     "verified_success": 64
+    },
+    {
+     "ranks": "320-383",
+     "verified_success": 64
+    }
+   ]
+  },
+  "bw180": {
+   "verified_success": 256,
+   "frames": 256,
+   "fallback_frames": 0,
+   "windows": [
+    {
+     "ranks": "128-191",
+     "verified_success": 64
+    },
+    {
+     "ranks": "192-255",
+     "verified_success": 64
+    },
+    {
+     "ranks": "256-319",
+     "verified_success": 64
+    },
+    {
+     "ranks": "320-383",
+     "verified_success": 64
+    }
+   ]
+  },
+  "bw200": {
+   "verified_success": 256,
+   "frames": 256,
+   "fallback_frames": 0,
+   "windows": [
+    {
+     "ranks": "128-191",
+     "verified_success": 64
+    },
+    {
+     "ranks": "192-255",
+     "verified_success": 64
+    },
+    {
+     "ranks": "256-319",
+     "verified_success": 64
+    },
+    {
+     "ranks": "320-383",
+     "verified_success": 64
+    }
+   ]
+  }
+ },
+ "e2_ser_boundary": {
+  "0.05": {
+   "verified_success": 2,
+   "frames": 128,
+   "fallback_frames": 128
+  },
+  "0.1": {
+   "verified_success": 0,
+   "frames": 128,
+   "fallback_frames": 128
+  },
+  "0.15": {
+   "verified_success": 0,
+   "frames": 128,
+   "fallback_frames": 128
+  },
+  "0.2": {
+   "verified_success": 0,
+   "frames": 128,
+   "fallback_frames": 128
+  },
+  "0.25": {
+   "verified_success": 0,
+   "frames": 128,
+   "fallback_frames": 128
+  },
+  "0.3": {
+   "verified_success": 0,
+   "frames": 128,
+   "fallback_frames": 128
+  },
+  "0.35": {
+   "verified_success": 0,
+   "frames": 128,
+   "fallback_frames": 128
+  },
+  "0.4": {
+   "verified_success": 0,
+   "frames": 128,
+   "fallback_frames": 128
+  },
+  "0.5": {
+   "verified_success": 0,
+   "frames": 128,
+   "fallback_frames": 128
+  }
+ }
+}

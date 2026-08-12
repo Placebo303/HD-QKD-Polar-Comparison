@@ -1,0 +1,63 @@
+{
+  "schema": "v9a_plan_v2_review_v1",
+  "reviewer": "reviewer-go (independent read-only review of the V9A plan amendment v2, budget-only)",
+  "date": "2026-08-04",
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "review_scope": "Read-only review of evidence/v9a_plan_v2.json (schema v9a_plan_v2_v1) against evidence/v9a_plan.json (v1, immutable), evidence/v9a_plan_review.json (v1 review), evidence/v9_00_freeze.json, opencode-autonomous-packet.md states A0/A1/A2, design.md section 2.2, comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_mcde.py and nonbinary_v9_common.py, git state, and workspace execution artifacts (workspace/v9a_04c9e7d25d7145659685415084d6fac7/, workspace/v9a_bench_707a1e2912124baf93d5bad919fc051b/). No file edited except this review artifact; nothing executed during review.",
+  "checks": {
+    "A_scientific_params_identical": {
+      "method": "Parsed v1 plan vs v2 unchanged_from_v1/amended_budget_v2 for every scientific element: searches S1..S4 (p/f/tier/opt_seed/gate), validation seeds 2026090111/112/113, candidates C1..C8, rho rule, gates .22/.215/.32/.32, selection rule, validation semantics (min over 3 seeds), resource/rank/leakage policies, immutability wording; verified run_mcde/threshold_binary_search accept n_samples/max_iter as keyword parameters.",
+      "result": "All scientific parameters identical: S1 (p=.20 f=1.15 seed 2026090101 gate .22), S2 (p=.20 f=1.08 seed 2026090102 gate .215), S3 (p=.30 f=1.15 seed 2026090103 gate .32), S4 (p=.30 f=1.08 seed 2026090104 gate .32); validation seeds and the min-over-3 conservative rule identical; candidates C1..C8 byte-identical; rho rule harmonic-exact concentrated two-point with reconstructed-rate error <=1e-12; robust gates .22/.32 and target .215/.32 with identical failure semantics (STOP before codebooks / efficiency_target_not_met robust-only); resource policy (ctypes process-tree RSS watcher, 3 GiB cap, aborted_resource_limit), rank policy (rank(H)=m, <=5 bounded relabel attempts then blocker), leakage policy (L_recon=10*m, 64-bit tag, L_total=10*m+64 hard caps, Toeplitz public_control n*10+63) restated identically; max_iter 150, entropy_tol 0.01, streak 20, floor 1e-300, p_tol 0.002, probe ranges [0.15,0.26]/[0.24,0.36] unchanged; stop rules restated unchanged. Only n_samples 2000->1000 and the probe protocol are amended. run_mcde(q, lambda_edge, rho_edge, p, *, n_samples, max_iter, seed, ...) and threshold_binary_search(..., *, n_samples, max_iter, seed, p_lo, p_hi, p_tol) accept the budget as keyword-only parameters (n_samples>=100, max_iter<=2000), so n_samples=1000 is expressible. Minor nit: selection_rule sits under unchanged_from_v1 although its wording was amended to 'among searched eligible'; the substantive amendment is correctly documented in amended_budget_v2.",
+      "pass": true
+    },
+    "B_screen_protocol_selection_equivalence": {
+      "method": "Checked the screen-then-search protocol for selection equivalence to v1 under the frozen monotone-boundary assumption (the same assumption threshold_binary_search already relies on): ineligible (one full-budget run at p=gate does not converge) has proxy < gate while any eligible has proxy >= gate, so an ineligible candidate cannot beat any eligible; winner = max proxy among searched eligible (first 4 in canonical order; ties C1..C8); further eligible recorded '>= gate' and excluded from search; no-eligible => gate FAIL; validation unchanged (full binary search over the same probe range, p_tol=0.002, min over 3 seeds); gate arithmetic unchanged (conservative >= gate); run-count cap 60/search with exceeding it a blocker.",
+      "result": "Selection-equivalent in the conservative direction; no gate is weakened. (1) Ineligible candidates cannot win: proxy < gate <= any eligible proxy. (2) The 4-eligible cap makes the winner a subset-max: candidates beyond the first 4 eligible in canonical order are never searched, so the winner's proxy is <= the global eligible max; this can only yield equal-or-lower conservative thresholds and can never fabricate a PASS; the plan pre-registers the cap and records capped candidates as '>= gate'. (3) no-eligible => gate FAIL is a conservative short-circuit of v1 (v1 would compute conservative < gate => FAIL anyway). (4) The eligible binary search over [gate, p_hi] instead of [p_lo, p_hi] returns the same boundary within the frozen p_tol semantics for eligible candidates (boundary >= gate), deterministic per the v2 protocol. (5) Validation semantics are unchanged (same probe range, p_tol, min over 3 seeds). (6) Budget arithmetic consistent: 8 screens + up to 4x6 eligible probes + 18 validation runs <= 50 <= 60 cap. Caveat: with >4 eligible the winner need not be the true max-proxy candidate; the execution must record the eligible count and the searched subset for full auditability.",
+      "pass": true
+    },
+    "C_no_result_and_no_execution": {
+      "method": "Recomputed sha256 of evidence/v9a_plan.json (expect 2e0a68807ca80ac92693b1829e02d6ef92828b01016e78a737d9fbe9ef1a8389); listed evidence/, plan_only/, workspace/v9a_04c9e7d25d7145659685415084d6fac7/ (execute/, execute.pid.txt, execute.stdout.log, execute.stderr.log, run_v9a_execute.py), workspace/v9a_bench_707a1e2912124baf93d5bad919fc051b/ (bench_v9a.py, results.jsonl); audited tasks.md V9-20.2/V9-20.3 checkboxes.",
+      "result": "FAIL. The v1 plan hash recomputes exactly to 2e0a68807ca80ac92693b1829e02d6ef92828b01016e78a737d9fbe9ef1a8389 (byte-identical; immutability of the v1 file holds) and no result file exists under evidence/ or plan_only/ (V9-20.2/V9-20.3 unchecked), but the v2 plan's claims 'No scientific result has been generated yet; nothing was executed' (amendment_rationale) and '(v1 was never executed)' (amended_budget_v2.implementation_optimization) are contradicted by observable workspace artifacts: (a) run_v9a_execute.py (bound to the v1 plan hash 2e0a6880... and to V9A_BUDGETS n_samples=2000) actually executed 2026-08-04 15:31:01..~17:34:56 local (pid 17948; execute.pid.txt; execute.stdout.log 'plan_hash_ok=2e0a68807ca80ac9') and computed real S1 threshold proxies on optimization seed 2026090101 (C1=0.192109375, C2=0.173203125, C3=0.174921875, C4=0.198984375, C5=0.185234375, 6 probes each) before being interrupted mid-S1 (execute/ dir empty; no S1.json/summary_science.json/run_meta.json persisted; no gate decision); (b) bench_v9a.py executed six q=1024 run_mcde calls (seed 2026090101, p=0.20, N=2000/1000, module and batch modes) and persisted real outcomes (converged/iterations/entropy_last/error_last) to results.jsonl. Scientific MC-DE values for the very searches v2 amends were therefore generated, and the interrupted run is a failed/aborted execute of the v1 protocol that started after the v1 review (14:09) granted READY_FOR_SINGLE_EXECUTION; the v2 amendment (17:54) alters budgets and probe protocol for those same searches instead of freezing the failed execute, which conflicts with the frozen lifecycle (packet A2, design.md 2.2, v1 plan stop_rules: 'a failed execute is immutable: no tuning, no rerun, no altered plan') unless the main thread documents the 15:31 run as an explicitly authorized non-scientific sizing trial and freezes its artifacts as immutable evidence. The v2 document does neither, and its runtime estimate (~180-270 s/run) appears to derive from that same denied execution, making the misstatement material.",
+      "pass": false
+    },
+    "D_scope": {
+      "method": "git rev-parse HEAD; git status --porcelain -- src experiments tools results; git diff --cached --name-only; git status --porcelain tracked-modified list vs v9_00_freeze.json; formal_ir_methods name check for v9* entries.",
+      "result": "HEAD = a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344 (matches frozen). Frozen dirs src/experiments/tools/results porcelain EMPTY. Nothing staged (git diff --cached --name-only empty). Tracked-modified exactly the frozen 12 files from v9_00_freeze.json (incl. AGENTS.md, AGENT_HANDOFF.md, AGENT_PROJECT_MEMORY.md, CURRENT_TASK.md, comparison_bench/README.md, docs/decision-log.md, 6 openspec change files). No v9* entry under comparison_bench/outputs_comparison/formal_ir_methods/ (V1-V8 era packages only). The workspace execute/bench artifacts are untracked scratch under workspace/ (outside frozen dirs and outputs_comparison), scope-compliant but material to check C.",
+      "pass": true
+    }
+  },
+  "findings": [
+    {
+      "id": 1,
+      "severity": "blocking",
+      "text": "v2 plan misstates execution history: 'No scientific result has been generated yet; nothing was executed' and '(v1 was never executed)' are false. A real v1-protocol execute ran 2026-08-04 15:31:01..~17:34:56 (pid 17948; run_v9a_execute.py bound to v1 plan hash 2e0a6880... and n_samples=2000) and computed S1 C1..C5 threshold proxies (0.192109375 / 0.173203125 / 0.174921875 / 0.198984375 / 0.185234375 on optimization seed 2026090101) before interruption; bench_v9a.py additionally ran six q=1024 MC-DE runs persisting outcomes to results.jsonl. The plan must be corrected to document the true execution history (freeze these artifacts as immutable evidence, or explicitly justify and record them as an authorized non-scientific sizing trial with discarded intermediates)."
+    },
+    {
+      "id": 2,
+      "severity": "blocking",
+      "text": "Amendment-after-failed-execute conflicts with the frozen lifecycle. The v1 plan (packet A2, design.md 2.2, v1 stop_rules) requires exactly one execute after review and forbids altering the plan after a failed execute ('a failed execute is immutable: no tuning, no rerun, no altered plan'). The interrupted 15:31 execute was the authorized v1-protocol run (v1 review returned READY_FOR_SINGLE_EXECUTION at 14:09). The v2 amendment (17:54) changes budgets and the probe protocol for the same searches. The main thread must decide and document which holds: (a) the 15:31 run is a failed execute => V9A must freeze immutable evidence and STOP (v2 cannot proceed); or (b) it is a documented non-scientific sizing trial => v2 may proceed only with that documentation and a re-certified no-result statement. As written, v2 resolves neither and cannot be granted READY_FOR_SINGLE_EXECUTION."
+    },
+    {
+      "id": 3,
+      "severity": "non-blocking",
+      "text": "The 4-eligible cap makes the winner a subset-max over the first 4 eligible in canonical order; with >4 eligible the winner need not be the global max-proxy candidate. This is conservative (never fabricates a gate PASS) and pre-registered, but the execution must record the eligible count and the searched subset so gate decisions are fully auditable."
+    },
+    {
+      "id": 4,
+      "severity": "non-blocking",
+      "text": "v2 lists selection_rule under unchanged_from_v1 although its wording was amended ('winner = max threshold proxy among searched eligible candidates'); the amendment itself is fully described in amended_budget_v2, so this is a labeling nit only."
+    },
+    {
+      "id": 5,
+      "severity": "non-blocking",
+      "text": "For eligible candidates the binary-search lower bound changes from p_lo to gate and the screen uses one run at p=gate; both rely on the same monotone-boundary assumption as the frozen binary search and stay within the frozen p_tol semantics. Validation is unaffected (full binary search, same probe range, p_tol=0.002, min over 3 seeds)."
+    },
+    {
+      "id": 6,
+      "severity": "non-blocking",
+      "text": "The V9 module constant V9A_BUDGETS['n_samples'] remains 2000 (frozen V9-20.1), and the existing run_v9a_execute.py reads that constant and cross-checks the plan budget against it, so it would run the v1 budget, not v2. The v2 execute must pass n_samples=1000 explicitly and implement the screen-then-search protocol; the plan should name/bind the v2 execute entrypoint and protocol so no v1-budget run can be reused as the v2 execute."
+    }
+  ],
+  "blocking_findings_count": 2,
+  "overall_verdict": "BLOCKED"
+}

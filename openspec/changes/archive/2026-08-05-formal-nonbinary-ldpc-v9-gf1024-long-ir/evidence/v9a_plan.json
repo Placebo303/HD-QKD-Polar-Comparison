@@ -1,0 +1,139 @@
+{
+  "schema": "v9a_plan_v1",
+  "stage": "V9A ensemble search plan — PLAN-ONLY package (V9-20.1)",
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "date": "2026-08-04",
+  "plan_frozen_before_any_result": true,
+  "immutability": "plan frozen before any result; a failed execute is immutable and never tuned/rerun; no result may alter this plan",
+  "lifecycle": "plan-only -> independent read-only review -> exactly one deterministic execute (all four searches + all validation seeds) -> exactly one strict read-only replay -> gate decision",
+  "round1_scope": "Round 1 creates and freezes this plan ONLY. No search, no probe, no canary, no validation-seed run is executed in Round 1. Execution is a later round after independent plan review.",
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "source_hashes": {
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_mcde.py": "e31ba8f942ee9f767e6c8e4c2687ac2b3051d1007988a85e4797af38a3e28086",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_common.py": "96d53e55828423677dad101e23a0363628e519fd18c4158b9ab9b47d69c5d178",
+    "comparison_bench/tests/test_nonbinary_v9_mcde.py": "9c495c927faae4eaf9d994ae6a9e161a5b57bf3dbabe92de25bda1afd3f51b7e",
+    "comparison_bench/tests/test_nonbinary_v9_common.py": "3b6c1bd0d671bfd6d2936aaa988588e1b49f4c340ec87f9fc2d5ac59fc605c0a"
+  },
+  "field": {
+    "q": 1024,
+    "q_minus_1_log2": 9.998590,
+    "basis": "polynomial",
+    "field_tables": "GF2mField from nonbinary_field (accepted field tables, import-only reuse)",
+    "message_model": "full length-1024 probability-domain vectors; scalar reliability surrogate forbidden",
+    "check_update": "coefficient-correct WHT convolution (own fwht_batched), validated against the independent V8 direct oracle at q=4/8/32 and bounded q=1024 within the frozen tolerance 1e-9",
+    "floor": 1e-300
+  },
+  "sizing": {
+    "formula": "H_q(p) = (h2(p) + p*log2(q-1)) / log2(q);  m(f,p,n) = ceil(f * H_q(p) * n);  R = 1 - m/n",
+    "computed_never_hardcoded": true,
+    "informative_expected": {
+      "p20": {"H_q": 0.2721646, "f115_m_over_n": 0.3129893, "f108_m_over_n": 0.2939378},
+      "p30": {"H_q": 0.3880868, "f115_m_over_n": 0.4462998, "f108_m_over_n": 0.4191337},
+      "log2_1023": 9.998590,
+      "note": "informative values are 7-decimal rounded; tests assert formula-exactness at 1e-12 and informative agreement at 1e-7; the module computes the formula and never hard-codes these constants"
+    }
+  },
+  "searches": [
+    {"id": "S1", "stratum_p": 0.20, "tier_f": 1.15, "tier_label": "robust", "optimization_seed": 2026090101, "probe_range": [0.15, 0.26], "gate_conservative": 0.22},
+    {"id": "S2", "stratum_p": 0.20, "tier_f": 1.08, "tier_label": "target", "optimization_seed": 2026090102, "probe_range": [0.15, 0.26], "gate_conservative": 0.215},
+    {"id": "S3", "stratum_p": 0.30, "tier_f": 1.15, "tier_label": "robust", "optimization_seed": 2026090103, "probe_range": [0.24, 0.36], "gate_conservative": 0.32},
+    {"id": "S4", "stratum_p": 0.30, "tier_f": 1.08, "tier_label": "target", "optimization_seed": 2026090104, "probe_range": [0.24, 0.36], "gate_conservative": 0.32}
+  ],
+  "search_order_frozen": ["S1", "S2", "S3", "S4"],
+  "validation": {
+    "seeds": [2026090111, 2026090112, 2026090113],
+    "same_three_for_all_searches": true,
+    "disjoint_from_optimization": true,
+    "rule": "the winning candidate of each search is re-evaluated on the 3 validation seeds with the same probe ranges; the conservative threshold is the MINIMUM over the 3 seeds of the per-seed threshold proxy"
+  },
+  "candidates": {
+    "population": {
+      "C1": {"2": 0.35, "3": 0.30, "20": 0.35},
+      "C2": {"2": 0.40, "3": 0.25, "30": 0.35},
+      "C3": {"2": 0.45, "3": 0.20, "40": 0.35},
+      "C4": {"2": 0.30, "3": 0.35, "20": 0.35},
+      "C5": {"3": 1.0},
+      "C6": {"2": 0.25, "3": 0.40, "40": 0.35},
+      "C7": {"2": 0.50, "3": 0.15, "40": 0.35},
+      "C8": {"2": 0.20, "3": 0.45, "30": 0.35}
+    },
+    "perspective": "edge-perspective lambda (variable-edge degree distribution)",
+    "degree_bounds": "degrees <= 40",
+    "applied_to": "all four searches, in the frozen canonical order C1..C8 (the tie-break order)",
+    "candidate_count": 8
+  },
+  "rho_rule": {
+    "construction": "harmonic-exact concentrated two-point check-degree distribution from the target rate: target = (1 - R) * sum_i lambda_i/i with R = 1 - m/n; dc = 1/target; on the adjacent degrees dc_lo = floor(dc), dc_hi = dc_lo + 1 set w_lo = (target - 1/dc_hi) / (1/dc_lo - 1/dc_hi), w_hi = 1 - w_lo; an integer dc degenerates to the regular single check degree",
+    "rate_condition": "sum_j rho_j/j == target exactly; reconstructed rate |1 - (sum rho_j/j)/(sum lambda_i/i) - R| <= 1e-12",
+    "implementation": "own v9 implementation (nonbinary_v9_common.concentrated_check_distribution), validated against the V8-60 formula within 1e-12 in tests; V8 is a test-only reference",
+    "check_degree_min": "dc >= 2 (no degree-1 checks)"
+  },
+  "budgets": {
+    "n_samples": 2000,
+    "max_iter": 150,
+    "entropy_tol": 0.01,
+    "entropy_base": "base q (=10 at q=1024)",
+    "streak": 20,
+    "floor": 1e-300,
+    "convergence_rule": "entropy < entropy_tol for streak consecutive iterations",
+    "iteration_order": "variable -> check -> belief (frozen)",
+    "rng": "deterministic seeded PCG64 (numpy default_rng)"
+  },
+  "threshold_search": {
+    "method": "deterministic binary search (threshold_binary_search), same frozen seed per probe",
+    "p_tol": 0.002,
+    "probe_ranges": {"p20": [0.15, 0.26], "p30": [0.24, 0.36]},
+    "threshold_proxy": "largest p (to p_tol) for which the MC-DE run converges"
+  },
+  "selection_rule": {
+    "per_search": "winner = candidate with the maximum threshold proxy evaluated on the optimization seed",
+    "ties": "broken by canonical candidate order C1..C8"
+  },
+  "gates": {
+    "robust_f115": {"p20_conservative_gate": 0.22, "p30_conservative_gate": 0.32, "failure": "freeze evidence and STOP before any finite codebook; no V9B plan"},
+    "target_f108": {"p20_conservative_gate": 0.215, "p30_conservative_gate": 0.32, "failure": "robust-only continuation with efficiency_target_not_met for that stratum; no target claim"},
+    "p20_target_capacity_note": ".215 remains below the approximate p=.20 f=1.08 capacity threshold ~.21827, preserving a feasible target"
+  },
+  "gate_reconstruction": {
+    "formula": "for each search: gate_outcome = PASS iff conservative_threshold >= gate_conservative; conservative_threshold = min over validation seeds of threshold_binary_search(winner, seed).threshold_proxy",
+    "robust_gates": {"S1": {"search": "S1 p=.20 f=1.15", "gate": 0.22}, "S3": {"search": "S3 p=.30 f=1.15", "gate": 0.32}},
+    "target_gates": {"S2": {"search": "S2 p=.20 f=1.08", "gate": 0.215}, "S4": {"search": "S4 p=.30 f=1.08", "gate": 0.32}},
+    "outcome_labels": {"robust_fail": "stop_before_codebooks", "target_fail": "efficiency_target_not_met (robust-only continuation)"},
+    "example": "S1: conservative = min(proxy(2026090111), proxy(2026090112), proxy(2026090113)) over the S1 winner; robust gate PASS iff conservative >= 0.22"
+  },
+  "resource_policy": {
+    "rss_watcher": "ctypes-only process-tree RSS watcher (toolhelp32 snapshot, sum WorkingSetSize of parent + children; stdlib ctypes only; NO psutil, NO installation)",
+    "sampling_interval_s": 10,
+    "cap_bytes": 3221225472,
+    "cap_gib": 3,
+    "scientific_runs_must_run_under_watcher": true,
+    "breach_status": "aborted_resource_limit with documented reason"
+  },
+  "rank_policy": {
+    "rule": "sparse GF(1024) Gaussian elimination using GF2mField tables (imported from nonbinary_field only); require rank(H)=m for every finite matrix before any plan",
+    "reconstruction": "bounded deterministic reconstruction <= 5 attempts (relabel with the next frozen label seed) then BLOCKER",
+    "scope_note": "policy frozen in this plan; the rank utility and finite-codebook enforcement are V9B-round work (Round 1 freezes the policy and unit-tests the utility contract on small cases)"
+  },
+  "leakage_policy": {
+    "L_recon": "10*m syndrome bits",
+    "tag": "separate fixed 64-bit correctness tag",
+    "L_total": "10*m + 64 bits",
+    "hard_caps": "exact mechanical hard caps; no other reconciliation payload",
+    "public_control": "Toeplitz verification seed bits (n*10 + 63) documented separately (accepted verifier shared.verification_result)",
+    "forbidden": "puncturing, shortening, interactive/adaptive stages, information-bearing index/control payload; blind rate adaptation deferred to a future V10 change",
+    "fixed_rate_per_stratum": "V9C uses one fixed rate per stratum: f=1.08 only where its target gate passed, else f=1.15 with efficiency_target_not_met"
+  },
+  "stop_rules": [
+    "any robust conservative gate failure (S1 < 0.22 or S3 < 0.32) => freeze immutable evidence and STOP before codebooks",
+    "target conservative gate failure (S2 < 0.215 or S4 < 0.32) => robust-only downstream with efficiency_target_not_met",
+    "a failed execute is immutable: no tuning, no rerun, no altered plan",
+    "no qualification/confirmation/real-data/N4/promotion/formal-comparison work is authorized by this plan"
+  ],
+  "seed_derivation": {
+    "constituent_seed": "int(sha256(f\"{P}:frame{f}:const{k}\")[0:8], 16)",
+    "error_pattern_seed": "int(sha256(f\"{P}:frame{f}:const{k}:err\")[0:8], 16)",
+    "v9_prefix": "202609xx (disjoint from ALL prior V1-V8 seeds)",
+    "future_reserved": {"V9B": "20260902xx", "V9C16": "20260903xx", "V9C32_canary": "20260904xx", "V9C32_development": "20260905xx"}
+  },
+  "v8_boundary": "V8's q=4 reproduction validates the method and audit machinery only; it is not a GF(1024) threshold or FER result. All GF(1024) thresholds in this plan come from the frozen V9A package, never from V8 numbers."
+}

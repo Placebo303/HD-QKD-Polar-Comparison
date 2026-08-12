@@ -1,0 +1,7 @@
+method: qldpc_reference
+method_variant: offline_reference
+qldpc_mode: offline_reference
+qldpc_parity_fraction: 0.5
+qldpc_row_weight: 6
+qldpc_seed: 20260415
+notes: Runs a synthetic/offline q-ary syndrome reference approximation; not a full qLDPC end-to-end decoder.

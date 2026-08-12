@@ -1,0 +1,51 @@
+{
+  "change": "formal-nonbinary-ldpc-v5-multistage-ir",
+  "milestone": "Route A acceptance T0-T3 (before data) and fixed-seed probe",
+  "date": "2026-07-31",
+  "tasks_evidenced": ["2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "3.1", "3.2", "3.3", "3.5"],
+  "suite_results": {
+    "test_nonbinary_v5a_codebook.py": {"passed": 5, "failed": 0, "tier": "T0/T1"},
+    "test_nonbinary_v5a_multistage.py": {"passed": 7, "failed": 0, "tier": "T0/T1"},
+    "test_nonbinary_v5a_ir_qualification.py": {"passed": 19, "failed": 0, "tier": "T1/T2"},
+    "v5a_total": {"passed": 31, "failed": 0},
+    "v4_regression": {"passed": true, "note": "test_nonbinary_v4_ir_qualification.py + test_nonbinary_v4_ir.py green under fresh writable basetemp"},
+    "v1_v2_v3_regression": {
+      "status": "pre-existing_failures_not_caused_by_this_change",
+      "evidence": [
+        "identical failures reproduced with ALL v5a files removed from the tree",
+        "identical failures reproduced with the v4 evidence package temporarily moved away",
+        "mechanism: v1-v3 era tests reuse production roots; their own evidence packages under outputs_comparison/formal_ir_methods/ trigger 'prior identity overlap' in _identity_overlap root checks",
+        "frozen baseline untouched; no v1-v4 source file modified by this change"
+      ]
+    }
+  },
+  "key_facts": {
+    "codebook_frozen": {"s6": [0, 3, 6, 7, 6, 0, 0, 0], "salt": 0,
+                        "manifest_id": "ed221b1bc2cec2dd326dfa1ea9e31c2395004819655a376b899827e5f04d6c78",
+                        "canonical_sha256": "fad503ab067efa67e77e6f9150c1002d7520549eb302de1c91035ca8c72095ab",
+                        "exact_v3_row_reuse": "rows 0..47 equal v3 48-row matrix (tested)"},
+    "plan_contract": {"frames": 128, "development_seed_records": 576,
+                      "identity_overlap_empty_vs_all_prior_evidence": true},
+    "design_deviation_recorded": {
+      "item": "s6 disjoint-shift-difference condition uses mask_a INTERSECT mask6, not mask_a in full",
+      "why": "full-mask condition is provably UNSAT (constraint propagation: blocks 0..4 SAT, 0..5 UNSAT); intersection is the exact zero-four-cycle condition because block 6 has no edges in columns 6,7",
+      "recorded_in": ["nonbinary_v5a_codebook.py module docstring and _find_s6 docstring",
+                      "evidence/v5a_acceptance_t0_t3.json"],
+      "pending": "decision log entry at documentation task 4.4 / 8.1"
+    }
+  },
+  "probe": "see probe_202607719999_routeA.json (deterministic repeat; all stages syndrome_consistent; warm extension converges in 1 iteration; dense bytes 4.46/5.51/6.29 MiB, under 24 MiB cap)",
+  "no_official_output": true,
+  "scoped_new_files": [
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v5_runtime.py",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v5a_codebook.py",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v5a_multistage.py",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v5a_ir_qualification.py",
+    "comparison_bench/src/comparison_bench/cli/run_formal_nonbinary_v5a_qualification.py",
+    "comparison_bench/tests/test_nonbinary_v5a_codebook.py",
+    "comparison_bench/tests/test_nonbinary_v5a_multistage.py",
+    "comparison_bench/tests/test_nonbinary_v5a_ir_qualification.py"
+  ],
+  "modified_files": "none (all additions; v1-v4 frozen baseline untouched)",
+  "remaining_before_execute": ["3.4 independent review (reviewer-go)", "4.1 plan creation after review"]
+}

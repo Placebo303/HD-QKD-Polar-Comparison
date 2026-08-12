@@ -1,0 +1,80 @@
+{
+  "schema": "v10_gate_decision_v1",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "stage": "V10A GF(1024) four-search ensemble gate -- final decision (failed_ensemble)",
+  "final_state": "failed_ensemble",
+  "decision_date_utc": "2026-08-06",
+  "per_search_gates": [
+    {
+      "search_id": "S1",
+      "tier": "robust",
+      "p": 0.2,
+      "f": 1.15,
+      "gate": 0.22,
+      "optimization_seed": 2026100201,
+      "conservative_threshold": 0.21531250000000002,
+      "delta": -0.004687499999999983,
+      "arithmetic": "conservative >= gate",
+      "verdict": "FAIL",
+      "reason": "conservative 0.21531250000000002 < gate 0.22"
+    },
+    {
+      "search_id": "S2",
+      "tier": "target",
+      "p": 0.2,
+      "f": 1.08,
+      "gate": 0.215,
+      "optimization_seed": 2026100202,
+      "conservative_threshold": 0.19843750000000002,
+      "delta": -0.01656249999999998,
+      "arithmetic": "conservative >= gate",
+      "verdict": "FAIL",
+      "reason": "conservative 0.19843750000000002 < gate 0.215"
+    },
+    {
+      "search_id": "S3",
+      "tier": "robust",
+      "p": 0.3,
+      "f": 1.15,
+      "gate": 0.32,
+      "optimization_seed": 2026100203,
+      "conservative_threshold": 0.31656249999999997,
+      "delta": -0.0034375000000000377,
+      "arithmetic": "conservative >= gate",
+      "verdict": "FAIL",
+      "reason": "conservative 0.31656249999999997 < gate 0.32"
+    },
+    {
+      "search_id": "S4",
+      "tier": "target",
+      "p": 0.3,
+      "f": 1.08,
+      "gate": 0.32,
+      "optimization_seed": 2026100204,
+      "conservative_threshold": null,
+      "delta": null,
+      "arithmetic": "conservative >= gate",
+      "verdict": "FAIL",
+      "reason": "no eligible (tier-1 converged) candidate at the gate p"
+    }
+  ],
+  "mechanical_gate_computation": {
+    "S1_robust_p20": "conservative >= 0.22",
+    "S2_target_p20": "conservative >= 0.215",
+    "S3_robust_p30": "conservative >= 0.32",
+    "S4_target_p30": "conservative >= 0.32",
+    "failed_ensemble_if": "S1 < 0.22 OR S3 < 0.32",
+    "robust_only_if": "S1 >= 0.22 AND S3 >= 0.32, but S2 < 0.215 OR S4 < 0.32",
+    "target_ready_if": "all four pass",
+    "evaluation": "S1: 0.21531250000000002 < 0.22 -> robust gate FAIL; S3: 0.31656249999999997 < 0.32 -> robust gate FAIL; failed_ensemble condition (S1 < 0.22 OR S3 < 0.32) is TRUE"
+  },
+  "state_machine_terminal_node": {
+    "node": "V10A ensemble gate",
+    "decision_branch": "failed_ensemble",
+    "terminal": true,
+    "consequence": "ordinary_irregular_GF1024 = failed_v10a; V10-30 PEG (n=4096) HALTED; V10-40 FFT-QSPA HALTED; V10-50 canary HALTED; V10-60 development HALTED; successor: new V11 NB-SC-LDPC change (fresh everything)",
+    "no_tuning_statement": "After formal V10A results exist, the budget MUST NOT change: no rerun, no parameter/budget/seed/gate/cap modification, no 'closest-to-gate' selection from a failed search. All failed evidence is retained immutably."
+  },
+  "main_thread_instruction_2026_08_06": "Per the 2026-08-06 protocol amendment (fingerprint mechanisms removed: plan-binding digests, self/source digests; direct byte comparison and field-level validation retained), the implementation operator continues the close-out: V10A replay re-run in a fresh output directory, replay byte comparison, three V10A evidence files, T2 tamper coverage, T3 git-baseline regression, full V10 test suite, tasks.md check-offs. Acceptance and scientific conclusions remain with the main thread; acceptance is NOT self-granted by the implementation operator.",
+  "operator_role": "implementation operator (coder-fast)"
+}

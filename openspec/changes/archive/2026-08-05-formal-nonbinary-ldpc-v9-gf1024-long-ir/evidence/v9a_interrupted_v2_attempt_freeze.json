@@ -1,0 +1,44 @@
+{
+  "schema": "v9a_interrupted_v2_attempt_freeze_v1",
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "phase": "V9-20.2/V9-20.3 official single execute (Round 2a, plan v2 budget protocol) - attempt B interruption freeze",
+  "trial_workspace": "workspace/v9a_04c9e7d25d7145659685415084d6fac7",
+  "attempt": "B",
+  "pid": 23652,
+  "start_local": "2026-08-04T18:20:09",
+  "start_utc": "2026-08-04T10:20:09.779093Z",
+  "status_statement": "Attempt B of the v2 official execute was killed EXTERNALLY by the agent harness (process-tree cleanup of the launching shell, 'ChildProcess.kill'); no Python exception, empty stderr (sha256 E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855). It completed ZERO searches, produced NO gate verdict and NO threshold, and is therefore a NON-DECISIONAL INTERRUPTED ATTEMPT under the frozen definition. Its single partial artifact (S1 C1 screen at p=0.22: converged=False, iters=150, entropy_last=0.6986367570243042) is frozen here for provenance only and SHALL NOT influence any gate decision. The official execute is the completed package run from a clean start (pid 5084).",
+  "bound_artifacts": [
+    {
+      "path": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_interrupted_attempt_pid23652/interruption_freeze.json",
+      "description": "primary workspace freeze record for attempt B"
+    },
+    {
+      "path": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_interrupted_attempt_pid23652/S1.progress.jsonl",
+      "sha256": "1349014DC058202D7A4515F547E86B88D64C4AB5EDE1209004BE8C520D2FDAD7",
+      "bytes": 179
+    },
+    {
+      "path": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_interrupted_attempt_pid23652/v2_execute.stdout.log",
+      "sha256": "A4055A7EBE01783409B1710AE2931C47B18F317F60FB748D7CBCAA273EA76283",
+      "bytes": 288
+    },
+    {
+      "path": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_interrupted_attempt_pid23652/v2_execute.stderr.log",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0
+    },
+    {
+      "path": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_interrupted_attempt_pid23652/v2_execute.pid.txt",
+      "sha256": "5161489045AFD249987E2E5A595D0FC3F1E079BDA115396742B164B259386B7B",
+      "bytes": 7
+    }
+  ],
+  "relaunch": "The SAME frozen script (run_v9a_execute_v2.py, plan v2 binding hash 4bd6380f19008c9c893b1114fbab94a60d37acb77e3fbdf7a0d03d347092ddf2) was relaunched from a CLEAN v2_execute/ package dir, launched fully detached via WMI Win32_Process.Create so no external shell cleanup could terminate it. No scientific parameter, seed, candidate, gate, or protocol was changed.",
+  "official_execute": {
+    "pid": 5084,
+    "workspace_dir": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/v2_execute",
+    "evidence": "openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/v9a_execute_results.json"
+  },
+  "freeze_recorded_at_utc": "2026-08-04T15:00:00Z"
+}

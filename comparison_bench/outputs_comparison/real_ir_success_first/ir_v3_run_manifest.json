@@ -1,0 +1,166 @@
+{
+  "benchmark_config_snapshot": {
+    "global": {
+      "output_dir": "comparison_bench/outputs_comparison/real_ir_success_first"
+    },
+    "qldpc": {
+      "channel_model": [
+        "qary_symmetric"
+      ],
+      "check_fraction": [
+        0.33,
+        0.4,
+        0.5
+      ],
+      "decoder": [
+        "qary_hard_syndrome_bf"
+      ],
+      "force": true,
+      "frame_caps": [
+        4
+      ],
+      "max_iter": [
+        20
+      ],
+      "max_q_for_realdata": 256,
+      "max_workers": 8,
+      "row_weight": [
+        3,
+        4
+      ],
+      "seed": [
+        0,
+        1
+      ]
+    },
+    "realdata": {
+      "bin_width_ps": [
+        120,
+        180
+      ],
+      "dimensions": [
+        8,
+        16
+      ],
+      "frame_batch_path": "comparison_bench/outputs_comparison/real_ir_success_first/representative_subset.parquet"
+    },
+    "synthetic": {
+      "frame_len_symbols": [
+        64
+      ],
+      "n_frames": 4,
+      "q_values": [
+        8,
+        16
+      ],
+      "seed": 1234,
+      "ser_values": [
+        0.01,
+        0.03
+      ]
+    }
+  },
+  "per_stage_config_snapshots": {
+    "cascade_param_sweep": {
+      "global": {
+        "output_dir": "comparison_bench/outputs_comparison/real_ir_success_first"
+      },
+      "dataset": {
+        "frame_batch_path": "comparison_bench/outputs_comparison/real_ir_success_first/representative_subset.parquet"
+      },
+      "cascade": {
+        "block_size_schedule": [
+          [8, 4, 16, 13],
+          [12, 6, 24, 13],
+          [16, 32, 64, 128]
+        ],
+        "num_passes": [2, 3, 4],
+        "permutation_mode": ["identity", "seeded_random"],
+        "seed": [0, 1],
+        "mapping": ["gray"],
+        "bisection_mode": ["recursive_binary"],
+        "verify_mode": ["crc32"],
+        "frame_caps": [4],
+        "max_workers": 16,
+        "include_all_points": true,
+        "force": true
+      }
+    },
+    "layered_ldpc_param_sweep": {
+      "global": {
+        "output_dir": "comparison_bench/outputs_comparison/real_ir_success_first"
+      },
+      "dataset": {
+        "frame_batch_path": "comparison_bench/outputs_comparison/real_ir_success_first/representative_subset.parquet"
+      },
+      "layered_ldpc": {
+        "parity_fraction": [1.0, 0.9, 0.8, 0.67, 0.50],
+        "max_iter": [20, 50],
+        "osd_order": [0],
+        "bp_method": ["minimum_sum"],
+        "mapping": ["gray"],
+        "llr_mode": ["bsc_estimated", "hard"],
+        "bitplane_rate_mode": ["uniform", "per_bitplane_raw_ber"],
+        "column_weight": [3],
+        "seed": [20260428],
+        "frame_caps": [4],
+        "max_workers": 16,
+        "include_all_points": true,
+        "force": true
+      }
+    },
+    "qldpc_param_sweep": {
+      "global": {
+        "output_dir": "comparison_bench/outputs_comparison/real_ir_success_first"
+      },
+      "synthetic": {
+        "q_values": [8, 16],
+        "ser_values": [0.01, 0.03],
+        "frame_len_symbols": [64],
+        "n_frames": 4,
+        "seed": 1234
+      },
+      "realdata": {
+        "frame_batch_path": "comparison_bench/outputs_comparison/real_ir_success_first/representative_subset.parquet",
+        "dimensions": [8, 16],
+        "bin_width_ps": [120, 180]
+      },
+      "qldpc": {
+        "check_fraction": [0.33, 0.40, 0.50],
+        "row_weight": [3, 4],
+        "max_iter": [20],
+        "decoder": ["qary_hard_syndrome_bf"],
+        "channel_model": ["qary_symmetric"],
+        "frame_caps": [4],
+        "seed": [0, 1],
+        "max_workers": 8,
+        "max_q_for_realdata": 256,
+        "force": true
+      }
+    }
+  },
+  "completed_stages": [
+    "cascade_param_sweep",
+    "layered_ldpc_param_sweep",
+    "qldpc_param_sweep"
+  ],
+  "failed_stages": [],
+  "git_commit": "b639e3d3cf1e2d3d784621d7f172baaec3853179",
+  "notes": "cascade tasks=216 representative_points=6; layered tasks=240 representative_points=6; qldpc tasks=84 batches=7",
+  "output_files": {
+    "cascade_leakage_diagnostics.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\cascade_leakage_diagnostics.csv",
+    "cascade_param_sweep_frame_results.parquet": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\cascade_param_sweep_frame_results.parquet",
+    "cascade_param_sweep_results.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\cascade_param_sweep_results.csv",
+    "failed_frame_diagnostics.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\failed_frame_diagnostics.csv",
+    "layered_ldpc_param_sweep_frame_results.parquet": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\layered_ldpc_param_sweep_frame_results.parquet",
+    "layered_ldpc_param_sweep_results.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\layered_ldpc_param_sweep_results.csv",
+    "qldpc_decoder_diagnostics.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\qldpc_decoder_diagnostics.csv",
+    "qldpc_param_sweep_frame_results.parquet": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\qldpc_param_sweep_frame_results.parquet",
+    "qldpc_param_sweep_results.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\qldpc_param_sweep_results.csv",
+    "run_errors_ir_v3.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_ir_success_first\\run_errors_ir_v3.csv"
+  },
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:13:34) [MSC v.1944 64 bit (AMD64)]",
+  "runtime_total_s": 20.004666200024076,
+  "timestamp": "2026-06-15T05:54:43.128434+00:00"
+}

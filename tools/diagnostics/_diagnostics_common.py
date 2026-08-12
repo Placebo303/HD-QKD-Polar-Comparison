@@ -11,33 +11,38 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
+if str(REPO_ROOT) not in __import__("sys").path:
+    __import__("sys").path.insert(0, str(REPO_ROOT))
+
+from src.runtime_paths import default_project_results_root, map_data_path
+
 ABS_EPS = 1e-9
 REL_EPS = 1e-6
 
 LOSS_CONFIGS: dict[int, dict[str, Any]] = {
     6: {
         "loss_db": 6,
-        "candidate_dir": REPO_ROOT / "results" / "e2e_6dB_fullgrid_pairing_v2_candidate",
-        "ttbin": Path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_6dB_2026-01-30_224719\Type2_5s_6dB_2026-01-30_224719.ttbin"),
-        "grid_table": Path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_6dB_2026-01-30_224719\e2e_pipeline_20260303_105145\_tmp_grid_table.csv"),
+        "candidate_dir": default_project_results_root(REPO_ROOT) / "e2e_6dB_fullgrid_pairing_v2_candidate",
+        "ttbin": map_data_path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_6dB_2026-01-30_224719\Type2_5s_6dB_2026-01-30_224719.ttbin"),
+        "grid_table": map_data_path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_6dB_2026-01-30_224719\e2e_pipeline_20260303_105145\_tmp_grid_table.csv"),
     },
     10: {
         "loss_db": 10,
-        "candidate_dir": REPO_ROOT / "results" / "e2e_10dB_fullgrid_pairing_v2_candidate",
-        "ttbin": Path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_10dB_2026-01-30_224808\Type2_5s_10dB_2026-01-30_224808.ttbin"),
-        "grid_table": Path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_10dB_2026-01-30_224808\e2e_new_ttbin_fullgrid\_tmp_grid_table_rawdata_fix.csv"),
+        "candidate_dir": default_project_results_root(REPO_ROOT) / "e2e_10dB_fullgrid_pairing_v2_candidate",
+        "ttbin": map_data_path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_10dB_2026-01-30_224808\Type2_5s_10dB_2026-01-30_224808.ttbin"),
+        "grid_table": map_data_path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_10dB_2026-01-30_224808\e2e_new_ttbin_fullgrid\_tmp_grid_table_rawdata_fix.csv"),
     },
     16: {
         "loss_db": 16,
-        "candidate_dir": REPO_ROOT / "results" / "e2e_16dB_fullgrid_pairing_v2_candidate",
-        "ttbin": Path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_16dB_2026-01-30_224900\Type2_5s_16dB_2026-01-30_224900.ttbin"),
-        "grid_table": Path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_16dB_2026-01-30_224900\e2e_new_ttbin_fullgrid\_tmp_grid_table_rawdata_fix.csv"),
+        "candidate_dir": default_project_results_root(REPO_ROOT) / "e2e_16dB_fullgrid_pairing_v2_candidate",
+        "ttbin": map_data_path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_16dB_2026-01-30_224900\Type2_5s_16dB_2026-01-30_224900.ttbin"),
+        "grid_table": map_data_path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_16dB_2026-01-30_224900\e2e_new_ttbin_fullgrid\_tmp_grid_table_rawdata_fix.csv"),
     },
     20: {
         "loss_db": 20,
-        "candidate_dir": REPO_ROOT / "results" / "e2e_20dB_fullgrid_pairing_v2_candidate_t15",
-        "ttbin": Path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_20dB_2026-01-30_224943\Type2_5s_20dB_2026-01-30_224943.ttbin"),
-        "grid_table": Path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_20dB_2026-01-30_224943\e2e_new_ttbin_fullgrid\_tmp_grid_table_rawdata_fix.csv"),
+        "candidate_dir": default_project_results_root(REPO_ROOT) / "e2e_20dB_fullgrid_pairing_v2_candidate_t15",
+        "ttbin": map_data_path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_20dB_2026-01-30_224943\Type2_5s_20dB_2026-01-30_224943.ttbin"),
+        "grid_table": map_data_path(r"D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\Type2_5s_20dB_2026-01-30_224943\e2e_new_ttbin_fullgrid\_tmp_grid_table_rawdata_fix.csv"),
     },
 }
 

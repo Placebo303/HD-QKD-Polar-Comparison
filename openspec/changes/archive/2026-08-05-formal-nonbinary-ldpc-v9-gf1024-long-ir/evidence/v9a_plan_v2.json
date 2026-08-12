@@ -1,0 +1,71 @@
+{
+  "schema": "v9a_plan_v2_v1",
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "phase": "V9-20.1 plan amendment (budget-only), frozen by the main thread 2026-08-04",
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "supersedes": {
+    "file": "evidence/v9a_plan.json",
+    "sha256": "2e0a68807ca80ac92693b1829e02d6ef92828b01016e78a737d9fbe9ef1a8389",
+    "status": "kept byte-identical (immutable history); independently reviewed READY_FOR_SINGLE_EXECUTION (evidence/v9a_plan_review.json)"
+  },
+  "execution_history_correction": {
+    "finding": "evidence/v9a_plan_v2_review.json (BLOCKED) discovered that a v1-protocol execute attempt actually ran 2026-08-04 15:31:01 - ~17:34:56 (pid 17948, artifacts workspace/v9a_04c9e7d25d7145659685415084d6fac7/execute.stdout.log and execute.pid.txt) computing S1 candidates C1..C5 threshold proxies (C1 0.1921, C2 0.1732, C3 0.1749, C4 0.1990, C5 0.1852 at n_samples=2000) before the operator interrupted the session; and an aborted benchmark session left 6 q=1024 MC-DE runs in workspace/v9a_bench_707a1e29d4ba4a46a059a4d3c38ff64e/results.jsonl. The earlier v2 text claiming 'nothing was executed' / 'v1 was never executed' was FALSE and is corrected here.",
+    "main_thread_decision": "The 15:31 v1-protocol run is a FROZEN, NON-DECISIONAL INTERRUPTED TRIAL: it computed no gate verdict, completed no search package, was interrupted by the operator, and is bound here as immutable evidence. It is NOT the official execute (the official execute is defined by a completed package: all four searches + validation + gate decision). It was NOT used to change any candidate, seed, gate, or target (v1 froze those before the trial existed; v2 keeps them identical). The interrupted trial's partial proxies are recorded for provenance only and SHALL NOT influence any gate decision. The v2 package below is the official frozen package and will be executed exactly once and strict-replayed exactly once.",
+    "bound_artifacts": [
+      "workspace/v9a_04c9e7d25d7145659685415084d6fac7/execute.stdout.log (v1-protocol interrupted trial, sha256 recorded at execute time)",
+      "workspace/v9a_04c9e7d25d7145659685415084d6fac7/execute.pid.txt (pid 17948)",
+      "workspace/v9a_bench_707a1e2912124baf93d5bad919fc051b/results.jsonl (6 interrupted benchmark runs)"
+    ],
+    "process_cleanup": "the v2 execute round must verify pid 17948 is no longer alive and terminate it if it is (it is a V9 process the operator owns); no other process is owned."
+  },
+  "amendment_rationale": "Runtime window constraint: the v1 budget implies ~264 MC-DE runs per execute (4 searches x (8 candidates + 3 validation seeds) x ~6 probes) at N=2000, ~180-270 s per run at q=1024 -> ~15 h execute, ~30 h with strict replay. The amendment keeps every scientific parameter, seed, candidate, gate, and validation semantics identical and only changes execution budgets and the probe protocol (screen-then-search).",
+  "unchanged_from_v1": {
+    "searches": [
+      {"id": "S1", "p": 0.20, "f": 1.15, "tier": "robust", "opt_seed": 2026090101, "gate": 0.22},
+      {"id": "S2", "p": 0.20, "f": 1.08, "tier": "target", "opt_seed": 2026090102, "gate": 0.215},
+      {"id": "S3", "p": 0.30, "f": 1.15, "tier": "robust", "opt_seed": 2026090103, "gate": 0.32},
+      {"id": "S4", "p": 0.30, "f": 1.08, "tier": "target", "opt_seed": 2026090104, "gate": 0.32}
+    ],
+    "validation_seeds": [2026090111, 2026090112, 2026090113],
+    "candidates": {
+      "C1": {"2": 0.35, "3": 0.30, "20": 0.35},
+      "C2": {"2": 0.40, "3": 0.25, "30": 0.35},
+      "C3": {"2": 0.45, "3": 0.20, "40": 0.35},
+      "C4": {"2": 0.30, "3": 0.35, "20": 0.35},
+      "C5": {"3": 1.0},
+      "C6": {"2": 0.25, "3": 0.40, "40": 0.35},
+      "C7": {"2": 0.50, "3": 0.15, "40": 0.35},
+      "C8": {"2": 0.20, "3": 0.45, "30": 0.35}
+    },
+    "rho_rule": "harmonic-exact concentrated two-point from (1-R): target=(1-R)*sum lambda_i/i, w_lo=(target-1/d_hi)/(1/d_lo-1/d_hi), integer dc degenerates to regular; reconstructed rate error <= 1e-12",
+    "mcde_semantics": "full length-q probability vectors, batched WHT check convolution, exact sampled edge-view degrees, fresh channel term, floor 1e-300, fail-closed normalization, base-q mean entropy convergence, seeded PCG64 determinism",
+    "entropy_tol": 0.01,
+    "streak": 20,
+    "gates": {
+      "robust": {"p20": 0.22, "p30": 0.32},
+      "target": {"p20": 0.215, "p30": 0.32},
+      "robust_failure": "STOP before any codebook; immutable evidence",
+      "target_failure": "robust-only continuation with efficiency_target_not_met"
+    },
+    "selection_rule": "winner = max threshold proxy among searched eligible candidates (ties C1..C8 canonical order)",
+    "validation_rule": "winner re-evaluated on the 3 validation seeds (same probe range and p_tol); conservative threshold = min over seeds of per-seed threshold proxy",
+    "resource_policy": "ctypes process-tree RSS watcher, 3 GiB cap, aborted_resource_limit on breach",
+    "rank_policy": "rank(H)=m for every finite matrix; <=5 bounded relabel attempts then blocker",
+    "leakage_policy": "L_recon=10*m, fixed 64-bit tag, L_total=10*m+64, hard caps; no other payload; Toeplitz public_control n*10+63",
+    "immutability": "plan frozen before any result; a failed execute is immutable and never tuned/rerun"
+  },
+  "amended_budget_v2": {
+    "n_samples": 1000,
+    "max_iter": 150,
+    "p_tol": 0.002,
+    "probe_ranges": {"p20": [0.15, 0.26], "p30": [0.24, 0.36]},
+    "screen_protocol": "per search, each candidate C1..C8 runs ONE full-budget run_mcde at p = gate (its search gate); converged => eligible (record '>= gate'); not converged => ineligible, recorded '< gate', NO binary search (an ineligible candidate cannot win because any eligible candidate's proxy is >= gate > its threshold)",
+    "eligible_search": "binary search over [gate, p_hi] for eligible candidates in canonical order, capped at the FIRST 4 eligible (further eligible recorded '>= gate', not searched); winner = max proxy among searched",
+    "no_eligible": "if no candidate is eligible => the search gate FAILS (frozen), recorded as '< gate' with the screen evidence",
+    "validation": "winner on the 3 validation seeds, full binary search over the same probe range with p_tol=0.002 (unchanged from v1); conservative = min per-seed proxy",
+    "implementation_optimization": "batch-draw gathers (one rng.integers call per update phase, single fancy-index gather over the (max_draws, N, q) axis) to cut per-iteration gather overhead; determinism is per this frozen v2 protocol; the v1-protocol interrupted trial (n_samples=2000) is NOT byte-comparable and is excluded from any comparison",
+    "expected_run_count_per_search": "8 screens + up to 4x6 eligible probes + 18 validation runs <= 50 runs (typical 35-42); expected execute total ~4-5.5 h, strict replay identical",
+    "run_count_cap": "hard cap 60 runs per search; exceeding it is a blocker, not a tuning path"
+  },
+  "stop_rules": "unchanged: robust gate failure stops V9 before codebooks; target failure selects robust with efficiency_target_not_met; a failed execute is immutable and never tuned/rerun; the execute must be run exactly once and strict-replayed exactly once with byte-identical outputs"
+}

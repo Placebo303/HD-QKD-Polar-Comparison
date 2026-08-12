@@ -1,0 +1,3 @@
+dataset_id,dimension,bin_width_ps,frame_cap,frames_used_actual,method,method_status,backend_status,parity_fraction,max_iter,osd_order,bp_method,mapping,llr_mode,bitplane_rate_mode,n_frames_attempted,n_frames_success,n_frames_failed_decode,n_frames_failed_verify,accepted_frame_fraction,raw_ser,post_ir_ser,leak_EC_actual_bits,leak_EC_per_input_bit,beta_eff_empirical,runtime_s,notes,param_hash,real_ir_success,success_classification
+d1,8,120,4,4,layered_ldpc_lite,ok,ok,0.5,20,0,minimum_sum,gray,hard,per_bitplane_raw_ber,4,4,0,0,1.0,0.1,0.0,600.0,0.5,0.8,0.2,,h1,True,real_ir_success
+d2,16,100,4,4,layered_ldpc_lite,ok,ok,0.5,20,0,minimum_sum,gray,hard,per_bitplane_raw_ber,4,4,0,0,1.0,0.1,0.0,850.0,0.5,0.8,0.3,,h3,True,real_ir_success
