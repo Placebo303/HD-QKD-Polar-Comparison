@@ -1,20 +1,25 @@
 # Tasks: formal-nonbinary-ldpc-v13-r3-fresh-acquisition
 
-Status: **PLANNING** — freeze review 未执行；ACCEPT 前禁止 prepare /
-execute / verify。
+Status: **FROZEN — freeze review ACCEPT (2026-08-15)**。独立 reviewer
+ACCEPT（零 blockers）；三个非阻塞警告已按 amendment 修复：A02 表述
+精确化（bw120+bw180 各 128/128）、§4 规模不足规则（eligible<192 →
+insufficient_eligible_frames）、§5 漂移阈值引用 V13 D01 参考区间。
+ACCEPT 后允许 prepare；execute 需 review ACCEPT 且数据可用。
 
 ## P — 规划与冻结（本对话完成）
 
-- [ ] **P01** 冻结数据源/acquisition/window/stratum 设置（design §1）。
-- [ ] **P02** 冻结新 frame/payload identities 与排除验证（design §2；
+- [x] **P01** 冻结数据源/acquisition/window/stratum 设置（design §1）。
+- [x] **P02** 冻结新 frame/payload identities 与排除验证（design §2；
   复用 V12 partition 身份机制）。
-- [ ] **P03** 冻结角色隔离（characterization/canary/confirmation 互斥，
+- [x] **P03** 冻结角色隔离（characterization/canary/confirmation 互斥，
   design §2）。
-- [ ] **P04** 冻结解码器不变式（R3 码本/先验/接口/max_iter，design §3）。
-- [ ] **P05** 冻结执行规模与判定表（design §4、§6）。
-- [ ] **P06** 冻结停止规则（无 eligible / 漂移 / 失败保留，design §5）。
-- [ ] **P07** 独立只读 freeze review（reviewer 子代理，对 P01–P06 +
-  design 全部条款 + claim boundary）。ACCEPT 前禁止任何执行。
+- [x] **P04** 冻结解码器不变式（R3 码本/先验/接口/max_iter，design §3）。
+- [x] **P05** 冻结执行规模与判定表（design §4、§6）。
+- [x] **P06** 冻结停止规则（无 eligible / 规模不足 / 漂移 / 失败保留，
+  design §5）。
+- [x] **P07** 独立只读 freeze review（reviewer 子代理，对 P01–P06 +
+  design 全部条款 + claim boundary）。（Done 2026-08-15：**ACCEPT，
+  零 blockers**；三个非阻塞警告按上述 amendment 修复并并入 design。）
 
 ## PREP — prepare（freeze review ACCEPT 后）
 

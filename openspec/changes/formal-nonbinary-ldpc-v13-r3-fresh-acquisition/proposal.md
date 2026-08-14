@@ -14,9 +14,10 @@ max_iter=100，回答唯一问题：**"R3 在 fresh 数据上是否仍能精确�
 
 ## Why
 
-- V13 全部证据（E01 64/64、A01 128/128、A02 256/256）基于**历史帧身份**
-  （V4/V5 身份锁覆盖），最高状态只能是 `ready_for_fresh_confirmation`
-  ——不是 promotion/qualification/fresh correction。
+- V13 全部证据（E01 64/64、A01 128/128、A02 bw120 128/128 + bw180
+  128/128）基于**历史帧身份**（V4/V5 身份锁覆盖），最高状态只能是
+  `ready_for_fresh_confirmation`——不是 promotion/qualification/fresh
+  correction。
 - 这是当前证据收益最高、技术不确定性最低的路线：候选已被 D05 诊断
   为 `code` 类根因并修复（连通 girth-8 图），历史数据上 448/448 精确
   纠错；唯一未验证的是**分布漂移后的 fresh 泛化**。

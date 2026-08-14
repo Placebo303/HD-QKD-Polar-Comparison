@@ -1,18 +1,24 @@
 # Tasks: formal-nonbinary-ldpc-v17-multibit-structured-de-gate
 
-Status: **PLANNING** — freeze review 未执行；ACCEPT 前禁止任何实现与执行。
+Status: **FROZEN — freeze review ACCEPT (2026-08-15)**。独立 reviewer
+ACCEPT（零 blockers）；两个非阻塞警告已按 amendment 修复：§4 评估
+点集固定 m∈{15,16,17,18} 全集（禁止事后收窄）、§2 Stage 0 锚点
+A/B 具体化（内部一致性 ≤0.005 + 文献交叉 |δ|≤0.012，无布尔
+fallback）。ACCEPT 后允许实现；生产执行需 review + 主线程授权。
 
 ## P — 规划与冻结（本对话完成）
 
-- [ ] **P01** 冻结立项依据/文献锚点/族排名（design §1）。
-- [ ] **P02** 冻结 Stage 0 机制复现门（锚点、PASS 判据，design §2）。
-- [ ] **P03** 冻结多位信道模型（per-bit-plane 向量 + 联合结构，schema
+- [x] **P01** 冻结立项依据/文献锚点/族排名（design §1）。
+- [x] **P02** 冻结 Stage 0 机制复现门（锚点 A/B、PASS 判据，design §2）。
+- [x] **P03** 冻结多位信道模型（per-bit-plane 向量 + 联合结构，schema
   v1，design §3）。
-- [ ] **P04** 冻结预注册候选（3–5 个，不搜索，design §4）与判定表。
-- [ ] **P05** 冻结预算/回放/降级链（design §5）。
-- [ ] **P06** 冻结产物与纪律、claim boundary（design §6、§7）。
-- [ ] **P07** 独立只读 freeze review（reviewer 子代理，对 P01–P06 +
-  design 全部条款）。ACCEPT 前禁止任何执行。
+- [x] **P04** 冻结预注册候选（3–5 个，不搜索，评估点集 m∈{15,16,17,18}
+  全集，design §4）与判定表。
+- [x] **P05** 冻结预算/回放/降级链（design §5）。
+- [x] **P06** 冻结产物与纪律、claim boundary（design §6、§7）。
+- [x] **P07** 独立只读 freeze review（reviewer 子代理，对 P01–P06 +
+  design 全部条款）。（Done 2026-08-15：**ACCEPT，零 blockers**；
+  两个非阻塞警告按上述 amendment 修复并并入 design。）
 
 ## I — 实现（freeze review ACCEPT 后，flash 子代理落实，主线程 review）
 

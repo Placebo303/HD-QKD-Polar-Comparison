@@ -50,8 +50,12 @@ amendment 流程 + 主线程授权）。
 
 ## 4. 执行规模（在 prepare 台账基础上预注册并冻结）
 
-- 主判定基于 **canary 64 帧 + confirmation 128 帧**（若 eligible 帧
-  充足；规模不足时按 §5 的 eligible 帧规则处理，**不**自适应放大）。
+- 主判定基于 **canary 64 帧 + confirmation 128 帧**（共 192 帧，
+  全部来自 eligible 行）。
+- **规模不足规则（frozen）**：eligible 帧 < 192 → **不缩小规模、不
+  自适应** → `frozen failure`（`insufficient_eligible_frames`），
+  prepare 包与不足台账原样保留；等用户提供更多 fresh 数据后重新
+  prepare（prepare 为确定性工具，重新 prepare 不是对失败的"重跑"）。
 - 每帧一次解码，失败原样保留（`decode_failed` / 其他状态均计入分母）。
 
 ## 5. 停止规则（frozen）
@@ -61,9 +65,13 @@ amendment 流程 + 主线程授权）。
    不重跑、不扩大搜索、不替换数据。
 2. **分布漂移**：fresh characterization（若 fresh 数据含 characterization
    角色）的 raw SER / bit-plane mismatch / conditional entropy 相对
-   历史参考区间漂移超阈值（SER 均值偏差 > 0.03、或 entropy 偏差 >
-   0.3 bits/symbol）→ `frozen failure`（`drift_exceeded`），失败原样
-   保留。
+   历史参考区间漂移超阈值 → `frozen failure`（`drift_exceeded`），失败
+   原样保留。**历史参考区间（V13 D01 包 v13_d01_20260814 的 bw200
+   观测，frozen 引用）**：raw SER mean 0.0771（帧级区间 0.0391–
+   0.1133）、条件熵下限 0.547 bits/symbol、bit-plane mismatch 单调
+   3.1e-5（MSB）→ 3.75e-2（LSB）。**漂移阈值（frozen）**：fresh SER
+   均值偏差 > 0.03、或条件熵偏差 > 0.3 bits/symbol、或 bit-plane
+   mismatch 单调性破坏（非单调）→ 触发。
 3. **任一执行失败**（decode_failed、decoder_error、verifier 失败、
    账目/身份违规、非法执行）→ 对应包 `frozen failure` 并保留原样；
    禁止替换帧、调参、重跑。
