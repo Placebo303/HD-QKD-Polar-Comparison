@@ -2082,3 +2082,55 @@ gate review **ACCEPT**：Stage 0 机制回归 PASS（proxy 0.060 vs 发表
 文献：Zhang 2016；V11 在 QSC 门失败但本结构化信道上耦合增益未测）；
 ② Cohen 2019 位面分解（与本数据 MSB→LSB 单调失配同构）；③ 多边/
 高维 λ 族。V12 archive 与 fresh acquisition 决定仍待用户。
+
+---
+
+### 2026-08-15: 更新目标 P0 收口完成 + P1（fresh acquisition）/ P2（V17 位面门）立项
+
+**Decision（用户更新目标）**: P0 状态收口（纯 housekeeping、无科学
+执行）→ P1（立即优先：V13 R3 fresh acquisition）→ P2（独立效率研究：
+位面/边标签 DE 门先行）。
+
+**P0 执行（2026-08-15，提交 fb6e579d）**:
+- V12 正式归档 →
+  `openspec/changes/archive/2026-08-15-formal-nonbinary-ldpc-v12-real-micro-feasibility/`
+  （保留 `source_partition_blocked`、X01/X02 未执行、v2 prepare 包；
+  归档≠成功、不重开执行；delta spec 未合并——V9/V10 先例）。
+- V15/V16 归档为 aborted drafts（未立项/前置门失败；delta spec 未合并；
+  aborted_notice.md 记录重启边界：需新 DE 门 PASS）。
+- 陈旧文档修复：CURRENT_TASK.md（V14 段降级为历史）、V14 tasks.md
+  （头部状态、测试数字、回放完成）、V13 tasks.md（C01 COMPLETE、
+  IT0-IT3 49/49）、AGENT_HANDOFF.md（Current State 重写）、记忆
+  §47/§48 修订 + §50 新增。
+- V14 测试数字统一（原始记录 = decision-log 2026-08-14）：修复前
+  13+49=62/62 → 修复后 15+49=**64/64**。
+- 本地领先 `origin/main` 28 个提交（收口后 29）；**push 待用户单独
+  授权**。
+
+**P1 立项（提交 240e3a2e）**: 新 change
+`formal-nonbinary-ldpc-v13-r3-fresh-acquisition`——冻结：新帧/载荷
+身份（排除 V4/V5/V12/V13 全部历史锁）、acquisition/window/stratum
+（bw200 主）、三角色隔离、R3 码本/先验/迭代上限不变、漂移与无
+eligible frame 停止规则、失败原样保留；流程冻结→prepare→review→
+单次 execute→只读 verify→fresh-confirmed/frozen failure。数据事实：
+2026-08-15 检查 `D:\Data` 无 fresh 帧数据源（最新 2026-07-28 JSI，
+非帧数据）→ prepare 预计产出 zero-eligible（合法冻结结果，V12 先例）；
+用户提供新数据后 prepare 可确定性重跑（非失败重跑）。
+
+**P2 立项（提交 240e3a2e）**: 新 change
+`formal-nonbinary-ldpc-v17-multibit-structured-de-gate`——纯可行性门：
+Stage 0 Cohen/多位机制复现 → Stage 1 MSB→LSB 单调失配映射为冻结
+多位信道模型（schema v1）→ Stage 2 预注册 3–5 个边标签/位面候选点
+评估（复用/扩展 V14 structured 分支）→ 冻结收敛（熵≤0.01×20 迭代）/
+f≤1.3/预算（3 GiB/24h）/execute-once+回放 → 一次执行。PASS → 另开
+有限码 candidate change；FAIL → 冻结、不启动 V15/V16、不扩大搜索。
+排名冻结：①位面/边标签（直接对应当前数据位面不均匀性）；②SC-LDPC
+（QSC 负耦合、结构化未否定）；③多边/高维 λ。
+
+**Process**: P0 由主线程完成并本地提交；P1/P2 规划文档由主线程起草，
+两个独立 freeze review（opencode-go/deepseek-v4-flash 子代理，只读）
+在途；ACCEPT 前禁止 prepare/实现/执行。V13/V14 源码零改动。
+
+**Consequences**: 两个新 change 的 tasks P07 均为独立 freeze review；
+review 结果决定是否进入 PREP/实现阶段。push（30 个本地领先提交）
+仍待用户单独授权。
