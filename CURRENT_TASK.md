@@ -1,46 +1,32 @@
 # CURRENT_TASK.md
 
-## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: D-STAGE COMPLETE THROUGH D05 (2026-08-14)
+## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: R3 FROZEN, E01 RUNNING (2026-08-14)
 
 The change
 `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/` has
-frozen planning (P01-P08 accepted) and a D stage complete through D05. The
-D05 root-cause report emits **`diagnosis_class=code`,
-`run_state=diagnosis_complete`, successor R3 code-only** (prior documented as
-co-factor); independent read-only review is the next gate. The lane remains
-retrospective diagnostics/development on existing 10 dB Type-II, q=1024 Gray
-256-symbol data: the rows' identities are historical V4/V5 identities and
-cannot be fresh-canary, confirmation, qualification, or promotion evidence.
+frozen planning (P01-P08 accepted), a complete D stage (D05 = code /
+diagnosis_complete, independent review ACCEPT), and the R3 code-only
+candidate frozen by amendment. The E01 development screen (64 pre-registered
+bw200 frames, baseline + candidate once each) is executing.
 
-- D01/D02/D03/DT0-DT2 as previously recorded (D01 `v13_d01_20260814`, D02
-  oracle, D03 hook equivalence, 27/27 tests incl. D04-lane DT3).
-- D04 baseline probe `v13_d04_20260814`: 8/32 exact_correct (all iteration 1),
-  24/32 decode_failed, zero decoder errors; verifier PASS.
-- D05 root-cause: offline girth analysis shows the frozen V7 R1A graph is
-  **85 disconnected 2-check components** (all variables degree 2, Tanner
-  girth 4, per-component d_min 3). Structural ceiling over the 32 D04 frames:
-  structural failure fraction 0.75 == observed 0.75 with **perfect frame-level
-  correspondence** (24/24 failed frames contain a >=2-error component; 8/8
-  exact-correct frames contain none). Emission
-  `v13_d05_20260814_corrected` (authoritative): code / diagnosis_complete /
-  R3; prior mismatch (calibration 0.1229, |entropy gap| 2.17 bits) recorded as
-  co-factor. First emission `v13_d05_20260814` invalidated by a
-  decision-machinery defect, preserved immutably with sibling notice
-  `v13_d05_20260814_invalid_execution_notice.json` (V8-60 precedent: fix +
-  additive re-emit once).
-- NOT authorized / NOT run: R3 candidate (requires amendment + independent
-  review of the D05 conclusion + main-thread freeze), I/E/A/C phases, and any
-  decoder execution beyond the 32 D04 baseline frames.
-- V12 remains `source_partition_blocked`; its archive is a separate
-  housekeeping decision and does not block V13. Do not reopen V12-X01/X02.
+- R3 candidate `nbldpc_v13_r3_code_v1` (frozen): connected simple check
+  graph, seed 20260818, Tanner girth 8, rank 170, checks 168x3+2x4, all
+  variables degree 2; prior (QSC p=.20), decoder interface, checks, rate,
+  max_iter unchanged. Implementation + IT0-IT3 tests complete (46/46), commit
+  `2967f6d3`.
+- E01 pre-registration (frozen): 64 bw200 development frames [77..221]
+  (sorted rule, skip D04's 32), disjoint from D04 and the 128 audit frames.
+  Run id `v13_e01_20260814`; gate: candidate >=1/64 exact_correct + zero
+  forbidden failures; 0/64 -> `failed_existing_data_feasibility`.
+- NOT authorized / NOT run: E02 freeze decision, A01 (128-frame audit), A02,
+  C01 — all gated on the E01 outcome.
 
 Claim boundary: the highest V13 state is `ready_for_fresh_confirmation`; no
-decoder correction, qualification, or promotion is established. R1/R2 are
-locked by the D05 conclusion (code); only R3 code-only may open after review.
+decoder correction, qualification, or promotion is established.
 
 ---
 
-## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: D-STAGE COMPLETE THROUGH D04 (2026-08-14)
+## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: D-STAGE COMPLETE THROUGH D05 (2026-08-14)
 
 Earlier 2026-08-14 state, superseded by the freeze review and D stage above.
 The new planning change

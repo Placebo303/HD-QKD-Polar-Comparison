@@ -101,15 +101,22 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   and max_iter=100 unchanged. New identity `nbldpc_v13_r3_code_v1`.
 - [ ] **V13-R4** mixed/inconclusive: not applicable (D05 = code).
 
-## Phase I — minimal implementation (R3 candidate; in progress 2026-08-14)
+## Phase I — minimal implementation (R3 candidate; complete 2026-08-14, IT0-IT3 46/46)
 
-- [ ] **V13-I01** Implement only the selected one-factor candidate under
+- [x] **V13-I01** Implement only the selected one-factor candidate under
   `comparison_bench/` (R3 codebook module `nbldpc_v13_r3_code_v1` + E01 lane);
-  keep frozen baseline directories unchanged.
-- [ ] **V13-I02** Bind diagnostic-only status, provenance, output-root, and
+  keep frozen baseline directories unchanged. (Done: `nonbinary_v13_r3_candidate.py`
+  + `run_e01` + CLI `e01`; frozen `src/`/`experiments/`/`tools/`/`results/`
+  zero-diff.)
+- [x] **V13-I02** Bind diagnostic-only status, provenance, output-root, and
   Alice-isolation contracts without checksums/hash DAGs/signatures/locks.
-- [ ] **V13-I03** Add explicit fake-runner entry points so tests cannot enter a
+  (Done: R3 canonical manifest, per-decoder syndrome separation, six-file
+  contract, E01 verify branch.)
+- [x] **V13-I03** Add explicit fake-runner entry points so tests cannot enter a
   production decoder, raw-data source, or official output root implicitly.
+  (Done: `run_e01` accepts explicit `baseline_decode`/`candidate_decode`
+  runners; IT2 uses fake runners, IT3 verifies real-tiny wiring; official
+  output root untouched by tests.)
 
 ## Diagnostic engineering tests (before D04; not candidate implementation)
 
