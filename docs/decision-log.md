@@ -1827,4 +1827,34 @@ checks，11/32 帧有振荡迹象。hook 等价性在全部 32 帧保持
 **Consequences**: D04 包 run_state=`plan_only`、`d05_emitted=false`，不产
 生任何 diagnosis_class/run_state 结论。D05（根因报告 + 独立复核）仍未
 授权、未实现；R/I/E/A/C 全部锁死。8/32 不得被表述为 promotion、
-qualification 或 fresh correction。下一授权点是主线程决定是否授权 D05。`
+qualification 或 fresh correction。下一授权点是主线程决定是否授权 D05。
+
+---
+
+### 2026-08-14: V13 D01 run 统计 bug 修正 + D04 数据的信道结构观测
+
+**Decision**: 修正 `nonbinary_v13_diagnostics._frame_channel_stats` 的 run
+计数 bug（条件表达式在 run-end 检查前把 `run` 清零，导致 D01 记录
+`run_count=8` 的伪影）；D01 六文件包保持不可变证据不重写。修正后的同一
+128 个 bw200 characterization 帧聚合值记入本条目作为可信参考。
+
+**Corrected aggregates** (read-only recompute, same frames): 2525 个错误符
+号；2340 个 run（每帧均值 18.3）；run 长度直方图 {1: 2169, 2: 157, 3: 14}
+（最大长度 3）；185 个相邻错误对（7.3% 的错误有相邻错误）——错误是孤立
+的单符号扰动，不是突发。**99.3%（2508/2525）的非零 Alice-Bob 差分落在
+[0,128)**，与位面失配的 MSB→LSB 单调结构（3.1e-5 → 3.75e-2）一致，并与
+binary V5 同域已知的相邻 ±1 符号扰动结构（troubleshooting 中
+`plane_error_channel` 的 adjacent_nominal）互证。这些是 D01 邻近的经验观
+测，不构成 D05 结论。
+
+**Context**: 主线程层面的 D04 数据预分析（非 D05）：基线双峰行为（8/32
+在第 1 次迭代 exact-correct、24/32 迭代上限 decode_failed）、失败帧高置
+信错字（posterior max 0.986、entropy 0.103、均值 3.79 unsatisfied
+checks、11/32 振荡）与"QSC p=.20 均匀先验严重失配于小差分集中信道"的假
+说一致（校准失配 0.1229；模型熵 2.722 vs 经验条件熵 0.547 bits/symbol；
+R1A 泄漏 6.64 bits/symbol ≈ 12× 经验下界）。候选排序与文献对照详见本轮
+分析答复；正式 diagnosis_class 只能由 D05 发射。
+
+**Consequences**: run 统计 bug 修正只影响未来运行；修正后的聚合值用于
+后续文档引用（替代 CURRENT_TASK 中旧 8-run 表述）。信道结构观测不自动
+授权 R1 候选——R 阶段仍需 D05 + OpenSpec amendment + 主线程批准。`

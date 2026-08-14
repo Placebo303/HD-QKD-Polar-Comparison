@@ -932,10 +932,12 @@ def _frame_channel_stats(alice: np.ndarray, bob: np.ndarray, *, q: int, n: int,
     runs: list[int] = []
     run = 0
     for value in errors:
-        run = run + 1 if value else 0
-        if not value and run:
-            runs.append(run)
-            run = 0
+        if value:
+            run += 1
+        else:
+            if run:
+                runs.append(run)
+                run = 0
     if run:
         runs.append(run)
     if p == 0.0:

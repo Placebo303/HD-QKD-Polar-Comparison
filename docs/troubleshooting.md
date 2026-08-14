@@ -153,3 +153,41 @@ out-of-distribution controls.
 it against `v5_plane_error_channel` (hardcoded `adjacent_nominal`) semantics.
 
 ---
+
+### V13 D01 bursts_runs aggregate: run counter reset before the end check
+
+**Observed** (2026-08-14): the recorded D01 `bursts_runs` aggregate said
+`run_count=8`, `max_run_length=2`, `runs_per_frame_mean=0.0625` while
+`error_symbol_fraction=0.0771` implies ~2525 error symbols — mathematically
+inconsistent; a read-only recompute produced the same impossible numbers.
+
+**Root cause**: in `nonbinary_v13_diagnostics._frame_channel_stats` the loop
+body was
+
+```python
+run = run + 1 if value else 0      # zeroes run FIRST
+if not value and run:              # now run is always 0 at a gap
+    runs.append(run); run = 0
+```
+
+The conditional expression reset `run` to 0 before the run-end check, so only
+runs ending at the LAST position of a frame (the trailing `if run: append`)
+were ever recorded. 8 frames happened to end with an error → 8 phantom runs.
+
+**Fix** (code only; the D01 package remains immutable evidence): explicit
+branch — `if value: run += 1` / `else: if run: runs.append(run); run = 0`.
+Corrected aggregates for the same 128 bw200 characterization frames: 2340
+runs (mean 18.3 runs/frame), run-length histogram {1: 2169, 2: 157, 3: 14},
+max run length 3, 185 adjacent error pairs (7.3% of errors have a neighbor) —
+errors are isolated single-symbol perturbations, not bursts. Additionally,
+99.3% (2508/2525) of nonzero Alice-Bob differences lie in [0,128), matching
+the LSB-dominated bit-plane mismatch and the adjacent-symbol error structure
+known from the binary V5 plane channel. The corrected numbers are recorded in
+the 2026-08-14 D04 decision-log entry.
+
+**Prevention**: never write `x = x + 1 if cond else 0` when the OLD value of
+`x` is read after the assignment in the same block; use explicit branches.
+Cross-check derived aggregates against each other (run counts must cover the
+error-symbol count) before trusting them in reports.
+
+---
