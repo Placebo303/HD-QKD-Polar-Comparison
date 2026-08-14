@@ -1,0 +1,9 @@
+{
+  "command": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\src\\comparison_bench\\cli\\run_v14_gate.py gate --authorized --production",
+  "git_commit": "1c6b1fc2b6026e1372a7c0f4fa0e70bb20732533",
+  "peak_rss_bytes": 577163264,
+  "rss_cap_bytes": 3221225472,
+  "rss_cap_exceeded": false,
+  "schema": "nbldpc_v14_gate_manifest_v1",
+  "wall_seconds": 5241.765000000014
+}

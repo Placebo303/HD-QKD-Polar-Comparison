@@ -1,0 +1,36 @@
+{
+  "channel_schema": "nbldpc_v14_channel_model_v1",
+  "checks": {
+    "folded_normalized": true,
+    "folding_entropy_monotone": true,
+    "smoothing_floor_ge_lam_over_q": true,
+    "w_smooth_sums_one": true
+  },
+  "diagnostic_only": true,
+  "folding_entropy_bits": {
+    "2": {
+      "entropy_bits": 0.47400031517346664,
+      "q": 4
+    },
+    "3": {
+      "entropy_bits": 0.5169750377149349,
+      "q": 8
+    },
+    "4": {
+      "entropy_bits": 0.5389114433273425,
+      "q": 16
+    }
+  },
+  "m_bits": [
+    2,
+    3,
+    4
+  ],
+  "schema": "nbldpc_v14_stage1_v1",
+  "smallq_run": {
+    "channel_mode": "structured",
+    "converged": false,
+    "final_entropy": 0.9612148871102593,
+    "iterations": 50
+  }
+}

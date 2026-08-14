@@ -1,0 +1,14 @@
+{
+  "computed_threshold_proxy": 0.06000000000000002,
+  "delta": 0.008999999999999987,
+  "diagnostic_only": true,
+  "max_iter": 150,
+  "mechanism_verified": true,
+  "n_samples": 100000,
+  "published_threshold_proxy": 0.069,
+  "q": 4,
+  "rate": 0.75,
+  "schema": "nbldpc_v14_stage0_v1",
+  "seed": 2026090118,
+  "tolerance": 0.012
+}
