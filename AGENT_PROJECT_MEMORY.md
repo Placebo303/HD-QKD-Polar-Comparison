@@ -1816,3 +1816,33 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   process writes under `comparison_bench/outputs_comparison/` (observed
   again on `__pycache__` and probe mkdirs). Future official-output runs from
   this harness need the same escalation. [repo-observed]
+
+## 46. Nonbinary LDPC V13 — D05 Root-Cause Report: code / diagnosis_complete (2026-08-14)
+
+- D05 emission (main-thread authorized per the recommended steps): offline
+  girth analysis shows the frozen V7 R1A graph is **85 disconnected 2-check
+  components** (256 all-degree-2 variables; 84 pairs with 3 parallel edges +
+  1 pair with 4; Tanner girth 4; per-component kernel d_min = 3). Structural
+  ceiling over the 32 D04 development frames: structural failure fraction
+  0.75 == observed failure fraction 0.75 with **perfect frame-level
+  correspondence** (24/24 decode-failed frames contain >=1 component with
+  >=2 errors; 8/8 exact-correct frames contain none). [repo-observed]
+- Emission `v13_d05_20260814_corrected` (authoritative, verifier PASS):
+  `diagnosis_class=code`, `run_state=diagnosis_complete`, successor **R3
+  code-only**; QSC p=.20 prior mismatch (calibration 0.1229, |entropy gap|
+  2.17 bits/symbol) documented as co-factor (structure alone explains 100% of
+  the observed failures). First emission `v13_d05_20260814` invalidated by a
+  decision-machinery defect (ceiling doc lacked observed fractions -> default
+  1.0; signed entropy-gap comparison), preserved immutably with sibling
+  notice `v13_d05_20260814_invalid_execution_notice.json`; V8-60 precedent
+  (fix + one additive re-emit). Decision-log 2026-08-14. [repo-observed]
+- Decisive cross-checks: consistent with V7 synthetic canaries 0/4+0/4 (SER
+  0.20 -> ~51 errors/frame -> every component multi-error); the D04 bimodal
+  behavior (iteration-1 success vs 100-iteration failure) is the 4-cycle
+  message-passing signature; D01 corrected run stats (2340 runs, max 3, 92.7%
+  singletons) and 99.3% of nonzero diffs < 128 remain channel facts. [decision]
+- Boundary: independent read-only review (reviewer-go) of the D05 conclusion
+  is the next scientific gate; R1/R2 locked; R3 requires OpenSpec amendment +
+  freeze review + main-thread approval; highest state remains
+  `ready_for_fresh_confirmation`; promoted/qualified/observed_fresh_correction
+  forbidden. [decision]
