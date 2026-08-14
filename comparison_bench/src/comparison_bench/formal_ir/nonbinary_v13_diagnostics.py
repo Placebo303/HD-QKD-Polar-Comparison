@@ -2022,7 +2022,8 @@ def pre_registered_e01_frames(ledger: Any, *, stratum: str = PRIMARY_STRATUM,
 
 def _e01_outcome(frame: Mapping[str, Any], result: Mapping[str, Any],
                  raw_ser: float, *, phase: str, method: str,
-                 role: str = "development") -> dict[str, Any]:
+                 role: str = "development",
+                 stratum: str = PRIMARY_STRATUM) -> dict[str, Any]:
     if result.get("status") == "syndrome_consistent":
         decoded = tuple(int(v) for v in result.get("decoded_symbols", ()))
         alice = tuple(int(v) for v in frame["alice"])
@@ -2030,7 +2031,7 @@ def _e01_outcome(frame: Mapping[str, Any], result: Mapping[str, Any],
     else:
         reason = str(result.get("reason", "no_decoded_word"))
     return {"phase": phase, "method": method,
-            "frame_id": int(frame["frame_id"]), "stratum": PRIMARY_STRATUM,
+            "frame_id": int(frame["frame_id"]), "stratum": stratum,
             "role": role, "status": str(result.get("status", "unclassified")),
             "reason": reason, "raw_ser": raw_ser,
             "iterations": int(result.get("iterations", 0)),
@@ -2371,6 +2372,166 @@ def run_a01(output_dir: Any, *, run_id: str | None = None, discovery_root: Any =
             out.rmdir()
         raise
 
+# ------------------------------------------------------------------ A02 cross-stratum check
+
+_A02_AUTHORIZATION = {"d04_authorized": True, "d05_authorized": True,
+                      "r3_authorized": True, "real_decode_authorized": True,
+                      "phase": "V13-A02 cross-stratum check"}
+A02_STRATA = ("d1024_bw120", "d1024_bw180")
+
+
+def run_a02(output_dir: Any, *, run_id: str | None = None, discovery_root: Any = None,
+            ledger: Any = None, frames: Any = None, candidate_decode: Any = None,
+            p: float = P, max_iter: int = MAX_ITER, command: str = "",
+            _test_only: bool = False, production_authorized: bool = False) -> dict[str, Any]:
+    """Execute the frozen A02 cross-stratum check: the sole R3 candidate once
+    on the 128 pre-registered frame-identical audit frames of each secondary
+    stratum (bw120, bw180).  Read-only check — its result never promotes or
+    demotes the bw200 outcome; the package run_state stays ``plan_only`` with
+    the per-stratum readiness fields recorded in ``a02_gate``.
+    """
+    if not _test_only and not production_authorized:
+        raise ValueError("V13 production A02 cross-stratum check is not "
+                         "authorized; the main thread must pass "
+                         "--authorized --production")
+    if run_id is None:
+        run_id = f"v13_a02_{uuid.uuid4().hex[:8]}"
+    out = Path(output_dir).resolve()
+    if out.exists():
+        raise FileExistsError("fresh additive output root required")
+    out.mkdir(parents=True)
+    oracle = run_engineering_oracle()
+    try:
+        if oracle["status"] != "ok":
+            return _write_package(out, run_id=run_id,
+                                  run_state="implementation_interface_fault",
+                                  test_only=_test_only, oracle=oracle, ledger=None,
+                                  channel=None, outcome_rows=[], telemetry_records=None,
+                                  characterization=None, command=command,
+                                  stages_completed=("A02",),
+                                  authorization=dict(_A02_AUTHORIZATION),
+                                  report_note="D02 engineering oracle failed "
+                                              "before the A02 check.")
+        if ledger is None:
+            if discovery_root is None:
+                raise ValueError("discovery root required for production lane")
+            ledger = build_production_ledger(discovery_root, run_id=run_id)
+        validate_role_ledger(ledger)
+        if ledger["ledger_state"] != "ready":
+            return _write_package(out, run_id=run_id,
+                                  run_state="blocked_role_ledger",
+                                  test_only=_test_only, oracle=oracle, ledger=ledger,
+                                  channel=None, outcome_rows=[], telemetry_records=None,
+                                  characterization=None, command=command,
+                                  stages_completed=("A02",),
+                                  authorization=dict(_A02_AUTHORIZATION),
+                                  report_note="ambiguous role ledger froze the "
+                                              "A02 check before any decode.")
+        from . import nonbinary_v13_r3_candidate as r3  # execute-only import
+        c_manifest, c_matrix = r3.build_r3_codebook()
+        if candidate_decode is None:
+            candidate_decode = lambda bob, syndrome: r3.decode_r3_frame(
+                bob, syndrome, c_manifest, c_matrix, check_count=M, p=p,
+                max_iter=max_iter, hook=True)
+        field = GF2mField.create(Q)
+        outcome_rows: list[dict[str, Any]] = []
+        telemetry_records: list[dict[str, Any]] = []
+        strata_results: dict[str, dict[str, Any]] = {}
+        if frames is None:
+            frames = {}
+        if not isinstance(frames, Mapping):
+            raise ValueError("frames must map stratum -> frame list")
+        for stratum in A02_STRATA:
+            rows = pre_registered_a01_frames(ledger, stratum=stratum)
+            stratum_frames = frames.get(stratum)
+            if stratum_frames is None:
+                stratum_frames = load_production_audit_frames(rows)
+            if not isinstance(stratum_frames, (list, tuple)) or len(stratum_frames) != len(rows):
+                raise ValueError("pre-registered frame list mismatch")
+            exact = 0
+            forbidden = 0
+            wall_times: list[float] = []
+            for row, frame in zip(rows, stratum_frames):
+                if int(frame["frame_id"]) != int(row["frame_id"]):
+                    raise ValueError("frame order does not match pre-registration")
+                try:
+                    alice = np.asarray(frame["alice"], dtype=np.int64)
+                    raw_ser = float(frame_symbol_error_rate(frame["alice"], frame["bob"]))
+                    syndrome = nonbinary_syndrome(c_matrix, alice, field)
+                    start = time.perf_counter()
+                    c_out = candidate_decode(frame["bob"], syndrome)
+                    wall_times.append(time.perf_counter() - start)
+                except Exception as exc:
+                    return _write_package(out, run_id=run_id,
+                                          run_state="invalid_diagnostic_execution",
+                                          test_only=_test_only, oracle=oracle,
+                                          ledger=ledger, channel=None,
+                                          outcome_rows=outcome_rows,
+                                          telemetry_records=telemetry_records,
+                                          characterization=None, command=command,
+                                          stages_completed=("A02",),
+                                          authorization=dict(_A02_AUTHORIZATION),
+                                          report_note=f"decoder exception on "
+                                                      f"{stratum} frame "
+                                                      f"{frame['frame_id']} "
+                                                      f"({type(exc).__name__}: "
+                                                      f"{exc}); check frozen with "
+                                                      "retained rows.")
+                result = c_out["result"]
+                outcome_rows.append(_e01_outcome(frame, result, raw_ser,
+                                                 phase="retrospective_audit",
+                                                 method=R3_METHOD_ID,
+                                                 role="retrospective_audit",
+                                                 stratum=stratum))
+                if outcome_rows[-1]["reason"] == "exact_correct":
+                    exact += 1
+                if result.get("status") not in ("syndrome_consistent", "decode_failed",
+                                                "decoder_error"):
+                    forbidden += 1
+                if c_out.get("telemetry") is not None:
+                    telemetry_records.append(
+                        {"schema": TELEMETRY_SCHEMA_TEST if _test_only
+                         else TELEMETRY_SCHEMA, "run_id": run_id,
+                         "frame_id": int(frame["frame_id"]),
+                         "phase": "retrospective_audit", "method": R3_METHOD_ID,
+                         "status": str(result.get("status")),
+                         "iterations": int(result.get("iterations", 0)),
+                         "telemetry": c_out["telemetry"]})
+            median_seconds = float(np.median(wall_times)) if wall_times else None
+            strata_results[stratum] = {
+                "frames": len(stratum_frames),
+                "candidate_exact_correct": exact,
+                "forbidden_failures": forbidden,
+                "median_seconds_per_frame": median_seconds,
+                "readiness_gate_met": exact >= A01_MIN_EXACT and forbidden == 0
+                and median_seconds is not None
+                and median_seconds <= A01_MAX_MEDIAN_SECONDS,
+                "disclosure_bits_per_symbol": M * 10 / N,
+                "note": "cross-stratum check only; no state promotion"}
+        a02_gate = {"strata": strata_results,
+                    "no_state_promotion": True,
+                    "pre_registered_frame_ids": {
+                        stratum: [int(r["frame_id"]) for r in
+                                  pre_registered_a01_frames(ledger, stratum=stratum)]
+                        for stratum in A02_STRATA}}
+        return _write_package(out, run_id=run_id, run_state="plan_only",
+                              test_only=_test_only, oracle=oracle, ledger=ledger,
+                              channel=None, outcome_rows=outcome_rows,
+                              telemetry_records=telemetry_records,
+                              characterization=None, command=command,
+                              stages_completed=("A02",),
+                              authorization=dict(_A02_AUTHORIZATION),
+                              extra_manifest={"a02_gate": a02_gate},
+                              report_note="A02 cross-stratum check completed "
+                                          "once; no state promotion.")
+    except Exception:
+        if out.exists() and not any(out.iterdir()):
+            out.rmdir()
+        raise
+
+
+# ------------------------------------------------------------------ read-only verify
+
 def _verify_telemetry_file(path: Path) -> dict[str, Any]:
     raw = path.read_bytes()
     if not raw:
@@ -2570,6 +2731,43 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
                 raise ValueError("A01 outcome phase")
             if not _test_schema(manifest) and a01_gate.get("frames") != A01_COUNT:
                 raise ValueError("manifest A01 frame count")
+    elif stages == ("A02",):
+        # A02 cross-stratum check package: read-only, never promotes state.
+        if authorization.get("real_decode_authorized") is not True \
+                or authorization.get("d04_authorized") is not True \
+                or authorization.get("d05_authorized") is not True \
+                or authorization.get("r3_authorized") is not True:
+            raise ValueError("manifest A02 authorization")
+        if not str(authorization.get("phase", "")).startswith("V13-A02"):
+            raise ValueError("manifest A02 phase")
+        if run_state not in ("plan_only", "implementation_interface_fault",
+                             "blocked_role_ledger", "invalid_diagnostic_execution"):
+            raise ValueError("manifest A02 run state")
+        if channel.get("characterization_performed"):
+            raise ValueError("A02 package must not carry characterization")
+        if report.get("d05_emitted", False) or report.get("diagnosis_concluded", False):
+            raise ValueError("report must not carry a D05 conclusion")
+        a02_gate = manifest.get("a02_gate")
+        if not isinstance(a02_gate, Mapping) or not a02_gate.get("no_state_promotion"):
+            raise ValueError("manifest A02 gate")
+        if run_state in ("implementation_interface_fault", "blocked_role_ledger"):
+            if outcomes["rows"] != 0 or telemetry["records"] != 0:
+                raise ValueError("manifest A02 failure package")
+        else:
+            strata = a02_gate.get("strata")
+            if not isinstance(strata, Mapping) or set(strata) != set(A02_STRATA):
+                raise ValueError("manifest A02 strata")
+            total = sum(int(s.get("frames", 0)) for s in strata.values())
+            if total != outcomes["rows"]:
+                raise ValueError("manifest A02 frame count")
+            rows_out = list(csv.DictReader(
+                StringIO((out / "diagnostic_outcomes.csv").read_text("utf-8"), newline="")))
+            if any(row.get("phase") != "retrospective_audit" for row in rows_out):
+                raise ValueError("A02 outcome phase")
+            if not _test_schema(manifest):
+                for stratum in A02_STRATA:
+                    if int(strata[stratum]["frames"]) != A01_COUNT:
+                        raise ValueError("manifest A02 stratum frame count")
     elif stages == _D05_STAGES:
         # Full D05 package: corrected channel aggregates + the D04 baseline
         # rows + the root-cause conclusion (real decode already authorized by
@@ -2674,7 +2872,7 @@ def v13_d04_d05_guard(action: str, authorized: bool) -> None:
     :func:`run_d04`, :func:`run_d05` and :func:`run_e01` (the CLI additionally
     requires ``--production``).  The test lane never uses this guard: it calls
     the module API directly with ``_test_only=True`` and fake inputs."""
-    if action not in ("d04", "d05", "e01", "a01"):
+    if action not in ("d04", "d05", "e01", "a01", "a02"):
         raise ValueError(f"unknown guard action: {action}")
     if not authorized:
         raise SystemExit(2)

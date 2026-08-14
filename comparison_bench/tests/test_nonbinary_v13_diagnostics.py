@@ -1174,3 +1174,45 @@ def test_a01_fake_lifecycle_gate_pass_and_fail():
     verified_f = core.verify_package(run_dir_f, _private_test_only=True)
     assert verified_f["verified"] is True
     assert verified_f["run_state"] == "retrospective_non_ready"
+
+
+def _fake_audit_frames_for_stratum(ledger: dict, stratum: str, *,
+                                   seed: int = 20260821,
+                                   clean_first: int = 128) -> list[dict]:
+    rows = core.pre_registered_a01_frames(ledger, stratum=stratum)
+    rng = np.random.default_rng(seed)
+    frames = []
+    for index, row in enumerate(rows):
+        alice = rng.integers(0, core.Q, size=core.N)
+        bob = alice.copy()
+        if index >= clean_first:
+            positions = rng.choice(core.N, size=20, replace=False)
+            bob[positions] = rng.integers(0, core.Q, size=20)
+        frames.append({"frame_id": int(row["frame_id"]), "stratum": stratum,
+                       "role": "retrospective_audit",
+                       "frame_identity": row["frame_identity"],
+                       "alice": alice, "bob": bob})
+    return frames
+
+
+def test_a02_fake_lifecycle_cross_stratum_no_promotion():
+    ledger = _fake_ledger_r3(per_stratum=230, n_dev=100, n_conf=128)
+    frames_by_stratum = {stratum: _fake_audit_frames_for_stratum(
+        ledger, stratum, seed=100 + i)
+        for i, stratum in enumerate(core.A02_STRATA)}
+    root = _out("t_a02")
+    run_dir = root / "package"
+    result = core.run_a02(run_dir, run_id="fake_v13_a02", ledger=ledger,
+                          frames=frames_by_stratum,
+                          candidate_decode=_fake_candidate_decode,
+                          _test_only=True, command="pytest A02")
+    assert result["run_state"] == "plan_only"   # never promotes state
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    assert verified["run_state"] == "plan_only"
+    manifest = json.loads((run_dir / "diagnostic_run_manifest.json").read_bytes())
+    gate = manifest["a02_gate"]
+    assert gate["no_state_promotion"] is True
+    assert set(gate["strata"]) == set(core.A02_STRATA)
+    assert all(s["candidate_exact_correct"] == 128 for s in gate["strata"].values())
+    assert all(s["readiness_gate_met"] is True for s in gate["strata"].values())

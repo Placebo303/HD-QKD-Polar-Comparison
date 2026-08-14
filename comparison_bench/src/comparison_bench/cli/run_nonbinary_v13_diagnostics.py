@@ -39,7 +39,8 @@ def main() -> int:
         description="V13 nonbinary LDPC existing-data diagnostics "
                     "(ledger / D01 characterize / D04 probe / D05 report)")
     parser.add_argument("action", nargs="?", default="ledger",
-                        choices=("ledger", "characterize", "d04", "d05", "e01", "a01"))
+                        choices=("ledger", "characterize", "d04", "d05", "e01",
+                                 "a01", "a02"))
     parser.add_argument("--output", default=None,
                         help="fresh additive output root (required for ledger/characterize/d04/d05)")
     parser.add_argument("--run-id", default=None,
@@ -62,6 +63,35 @@ def main() -> int:
     formal_ir_root = Path(args.formal_ir_root) if args.formal_ir_root \
         else root / "comparison_bench/outputs_comparison/formal_ir_methods"
 
+    if args.action == "a02":
+        try:
+            core.v13_d04_d05_guard("a02", args.authorized)
+        except SystemExit:
+            print("V13-A02 cross-stratum check requires the explicit --authorized "
+                  "flag (main-thread authorization)", file=sys.stderr)
+            return 2
+        if args.output is None:
+            print("--output DIR is required", file=sys.stderr)
+            return 2
+        if not args.production:
+            print("production A02 check requires the explicit --production flag",
+                  file=sys.stderr)
+            return 2
+        out = Path(args.output)
+        if out.exists():
+            print("fresh additive output root required", file=sys.stderr)
+            return 2
+        run_id = args.run_id or f"v13_a02_{uuid.uuid4().hex[:8]}"
+        try:
+            result = core.run_a02(out, run_id=run_id,
+                                  discovery_root=formal_ir_root,
+                                  production_authorized=True,
+                                  command=" ".join(sys.argv))
+        except Exception as exc:
+            print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(result, sort_keys=True))
+        return 0
     if args.action == "a01":
         try:
             core.v13_d04_d05_guard("a01", args.authorized)
