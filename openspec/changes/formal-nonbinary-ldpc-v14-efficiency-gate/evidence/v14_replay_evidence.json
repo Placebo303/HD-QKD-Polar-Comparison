@@ -1,0 +1,17 @@
+{
+  "evidence_files": 6,
+  "evidence_root": "openspec\\changes\\formal-nonbinary-ldpc-v14-efficiency-gate\\evidence",
+  "matched": 5,
+  "mismatches": [
+    {
+      "evidence_size": 385,
+      "relative": "v14_gate_manifest.json",
+      "replay_size": 426
+    }
+  ],
+  "missing_in_replay": [],
+  "ok": false,
+  "replay_only": [],
+  "replay_root": "workspace\\v14_gate_replay_20260815",
+  "schema": "nbldpc_v14_replay_evidence_v1"
+}
