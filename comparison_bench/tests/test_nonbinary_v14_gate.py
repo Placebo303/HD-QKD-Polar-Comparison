@@ -12,10 +12,12 @@
   with finite entropies.
 - **T3** fake gate lifecycle: monkeypatch the v14 mcde DE entry points with
   fakes, run the CLI gate action (`_test_only=True`) into a fresh
-  ``workspace/nbldpc_v14_<uuid>/`` root, assert the gate-decision schema and
-  gate_state computed from the fake inputs, assert strict byte replay works,
-  and assert NO file appears under an official output root or the change
-  evidence path.
+  ``workspace/nbldpc_v14_<uuid>/`` root seeded with a valid channel model,
+  assert the gate-decision schema and gate_state computed from the fake inputs,
+  assert the model file is read and never rewritten, assert strict byte replay
+  works, assert the gate fails closed per file when an own output already
+  exists (and fails closed on a missing/invalid model), and assert NO file
+  appears under an official output root or the change evidence path.
 
 All roots are fresh ``workspace/nbldpc_v14_<uuid>``; no real sidecar, no real
 source loader, and no official output root is ever touched.
@@ -271,6 +273,15 @@ def test_t3_fake_gate_lifecycle_and_replay(monkeypatch):
     monkeypatch.setattr(mcde, "run_mcde", fake_run_mcde)
 
     out = _out("evidence")  # workspace/nbldpc_v14_<uuid>/evidence (fresh)
+    out.mkdir(parents=True, exist_ok=True)
+
+    # The workspace evidence dir ALREADY contains a valid channel model (the
+    # same evidence set, design section 4).  The gate reads it, never rewrites.
+    w_smooth = channel.smooth(channel.build_diff_distribution(_fake_frames(8, seed=7)))
+    model_doc = channel.build_channel_model_doc(w_smooth, frames_used=8)
+    model_path = out / "v14_structured_channel_model.json"
+    model_path.write_text(json.dumps(model_doc, indent=2, sort_keys=True), encoding="utf8")
+    model_before = model_path.read_bytes()
 
     # Production roots snapshot before (the specific roots the gate could write).
     output_root = Path("comparison_bench/outputs_comparison/formal_ir_methods")
@@ -288,6 +299,16 @@ def test_t3_fake_gate_lifecycle_and_replay(monkeypatch):
     assert "v14_stage1_structured_smallq.json" in files
     assert "v14_stage2_q1024_threshold.json" in files
     assert "v14_structured_channel_model.json" in files
+    # The gate's own writes = 5 files; the model is pre-existing and untouched.
+    assert len(files) == 6
+    gate_writes = {"v14_gate_decision.json", "v14_gate_manifest.json",
+                   "v14_stage0_q4_qsc_regression.json",
+                   "v14_stage1_structured_smallq.json",
+                   "v14_stage2_q1024_threshold.json"}
+    assert gate_writes == {f for f in files if f != "v14_structured_channel_model.json"}
+
+    # The model file is byte-identical (the gate never rewrites it).
+    assert model_path.read_bytes() == model_before
 
     decision = json.loads((out / "v14_gate_decision.json").read_text(encoding="utf8"))
     assert decision["schema"] == "nbldpc_v14_gate_decision_v1"
@@ -306,7 +327,8 @@ def test_t3_fake_gate_lifecycle_and_replay(monkeypatch):
     stage0 = json.loads((out / "v14_stage0_q4_qsc_regression.json").read_text(encoding="utf8"))
     assert stage0["schema"] == "nbldpc_v14_stage0_v1"
 
-    # Strict byte replay against a sibling replay dir.
+    # Strict byte replay against a sibling replay dir (6 evidence files,
+    # including the pre-existing model).
     replay_root = out.parent / "replay"
     shutil.copytree(str(out), str(replay_root))
     report = cli.replay_evidence(str(out), str(replay_root))
@@ -331,6 +353,82 @@ def test_t3_fake_gate_lifecycle_and_replay(monkeypatch):
     # Nothing was created under official output roots or the change evidence.
     assert _snapshot_tree(str(output_root)) == before_output
     assert _snapshot_tree(str(openspec_evidence)) == before_openspec
+
+
+def test_t3_gate_refuses_when_own_output_already_exists(monkeypatch):
+    """The gate fails closed PER FILE (execute-once): a pre-existing
+    v14_gate_decision.json (or any other gate own-output) aborts the run."""
+    from comparison_bench.src.comparison_bench.cli import run_v14_gate as cli
+
+    def fake_threshold_binary_search(q, rate, lambda_edge, rho_edge, **kw):
+        return {"threshold_proxy": 0.062, "grid_points": [0.01],
+                "probes": [{"p": 0.099, "converged": True, "final_entropy": 0.0}],
+                "converged_at_lo": True}
+
+    def fake_run_mcde(q, lambda_edge, rho_edge, **kw):
+        return {"converged": True, "iterations": 21,
+                "entropy_trace": [0.0] * 21, "final_entropy": 0.0,
+                "channel_mode": "structured"}
+
+    monkeypatch.setattr(mcde, "threshold_binary_search", fake_threshold_binary_search)
+    monkeypatch.setattr(mcde, "run_mcde", fake_run_mcde)
+
+    out = _out("evidence")
+    out.mkdir(parents=True, exist_ok=True)
+    # Pre-existing valid channel model (same evidence set).
+    w_smooth = channel.smooth(channel.build_diff_distribution(_fake_frames(8, seed=7)))
+    model_doc = channel.build_channel_model_doc(w_smooth, frames_used=8)
+    (out / "v14_structured_channel_model.json").write_text(
+        json.dumps(model_doc), encoding="utf8")
+    model_before = (out / "v14_structured_channel_model.json").read_bytes()
+
+    # A gate own-output already exists -> fail closed before any write.
+    (out / "v14_gate_decision.json").write_text(json.dumps({"stub": True}), encoding="utf8")
+    with pytest.raises(FileExistsError):
+        cli.run_gate(str(out), production_authorized=False, _test_only=True,
+                     command="pytest T3 exists")
+    # No stage files were written and the model is untouched.
+    assert not (out / "v14_stage0_q4_qsc_regression.json").exists()
+    assert not (out / "v14_stage2_q1024_threshold.json").exists()
+    assert (out / "v14_structured_channel_model.json").read_bytes() == model_before
+
+
+def test_t3_gate_fails_closed_on_missing_or_invalid_model():
+    """The gate requires a pre-existing, valid channel model in the evidence
+    dir: missing -> FileExistsError; bad schema / bad length / bad mass ->
+    ValueError."""
+    from comparison_bench.src.comparison_bench.cli import run_v14_gate as cli
+
+    # Missing model (empty evidence dir) -> FileExistsError.
+    empty = _out("evidence")
+    empty.mkdir(parents=True, exist_ok=True)
+    with pytest.raises(FileExistsError):
+        cli.run_gate(str(empty), production_authorized=True, _test_only=True)
+
+    # Wrong schema -> ValueError.
+    bad_schema = _out("evidence")
+    bad_schema.mkdir(parents=True, exist_ok=True)
+    (bad_schema / "v14_structured_channel_model.json").write_text(
+        json.dumps({"schema": "not_the_right_schema", "w": [0.5, 0.5]}), encoding="utf8")
+    with pytest.raises(ValueError):
+        cli.run_gate(str(bad_schema), production_authorized=True, _test_only=True)
+
+    # Wrong w length -> ValueError.
+    bad_len = _out("evidence")
+    bad_len.mkdir(parents=True, exist_ok=True)
+    (bad_len / "v14_structured_channel_model.json").write_text(
+        json.dumps({"schema": channel.CHANNEL_MODEL_SCHEMA, "w": [1.0]}), encoding="utf8")
+    with pytest.raises(ValueError):
+        cli.run_gate(str(bad_len), production_authorized=True, _test_only=True)
+
+    # Wrong w mass -> ValueError.
+    bad_mass = _out("evidence")
+    bad_mass.mkdir(parents=True, exist_ok=True)
+    (bad_mass / "v14_structured_channel_model.json").write_text(
+        json.dumps({"schema": channel.CHANNEL_MODEL_SCHEMA, "w": [0.5] * 1024}),
+        encoding="utf8")
+    with pytest.raises(ValueError):
+        cli.run_gate(str(bad_mass), production_authorized=True, _test_only=True)
 
 
 STAGE3_REPLAY_TARGET = "v14_structured_channel_model.json"

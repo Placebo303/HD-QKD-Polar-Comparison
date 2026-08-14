@@ -13,10 +13,13 @@ conductor loads V13 characterization frames via
 
 Actions:
   model    build and write the frozen structured channel model
-           (``v14_structured_channel_model.json``).
+           (``v14_structured_channel_model.json``); refuses to overwrite.
   gate     run Stage 0 (QSC mechanism regression), Stage 1 (folded small-q
            structured validation) and Stage 2 (12 q=1024 structured DE points)
-           and write the gate evidence set.
+           and write the gate evidence set.  The structured channel model is
+           part of the same evidence set: it is read as input (never written)
+           and the gate fails closed per file for its own outputs
+           (execute-once).
   replay   byte-compare the evidence dir against a sibling replay dir and
            write ``v14_replay_evidence.json``.
   self-check   structural import check (no scientific run).
@@ -34,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import subprocess
 import sys
@@ -70,6 +74,18 @@ STAGE1_SEED = 2026090203
 #: Stage-2 per-point seed root (deterministic, disjoint prefix 202609).
 STAGE2_SEED_START = 2026090210
 
+#: Gate's own output files (design section 4).  The channel model is part of
+#: the SAME evidence set and is read (never written) by the gate; these files
+#: are the gate's own writes, enforced execute-once per file.
+GATE_OUTPUT_FILES = (
+    STAGE0_FILE,
+    STAGE1_FILE,
+    STAGE2_FILE,
+    GATE_DECISION_FILE,
+    GATE_MANIFEST_FILE,
+    REPLAY_EVIDENCE_FILE,
+)
+
 
 def _repo_root() -> str:
     return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
@@ -84,6 +100,34 @@ def _write_evidence(path: str, payload: dict) -> str:
     with open(target, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2, sort_keys=True)
     return str(target)
+
+
+def _load_and_verify_model(path: str) -> dict:
+    """Read and verify the pre-existing channel model from the evidence dir
+    (design section 4).  The channel model is part of the SAME evidence set and
+    is READ as a gate input, never written by the gate.  Missing or invalid ->
+    hard error (fail closed)."""
+    target = Path(path)
+    if not target.is_file():
+        raise FileExistsError(f"fresh additive evidence root required: "
+                              f"channel model missing (expected: {target})")
+    try:
+        doc = json.loads(target.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 - surface any parse failure
+        raise ValueError(f"invalid channel model JSON {target}: {exc}") from exc
+    if not isinstance(doc, dict) or doc.get("schema") != channel.CHANNEL_MODEL_SCHEMA:
+        raise ValueError(f"channel model schema mismatch (expected "
+                         f"{channel.CHANNEL_MODEL_SCHEMA}): {target}")
+    w = doc.get("w")
+    if not isinstance(w, list) or len(w) != channel.Q:
+        raise ValueError(f"channel model w must have length {channel.Q}: {target}")
+    w_arr = np.asarray(w, dtype=np.float64)
+    if not np.all(np.isfinite(w_arr)) or np.any(w_arr < 0.0):
+        raise ValueError(f"channel model w must be finite and non-negative: {target}")
+    if not math.isclose(float(w_arr.sum()), 1.0, abs_tol=1e-6):
+        raise ValueError(f"channel model w must sum to ~1 "
+                         f"(got {float(w_arr.sum())}): {target}")
+    return doc
 
 
 def _git_commit() -> str | None:
@@ -234,25 +278,32 @@ def _run_stage2(w_smooth: np.ndarray, entropy_bits_w: float) -> tuple[dict, list
 def run_gate(output_dir: str, *, production_authorized: bool,
              _test_only: bool = False, frames_override: list | None = None,
              command: str = "") -> dict:
-    """Run the full V14 gate (Stage 0/1/2) and write the evidence set into
-    ``output_dir`` (additive, fail closed).  ``_test_only=True`` uses synthetic
-    frames; production requires ``production_authorized=True``.  The DE kernels
-    are invoked through :mod:`nonbinary_v14_mcde` so tests can inject fakes."""
+    """Run the full V14 gate (Stage 0/1/2) and write the gate evidence set into
+    ``output_dir`` (additive, fail closed per file).  The channel model is part
+    of the same evidence set (design section 4): it is READ as input from a
+    pre-existing ``v14_structured_channel_model.json`` and never written by the
+    gate.  The gate fails closed if ANY of its own output files already exists
+    (execute-once).  ``_test_only=True`` relaxes the production authorization;
+    the DE kernels are invoked through :mod:`nonbinary_v14_mcde` so tests can
+    inject fakes."""
     out = Path(output_dir).resolve()
     if not _test_only and not production_authorized:
         raise ValueError("V14 gate requires the explicit production authorization")
-    if out.exists():
-        raise FileExistsError(f"fresh additive evidence root required (exists: {out})")
-    out.mkdir(parents=True)
+    if not out.is_dir():
+        raise FileExistsError(f"fresh additive evidence root required "
+                              f"(missing evidence dir: {out})")
+    # Read + verify the pre-existing structured channel model (same evidence set).
+    model_doc = _load_and_verify_model(os.path.join(str(out), CHANNEL_MODEL_FILE))
+    # Fail closed per file for the gate's own outputs (execute-once discipline).
+    for name in GATE_OUTPUT_FILES:
+        existing = out / name
+        if existing.exists():
+            raise FileExistsError(
+                f"evidence file already exists (fail closed): {existing}")
     start = time.monotonic()
     watcher = _watcher()
     payload: dict = {}
     try:
-        model_doc, frames = _build_channel_model(
-            production_authorized=production_authorized, _test_only=_test_only,
-            frames_override=frames_override)
-        payload["channel_model_file"] = _write_evidence(
-            os.path.join(str(out), CHANNEL_MODEL_FILE), model_doc)
         w_smooth = np.asarray(model_doc["w"], dtype=np.float64)
         entropy_bits_w = float(model_doc["entropy_bits"])
 
@@ -281,6 +332,7 @@ def run_gate(output_dir: str, *, production_authorized: bool,
             os.path.join(str(out), GATE_MANIFEST_FILE), manifest)
         payload["gate_state"] = decision["gate_state"]
         payload["evidence_dir"] = str(out)
+        payload["channel_model_file"] = os.path.join(str(out), CHANNEL_MODEL_FILE)
         return payload
     finally:
         if watcher is not None:
