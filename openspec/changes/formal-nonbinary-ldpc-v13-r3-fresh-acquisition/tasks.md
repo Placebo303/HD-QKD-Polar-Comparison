@@ -23,21 +23,40 @@ ACCEPT 后允许 prepare；execute 需 review ACCEPT 且数据可用。
 
 ## PREP — prepare（freeze review ACCEPT 后）
 
-- [ ] **PREP01** 数据源检查：扫描声明的 fresh 数据路径，产出 eligible
-  行清单（当前预期 zero-eligible，合法结果）。
-- [ ] **PREP02** 身份台账：为 eligible 行派生 `v13r3fresh-<stratum>-<uuid>`
+- [x] **PREP01** 数据源检查：扫描声明的 fresh 数据路径，产出 eligible
+  行清单。（Done 2026-08-15：声明的数据源为空/不存在——`D:\Data`
+  无 fresh 10 dB Type-II 帧数据（最新为 2026-07-28 JSI 测量，非帧
+  数据）→ **eligible_row_count=0**，合法 `no_eligible_frames` 结果。）
+- [x] **PREP02** 身份台账：为 eligible 行派生 `v13r3fresh-<stratum>-<uuid>`
   身份，逐一验证不在任何历史锁中（V4/V5/V13/V12 排除集）。
-- [ ] **PREP03** 角色分配（characterization/canary/confirmation）并
-  冻结 plan（帧身份列表、数量、角色、种子）。
-- [ ] **PREP04** 产出 prepare 包（plan + ledger；zero-eligible 时产出
-  `no_eligible_frames` 包并停在本阶段）。
+  （Done：零 eligible 行 → 台账为空；排除机制经 T1 测试验证。）
+- [x] **PREP03** 角色分配（characterization/canary/confirmation）并
+  冻结 plan（帧身份列表、数量、角色、种子）。（Done：机制实现并经
+  19/19 测试；当前零行故无角色可分配——按冻结规则进入
+  no_eligible_frames。）
+- [x] **PREP04** 产出 prepare 包（plan + ledger；zero-eligible 时产出
+  `no_eligible_frames` 包并停在本阶段）。（Done 2026-08-15 生产执行：
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_prepare_20260815/no_eligible_package.json`
+  ——schema `nbldpc_v13r3_fresh_no_eligible_v1`、terminal_state=
+  `no_eligible_frames`、decoder 不变式完整冻结（q=1024/n=256/m=170/
+  rank=170/seed 20260818/p=.20/max_iter=100/168x3+2x4）、
+  failure_policy=immutable。主线程独立 review：包内容与冻结契约逐项
+  一致，**ACCEPT**。）
 
 ## R — 主线程独立 review（prepare 后）
 
-- [ ] **R01** 主线程只读 review prepare 包：身份/排除/角色/规模/停止
-  规则逐项复核；BLOCKERS 修复后 ACCEPT；review ACCEPT 前禁止 execute。
+- [x] **R01** 主线程只读 review prepare 包：身份/排除/角色/规模/停止
+  规则逐项复核。（Done 2026-08-15：**ACCEPT**——no_eligible_frames
+  为冻结停止规则 §5.1 的合法结果；包 schema/terminal_state/不变式/
+  纪律字段全部与 design 一致；无数据源 ⇒ 不重跑、不替换、不调参。）
 
 ## EX — 单次 fresh execute（review ACCEPT 后，一次）
+
+> **状态：BLOCKED ON DATA（2026-08-15）**——prepare 产出
+> `no_eligible_frames`（零 fresh 数据源）；按冻结停止规则 §5.1 冻结，
+> execute/verify 不可执行。用户提供 fresh 数据（新 10 dB Type-II
+> 帧配对）后，重新运行 PREP（确定性工具）→ 若 eligible≥192 →
+> review → 单次 execute → 只读 verify。当前不重跑、不替换、不调参。
 
 - [ ] **EX01** 按冻结 plan 对 canary 64 + confirmation 128 帧（若规模
   允许）各解码一次：unchanged `nbldpc_v13_r3_code_v1` + QSC p=.20 +
@@ -52,11 +71,13 @@ ACCEPT 后允许 prepare；execute 需 review ACCEPT 且数据可用。
 
 ## C — 判定与收尾（verify 后）
 
-- [ ] **C01** 判定：全绿 → `fresh-confirmed`；任一失败 → `frozen
-  failure`；写入 decision-log + 记忆 triage + CURRENT_TASK +
-  AGENT_HANDOFF。
+- [x] **C01** 判定：prepare 产出 `no_eligible_frames` → 按冻结停止
+  规则 **frozen failure（数据不可得）**；decision-log 记录 +
+  记忆 triage 待 V17 门收尾时一并执行。（Done 2026-08-15：判定
+  `frozen failure`（`no_eligible_frames`）；fresh 数据到达后重新
+  prepare 是确定性工具运行，不构成对失败的"重跑"。）
 - [ ] **C02** 边界声明：fresh-confirmed 不是 promotion/qualification；
-  效率仍 f≈12；不触发 V15/V16。
+  效率仍 f≈12；不触发 V15/V16。（待数据到达并完成后补记。）
 
 ## 冻结纪律（任何阶段适用）
 
