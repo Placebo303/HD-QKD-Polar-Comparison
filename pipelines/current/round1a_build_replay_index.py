@@ -76,6 +76,8 @@ def _rerun_layer_metrics(
     out_dir: Path,
     *,
     jobs: int,
+    frames: int,
+    seed: int,
     dims_filter: set[int],
     bws_filter: set[int],
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, Path]:
@@ -99,6 +101,10 @@ def _rerun_layer_metrics(
         str(tmp_out),
         "--jobs",
         str(int(jobs)),
+        "--frames",
+        str(int(frames)),
+        "--seed",
+        str(int(seed)),
         "--prefer-sidecar-map-ser",
     ]
     if only_points:
@@ -117,6 +123,9 @@ def _build_tables(
     output_dir: Path,
     *,
     jobs: int,
+    frames: int,
+    seed: int,
+    recompute_layer_metrics: bool,
     dims_filter: set[int],
     bws_filter: set[int],
 ) -> tuple[pd.DataFrame, pd.DataFrame, Path, list[str]]:
@@ -131,21 +140,24 @@ def _build_tables(
         layer = layer[pd.to_numeric(layer["bin_width_ps"], errors="coerce").isin(sorted(bws_filter))].copy()
     source_root = candidate_dir
     notes: list[str] = []
-    if not _has_replay_cols(layer):
+    if recompute_layer_metrics or not _has_replay_cols(layer):
         cached_root = output_dir / "_recomputed_replay_inputs" / candidate_dir.name
         cached_layer = cached_root / "polar_layer_metrics.csv"
-        if cached_layer.exists():
+        if cached_layer.exists() and not recompute_layer_metrics:
             notes.append(f"missing replay layer cols in {candidate_dir / 'polar_layer_metrics.csv'}; reusing cached replay-only layer tables from {cached_root}")
             main = pd.read_csv(cached_root / "polar_e2e_results.csv")
             diag = pd.read_csv(cached_root / "polar_diag_summary.csv")
             layer = pd.read_csv(cached_layer)
             source_root = cached_root
         else:
-            notes.append(f"missing replay layer cols in {candidate_dir / 'polar_layer_metrics.csv'}; regenerated replay-only layer tables via run_real_polar_max_pie.py")
+            reason = "paper-grade forced recomputation" if recompute_layer_metrics else "missing replay layer cols"
+            notes.append(f"{reason}; regenerated replay-only layer tables via run_real_polar_max_pie.py")
             main, diag, layer, source_root = _rerun_layer_metrics(
                 candidate_dir,
                 output_dir,
                 jobs=jobs,
+                frames=frames,
+                seed=seed,
                 dims_filter=dims_filter,
                 bws_filter=bws_filter,
             )
@@ -236,6 +248,9 @@ def main() -> int:
     ap.add_argument("--input-dirs", nargs="*", default=[])
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--jobs", type=int, default=15)
+    ap.add_argument("--frames", type=int, default=100)
+    ap.add_argument("--seed", type=int, default=20260228)
+    ap.add_argument("--recompute-layer-metrics", action="store_true")
     ap.add_argument("--dimensions", default="")
     ap.add_argument("--bin-widths", default="")
     ap.add_argument("--overwrite", action="store_true")
@@ -259,6 +274,9 @@ def main() -> int:
             candidate_dir,
             output_dir,
             jobs=int(args.jobs),
+            frames=int(args.frames),
+            seed=int(args.seed),
+            recompute_layer_metrics=bool(args.recompute_layer_metrics),
             dims_filter=dims_filter,
             bws_filter=bws_filter,
         )

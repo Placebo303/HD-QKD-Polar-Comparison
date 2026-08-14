@@ -15,6 +15,12 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.reconciliation.verification import (
+    VERIFICATION_PROTOCOL_ID,
+    VERIFICATION_SEED_POLICY,
+    VERIFICATION_TRANSCRIPT_SOURCE_TAG,
+)
+
 
 FORMULA_TAG = "union_bound_over_blocks_universal_hash"
 
@@ -34,7 +40,8 @@ def main() -> int:
     ap.add_argument("--stage1-dir", required=True)
     ap.add_argument("--master", default="")
     ap.add_argument("--expected-points", type=int, default=0)
-    ap.add_argument("--verification-tag-bits", type=int, default=32)
+    ap.add_argument("--verification-tag-bits", type=int, default=64)
+    ap.add_argument("--eps-cor-target", type=float, default=1e-10)
     ap.add_argument("--output-dir", default="")
     args = ap.parse_args()
 
@@ -55,7 +62,9 @@ def main() -> int:
         "verification_invoked_flag",
         "verification_bits_budgeted",
         "verification_bits_used_actual",
-        "verification_seed_index",
+        "verification_seed_policy",
+        "verification_seed_length_bits",
+        "verification_seed_artifact",
         "verification_pass_flag",
         "verification_fail_flag",
         "verification_transcript_source_tag",
@@ -82,6 +91,20 @@ def main() -> int:
         "epsilon_EC_in_budget_flag",
         "epsilon_EC_bound",
         "epsilon_EC_bound_formula_tag",
+        "PIE_main",
+        "SKR_main_bps",
+        "PIE_reconciled_net",
+        "SKR_reconciled_net_bps",
+        "total_kept_info_bits",
+        "total_leak_ec_bits",
+        "n_pairs_actual",
+        "coincidence_rate_hz",
+        "coincidence_rate_source_tag",
+        "reconciliation_evidence_status",
+        "main_result_source",
+        "main_result_claim",
+        "claim_boundary",
+        "legacy_secure_result_status",
     ]
 
     for col in _missing(block, block_required):
@@ -104,12 +127,35 @@ def main() -> int:
         if bool(bad_block_bits.any()):
             errors.append("invoked block has verification_bits_used_actual different from verification_tag_bits")
 
+        invoked_mask = invoked_block == 1
+        protocol_ids = block.loc[invoked_mask, "verification_protocol_id"].astype(str)
+        if bool((protocol_ids != VERIFICATION_PROTOCOL_ID).any()):
+            errors.append("invoked block does not use the paper-grade random-Toeplitz protocol")
+        seed_policies = block.loc[invoked_mask, "verification_seed_policy"].astype(str)
+        if bool((seed_policies != VERIFICATION_SEED_POLICY).any()):
+            errors.append("invoked block does not use the required uniform-random Toeplitz seed policy")
+        transcript_sources = block.loc[invoked_mask, "verification_transcript_source_tag"].astype(str)
+        if bool((transcript_sources != VERIFICATION_TRANSCRIPT_SOURCE_TAG).any()):
+            errors.append("invoked block has an unexpected verification transcript source")
+        seed_lengths = _num(block.loc[invoked_mask], "verification_seed_length_bits")
+        if seed_lengths.isna().any() or bool((seed_lengths < int(args.verification_tag_bits)).any()):
+            errors.append("invoked block has an invalid Toeplitz seed length")
+        seed_artifacts = sorted(
+            x for x in block.loc[invoked_mask, "verification_seed_artifact"].astype(str).unique() if x.strip()
+        )
+        if len(seed_artifacts) != 1:
+            errors.append("formal batch must reference exactly one shared Toeplitz seed artifact")
+        elif not Path(seed_artifacts[0]).exists():
+            errors.append(f"shared Toeplitz seed artifact is missing: {seed_artifacts[0]}")
+
         empirical = _num(point, "epsilon_EC_empirical")
         bound = _num(point, "epsilon_EC_bound")
         if bool((empirical.dropna() > 1.0).any()):
             errors.append("epsilon_EC_empirical exceeds 1")
         if bool((bound.dropna() > 1.0).any()):
             errors.append("epsilon_EC_bound exceeds 1")
+        if bool((bound.dropna() > float(args.eps_cor_target)).any()):
+            errors.append("epsilon_EC_bound exceeds eps_cor_target")
 
         invoked_point = _num(point, "verification_invoked_block_count")
         lambda_ver = _num(point, "lambda_ver_bits_actual")
@@ -126,6 +172,44 @@ def main() -> int:
         formal_mask = master.get("epsilon_EC_bound_formula_tag", pd.Series(dtype=str)).astype(str).eq(FORMULA_TAG)
         if bool((budget_flags[formal_mask].dropna() != 1).any()):
             errors.append("formal master rows contain epsilon_EC_in_budget_flag values different from 1")
+        if not _missing(master, master_required):
+            pie_main = _num(master, "PIE_main")
+            skr_main = _num(master, "SKR_main_bps")
+            pie_reconciled = _num(master, "PIE_reconciled_net")
+            skr_reconciled = _num(master, "SKR_reconciled_net_bps")
+            kept = _num(master, "total_kept_info_bits")
+            leak = _num(master, "total_leak_ec_bits")
+            pairs = _num(master, "n_pairs_actual")
+            rate = _num(master, "coincidence_rate_hz")
+            expected_pie = ((kept - leak) / pairs).clip(lower=0.0)
+            if bool((pairs <= 0).any()) or bool(master[master_required].isna().any().any()):
+                errors.append("formal master has missing values or nonpositive n_pairs_actual in required reconciled fields")
+            if bool(((pie_main - pie_reconciled).abs() > 1e-12).any()):
+                errors.append("PIE_main does not map exactly to PIE_reconciled_net")
+            if bool(((skr_main - skr_reconciled).abs() > 1e-9).any()):
+                errors.append("SKR_main_bps does not map exactly to SKR_reconciled_net_bps")
+            if bool(((pie_main - expected_pie).abs() > 1e-12).any()):
+                errors.append("PIE_reconciled_net identity failed")
+            if bool(((skr_main - pie_main * rate).abs() > 1e-8).any()):
+                errors.append("SKR_reconciled_net_bps identity failed")
+            expected_tags = {
+                "explicit_acquisition_duration",
+                "grid_table_preserved_measured_rate",
+                "source_candidate_preserved_measured_rate",
+                "authoritative_candidate_grid_table_preserved_measured_rate",
+            }
+            if not set(master["coincidence_rate_source_tag"].astype(str)).issubset(expected_tags):
+                errors.append("formal master contains an unverified coincidence-rate source")
+            expected_constants = {
+                "reconciliation_evidence_status": "verified_actual_ir_replay_reconciled_net",
+                "main_result_source": "actual_ir_reconciled_net_not_secure",
+                "main_result_claim": "public_ec_only_reconciled_net_not_secret_key_rate",
+                "claim_boundary": "public_ec_only_not_secure",
+                "legacy_secure_result_status": "scientifically_blocked_dimensional_inconsistency",
+            }
+            for col, expected in expected_constants.items():
+                if bool((master[col].astype(str) != expected).any()):
+                    errors.append(f"formal master has unexpected {col}; expected {expected}")
 
     expected_points = int(args.expected_points)
     if expected_points > 0:
@@ -153,6 +237,7 @@ def main() -> int:
         f"stage1_dir: {stage1_dir}",
         f"master: {Path(args.master) if str(args.master).strip() else 'not_provided'}",
         f"verification_tag_bits: {int(args.verification_tag_bits)}",
+        f"eps_cor_target: {float(args.eps_cor_target)}",
         f"block_rows: {len(block)}",
         f"point_rows: {len(point)}",
         f"point_formal_rows: {point_formal_rows}",

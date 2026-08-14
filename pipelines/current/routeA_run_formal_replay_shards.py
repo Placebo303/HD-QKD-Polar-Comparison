@@ -14,10 +14,12 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from _longrun_common import csv_read, point_table_sort, python_tool, shard_dataframe, write_text
 from _security_round_common import ensure_output_dir
+from src.reconciliation.verification import generate_toeplitz_seed
 
 
 def _shard_done(shard_output_dir: Path) -> bool:
@@ -45,6 +47,7 @@ def _run_shard(
     shard_index_dir: Path,
     shard_output_dir: Path,
     verification_tag_bits: int,
+    toeplitz_seed_file: Path,
     channel_model_table: str,
     channel_model_tag: str,
     shard_key: str,
@@ -60,6 +63,8 @@ def _run_shard(
         str(shard_output_dir),
         "--verification-tag-bits",
         str(int(verification_tag_bits)),
+        "--toeplitz-seed-file",
+        str(toeplitz_seed_file),
         "--channel-model-tag",
         str(channel_model_tag),
         *(["--channel-model-table", str(channel_model_table)] if str(channel_model_table).strip() else []),
@@ -75,7 +80,7 @@ def main() -> int:
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--shards", type=int, default=16)
     ap.add_argument("--workers", type=int, default=1)
-    ap.add_argument("--verification-tag-bits", type=int, default=32)
+    ap.add_argument("--verification-tag-bits", type=int, default=64)
     ap.add_argument("--channel-model-table", default="")
     ap.add_argument("--channel-model-tag", default="bsc_legacy", choices=["bsc_legacy", "asym_binary_v1"])
     ap.add_argument("--resume", dest="resume", action="store_true", default=True)
@@ -95,6 +100,36 @@ def main() -> int:
 
     point_df = point_table_sort(csv_read(replay_index_dir / "replay_index_point_table.csv"))
     layer_df = csv_read(replay_index_dir / "replay_index_layer_table.csv")
+
+    block_sizes = pd.to_numeric(
+        layer_df.loc[
+            layer_df["layer_replay_ready_tag"].astype(str).str.lower().eq("yes"),
+            "layer_block_symbols",
+        ],
+        errors="coerce",
+    ).dropna()
+    if block_sizes.empty:
+        raise SystemExit("no replayable layer block sizes available for Toeplitz seed")
+    max_message_len = int(block_sizes.max())
+    expected_seed_bits = max_message_len + int(args.verification_tag_bits) - 1
+    toeplitz_seed_file = (output_dir / "toeplitz_seed_bits.npy").resolve()
+    completed_without_seed = list(
+        (output_dir / "_shards").glob("shard_*/replay_output/actual_ir_block_table.csv")
+    )
+    if completed_without_seed and not toeplitz_seed_file.exists():
+        raise SystemExit("cannot resume completed shards because the shared Toeplitz seed artifact is missing")
+    if toeplitz_seed_file.exists():
+        toeplitz_seed = np.asarray(np.load(toeplitz_seed_file), dtype=np.uint8).reshape(-1)
+    else:
+        toeplitz_seed = generate_toeplitz_seed(
+            max_message_len=max_message_len,
+            tag_bits=int(args.verification_tag_bits),
+        )
+        np.save(toeplitz_seed_file, toeplitz_seed)
+    if toeplitz_seed.size != expected_seed_bits or not np.all((toeplitz_seed == 0) | (toeplitz_seed == 1)):
+        raise SystemExit(
+            f"invalid shared Toeplitz seed: expected {expected_seed_bits} binary bits, got {toeplitz_seed.size}"
+        )
 
     # Keep a root copy so the formal stage1 directory is self-contained.
     point_df.to_csv(output_dir / "replay_index_point_table.csv", index=False)
@@ -129,6 +164,7 @@ def main() -> int:
                     shard_index_dir=shard_index_dir,
                     shard_output_dir=shard_output_dir,
                     verification_tag_bits=int(args.verification_tag_bits),
+                    toeplitz_seed_file=toeplitz_seed_file,
                     channel_model_table=str(args.channel_model_table),
                     channel_model_tag=str(args.channel_model_tag),
                     shard_key=shard_key,
@@ -144,6 +180,7 @@ def main() -> int:
                     shard_index_dir=shard_index_dir,
                     shard_output_dir=shard_output_dir,
                     verification_tag_bits=int(args.verification_tag_bits),
+                    toeplitz_seed_file=toeplitz_seed_file,
                     channel_model_table=str(args.channel_model_table),
                     channel_model_tag=str(args.channel_model_tag),
                     shard_key=shard_key,
@@ -193,6 +230,8 @@ def main() -> int:
         f"point_count: {len(point_df)}",
         f"shard_count: {len(shard_frames)}",
         f"verification_tag_bits: {int(args.verification_tag_bits)}",
+        f"toeplitz_seed_file: {toeplitz_seed_file}",
+        f"toeplitz_seed_length_bits: {int(toeplitz_seed.size)}",
         f"channel_model_tag: {str(args.channel_model_tag)}",
         f"channel_model_table: {str(args.channel_model_table) if str(args.channel_model_table).strip() else 'none'}",
         f"block_row_count: {len(block_df)}",

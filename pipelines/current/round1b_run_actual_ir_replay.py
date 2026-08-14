@@ -19,10 +19,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
 from experiments.run_real_polar_max_pie import _polar_weight_order  # type: ignore
 from src.reconciliation.cpp_scl_wrapper import PolarSCLDecoder  # type: ignore
 from src.reconciliation.real_polar_sc_rescue import (  # type: ignore
@@ -36,8 +32,10 @@ from src.reconciliation.verification import (  # type: ignore
     VERIFICATION_SCOPE,
     VERIFICATION_SEED_POLICY,
     VERIFICATION_TRANSCRIPT_SOURCE_TAG,
+    generate_toeplitz_seed,
     verification_transcript,
 )
+from src.runtime_paths import resolve_repo_path  # type: ignore
 from _security_round_common import (
     bit_layer_from_symbols,
     ensure_output_dir,
@@ -52,6 +50,18 @@ def _default_candidate_dirs() -> list[Path]:
 
 def _default_replay_index_dir() -> Path:
     return REPO_ROOT / "results" / "_tmp_round1a_replay_index"
+
+
+def _resolve_replay_input_path(value: str | Path) -> Path:
+    resolved = resolve_repo_path(REPO_ROOT, value)
+    if resolved.exists():
+        return resolved
+    text = str(value).replace("\\", "/").lstrip("/")
+    if text.startswith("results/"):
+        archived = REPO_ROOT / "results" / "authoritative" / Path(text[len("results/") :])
+        if archived.exists():
+            return archived
+    return resolved
 
 
 def _llr_from_side_info(bits_b: np.ndarray, ber: float) -> np.ndarray:
@@ -115,7 +125,7 @@ def _decode_block(
     if decoder_mode == "scl":
         if decoder is None:
             raise RuntimeError("SCL replay requested but replay decoder is unavailable")
-        info_bits = decoder.decode_batch_frozen(
+        info_bits = decoder.decode_batch_frozen_plain(
             int(llr.size),
             int(np.sum(mask_u8)),
             1,
@@ -124,7 +134,7 @@ def _decode_block(
             llr.reshape(1, -1).astype(np.float32),
         )[0]
         u_hat = _full_u_from_info(info_bits, frozen_values_u8, info_idx_sorted)
-        return u_hat.astype(np.uint8), "configured_crc_budget"
+        return u_hat.astype(np.uint8), "ordinary_scl_min_path_metric"
     raise ValueError(f"unsupported decoder_mode={decoder_mode}")
 
 
@@ -134,7 +144,8 @@ def main() -> int:
     ap.add_argument("--replay-index-dir", default=str(_default_replay_index_dir()))
     ap.add_argument("--output-dir", required=True)
     ap.add_argument("--force-rebuild-decoder", action="store_true")
-    ap.add_argument("--verification-tag-bits", type=int, default=32)
+    ap.add_argument("--verification-tag-bits", type=int, default=64)
+    ap.add_argument("--toeplitz-seed-file", default="")
     ap.add_argument("--channel-model-table", default="")
     ap.add_argument("--channel-model-tag", default="bsc_legacy", choices=["bsc_legacy", "asym_binary_v1"])
     ap.add_argument("--overwrite", action="store_true")
@@ -161,6 +172,36 @@ def main() -> int:
         if col in layer_index.columns:
             layer_index[col] = pd.to_numeric(layer_index[col], errors="coerce")
 
+    replayable_block_sizes = pd.to_numeric(
+        layer_index.loc[
+            layer_index["layer_replay_ready_tag"].astype(str).str.lower().eq("yes"),
+            "layer_block_symbols",
+        ],
+        errors="coerce",
+    ).dropna()
+    if replayable_block_sizes.empty:
+        raise SystemExit("no replayable layer block sizes available for Toeplitz seed")
+    max_message_len = int(replayable_block_sizes.max())
+    required_seed_bits = max_message_len + int(args.verification_tag_bits) - 1
+    seed_path = (
+        Path(args.toeplitz_seed_file)
+        if str(args.toeplitz_seed_file).strip()
+        else output_dir / "toeplitz_seed_bits.npy"
+    ).resolve()
+    if seed_path.exists():
+        toeplitz_seed_bits = np.asarray(np.load(seed_path), dtype=np.uint8).reshape(-1)
+    else:
+        toeplitz_seed_bits = generate_toeplitz_seed(
+            max_message_len=max_message_len,
+            tag_bits=int(args.verification_tag_bits),
+        )
+        seed_path.parent.mkdir(parents=True, exist_ok=True)
+        np.save(seed_path, toeplitz_seed_bits)
+    if toeplitz_seed_bits.size != required_seed_bits or not np.all((toeplitz_seed_bits == 0) | (toeplitz_seed_bits == 1)):
+        raise SystemExit(
+            f"invalid Toeplitz seed artifact: expected {required_seed_bits} binary bits, got {toeplitz_seed_bits.size}"
+        )
+
     allowed_losses = {infer_loss_db_from_path(p) for p in candidate_dirs}
     if allowed_losses:
         point_index = point_index[point_index["loss_db"].isin(allowed_losses)].copy()
@@ -169,7 +210,7 @@ def main() -> int:
     scl_decoder: PolarSCLDecoder | None = PolarSCLDecoder(
         repo_root=REPO_ROOT,
         force_rebuild=bool(args.force_rebuild_decoder),
-        lib_stem="ca_scl_replay",
+        lib_stem="polar_scl_replay",
     )
     block_rows: list[dict[str, Any]] = []
 
@@ -203,7 +244,8 @@ def main() -> int:
                     "verification_bits_budgeted": "",
                     "verification_bits_used_actual": "",
                     "verification_bits_revealed_legacy_crc": "",
-                    "verification_seed_index": "",
+                    "verification_seed_length_bits": "",
+                    "verification_seed_artifact": "",
                     "verification_pass_flag": "",
                     "verification_fail_flag": "",
                     "verification_transcript_source_tag": "",
@@ -225,8 +267,8 @@ def main() -> int:
         d = int(prow["dimension"])
         bw = int(prow["bin_width_ps"])
         pid = str(prow["point_id"])
-        a_path = Path(str(prow["a_eff_source_path"]))
-        b_path = Path(str(prow["b_eff_source_path"]))
+        a_path = _resolve_replay_input_path(str(prow["a_eff_source_path"]))
+        b_path = _resolve_replay_input_path(str(prow["b_eff_source_path"]))
         if (not a_path.exists()) or (not b_path.exists()):
             block_rows.append(
                 {
@@ -256,7 +298,8 @@ def main() -> int:
                     "verification_bits_budgeted": "",
                     "verification_bits_used_actual": "",
                     "verification_bits_revealed_legacy_crc": "",
-                    "verification_seed_index": "",
+                    "verification_seed_length_bits": "",
+                    "verification_seed_artifact": "",
                     "verification_pass_flag": "",
                     "verification_fail_flag": "",
                     "verification_transcript_source_tag": "",
@@ -312,7 +355,8 @@ def main() -> int:
                     "verification_bits_budgeted": "",
                     "verification_bits_used_actual": "",
                     "verification_bits_revealed_legacy_crc": "",
-                    "verification_seed_index": "",
+                    "verification_seed_length_bits": "",
+                    "verification_seed_artifact": "",
                     "verification_pass_flag": "",
                     "verification_fail_flag": "",
                     "verification_transcript_source_tag": "",
@@ -380,7 +424,8 @@ def main() -> int:
                         "verification_bits_budgeted": "",
                         "verification_bits_used_actual": "",
                         "verification_bits_revealed_legacy_crc": "",
-                        "verification_seed_index": "",
+                        "verification_seed_length_bits": "",
+                        "verification_seed_artifact": "",
                         "verification_pass_flag": "",
                         "verification_fail_flag": "",
                         "verification_transcript_source_tag": "",
@@ -454,15 +499,11 @@ def main() -> int:
                     transcript = verification_transcript(
                         reference_bits=x_a,
                         candidate_bits=x_hat,
-                        point_id=pid,
-                        layer_id=layer_id,
-                        block_index=block_index,
+                        toeplitz_seed_bits=toeplitz_seed_bits,
                         tag_bits=int(args.verification_tag_bits),
                     )
                     verification_bits = int(transcript["verification_bits_used_actual"])
-                    verification_source_tag = "actual_replay" if verification_bits_legacy_crc == 0 else "configured_crc_budget"
-                    if verification_bits_legacy_crc > 0:
-                        replay_status = "ok_configured_crc_budget"
+                    verification_source_tag = "random_toeplitz_tag"
                 except Exception as exc:
                     block_success = 0
                     decode_fail = 1
@@ -506,7 +547,8 @@ def main() -> int:
                         "verification_bits_budgeted": transcript.get("verification_bits_budgeted", ""),
                         "verification_bits_used_actual": transcript.get("verification_bits_used_actual", ""),
                         "verification_bits_revealed_legacy_crc": verification_bits_legacy_crc if replay_status.startswith("ok") else "",
-                        "verification_seed_index": transcript.get("verification_seed_index", ""),
+                        "verification_seed_length_bits": transcript.get("verification_seed_length_bits", ""),
+                        "verification_seed_artifact": str(seed_path),
                         "verification_pass_flag": transcript.get("verification_pass_flag", ""),
                         "verification_fail_flag": transcript.get("verification_fail_flag", ""),
                         "verification_transcript_source_tag": transcript.get("verification_transcript_source_tag", ""),
@@ -538,10 +580,13 @@ def main() -> int:
         f"verification_seed_policy: {VERIFICATION_SEED_POLICY}",
         f"verification_public_message_rule: {VERIFICATION_PUBLIC_MESSAGE_RULE}",
         f"verification_tag_bits: {int(args.verification_tag_bits)}",
+        f"verification_seed_artifact: {seed_path}",
+        f"verification_seed_length_bits: {int(toeplitz_seed_bits.size)}",
         f"channel_model_tag: {str(args.channel_model_tag)}",
         f"channel_model_table: {str(args.channel_model_table) if str(args.channel_model_table).strip() else 'none'}",
         "notes:",
-        "- syndrome bits are actual replay outputs from frozen-value-aware decoding.",
+        "- syndrome bits are actual replay outputs from frozen-value-aware SC or ordinary minimum-metric SCL decoding.",
+        "- one recorded uniformly random Toeplitz seed is reused across this predeclared fixed replay batch.",
         "- verification_bits_revealed now records universal-hash transcript leakage; legacy CRC budgeting is preserved in verification_bits_revealed_legacy_crc.",
         "- frame_success_rate remains unresolved at replay-run stage and is aggregated later as MISSING unless a rigorous denominator is available.",
     ]

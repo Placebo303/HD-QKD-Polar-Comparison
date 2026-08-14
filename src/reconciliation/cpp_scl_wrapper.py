@@ -12,13 +12,13 @@ import numpy as np
 
 
 class PolarSCLDecoder:
-    """Thin ctypes wrapper for C++ CA-SCL batch decoder."""
+    """Thin ctypes wrapper for ordinary SCL and legacy CA-SCL decoders."""
 
     def __init__(
         self,
         repo_root: Path | str | None = None,
         force_rebuild: bool = False,
-        lib_stem: str = "ca_scl",
+        lib_stem: str = "polar_scl",
     ) -> None:
         self._repo_root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[2]
         self._cpp_main = (self._repo_root / "src" / "reconciliation" / "cpp_polar" / "main.cpp").resolve()
@@ -28,6 +28,7 @@ class PolarSCLDecoder:
         self._lib: ctypes.CDLL | None = None
         self._decode = None
         self._decode_frozen = None
+        self._decode_frozen_plain = None
 
         self._build_if_needed(force=force_rebuild)
         self._configure_windows_dll_dirs(self._lib_path.parent)
@@ -43,7 +44,11 @@ class PolarSCLDecoder:
 
     def _build_if_needed(self, force: bool = False) -> None:
         self._lib_path.parent.mkdir(parents=True, exist_ok=True)
-        need = force or (not self._lib_path.exists())
+        need = (
+            force
+            or (not self._lib_path.exists())
+            or self._cpp_main.stat().st_mtime_ns > self._lib_path.stat().st_mtime_ns
+        )
         if not need:
             return
         self._compile_lib(self._cpp_main, self._lib_path)
@@ -59,7 +64,7 @@ class PolarSCLDecoder:
             cmd = f'g++ -O3 -shared -fPIC -std=c++17 "{cpp_main}" -o "{lib_path}"'
         rc = os.system(cmd)
         if rc != 0 or not lib_path.exists():
-            raise RuntimeError(f"Failed to build CA-SCL shared library: {cmd}")
+            raise RuntimeError(f"Failed to build Polar SCL shared library: {cmd}")
 
     def _configure_windows_dll_dirs(self, lib_dir: Path) -> None:
         if os.name != "nt":
@@ -114,6 +119,62 @@ class PolarSCLDecoder:
                 ctypes.POINTER(ctypes.c_uint8),
             ]
             self._decode_frozen.restype = None
+        try:
+            self._decode_frozen_plain = self._lib.decode_scl_batch_frozen_plain
+        except AttributeError:
+            self._decode_frozen_plain = None
+        if self._decode_frozen_plain is not None:
+            self._decode_frozen_plain.argtypes = [
+                ctypes.c_int,
+                ctypes.c_int,
+                ctypes.c_int,
+                ctypes.POINTER(ctypes.c_uint8),
+                ctypes.POINTER(ctypes.c_uint8),
+                ctypes.POINTER(ctypes.c_float),
+                ctypes.POINTER(ctypes.c_uint8),
+            ]
+            self._decode_frozen_plain.restype = None
+
+    @staticmethod
+    def _validate_common(
+        n: int,
+        k: int,
+        frames: int,
+        mask: np.ndarray,
+        llrs: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        if n <= 0 or k <= 0 or frames <= 0:
+            raise ValueError("n/k/frames must be positive")
+        if n & (n - 1):
+            raise ValueError(f"n must be a power of two, got {n}")
+        if k > n:
+            raise ValueError(f"k must not exceed n: k={k}, n={n}")
+
+        mask_raw = np.asarray(mask).reshape(-1)
+        if mask_raw.size != int(n):
+            raise ValueError(f"mask size mismatch: expected {n}, got {mask_raw.size}")
+        if not np.all((mask_raw == 0) | (mask_raw == 1)):
+            raise ValueError("mask must be binary")
+        mask_u8 = np.ascontiguousarray(mask_raw, dtype=np.uint8)
+        if int(np.sum(mask_u8)) != int(k):
+            raise ValueError(f"mask popcount mismatch: expected {k}, got {int(np.sum(mask_u8))}")
+
+        llr_raw = np.asarray(llrs)
+        if llr_raw.size != int(frames) * int(n):
+            raise ValueError(f"llrs size mismatch: expected {frames * n}, got {llr_raw.size}")
+        if not np.all(np.isfinite(llr_raw)):
+            raise ValueError("llrs must be finite")
+        llr_f32 = np.ascontiguousarray(llr_raw, dtype=np.float32).reshape(int(frames), int(n))
+        return mask_u8, llr_f32
+
+    @staticmethod
+    def _validate_frozen(frozen_values: np.ndarray, frames: int, n: int) -> np.ndarray:
+        frozen_raw = np.asarray(frozen_values)
+        if frozen_raw.size != int(frames) * int(n):
+            raise ValueError(f"frozen_values size mismatch: expected {frames * n}, got {frozen_raw.size}")
+        if not np.all((frozen_raw == 0) | (frozen_raw == 1)):
+            raise ValueError("frozen_values must be binary")
+        return np.ascontiguousarray(frozen_raw, dtype=np.uint8).reshape(int(frames), int(n))
 
     def decode_batch(
         self,
@@ -125,17 +186,8 @@ class PolarSCLDecoder:
     ) -> np.ndarray:
         if self._decode is None:
             raise RuntimeError("Decoder function is not initialized")
-        if n <= 0 or k <= 0 or frames <= 0:
-            raise ValueError("n/k/frames must be positive")
-
-        mask_u8 = np.ascontiguousarray(mask, dtype=np.uint8).reshape(-1)
-        if mask_u8.size != int(n):
-            raise ValueError(f"mask size mismatch: expected {n}, got {mask_u8.size}")
-        if int(np.sum(mask_u8)) != int(k):
-            raise ValueError(f"mask popcount mismatch: expected {k}, got {int(np.sum(mask_u8))}")
-
-        llr_f32 = np.ascontiguousarray(llrs, dtype=np.float32).reshape(int(frames), int(n))
-        out_bits = np.empty((int(frames), int(k)), dtype=np.uint8)
+        mask_u8, llr_f32 = self._validate_common(n, k, frames, mask, llrs)
+        out_bits = np.zeros((int(frames), int(k)), dtype=np.uint8)
 
         self._decode(
             int(n),
@@ -158,20 +210,38 @@ class PolarSCLDecoder:
     ) -> np.ndarray:
         if self._decode_frozen is None:
             raise RuntimeError("Frozen-aware decoder function is not initialized")
-        if n <= 0 or k <= 0 or frames <= 0:
-            raise ValueError("n/k/frames must be positive")
-
-        mask_u8 = np.ascontiguousarray(mask, dtype=np.uint8).reshape(-1)
-        if mask_u8.size != int(n):
-            raise ValueError(f"mask size mismatch: expected {n}, got {mask_u8.size}")
-        if int(np.sum(mask_u8)) != int(k):
-            raise ValueError(f"mask popcount mismatch: expected {k}, got {int(np.sum(mask_u8))}")
-
-        frozen_u8 = np.ascontiguousarray(frozen_values, dtype=np.uint8).reshape(int(frames), int(n))
-        llr_f32 = np.ascontiguousarray(llrs, dtype=np.float32).reshape(int(frames), int(n))
-        out_bits = np.empty((int(frames), int(k)), dtype=np.uint8)
+        mask_u8, llr_f32 = self._validate_common(n, k, frames, mask, llrs)
+        frozen_u8 = self._validate_frozen(frozen_values, frames, n)
+        out_bits = np.zeros((int(frames), int(k)), dtype=np.uint8)
 
         self._decode_frozen(
+            int(n),
+            int(k),
+            int(frames),
+            mask_u8.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+            frozen_u8.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+            llr_f32.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+            out_bits.ctypes.data_as(ctypes.POINTER(ctypes.c_uint8)),
+        )
+        return out_bits
+
+    def decode_batch_frozen_plain(
+        self,
+        n: int,
+        k: int,
+        frames: int,
+        mask: np.ndarray,
+        frozen_values: np.ndarray,
+        llrs: np.ndarray,
+    ) -> np.ndarray:
+        """Decode arbitrary information bits with frozen-aware ordinary SCL (L=4)."""
+        if self._decode_frozen_plain is None:
+            raise RuntimeError("Frozen-aware plain SCL decoder function is not initialized")
+        mask_u8, llr_f32 = self._validate_common(n, k, frames, mask, llrs)
+        frozen_u8 = self._validate_frozen(frozen_values, frames, n)
+        out_bits = np.zeros((int(frames), int(k)), dtype=np.uint8)
+
+        self._decode_frozen_plain(
             int(n),
             int(k),
             int(frames),

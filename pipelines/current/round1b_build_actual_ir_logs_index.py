@@ -76,11 +76,16 @@ def main() -> int:
         ok_rows = grp[grp["replay_status"].astype(str).str.startswith("ok")].copy()
         blocked_rows = grp[~grp["replay_status"].astype(str).str.startswith("ok")].copy()
         audited_blocks = int(len(ok_rows))
-        kept_blocks = int(pd.to_numeric(ok_rows["block_success_flag"], errors="coerce").fillna(0).sum())
+        verification_accept = pd.to_numeric(
+            ok_rows["verification_pass_flag"], errors="coerce"
+        ).fillna(0)
+        kept_blocks = int(verification_accept.sum())
         fail_blocks = int(pd.to_numeric(ok_rows["decode_fail_flag"], errors="coerce").fillna(0).sum())
         total_leak = float(pd.to_numeric(ok_rows["total_leak_ec_bits"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
         total_leak_legacy_crc = float(pd.to_numeric(ok_rows["total_leak_ec_bits_legacy_crc"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
-        total_kept_info_bits = float((pd.to_numeric(ok_rows["k_used"], errors="coerce").fillna(0) * pd.to_numeric(ok_rows["block_success_flag"], errors="coerce").fillna(0)).sum()) if audited_blocks > 0 else np.nan
+        total_kept_info_bits = float(
+            (pd.to_numeric(ok_rows["k_used"], errors="coerce").fillna(0) * verification_accept).sum()
+        ) if audited_blocks > 0 else np.nan
         verification_bits_used_actual = float(pd.to_numeric(ok_rows["verification_bits_used_actual"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
         verification_bits_used_actual_legacy_crc = float(pd.to_numeric(ok_rows["verification_bits_revealed_legacy_crc"], errors="coerce").fillna(0).sum()) if audited_blocks > 0 else np.nan
         lambda_ver_bits_actual = verification_bits_used_actual
@@ -127,6 +132,11 @@ def main() -> int:
                 "total_leak_ec_bits": total_leak,
                 "total_leak_ec_bits_legacy_crc": total_leak_legacy_crc,
                 "block_success_rate": (float(kept_blocks) / float(audited_blocks)) if audited_blocks > 0 else "MISSING",
+                "verification_accept_rate": (float(kept_blocks) / float(audited_blocks)) if audited_blocks > 0 else "MISSING",
+                "block_match_oracle_rate": (
+                    float(pd.to_numeric(ok_rows["block_success_flag"], errors="coerce").fillna(0).sum())
+                    / float(audited_blocks)
+                ) if audited_blocks > 0 else "MISSING",
                 "frame_success_rate": "MISSING",
                 "decode_fail_count": fail_blocks if audited_blocks > 0 else "MISSING",
                 "kept_block_count": kept_blocks if audited_blocks > 0 else "MISSING",

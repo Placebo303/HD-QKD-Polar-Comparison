@@ -76,9 +76,7 @@ class SmokeTests(unittest.TestCase):
         transcript = verification_transcript(
             reference_bits=bits,
             candidate_bits=bits.copy(),
-            point_id="smoke",
-            layer_id=0,
-            block_index=0,
+            toeplitz_seed_bits=np.zeros(bits.size + 32 - 1, dtype=np.uint8),
             tag_bits=32,
         )
         self.assertEqual(transcript["verification_pass_flag"], 1)
@@ -139,7 +137,8 @@ class SmokeTests(unittest.TestCase):
                     "leak_ec_source_tag": "actual_ir_replay_formal",
                     "total_kept_info_bits": 1800,
                     "frame_success_rate": 0.8,
-                    "block_success_rate": 0.9,
+                    "verification_accept_rate": 0.9,
+                    "block_success_rate": 0.5,
                     "epsilon_EC_bound": 1e-9,
                 }],
             )
@@ -158,6 +157,9 @@ class SmokeTests(unittest.TestCase):
                 row = next(csv.DictReader(stream))
             self.assertAlmostEqual(float(row["leak_EC_actual_bits"]), 0.1)
             self.assertAlmostEqual(float(row["accepted_frame_fraction"]), 0.8)
+            self.assertAlmostEqual(float(row["n_eff_pairs"]), 720.0)
+            self.assertEqual(row["n_eff_pairs_rule"], "block_success_already_in_actual_kept_bits")
+            self.assertEqual(row["block_success_rate_source_tag"], "actual_verification_accept_rate")
             self.assertEqual(row["leak_EC_source_tag"], "actual_ir_replay_formal")
 
 

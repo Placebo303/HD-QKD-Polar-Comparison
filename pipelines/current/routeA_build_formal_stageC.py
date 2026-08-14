@@ -21,6 +21,7 @@ from _longrun_common import (
     python_tool,
     write_text,
 )
+from src.reconciliation.verification import VERIFICATION_PROTOCOL_ID
 
 
 def main() -> int:
@@ -34,6 +35,12 @@ def main() -> int:
     candidate_dir = Path(args.candidate_dir)
     stage1_dir = Path(args.stage1_dir)
     output_dir = Path(args.output_dir)
+    required_candidate_csv = candidate_dir / "polar_e2e_results.csv"
+    if not required_candidate_csv.is_file():
+        raise SystemExit(
+            "Stage 2 requires a candidate containing polar_e2e_results.csv: "
+            f"{required_candidate_csv}"
+        )
 
     python_tool(
         "longrun_build_finite_key_audit_table.py",
@@ -96,9 +103,9 @@ def main() -> int:
                 f"candidate_dir: {candidate_dir}",
                 f"stage1_dir: {stage1_dir}",
                 f"output_dir: {output_dir}",
-                "verification_protocol_id: uhv1_per_block",
+                f"verification_protocol_id: {VERIFICATION_PROTOCOL_ID}",
                 "correctness_budget_rule: epsilon_EC_bound enters eps_cor_total; empirical replay quantities are audit-only.",
-                "claim_boundary: Route A correctness-side verification interface formalized under current calibrated actual-IR finite-key shadow.",
+                "claim_boundary: paper-grade reconciliation correctness is formalized; the calibrated actual-IR finite-key output is non-composable.",
             ]
         ),
     )

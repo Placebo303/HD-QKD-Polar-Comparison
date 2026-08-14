@@ -18,17 +18,27 @@ import pandas as pd
 from _longrun_common import candidate_dir_for_loss, python_tool, write_text
 
 
-def _default_replay_index_dir(loss_db: int) -> Path:
-    return Path("results") / "authoritative" / "_tmp_longrun_fresh_rerun" / f"full_{int(loss_db)}dB" / "stage1_actual_ir"
-
+def _fresh_recomputed_candidate_dir(replay_index_dir: Path, candidate_dir: Path) -> Path:
+    """Return the Stage 0 recomputed candidate, refusing the stale source candidate."""
+    fresh_candidate_dir = replay_index_dir / "_recomputed_replay_inputs" / candidate_dir.name
+    required_csv = fresh_candidate_dir / "polar_e2e_results.csv"
+    if not required_csv.is_file():
+        raise SystemExit(
+            "Stage 0 recomputed candidate is missing required polar_e2e_results.csv: "
+            f"{required_csv}"
+        )
+    return fresh_candidate_dir
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run Route A formal correctness rerun across configured losses.")
     ap.add_argument("--losses", default="20,16,10,6")
-    ap.add_argument("--output-dir", default="results/authoritative/_tmp_routeA_correctness_formal_stageD_cross_loss")
+    ap.add_argument("--output-dir", default="results/paper_grade_v2/four_loss_full")
     ap.add_argument("--shards", type=int, default=121)
     ap.add_argument("--workers", type=int, default=1)
-    ap.add_argument("--verification-tag-bits", type=int, default=32)
+    ap.add_argument("--metric-jobs", type=int, default=4)
+    ap.add_argument("--frames", type=int, default=100)
+    ap.add_argument("--seed", type=int, default=20260228)
+    ap.add_argument("--verification-tag-bits", type=int, default=64)
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
 
@@ -46,10 +56,36 @@ def main() -> int:
     ]
     for loss_db in losses:
         candidate_dir = candidate_dir_for_loss(loss_db)
-        replay_index_dir = _default_replay_index_dir(loss_db)
+        if not candidate_dir.exists():
+            archived_candidate = REPO_ROOT / "results" / "authoritative" / candidate_dir.name
+            if archived_candidate.exists():
+                candidate_dir = archived_candidate
         loss_root = output_dir / f"loss_{int(loss_db)}dB"
+        replay_index_dir = loss_root / "stage0_replay_index"
         stage1_dir = loss_root / "stage1_actual_ir"
         stage2_dir = loss_root / "stage2_security"
+        stage0_ready = (
+            (replay_index_dir / "replay_index_point_table.csv").exists()
+            and (replay_index_dir / "replay_index_layer_table.csv").exists()
+            and (replay_index_dir / "round1a_summary.txt").exists()
+        )
+        if bool(args.overwrite) or not stage0_ready:
+            python_tool(
+                "round1a_build_replay_index.py",
+                "--input-dirs",
+                str(candidate_dir),
+                "--output-dir",
+                str(replay_index_dir),
+                "--jobs",
+                str(int(args.metric_jobs)),
+                "--frames",
+                str(int(args.frames)),
+                "--seed",
+                str(int(args.seed)),
+                "--recompute-layer-metrics",
+                *(["--overwrite"] if bool(args.overwrite) else []),
+            )
+        fresh_candidate_dir = _fresh_recomputed_candidate_dir(replay_index_dir, candidate_dir)
         python_tool(
             "routeA_run_formal_replay_shards.py",
             "--candidate-dir",
@@ -69,7 +105,7 @@ def main() -> int:
         python_tool(
             "routeA_build_formal_stageC.py",
             "--candidate-dir",
-            str(candidate_dir),
+            str(fresh_candidate_dir),
             "--stage1-dir",
             str(stage1_dir),
             "--output-dir",
@@ -94,7 +130,10 @@ def main() -> int:
         master["routeA_formal_loss_dir"] = str(loss_root)
         masters.append(master)
         formal_rows = int(master.get("epsilon_EC_bound_formula_tag", pd.Series(dtype=str)).astype(str).eq("union_bound_over_blocks_universal_hash").sum())
-        lines.append(f"  - loss={int(loss_db)} rows={len(master)} formal_rows={formal_rows} stage2_dir={stage2_dir}")
+        lines.append(
+            f"  - loss={int(loss_db)} rows={len(master)} formal_rows={formal_rows} "
+            f"stage0_dir={replay_index_dir} fresh_candidate_dir={fresh_candidate_dir} stage2_dir={stage2_dir}"
+        )
 
     merged = pd.concat(masters, ignore_index=True) if masters else pd.DataFrame()
     merged.to_csv(output_dir / "cross_loss_security_master_table.csv", index=False)
@@ -104,7 +143,7 @@ def main() -> int:
             f"cross_loss_rows: {len(merged)}",
             f"cross_loss_formal_rows: {int(merged.get('epsilon_EC_bound_formula_tag', pd.Series(dtype=str)).astype(str).eq('union_bound_over_blocks_universal_hash').sum()) if not merged.empty else 0}",
             f"cross_loss_positive_actual_rows: {positive_rows}",
-            "claim_boundary: correctness-side verification interface formalized; not strict Zhong 2015 or full Niu 2016.",
+            "claim_boundary: paper-grade reconciliation and correctness evidence; calibrated security shadow is not a composable HD-QKD key-rate proof.",
         ]
     )
     write_text(output_dir / "routeA_formal_cross_loss_summary.txt", "\n".join(lines))

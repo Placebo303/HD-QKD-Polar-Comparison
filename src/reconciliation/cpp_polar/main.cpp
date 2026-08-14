@@ -151,7 +151,8 @@ std::vector<uint8_t> decode_one_frame(
     const std::vector<int>& info_idx,
     const std::vector<uint8_t>& info_mask,
     const std::vector<uint8_t>* frozen_values,
-    int n_log
+    int n_log,
+    bool use_crc
 ) {
     std::vector<PathState> paths;
     paths.reserve(kListSize);
@@ -226,7 +227,7 @@ std::vector<uint8_t> decode_one_frame(
             const int idx = info_idx[static_cast<size_t>(t)];
             info_bits[static_cast<size_t>(t)] = path.inter_bits[static_cast<size_t>(n_log * N + idx)];
         }
-        if (check_crc16(info_bits) == 1) {
+        if (use_crc && check_crc16(info_bits) == 1) {
             if (path.pm < best_pm_crc) {
                 best_pm_crc = path.pm;
                 best_idx_crc = i;
@@ -234,7 +235,7 @@ std::vector<uint8_t> decode_one_frame(
         }
     }
 
-    const int final_idx = (best_idx_crc >= 0) ? best_idx_crc : best_idx_any;
+    const int final_idx = (use_crc && best_idx_crc >= 0) ? best_idx_crc : best_idx_any;
     std::vector<uint8_t> out(static_cast<size_t>(K), 0U);
     if (final_idx < 0) {
         return out;
@@ -292,7 +293,7 @@ EXPORT void decode_ca_scl_batch(
     for (int i = 0; i < frames; ++i) {
         const float* frame_llr = llrs + static_cast<size_t>(i) * static_cast<size_t>(n);
         uint8_t* frame_out = out_bits + static_cast<size_t>(i) * static_cast<size_t>(k);
-        const std::vector<uint8_t> dec = decode_one_frame(frame_llr, n, k, info_idx, info_mask, nullptr, n_log);
+        const std::vector<uint8_t> dec = decode_one_frame(frame_llr, n, k, info_idx, info_mask, nullptr, n_log, true);
         for (int t = 0; t < k; ++t) {
             frame_out[static_cast<size_t>(t)] = dec[static_cast<size_t>(t)] & 1U;
         }
@@ -344,7 +345,59 @@ EXPORT void decode_ca_scl_batch_frozen(
         for (int pos = 0; pos < n; ++pos) {
             frozen_row[static_cast<size_t>(pos)] = static_cast<uint8_t>(frame_frozen[static_cast<size_t>(pos)] & 1U);
         }
-        const std::vector<uint8_t> dec = decode_one_frame(frame_llr, n, k, info_idx, info_mask, &frozen_row, n_log);
+        const std::vector<uint8_t> dec = decode_one_frame(frame_llr, n, k, info_idx, info_mask, &frozen_row, n_log, true);
+        for (int t = 0; t < k; ++t) {
+            frame_out[static_cast<size_t>(t)] = dec[static_cast<size_t>(t)] & 1U;
+        }
+    }
+}
+
+EXPORT void decode_scl_batch_frozen_plain(
+    int n, int k, int frames,
+    const uint8_t* mask,
+    const uint8_t* frozen_values,
+    const float* llrs,
+    uint8_t* out_bits
+) {
+    if (n <= 0 || k <= 0 || frames <= 0 || mask == nullptr || frozen_values == nullptr || llrs == nullptr || out_bits == nullptr) {
+        return;
+    }
+    if (!is_power_of_two(n) || k > n) {
+        return;
+    }
+
+    const int n_log = static_cast<int>(std::round(std::log2(static_cast<double>(n))));
+    if (n_log < 0 || n_log > 30) {
+        return;
+    }
+    const uint64_t pow2 = (1ULL << static_cast<unsigned>(n_log));
+    if (pow2 != static_cast<uint64_t>(n)) {
+        return;
+    }
+
+    std::vector<uint8_t> info_mask(static_cast<size_t>(n), 0U);
+    std::vector<int> info_idx;
+    info_idx.reserve(static_cast<size_t>(k));
+    for (int pos = 0; pos < n; ++pos) {
+        const uint8_t v = static_cast<uint8_t>(mask[static_cast<size_t>(pos)] & 1U);
+        info_mask[static_cast<size_t>(pos)] = v;
+        if (v != 0U) {
+            info_idx.push_back(pos);
+        }
+    }
+    if (static_cast<int>(info_idx.size()) != k) {
+        return;
+    }
+
+    for (int i = 0; i < frames; ++i) {
+        const float* frame_llr = llrs + static_cast<size_t>(i) * static_cast<size_t>(n);
+        const uint8_t* frame_frozen = frozen_values + static_cast<size_t>(i) * static_cast<size_t>(n);
+        uint8_t* frame_out = out_bits + static_cast<size_t>(i) * static_cast<size_t>(k);
+        std::vector<uint8_t> frozen_row(static_cast<size_t>(n), 0U);
+        for (int pos = 0; pos < n; ++pos) {
+            frozen_row[static_cast<size_t>(pos)] = static_cast<uint8_t>(frame_frozen[static_cast<size_t>(pos)] & 1U);
+        }
+        const std::vector<uint8_t> dec = decode_one_frame(frame_llr, n, k, info_idx, info_mask, &frozen_row, n_log, false);
         for (int t = 0; t < k; ++t) {
             frame_out[static_cast<size_t>(t)] = dec[static_cast<size_t>(t)] & 1U;
         }
