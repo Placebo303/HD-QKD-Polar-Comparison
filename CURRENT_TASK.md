@@ -1,32 +1,36 @@
 # CURRENT_TASK.md
 
-## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: R3 FROZEN, E01 RUNNING (2026-08-14)
+## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: READY_FOR_FRESH_CONFIRMATION, C01 PENDING (2026-08-14)
 
 The change
 `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/` has
-frozen planning (P01-P08 accepted), a complete D stage (D05 = code /
-diagnosis_complete, independent review ACCEPT), and the R3 code-only
-candidate frozen by amendment. The E01 development screen (64 pre-registered
-bw200 frames, baseline + candidate once each) is executing.
+completed the full frozen route: P01-P08 accepted; D01-D03 + DT0-DT2; D04
+baseline probe (8/32 exact); D05 root-cause (code / diagnosis_complete,
+independent review ACCEPT); R3 code-only candidate `nbldpc_v13_r3_code_v1`
+(frozen by amendment; IT0-IT3, 49/49 tests); E01 screen **64/64** candidate
+exact (baseline 13/64); E02 (candidate already frozen); A01 retrospective
+audit **128/128** exact -> **run_state `ready_for_fresh_confirmation`**;
+A02 cross-stratum check bw120 **128/128** + bw180 **128/128** (no
+promotion). All production packages verified read-only; all results
+committed (ed4bb690 .. 5ef7984a + a02 commit).
 
-- R3 candidate `nbldpc_v13_r3_code_v1` (frozen): connected simple check
-  graph, seed 20260818, Tanner girth 8, rank 170, checks 168x3+2x4, all
-  variables degree 2; prior (QSC p=.20), decoder interface, checks, rate,
-  max_iter unchanged. Implementation + IT0-IT3 tests complete (46/46), commit
-  `2967f6d3`.
-- E01 pre-registration (frozen): 64 bw200 development frames [77..221]
-  (sorted rule, skip D04's 32), disjoint from D04 and the 128 audit frames.
-  Run id `v13_e01_20260814`; gate: candidate >=1/64 exact_correct + zero
-  forbidden failures; 0/64 -> `failed_existing_data_feasibility`.
-- NOT authorized / NOT run: E02 freeze decision, A01 (128-frame audit), A02,
-  C01 — all gated on the E01 outcome.
-
-Claim boundary: the highest V13 state is `ready_for_fresh_confirmation`; no
-decoder correction, qualification, or promotion is established.
+- Evidence packages (all under
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/`):
+  v13_d01_20260814, v13_d04_20260814, v13_d05_20260814_corrected (+
+  invalid-execution notice for the first emission), v13_e01_20260814,
+  v13_a01_20260814, v13_a02_20260814.
+- C01 (independent acceptance review + mandatory memory triage + user
+  decision on a fresh-acquisition change) is the only remaining item; the
+  independent acceptance review is running.
+- Claim boundary: `ready_for_fresh_confirmation` is the MAXIMUM V13 state;
+  it is NOT promotion/qualification/fresh correction. Fresh acquisition,
+  formal confirmation or qualification requires a NEW OpenSpec change and an
+  explicit user decision. V12 remains `source_partition_blocked` (archive is
+  a separate housekeeping decision).
 
 ---
 
-## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: D-STAGE COMPLETE THROUGH D05 (2026-08-14)
+## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: R3 FROZEN, E01 RUNNING (2026-08-14)
 
 Earlier 2026-08-14 state, superseded by the freeze review and D stage above.
 The new planning change

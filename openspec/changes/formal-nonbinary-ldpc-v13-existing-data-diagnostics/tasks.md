@@ -159,20 +159,26 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   tuning or candidate substitution. (Done: the candidate was already frozen
   by the R3 amendment before E01; no tuning, no substitution occurred.)
 
-## Phase A — retrospective audit and closeout (2026-08-14: A01 running)
+## Phase A — retrospective audit and closeout (2026-08-14: A01/A02 PASSED, C01 pending)
 
-- [ ] **V13-A01** Run the frozen candidate once on the 128 frame-identical V5
+- [x] **V13-A01** Run the frozen candidate once on the 128 frame-identical V5
   control/audit frames. Use the suggested readiness gate (>=120/128 exact,
   zero forbidden failures, median <=120 s/frame, disclosure <=8.75
   bits/input-symbol with tag separated). Failure is
   `retrospective_non_ready`; pass is only `ready_for_fresh_confirmation`.
-  (Running: run id `v13_a01_20260814`, candidate-only pre-registered, 128
-  frames.)
-- [ ] **V13-A02** Only after bw200 A01 passes, perform the pre-registered
-  read-only bw120/bw180 cross-stratum check; do not promote.
+  (Done 2026-08-14, run `v13_a01_20260814`: candidate exact-corrected
+  **128/128** (raw SER 0.039-0.113), zero forbidden failures, median 0.90
+  s/frame, disclosure 6.640625 <= 8.75; all readiness gates passed ->
+  run_state **`ready_for_fresh_confirmation`**; baseline pre-registered
+  candidate-only; strict read-only verifier PASS.)
+- [x] **V13-A02** Only after bw200 A01 passes, perform the pre-registered
+  read-only bw120/bw180 cross-stratum check; do not promote. (Done
+  2026-08-14, run `v13_a02_20260814`: bw120 128/128 and bw180 128/128
+  exact_correct, readiness gates met, `no_state_promotion`; verifier PASS.)
 - [ ] **V13-C01** Complete independent acceptance and mandatory memory triage;
   preserve all diagnostic failures and decide separately whether to open a
-  new fresh-acquisition/qualification change.
+  new fresh-acquisition/qualification change. (In progress: independent
+  read-only acceptance review running.)
 
 ## Diagnostic artifact contract
 

@@ -1960,4 +1960,32 @@ bits/symbol（170×10/256=6.640625 结构性满足）。通过 → 仅
 **Consequences**: A01 生产运行（`v13_a01_20260814`）已启动；其后是 A02
 （bw200 通过后预注册只读 bw120/bw180 跨层检查，不提升状态）与 C01
 （独立验收 + 记忆 triage + 用户决定 fresh acquisition）。64/64 与任何
-后续结果均不构成 promotion/qualification/fresh correction。`
+后续结果均不构成 promotion/qualification/fresh correction。
+
+---
+
+### 2026-08-14: V13-A01 通过（128/128）→ ready_for_fresh_confirmation；A02 通过
+
+**Decision**: A01 retrospective audit 生产执行一次（run_id
+`v13_a01_20260814`，128 个 frame-identical V5 confirmation 帧，candidate
+once）：R3 候选 **128/128 exact_correct**（raw SER 0.039–0.113），零
+forbidden，median 0.90 s/frame（门 ≤120），disclosure 6.640625（门
+≤8.75）。全部 readiness 门通过 → **run_state=`ready_for_fresh_confirmation`**
+（V13 冻结计划允许的最高声明状态）。严格只读 verifier PASS。
+
+A02 cross-stratum check 生产执行一次（run_id `v13_a02_20260814`）：
+bw120 128/128、bw180 128/128 exact_correct，readiness gate 均满足；
+`no_state_promotion=true`（只读检查，不改变 bw200 状态）；verifier PASS。
+
+**Context**: E01（64/64）+ A01（128/128）+ A02（256/256）在同一冻结候选
+（连通 girth-8 图 + QSC p=.20 先验 + flooding FFT-QSPA）上的全绿结果与
+D05 `code` 诊断闭环：图的连通性/girth 是此前 24/32 失败的根因，替换后
+在相同先验/解码器下全部精确纠错。补充观测：candidate 帧耗时 median
+~0.9–1.0 s（远低于 120 s 门）；全部帧 syndrome_consistent + post-decode
+exact equality。
+
+**Consequences**: V13 的 existing-data 诊断路线达到终态
+`ready_for_fresh_confirmation`。**不构成** promotion/qualification/fresh
+correction（身份仍为历史复用）。下一步由用户决定：是否另开 OpenSpec
+change 做 fresh acquisition（新帧身份）以把该候选提升为 fresh canary/
+confirmation/qualification。C01（独立验收 + 记忆 triage）进行中。`

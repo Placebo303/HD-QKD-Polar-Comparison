@@ -1846,3 +1846,31 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   freeze review + main-thread approval; highest state remains
   `ready_for_fresh_confirmation`; promoted/qualified/observed_fresh_correction
   forbidden. [decision]
+
+## 47. Nonbinary LDPC V13 — R3 候选 E01/A01/A02 全绿 → ready_for_fresh_confirmation (2026-08-14)
+
+- R3 code-only candidate `nbldpc_v13_r3_code_v1`（amendment 冻结）：连通
+  简单 check 图（170 校验节点、256 全 degree-2 变量、校验度 168x3+2x4、
+  无平行边、check-girth 4/Tanner girth 8、rank 170），确定性种子搜索冻结
+  seed=20260818；prior（QSC p=.20）、decoder 接口（flooding FFT-QSPA 镜像
+  循环）、校验数/rate/max_iter 全不变。实现 `nonbinary_v13_r3_candidate.py`
+  + `run_e01`/`run_a01`/`run_a02` + CLI + verify 分支；测试 49/49（含 IT0-
+  IT3 与 A01/A02 fake 生命周期）。[repo-observed]
+- **E01**（v13_e01_20260814，64 个预注册 bw200 development 帧）：
+  candidate **64/64 exact_correct**，baseline（unchanged R1A）13/64，零
+  forbidden；门通过。**A01**（v13_a01_20260814，128 个 frame-identical V5
+  audit 帧，candidate-only 预注册）：**128/128 exact_correct**（raw SER
+  0.039–0.113），median 0.90 s/frame，disclosure 6.640625 ≤ 8.75 → 门全过
+  → **run_state=`ready_for_fresh_confirmation`**（V13 最高状态）。
+  **A02**（v13_a02_20260814，bw120+bw180 各 128 audit 帧）：128/128 与
+  128/128，readiness gate 满足，no_state_promotion=true。六个生产包全部
+  只读 verifier PASS、git 提交。闭环：与 D05 `code` 诊断一致——图连通性/
+  girth 是根因，替换后同先验下全部精确纠错。[repo-observed]
+- 科学边界：ready_for_fresh_confirmation 不是 promotion/qualification/
+  fresh correction；fresh acquisition 需用户另开 OpenSpec change。V13
+  C01（独立验收 + 记忆 triage）进行中；V12 仍 source_partition_blocked。
+  [decision]
+- 可复用经验：E01/A01 候选帧解码 median ~0.9–1.0 s/帧（q=1024 flooding，
+  大多帧 1–2 轮收敛）；一次 E01 全屏（64 帧×2 解码）约 20–40 分钟，A01
+  （128 帧）约 5–10 分钟——远比最坏 100 迭代估计快，因为收敛帧占多数。
+  [repo-observed]
