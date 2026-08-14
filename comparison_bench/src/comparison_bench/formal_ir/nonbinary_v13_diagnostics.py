@@ -40,6 +40,7 @@ import json
 import math
 import platform
 import subprocess
+import time
 import uuid
 from collections import Counter, deque
 from functools import lru_cache
@@ -492,6 +493,22 @@ def load_production_development_frames(rows: Any) -> list[dict[str, Any]]:
                                                     "frame_id": row["frame_id"]})
         frames.append({"frame_id": int(row["frame_id"]), "stratum": row["stratum"],
                        "role": "development",
+                       "frame_identity": row["frame_identity"],
+                       "alice": alice, "bob": bob})
+    return frames
+
+
+def load_production_audit_frames(rows: Any) -> list[dict[str, Any]]:
+    """Load the A01 audit-role frame arrays from the real 10 dB sidecars
+    (same lazy adapter boundary as the other production frame loaders)."""
+    from . import ldpc_v4_10db_source as source  # real source loader: execute-only
+    lock = source.build_source_lock()
+    frames: list[dict[str, Any]] = []
+    for row in rows:
+        alice, bob = source.arrays_for_frame(lock, {"stratum": row["stratum"],
+                                                    "frame_id": row["frame_id"]})
+        frames.append({"frame_id": int(row["frame_id"]), "stratum": row["stratum"],
+                       "role": "retrospective_audit",
                        "frame_identity": row["frame_identity"],
                        "alice": alice, "bob": bob})
     return frames
@@ -2004,7 +2021,8 @@ def pre_registered_e01_frames(ledger: Any, *, stratum: str = PRIMARY_STRATUM,
 
 
 def _e01_outcome(frame: Mapping[str, Any], result: Mapping[str, Any],
-                 raw_ser: float, *, phase: str, method: str) -> dict[str, Any]:
+                 raw_ser: float, *, phase: str, method: str,
+                 role: str = "development") -> dict[str, Any]:
     if result.get("status") == "syndrome_consistent":
         decoded = tuple(int(v) for v in result.get("decoded_symbols", ()))
         alice = tuple(int(v) for v in frame["alice"])
@@ -2013,7 +2031,7 @@ def _e01_outcome(frame: Mapping[str, Any], result: Mapping[str, Any],
         reason = str(result.get("reason", "no_decoded_word"))
     return {"phase": phase, "method": method,
             "frame_id": int(frame["frame_id"]), "stratum": PRIMARY_STRATUM,
-            "role": "development", "status": str(result.get("status", "unclassified")),
+            "role": role, "status": str(result.get("status", "unclassified")),
             "reason": reason, "raw_ser": raw_ser,
             "iterations": int(result.get("iterations", 0)),
             "notes": "hook_equivalence=ok"}
@@ -2184,7 +2202,174 @@ def run_e01(output_dir: Any, *, run_id: str | None = None, discovery_root: Any =
         raise
 
 
-# ------------------------------------------------------------------ read-only verify
+# ------------------------------------------------------------------ A01 retrospective audit
+
+_A01_AUTHORIZATION = {"d04_authorized": True, "d05_authorized": True,
+                      "r3_authorized": True, "real_decode_authorized": True,
+                      "phase": "V13-A01 retrospective audit"}
+A01_COUNT = 128
+A01_MIN_EXACT = 120
+A01_MAX_MEDIAN_SECONDS = 120.0
+A01_MAX_DISCLOSURE_BITS = 8.75
+
+
+def pre_registered_a01_frames(ledger: Any, *, stratum: str = PRIMARY_STRATUM) -> list[dict[str, Any]]:
+    """A01 pre-registration (frozen): the 128 sealed frame-identical V5
+    confirmation-role frames of the primary stratum (partition ranks 0..127)."""
+    validate_role_ledger(ledger)
+    if ledger["ledger_state"] != "ready":
+        raise ValueError("ledger not ready")
+    rows = [dict(r) for r in ledger["rows"]
+            if r["role"] == "retrospective_audit" and r["stratum"] == stratum]
+    if len(rows) != A01_COUNT:
+        raise ValueError(f"audit rows {len(rows)} != {A01_COUNT}")
+    return sorted(rows, key=lambda r: (int(r["frame_id"]), str(r["frame_identity"])))
+
+
+def run_a01(output_dir: Any, *, run_id: str | None = None, discovery_root: Any = None,
+            ledger: Any = None, frames: Any = None, candidate_decode: Any = None,
+            p: float = P, max_iter: int = MAX_ITER, command: str = "",
+            _test_only: bool = False, production_authorized: bool = False) -> dict[str, Any]:
+    """Execute the frozen A01 retrospective audit: the sole R3 candidate once
+    on each of the 128 pre-registered frame-identical V5 audit frames (the
+    baseline is NOT run on audit frames — pre-registered candidate-only).
+
+    Readiness gates (tasks.md V13-A01): >=120/128 verified exact corrections,
+    zero forbidden failures, median <=120 s/frame, disclosure <=8.75
+    bits/input-symbol (170 checks x 10 bits / 256 = 6.640625 by construction).
+    Pass => ``run_state=ready_for_fresh_confirmation`` (the terminal V13
+    claim); failure => ``retrospective_non_ready``.  All failures retained.
+    """
+    if not _test_only and not production_authorized:
+        raise ValueError("V13 production A01 retrospective audit is not "
+                         "authorized; the main thread must pass "
+                         "--authorized --production")
+    if run_id is None:
+        run_id = f"v13_a01_{uuid.uuid4().hex[:8]}"
+    out = Path(output_dir).resolve()
+    if out.exists():
+        raise FileExistsError("fresh additive output root required")
+    out.mkdir(parents=True)
+    oracle = run_engineering_oracle()
+    try:
+        if oracle["status"] != "ok":
+            return _write_package(out, run_id=run_id,
+                                  run_state="implementation_interface_fault",
+                                  test_only=_test_only, oracle=oracle, ledger=None,
+                                  channel=None, outcome_rows=[], telemetry_records=None,
+                                  characterization=None, command=command,
+                                  stages_completed=("A01",),
+                                  authorization=dict(_A01_AUTHORIZATION),
+                                  report_note="D02 engineering oracle failed "
+                                              "before the A01 audit.")
+        if ledger is None:
+            if discovery_root is None:
+                raise ValueError("discovery root required for production lane")
+            ledger = build_production_ledger(discovery_root, run_id=run_id)
+        validate_role_ledger(ledger)
+        if ledger["ledger_state"] != "ready":
+            return _write_package(out, run_id=run_id,
+                                  run_state="blocked_role_ledger",
+                                  test_only=_test_only, oracle=oracle, ledger=ledger,
+                                  channel=None, outcome_rows=[], telemetry_records=None,
+                                  characterization=None, command=command,
+                                  stages_completed=("A01",),
+                                  authorization=dict(_A01_AUTHORIZATION),
+                                  report_note="ambiguous role ledger froze the "
+                                              "A01 audit before any decode.")
+        rows = pre_registered_a01_frames(ledger, stratum=PRIMARY_STRATUM)
+        if frames is None:
+            frames = load_production_audit_frames(rows)
+        if not isinstance(frames, (list, tuple)) or len(frames) != len(rows):
+            raise ValueError("pre-registered frame list mismatch")
+        from . import nonbinary_v13_r3_candidate as r3  # execute-only import
+        c_manifest, c_matrix = r3.build_r3_codebook()
+        if candidate_decode is None:
+            candidate_decode = lambda bob, syndrome: r3.decode_r3_frame(
+                bob, syndrome, c_manifest, c_matrix, check_count=M, p=p,
+                max_iter=max_iter, hook=True)
+        field = GF2mField.create(Q)
+        outcome_rows: list[dict[str, Any]] = []
+        telemetry_records: list[dict[str, Any]] = []
+        exact = 0
+        forbidden = 0
+        wall_times: list[float] = []
+        for row, frame in zip(rows, frames):
+            if int(frame["frame_id"]) != int(row["frame_id"]):
+                raise ValueError("frame order does not match pre-registration")
+            try:
+                alice = np.asarray(frame["alice"], dtype=np.int64)
+                raw_ser = float(frame_symbol_error_rate(frame["alice"], frame["bob"]))
+                syndrome = nonbinary_syndrome(c_matrix, alice, field)
+                start = time.perf_counter()
+                c_out = candidate_decode(frame["bob"], syndrome)
+                wall_times.append(time.perf_counter() - start)
+            except Exception as exc:
+                return _write_package(out, run_id=run_id,
+                                      run_state="invalid_diagnostic_execution",
+                                      test_only=_test_only, oracle=oracle, ledger=ledger,
+                                      channel=None, outcome_rows=outcome_rows,
+                                      telemetry_records=telemetry_records,
+                                      characterization=None, command=command,
+                                      stages_completed=("A01",),
+                                      authorization=dict(_A01_AUTHORIZATION),
+                                      report_note=f"decoder exception on frame "
+                                                  f"{frame['frame_id']} "
+                                                  f"({type(exc).__name__}: {exc}); "
+                                                  "audit frozen with retained rows.")
+            result = c_out["result"]
+            outcome_rows.append(_e01_outcome(frame, result, raw_ser,
+                                             phase="retrospective_audit",
+                                             method=R3_METHOD_ID,
+                                             role="retrospective_audit"))
+            if outcome_rows[-1]["reason"] == "exact_correct":
+                exact += 1
+            if result.get("status") not in ("syndrome_consistent", "decode_failed",
+                                            "decoder_error"):
+                forbidden += 1
+            if c_out.get("telemetry") is not None:
+                telemetry_records.append(
+                    {"schema": TELEMETRY_SCHEMA_TEST if _test_only
+                     else TELEMETRY_SCHEMA, "run_id": run_id,
+                     "frame_id": int(frame["frame_id"]),
+                     "phase": "retrospective_audit", "method": R3_METHOD_ID,
+                     "status": str(result.get("status")),
+                     "iterations": int(result.get("iterations", 0)),
+                     "telemetry": c_out["telemetry"]})
+        median_seconds = float(np.median(wall_times)) if wall_times else None
+        disclosure = M * 10 / N
+        gate_passed = exact >= A01_MIN_EXACT and forbidden == 0 \
+            and median_seconds is not None and median_seconds <= A01_MAX_MEDIAN_SECONDS \
+            and disclosure <= A01_MAX_DISCLOSURE_BITS
+        run_state = "ready_for_fresh_confirmation" if gate_passed \
+            else "retrospective_non_ready"
+        a01_gate = {"frames": len(frames),
+                    "pre_registered_frame_ids": [int(r["frame_id"]) for r in rows],
+                    "candidate_exact_correct": exact,
+                    "forbidden_failures": forbidden,
+                    "median_seconds_per_frame": median_seconds,
+                    "max_seconds_per_frame": float(max(wall_times))
+                    if wall_times else None,
+                    "disclosure_bits_per_symbol": disclosure,
+                    "gate_passed": gate_passed,
+                    "gate": ">=120/128 exact, zero forbidden, median <=120 "
+                            "s/frame, disclosure <=8.75 bits/symbol",
+                    "baseline_not_run": "pre-registered candidate-only"}
+        return _write_package(out, run_id=run_id, run_state=run_state,
+                              test_only=_test_only, oracle=oracle, ledger=ledger,
+                              channel=None, outcome_rows=outcome_rows,
+                              telemetry_records=telemetry_records,
+                              characterization=None, command=command,
+                              stages_completed=("A01",),
+                              authorization=dict(_A01_AUTHORIZATION),
+                              extra_manifest={"a01_gate": a01_gate},
+                              report_note="A01 retrospective audit completed "
+                                          "once; cross-stratum A02 check and "
+                                          "closeout follow the gate.")
+    except Exception:
+        if out.exists() and not any(out.iterdir()):
+            out.rmdir()
+        raise
 
 def _verify_telemetry_file(path: Path) -> dict[str, Any]:
     raw = path.read_bytes()
@@ -2348,6 +2533,43 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
                 raise ValueError("E01 outcome phases")
             if not _test_schema(manifest) and e01_gate.get("frames") != E01_COUNT:
                 raise ValueError("manifest E01 frame count")
+    elif stages == ("A01",):
+        # A01 retrospective audit package: candidate-only rows on the 128
+        # frame-identical audit frames; the terminal run_state is
+        # ready_for_fresh_confirmation only when every readiness gate passes.
+        if authorization.get("real_decode_authorized") is not True \
+                or authorization.get("d04_authorized") is not True \
+                or authorization.get("d05_authorized") is not True \
+                or authorization.get("r3_authorized") is not True:
+            raise ValueError("manifest A01 authorization")
+        if not str(authorization.get("phase", "")).startswith("V13-A01"):
+            raise ValueError("manifest A01 phase")
+        if run_state not in ("ready_for_fresh_confirmation",
+                             "retrospective_non_ready",
+                             "implementation_interface_fault",
+                             "blocked_role_ledger", "invalid_diagnostic_execution"):
+            raise ValueError("manifest A01 run state")
+        if channel.get("characterization_performed"):
+            raise ValueError("A01 package must not carry characterization")
+        if report.get("d05_emitted", False) or report.get("diagnosis_concluded", False):
+            raise ValueError("report must not carry a D05 conclusion")
+        a01_gate = manifest.get("a01_gate")
+        if not isinstance(a01_gate, Mapping):
+            raise ValueError("manifest A01 gate")
+        if run_state in ("implementation_interface_fault", "blocked_role_ledger"):
+            if outcomes["rows"] != 0 or telemetry["records"] != 0:
+                raise ValueError("manifest A01 failure package")
+        else:
+            if a01_gate.get("gate_passed") != (run_state == "ready_for_fresh_confirmation") \
+                    or a01_gate.get("frames") != outcomes["rows"] \
+                    or a01_gate.get("disclosure_bits_per_symbol") != M * 10 / N:
+                raise ValueError("manifest A01 gate fields")
+            rows_out = list(csv.DictReader(
+                StringIO((out / "diagnostic_outcomes.csv").read_text("utf-8"), newline="")))
+            if any(row.get("phase") != "retrospective_audit" for row in rows_out):
+                raise ValueError("A01 outcome phase")
+            if not _test_schema(manifest) and a01_gate.get("frames") != A01_COUNT:
+                raise ValueError("manifest A01 frame count")
     elif stages == _D05_STAGES:
         # Full D05 package: corrected channel aggregates + the D04 baseline
         # rows + the root-cause conclusion (real decode already authorized by
@@ -2452,7 +2674,7 @@ def v13_d04_d05_guard(action: str, authorized: bool) -> None:
     :func:`run_d04`, :func:`run_d05` and :func:`run_e01` (the CLI additionally
     requires ``--production``).  The test lane never uses this guard: it calls
     the module API directly with ``_test_only=True`` and fake inputs."""
-    if action not in ("d04", "d05", "e01"):
+    if action not in ("d04", "d05", "e01", "a01"):
         raise ValueError(f"unknown guard action: {action}")
     if not authorized:
         raise SystemExit(2)

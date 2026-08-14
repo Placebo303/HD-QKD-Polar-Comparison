@@ -873,11 +873,12 @@ def _r3():
     return r3
 
 
-def _fake_ledger_r3(*, per_stratum: int = 104, n_dev: int = 100) -> dict:
+def _fake_ledger_r3(*, per_stratum: int = 104, n_dev: int = 100,
+                    n_conf: int = 2) -> dict:
     """Fake ledger with >=96 development rows per stratum (D04 32 + E01 64);
-    pool size == transfer 2 + confirmation 2 + development n_dev."""
+    pool size == transfer 2 + confirmation n_conf + development n_dev."""
     pool = _fake_identity_rows(per_stratum=per_stratum)
-    transfer, partition = _fake_roles(pool, n_transfer=2, n_conf=2, n_dev=n_dev)
+    transfer, partition = _fake_roles(pool, n_transfer=2, n_conf=n_conf, n_dev=n_dev)
     return core.build_role_ledger(pool, transfer, partition,
                                   schema=core.LEDGER_SCHEMA_TEST,
                                   run_id="fake_v13_r3_test",
@@ -1102,3 +1103,74 @@ def test_it3_official_root_and_frozen_dirs_hygiene():
                           "src", "experiments", "tools", "results"],
                          capture_output=True, text=True, cwd=repo)
     assert out.returncode == 0 and out.stdout.strip() == ""
+
+
+# ------------------------------------------------------------------ A01 retrospective audit lane
+
+def _fake_audit_frames(ledger: dict, *, seed: int = 20260821,
+                       clean_first: int = 120) -> list[dict]:
+    rows = core.pre_registered_a01_frames(ledger)
+    rng = np.random.default_rng(seed)
+    frames = []
+    for index, row in enumerate(rows):
+        alice = rng.integers(0, core.Q, size=core.N)
+        bob = alice.copy()
+        if index >= clean_first:
+            positions = rng.choice(core.N, size=20, replace=False)
+            bob[positions] = rng.integers(0, core.Q, size=20)
+        frames.append({"frame_id": int(row["frame_id"]),
+                       "stratum": row["stratum"],
+                       "role": "retrospective_audit",
+                       "frame_identity": row["frame_identity"],
+                       "alice": alice, "bob": bob})
+    return frames
+
+
+def test_a01_pre_registration_128_disjoint():
+    ledger = _fake_ledger_r3(per_stratum=230, n_dev=100, n_conf=128)
+    first = core.pre_registered_a01_frames(ledger)
+    second = core.pre_registered_a01_frames(ledger)
+    assert len(first) == 128
+    assert [r["frame_id"] for r in first] == [r["frame_id"] for r in second]
+    assert all(r["role"] == "retrospective_audit" for r in first)
+    dev_ids = {r["frame_id"] for r in ledger["rows"]
+               if r["role"] == "development"}
+    assert not ({r["frame_id"] for r in first} & dev_ids)
+    with pytest.raises(ValueError, match="audit rows"):
+        core.pre_registered_a01_frames(_fake_ledger_r3())
+
+
+def test_a01_fake_lifecycle_gate_pass_and_fail():
+    # pass case: 120/128 noiseless -> candidate exact 120 -> gate passed
+    ledger = _fake_ledger_r3(per_stratum=230, n_dev=100, n_conf=128)
+    frames = _fake_audit_frames(ledger, clean_first=120)
+    root = _out("t_a01_pass")
+    run_dir = root / "package"
+    result = core.run_a01(run_dir, run_id="fake_v13_a01", ledger=ledger,
+                          frames=frames, candidate_decode=_fake_candidate_decode,
+                          _test_only=True, command="pytest A01")
+    assert result["run_state"] == "ready_for_fresh_confirmation"
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    assert verified["run_state"] == "ready_for_fresh_confirmation"
+    manifest = json.loads((run_dir / "diagnostic_run_manifest.json").read_bytes())
+    gate = manifest["a01_gate"]
+    assert gate["candidate_exact_correct"] == 120
+    assert gate["gate_passed"] is True
+    assert gate["disclosure_bits_per_symbol"] == 170 * 10 / 256
+    outcome = list(csv.DictReader(
+        (run_dir / "diagnostic_outcomes.csv").read_text("utf-8").splitlines()))
+    assert len(outcome) == 128
+    assert all(row["phase"] == "retrospective_audit" for row in outcome)
+    assert all(row["role"] == "retrospective_audit" for row in outcome)
+    # fail case: 119/128 -> retrospective_non_ready
+    frames_fail = _fake_audit_frames(ledger, clean_first=119, seed=99)
+    root_f = _out("t_a01_fail")
+    run_dir_f = root_f / "package"
+    result_f = core.run_a01(run_dir_f, run_id="fake_v13_a01_f", ledger=ledger,
+                            frames=frames_fail, candidate_decode=_fake_candidate_decode,
+                            _test_only=True, command="pytest A01")
+    assert result_f["run_state"] == "retrospective_non_ready"
+    verified_f = core.verify_package(run_dir_f, _private_test_only=True)
+    assert verified_f["verified"] is True
+    assert verified_f["run_state"] == "retrospective_non_ready"

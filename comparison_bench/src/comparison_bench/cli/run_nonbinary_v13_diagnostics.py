@@ -39,7 +39,7 @@ def main() -> int:
         description="V13 nonbinary LDPC existing-data diagnostics "
                     "(ledger / D01 characterize / D04 probe / D05 report)")
     parser.add_argument("action", nargs="?", default="ledger",
-                        choices=("ledger", "characterize", "d04", "d05", "e01"))
+                        choices=("ledger", "characterize", "d04", "d05", "e01", "a01"))
     parser.add_argument("--output", default=None,
                         help="fresh additive output root (required for ledger/characterize/d04/d05)")
     parser.add_argument("--run-id", default=None,
@@ -62,6 +62,35 @@ def main() -> int:
     formal_ir_root = Path(args.formal_ir_root) if args.formal_ir_root \
         else root / "comparison_bench/outputs_comparison/formal_ir_methods"
 
+    if args.action == "a01":
+        try:
+            core.v13_d04_d05_guard("a01", args.authorized)
+        except SystemExit:
+            print("V13-A01 retrospective audit requires the explicit --authorized "
+                  "flag (main-thread authorization)", file=sys.stderr)
+            return 2
+        if args.output is None:
+            print("--output DIR is required", file=sys.stderr)
+            return 2
+        if not args.production:
+            print("production A01 audit requires the explicit --production flag",
+                  file=sys.stderr)
+            return 2
+        out = Path(args.output)
+        if out.exists():
+            print("fresh additive output root required", file=sys.stderr)
+            return 2
+        run_id = args.run_id or f"v13_a01_{uuid.uuid4().hex[:8]}"
+        try:
+            result = core.run_a01(out, run_id=run_id,
+                                  discovery_root=formal_ir_root,
+                                  production_authorized=True,
+                                  command=" ".join(sys.argv))
+        except Exception as exc:
+            print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(result, sort_keys=True))
+        return 0
     if args.action == "e01":
         try:
             core.v13_d04_d05_guard("e01", args.authorized)
