@@ -6,7 +6,20 @@ from pathlib import Path
 
 import pandas as pd
 
-from _security_round_common import REPO_ROOT, ensure_output_dir, write_summary
+try:
+    from ._security_round_common import REPO_ROOT, ensure_output_dir, write_summary
+except ImportError:
+    from _security_round_common import REPO_ROOT, ensure_output_dir, write_summary
+
+
+def apply_reconciled_main_mapping(merged: pd.DataFrame) -> pd.DataFrame:
+    """Point the public main columns at reconciled net, never secure shadow."""
+    merged = merged.copy()
+    merged["PIE_main"] = pd.to_numeric(merged["PIE_reconciled_net"], errors="coerce")
+    merged["SKR_main_bps"] = pd.to_numeric(merged["SKR_reconciled_net_bps"], errors="coerce")
+    merged["main_result_source"] = "actual_ir_reconciled_net_not_secure"
+    merged["main_result_claim"] = "public_ec_only_reconciled_net_not_secret_key_rate"
+    return merged
 
 
 def main() -> int:
@@ -39,9 +52,16 @@ def main() -> int:
         how="left",
         suffixes=("", "_perf"),
     )
-    merged["PIE_main"] = pd.to_numeric(merged["PIE_secure_actual_ir"], errors="coerce")
-    merged["SKR_main_bps"] = pd.to_numeric(merged["SKR_secure_actual_ir_bps"], errors="coerce")
-    merged["main_result_source"] = "actual_ir_finite_key"
+    # Keep the finite-key audit's reconciled columns available even when an
+    # older actual table is supplied; such rows remain blocked/NaN.
+    for col in (
+        "PIE_reconciled_net", "SKR_reconciled_net_bps", "reconciliation_evidence_status",
+        "reconciliation_evidence_source", "claim_boundary", "legacy_secure_result_status",
+        "legacy_secure_result_role",
+    ):
+        if col not in merged.columns:
+            merged[col] = pd.NA
+    merged = apply_reconciled_main_mapping(merged)
     merged["performance_proxy_role"] = "diagnostic_only"
     front_cols = [
         "loss_db",
@@ -50,36 +70,44 @@ def main() -> int:
         "PIE_main",
         "SKR_main_bps",
         "main_result_source",
+        "main_result_claim",
         "PIE_secure_actual_ir",
         "SKR_secure_actual_ir_bps",
+        "PIE_reconciled_net",
+        "SKR_reconciled_net_bps",
+        "reconciliation_evidence_status",
+        "reconciliation_evidence_source",
+        "claim_boundary",
+        "legacy_secure_result_status",
+        "legacy_secure_result_role",
     ]
     rest_cols = [c for c in merged.columns if c not in front_cols]
     merged = merged[[*front_cols, *rest_cols]]
     merged.to_csv(output_dir / "round2_security_master_table.csv", index=False)
 
-    beta_minus_actual = pd.to_numeric(merged["PIE_secure_beta_baseline"], errors="coerce") - pd.to_numeric(merged["PIE_secure_actual_ir"], errors="coerce")
-    perf_minus_actual = pd.to_numeric(merged["PIE_practical"], errors="coerce") - pd.to_numeric(merged["PIE_secure_actual_ir"], errors="coerce")
+    beta_minus_main = pd.to_numeric(merged["PIE_secure_beta_baseline"], errors="coerce") - pd.to_numeric(merged["PIE_main"], errors="coerce")
+    perf_minus_main = pd.to_numeric(merged["PIE_practical"], errors="coerce") - pd.to_numeric(merged["PIE_main"], errors="coerce")
     best_rows = []
     for loss_db, grp in merged.groupby("loss_db"):
         perf_best = grp.loc[pd.to_numeric(grp["SKR_measured_bps"], errors="coerce").idxmax()]
-        actual_best = grp.loc[pd.to_numeric(grp["SKR_secure_actual_ir_bps"], errors="coerce").idxmax()]
-        best_rows.append(f"- loss={int(loss_db)} performance_best=(d={int(perf_best['dimension'])},bw={int(perf_best['bin_width_ps'])}) actual_ir_best=(d={int(actual_best['dimension'])},bw={int(actual_best['bin_width_ps'])})")
+        main_best = grp.loc[pd.to_numeric(grp["SKR_main_bps"], errors="coerce").idxmax()]
+        best_rows.append(f"- loss={int(loss_db)} performance_best=(d={int(perf_best['dimension'])},bw={int(perf_best['bin_width_ps'])}) reconciled_main_best=(d={int(main_best['dimension'])},bw={int(main_best['bin_width_ps'])})")
 
     lines = [
         f"point_count: {len(merged)}",
         f"1. actual_leak_rows: {int(merged['leak_EC_source_tag'].astype(str).str.startswith('actual_ir_replay').sum())}",
         "2. DeltaFK_explicit_inputs: n_pairs_actual, layer_fraction, accepted_frame_fraction, block_success_rate_used, eps_sec, eps_cor",
-        "3. post-selection sensitivity region: higher-bw / lower-clean-fraction points move most because post_selection_correction follows accepted_frame_fraction",
-        f"4. mean_PIE_drop_actual_vs_performance: {perf_minus_actual.mean()}",
-        f"5. beta_baseline_more_optimistic_rows: {int((beta_minus_actual > 0).sum())}; more_conservative_rows: {int((beta_minus_actual < 0).sum())}",
+        "3. post_selection_correction is a known dimensional-inconsistency column (docs/decision-log.md 2026-08-14); it only feeds blocked/diagnostic columns and must not be read as a sensitivity driver",
+        f"4. mean_PIE_gap_performance_minus_reconciled: {perf_minus_main.mean()}",
+        f"5. beta_baseline_above_reconciled_rows: {int((beta_minus_main > 0).sum())}; below_rows: {int((beta_minus_main < 0).sum())}",
         f"5b. formal_epsilon_bound_rows: {int(merged['eps_cor_budget_rule'].astype(str).eq('verification_only_shadow').sum()) if 'eps_cor_budget_rule' in merged.columns else 0}",
         "6. best_point_shift_by_loss:",
         *best_rows,
-        f"7. positive_actual_secure_rows: {int((pd.to_numeric(merged['SKR_secure_actual_ir_bps'], errors='coerce') > 0).sum())}",
+        f"7. positive_reconciled_rows: {int((pd.to_numeric(merged['SKR_main_bps'], errors='coerce') > 0).sum())}",
         f"8. surrogate_sensitive_rows: {int(merged['leak_EC_source_tag'].astype(str).str.startswith('surrogate').sum())}",
-        "PRIMARY_REPORTING_MODE = actual_ir_finite_key",
+        "PRIMARY_REPORTING_MODE = actual_ir_reconciled_net_not_secure",
         "DEFAULT_MAIN_COLUMNS = PIE_main, SKR_main_bps",
-        "MAIN_COLUMNS_SOURCE = PIE_secure_actual_ir, SKR_secure_actual_ir_bps",
+        "MAIN_COLUMNS_SOURCE = PIE_reconciled_net, SKR_reconciled_net_bps",
         "PERFORMANCE_PROXY_ROLE = diagnostic_only",
         "BETA_BASELINE_ROLE = comparison_only",
         "NIU_2016_STATUS = not_supported_by_current_observables",
