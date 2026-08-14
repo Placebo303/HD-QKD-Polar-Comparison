@@ -1,6 +1,26 @@
 # CURRENT_TASK.md
 
-## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: COMPLETE (2026-08-14)
+## Current Task — V14 效率可行性门：FAIL（效率路线冻结）；V15/V16 不立项 (2026-08-15)
+
+V14 gate（`openspec/changes/formal-nonbinary-ldpc-v14-efficiency-gate/`）
+按冻结计划完成：Stage 0 机制回归 PASS、Stage 1 折叠验证全绿、Stage 2
+的 12 个 q=1024 冻结点（3 λ × m∈{15,16,17,18}）**全部非收敛**（最终
+base-q 熵 0.288–0.357，阈值 0.01 的 29–36 倍）→ **gate_state=fail**。
+E02 独立 gate review ACCEPT（FAIL 机械正确、纪律干净）。严格回放在途。
+
+- 结论：冻结的普通不规则系综在 rate 0.93–0.94（f≤1.3 区间）上无 BP
+  收敛点——效率路线按 V14 冻结纪律**终止**；V15/V16 提案/设计骨架
+  保留为"门未过、不立项"。
+- 路线状态：V13 R3（f≈12.1）仍是唯一经验证的精确纠错器；
+  fresh-confirmation-only 路线不受影响（待用户决定新采集）。
+- 待用户决定：效率路线的下一步方向（新 change + 新 DE 门先行）——
+  ① 非二元 SC-LDPC（阈值饱和）；② Cohen 2019 位面分解；③ 多边/高
+  维 λ 族；或接受冻结。另：V12 archive 决定、fresh acquisition 决定。
+- 下一项在途工作：V14 strict replay 完成 → 提交回放证据 → C01 完毕。
+
+---
+
+## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: COMPLETE (2026-08-14)
 
 The change
 `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/` has
