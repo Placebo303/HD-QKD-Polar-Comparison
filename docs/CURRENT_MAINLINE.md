@@ -2,13 +2,14 @@
 
 ## Reporting Rule
 
-The default reporting line is Route A actual-IR finite-key:
+The default reporting line is the Route A actual-IR reconciled net (public-EC-only, not a secret-key rate):
 
 - `PIE_main`
 - `SKR_main_bps`
-- `main_result_source=actual_ir_finite_key`
+- `main_result_source=actual_ir_reconciled_net_not_secure`
+- `claim_boundary=public_ec_only_not_secure`
 
-`PIE_practical`, `SKR_measured_bps`, shadow-only outputs, and estimate-only outputs are diagnostics.
+`PIE_practical`, `SKR_measured_bps`, shadow-only outputs, and estimate-only outputs are diagnostics. Legacy `PIE_secure_actual_ir` / `SKR_secure_actual_ir_bps` are blocked from scientific reporting (see `docs/decision-log.md` 2026-08-14).
 
 ## Recommended Entrypoints
 

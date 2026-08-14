@@ -98,8 +98,8 @@ finite_key_correction: 0.12 bits
 
 ### Interpretation
 
-- **PIE_secure_actual_ir**: Secure PIE after all corrections
-- **SKR_secure_actual_ir_bps**: Secure key rate in bits per second
+- **PIE_secure_actual_ir**: Legacy calibrated shadow — BLOCKED for scientific reporting (`scientifically_blocked_dimensional_inconsistency`, `diagnostic_only`; see `docs/decision-log.md` 2026-08-14). It is not a secure PIE.
+- **SKR_secure_actual_ir_bps**: Legacy calibrated shadow — BLOCKED, diagnostic only. It is not a secure key rate. The current main metric is `PIE_main` / `SKR_main_bps` = `PIE_reconciled_net` / `SKR_reconciled_net_bps` (public-EC-only net shared bits, `claim_boundary=public_ec_only_not_secure`).
 - **QBER_actual_ir**: Actual quantum bit error rate
 - **epsilon_EC_bound**: Error correction security parameter
 - **finite_key_correction**: Reduction due to finite-key effects

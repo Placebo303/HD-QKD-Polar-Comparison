@@ -10,15 +10,15 @@ Research pipeline for high-dimensional QKD timing data, Polar-code information r
 The default reporting line is:
 
 ```text
-PRIMARY_REPORTING_MODE = actual_ir_finite_key
+PRIMARY_REPORTING_MODE = actual_ir_reconciled_net_not_secure
 PIE_main
 SKR_main_bps
-main_result_source = actual_ir_finite_key
+main_result_source = actual_ir_reconciled_net_not_secure
 BETA_BASELINE_ROLE = comparison_only
 NIU_2016_STATUS = not_supported_by_current_observables
 ```
 
-Route A correctness-side verification is formalized with per-block universal hashing. This is not a strict Zhong 2015 or full Niu 2016 proof instantiation.
+`PIE_main` and `SKR_main_bps` are public-EC-only reconciled net metrics, not secret-key metrics. Route A correctness-side verification is formalized with per-block universal hashing. This is not a strict Zhong 2015 or full Niu 2016 proof instantiation.
 
 Route B-lite is a completed archived study. Its LLR-only gains were local and unstable, so it is not part of the mainline.
 
@@ -47,7 +47,7 @@ python -m pip install -r requirements.txt
 Additional runtime requirements:
 
 - `.ttbin` ingestion requires the Swabian Instruments Time Tagger software and its `TimeTagger` Python module.
-- The CA-SCL decoder uses the included Windows DLL when compatible. If the platform-specific library is absent, the wrapper builds it from C++17 source and requires `g++`.
+- The paper-grade path uses ordinary minimum-metric SCL; legacy CA-SCL remains comparison-only. The wrapper rebuilds the local C++17 library when needed and requires `g++`.
 - `results/` and raw `.ttbin` data are not included in a fresh clone.
 
 Verify the optional TimeTagger binding:

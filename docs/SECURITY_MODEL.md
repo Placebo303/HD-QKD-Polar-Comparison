@@ -82,13 +82,16 @@ where:
 
 ### Primary Reporting Mode
 
-The primary reporting mode is `actual_ir_finite_key`:
+The primary reporting mode is `actual_ir_reconciled_net_not_secure` (since the 2026-08-12 V3 consolidation):
 
 ```
-PRIMARY_REPORTING_MODE = actual_ir_finite_key
+PRIMARY_REPORTING_MODE = actual_ir_reconciled_net_not_secure
 default main result columns: PIE_main, SKR_main_bps
-default main result source: PIE_secure_actual_ir, SKR_secure_actual_ir_bps
+default main result source: PIE_reconciled_net, SKR_reconciled_net_bps
+claim_boundary = public_ec_only_not_secure (net shared bits; NOT a secret-key rate)
 ```
+
+Legacy `PIE_secure_actual_ir` / `SKR_secure_actual_ir_bps` are retained for compatibility only and are blocked from scientific reporting (`scientifically_blocked_dimensional_inconsistency`, `diagnostic_only`; the old formula subtracted the dimensionless accepted-frame fraction as if it were bits/symbol — see `docs/decision-log.md` 2026-08-14).
 
 ### Diagnostic Mode
 

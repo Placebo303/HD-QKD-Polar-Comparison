@@ -1,14 +1,35 @@
 # AGENT_HANDOFF
 
-最后更新：2026-07-25 16:47（Asia/Shanghai）
+最后更新：2026-08-12（Asia/Shanghai）
 
 本文件是本仓库当前状态的权威交接入口。`AGENT_PROJECT_MEMORY.md` 保留较长的背景与接口清单；如果两者对“当前状态”的描述不一致，以本文件和仓库内现有证据为准。
+
+## 2026-08-12 V3 科研口径收口（当前主入口）
+
+- V2 Q3 四损耗 back-half 已完成；最终只读重建位于 `results/paper_grade_v3/reconciled_stage2_20260812_final_v3/`，共 `484/484` 可报告 reconciliation rows，四份 formal validator 均通过。
+- 主指标改为 `PIE_reconciled_net=max(0,(total_kept_info_bits-total_leak_ec_bits)/n_pairs_actual)` 与 `SKR_reconciled_net_bps=PIE_reconciled_net*coincidence_rate_hz`。`PIE_main/SKR_main_bps` 只映射到这两个字段。
+- 主指标的论文表述只能是“公开 EC 泄漏扣除后的净共享比特/率”，`claim_boundary=public_ec_only_not_secure`；它不是 secret-key rate，也不含 Eve 信息、phase-error/parameter-estimation 或 privacy amplification。
+- 旧 `PIE_secure_actual_ir/SKR_secure_actual_ir_bps` 存在接受率归一化的量纲不一致，现仅为兼容诊断字段；全部标记 `scientifically_blocked_dimensional_inconsistency` 与 `diagnostic_only`，不得引用为论文结果。
+- Stage 0 已移除缺失采集时长时的 5 s 回退，并恢复 occupancy sidecar 解析；缺失可核验速率来源时主指标 fail closed。V3 使用 authoritative candidate grid table 中保留的 measured rate，484 行均记录来源标签。
+- 复现命令、统计摘要与声明边界见 `docs/POLAR_RECONCILED_RESULT_V3.md`。上一版 V2 Stage 2 表不得替代 V3 主表。
+
+## 2026-08-11 Polar 论文级 V2 更正（优先阅读）
+
+- 历史 Route A v1 的 `484/484` 结果继续保留，但已降级为历史工程证据，不能再作为论文级 correctness 结果引用。
+- 已完成的 V2 代码更正包括：任意信息位普通 SCL 最小路径度量、随机且记录的 Toeplitz 验证种子、确定性候选随机种子、单侧 Wilson FER 验收、逐层 PIE/元数据一致、有效样本去除 block-success 双计数、非 composable 安全标签。
+- 冻结规范与审计证据分别见 `docs/POLAR_PAPER_GRADE_QUALIFICATION_V2.md` 和 `docs/POLAR_PAPER_GRADE_AUDIT_V2.md`。
+- Q0 组合测试通过；Q1 同种子单点两次输出一致；四损耗 d4/20 ps 的 decoder/replay canary 均无解码或验证失败。
+- 32-bit tag canary 的联合上界为 `1.40e-9` 至 `1.26e-8`，超过 `eps_cor=1e-10`，因此已判定预算失败；主参数已在全量 replay 前改为 64 bit。未完成的 tag-32 全量指标任务保存在 `results/paper_grade_v2/four_loss_parts_tag32_budget_failed/`，不得引用。
+- tag-64 Q2 已在 20/16/10/6 dB 的 d4/20 ps 代表点重新通过：分别审计 6/15/54/54 块，全部解码匹配且验证通过，联合上界 `3.25e-19` 至 `2.93e-18`。Q3 可据此重新启动；只有四份 loss-specific validator 均无错误且 `epsilon_EC_bound <= 1e-10` 后才允许合并或升级结论。
+- tag-64 Q3 已完成，冻结 Stage 1 位于 `results/paper_grade_v2/four_loss_parts_tag64/`；经 V3 Stage 2 口径修正后，四损耗 validator 均通过。
+- 既有 `results/authoritative/` 未被覆盖；V2 仅写入 `results/paper_grade_v2/`。
+- 当前安全边界：V2 的 reconciliation/correctness 可做论文级资格审查；visibility/finite-size 输出仍是 calibrated model-based non-composable shadow，缺失 protocol-specific phase-error 与 parameter-estimation observables。
 
 ## 一页结论
 
 - 项目已从多分支研究开发收口到 `main`；2026-07-25 刷新远端后，本地及远端可见分支均已进入 `main`，收口 merge commit 为 `bd18e07`。
-- 当前可交付的是一条研究级 HD-QKD Polar 主线：`.ttbin` / timing input → E2E extraction → symbol mapping / sidecars → Polar actual-IR replay → Route A finite-key accounting → `PIE_main` / `SKR_main_bps`。
-- Route A 的 correctness-side verification v1 已完成：四个 loss 共 `484/484` 个 formal rows，四份 validation 均为 `ok`，无 errors / warnings。
+- 当前工程主线为 `.ttbin` / timing input → E2E extraction → symbol mapping / sidecars → Polar actual-IR replay → Route A reconciliation/correctness accounting；论文引用使用 V3 public-EC-only 主表。
+- Route A correctness v1 的四损耗 `484/484` formal rows 是历史结果；其公开标签派生 hash 与 CA-SCL 口径不满足 V2 论文级资格。
 - Route B-lite 已完成并归档，结论是“局部有效、整体不稳定”的 limited / partial negative result；不得迁入主线。
 - Route C / q-ary Polar 没有形成完整可交付主线；仓库中只有 nonbinary LDPC demo 入口，若重启 Route C 应作为独立研究任务。
 - 项目明确定位为从仓库根目录运行的脚本仓库，不引入无用途的 Python package scaffolding。
@@ -21,8 +42,9 @@
 | 工作面 | 状态 | 当前证据 | 下一步 |
 |---|---|---|---|
 | E2E / Polar 前半链 | 已实现 | `experiments/run_e2e_pipeline.py`、`experiments/run_real_polar_max_pie.py`；本轮 `--help` 与 compileall 通过 | 有原始数据时做新目录 smoke，不覆盖权威结果 |
-| actual-IR finite-key 主报告线 | 已建立 | `PIE_main`、`SKR_main_bps`，`main_result_source=actual_ir_finite_key` | 保持 proxy / shadow 字段为诊断用途 |
-| Route A correctness v1 | 已完成 | 4 losses × 121 points；`484/484` formal rows；4 个 validation `ok` | 若论文要求严格证明，另立 proof-observable 工作包 |
+| actual-IR reconciled-net 主报告线 | 已通过 | V3 `484/484` rows；四份 formal validator；主字段恒等式通过 | 仅按 public-EC-only、not-secure 口径引用 |
+| Route A correctness v1 | 历史工程证据 | 4 losses × 121 points；`484/484` formal rows；4 个 validation `ok` | 不再作为论文级 correctness 引用；使用 V2 |
+| Polar correctness V2/Q3 | 已完成 | `results/paper_grade_v3/reconciled_stage2_20260812_final_v3/`；4×121 rows | 冻结并使用 V3 报表 |
 | refined cross-loss 历史结果 | 已完成 | 4 个 loss 均 `121/121` actual coverage；refined 表中 positive actual rows 为 `312` | 只从 authoritative pack 引用 |
 | Route A formal cross-loss 结果 | 已完成 | formal pack 中 positive actual rows 为 `293` | 不要和 refined pre-formal 的 `312` 混用 |
 | Route B-lite | 已完成并归档 | 20 dB：47 improve / 46 degrade / 28 tie，中位改进为 0 | 停止扩展；除非有新的 symbol-offset / reliability-order 方案 |
@@ -34,15 +56,18 @@
 当前默认报告字段：
 
 ```text
-PRIMARY_REPORTING_MODE = actual_ir_finite_key
+PRIMARY_REPORTING_MODE = actual_ir_reconciled_net_not_secure
 PIE_main
 SKR_main_bps
-main_result_source = actual_ir_finite_key
+main_result_source = actual_ir_reconciled_net_not_secure
+claim_boundary = public_ec_only_not_secure
 BETA_BASELINE_ROLE = comparison_only
 NIU_2016_STATUS = not_supported_by_current_observables
 ```
 
-Route A correctness v1：
+已知问题（2026-08-14 确认，详见 `docs/decision-log.md`）：`post_selection_correction` 把 0–1 的接受帧比例当作 bits/symbol 从旧 `PIE_secure_actual_ir`/`PIE_secure_beta_baseline` 中减法扣除，属量纲错误 + 重复计入。旧列已 blocked/仅诊断，当前主口径（reconciled net）不受影响；`PIE_secure_beta_baseline` 解读时须注明 ~1 bit/sym 的系统性下偏。
+
+历史 Route A correctness v1（仅供 provenance，不再作为 V2 主口径）：
 
 ```text
 verification_protocol_id = uhv1_per_block
