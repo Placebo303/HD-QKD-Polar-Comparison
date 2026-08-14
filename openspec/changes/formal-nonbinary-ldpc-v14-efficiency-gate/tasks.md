@@ -17,23 +17,29 @@ V14-P06 独立 freeze review 进行中；review ACCEPT 前禁止任何执行。
 
 ## I — 实现（review ACCEPT 后，subagent 落实，主线程 review）
 
-- [ ] **V14-I01** 结构化信道模型模块：从 characterization 帧只读重算全
+- [x] **V14-I01** 结构化信道模型模块：从 characterization 帧只读重算全
   1024-bin 差分直方图 + λ 光滑化 + 归一化 + `v14_structured_channel_model.json`
-  持久化（schema v1）+ 折叠同态 φ_m 实现。
-- [ ] **V14-I02** DE 门机制（新模块 `nonbinary_v14_mcde.py`，不改 V8/V9/
+  持久化（schema v1）+ 折叠同态 φ_m 实现。（Done 2026-08-14：
+  `nonbinary_v14_channel.py`；模型文件已构建一次，H(w')=0.5677
+  bits/symbol、fit_frames=128。）
+- [x] **V14-I02** DE 门机制（新模块 `nonbinary_v14_mcde.py`，不改 V8/V9/
   V11 源码）：`channel_mode` 分支（qsc/structured）+ Stage 0 复现路径 +
   Stage 1 小 q 验证 + Stage 2 点评估；QSC 模式与 V9 `run_mcde` 逐字段
-  等价（T2 断言）。
-- [ ] **V14-I03** gate 编排：Stage 0/1/2 顺序执行、12 点收敛判定、f 计算、
+  等价（T2 断言）。（Done：numba 本地核拷贝，use_v9_kernels=False 默认，
+  T2 等价 1e-12。）
+- [x] **V14-I03** gate 编排：Stage 0/1/2 顺序执行、12 点收敛判定、f 计算、
   `v14_gate_decision.json`（schema `nbldpc_v14_gate_decision_v1`）、
   `v14_gate_manifest.json` 生成；execute-once + strict replay 语义；证据
-  全部落 `evidence/`（无 <run_id> 子目录）。
-- [ ] **V14-T0/T1/T2/T3** 四层测试（design §4 冻结清单）全过。
+  全部落 `evidence/`（无 <run_id> 子目录）。（Done：
+  `cli/run_v14_gate.py` model/gate/replay/self-check；fail-closed 加法写。）
+- [x] **V14-T0/T1/T2/T3** 四层测试（design §4 冻结清单）全过。
+  （Done：13/13 + v13 回归 49/49 = 62/62；独立 verifier ACCEPT。）
 
 ## E — 执行（一次）
 
 - [ ] **V14-E01** 生产执行一次：Stage 0 复现 + Stage 1 验证 + Stage 2
-  判定（预算内）；证据落 `evidence/`；strict replay 一次。
+  判定（预算内）；证据落 `evidence/`；strict replay 一次。（进行中——
+  生产 gate 后台任务已启动。）
 - [ ] **V14-E02** 独立 gate review（reviewer-go 复核判定表与数值）。
 
 ## C — 收尾
