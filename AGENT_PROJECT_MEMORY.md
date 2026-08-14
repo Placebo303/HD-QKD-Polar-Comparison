@@ -1874,3 +1874,28 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   大多帧 1–2 轮收敛）；一次 E01 全屏（64 帧×2 解码）约 20–40 分钟，A01
   （128 帧）约 5–10 分钟——远比最坏 100 迭代估计快，因为收敛帧占多数。
   [repo-observed]
+
+## 48. Nonbinary LDPC V14 效率可行性门——冻结、实现、执行中 (2026-08-14)
+
+- 立项依据：SciVerse 调研（docs/nonbinary-ldpc-efficiency-roadmap-survey.md）
+  ——文献效率锚点 Müller 2024 f=1.078–1.14（q=8），V13 R3 f≈12.1 需高码
+  率（m≈15–18 → rate 0.93–0.94）+ 结构化先验（H=0.547 vs QSC 2.72）。
+  [decision]
+- 冻结门：3 λ × m∈{15,16,17,18} 共 12 点评估；Stage 0 QSC 回归
+  （0.069±0.012）；Stage 1 折叠 φ_m 小 q 验证；Stage 2 q=1024 点评估；
+  PASS=f≤1.3 且收敛；FAIL=路线冻结。预算 3 GiB/24h/execute-once+回放；
+  降级链 Li→Cohen→resource_blocked。freeze review：首轮 BLOCKERS 修复后
+  ACCEPT。 [decision]
+- DE 机制事实（可复用）：V9 run_mcde 信道块（:446-457）~10 行改动即
+  支持任意 w（更新核已接受任意 (N,q) 先验）；q=1024 单点 DE 可行
+  （numba ~1.18s/500样本×30迭代）而 profile 搜索不可行（V11 66.7h）；
+  V9A/V10/V11 失败根因=测量前承诺不可达门限/零候选/继承门限。
+  [repo-observed]
+- 实现（flash 子代理 + 独立 verifier ACCEPT）：nonbinary_v14_channel.py
+  / nonbinary_v14_mcde.py（numba 本地核，QSC 与 V9 等价 1e-12）/ cli/
+  run_v14_gate.py；测试 64/64；V8/V9/V11/V13 源码零改动。gate 首启失败
+  （证据目录整体 fail-closed 误伤先存的模型文件）已修为按文件
+  fail-closed。 [repo-observed]
+- 下一步：门结果 → V15（高码率候选，合成资格；fresh 实数据需用户决定
+  采集）/ 或路线冻结声明；V16（rate-adaptive + syndrome 估计 + 子块确认）。
+  [decision]
