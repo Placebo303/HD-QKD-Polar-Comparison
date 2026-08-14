@@ -1,5 +1,5 @@
-"""V13 diagnostic engineering tests DT0/DT1/DT2 + D04-lane tests DT3
-(``formal-nonbinary-ldpc-v13-existing-data-diagnostics``).
+"""V13 diagnostic engineering tests DT0/DT1/DT2 + D04-lane DT3 + D05-lane DT4
++ R3-candidate IT0-IT3 (``formal-nonbinary-ldpc-v13-existing-data-diagnostics``).
 
 - **DT0** compile/import, structural checks, tiny GF/syndrome math, oracle
   limits and the D02 engineering oracle;
@@ -12,7 +12,14 @@
   root;
 - **DT3** the D04 baseline-probe lane with fake frames: deterministic
   pre-registration, fake lifecycle + read-only verify, authorization
-  tamper rejection, Alice-information boundary and no-overwrite.
+  tamper rejection, Alice-information boundary and no-overwrite;
+- **DT4** the D05 root-cause lane: frozen-graph analysis, structural ceiling
+  with perfect correspondence, the frozen decision table (pure function) and
+  fake D05 lifecycle + verify;
+- **IT0-IT3** the R3 code-only candidate (`nbldpc_v13_r3_code_v1`) and the
+  E01 development-screen lane: deterministic codebook gates, pre-registration
+  disjointness, explicit fake runners, fake + real-tiny E01 lifecycles and
+  read-only verify, official-root and frozen-dir hygiene.
 
 All frames and locks are synthetic; no real sidecar, no real source loader and
 no official output root is ever touched.
@@ -23,6 +30,7 @@ import csv
 import hashlib
 import inspect
 import json
+import subprocess
 import sys
 import uuid
 from pathlib import Path
@@ -855,3 +863,242 @@ def test_dt4_d05_oracle_freeze_package_verifies(monkeypatch):
     verified = core.verify_package(run_dir, _private_test_only=True)
     assert verified["verified"] is True
     assert verified["run_state"] == "implementation_interface_fault"
+
+
+# ------------------------------------------------------------------ IT0-IT3 (R3 candidate + E01 lane)
+
+def _r3():
+    from comparison_bench.src.comparison_bench.formal_ir import (
+        nonbinary_v13_r3_candidate as r3)
+    return r3
+
+
+def _fake_ledger_r3(*, per_stratum: int = 104, n_dev: int = 100) -> dict:
+    """Fake ledger with >=96 development rows per stratum (D04 32 + E01 64);
+    pool size == transfer 2 + confirmation 2 + development n_dev."""
+    pool = _fake_identity_rows(per_stratum=per_stratum)
+    transfer, partition = _fake_roles(pool, n_transfer=2, n_conf=2, n_dev=n_dev)
+    return core.build_role_ledger(pool, transfer, partition,
+                                  schema=core.LEDGER_SCHEMA_TEST,
+                                  run_id="fake_v13_r3_test",
+                                  identity_sources=[
+                                      {"name": "fake_v4_v1", "lock_file": "real_data_lock.json",
+                                       "path": "workspace/fake_v4_v1.json", "schema": "x",
+                                       "row_count": len(transfer)},
+                                      {"name": "fake_v5_partition", "lock_file": "partition_lock.json",
+                                       "path": "workspace/fake_v5.json", "schema": "y",
+                                       "row_count": len(partition)}])
+
+
+def _fake_e01_frames(ledger: dict, rows: list[dict], *, seed: int = 20260820,
+                     clean_first: int = 2) -> list[dict]:
+    """Fake frames: the first ``clean_first`` are noiseless (bob == alice)."""
+    rng = np.random.default_rng(seed)
+    frames = []
+    for index, row in enumerate(rows):
+        alice = rng.integers(0, core.Q, size=core.N)
+        bob = alice.copy()
+        if index >= clean_first:
+            positions = rng.choice(core.N, size=20, replace=False)
+            bob[positions] = rng.integers(0, core.Q, size=20)
+        frames.append({"frame_id": int(row["frame_id"]), "stratum": row["stratum"],
+                       "role": "development", "frame_identity": row["frame_identity"],
+                       "alice": alice, "bob": bob})
+    return frames
+
+
+def _fake_baseline_decode(bob, syndrome):
+    return {"result": {"status": "decode_failed", "iterations": 100,
+                       "reason": "iteration_limit"}, "telemetry": None}
+
+
+def _fake_candidate_decode(bob, syndrome):
+    # returns bob unchanged: exact_correct exactly on noiseless frames
+    return {"result": {"status": "syndrome_consistent", "iterations": 1,
+                       "decoded_symbols": tuple(int(v) for v in bob)},
+            "telemetry": None}
+
+
+def test_it0_r3_codebook_deterministic_gates_and_identity():
+    r3 = _r3()
+    m1, mat1 = r3.build_r3_codebook()
+    m2, mat2 = r3.build_r3_codebook()
+    assert m1 == m2 and mat1 == mat2
+    assert m1["method"] == r3.R3_METHOD == core.R3_METHOD_ID
+    assert m1["construction_seed"] == 20260818
+    assert m1["q"] == 1024 and m1["n"] == 256 and m1["m"] == 170
+    assert m1["check_degree_histogram"] == {"3": 168, "4": 2}
+    assert m1["variable_degree_histogram"] == {"2": 256}
+    assert m1["component_count"] == 1          # connected
+    assert m1["tanner_girth"] == 8             # check-graph girth 4 gate
+    assert m1["rank"] == 170
+    assert m1["canonical_sha256"] == \
+        "857d25a4ca0a23fd759cea1428e2e36ac544679101c64908fabd2743f6a14d7f"
+    assert r3.verify_r3_codebook(m1, mat1)["status"] == "ok"
+    # tamper detection
+    tampered = tuple(row[:128] + (1,) + row[129:] for row in mat1)
+    assert r3.verify_r3_codebook(m1, tampered)["status"] == "failed"
+
+
+def test_it0_r3_noiseless_frame_converges_iteration_one():
+    r3 = _r3()
+    manifest, matrix = r3.build_r3_codebook()
+    field = core.GF2mField.create(core.Q)
+    rng = np.random.default_rng(11)
+    alice = rng.integers(0, core.Q, size=core.N)
+    syndrome = core.nonbinary_syndrome(matrix, alice, field)
+    out = r3.decode_r3_frame(alice, syndrome, manifest, matrix,
+                             check_count=170, p=0.20, max_iter=3)
+    assert out["result"]["status"] == "syndrome_consistent"
+    assert out["result"]["iterations"] == 1
+    assert out["telemetry"]["final_status"] == "syndrome_consistent"
+
+
+def test_it0_r3_imports_do_not_load_frozen_decoder():
+    r3 = _r3()
+    source = Path(r3.__file__).read_text(encoding="utf8")
+    top_level = [line for line in source.splitlines()
+                 if "nonbinary_v7_r1a_long" in line
+                 and (line.startswith("from") or line.startswith("import"))]
+    assert top_level == []
+    assert "nonbinary_v7_r1a_long" not in sys.modules
+
+
+def test_it1_e01_pre_registration_deterministic_and_disjoint():
+    ledger = _fake_ledger_r3()
+    e01_first = core.pre_registered_e01_frames(ledger, count=64)
+    e01_second = core.pre_registered_e01_frames(ledger, count=64)
+    ids_first = [r["frame_id"] for r in e01_first]
+    assert ids_first == [r["frame_id"] for r in e01_second]
+    assert len(ids_first) == 64
+    d04_ids = {r["frame_id"] for r in core.pre_registered_d04_frames(ledger)}
+    audit_ids = {r["frame_id"] for r in ledger["rows"]
+                 if r["role"] == "retrospective_audit"}
+    assert not (set(ids_first) & d04_ids)
+    assert not (set(ids_first) & audit_ids)
+    with pytest.raises(ValueError, match="insufficient development rows"):
+        core.pre_registered_e01_frames(_fake_ledger_large())
+
+
+def test_it1_e01_alice_isolation_and_binding_tamper():
+    r3 = _r3()
+    parameters = set(inspect.signature(r3.decode_r3_frame).parameters)
+    assert "alice" not in parameters and "alice_symbols" not in parameters
+    manifest, matrix = r3.build_r3_codebook()
+    field = core.GF2mField.create(core.Q)
+    bob = np.zeros(core.N, dtype=np.int64)
+    syndrome = tuple(0 for _ in range(170))
+    with pytest.raises(ValueError, match="binding mismatch"):
+        r3.decode_r3_frame(bob, syndrome, {"method": "wrong"}, matrix)
+    with pytest.raises(ValueError, match="binding mismatch"):
+        r3.decode_r3_frame(bob, syndrome, manifest, matrix[:1])
+
+
+def test_it1_e01_no_overwrite_fresh_root():
+    root = _out("t_r3_overwrite")
+    run_dir = root / "package"
+    run_dir.mkdir(parents=True)
+    ledger = _fake_ledger_r3()
+    rows = core.pre_registered_e01_frames(ledger, count=4)
+    frames = _fake_e01_frames(ledger, rows)
+    with pytest.raises(FileExistsError, match="fresh additive output root required"):
+        core.run_e01(run_dir, run_id="fake", ledger=ledger, frames=frames,
+                     count=4, baseline_decode=_fake_baseline_decode,
+                     candidate_decode=_fake_candidate_decode,
+                     _test_only=True, command="pytest IT1")
+
+
+def test_it2_e01_fake_lifecycle_and_verify():
+    root = _out("t_r3_e01")
+    ledger = _fake_ledger_r3()
+    rows = core.pre_registered_e01_frames(ledger, count=4)
+    frames = _fake_e01_frames(ledger, rows, clean_first=2)
+    run_dir = root / "package"
+    result = core.run_e01(run_dir, run_id="fake_v13_e01", ledger=ledger,
+                          frames=frames, count=4,
+                          baseline_decode=_fake_baseline_decode,
+                          candidate_decode=_fake_candidate_decode,
+                          _test_only=True, command="pytest IT2")
+    assert result["run_state"] == "plan_only"   # candidate >= 1/64 gate passed
+    assert {p.name for p in run_dir.iterdir()} == set(core.ARTIFACTS)
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    assert verified["outcome_rows"] == 8        # 4 frames x (baseline + candidate)
+    outcome = list(csv.DictReader(
+        (run_dir / "diagnostic_outcomes.csv").read_text("utf-8").splitlines()))
+    phases = {row["phase"] for row in outcome}
+    assert phases == {"baseline", "candidate_development"}
+    methods = {row["method"] for row in outcome}
+    assert methods == {core.V7_R1A_METHOD, core.R3_METHOD_ID}
+    manifest = json.loads((run_dir / "diagnostic_run_manifest.json").read_bytes())
+    gate = manifest["e01_gate"]
+    assert gate["frames"] == 4 and gate["candidate_exact_correct"] == 2
+    assert gate["baseline_exact_correct"] == 0 and gate["gate_passed"] is True
+    assert manifest["authorization"]["r3_authorized"] is True
+    assert manifest["stages_completed"] == ["E01"]
+    report = json.loads((run_dir / "root_cause_report.json").read_bytes())
+    assert report["d05_emitted"] is False
+    assert str(run_dir.resolve()).startswith(str(Path("workspace").resolve()))
+
+
+def test_it2_e01_fake_lifecycle_zero_candidate_frozen():
+    root = _out("t_r3_e01_zero")
+    ledger = _fake_ledger_r3()
+    rows = core.pre_registered_e01_frames(ledger, count=4)
+    frames = _fake_e01_frames(ledger, rows, clean_first=0)  # all noisy
+    run_dir = root / "package"
+    result = core.run_e01(run_dir, run_id="fake_v13_e01_zero", ledger=ledger,
+                          frames=frames, count=4,
+                          baseline_decode=_fake_baseline_decode,
+                          candidate_decode=_fake_candidate_decode,
+                          _test_only=True, command="pytest IT2")
+    assert result["run_state"] == "failed_existing_data_feasibility"
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    assert verified["run_state"] == "failed_existing_data_feasibility"
+    manifest = json.loads((run_dir / "diagnostic_run_manifest.json").read_bytes())
+    assert manifest["e01_gate"]["gate_passed"] is False
+    assert manifest["e01_gate"]["candidate_exact_correct"] == 0
+
+
+def test_it3_e01_real_r3_integration_tiny():
+    root = _out("t_r3_real")
+    ledger = _fake_ledger_r3()
+    rows = core.pre_registered_e01_frames(ledger, count=4)
+    frames = _fake_e01_frames(ledger, rows, clean_first=2)
+    run_dir = root / "package"
+    # production wiring without production authorization: real R1A baseline +
+    # real R3 candidate at max_iter=2 (fast, tiny lane)
+    result = core.run_e01(run_dir, run_id="fake_v13_e01_real", ledger=ledger,
+                          frames=frames, count=4, max_iter=2,
+                          _test_only=True, command="pytest IT3")
+    assert result["run_state"] == "plan_only"
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    outcome = list(csv.DictReader(
+        (run_dir / "diagnostic_outcomes.csv").read_text("utf-8").splitlines()))
+    assert all(row["status"] in ("syndrome_consistent", "decode_failed")
+               for row in outcome)
+    assert all(row["notes"] == "hook_equivalence=ok" for row in outcome)
+
+
+def test_it3_official_root_and_frozen_dirs_hygiene():
+    diag = Path("comparison_bench/outputs_comparison/nonbinary_diagnostics")
+    before = sorted(p.name for p in diag.iterdir()) if diag.is_dir() else []
+    root = _out("t_r3_hygiene")
+    ledger = _fake_ledger_r3()
+    rows = core.pre_registered_e01_frames(ledger, count=4)
+    frames = _fake_e01_frames(ledger, rows, clean_first=2)
+    core.run_e01(root / "package", run_id="fake_hygiene", ledger=ledger,
+                 frames=frames, count=4,
+                 baseline_decode=_fake_baseline_decode,
+                 candidate_decode=_fake_candidate_decode,
+                 _test_only=True, command="pytest IT3")
+    after = sorted(p.name for p in diag.iterdir()) if diag.is_dir() else []
+    assert after == before  # official output root untouched by the test lane
+    # frozen baseline directories carry no working-tree changes
+    repo = Path(__file__).resolve().parents[2]
+    out = subprocess.run(["git", "status", "--porcelain", "--",
+                          "src", "experiments", "tools", "results"],
+                         capture_output=True, text=True, cwd=repo)
+    assert out.returncode == 0 and out.stdout.strip() == ""

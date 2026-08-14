@@ -63,6 +63,7 @@ P = 0.20
 PRIMARY_STRATUM = "d1024_bw200"
 D04_FRAME_COUNT = 32
 D04_PHASE = "baseline"
+R3_METHOD_ID = "nbldpc_v13_r3_code_v1"
 STRATA = ("d1024_bw120", "d1024_bw180", "d1024_bw200")
 ROLES = ("characterization", "development", "retrospective_audit")
 BIT_PLANES = 10
@@ -1111,13 +1112,18 @@ def _telemetry_lines(records: Any, *, run_id: str, schema: str) -> list[dict[str
         if forbidden:
             raise ValueError(f"telemetry forbidden key: {sorted(forbidden)}")
         if set(record).difference({"schema", "run_id", "frame_id", "status",
-                                   "iterations", "telemetry"}):
+                                   "iterations", "telemetry", "phase", "method"}):
             raise ValueError("telemetry top-level keys")
-        lines.append({"schema": schema, "run_id": run_id,
-                      "frame_id": int(record["frame_id"]),
-                      "status": str(record["status"]),
-                      "iterations": int(record["iterations"]),
-                      "telemetry": record["telemetry"]})
+        line = {"schema": schema, "run_id": run_id,
+                "frame_id": int(record["frame_id"]),
+                "status": str(record["status"]),
+                "iterations": int(record["iterations"]),
+                "telemetry": record["telemetry"]}
+        if "phase" in record:
+            line["phase"] = str(record["phase"])
+        if "method" in record:
+            line["method"] = str(record["method"])
+        lines.append(line)
     return lines
 
 
@@ -1143,7 +1149,8 @@ def _manifest_doc(run_id: str, run_state: str, *, test_only: bool, oracle: Mappi
                   telemetry_records: int, characterization: Mapping[str, Any] | None,
                   command: str, stages_completed: tuple[str, ...] = ("D01",),
                   authorization: Mapping[str, Any] | None = None,
-                  baseline: Mapping[str, Any] | None = None) -> dict[str, Any]:
+                  baseline: Mapping[str, Any] | None = None,
+                  extra_manifest: Mapping[str, Any] | None = None) -> dict[str, Any]:
     if authorization is None:
         authorization = {"d04_authorized": False, "d05_authorized": False,
                          "real_decode_authorized": False,
@@ -1168,6 +1175,9 @@ def _manifest_doc(run_id: str, run_state: str, *, test_only: bool, oracle: Mappi
         "provenance": _provenance()}
     if baseline is not None:
         doc["baseline"] = dict(baseline)
+    if extra_manifest is not None:
+        for key, value in extra_manifest.items():
+            doc[key] = value
     return doc
 
 
@@ -1179,7 +1189,8 @@ def _write_package(output_dir: Path, *, run_id: str, run_state: str, test_only: 
                    authorization: Mapping[str, Any] | None = None,
                    baseline: Mapping[str, Any] | None = None,
                    report_note: str | None = None,
-                   report_doc: Mapping[str, Any] | None = None) -> dict[str, Any]:
+                   report_doc: Mapping[str, Any] | None = None,
+                   extra_manifest: Mapping[str, Any] | None = None) -> dict[str, Any]:
     if not output_dir.is_dir() or any(output_dir.iterdir()):
         raise ValueError("fresh empty output directory required")
     if run_state not in RUN_STATES:
@@ -1215,7 +1226,8 @@ def _write_package(output_dir: Path, *, run_id: str, run_state: str, test_only: 
                              telemetry_records=len(telemetry_lines) if telemetry_records else 0,
                              characterization=characterization, command=command,
                              stages_completed=stages_completed,
-                             authorization=authorization, baseline=baseline)
+                             authorization=authorization, baseline=baseline,
+                             extra_manifest=extra_manifest)
     _put(output_dir / "diagnostic_run_manifest.json", manifest)
     return {"run_id": run_id, "run_state": run_state,
             "package_dir": str(output_dir),
@@ -1970,6 +1982,208 @@ def _d05_report_doc(run_id: str, decision: Mapping[str, Any], *, test_only: bool
             "diagnostic_only": True, "retrospective_reuse": True}
 
 
+# ------------------------------------------------------------------ E01 development screen
+
+_E01_AUTHORIZATION = {"d04_authorized": True, "d05_authorized": True,
+                      "r3_authorized": True, "real_decode_authorized": True,
+                      "phase": "V13-E01 development screen"}
+E01_COUNT = 64
+
+
+def pre_registered_e01_frames(ledger: Any, *, stratum: str = PRIMARY_STRATUM,
+                              count: int = E01_COUNT) -> list[dict[str, Any]]:
+    """E01 pre-registration (frozen 2026-08-14): the 64 development rows of
+    the primary stratum that follow the 32 D04 rows in the frozen sorted
+    order.  Disjoint from the D04 probe and from the sealed audit frames."""
+    rows = development_rows(ledger, stratum=stratum)
+    if len(rows) < D04_FRAME_COUNT + count:
+        raise ValueError(f"insufficient development rows: {len(rows)} < "
+                         f"{D04_FRAME_COUNT + count}")
+    ordered = sorted(rows, key=lambda r: (int(r["frame_id"]), str(r["frame_identity"])))
+    return [dict(r) for r in ordered[D04_FRAME_COUNT:D04_FRAME_COUNT + count]]
+
+
+def _e01_outcome(frame: Mapping[str, Any], result: Mapping[str, Any],
+                 raw_ser: float, *, phase: str, method: str) -> dict[str, Any]:
+    if result.get("status") == "syndrome_consistent":
+        decoded = tuple(int(v) for v in result.get("decoded_symbols", ()))
+        alice = tuple(int(v) for v in frame["alice"])
+        reason = "exact_correct" if decoded == alice else "exact_mismatch"
+    else:
+        reason = str(result.get("reason", "no_decoded_word"))
+    return {"phase": phase, "method": method,
+            "frame_id": int(frame["frame_id"]), "stratum": PRIMARY_STRATUM,
+            "role": "development", "status": str(result.get("status", "unclassified")),
+            "reason": reason, "raw_ser": raw_ser,
+            "iterations": int(result.get("iterations", 0)),
+            "notes": "hook_equivalence=ok"}
+
+
+def run_e01(output_dir: Any, *, run_id: str | None = None, discovery_root: Any = None,
+            ledger: Any = None, frames: Any = None,
+            baseline_decode: Any = None, candidate_decode: Any = None,
+            count: int = E01_COUNT, p: float = P, max_iter: int = MAX_ITER,
+            command: str = "", _test_only: bool = False,
+            production_authorized: bool = False) -> dict[str, Any]:
+    """Execute the frozen E01 development screen: the unchanged V7 R1A
+    baseline and the sole R3 candidate, each exactly once, on the 64
+    pre-registered bw200 development frames.  All failures are retained.
+
+    Continue gate (tasks.md V13-E01): at least 1/64 candidate frames
+    independently exact-corrected with syndrome consistency, post-decode
+    exact equality and zero forbidden/internal/accounting failures; 0/64
+    freezes the route at ``failed_existing_data_feasibility``.
+
+    ``baseline_decode`` / ``candidate_decode`` are explicit runner entry
+    points: production defaults to the frozen R1A hook and the R3 candidate
+    decoder; the test lane passes explicit fake runners (V13-I03) and never
+    enters a production decoder implicitly.
+    """
+    if not _test_only and not production_authorized:
+        raise ValueError("V13 production E01 development screen is not "
+                         "authorized; the main thread must pass "
+                         "--authorized --production")
+    if run_id is None:
+        run_id = f"v13_e01_{uuid.uuid4().hex[:8]}"
+    out = Path(output_dir).resolve()
+    if out.exists():
+        raise FileExistsError("fresh additive output root required")
+    out.mkdir(parents=True)
+    oracle = run_engineering_oracle()
+    try:
+        if oracle["status"] != "ok":
+            return _write_package(out, run_id=run_id,
+                                  run_state="implementation_interface_fault",
+                                  test_only=_test_only, oracle=oracle, ledger=None,
+                                  channel=None, outcome_rows=[], telemetry_records=None,
+                                  characterization=None, command=command,
+                                  stages_completed=("E01",),
+                                  authorization=dict(_E01_AUTHORIZATION),
+                                  report_note="D02 engineering oracle failed "
+                                              "before the E01 screen.")
+        if ledger is None:
+            if discovery_root is None:
+                raise ValueError("discovery root required for production lane")
+            ledger = build_production_ledger(discovery_root, run_id=run_id)
+        validate_role_ledger(ledger)
+        if ledger["ledger_state"] != "ready":
+            return _write_package(out, run_id=run_id,
+                                  run_state="blocked_role_ledger",
+                                  test_only=_test_only, oracle=oracle, ledger=ledger,
+                                  channel=None, outcome_rows=[], telemetry_records=None,
+                                  characterization=None, command=command,
+                                  stages_completed=("E01",),
+                                  authorization=dict(_E01_AUTHORIZATION),
+                                  report_note="ambiguous role ledger froze the "
+                                              "E01 screen before any decode.")
+        rows = pre_registered_e01_frames(ledger, stratum=PRIMARY_STRATUM,
+                                         count=count)
+        manifest, matrix = v7_cb.build_nbldpc_v7_r1a_codebook()
+        if frames is None:
+            frames = load_production_development_frames(rows)
+        if not isinstance(frames, (list, tuple)) or len(frames) != len(rows):
+            raise ValueError("pre-registered frame list mismatch")
+        if baseline_decode is None:
+            baseline_decode = lambda bob, syndrome: run_diagnostic_hook(
+                bob, syndrome, manifest, matrix, check_count=M, p=p,
+                max_iter=max_iter, hook=True)
+        candidate_matrix = None
+        if candidate_decode is None:
+            from . import nonbinary_v13_r3_candidate as r3  # execute-only import
+            c_manifest, c_matrix = r3.build_r3_codebook()
+            candidate_matrix = c_matrix
+            candidate_decode = lambda bob, syndrome: r3.decode_r3_frame(
+                bob, syndrome, c_manifest, c_matrix, check_count=M, p=p,
+                max_iter=max_iter, hook=True)
+        field = GF2mField.create(Q)
+        outcome_rows: list[dict[str, Any]] = []
+        telemetry_records: list[dict[str, Any]] = []
+        baseline_exact = 0
+        candidate_exact = 0
+        forbidden = 0
+        for row, frame in zip(rows, frames):
+            if int(frame["frame_id"]) != int(row["frame_id"]):
+                raise ValueError("frame order does not match pre-registration")
+            try:
+                alice = np.asarray(frame["alice"], dtype=np.int64)
+                raw_ser = float(frame_symbol_error_rate(frame["alice"], frame["bob"]))
+                syndrome_base = nonbinary_syndrome(matrix, alice, field)
+                b_out = baseline_decode(frame["bob"], syndrome_base)
+                if candidate_matrix is None:
+                    # test lane injected a fake candidate: same syndrome is fine
+                    c_out = candidate_decode(frame["bob"], syndrome_base)
+                else:
+                    syndrome_cand = nonbinary_syndrome(candidate_matrix, alice, field)
+                    c_out = candidate_decode(frame["bob"], syndrome_cand)
+            except Exception as exc:
+                return _write_package(out, run_id=run_id,
+                                      run_state="invalid_diagnostic_execution",
+                                      test_only=_test_only, oracle=oracle, ledger=ledger,
+                                      channel=None, outcome_rows=outcome_rows,
+                                      telemetry_records=telemetry_records,
+                                      characterization=None, command=command,
+                                      stages_completed=("E01",),
+                                      authorization=dict(_E01_AUTHORIZATION),
+                                      extra_manifest={"e01_gate": {
+                                          "frames": len(outcome_rows),
+                                          "frozen": False}},
+                                      report_note=f"decoder exception on frame "
+                                                  f"{frame['frame_id']} "
+                                                  f"({type(exc).__name__}: {exc}); "
+                                                  "screen frozen with retained rows.")
+            b_result = b_out["result"]
+            c_result = c_out["result"]
+            b_row = _e01_outcome(frame, b_result, raw_ser, phase="baseline",
+                                 method=V7_R1A_METHOD)
+            c_row = _e01_outcome(frame, c_result, raw_ser,
+                                 phase="candidate_development", method=R3_METHOD_ID)
+            outcome_rows.extend([b_row, c_row])
+            if b_row["reason"] == "exact_correct":
+                baseline_exact += 1
+            if c_row["reason"] == "exact_correct":
+                candidate_exact += 1
+            for row_out, out_res in ((b_row, b_out), (c_row, c_out)):
+                if row_out["status"] not in ("syndrome_consistent", "decode_failed",
+                                             "decoder_error"):
+                    forbidden += 1
+                if out_res.get("telemetry") is not None:
+                    telemetry_records.append(
+                        {"schema": TELEMETRY_SCHEMA_TEST if _test_only
+                         else TELEMETRY_SCHEMA, "run_id": run_id,
+                         "frame_id": int(frame["frame_id"]),
+                         "phase": row_out["phase"], "method": row_out["method"],
+                         "status": row_out["status"],
+                         "iterations": row_out["iterations"],
+                         "telemetry": out_res["telemetry"]})
+        gate_passed = candidate_exact >= 1 and forbidden == 0
+        run_state = "plan_only" if gate_passed else "failed_existing_data_feasibility"
+        e01_gate = {"frames": len(frames),
+                    "pre_registered_frame_ids": [int(r["frame_id"]) for r in rows],
+                    "selection_rule": "development rows of d1024_bw200 sorted by "
+                                      "(frame_id, frame_identity); skip first 32 "
+                                      "(D04); take next 64",
+                    "baseline_exact_correct": baseline_exact,
+                    "candidate_exact_correct": candidate_exact,
+                    "forbidden_failures": forbidden,
+                    "gate_passed": gate_passed,
+                    "gate": "candidate >= 1/64 exact_correct and zero "
+                            "forbidden/internal/accounting failures"}
+        return _write_package(out, run_id=run_id, run_state=run_state,
+                              test_only=_test_only, oracle=oracle, ledger=ledger,
+                              channel=None, outcome_rows=outcome_rows,
+                              telemetry_records=telemetry_records,
+                              characterization=None, command=command,
+                              stages_completed=("E01",),
+                              authorization=dict(_E01_AUTHORIZATION),
+                              extra_manifest={"e01_gate": e01_gate},
+                              report_note="E01 development screen completed once; "
+                                          "E02 freeze decision follows the gate.")
+    except Exception:
+        if out.exists() and not any(out.iterdir()):
+            out.rmdir()
+        raise
+
+
 # ------------------------------------------------------------------ read-only verify
 
 def _verify_telemetry_file(path: Path) -> dict[str, Any]:
@@ -2091,6 +2305,49 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
                 or authorization.get("d04_authorized", True) \
                 or authorization.get("d05_authorized") is not True:
             raise ValueError("manifest D05 freeze authorization")
+    elif stages == ("E01",):
+        # E01 development screen package: baseline + candidate_development
+        # rows on the pre-registered 64 frames; no D05 conclusion carried.
+        if authorization.get("real_decode_authorized") is not True \
+                or authorization.get("d04_authorized") is not True \
+                or authorization.get("d05_authorized") is not True \
+                or authorization.get("r3_authorized") is not True:
+            raise ValueError("manifest E01 authorization")
+        if not str(authorization.get("phase", "")).startswith("V13-E01"):
+            raise ValueError("manifest E01 phase")
+        if run_state not in ("plan_only", "failed_existing_data_feasibility",
+                             "implementation_interface_fault",
+                             "blocked_role_ledger", "invalid_diagnostic_execution"):
+            raise ValueError("manifest E01 run state")
+        if channel.get("characterization_performed"):
+            raise ValueError("E01 package must not carry characterization")
+        if report.get("d05_emitted", False) or report.get("diagnosis_concluded", False):
+            raise ValueError("report must not carry a D05 conclusion")
+        rows_out = list(csv.DictReader(
+            StringIO((out / "diagnostic_outcomes.csv").read_text("utf-8"), newline="")))
+        if any(row.get("phase") not in ("baseline", "candidate_development")
+               for row in rows_out):
+            raise ValueError("E01 outcome phase")
+        e01_gate = manifest.get("e01_gate")
+        if not isinstance(e01_gate, Mapping):
+            raise ValueError("manifest E01 gate")
+        if run_state in ("implementation_interface_fault", "blocked_role_ledger"):
+            if outcomes["rows"] != 0 or telemetry["records"] != 0:
+                raise ValueError("manifest E01 failure package")
+        elif run_state == "invalid_diagnostic_execution":
+            if e01_gate.get("frozen") is not False \
+                    or e01_gate.get("frames") != outcomes["rows"] // 2:
+                raise ValueError("manifest E01 frozen package")
+        else:
+            if e01_gate.get("gate_passed") != (run_state == "plan_only") \
+                    or e01_gate.get("frames") != len(rows_out) // 2 \
+                    or e01_gate.get("frames") != outcomes["rows"] // 2:
+                raise ValueError("manifest E01 gate fields")
+            phases = {row.get("phase") for row in rows_out}
+            if phases != {"baseline", "candidate_development"}:
+                raise ValueError("E01 outcome phases")
+            if not _test_schema(manifest) and e01_gate.get("frames") != E01_COUNT:
+                raise ValueError("manifest E01 frame count")
     elif stages == _D05_STAGES:
         # Full D05 package: corrected channel aggregates + the D04 baseline
         # rows + the root-cause conclusion (real decode already authorized by
@@ -2188,14 +2445,14 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
 
 
 def v13_d04_d05_guard(action: str, authorized: bool) -> None:
-    """D04/D05 entry guard.
+    """D04/D05/E01 entry guard.
 
-    Both actions exit 2 unless the main thread passed the explicit
+    Every execution action exits 2 unless the main thread passed the explicit
     authorization flag; the authorized production lanes are implemented in
-    :func:`run_d04` and :func:`run_d05` (the CLI additionally requires
-    ``--production``).  The test lane never uses this guard: it calls the
-    module API directly with ``_test_only=True`` and fake inputs."""
-    if action not in ("d04", "d05"):
+    :func:`run_d04`, :func:`run_d05` and :func:`run_e01` (the CLI additionally
+    requires ``--production``).  The test lane never uses this guard: it calls
+    the module API directly with ``_test_only=True`` and fake inputs."""
+    if action not in ("d04", "d05", "e01"):
         raise ValueError(f"unknown guard action: {action}")
     if not authorized:
         raise SystemExit(2)

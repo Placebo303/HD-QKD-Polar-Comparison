@@ -1,11 +1,12 @@
 # Tasks: V13 Existing-Data Nonbinary LDPC Diagnostics
 
-Status: **PLAN FROZEN / P08 ACCEPTED / D-STAGE COMPLETE THROUGH D05 (EMITTED, REVIEW PENDING)** (2026-08-14).
-P01--P08 were accepted by an independent read-only freeze review (zero
-blockers; two WARNING-level items and three suggestions recorded for
-correction before D05). D01-D04 + DT0-DT2 complete; D05 emitted with
-`diagnosis_class=code`, `run_state=diagnosis_complete` (independent read-only
-review pending). R/I/E/A/C items remain unauthorized and unchecked.
+Status: **PLAN FROZEN / P08 ACCEPTED / D05 EMITTED + REVIEW ACCEPTED / R3 FROZEN (2026-08-14)**.
+P01--P08 accepted (zero blockers). D01-D04 + DT0-DT2 complete; D05 emitted
+`diagnosis_class=code`, `run_state=diagnosis_complete` and the independent
+read-only review returned ACCEPT (zero blockers, four non-blocking warnings).
+R3 code-only candidate is frozen by amendment (connected simple check graph,
+seed 20260818, Tanner girth >= 8; prior/decoder/checks/rate unchanged; E01
+pre-registered 64 frames). R1/R2 locked; I/E/A/C items remain unchecked.
 
 ## Planning freeze (frozen via P08)
 
@@ -81,27 +82,30 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   the structural ceiling over the 32 D04 frames is 0.75 == observed failure
   fraction 0.75 with perfect frame-level correspondence (24/24 failed frames
   contain a >=2-error component; 8/8 exact-correct frames contain none).
-  Independent read-only review: PENDING.)
+  Independent read-only review: **ACCEPT 2026-08-14, zero blockers**
+  (reviewer-go; five tasks completed read-only; decision reproduced
+  exactly; four non-blocking warnings recorded in the decision-log).
 
-## Phase R — one-factor candidate (blocked until D05)
+## Phase R — one-factor candidate (D05 = code; R3 frozen by amendment 2026-08-14)
 
-- [ ] **V13-R1** If and only if D05 emits `diagnosis_class=prior`, freeze one
-  prior-only candidate with the same matrix, schedule, and checks; derive a
-  cross-fitted public global prior without audit truth.
-- [ ] **V13-R2** If and only if D05 emits `diagnosis_class=decoder`, freeze one
-  decoder-only numerical or scheduling change with the same matrix, prior,
-  and checks.
-- [ ] **V13-R3** If and only if D05 emits `diagnosis_class=code`,
-  freeze one finite graph/rate change with the same prior and decoder
-  interface.
-- [ ] **V13-R4** If D05 emits `diagnosis_class=mixed` or `inconclusive`, the
-  run_state is `diagnosis_inconclusive`; stop and return to the planner. No
-  mixed route or disguised V7/V10/V11 rerun is allowed.
+- [ ] **V13-R1** prior-only: LOCKED — D05 emitted `code`, not `prior`.
+- [ ] **V13-R2** decoder-only: LOCKED — D05 emitted `code`, not `decoder`.
+- [x] **V13-R3** code-only: D05 `diagnosis_class=code`; ONE finite graph/rate
+  property change frozen by amendment (2026-08-14, main-thread authorized):
+  replace the degenerate frozen graph (85 disconnected 2-check components,
+  Tanner girth 4) with a CONNECTED simple check graph — 170 check nodes, 256
+  variable edges, all variables degree 2, check degrees 168x3 + 2x4, no
+  parallel edges, check-graph girth >= 4 (Tanner girth >= 8) — deterministic
+  seeded construction with frozen seed 20260818 (smallest seed passing the
+  gates). Prior (QSC p=.20), decoder interface, check count 170, n=256, rate
+  and max_iter=100 unchanged. New identity `nbldpc_v13_r3_code_v1`.
+- [ ] **V13-R4** mixed/inconclusive: not applicable (D05 = code).
 
-## Phase I — future minimal implementation (not authorized)
+## Phase I — minimal implementation (R3 candidate; in progress 2026-08-14)
 
 - [ ] **V13-I01** Implement only the selected one-factor candidate under
-  `comparison_bench/`; keep frozen baseline directories unchanged.
+  `comparison_bench/` (R3 codebook module `nbldpc_v13_r3_code_v1` + E01 lane);
+  keep frozen baseline directories unchanged.
 - [ ] **V13-I02** Bind diagnostic-only status, provenance, output-root, and
   Alice-isolation contracts without checksums/hash DAGs/signatures/locks.
 - [ ] **V13-I03** Add explicit fake-runner entry points so tests cannot enter a
@@ -132,13 +136,21 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   scope review, output-root absence, and proof that no official qualification
   output was created. E01 is blocked until IT0--IT3 pass.
 
-## Phase E — development screen (future, not authorized)
+## Phase E — development screen (frozen, not yet executed 2026-08-14)
 
 - [ ] **V13-E01** Freeze 64 bw200 development frames and run unchanged
   baseline plus the sole candidate once each. Continue only if at least 1/64
   is independently exact-corrected with zero forbidden/internal/accounting
   failures, syndrome consistency, and post-decode exact equality. Zero
   successes yields `failed_existing_data_feasibility` and freezes the route.
+  (Pre-registered 2026-08-14: sorted development rows of d1024_bw200 by
+  (frame_id, frame_identity), skip first 32 (D04), take next 64:
+  [77,78,88,89,92,98,100,102,104,105,106,108,111,113,115,116,117,118,119,
+  121,123,124,125,127,128,129,134,138,139,140,142,144,145,148,151,153,159,
+  160,161,163,165,166,168,170,171,172,173,175,177,179,181,184,187,190,193,
+  194,196,198,208,212,215,216,217,221] — disjoint from D04's 32 and the 128
+  audit frames. Baseline = unchanged V7 R1A p=.20; candidate =
+  `nbldpc_v13_r3_code_v1` p=.20, each exactly once, all failures retained.)
 - [ ] **V13-E02** If E01 passes, freeze the candidate and prohibit further
   tuning or candidate substitution.
 

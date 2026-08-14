@@ -1890,4 +1890,48 @@ n/m/rate/度数、连通、girth≥8 的图）。R1/R2 锁死。R3 候选需 Ope
 amendment + 独立复核后方可冻结；E01 门（≥1/64）与 A01 门（≥120/128）不
 变。D05 独立只读复核（reviewer-go）为下一科学门。最高状态仍为
 `ready_for_fresh_confirmation`，禁止 promoted/qualified/
-observed_fresh_correction。`
+observed_fresh_correction。
+
+---
+
+### 2026-08-14: V13-D05 独立复核 ACCEPT + R3 候选冻结（amendment）
+
+**Decision**: reviewer-go 独立只读复核（2026-08-14）对修正版 D05 包
+`v13_d05_20260814_corrected` 出具 **ACCEPT，零 blocker**：五任务全过
+（六文件包 + verifier PASS；图普查 85 组件/girth4/d_min3 独立重算一致；
+结构天花板 0.75==0.75、完美对应 24/24+8/8、对抗性逐帧 0 失配；决策表符
+合性判断——`mixed` 不成立，因为帧级完美对应是决定性分离：每个失败帧结
+构上不可纠（≥2 错误在 d_min=3 组件），每个结构干净帧在（失配的）先验
+下也成功，先验解释 0/32 结果；边界扫描干净；无效发射处理正确）。四个
+非阻塞警告记录在案（共存分辨率 operationalization、rationale 措辞、
+D05 重算聚合的可复现性依赖、real_decode_authorized 语义）。
+
+**R3 amendment (frozen by this entry)**: 唯一候选 = **一个** finite
+graph/rate 属性变更——把冻结 R1A 退化图（85 个不相连 2-校验组件，Tanner
+girth 4，组件 d_min 3）替换为**连通简单 check 图**（170 校验节点、256
+变量边、变量全 degree 2、校验度 168×3+2×4、无平行边、check 图 girth≥4
+即 Tanner girth≥8）。构造：确定性种子化随机配对，冻结种子 = 20260818
+（>=20260814 中第一个通过 简单/连通/check-girth≥4 门的种子；原型验证
+通过）。**不变**：prior（QSC p=.20）、decoder 接口（flooding FFT-QSPA，
+与 D03 证明等价的镜像循环）、校验数 170、n=256、rate、max_iter=100、
+syndrome/tag 语义、Alice 边界、六文件包契约。新身份
+`nbldpc_v13_r3_code_v1`（canonical manifest 含构造种子与 girth 证书）。
+
+**E01 预注册（冻结）**: 64 个 bw200 development 帧 = 按 (frame_id,
+frame_identity) 排序的 development 行，跳过前 32（D04），取接下来 64：
+[77,78,88,89,92,98,100,102,104,105,106,108,111,113,115,116,117,118,119,
+121,123,124,125,127,128,129,134,138,139,140,142,144,145,148,151,153,159,
+160,161,163,165,166,168,170,171,172,173,175,177,179,181,184,187,190,193,
+194,196,198,208,212,215,216,217,221]。与 D04 的 32 帧及 128 个 audit 帧
+互斥。E01 = baseline（unchanged R1A）与 candidate 各执行一次；门：
+candidate ≥1/64 independently exact-corrected + syndrome consistency +
+post-decode exact check + 零 forbidden/internal/accounting failures；
+0/64 → `failed_existing_data_feasibility` 冻结路线。E01 通过 → E02 冻结
+候选（禁止继续调参/替换）。A01（候选在 128 个 frame-identical audit 帧
+上各一次；≥120/128、零 forbidden、median ≤120 s/frame、disclosure ≤8.75
+bits/symbol——170×10/256=6.64 结构性通过）→ A02（bw120/bw180 预注册只读
+跨层检查）→ C01。
+
+**Consequences**: R3 候选实现（`comparison_bench/` 内新模块 + E01 通道 +
+IT0-IT3 测试）现在开始；E01 前必须 IT0-IT3 全过。所有失败保留；禁止
+重试/调参/替换/同义重跑 V7/V10/V11 路线。`
