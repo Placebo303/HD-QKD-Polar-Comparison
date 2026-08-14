@@ -48,15 +48,15 @@ implemented code, prepared a real partition, or executed a decoder.
 
 ## Main-Thread Acceptance Before Real Data
 
-- [ ] **V12-T3** Run scoped regression, task-file/source-manifest review,
+- [x] **V12-T3** Run scoped regression, task-file/source-manifest review,
   dirty-worktree scope review, frozen V1-V11/baseline checks, and prove the
   V12 production output root is absent.
-- [ ] **V12-RP01** Reconstruct and independently review the explicit historical
+- [x] **V12-RP01** Reconstruct and independently review the explicit historical
   real-package exclusion inventory without loading frame arrays.
-- [ ] **V12-RP02** Reconstruct the complete eligible source pool, exclude all
+- [x] **V12-RP02** Reconstruct the complete eligible source pool, exclude all
   historical frame/payload identities, freeze exactly four bw200 rows, and
   independently review the partition without decoding.
-- [ ] **V12-RP03** Prepare and independently review one complete no-decode
+- [x] **V12-RP03** Prepare and independently review one complete no-decode
   production plan; record explicit main-thread execution authorization.
 
 ## One Real Execute and One Read-Only Verification
@@ -69,11 +69,12 @@ implemented code, prepared a real partition, or executed a decoder.
 
 ## Final Decision and Durable State
 
-- [ ] **V12-D01** Record `source_partition_blocked`, `invalid_execution`,
+- [x] **V12-D01** Record `source_partition_blocked`, `invalid_execution`,
   `failed_canary`, or `observed_real_correction` with the
   exact claim boundary and no automatic successor.
-- [ ] **V12-D02** Complete scoped final checks, decision log/handoff updates,
-  and mandatory memory triage.
+- [x] **V12-D02** Complete scoped final checks, decision log/handoff updates,
+  and mandatory memory triage. (Done 2026-08-13: decision-log entry, handoff/
+  CURRENT_TASK update, memory §42 triage)
 
 ## Stop Rule
 

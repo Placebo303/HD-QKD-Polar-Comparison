@@ -1,0 +1,101 @@
+"""CLI for the V13 existing-data nonbinary LDPC diagnostics lane
+(``formal-nonbinary-ldpc-v13-existing-data-diagnostics``).
+
+Main-thread-authorized Phase-D entrypoints (2026-08-14):
+
+- ``ledger`` — build the data-role ledger from the locally discoverable 10 dB
+  identity locks (V4 v1/v2 transfer locks + V5 partition lock) and write
+  ``data_role_ledger.json`` into one fresh additive root;
+- ``characterize`` — run the D01 no-decode channel characterization over the
+  characterization-role bw200 frames and write the six-file diagnostic package
+  into one fresh additive root under
+  ``comparison_bench/outputs_comparison/nonbinary_diagnostics/<run_id>/``.
+
+D04 and D05 remain hard stops: the actions exit 2 unless an explicit
+``--authorized`` flag AND ``--test-only`` are both present, and even then the
+execution is not implemented in this phase.  No real-data decoder execution is
+authorized or performed.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import uuid
+from pathlib import Path
+
+from ..formal_ir import nonbinary_v13_diagnostics as core
+
+
+def main() -> int:
+    root = Path(__file__).resolve().parents[4]
+    parser = argparse.ArgumentParser(
+        description="V13 nonbinary LDPC existing-data diagnostics "
+                    "(D01 ledger + channel characterization; D04/D05 hard-stopped)")
+    parser.add_argument("action", nargs="?", default="ledger",
+                        choices=("ledger", "characterize", "d04", "d05"))
+    parser.add_argument("--output", default=None,
+                        help="fresh additive output root (required for ledger/characterize)")
+    parser.add_argument("--run-id", default=None,
+                        help="diagnostic run id (default v13_d01_<8-hex>)")
+    parser.add_argument("--formal-ir-root", default=None,
+                        help="formal_ir_methods discovery root "
+                             "(default comparison_bench/outputs_comparison/formal_ir_methods)")
+    parser.add_argument("--production", action="store_true",
+                        help="explicit production-lane authorization for D01")
+    parser.add_argument("--authorized", action="store_true",
+                        help="D04/D05 escape flag (still not implemented)")
+    parser.add_argument("--test-only", action="store_true",
+                        help="test-only lane flag (module API, not this CLI)")
+    args = parser.parse_args()
+
+    if args.action in ("d04", "d05"):
+        try:
+            core.v13_d04_d05_guard(args.authorized, args.test_only)
+        except SystemExit:
+            print(f"V13-{args.action.upper()} is not authorized in the initial "
+                  "diagnostic phase; no baseline probe or root-cause report may "
+                  "run on real data", file=sys.stderr)
+            return 2
+        print(f"V13-{args.action.upper()} execution is not implemented in this phase",
+              file=sys.stderr)
+        return 2
+    if args.output is None:
+        print("--output DIR is required", file=sys.stderr)
+        return 2
+    if not args.production and not args.test_only:
+        print("production D01 work requires the explicit --production flag "
+              "(or use the module API with _test_only=True)", file=sys.stderr)
+        return 2
+    formal_ir_root = Path(args.formal_ir_root) if args.formal_ir_root \
+        else root / "comparison_bench/outputs_comparison/formal_ir_methods"
+    run_id = args.run_id or f"v13_d01_{uuid.uuid4().hex[:8]}"
+    out = Path(args.output)
+    if out.exists():
+        print("fresh additive output root required", file=sys.stderr)
+        return 2
+    if args.action == "ledger":
+        out.mkdir(parents=True)
+    if args.action == "ledger":
+        try:
+            ledger = core.build_production_ledger(formal_ir_root, run_id=run_id)
+            core.write_role_ledger(out / "data_role_ledger.json", ledger)
+        except Exception as exc:
+            print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps({"run_id": run_id, "ledger_state": ledger["ledger_state"],
+                          "counts": ledger["counts"]}, sort_keys=True))
+        return 0
+    try:
+        result = core.run_d01(out, run_id=run_id, discovery_root=formal_ir_root,
+                              production_authorized=bool(args.production),
+                              command=" ".join(sys.argv))
+    except Exception as exc:
+        print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(result, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

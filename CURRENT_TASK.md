@@ -1,6 +1,116 @@
 # CURRENT_TASK.md
 
-## Current Task — Nonbinary V11 spatially coupled DE gate: PLAN FROZEN (2026-08-06)
+## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: PLAN FROZEN + D-STAGE COMPLETE (2026-08-14)
+
+The change
+`openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/` has
+frozen planning and a completed D stage. P01-P08 were accepted by an
+independent read-only freeze review (zero blockers) with four non-blocking
+corrections applied to the planning docs; D01-D03 + DT0-DT2 were authorized
+and completed on 2026-08-14. The lane remains retrospective
+diagnostics/development on existing 10 dB Type-II, q=1024 Gray 256-symbol
+data: the rows' frame/payload identities are historical V4/V5 identities and
+cannot be fresh-canary, confirmation, qualification, or promotion evidence.
+
+- D01 no-decode channel characterization ran exactly once (run_id
+  `v13_d01_20260814`, six-file package at
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d01_20260814/`).
+  Ledger ready: 2304 rows = characterization 384 (128/stratum) + development
+  1536 (512/stratum) + retrospective_audit 384 (128/stratum). bw200
+  aggregates: raw SER mean 0.0771 (0.0391-0.1133); bit-plane mismatch
+  monotone 3.1e-5 (MSB) to 3.75e-2 (LSB); zero-diff mass 0.9229; 8 runs max
+  length 2 (isolated errors, no bursts); QSC p=.20 calibration mismatch
+  0.1229; model entropy 2.722 b/symbol; NLL mean 1.247; empirical conditional
+  entropy lower bound 0.547 b/symbol (labelled empirical diagnostic, not a
+  proof).
+- D02 engineering oracle implemented (noiseless/single-error/tiny-q/tiny-n);
+  D03 wrapper hook with element-for-element equivalence; V7 R1A sources
+  byte-unchanged.
+- Tests: DT0 8 + DT1 8 + DT2 5 = 21/21 passed in fresh
+  `workspace/nbldpc_v13_<uuid>/` roots.
+- Independent read-only review: ACCEPT, zero blockers (two non-blocking
+  warnings: stale planning docs — this task; manifest time field — noted).
+- NOT authorized and NOT run: D04 (32-frame baseline probe), D05 (root-cause
+  report), R/I/E/A/C, and any real-data decoder execution. D04 remains
+  blocked pending a separate main-thread authorization.
+- V12 remains `source_partition_blocked`; its archive is a separate
+  housekeeping decision and does not block V13. Do not reopen V12-X01/X02.
+
+Claim boundary: the highest V13 state is `ready_for_fresh_confirmation`; no
+decoder correction, qualification, or promotion is established, and D04/D05
+plus real decode remain unauthorized.
+
+---
+
+## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: PLAN DRAFTED / EXECUTION NOT AUTHORIZED (2026-08-14)
+
+Earlier 2026-08-14 state, superseded by the freeze review and D stage above.
+The new planning change
+`openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/`
+recorded the user's decision to diagnose the algorithm using existing 10 dB
+Type-II, q=1024 Gray 256-symbol data before considering a new acquisition.
+Existing rows were sufficient for retrospective diagnostics/development, but
+their frame/payload identities are historical V4/V5 identities and cannot be
+fresh-canary, confirmation, qualification, or promotion evidence.
+
+- P01-P07 were drafted only; P08 (independent read-only freeze review) was
+  the next scientific task and is since complete.
+- All D/R/I/E/A/C tasks were unauthorized and unexecuted; the planning turn
+  performed no code change, test, decoder call, telemetry run, data
+  execution, output generation, archive, or Git write operation.
+- V12 remained `source_partition_blocked`; its archive is a separate
+  housekeeping decision and did not block V13 plan review. Do not reopen
+  V12-X01/X02.
+- If later authorized, diagnostic artifacts go only to the additive
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/<run_id>/` root;
+  frozen baseline directories and official qualification roots stay unchanged.
+- The six-file diagnostic package uses `diagnostic_outcomes.csv` for baseline,
+  candidate-development, and retrospective-audit rows with explicit `phase`
+  and `method` fields.
+
+Claim boundary was: the highest future V13 state is
+`ready_for_fresh_confirmation`; fresh acquisition or qualification requires a
+separate OpenSpec change and explicit user decision.
+
+---
+
+## Previous Task — V12 Nonbinary LDPC Real Micro-Feasibility: TERMINAL `source_partition_blocked` (2026-08-13)
+
+The change
+`openspec/changes/formal-nonbinary-ldpc-v12-real-micro-feasibility/` is in
+TERMINAL STATE **source_partition_blocked**: the four-frame bw200
+micro-feasibility canary cannot be executed because the reconstructed
+traceable 10 dB pool (2304 rows, 768 per stratum incl. 768 bw200 rows) is 100%
+covered by historical frame/payload identities from the V4 10 dB/16 dB
+transfer locks and V5 development/partition role locks (2848 excluded frame +
+2688 excluded payload identities; identical union in both prepare runs). Zero
+fresh eligible bw200 rows; a fresh acquisition would be required for any
+future four-frame canary.
+
+- Implementation (V12-I01..I05) and engineering acceptance (V12-T0..T2, 41/41)
+  complete; prepare lane (RP01-RP03) executed, official package at
+  `comparison_bench/outputs_comparison/formal_ir_methods/20260813_v2_nonbinary_v12_real_micro/`
+  (v1 intermediate deleted by explicit user decision).
+- Decision-log and memory triage completed on 2026-08-13; V12-D02 is complete.
+
+There is currently no authorized execution successor. The next action is the
+user's archive decision for this V12 change. Archiving does not execute
+V12-X01/X02, merge unattained requirements, or manufacture a success
+declaration; retain the `source_partition_blocked` terminal state and the v2
+three-artifact prepare package. The alternative is fresh-acquisition
+feasibility/planning, but only if the user explicitly wants to continue the
+real canary and opens a new OpenSpec change. Do not start V13 or decoder work
+before that acquisition-planning boundary.
+2026-08-14 supersession: the user explicitly changed this successor decision
+to V13 retrospective diagnostics planning first; the V12 fresh-canary identity
+boundary itself remains unchanged.
+
+Claim boundary remains strict: no finite decoder correction, FER,
+qualification, or promotion was established.
+
+---
+
+## Previous Task — Nonbinary V11 spatially coupled DE gate: PLAN FROZEN (2026-08-06)
 
 The new planning change is
 `openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/`. Literature review,

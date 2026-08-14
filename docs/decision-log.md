@@ -1726,3 +1726,74 @@ was 60/60 byte-identical on science fields from a fresh workspace
 - Resource budget (15.83 h < 24 h, peak RSS 2.82 GiB < 3 GiB) and rate
   contract passed; the failure is purely scientific (no threshold gain from
   spatial coupling under the frozen distributions and geometries).
+
+---
+
+### 2026-08-13: V12 nonbinary LDPC real micro-feasibility: source_partition_blocked
+
+**Decision**: V12 terminated with terminal state `source_partition_blocked`. The
+four-frame bw200 micro-feasibility canary cannot be executed because the
+reconstructed traceable 10 dB pool (2304 rows, 768 per stratum) is 100%
+covered by historical frame/payload identities from the V4 10 dB/16 dB
+transfer locks (20260729_v1/v2) and V5 development/partition role locks
+(20260731_v1): 2848 excluded frame + 2688 excluded payload identities, zero
+eligible bw200 rows. Implementation (V12-I01..I05) and engineering acceptance
+(V12-T0..T2, 41/41 tests) completed; prepare lane (RP01-RP03) produced the
+official package
+`comparison_bench/outputs_comparison/formal_ir_methods/20260813_v2_nonbinary_v12_real_micro/`
+(v1 intermediate package deleted by explicit user decision). No successor,
+rerun, tuning, replacement, or promotion is automatically authorized.
+
+**Context**: V12 asked whether the frozen finite GF(1024) R1 baseline
+(unchanged V7 R1A matrix, p=.20 prior, full 170-row syndrome) can produce an
+independently verified exact correction on four fresh compatible real frames;
+the partition-freeze step found zero collision-free rows in the existing pool.
+
+**Alternatives considered**:
+- Reuse historical frames: rejected — cross-history frame/payload exclusion is
+  frozen in V12-P05 and design §4.
+- Relax the exclusion inventory: rejected — the identities are genuinely
+  shared with prior V4/V5 real packages; relaxing would break freshness.
+- Fresh acquisition now: deferred — out of V12 scope; requires new capture and
+  a new OpenSpec change.
+
+**Consequences**: V12 stands as a documentation + engineering deliverable with
+terminal state `source_partition_blocked`; no finite decoder correction was
+established for the existing pool; any future canary requires a fresh
+acquisition and a new OpenSpec change. Claim boundary: V12 never establishes
+success probability, FER, threshold, qualification, or promotion.
+
+---
+
+### 2026-08-14: 先用现有数据诊断非二元 LDPC，不以重新采集为前置
+
+**Decision**: 用户决定先使用现有 10 dB Type-II、q=1024、Gray、256-symbol
+数据做非二元 LDPC 的 retrospective diagnostic/development 规划，不把
+重新采集设为 V13 的前置条件。V13 change
+`formal-nonbinary-ldpc-v13-existing-data-diagnostics` 仅处于
+`PLAN DRAFTED / EXECUTION NOT AUTHORIZED`；本轮只请求独立只读 freeze
+review，不请求 decoder 或真实数据执行。
+
+**Context**: V12 的 `source_partition_blocked` 是 freshness/identity
+partition 失败：已有 10 dB 池中的 768 个 bw200 行均已被 V4/V5 历史
+frame/payload identities 覆盖，而不是数据量为零。现有行可用于 channel
+统计、接口/数值诊断和事后 exact-correction 检查，但不能被称为 fresh
+canary、confirmation、qualification 或 promotion evidence。
+
+**Frozen boundary**: V7 R1A、V10 `failed_ensemble`、V11
+`failed_coupling`、V12 `source_partition_blocked` 的含义不改写；binary
+V5 同域 384/384 仅作 frame-difficulty/control 参照，不复制其 leakage、
+prior 或模型。Alice truth 仅可进入离线 aggregate 与事后 exact check；
+公共 telemetry 不保存 raw arrays 或逐位置 error mask。bw200 是 primary，
+bw120/bw180 只能在 bw200 根因结论之后做预注册 cross-stratum check。
+
+**Artifact naming**: future diagnostics use the six-file additive package;
+`diagnostic_outcomes.csv` contains baseline, candidate-development, and
+retrospective-audit rows with explicit `phase` and `method` fields. The
+diagnostic CSV name is frozen to `diagnostic_outcomes.csv`.
+
+**Consequences**: P01--P07 只在文档中 drafted，P08 独立 freeze review
+尚未完成；所有 D/R/I/E/A/C 均未授权。即使未来诊断全绿，最高状态也
+只是 `ready_for_fresh_confirmation`。fresh acquisition、正式
+qualification 或 promotion 必须另开 OpenSpec change 并由用户决定；V12
+仍保持 `source_partition_blocked`，不重开 X01/X02。

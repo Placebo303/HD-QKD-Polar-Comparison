@@ -1,8 +1,103 @@
 # AGENT_HANDOFF.md
 
-Last verified: **2026-08-12**
+Last verified: **2026-08-14**
 
-## Current State — Binary LDPC v5 Phase 4 REAL PROMOTED (2026-08-12)
+## Current State — V13 Existing-Data Nonbinary LDPC Diagnostics: PLAN FROZEN + D-STAGE COMPLETE (2026-08-14)
+
+Change: `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/`
+
+V13 planning is FROZEN: P01-P08 were accepted by an independent read-only
+freeze review (zero blockers) and four non-blocking corrections were applied
+to the planning docs. The D stage (D01-D03 + DT0-DT2) was authorized and
+completed on 2026-08-14. This remains a retrospective diagnostic/development
+lane on existing 10 dB Type-II q=1024 Gray 256-symbol data — not fresh
+evidence: the existing rows are already covered by V4/V5 frame/payload
+identities. Every future artifact must be marked `diagnostic_only` and
+`retrospective_reuse`; even an all-green path can reach only
+`ready_for_fresh_confirmation`.
+
+- D01 no-decode channel characterization ran exactly once (run_id
+  `v13_d01_20260814`, six-file package at
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d01_20260814/`).
+  Ledger ready: 2304 rows = characterization 384 (128/stratum) + development
+  1536 (512/stratum) + retrospective_audit 384 (128/stratum). bw200
+  aggregates: raw SER mean 0.0771 (0.0391-0.1133); bit-plane mismatch
+  monotone 3.1e-5 (MSB) to 3.75e-2 (LSB); zero-diff mass 0.9229; 8 runs max
+  length 2 (isolated errors, no bursts); QSC p=.20 calibration mismatch
+  0.1229; model entropy 2.722 b/symbol; NLL mean 1.247; empirical conditional
+  entropy lower bound 0.547 b/symbol (labelled empirical diagnostic, not a
+  proof).
+- D02 engineering oracle implemented (noiseless/single-error/tiny-q/tiny-n);
+  D03 wrapper hook with element-for-element equivalence; V7 R1A sources
+  byte-unchanged.
+- Tests: DT0 8 + DT1 8 + DT2 5 = 21/21 passed in fresh
+  `workspace/nbldpc_v13_<uuid>/` roots.
+- Independent read-only review: ACCEPT, zero blockers (two non-blocking
+  warnings: stale planning docs — this task; manifest time field — noted).
+- NOT authorized and NOT run: D04 (32-frame baseline probe), D05 (root-cause
+  report), R/I/E/A/C, and any real-data decoder execution. D04 remains
+  blocked pending a separate main-thread authorization.
+- V12 remains terminal `source_partition_blocked`; its archive is a separate
+  housekeeping decision and does not block V13. Do not reopen V12-X01/X02.
+- Diagnostic output stays additive under
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/<run_id>/`; frozen
+  `src/`, `experiments/`, `tools/`, `results/`, and official
+  `formal_ir_methods` roots remain untouched. The six-file diagnostic package
+  uses `diagnostic_outcomes.csv` for baseline, candidate-development, and
+  retrospective-audit rows with explicit `phase` and `method` fields.
+
+Recommended next action: none is authorized. D04 (32-frame baseline probe) and
+D05 (root-cause report) require a separate main-thread authorization; real
+decode, fresh confirmation, qualification, and promotion require a later
+OpenSpec change and explicit user decision.
+
+Claim boundary: the highest V13 state is `ready_for_fresh_confirmation`; no
+decoder correction, qualification, or promotion is established, and D04/D05
+plus real decode remain unauthorized.
+
+---
+
+## Previous State — V12 Nonbinary LDPC Real Micro-Feasibility: TERMINAL `source_partition_blocked` (2026-08-13)
+
+Change: `openspec/changes/formal-nonbinary-ldpc-v12-real-micro-feasibility/`
+
+V12 is in TERMINAL STATE `source_partition_blocked`. The four-frame bw200
+micro-feasibility canary cannot be executed: the reconstructed traceable 10 dB
+pool (2304 rows, 768 per stratum incl. 768 bw200 rows) is 100% covered by
+historical frame/payload identities from the V4 10 dB/16 dB transfer locks and
+V5 development/partition role locks (2848 excluded frame + 2688 excluded
+payload identities; identical union in both prepare runs). Zero fresh eligible
+bw200 rows → per design §4 the honest terminal state is
+`source_partition_blocked`; a fresh acquisition would be required for any
+future four-frame canary.
+
+- Implementation (V12-I01..I05) and engineering acceptance (V12-T0..T2,
+  41/41) completed; prepare lane (RP01-RP03) executed and produced the v2
+  package with zero eligible rows.
+- Official package:
+  `comparison_bench/outputs_comparison/formal_ir_methods/20260813_v2_nonbinary_v12_real_micro/`
+  (v1 intermediate package deleted by explicit user decision).
+- tasks.md: V12-T3, V12-RP01..RP03, V12-D01, and V12-D02 checked; V12-X01/X02
+  are blocked and were never run.
+- Decision-log and memory triage were completed on 2026-08-13.
+
+Recommended next action: the user separately authorizes archiving this V12
+change. Archiving does not execute V12-X01/X02, merge unattained requirements,
+or manufacture any success declaration; retain the terminal
+`source_partition_blocked` state and the v2 three-artifact prepare package.
+Only if the user later wants to continue a real canary should a fresh-
+acquisition feasibility plan and new OpenSpec change be opened. Do not start
+V13 or decoder work before that new acquisition planning boundary.
+2026-08-14 supersession: the user explicitly changed this successor decision
+to V13 retrospective diagnostics planning first; the V12 fresh-canary identity
+boundary itself remains unchanged.
+
+Claim boundary: V12 established no finite decoder correction and no FER,
+qualification, or promotion claim.
+
+---
+
+## Previous State — Binary LDPC v5 Phase 4 REAL PROMOTED (2026-08-12)
 
 Change: `openspec/changes/binary-ldpc-v5-incremental-redundancy/`
 

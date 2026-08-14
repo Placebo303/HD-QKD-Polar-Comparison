@@ -1,5 +1,49 @@
 # AGENT_PROJECT_MEMORY.md
 
+## 2026-08-13 Mainline fusion merge — main = db00174d, two lines re-fused
+
+- The local working line is now `main` at merge commit
+  `db00174d2d9edb471da5cae159561c04fdf40ccd` (parents `c7853867…` PolarCode
+  line + `8338c9e4…` formal-ir line), pushed to origin/main and synced
+  (local main == origin/main). Supersedes the 2026-08-12 entry's
+  "working branch is formal-ir-accumulation"; that branch is now a
+  historical label only. [repo-observed]
+- Line history: the local formal IR line (`comparison_bench/`, `openspec/`,
+  `formal_ir/`, nonbinary LDPC v1-v12, cascade, ldpc v2-v5) and the remote
+  PolarCode line (`pipelines/`, `tools/diagnostics|security_reports`,
+  `src/qkd_io`, Route A/B-lite audit, P0/P1 release hygiene: checksum
+  verification, `CURRENT_MAINLINE.md`, runtime paths) forked at `b6f61d40`
+  and are now re-fused. The merge tree contains both sides completely
+  (695 + 215 file diff verified). [repo-observed]
+- Six conflict files resolved by policy: add/add → formal-ir version for
+  `AGENT_HANDOFF.md`, `AGENT_PROJECT_MEMORY.md`, `wsl-env.sh`; content →
+  two-side merge for `.gitignore`, `README.md`,
+  `experiments/run_golden_sweep_four_datasets.py`. [decision]
+- Local branch cleanup completed: `develop`, `codex/feat/polar-diagnostics-occupancy`,
+  `wt-a1..wt-ab` deleted; all worktrees removed (formerly
+  `C:/Users/admin/.codex/worktrees/*`). Local branches now only `main`
+  (working line) and `formal-ir-accumulation` (historical tip `8338c9e4`,
+  kept as label/backup, pushed to origin). [repo-observed]
+- Remote branches preserved: origin/main (`db00174d`),
+  origin/formal-ir-accumulation (`8338c9e4`),
+  origin/codex/feat/polar-diagnostics-occupancy (stale, `e0494156` — do not
+  treat as current), origin/project-restructure-20260427 (`0e4f7351`, merged
+  into main history). [repo-observed]
+- AGENT_PROJECT_MEMORY.md itself was committed in `8338c9e4` (carrying the
+  2026-08-12 triage entry); the merge kept the formal-ir version. This entry
+  is an uncommitted working-tree addition by design. [repo-observed]
+- Still deliberately untracked (user decision: leave for now; they now hang
+  on the main worktree): v12 real-micro/partition and ldpc_v5 transfer
+  evaluation sources + tests — 8 py files under
+  `comparison_bench/src/comparison_bench/{cli,formal_ir}/` and
+  `comparison_bench/tests/` — plus
+  `outputs_comparison/{final_ir_method_selection,formal_ir_methods,transfer_evaluation}/`,
+  the `comparison_bench/新增卷 (D).lnk` Windows shortcut leftover, and
+  `workspace/` scratch. Do not commit or delete unprompted. [repo-observed]
+- Environment facts: `http.sslBackend schannel` already recorded in §3; local
+  proxy 127.0.0.1:7899 had a transient outage during the merge (no durable
+  impact); git 2.52.0 in use, supports `merge-tree --write-tree`. [repo-observed]
+
 ## 2026-08-12 Formal IR accumulation commit, branch, and push
 
 - Current working branch is `formal-ir-accumulation`, HEAD =
@@ -1592,3 +1636,146 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   `L_recon=10*m`, separate fixed 64-bit tag, `L_total=10*m+64`; these are hard
   caps and no shortened/index/other reconciliation payload is allowed. Blind
   adaptation is prohibited in V9 and deferred to a future V10. [decision]
+
+## 42. Nonbinary V12 Real Micro-Feasibility — source_partition_blocked (2026-08-13)
+
+- Change: `formal-nonbinary-ldpc-v12-real-micro-feasibility`. Terminal state
+  **source_partition_blocked** (`partition_state` and `plan_state`
+  `source_partition_blocked`): 0 frames, 0 seed records, no decoder, no
+  arrays. Implementation V12-I01..I05 complete; engineering acceptance
+  V12-T0..T2 passed 41/41 tests (prepare-only production lane added to the six
+  V12 files: `nonbinary_v12_real_micro.py` `prepare_production`,
+  `partition.py` `prepare` with `production_prepare_authorized`, CLI `prepare`
+  action). [repo-observed, decision]
+- Root cause: the reconstructed traceable 10 dB pool (2304 rows, 768 per
+  stratum incl. 768 bw200) is 100% covered by historical identities from the
+  V4 10 dB/16 dB transfer locks (20260729_v1/v2) and V5
+  development/partition role locks (20260731_v1): 2848 excluded frame + 2688
+  excluded payload identities, zero eligible bw200 rows -> no source rows to
+  partition. [repo-observed]
+- Official preparation package (exactly 3 artifacts):
+  `comparison_bench/outputs_comparison/formal_ir_methods/20260813_v2_nonbinary_v12_real_micro/`
+  (`exclusion_manifest.json`, `partition_lock.json`, `pre_run_plan.json`;
+  schemas `nbldpc_v12_exclusion_manifest_v1` / `partition_lock` / `plan`;
+  run_id `nbldpc_v12_real_micro`). The v1 intermediate package
+  (`20260813_v1_...`) was deleted by explicit user decision; v2's exclusion
+  manifest (33 packages) still lists the deleted v1 package as a
+  formal_package with 0 identities. [decision]
+- V12-X01/X02 never ran (blocked — no eligible frames). V12-D01 recorded;
+  V12-D02 completed 2026-08-13. `docs/decision-log.md`,
+  `AGENT_HANDOFF.md`, `CURRENT_TASK.md`, and the §42 memory triage were
+  updated. [repo-observed]
+- Scientific implication: a fresh acquisition is required for any future
+  four-frame bw200 canary; no successor/rerun/tuning/promotion is
+  automatically authorized. Claim boundary: no finite decoder correction
+  established for the existing pool. [decision]
+- Procedural: the user's own binary V5 transfer-evaluation work
+  (`ldpc_v5_transfer_evaluation.py`,
+  `run_ldpc_v5_transfer_evaluation.py`,
+  `outputs_comparison/transfer_evaluation/`) is user-owned/kept, out of V12
+  scope, adjudicated as NOT a V12 operator violation — an evaluation-only,
+  non-qualification retrospective transfer evaluation of frozen V5-C2
+  (2026-08-12). [decision]
+- Status supersession: the 2026-08-12 AGENT_HANDOFF current state (binary LDPC
+  v5 REAL PROMOTED) is now previous state; V12 blocked supersedes it as
+  current. The pre-existing 2026-08-13 mainline-fusion merge entry at the top
+  of this file is unchanged and not duplicated here. [repo-observed]
+
+## 43. Nonbinary LDPC V13 Existing-Data Diagnostics Plan (2026-08-14)
+
+- User decision: diagnose the nonbinary LDPC algorithm on the existing 10 dB
+  Type-II, q=1024, Gray, 256-symbol data before considering a new acquisition.
+  V12 remains terminal `source_partition_blocked`; V12-X01/X02 are not
+  reopened. [decision]
+- The existing pool is sufficient for retrospective diagnostics/development,
+  including channel aggregates, tiny interface oracles, optional decoder
+  telemetry, and post-hoc exact-correction checks. Its frame/payload identities
+  are already used by V4/V5, so every V13 artifact is
+  `diagnostic_only`/`retrospective_reuse`; it is not fresh canary,
+  confirmation, qualification, or promotion evidence. [decision]
+- New OpenSpec change:
+  `formal-nonbinary-ldpc-v13-existing-data-diagnostics`. Status is **PLAN
+  DRAFTED / EXECUTION NOT AUTHORIZED**. P01-P07 are drafted; P08 independent
+  read-only freeze review is pending. All D/R/I/E/A/C tasks are unexecuted and
+  unauthorized. [repo-observed]
+- Frozen plan: bw200 is primary; bw120/bw180 are deferred to a post-bw200
+  cross-stratum check. Reconstruct mutually exclusive characterization,
+  development, and retrospective-audit roles; ambiguous history yields
+  `blocked_role_ledger`. Prefer V5 development as NB development and sealed
+  V5 real frames as frame-identical audit without relabeling V5 evidence.
+  [decision]
+- Alice truth is allowed only for offline aggregates and post-hoc exact
+  equality. It cannot enter decoder prior, stopping, candidate selection,
+  retry, frame ordering, or same-frame tuning. Persistent telemetry contains no
+  raw Alice/Bob arrays or per-position error masks; only required aggregate and
+  decoder-internal traces are planned. [decision]
+- D-stage D05 emits separate fields: `diagnosis_class` is exactly `interface`,
+  `prior`, `decoder`, `code`, `mixed`, or `inconclusive`; `run_state` is
+  `diagnosis_complete` for a supported single-factor conclusion and
+  `diagnosis_inconclusive` for mixed/insufficient evidence. A D02/oracle
+  failure may directly set `run_state=implementation_interface_fault`.
+  Diagnostic engineering gates are V13-DT0/DT1/DT2 before D04; candidate
+  implementation gates are V13-IT0/IT1/IT2/IT3 before E01.
+  After D05 and a new amendment, at most one prior-only, decoder-only, or
+  code-only candidate may be selected; mixed/inconclusive stops the route.
+  [decision]
+- Future additive diagnostics, if separately authorized, use
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/<run_id>/` with
+  six minimal artifacts: `data_role_ledger.json`, `channel_diagnostics.json`,
+  `diagnostic_outcomes.csv`, `decoder_telemetry.jsonl`,
+  `root_cause_report.json`, and `diagnostic_run_manifest.json`. Frozen
+  `src/`, `experiments/`, `tools/`, `results/`, and official
+  `formal_ir_methods` roots remain unchanged. `diagnostic_outcomes.csv`
+  contains baseline, candidate-development, and retrospective-audit rows with
+  `phase` and `method` fields. [decision]
+- Allowed `run_state` values are `plan_only`, `blocked_role_ledger`,
+  `implementation_interface_fault`, `diagnosis_complete`,
+  `diagnosis_inconclusive`,
+  `failed_existing_data_feasibility`, `retrospective_non_ready`,
+  `ready_for_fresh_confirmation`, and `invalid_diagnostic_execution`.
+  `promoted`, `qualified`, and `observed_fresh_correction` are forbidden.
+  Fresh acquisition/qualification requires a separate OpenSpec change and
+  explicit user decision. [decision]
+
+## 44. Nonbinary LDPC V13 Existing-Data Diagnostics — D-Stage Complete (2026-08-14)
+
+- Change: `formal-nonbinary-ldpc-v13-existing-data-diagnostics`. **PLAN
+  FROZEN**: P01-P08 accepted via independent read-only freeze review, zero
+  blockers; four non-blocking planning corrections applied (code-branch
+  evidence source pinned to offline short-cycle/girth analysis plus frozen
+  rank=170 facts; spec scenario added; 512/stratum V5 development basis for
+  32+64 denominators; V7 R1A label harmonized). [decision]
+- D stage authorized and completed: D01-D03 plus DT0-DT2 (D04/D05 NOT
+  authorized). New files: `comparison_bench/src/comparison_bench/formal_ir/
+  nonbinary_v13_diagnostics.py`, `cli/run_nonbinary_v13_diagnostics.py`,
+  `cli/verify_nonbinary_v13_diagnostics.py`,
+  `tests/test_nonbinary_v13_diagnostics.py`. Tests 21/21 passed
+  (DT0 8 + DT1 8 + DT2 5) in fresh `workspace/nbldpc_v13_<uuid>/` roots with
+  `pytest -p no:cacheprovider`. [repo-observed]
+- D01 real run exactly once: run_id `v13_d01_20260814`, package
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d01_20260814/`
+  (six-file set). Role ledger 2304 rows = characterization 384 (128/stratum) +
+  development 1536 (512/stratum) + retrospective_audit 384 (128/stratum);
+  mutually exclusive, zero V4<->V5 identity overlap. [repo-observed]
+- bw200 aggregates (128 frames, 32768 symbols, aggregate-only, no raw arrays
+  persisted) — **empirical observations only, no root-cause conclusion (D05
+  not run)**: raw SER mean 0.0771 (min 0.0391, max 0.1133); bit-plane
+  mismatch monotone MSB->LSB 3.1e-5 .. 3.75e-2; zero-diff mass 0.9229, only 8
+  runs max run length 2 (isolated errors, no bursts); QSC p=.20 calibration
+  mismatch 0.1229; model entropy 2.722 b/symbol; NLL mean 1.247 b/symbol;
+  empirical conditional entropy / necessary-leakage lower bound 0.547 b/symbol
+  (empirical diagnostic, not a Shannon or finite-length proof). [repo-observed]
+- D03 hook: wrapper/adapter only, V7 R1A sources byte-unchanged; hook-off
+  element-for-element identical; hook-on adds aggregate telemetry without
+  changing word/status/iterations. Independent read-only review: ACCEPT, zero
+  blockers; two non-blocking warnings (stale planning docs — updated;
+  manifest time field missing — noted for D04). [repo-observed]
+- Claim boundary: highest V13 state is `ready_for_fresh_confirmation`; no
+  decoder correction/qualification/promotion established. D04 (32-frame bw200
+  baseline probe) requires separate main-thread authorization after DT0-DT2;
+  D05 (root-cause report) requires D04; real-data decoder execution remains
+  unauthorized. V12 remains `source_partition_blocked` (not reopened).
+  [decision]
+- Procedural: AGENT_HANDOFF.md / CURRENT_TASK.md updated 2026-08-14 with V13
+  D-stage-complete as current state; V12 entries retained as previous state.
+  [repo-observed]
