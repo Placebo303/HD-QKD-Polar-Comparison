@@ -49,5 +49,8 @@ V14-P06 独立 freeze review 进行中；review ACCEPT 前禁止任何执行。
 
 ## C — 收尾
 
-- [ ] **V14-C01** decision-log 记录 gate 结论（fail → 路线冻结声明；
+- [x] **V14-C01** decision-log 记录 gate 结论（fail → 路线冻结声明；
   pass 不适用）；记忆 triage；V15/V16 提案归档为"门未过、不立项"。
+  （Done 2026-08-15：decision-log FAIL 条目 + 路线冻结声明；记忆 §49；
+  strict replay 完成——科学文件 5/6 字节一致、manifest 仅 provenance
+  四字段差异（V10 先例）；CURRENT_TASK 更新。V14 change 全流程完毕。）
