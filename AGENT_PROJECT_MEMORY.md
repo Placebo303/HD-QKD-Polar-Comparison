@@ -1899,3 +1899,24 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - 下一步：门结果 → V15（高码率候选，合成资格；fresh 实数据需用户决定
   采集）/ 或路线冻结声明；V16（rate-adaptive + syndrome 估计 + 子块确认）。
   [decision]
+
+## 49. Nonbinary LDPC V14 效率可行性门——FAIL：普通系综在 f<=1.3 无解 (2026-08-15)
+
+- V14 门执行一次（evidence 提交 1cdc63b6；E02 独立 review ACCEPT）：
+  Stage 0 QSC 回归 PASS（proxy 0.060 vs 0.069, |d|=0.009<=0.012）；
+  Stage 1 折叠验证全绿；Stage 2 的 12 个冻结点（3 λ × m∈{15..18}，
+  q=1024 结构化信道）全部非收敛——最终 base-q 熵 0.288-0.357（阈值
+  0.01 的 29-36 倍，非边际）；f 值 1.032-1.239 全满足 <=1.3 但收敛是
+  绑定判据 → gate_state=fail。预算 wall 87min/577MiB。 [repo-observed]
+- 科学含义：码率点全在容量内（R<=0.9414 vs C~0.9432）→ 非信息论不可
+  能，是普通不规则系综（degree-2 含 λ、dc~51 集中 ρ）在高码率的 BP
+  阈值结构性缺口（与 V10/V11 的 QSC .22/.32 失败同类）。机制可信
+  （T2 与 V9 等价 1e-12 + Stage 0 文献回归双背书）。 [decision]
+- 后果：V15/V16 不立项（提案/骨架保留为 gated drafts）；效率路线冻结；
+  下一步只能用户决定新 change（SC-LDPC 阈值饱和 / Cohen 位面分解 /
+  多边族），且必须新 DE 门先行。V13 R3（f~12）仍为唯一验证正确器；
+  fresh-confirmation-only 路线不受影响。 [decision]
+- 可复用经验：q=1024 结构化 DE 单点 ~7 min（numba；12 点 87 min）；
+  普通 irregular 系综在 rate>0.93 不收敛是"可预测的负结果"——高码率
+  必须换系综族而非调 profile；gate-first 纪律防止了 V15 的浪费性构造。
+  [repo-observed]
