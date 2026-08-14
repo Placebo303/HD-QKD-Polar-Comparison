@@ -1988,4 +1988,31 @@ exact equality。
 `ready_for_fresh_confirmation`。**不构成** promotion/qualification/fresh
 correction（身份仍为历史复用）。下一步由用户决定：是否另开 OpenSpec
 change 做 fresh acquisition（新帧身份）以把该候选提升为 fresh canary/
-confirmation/qualification。C01（独立验收 + 记忆 triage）进行中。`
+confirmation/qualification。C01（独立验收 + 记忆 triage）进行中。
+
+---
+
+### 2026-08-14: V13-C01 独立验收 ACCEPT — V13 规划完成
+
+**Decision**: reviewer-go 独立只读验收（2026-08-14）出具 **ACCEPT，零
+blocker**：六项任务全过——(1) 五个生产包（D04/D05_corrected/E01/A01/A02）
+只读 verifier 全 PASS 且 run_state 与声明集一致；(2) 冻结门全部满足
+（E01 candidate 64/64≥1/64、A01 128/128≥120 + median 0.904s≤120 +
+disclosure 6.640625≤8.75 + gate_passed==run_state、A02 两层 128/128 +
+no_state_promotion）；(3) 预注册纪律（D04=排序前 32、E01=次 64、A01=128
+audit，互斥且与 decision-log 冻结清单精确一致）；(4) 声明边界（无
+promoted/qualified/observed_fresh_correction、无 raw 数据持久化、纯加法
+提交零删除）；(5) 执行授权（outcome 行数精确匹配授权解码集：32/128/128/
+256）；(6) 科学一致性（`ready_for_fresh_confirmation` 为 V13 最高状态、
+R3 候选独立重算一致：seed 20260818、连通、Tanner girth 8、rank 170）。
+三个非阻塞警告记录在案（首版 D05 包的 run_state 标注、D01 bursts_runs
+已知 bug 与 D05 修正聚合、A02 跨层 frame_id 复用——身份以
+(stratum, frame_id, frame_identity) 三元组为准）。
+
+**Consequences**: V13 冻结规划**全部完成**：P→D→R→I→E→A→C 每阶段按
+纪律执行，终态 `ready_for_fresh_confirmation`，七个生产包 + 无效发射
+notice 全部保留并提交。记忆 triage 完成（AGENT_PROJECT_MEMORY §47）。
+待用户决定的独立事项：① 是否另开 OpenSpec change 做 fresh acquisition
+（新帧身份 + prepare/review/execute/verify 链）以推进
+confirmation/qualification/promotion；② V12 change 的 archive 决定
+（独立 housekeeping）。两者都不由 V13 自动触发。`

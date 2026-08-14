@@ -1,12 +1,15 @@
 # Tasks: V13 Existing-Data Nonbinary LDPC Diagnostics
 
-Status: **PLAN FROZEN / P08 ACCEPTED / D05 EMITTED + REVIEW ACCEPTED / R3 FROZEN (2026-08-14)**.
-P01--P08 accepted (zero blockers). D01-D04 + DT0-DT2 complete; D05 emitted
-`diagnosis_class=code`, `run_state=diagnosis_complete` and the independent
-read-only review returned ACCEPT (zero blockers, four non-blocking warnings).
-R3 code-only candidate is frozen by amendment (connected simple check graph,
-seed 20260818, Tanner girth >= 8; prior/decoder/checks/rate unchanged; E01
-pre-registered 64 frames). R1/R2 locked; I/E/A/C items remain unchecked.
+Status: **COMPLETE — `ready_for_fresh_confirmation` (2026-08-14)**.
+P01-P08 accepted; D01-D04 + DT0-DT2; D05 `code`/`diagnosis_complete` with
+independent review ACCEPT; R3 code-only candidate `nbldpc_v13_r3_code_v1`
+frozen by amendment (IT0-IT3, 49/49 tests); E01 screen 64/64 candidate exact
+(baseline 13/64) + E02; A01 retrospective audit 128/128 ->
+`ready_for_fresh_confirmation`; A02 cross-stratum check bw120 128/128 + bw180
+128/128 (no promotion); **C01 independent acceptance ACCEPT (zero blockers)**.
+All production packages verified read-only and committed. The maximum V13
+claim is `ready_for_fresh_confirmation` — NOT promotion/qualification/fresh
+correction; fresh acquisition requires a separate user OpenSpec change.
 
 ## Planning freeze (frozen via P08)
 
@@ -175,10 +178,15 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   read-only bw120/bw180 cross-stratum check; do not promote. (Done
   2026-08-14, run `v13_a02_20260814`: bw120 128/128 and bw180 128/128
   exact_correct, readiness gates met, `no_state_promotion`; verifier PASS.)
-- [ ] **V13-C01** Complete independent acceptance and mandatory memory triage;
+- [x] **V13-C01** Complete independent acceptance and mandatory memory triage;
   preserve all diagnostic failures and decide separately whether to open a
-  new fresh-acquisition/qualification change. (In progress: independent
-  read-only acceptance review running.)
+  new fresh-acquisition/qualification change. (Done 2026-08-14: independent
+  read-only acceptance review **ACCEPT, zero blockers** — five production
+  packages verifier PASS, gates, pre-registration discipline, claim boundary,
+  execution authorization and scientific consistency all verified; three
+  non-blocking warnings recorded in the decision-log. Memory triage done
+  (AGENT_PROJECT_MEMORY.md section 47). The fresh-acquisition decision is the
+  user's separate OpenSpec change.)
 
 ## Diagnostic artifact contract
 

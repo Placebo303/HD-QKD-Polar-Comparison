@@ -1,36 +1,36 @@
 # CURRENT_TASK.md
 
-## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: READY_FOR_FRESH_CONFIRMATION, C01 PENDING (2026-08-14)
+## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: COMPLETE (2026-08-14)
 
 The change
 `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/` has
-completed the full frozen route: P01-P08 accepted; D01-D03 + DT0-DT2; D04
-baseline probe (8/32 exact); D05 root-cause (code / diagnosis_complete,
+completed the full frozen route and reached the terminal claim
+**`ready_for_fresh_confirmation`**: P01-P08 accepted; D01-D03 + DT0-DT2; D04
+baseline probe (8/32 exact); D05 root-cause (`code` / `diagnosis_complete`,
 independent review ACCEPT); R3 code-only candidate `nbldpc_v13_r3_code_v1`
-(frozen by amendment; IT0-IT3, 49/49 tests); E01 screen **64/64** candidate
-exact (baseline 13/64); E02 (candidate already frozen); A01 retrospective
-audit **128/128** exact -> **run_state `ready_for_fresh_confirmation`**;
-A02 cross-stratum check bw120 **128/128** + bw180 **128/128** (no
-promotion). All production packages verified read-only; all results
-committed (ed4bb690 .. 5ef7984a + a02 commit).
+(frozen amendment; IT0-IT3, 49/49 tests); E01 screen 64/64 candidate exact
+(baseline 13/64); E02 (candidate frozen); A01 retrospective audit 128/128
+exact -> `ready_for_fresh_confirmation`; A02 cross-stratum bw120 128/128 +
+bw180 128/128 (no promotion); **C01 independent acceptance ACCEPT (zero
+blockers)**. Memory triage done (AGENT_PROJECT_MEMORY §47).
 
 - Evidence packages (all under
   `comparison_bench/outputs_comparison/nonbinary_diagnostics/`):
   v13_d01_20260814, v13_d04_20260814, v13_d05_20260814_corrected (+
-  invalid-execution notice for the first emission), v13_e01_20260814,
-  v13_a01_20260814, v13_a02_20260814.
-- C01 (independent acceptance review + mandatory memory triage + user
-  decision on a fresh-acquisition change) is the only remaining item; the
-  independent acceptance review is running.
-- Claim boundary: `ready_for_fresh_confirmation` is the MAXIMUM V13 state;
-  it is NOT promotion/qualification/fresh correction. Fresh acquisition,
-  formal confirmation or qualification requires a NEW OpenSpec change and an
-  explicit user decision. V12 remains `source_partition_blocked` (archive is
-  a separate housekeeping decision).
+  v13_d05_20260814_invalid_execution_notice.json for the retained first
+  emission), v13_e01_20260814, v13_a01_20260814, v13_a02_20260814. All
+  verified read-only and committed (ed4bb690 .. 4c0f27a4).
+- Claim boundary: `ready_for_fresh_confirmation` is the MAXIMUM V13 state —
+  NOT promotion/qualification/fresh correction. **User decisions pending**
+  (independent of V13, not auto-triggered): ① whether to open a NEW OpenSpec
+  change for fresh acquisition (new frame identities, prepare/review/
+  execute/verify chain) to advance confirmation/qualification/promotion of
+  the R3 candidate; ② the V12 archive decision (separate housekeeping; V12
+  stays `source_partition_blocked`, X01/X02 not reopened).
 
 ---
 
-## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: R3 FROZEN, E01 RUNNING (2026-08-14)
+## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: READY_FOR_FRESH_CONFIRMATION, C01 PENDING (2026-08-14)
 
 Earlier 2026-08-14 state, superseded by the freeze review and D stage above.
 The new planning change
