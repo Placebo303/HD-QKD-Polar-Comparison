@@ -6,6 +6,7 @@ import csv
 import json
 import math
 import multiprocessing as mp
+from statistics import NormalDist
 import sys
 from pathlib import Path
 from typing import Any
@@ -73,7 +74,10 @@ def _resolve_sidecar_path(sidecar_root: Path, path_text: str | None) -> Path | N
         return None
     pp = Path(p)
     if pp.is_absolute():
-        return pp
+        # Archived candidate bundles may retain an absolute path into the
+        # non-authoritative ``results`` tree.  Resolve that path through the
+        # repository fallback so diagnostics remain readable after archiving.
+        return _resolve_path(REPO_ROOT, pp)
     return (sidecar_root / pp).resolve()
 
 
@@ -464,9 +468,12 @@ def _simulate_layer_sc_fer_early(
     llr_clip: float,
     n_log: int,
     max_err_allowed: int,
-) -> float:
+    seed: int,
+) -> tuple[int, int]:
     if k <= 0:
-        return 1.0
+        return 1, 1
+
+    np.random.seed(seed)
 
     p = ber
     if p < 1e-6:
@@ -502,9 +509,9 @@ def _simulate_layer_sc_fer_early(
                 break
         frame_err += bad
         if frame_err > max_err_allowed:
-            return float(frame_err) / float(n_frames)
+            return frame_err, _ + 1
 
-    return float(frame_err) / float(n_frames)
+    return frame_err, n_frames
 
 
 _ORDER: np.ndarray | None = None
@@ -512,14 +519,26 @@ _SIDECAR_MAP: dict[tuple[int, int], str] = {}
 _RATE_MAP: dict[tuple[int, int], float] = {}
 _N = 4096
 _N_LOG = 12
-_N_FRAMES = 100
+_N_FRAMES = 300
 _FER_THRESH = 0.05
+_FER_CONFIDENCE = 0.95
 _SC_MARGIN = 0.05
 _SCL_MARGINS: tuple[float, ...] = (0.02, 0.05)
 _SCL_BATCH = 20
 _BASE_SEED = 20260228
 _E_P = 0.025
 _SCL_DECODER: PolarSCLDecoder | None = None
+
+# Rate-search fix (branch codex/fix/rate-search-leak, 2026-08-14):
+# the previous candidate ladder {1.0,0.95,0.90,0.85,0.80,0.70,0.60,0.50}
+# combined with only 100 FER frames (max 1 error allowed) forced chosen
+# rates 0.14-0.20 bits/bit below per-layer BSC capacity, which is the main
+# driver of the large EC leak at low dimensions (see docs/decision-log.md
+# 2026-08-14 entry 2).  A fine ladder (_RATE_STEP) plus more frames
+# (_N_FRAMES=300, up to 8 errors allowed at 95% Wilson < 0.05) lets the
+# search land close to the FER boundary instead of a coarse step below it.
+_RATE_STEP = 0.02
+_RATE_MIN_FACTOR = 0.50
 
 
 def _worker_init(
@@ -535,9 +554,12 @@ def _worker_init(
     e_p: float,
     enable_scl: bool,
     repo_root: str,
+    rate_step: float = _RATE_STEP,
+    rate_min_factor: float = _RATE_MIN_FACTOR,
 ) -> None:
     global _ORDER, _SIDECAR_MAP, _RATE_MAP, _N, _N_LOG, _N_FRAMES, _FER_THRESH
     global _SC_MARGIN, _SCL_MARGINS, _SCL_BATCH, _BASE_SEED, _E_P, _SCL_DECODER
+    global _RATE_STEP, _RATE_MIN_FACTOR
 
     _SIDECAR_MAP = dict(sidecar_map)
     _RATE_MAP = dict(rate_map)
@@ -550,13 +572,15 @@ def _worker_init(
     _SCL_BATCH = int(scl_batch)
     _BASE_SEED = int(base_seed)
     _E_P = float(e_p)
+    _RATE_STEP = float(rate_step)
+    _RATE_MIN_FACTOR = float(rate_min_factor)
     _ORDER = _polar_weight_order(_N)[::-1]
 
     # JIT warm-up for SC path.
     idx = np.asarray([_ORDER[0]], dtype=np.int64)
     mask = np.zeros(_N, dtype=np.int8)
     mask[idx] = 1
-    _ = _simulate_layer_sc_fer_early(0.1, _N, 1, idx, mask, 1, 20.0, _N_LOG, 0)
+    _ = _simulate_layer_sc_fer_early(0.1, _N, 1, idx, mask, 1, 20.0, _N_LOG, 0, 0)
 
     _SCL_DECODER = None
     if enable_scl:
@@ -582,18 +606,66 @@ def _extract_real_layer_bers(a_eff: np.ndarray, b_eff: np.ndarray, d: int) -> np
 
 
 def _build_candidates(k_base: int, n: int) -> list[int]:
+    """Fine-grained descending rate ladder (step _RATE_STEP, floor _RATE_MIN_FACTOR)."""
     cands: list[int] = []
-    for s in (1.0, 0.95, 0.90, 0.85, 0.80, 0.70, 0.60, 0.50):
-        k = int(math.floor(float(k_base) * float(s)))
+    s = 1.0
+    while s >= _RATE_MIN_FACTOR - 1e-9:
+        k = int(math.floor(float(k_base) * s))
         if k > n:
             k = n
         if k > 16:
             cands.append(k)
+        s -= _RATE_STEP
     return sorted(set(cands), reverse=True)
 
 
-def _try_layer_sc(ber: float, cap: float, order: np.ndarray) -> dict[str, Any]:
-    max_err_allowed = int(math.floor(_FER_THRESH * _N_FRAMES - 1e-12))
+def _candidate_seed(base_seed: int, d: int, bw: int, layer_idx: int, k: int, decoder_tag: int) -> int:
+    """Stable seed keyed by the scientific candidate, independent of execution order."""
+    words = [int(x) & 0xFFFFFFFF for x in (base_seed, d, bw, layer_idx, k, decoder_tag)]
+    return int(np.random.SeedSequence(words).generate_state(1, dtype=np.uint32)[0])
+
+
+def _wilson_upper_bound(errors: int, trials: int, confidence: float = _FER_CONFIDENCE) -> float:
+    if trials <= 0 or errors < 0 or errors > trials:
+        raise ValueError("require 0 <= errors <= trials")
+    if not (0.5 < confidence < 1.0):
+        raise ValueError("confidence must be between 0.5 and 1")
+    p = float(errors) / float(trials)
+    z = NormalDist().inv_cdf(float(confidence))
+    z2 = z * z
+    denom = 1.0 + z2 / float(trials)
+    center = p + z2 / (2.0 * float(trials))
+    radius = z * math.sqrt(p * (1.0 - p) / float(trials) + z2 / (4.0 * float(trials) ** 2))
+    return min(1.0, max(0.0, (center + radius) / denom))
+
+
+def _fer_metadata(errors: int, trials: int) -> dict[str, Any]:
+    upper = _wilson_upper_bound(errors, trials)
+    return {
+        "fer_errors": int(errors),
+        "fer_trials": int(trials),
+        "fer_point_estimate": float(errors) / float(trials),
+        "fer_upper_bound": float(upper),
+        "fer_confidence": float(_FER_CONFIDENCE),
+        "fer_acceptance_rule": "one_sided_wilson_upper_lt_threshold",
+        "fer_accepted": int(upper < _FER_THRESH),
+    }
+
+
+def _max_accepted_errors(trials: int) -> int:
+    return max(
+        (e for e in range(trials + 1) if _wilson_upper_bound(e, trials) < _FER_THRESH),
+        default=-1,
+    )
+
+
+def _choose_layer_meta(sc_meta: dict[str, Any], scl_meta: dict[str, Any]) -> dict[str, Any]:
+    return sc_meta if float(sc_meta.get("gain", 0.0)) >= float(scl_meta.get("gain", 0.0)) else scl_meta
+
+
+def _try_layer_sc(ber: float, cap: float, order: np.ndarray, *, d: int, bw: int, layer_idx: int) -> dict[str, Any]:
+    # Stop only once even zero errors in all remaining declared trials cannot pass.
+    max_err_allowed = _max_accepted_errors(_N_FRAMES)
     k_base = int(math.floor(float(_N) * max(0.0, float(cap) - float(_SC_MARGIN))))
     if k_base <= 16:
         return {
@@ -610,8 +682,7 @@ def _try_layer_sc(ber: float, cap: float, order: np.ndarray) -> dict[str, Any]:
         info_idx = np.asarray(order[:k], dtype=np.int64)
         mask = np.zeros(_N, dtype=np.int8)
         mask[info_idx] = 1
-        fer = float(
-            _simulate_layer_sc_fer_early(
+        errors, trials = _simulate_layer_sc_fer_early(
                 float(ber),
                 _N,
                 int(k),
@@ -621,9 +692,10 @@ def _try_layer_sc(ber: float, cap: float, order: np.ndarray) -> dict[str, Any]:
                 20.0,
                 _N_LOG,
                 max_err_allowed,
+                _candidate_seed(_BASE_SEED, d, bw, layer_idx, k, 1),
             )
-        )
-        if fer < _FER_THRESH:
+        fer_meta = _fer_metadata(errors, trials)
+        if bool(fer_meta["fer_accepted"]):
             return {
                 "decoder_mode": "sc",
                 "gain": float(k) / float(_N),
@@ -632,6 +704,7 @@ def _try_layer_sc(ber: float, cap: float, order: np.ndarray) -> dict[str, Any]:
                 "crc_bits": 0,
                 "frozen_count": int(_N - int(k)),
                 "layer_block_symbols": int(_N),
+                **fer_meta,
             }
     return {
         "decoder_mode": "sc",
@@ -655,16 +728,15 @@ def _simulate_layer_scl_fer_early(
     n_frames: int,
     rng: np.random.Generator,
     llr_clip: float = 20.0,
-) -> float:
+) -> tuple[int, int]:
     if _SCL_DECODER is None:
-        return 1.0
-    msg_len = int(k) - 16
-    if msg_len <= 0:
-        return 1.0
+        return 1, 1
+    if int(k) <= 0:
+        return 1, 1
 
     p = float(min(1.0 - 1e-6, max(1e-6, float(ber))))
     lam = float(math.log((1.0 - p) / p))
-    max_err_allowed = int(math.floor(_FER_THRESH * float(n_frames) - 1e-12))
+    max_err_allowed = _max_accepted_errors(int(n_frames))
     err_count = 0
     seen = 0
 
@@ -674,8 +746,7 @@ def _simulate_layer_scl_fer_early(
         llrs = np.empty((bsz, int(n)), dtype=np.float32)
 
         for f in range(bsz):
-            msg = rng.integers(0, 2, size=int(msg_len), dtype=np.uint8)
-            info = _crc16_append(msg)
+            info = rng.integers(0, 2, size=int(k), dtype=np.uint8)
             infos[f, :] = info
 
             u = np.zeros(int(n), dtype=np.int8)
@@ -687,25 +758,28 @@ def _simulate_layer_scl_fer_early(
             v = np.clip(v, -llr_clip, llr_clip)
             llrs[f, :] = v.astype(np.float32)
 
-        out_bits = _SCL_DECODER.decode_batch(int(n), int(k), int(bsz), mask, llrs)
+        frozen_values = np.zeros((bsz, int(n)), dtype=np.uint8)
+        out_bits = _SCL_DECODER.decode_batch_frozen_plain(
+            int(n), int(k), int(bsz), mask, frozen_values, llrs
+        )
         frame_err = np.any(out_bits != infos, axis=1)
         err_count += int(np.sum(frame_err))
         seen += int(bsz)
 
         if err_count > max_err_allowed:
-            return float(err_count) / float(max(1, seen))
+            return err_count, seen
 
-    return float(err_count) / float(max(1, seen))
+    return err_count, seen
 
 
-def _try_layer_scl(ber: float, cap: float, order: np.ndarray, rng: np.random.Generator) -> dict[str, Any]:
+def _try_layer_scl(ber: float, cap: float, order: np.ndarray, *, d: int, bw: int, layer_idx: int) -> dict[str, Any]:
     if _SCL_DECODER is None:
         return {
             "decoder_mode": "scl",
             "gain": 0.0,
             "k": 0,
             "rate": 0.0,
-            "crc_bits": 16,
+            "crc_bits": 0,
             "frozen_count": int(_N),
             "layer_block_symbols": int(_N),
         }
@@ -718,7 +792,7 @@ def _try_layer_scl(ber: float, cap: float, order: np.ndarray, rng: np.random.Gen
             info_idx = np.sort(np.asarray(order[:k], dtype=np.int64))
             mask = np.zeros(_N, dtype=np.uint8)
             mask[info_idx] = 1
-            fer = _simulate_layer_scl_fer_early(
+            errors, trials = _simulate_layer_scl_fer_early(
                 ber=float(ber),
                 n=_N,
                 n_log=_N_LOG,
@@ -726,24 +800,26 @@ def _try_layer_scl(ber: float, cap: float, order: np.ndarray, rng: np.random.Gen
                 info_idx=info_idx,
                 mask=mask,
                 n_frames=_N_FRAMES,
-                rng=rng,
+                rng=np.random.default_rng(_candidate_seed(_BASE_SEED, d, bw, layer_idx, k, 2)),
             )
-            if fer < _FER_THRESH:
+            fer_meta = _fer_metadata(errors, trials)
+            if bool(fer_meta["fer_accepted"]):
                 return {
                     "decoder_mode": "scl",
                     "gain": float(k) / float(_N),
                     "k": int(k),
                     "rate": float(k) / float(_N),
-                    "crc_bits": 16,
+                    "crc_bits": 0,
                     "frozen_count": int(_N - int(k)),
                     "layer_block_symbols": int(_N),
+                    **fer_meta,
                 }
     return {
         "decoder_mode": "scl",
         "gain": 0.0,
         "k": 0,
         "rate": 0.0,
-        "crc_bits": 16,
+        "crc_bits": 0,
         "frozen_count": int(_N),
         "layer_block_symbols": int(_N),
     }
@@ -812,10 +888,9 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
         return _zero_row(chi_e=chi_e, skip_reason=f"sidecar_load_exception:{type(e).__name__}")
 
     order = _ORDER if _ORDER is not None else _polar_weight_order(_N)[::-1]
-    rng = np.random.default_rng(_BASE_SEED + int(d) * 1009 + int(bw) * 1013)
-
     sc_pie = 0.0
     scl_pie = 0.0
+    best_hard_pie = 0.0
     layers_sc = 0
     layers_scl = 0
     layers_best = 0
@@ -838,7 +913,9 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
             continue
         layers_capacity_ge_01 += 1
 
-        sc_meta = _try_layer_sc(ber=float(ber), cap=cap, order=order)
+        sc_meta = _try_layer_sc(
+            ber=float(ber), cap=cap, order=order, d=int(d), bw=int(bw), layer_idx=int(i)
+        )
         gain_sc = float(sc_meta.get("gain", 0.0))
         if gain_sc > 0.0:
             sc_pie += gain_sc
@@ -848,7 +925,9 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
             ber=float(ber),
             cap=cap,
             order=order,
-            rng=np.random.default_rng(int(rng.integers(0, 2**31 - 1)) + i * 7919),
+            d=int(d),
+            bw=int(bw),
+            layer_idx=int(i),
         )
         gain_scl = float(scl_meta.get("gain", 0.0))
         if gain_scl > 0.0:
@@ -857,7 +936,8 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
 
         if max(gain_sc, gain_scl) > 0.0:
             layers_best += 1
-        chosen_meta = sc_meta if gain_sc >= gain_scl else scl_meta
+        chosen_meta = _choose_layer_meta(sc_meta, scl_meta)
+        best_hard_pie += float(chosen_meta.get("gain", 0.0))
         layer_metrics.append(
             {
                 "layer_idx": int(i),
@@ -870,10 +950,15 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
                 "crc_bits": int(chosen_meta.get("crc_bits", 0) or 0),
                 "frozen_count_best": int(chosen_meta.get("frozen_count", _N) or _N),
                 "layer_block_symbols": int(chosen_meta.get("layer_block_symbols", _N) or _N),
+                "fer_errors": chosen_meta.get("fer_errors", ""),
+                "fer_trials": chosen_meta.get("fer_trials", ""),
+                "fer_point_estimate": chosen_meta.get("fer_point_estimate", ""),
+                "fer_upper_bound": chosen_meta.get("fer_upper_bound", ""),
+                "fer_confidence": chosen_meta.get("fer_confidence", ""),
+                "fer_acceptance_rule": chosen_meta.get("fer_acceptance_rule", ""),
             }
         )
 
-    best_hard_pie = max(float(sc_pie), float(scl_pie))
     chi_e = _h2(_E_P) + _E_P * math.log2(int(d) - 1)
     pie_practical = max(0.0, float(best_hard_pie) - float(chi_e))
     skr = float(pie_practical * rate) if math.isfinite(rate) else float("nan")
@@ -931,7 +1016,15 @@ def _parse_only_points(spec: str | None) -> set[tuple[int, int]]:
 
 
 def _resolve_path(repo_root: Path, p: str | Path) -> Path:
-    return resolve_repo_path(repo_root, p)
+    resolved = resolve_repo_path(repo_root, p)
+    if resolved.exists():
+        return resolved
+    try:
+        suffix = resolved.relative_to(repo_root / "results")
+    except ValueError:
+        return resolved
+    archived = repo_root / "results" / "authoritative" / suffix
+    return archived if archived.exists() else resolved
 
 
 def _recover_rate_from_sidecar(repo_root: Path, sidecar_root: Path) -> float:
@@ -1023,21 +1116,41 @@ def _effective_rate_from_sidecar(repo_root: Path, sidecar_root: Path) -> float:
             except Exception:
                 mj = {}
             acq_s = _extract_acquisition_duration_s_from_metrics(mj)
+    # Do not invent an acquisition duration.  The caller keeps the original
+    # candidate/grid coincidence rate when no explicit duration is available.
     if (not math.isfinite(acq_s)) or acq_s <= 0.0:
-        acq_s = 5.0
+        return float("nan")
     return float(n_symbols) / float(acq_s)
+
+
+def _select_coincidence_rate(*, grid_rate: float, source_rate: float, effective_rate: float) -> float:
+    """Select a measured rate without fabricating a duration.
+
+    An explicitly recovered acquisition duration is the only reason to replace
+    the rate preserved in the candidate/grid inputs.  If it is unavailable,
+    retain those inputs in grid-then-source order; otherwise return NaN.
+    """
+    if math.isfinite(effective_rate) and effective_rate > 0.0:
+        return float(effective_rate)
+    if math.isfinite(grid_rate):
+        return float(grid_rate)
+    if math.isfinite(source_rate):
+        return float(source_rate)
+    return float("nan")
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Unified real-sequence Polar envelope scan (SC + C++ CA-SCL + in-script practical SKR)"
+        description="Unified real-sequence Polar envelope scan (SC + ordinary C++ SCL + calibrated practical SKR)"
     )
     ap.add_argument("--jobs", type=int, default=15)
     ap.add_argument("--N", type=int, default=4096)
-    ap.add_argument("--frames", type=int, default=100)
+    ap.add_argument("--frames", type=int, default=300)
     ap.add_argument("--fer-thresh", type=float, default=0.05)
     ap.add_argument("--sc-margin", type=float, default=0.05)
     ap.add_argument("--scl-margins", default="0.02,0.05")
+    ap.add_argument("--rate-step", type=float, default=0.02)
+    ap.add_argument("--rate-min-factor", type=float, default=0.50)
     ap.add_argument("--scl-batch", type=int, default=20)
     ap.add_argument("--seed", type=int, default=20260228)
     ap.add_argument("--visibility", type=float, default=0.95)
@@ -1076,7 +1189,7 @@ def main() -> int:
         with in_csv.open("r", encoding="utf-8", newline="") as f:
             src_rows = list(csv.DictReader(f))
 
-    src_meta: dict[tuple[int, int], tuple[str, float, str, str]] = {}
+    src_meta: dict[tuple[int, int], tuple[str, float, str, str, float]] = {}
     for r in src_rows:
         try:
             d = _as_int(r.get("dimension", "nan"))
@@ -1090,10 +1203,15 @@ def main() -> int:
             map_ser = _as_float(r.get("map_ser", "nan"))
         except Exception:
             map_ser = float("nan")
-        src_meta[(int(d), int(bw))] = (status, float(map_ser), sidecar_verdict, fail_reason)
+        try:
+            src_rate = _as_float(r.get("coincidence_rate_hz", "nan"))
+        except Exception:
+            src_rate = float("nan")
+        src_meta[(int(d), int(bw))] = (status, float(map_ser), sidecar_verdict, fail_reason, float(src_rate))
 
     sidecar_map: dict[tuple[int, int], str] = {}
     rate_map: dict[tuple[int, int], float] = {}
+    rate_source_map: dict[tuple[int, int], str] = {}
     tasks: list[tuple[int, int, str, float, str, str]] = []
     seen: set[tuple[int, int]] = set()
 
@@ -1117,7 +1235,9 @@ def main() -> int:
         except Exception:
             pass
 
-        src_status, src_map_ser, src_verdict, src_fail_reason = src_meta.get(key, ("", float("nan"), "", ""))
+        src_status, src_map_ser, src_verdict, src_fail_reason, src_rate = src_meta.get(
+            key, ("", float("nan"), "", "", float("nan"))
+        )
         status = src_status if src_status else grid_status
         map_ser = src_map_ser if math.isfinite(src_map_ser) else grid_map_ser
         sidecar_verdict = src_verdict if src_verdict else status
@@ -1135,18 +1255,29 @@ def main() -> int:
                         map_ser = float(map_ser_sidecar)
 
         try:
-            rate = _as_float(r.get("coincidence_rate_hz", "nan"))
+            grid_rate = _as_float(r.get("coincidence_rate_hz", "nan"))
         except Exception:
-            rate = float("nan")
+            grid_rate = float("nan")
+        rate = _select_coincidence_rate(
+            grid_rate=float(grid_rate),
+            source_rate=float(src_rate),
+            effective_rate=float("nan"),
+        )
+        rate_source = "grid_table_preserved_measured_rate" if math.isfinite(grid_rate) else (
+            "source_candidate_preserved_measured_rate" if math.isfinite(src_rate) else "missing"
+        )
         if key in sidecar_map:
             sidecar_root = Path(sidecar_map[key])
-            # Always prefer effective symbol rate from extracted sequence length.
             rate_eff = _effective_rate_from_sidecar(repo_root, sidecar_root)
-            if math.isfinite(rate_eff) and rate_eff > 0.0:
-                rate = float(rate_eff)
-            elif not math.isfinite(rate):
-                rate = _recover_rate_from_sidecar(repo_root, sidecar_root)
+            rate = _select_coincidence_rate(
+                grid_rate=float(grid_rate),
+                source_rate=float(src_rate),
+                effective_rate=float(rate_eff),
+            )
+            if math.isfinite(rate_eff):
+                rate_source = "explicit_acquisition_duration"
         rate_map[key] = float(rate) if math.isfinite(rate) else float("nan")
+        rate_source_map[key] = rate_source
 
         tasks.append((int(d), int(bw), status, float(map_ser), sidecar_verdict, fail_reason))
 
@@ -1177,6 +1308,8 @@ def main() -> int:
             float(e_p),
             (not bool(args.disable_scl)),
             str(repo_root),
+            float(args.rate_step),
+            float(args.rate_min_factor),
         ),
     ) as pool:
         for row in pool.imap_unordered(_worker, tasks, chunksize=1):
@@ -1245,6 +1378,7 @@ def main() -> int:
         "n_pairs_actual",
         "frame_diag_available",
         "coincidence_rate_hz",
+        "coincidence_rate_source_tag",
         "sc_hard_PIE",
         "cpp_scl_hard_PIE",
         "best_hard_PIE",
@@ -1278,6 +1412,7 @@ def main() -> int:
             row.update(threshold_by_key.get(key, {}))
             row.update(nuisance_by_key.get(key, {}))
             row.update(frame_diag_by_key.get(key, {}))
+            row["coincidence_rate_source_tag"] = rate_source_map.get(key, "missing")
             w.writerow({k: row.get(k) for k in cols})
 
     diag_csv = out_csv.parent / "polar_diag_summary.csv"
@@ -1291,6 +1426,7 @@ def main() -> int:
         "map_ser",
         "layers_success_best",
         "coincidence_rate_hz",
+        "coincidence_rate_source_tag",
         "peak_center_ps",
         "peak_sigma_ps",
         "peak_to_bg",
@@ -1330,6 +1466,7 @@ def main() -> int:
                 "map_ser": r.get("map_ser"),
                 "layers_success_best": r.get("layers_success_best"),
                 "coincidence_rate_hz": r.get("coincidence_rate_hz"),
+                "coincidence_rate_source_tag": rate_source_map.get(key, "missing"),
                 "peak_center_ps": diag.get("peak_center_ps"),
                 "peak_sigma_ps": diag.get("peak_sigma_ps"),
                 "peak_to_bg": diag.get("peak_to_bg"),
@@ -1367,6 +1504,12 @@ def main() -> int:
         "crc_bits",
         "frozen_count_best",
         "layer_block_symbols",
+        "fer_errors",
+        "fer_trials",
+        "fer_point_estimate",
+        "fer_upper_bound",
+        "fer_confidence",
+        "fer_acceptance_rule",
     ]
     with layer_csv.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=layer_cols)
@@ -1393,6 +1536,12 @@ def main() -> int:
                     "crc_bits": lm.get("crc_bits"),
                     "frozen_count_best": lm.get("frozen_count_best"),
                     "layer_block_symbols": lm.get("layer_block_symbols"),
+                    "fer_errors": lm.get("fer_errors"),
+                    "fer_trials": lm.get("fer_trials"),
+                    "fer_point_estimate": lm.get("fer_point_estimate"),
+                    "fer_upper_bound": lm.get("fer_upper_bound"),
+                    "fer_confidence": lm.get("fer_confidence"),
+                    "fer_acceptance_rule": lm.get("fer_acceptance_rule"),
                 }
                 w.writerow({k: _csv_cell(row.get(k)) for k in layer_cols})
 
