@@ -27,3 +27,5 @@ Thumbs.db
 .idea/
 .env
 *.local
+*.dll
+pytest-cache-files-*/
