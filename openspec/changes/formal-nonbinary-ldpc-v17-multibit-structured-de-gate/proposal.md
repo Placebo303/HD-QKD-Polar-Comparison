@@ -9,6 +9,8 @@
 **MSB→LSB 单调失配**（bit-plane mismatch 3.1e-5 → 3.75e-2，D01
 characterization）映射为冻结的**多位结构化信道模型**之后，是否存在
 **边标签/位面级**的非二元 LDPC 系综能在 rate ≥ 0.90 上达到 f ≤ 1.3。
+**评估点集冻结为 m∈{15,16,17,18}（rate 0.9297–0.9414，与 V14 同
+协议；不允许收窄子集）。**
 
 本 change **不构造任何有限码**（无 codebook、无 decoder、无 canary/
 development/qualification）。

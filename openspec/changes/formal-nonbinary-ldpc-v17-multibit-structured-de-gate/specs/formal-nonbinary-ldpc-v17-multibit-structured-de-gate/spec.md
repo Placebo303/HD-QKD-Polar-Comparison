@@ -19,8 +19,9 @@ from the V13 MSB→LSB monotone mismatch observation.
   point evaluation.
 - V17-3: The channel model must be rebuilt read-only from characterization
   frames and persisted as schema `nbldpc_v17_multibit_channel_model_v1`.
-- V17-4: A small candidate set (3–5) is pre-registered before execution;
-  no search, tuning, or rerun is allowed.
+- V17-4: A small candidate set (3–5) is pre-registered before execution
+  with the FULL evaluation point set m∈{15,16,17,18} (rate 0.9297–0.9414,
+  same protocol as V14); no subsetting, no search, no tuning, no rerun.
 - V17-5: Convergence, efficiency (f≤1.3), budget (3 GiB / 24 h), and
   execute-once + strict replay standards are frozen before execution.
 - V17-6: PASS ⇒ a separate finite-code candidate change; FAIL ⇒ route
