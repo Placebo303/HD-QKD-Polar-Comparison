@@ -1,4 +1,4 @@
-"""V13 diagnostic engineering tests DT0/DT1/DT2
+"""V13 diagnostic engineering tests DT0/DT1/DT2 + D04-lane tests DT3
 (``formal-nonbinary-ldpc-v13-existing-data-diagnostics``).
 
 - **DT0** compile/import, structural checks, tiny GF/syndrome math, oracle
@@ -9,13 +9,17 @@
 - **DT2** a complete fake diagnostic lifecycle and decoder-free replay in a
   fresh ``workspace/nbldpc_v13_<uuid>/`` root, proving tests cannot enter a
   real source loader, a production decoder by default, or an official output
-  root.
+  root;
+- **DT3** the D04 baseline-probe lane with fake frames: deterministic
+  pre-registration, fake lifecycle + read-only verify, authorization
+  tamper rejection, Alice-information boundary and no-overwrite.
 
 All frames and locks are synthetic; no real sidecar, no real source loader and
 no official output root is ever touched.
 """
 from __future__ import annotations
 
+import csv
 import hashlib
 import inspect
 import json
@@ -343,14 +347,19 @@ def test_dt2_production_entrypoints_hard_stopped():
         core.run_d01(Path("workspace") / "must_not_exist",
                      run_id="fake", discovery_root=Path("workspace"),
                      production_authorized=False)
+    with pytest.raises(ValueError, match="production D04 baseline probe is not authorized"):
+        core.run_d04(Path("workspace") / "must_not_exist",
+                     run_id="fake", discovery_root=Path("workspace"),
+                     production_authorized=False)
+    # D05 stays a hard stop; D04 requires the explicit main-thread flag
     with pytest.raises(SystemExit) as excinfo:
-        core.v13_d04_d05_guard(authorized=False, test_only=False)
+        core.v13_d04_d05_guard("d05", True)
     assert excinfo.value.code == 2
     with pytest.raises(SystemExit) as excinfo:
-        core.v13_d04_d05_guard(authorized=True, test_only=False)
+        core.v13_d04_d05_guard("d04", False)
     assert excinfo.value.code == 2
-    # the escape clause exists but D04/D05 execution is not implemented
-    assert core.v13_d04_d05_guard(authorized=True, test_only=True) is None
+    # the authorized D04 probe is implemented (module API; test lane below)
+    assert core.v13_d04_d05_guard("d04", True) is None
 
 
 def test_dt2_complete_fake_lifecycle_and_replay():
@@ -434,3 +443,200 @@ def test_dt2_tests_cannot_enter_real_loader_decoder_or_official_root():
                      or line.startswith("from . import ldpc_v4_10db_source")
                      or line.startswith("import ldpc_v4_10db_source"))]
     assert top_level == []
+
+
+# ------------------------------------------------------------------ DT3 (D04 baseline-probe lane)
+
+def _fake_ledger_large(*, per_stratum: int = 40, n_dev: int = 36) -> dict:
+    """Fake ledger with >=32 development rows in every stratum (D04 needs 32
+    bw200 development frames)."""
+    pool = _fake_identity_rows(per_stratum=per_stratum)
+    transfer, partition = _fake_roles(pool, n_transfer=2, n_conf=2, n_dev=n_dev)
+    return core.build_role_ledger(pool, transfer, partition,
+                                  schema=core.LEDGER_SCHEMA_TEST,
+                                  run_id="fake_v13_d04_test",
+                                  identity_sources=[
+                                      {"name": "fake_v4_v1", "lock_file": "real_data_lock.json",
+                                       "path": "workspace/fake_v4_v1.json", "schema": "x",
+                                       "row_count": len(transfer)},
+                                      {"name": "fake_v5_partition", "lock_file": "partition_lock.json",
+                                       "path": "workspace/fake_v5.json", "schema": "y",
+                                       "row_count": len(partition)}])
+
+
+def _fake_d04_frames(ledger: dict, rows: list[dict], *, seed: int = 20260815,
+                     noise_frames: int = 2) -> list[dict]:
+    rng = np.random.default_rng(seed)
+    frames: list[dict] = []
+    for index, row in enumerate(rows):
+        alice = rng.integers(0, core.Q, size=core.N)
+        bob = alice.copy()
+        if index < noise_frames:
+            positions = rng.choice(core.N, size=20, replace=False)
+            bob[positions] = rng.integers(0, core.Q, size=20)
+        frames.append({"frame_id": int(row["frame_id"]), "stratum": row["stratum"],
+                       "role": "development", "frame_identity": row["frame_identity"],
+                       "alice": alice, "bob": bob})
+    return frames
+
+
+def test_dt3_d04_pre_registration_deterministic_and_disjoint():
+    ledger = _fake_ledger_large()
+    first = core.pre_registered_d04_frames(ledger)
+    second = core.pre_registered_d04_frames(ledger)
+    assert [r["frame_id"] for r in first] == [r["frame_id"] for r in second]
+    assert len(first) == core.D04_FRAME_COUNT == 32
+    assert all(r["role"] == "development" and r["stratum"] == core.PRIMARY_STRATUM
+               for r in first)
+    ids = [r["frame_id"] for r in first]
+    assert ids == sorted(ids)
+    # disjoint from the sealed audit frames by role construction
+    audit_ids = {r["frame_id"] for r in ledger["rows"]
+                 if r["role"] == "retrospective_audit"}
+    assert not (set(ids) & audit_ids)
+    # insufficient development rows fail closed
+    with pytest.raises(ValueError, match="insufficient development rows"):
+        core.pre_registered_d04_frames(_fake_ledger())
+
+
+def test_dt3_d04_fake_lifecycle_and_verify():
+    root = _out("t3_d04")
+    ledger = _fake_ledger_large()
+    rows = core.pre_registered_d04_frames(ledger, count=4)
+    frames = _fake_d04_frames(ledger, rows)
+    run_dir = root / "package"
+    result = core.run_d04(run_dir, run_id="fake_v13_d04", ledger=ledger, frames=frames,
+                          count=4, max_iter=2, _test_only=True, command="pytest DT3")
+    assert result["run_state"] == "plan_only"
+    assert result["ledger_state"] == "ready"
+    assert {p.name for p in run_dir.iterdir()} == set(core.ARTIFACTS)
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    assert verified["run_state"] == "plan_only"
+    assert verified["outcome_rows"] == 4
+    assert verified["telemetry_records"] == 4
+    outcome = list(csv.DictReader(
+        (run_dir / "diagnostic_outcomes.csv").read_text("utf-8").splitlines()))
+    assert all(row["phase"] == "baseline" for row in outcome)
+    assert all(row["method"] == core.V7_R1A_METHOD for row in outcome)
+    assert all(row["stratum"] == core.PRIMARY_STRATUM and row["role"] == "development"
+               for row in outcome)
+    assert [int(row["frame_id"]) for row in outcome] == [int(f["frame_id"]) for f in frames]
+    # the two noiseless frames must be exactly corrected; noisy frames are
+    # retained as failures when the decoder cannot converge in 2 iterations
+    assert sum(1 for row in outcome if row["reason"] == "exact_correct") >= 2
+    assert all(row["status"] in ("syndrome_consistent", "decode_failed") for row in outcome)
+    # manifest carries the D04-limited authorization and the baseline summary
+    manifest = json.loads((run_dir / "diagnostic_run_manifest.json").read_bytes())
+    assert manifest["authorization"] == {"d04_authorized": True, "d05_authorized": False,
+                                         "real_decode_authorized": True,
+                                         "phase": "V13-D04 baseline probe"}
+    assert manifest["stages_completed"] == ["D04"]
+    assert manifest["baseline"]["frames"] == 4
+    assert manifest["baseline"]["frozen_binding"] == core.V7_R1A_FROZEN["manifest_id"]
+    assert sum(manifest["baseline"]["status_counts"].values()) == 4
+    # root-cause report carries no D05 conclusion
+    report = json.loads((run_dir / "root_cause_report.json").read_bytes())
+    assert report["d05_emitted"] is False and report["diagnosis_class"] is None
+    assert str(run_dir.resolve()).startswith(str(Path("workspace").resolve()))
+
+
+def test_dt3_d04_tampered_authorization_rejected():
+    root = _out("t3_tamper")
+    ledger = _fake_ledger_large()
+    rows = core.pre_registered_d04_frames(ledger, count=4)
+    frames = _fake_d04_frames(ledger, rows)
+    run_dir = root / "package"
+    core.run_d04(run_dir, run_id="fake_v13_d04_t", ledger=ledger, frames=frames,
+                 count=4, max_iter=2, _test_only=True, command="pytest DT3")
+    # a D04 package claiming real-decode authorization without the main-thread
+    # D04 flag must fail read-only verification
+    manifest_path = run_dir / "diagnostic_run_manifest.json"
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["authorization"] = {"d04_authorized": False, "d05_authorized": False,
+                                 "real_decode_authorized": True,
+                                 "phase": "V13-D04 baseline probe"}
+    manifest_path.write_bytes(core._compact(manifest))
+    with pytest.raises(ValueError, match="manifest D04 authorization"):
+        core.verify_package(run_dir, _private_test_only=True)
+    # a D04 package with a D05 conclusion is rejected too
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["authorization"] = {"d04_authorized": True, "d05_authorized": False,
+                                 "real_decode_authorized": True,
+                                 "phase": "V13-D04 baseline probe"}
+    manifest_path.write_bytes(core._compact(manifest))
+    report_path = run_dir / "root_cause_report.json"
+    report = json.loads(report_path.read_bytes())
+    report["d05_emitted"] = True
+    report_path.write_bytes(core._compact(report))
+    with pytest.raises(ValueError, match="must not carry a D05 conclusion"):
+        core.verify_package(run_dir, _private_test_only=True)
+
+
+def test_dt3_d04_alice_only_in_syndrome_and_exact_check(monkeypatch):
+    # Alice truth never reaches the decoder path: spy the hook and assert the
+    # call carries bob + the disclosed syndrome only; persisted artifacts
+    # contain no raw arrays.
+    root = _out("t3_alice")
+    ledger = _fake_ledger_large()
+    rows = core.pre_registered_d04_frames(ledger, count=4)
+    frames = _fake_d04_frames(ledger, rows)
+    calls: list[dict] = []
+    real_hook = core.run_diagnostic_hook
+
+    def spy(bob_symbols, syndrome, manifest, matrices, *, check_count, p,
+            schedule="flooding", max_iter=100, hook=True):
+        calls.append({"bob": np.asarray(bob_symbols), "syndrome": tuple(syndrome)})
+        return real_hook(bob_symbols, syndrome, manifest, matrices,
+                         check_count=check_count, p=p, schedule=schedule,
+                         max_iter=max_iter, hook=hook)
+
+    monkeypatch.setattr(core, "run_diagnostic_hook", spy)
+    run_dir = root / "package"
+    core.run_d04(run_dir, run_id="fake_v13_d04_a", ledger=ledger, frames=frames,
+                 count=4, max_iter=2, _test_only=True, command="pytest DT3")
+    assert len(calls) == 4
+    for call in calls:
+        assert call["bob"].shape == (core.N,)
+        assert len(call["syndrome"]) == core.M
+    text = (run_dir / "diagnostic_outcomes.csv").read_text("utf-8")
+    assert "alice" not in text.lower() and "bob" not in text.lower()
+    telemetry = (run_dir / "decoder_telemetry.jsonl").read_text("utf-8")
+    assert "alice" not in telemetry and "bob" not in telemetry
+    assert "decoded_symbols" not in telemetry and "error_positions" not in telemetry
+
+
+def test_dt3_d04_oracle_failure_package_frozen_and_verifiable(monkeypatch):
+    # an oracle failure freezes the D04 package at interface fault with zero
+    # baseline rows; the frozen package still verifies read-only
+    root = _out("t3_d04_interface")
+    ledger = _fake_ledger_large()
+    rows = core.pre_registered_d04_frames(ledger, count=4)
+    frames = _fake_d04_frames(ledger, rows)
+
+    def broken_oracle(*args, **kwargs):
+        return {"status": "failed", "diagnosis_class": "interface",
+                "run_state": "implementation_interface_fault",
+                "failed_checks": ["forced"], "checks": {}}
+
+    monkeypatch.setattr(core, "run_engineering_oracle", broken_oracle)
+    run_dir = root / "package"
+    result = core.run_d04(run_dir, run_id="fake_v13_d04_if", ledger=ledger, frames=frames,
+                          count=4, max_iter=2, _test_only=True, command="pytest DT3")
+    assert result["run_state"] == "implementation_interface_fault"
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    assert verified["run_state"] == "implementation_interface_fault"
+    assert verified["outcome_rows"] == 0 and verified["telemetry_records"] == 0
+
+
+def test_dt3_d04_no_overwrite_fresh_root():
+    root = _out("t3_overwrite")
+    run_dir = root / "package"
+    run_dir.mkdir(parents=True)
+    ledger = _fake_ledger_large()
+    rows = core.pre_registered_d04_frames(ledger, count=4)
+    frames = _fake_d04_frames(ledger, rows)
+    with pytest.raises(FileExistsError, match="fresh additive output root required"):
+        core.run_d04(run_dir, run_id="fake", ledger=ledger, frames=frames,
+                     count=4, max_iter=2, _test_only=True, command="pytest DT3")

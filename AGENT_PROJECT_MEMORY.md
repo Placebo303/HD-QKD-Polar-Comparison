@@ -1779,3 +1779,40 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - Procedural: AGENT_HANDOFF.md / CURRENT_TASK.md updated 2026-08-14 with V13
   D-stage-complete as current state; V12 entries retained as previous state.
   [repo-observed]
+
+## 45. Nonbinary LDPC V13 — D04 Baseline Probe Authorized, Implemented, Executed Once (2026-08-14)
+
+- Change: `formal-nonbinary-ldpc-v13-existing-data-diagnostics`. Main thread
+  authorized V13-D04 (unchanged V7 R1A `p=.20`, 32 pre-registered bw200
+  development frames, exactly once). [decision]
+- Implementation (in `comparison_bench/` only): `run_d04` core lane in
+  `nonbinary_v13_diagnostics.py` (deterministic pre-registration sorted by
+  frame_id, D04-limited manifest authorization, frozen-failure packages at
+  `implementation_interface_fault`/`blocked_role_ledger`/
+  `invalid_diagnostic_execution`), CLI `d04` action (requires `--authorized`
+  + `--production` + fresh output root; `d05` remains a hard stop exit 2),
+  read-only `verify_package` D04 branch, and DT3 lane tests (fake lifecycle,
+  tamper, Alice boundary, no-overwrite, frozen failures). Tests 27/27 pass.
+  V7 R1A frozen sources byte-unchanged; hook equivalence held on all frames.
+  [repo-observed]
+- D04 production run exactly once: run_id `v13_d04_20260814`, six-file package
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d04_20260814/`,
+  strict read-only verifier PASS (32 outcome rows, 32 telemetry records,
+  ledger ready 2304). Outcome: **8/32 `syndrome_consistent` + `exact_correct`
+  (all converging at iteration 1), 24/32 `decode_failed` at the 100-iteration
+  limit, zero `decoder_error`, zero exact mismatches, zero
+  non-finite/normalisation/underflow events.** Telemetry observations
+  (empirical only, no D05 conclusion): decode_failed frames end highly
+  concentrated (mean posterior max 0.986, entropy 0.103 bits) with mean 3.79
+  unsatisfied checks; oscillation detected on 11/32 frames. [repo-observed]
+- Claim boundary: package run_state=`plan_only`, `d05_emitted=false`; no
+  diagnosis_class/run_state conclusion. D05 (root-cause report + independent
+  review) remains unauthorized and unimplemented; R/I/E/A/C locked; no
+  decoder execution beyond the 32 pre-registered frames. 8/32 is not
+  promotion/qualification/fresh correction. [decision]
+- Procedural note: writing the package to the official
+  `nonbinary_diagnostics/` root required a one-time sandbox escalation
+  (danger-full-access, user-approved); normal workspace-write mode denies
+  process writes under `comparison_bench/outputs_comparison/` (observed
+  again on `__pycache__` and probe mkdirs). Future official-output runs from
+  this harness need the same escalation. [repo-observed]

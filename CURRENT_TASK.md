@@ -1,13 +1,13 @@
 # CURRENT_TASK.md
 
-## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: PLAN FROZEN + D-STAGE COMPLETE (2026-08-14)
+## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: D-STAGE COMPLETE THROUGH D04 (2026-08-14)
 
 The change
 `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/` has
-frozen planning and a completed D stage. P01-P08 were accepted by an
-independent read-only freeze review (zero blockers) with four non-blocking
-corrections applied to the planning docs; D01-D03 + DT0-DT2 were authorized
-and completed on 2026-08-14. The lane remains retrospective
+frozen planning (P01-P08 accepted, zero blockers) and a D stage complete
+through D04. D01-D03 + DT0-DT2 were completed and reviewed on 2026-08-14;
+the main thread then authorized D04, which was implemented in
+`comparison_bench/` and executed exactly once. The lane remains retrospective
 diagnostics/development on existing 10 dB Type-II, q=1024 Gray 256-symbol
 data: the rows' frame/payload identities are historical V4/V5 identities and
 cannot be fresh-canary, confirmation, qualification, or promotion evidence.
@@ -25,24 +25,34 @@ cannot be fresh-canary, confirmation, qualification, or promotion evidence.
   proof).
 - D02 engineering oracle implemented (noiseless/single-error/tiny-q/tiny-n);
   D03 wrapper hook with element-for-element equivalence; V7 R1A sources
-  byte-unchanged.
-- Tests: DT0 8 + DT1 8 + DT2 5 = 21/21 passed in fresh
-  `workspace/nbldpc_v13_<uuid>/` roots.
-- Independent read-only review: ACCEPT, zero blockers (two non-blocking
-  warnings: stale planning docs — this task; manifest time field — noted).
-- NOT authorized and NOT run: D04 (32-frame baseline probe), D05 (root-cause
-  report), R/I/E/A/C, and any real-data decoder execution. D04 remains
+  byte-unchanged. Tests DT0 8 + DT1 8 + DT2 5 = 21/21, extended with the
+  D04-lane DT3 tests to 27/27 in fresh `workspace/nbldpc_v13_<uuid>/` roots.
+- D04 frozen baseline probe: main-thread authorized 2026-08-14; implemented
+  (`run_d04` core lane, CLI `d04` action, verify extension); executed exactly
+  once, run_id `v13_d04_20260814`, six-file package at
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d04_20260814/`,
+  strict read-only verifier PASS (32 outcome rows, 32 telemetry records,
+  ledger ready). Outcome: 8/32 `syndrome_consistent` + `exact_correct` (all
+  converging at iteration 1), 24/32 `decode_failed` at the 100-iteration
+  limit, zero `decoder_error`, zero exact mismatches, zero
+  non-finite/normalisation/underflow events. Telemetry observations (empirical
+  only, no D05 conclusion): decode_failed frames end highly concentrated
+  (mean posterior max 0.986, entropy 0.103 bits) with mean 3.79 unsatisfied
+  checks; oscillation detected on 11/32 frames. Hook equivalence held on all
+  32 frames (`hook_equivalence=ok`).
+- NOT authorized and NOT run: D05 (root-cause report), R/I/E/A/C, and any
+  decoder execution beyond the 32 pre-registered D04 frames. D05 remains
   blocked pending a separate main-thread authorization.
 - V12 remains `source_partition_blocked`; its archive is a separate
   housekeeping decision and does not block V13. Do not reopen V12-X01/X02.
 
 Claim boundary: the highest V13 state is `ready_for_fresh_confirmation`; no
-decoder correction, qualification, or promotion is established, and D04/D05
-plus real decode remain unauthorized.
+decoder correction, qualification, or promotion is established, and D05 plus
+real decode beyond D04 remain unauthorized.
 
 ---
 
-## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: PLAN DRAFTED / EXECUTION NOT AUTHORIZED (2026-08-14)
+## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: PLAN FROZEN + D-STAGE COMPLETE (2026-08-14)
 
 Earlier 2026-08-14 state, superseded by the freeze review and D stage above.
 The new planning change

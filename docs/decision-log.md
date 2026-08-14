@@ -1797,3 +1797,34 @@ diagnostic CSV name is frozen to `diagnostic_outcomes.csv`.
 只是 `ready_for_fresh_confirmation`。fresh acquisition、正式
 qualification 或 promotion 必须另开 OpenSpec change 并由用户决定；V12
 仍保持 `source_partition_blocked`，不重开 X01/X02。
+
+---
+
+### 2026-08-14: V13-D04 baseline probe — 主线程授权、实现并执行一次
+
+**Decision**: 主线程授权执行 V13-D04（unchanged V7 R1A `p=.20` baseline
+probe，32 个预注册 bw200 development frames，恰好一次，禁止重试/替换/调
+参）。D04 通道实现于 `comparison_bench/`：`run_d04` core lane（含 D04
+限定的 manifest authorization、冻结失败包处理）、CLI `d04` action、
+只读 verify 扩展、D04-lane 工程测试（DT3，27/27 全绿）。生产执行一次，
+run_id `v13_d04_20260814`，六文件包位于
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d04_20260814/`，
+严格只读 verify PASS（32 outcome rows、32 telemetry records、ledger ready）。
+
+**Context**: P08 freeze review 已 ACCEPT；DT0-DT2 21/21 通过。D04 结果：
+8/32 `syndrome_consistent` + `exact_correct`（全部在第 1 次迭代收敛）、
+24/32 `decode_failed` 到 100 次迭代上限、零 `decoder_error`、零
+exact_mismatch、零 non-finite/normalisation/underflow 事件。telemetry
+观测（经验诊断，非结论）：decode_failed 帧末态后验高度集中（mean
+posterior max 0.986、entropy 0.103 bits）但平均 3.79 个 unsatisfied
+checks，11/32 帧有振荡迹象。hook 等价性在全部 32 帧保持
+（hook_equivalence=ok），V7 R1A 冻结源码字节未改。
+
+**Alternatives considered**: D04 之前是 CLI 硬停止（exit 2）；实现即唯一
+路径。输出根写入在沙箱下被拒一次，以 danger-full-access 重试同一命令
+成功（用户批准）。
+
+**Consequences**: D04 包 run_state=`plan_only`、`d05_emitted=false`，不产
+生任何 diagnosis_class/run_state 结论。D05（根因报告 + 独立复核）仍未
+授权、未实现；R/I/E/A/C 全部锁死。8/32 不得被表述为 promotion、
+qualification 或 fresh correction。下一授权点是主线程决定是否授权 D05。`

@@ -1,10 +1,10 @@
 # Tasks: V13 Existing-Data Nonbinary LDPC Diagnostics
 
-Status: **PLAN FROZEN / P08 ACCEPTED / EXECUTION NOT AUTHORIZED** (2026-08-14).
+Status: **PLAN FROZEN / P08 ACCEPTED / D-STAGE COMPLETE THROUGH D04** (2026-08-14).
 P01--P08 were accepted by an independent read-only freeze review (zero
 blockers; two WARNING-level items and three suggestions recorded for
-correction before D05). Every D/R/I/E/A/C item remains unauthorized and
-unchecked.
+correction before D05). D01-D04 + DT0-DT2 are complete; D05 and every
+R/I/E/A/C item remain unauthorized and unchecked.
 
 ## Planning freeze (frozen via P08)
 
@@ -31,11 +31,12 @@ unchecked.
   (Done 2026-08-14: reviewer-go returned ACCEPT, zero blockers; non-blocking
   corrections below are required before D05.)
 
-## Phase D — initial diagnostic-only work (main-thread authorized 2026-08-14: D01-D03 + DT0-DT2 only)
+## Phase D — initial diagnostic-only work (main-thread authorized 2026-08-14: D01-D04 + DT0-DT2; D05 remains unauthorized)
 
-Gate: V13-P08 accepted (2026-08-14). D04 and D05 remain NOT authorized —
-D04 requires DT0-DT2 to pass first and then a separate main-thread
-authorization; D05 requires D04 results. No real-data decode is authorized.
+Gate: V13-P08 accepted (2026-08-14). D04 required DT0-DT2 to pass first and
+then a separate main-thread authorization (granted 2026-08-14). D05 requires
+D04 results and a separate main-thread authorization; no decoder execution
+beyond the 32 pre-registered D04 baseline frames is authorized.
 
 - [x] **V13-D01** Produce no-decode channel characterization: raw SER,
   GF-symbol differences, bit-plane mismatch, burst/run/position aggregates,
@@ -53,11 +54,16 @@ authorization; D05 requires D04 results. No real-data decode is authorized.
   must not alter decoded word, status, or iterations. Persist only aggregate
   internal traces and never Alice error locations. (Done: wrapper/adapter,
   equivalence verified, V7 sources byte-unchanged.)
-- [ ] **V13-D04** After P08 and V13-DT0--V13-DT2 only, run unchanged V7 R1A `p=.20`
+- [x] **V13-D04** After P08 and V13-DT0--V13-DT2 only, run unchanged V7 R1A `p=.20`
   once on 32 pre-registered bw200 development frames. Import binary V5 only as
   a read-only identity/control reference; label nearest-available controls
-  when exact identity cannot be established. (DT0-DT2 passed 21/21; D04
-  remains NOT authorized — requires separate main-thread authorization.)
+  when exact identity cannot be established. (Done 2026-08-14: main-thread
+  authorized; run `v13_d04_20260814` executed exactly once, six-file package
+  at `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d04_20260814/`;
+  outcomes 8/32 `syndrome_consistent` + `exact_correct` (all at iteration 1),
+  24/32 `decode_failed` at the iteration limit, zero `decoder_error`, zero
+  exact mismatches, zero non-finite/normalisation failures; strict read-only
+  verifier PASS; D04-lane engineering tests 27/27.)
 - [ ] **V13-D05** Produce a root-cause report, retain all failures, and obtain
   independent review. Emit separate fields: `diagnosis_class` is exactly one
   of `interface`, `prior`, `decoder`, `code`, `mixed`, or `inconclusive`;
@@ -98,7 +104,10 @@ authorization; D05 requires D04 results. No real-data decode is authorized.
   hook-equivalence tests. (Done: 8 tests pass.)
 - [x] **V13-DT2** Complete fake diagnostic lifecycle and decoder-free replay in
   a fresh `workspace/nbldpc_v13_<uuid>/` root with
-  `pytest -p no:cacheprovider`. (Done: 5 tests pass; total 21/21.)
+  `pytest -p no:cacheprovider`. (Done: 5 tests pass; total 21/21. 2026-08-14
+  D04 lane: DT3 tests added for the baseline-probe lane — deterministic
+  pre-registration, fake lifecycle + read-only verify, authorization tamper,
+  Alice boundary, no-overwrite, frozen failure packages — total 27/27.)
 
 ## Candidate implementation tests (before E01; future only)
 

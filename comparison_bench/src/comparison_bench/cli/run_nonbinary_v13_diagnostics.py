@@ -9,12 +9,14 @@ Main-thread-authorized Phase-D entrypoints (2026-08-14):
 - ``characterize`` — run the D01 no-decode channel characterization over the
   characterization-role bw200 frames and write the six-file diagnostic package
   into one fresh additive root under
-  ``comparison_bench/outputs_comparison/nonbinary_diagnostics/<run_id>/``.
+  ``comparison_bench/outputs_comparison/nonbinary_diagnostics/<run_id>/``;
+- ``d04`` — run the frozen D04 baseline probe (unchanged V7 R1A ``p=.20``,
+  exactly once, on the 32 pre-registered bw200 development frames).  Requires
+  the explicit ``--authorized`` (main-thread authorization) and ``--production``
+  flags and a fresh additive ``--output`` root.
 
-D04 and D05 remain hard stops: the actions exit 2 unless an explicit
-``--authorized`` flag AND ``--test-only`` are both present, and even then the
-execution is not implemented in this phase.  No real-data decoder execution is
-authorized or performed.
+D05 remains a hard stop (exit 2): the root-cause report requires D04 results
+and a separate main-thread authorization, and its execution is not implemented.
 """
 from __future__ import annotations
 
@@ -31,35 +33,63 @@ def main() -> int:
     root = Path(__file__).resolve().parents[4]
     parser = argparse.ArgumentParser(
         description="V13 nonbinary LDPC existing-data diagnostics "
-                    "(D01 ledger + channel characterization; D04/D05 hard-stopped)")
+                    "(ledger / D01 characterize / D04 baseline probe; D05 hard-stopped)")
     parser.add_argument("action", nargs="?", default="ledger",
                         choices=("ledger", "characterize", "d04", "d05"))
     parser.add_argument("--output", default=None,
-                        help="fresh additive output root (required for ledger/characterize)")
+                        help="fresh additive output root (required for ledger/characterize/d04)")
     parser.add_argument("--run-id", default=None,
-                        help="diagnostic run id (default v13_d01_<8-hex>)")
+                        help="diagnostic run id (default v13_d01_<8-hex> / v13_d04_<8-hex>)")
     parser.add_argument("--formal-ir-root", default=None,
                         help="formal_ir_methods discovery root "
                              "(default comparison_bench/outputs_comparison/formal_ir_methods)")
     parser.add_argument("--production", action="store_true",
-                        help="explicit production-lane authorization for D01")
+                        help="explicit production-lane authorization for D01/D04")
     parser.add_argument("--authorized", action="store_true",
-                        help="D04/D05 escape flag (still not implemented)")
+                        help="explicit main-thread authorization for the D04 baseline probe")
     parser.add_argument("--test-only", action="store_true",
                         help="test-only lane flag (module API, not this CLI)")
     args = parser.parse_args()
 
-    if args.action in ("d04", "d05"):
+    formal_ir_root = Path(args.formal_ir_root) if args.formal_ir_root \
+        else root / "comparison_bench/outputs_comparison/formal_ir_methods"
+
+    if args.action == "d05":
         try:
-            core.v13_d04_d05_guard(args.authorized, args.test_only)
+            core.v13_d04_d05_guard("d05", args.authorized)
         except SystemExit:
-            print(f"V13-{args.action.upper()} is not authorized in the initial "
-                  "diagnostic phase; no baseline probe or root-cause report may "
-                  "run on real data", file=sys.stderr)
-            return 2
-        print(f"V13-{args.action.upper()} execution is not implemented in this phase",
-              file=sys.stderr)
+            pass
+        print("V13-D05 root-cause report is not implemented and requires D04 "
+              "results plus a separate main-thread authorization", file=sys.stderr)
         return 2
+    if args.action == "d04":
+        try:
+            core.v13_d04_d05_guard("d04", args.authorized)
+        except SystemExit:
+            print("V13-D04 baseline probe requires the explicit --authorized "
+                  "flag (main-thread authorization)", file=sys.stderr)
+            return 2
+        if args.output is None:
+            print("--output DIR is required", file=sys.stderr)
+            return 2
+        if not args.production:
+            print("production D04 baseline probe requires the explicit "
+                  "--production flag", file=sys.stderr)
+            return 2
+        out = Path(args.output)
+        if out.exists():
+            print("fresh additive output root required", file=sys.stderr)
+            return 2
+        run_id = args.run_id or f"v13_d04_{uuid.uuid4().hex[:8]}"
+        try:
+            result = core.run_d04(out, run_id=run_id, discovery_root=formal_ir_root,
+                                  production_authorized=True,
+                                  command=" ".join(sys.argv))
+        except Exception as exc:
+            print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(result, sort_keys=True))
+        return 0
     if args.output is None:
         print("--output DIR is required", file=sys.stderr)
         return 2
@@ -67,8 +97,6 @@ def main() -> int:
         print("production D01 work requires the explicit --production flag "
               "(or use the module API with _test_only=True)", file=sys.stderr)
         return 2
-    formal_ir_root = Path(args.formal_ir_root) if args.formal_ir_root \
-        else root / "comparison_bench/outputs_comparison/formal_ir_methods"
     run_id = args.run_id or f"v13_d01_{uuid.uuid4().hex[:8]}"
     out = Path(args.output)
     if out.exists():
