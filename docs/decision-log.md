@@ -2016,3 +2016,40 @@ notice 全部保留并提交。记忆 triage 完成（AGENT_PROJECT_MEMORY §47�
 （新帧身份 + prepare/review/execute/verify 链）以推进
 confirmation/qualification/promotion；② V12 change 的 archive 决定
 （独立 housekeeping）。两者都不由 V13 自动触发。`
+
+---
+
+### 2026-08-14: V14 效率可行性门——计划冻结（freeze review ACCEPT）+ 实现 + 门执行启动
+
+**Decision**: 按调研路线（docs/nonbinary-ldpc-efficiency-roadmap-survey.md）
+立项 V14 效率可行性门：在构造任何高码率码之前，用 DE 判定"结构化信道
+（V13 characterization 帧经验差分分布）上是否存在 rate≥0.90、f≤1.3 的
+非二元 LDPC 系综"。冻结内容：信道模型（λ=1e-3 光滑化、cross-fit 只用
+characterization 帧；H(w')=0.5677 bits/symbol）；候选集 3 个 λ
+（{2:.25,3:.30,4:.45}/{2:.20,3:.25,5:.55}/{3:.3,4:.7}）× m∈{15,16,17,18}
+共 12 点评估（不做 profile 搜索——V11 教训 66.7h）；Stage 0 QSC 回归
+（q=4 R=0.75 发表门限 0.069±0.012）；Stage 1 折叠小 q 结构化验证
+（φ_m(d)=d mod 2^m）；Stage 2 q=1024 点评估（n_samples=1e4、max_iter
+150、熵≤0.01 连续 20 迭代）；预算 3 GiB RSS / 24 h wall / execute-once
++ 严格字节回放；预注册降级链（Li-Fair-Krzymień GA → Cohen 位面分解 →
+resource_blocked）。判定规则先冻结：PASS iff Stage 0 通过且存在收敛点
+且 f≤1.3；FAIL → 路线冻结为"仅 fresh 确认 V13 R3 现状"。
+
+**Process**: DE 机制由调研子代理定稿（V9 run_mcde 信道块 ~10 行改动
+即支持任意 w；q=1024 单点 ~1.18s/500×30 可行、profile 搜索不可行）；
+freeze review 首轮 BLOCKERS（spec 候选集与 design 矛盾、Stage 0 锚点
+漂移）修复后复评 ACCEPT（三个非阻塞词汇警告已并入）；实现由
+opencode-go/deepseek-v4-flash 子代理落实（nonbinary_v14_channel.py、
+nonbinary_v14_mcde.py——numba 本地核拷贝 + QSC 模式与 V9 等价 1e-12、
+cli/run_v14_gate.py），独立 verifier ACCEPT；测试 13/13 + v13 回归
+49/49 = 62/62（gate 修复后 64/64）；V8/V9/V11/V13 源码零改动。
+
+**Correction**: 首启失败——gate 动作对 evidence 目录整体 fail-closed，
+而模型文件（model 动作产物、已提交）先存在；修复为按文件 fail-closed
+（模型文件属同一冻结证据集，gate 只读校验之；gate 自身 6 个输出文件
+任一存在即拒绝，execute-once 不变）。
+
+**Consequences**: 生产门（Stage 0/1/2）已启动（execute-once）。门结果
+决定 V15：PASS → V15 高码率候选立项（合成资格 + fresh 实数据需用户
+决定采集）；FAIL → 路线冻结声明。门证据落 change 的 evidence/ 目录
+（加法、fail-closed）。
