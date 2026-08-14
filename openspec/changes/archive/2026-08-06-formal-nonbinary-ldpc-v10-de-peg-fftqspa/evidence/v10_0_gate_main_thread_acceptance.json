@@ -1,0 +1,38 @@
+{
+  "schema": "v10_0_gate_main_thread_acceptance_v1",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "main_thread_confirmation_at_utc": "2026-08-05T22:00:00Z",
+  "basis": "evidence/v10_0_q4_reference_recovery.json (schema v10_0_q4_reference_recovery_v1, sha256 1b41baad7ed03550379e2b052666cd3d399c8edbe95601ff427a771641f3373d)",
+  "verdict": "PASS — V10-0 q=4 reference recovery gate ACCEPTED; advance to V10-20 authorized",
+  "confirmed_numbers": {
+    "winner_lambda_degree_keys": [2, 3, 4, 5, 7, 25, 27, 31],
+    "winner_threshold_proxy_opt_seed": 0.07273437499999999,
+    "validation_per_seed_thresholds": [0.064140625, 0.064140625, 0.064140625],
+    "conservative_threshold": 0.064140625,
+    "delta_vs_det_0_069": 0.004859374999999999,
+    "tolerance": 0.012,
+    "rate_reconstruction_error": 0.0,
+    "rate_tolerance": 1e-12,
+    "passing_seed_count": 3,
+    "required_min_seeds": 2
+  },
+  "checklist": {
+    "execute_exactly_once": true,
+    "strict_replay_exactly_once": true,
+    "scientific_files_byte_identical": true,
+    "provenance_only_diffs": ["run_meta.json", "search/run_complete.json (wall_clock only)"],
+    "plan_binding_sha256_match": true,
+    "published_lambda_not_injected": true,
+    "optimization_seed_disjoint": true,
+    "validation_seeds_disjoint": true,
+    "no_tuning_no_rerun": true,
+    "t2_fake_lifecycle_tests_pass": true
+  },
+  "retroactive_decision_adoption": {
+    "item": "p_gate = 0.06 for the V10-0 DE screen tier-1 eligibility",
+    "rationale": "chosen before the run from prior published evidence (V8-60 measured reference threshold ~0.0624); a screen gate at or above 0.069 would mark reference-class candidates ineligible. Adopted by the main thread as a frozen protocol clarification; recorded in the recovery evidence under protocol.main_thread_decisions.",
+    "scope": "V10-0 screen only; V10A screens use the preregistered per-search gate p (design section 4 'evaluated once at gate p')."
+  },
+  "validity_signal": "DE-found winner conservative threshold 0.064140625 is within 0.0017 of the V8-60 measured reference threshold 0.062421875 without published-lambda injection — strong optimizer validity evidence.",
+  "next_stage": "V10-20 V10A GF(1024) four-search ensemble gate (plan -> independent review -> execute once -> strict replay once)."
+}

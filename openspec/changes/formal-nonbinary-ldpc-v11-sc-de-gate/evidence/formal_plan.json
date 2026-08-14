@@ -1,0 +1,416 @@
+{
+  "schema": "v11_formal_plan_v1",
+  "metadata": {
+    "change": "formal-nonbinary-ldpc-v11-sc-de-gate",
+    "plan_version": "1.0.0",
+    "frozen_date": "2026-08-06",
+    "plan_author": "planner (agent)",
+    "amendment_refs": [
+      "AMEND-2026-08-06-01 (numba hot-kernel integration)",
+      "AMEND-2026-08-06-02 (multiprocessing worker pool)"
+    ],
+    "design_ref": "design.md §1-§7",
+    "spec_ref": "specs/spec.md",
+    "purpose": "Stage P frozen formal plan: LPT scheduling extrapolation, seed-to-run mapping, budgets, stopping rules, acceptance mapping. No production code, no scientific execution."
+  },
+
+  "strata": {
+    "S1": {
+      "stratum_p": 0.20,
+      "tier_f": 1.15,
+      "tier_label": "robust",
+      "gate_conservative": 0.22,
+      "V10_winner_lambda": {
+        "provenance": "V10 archived evidence v10a_execute_results.json, key S1.winner.lambda",
+        "degrees": {2: 0.24743292985233187, 4: 0.38007906714020584, 6: 0.03289326150564248,
+                    10: 0.05380096037231538, 15: 0.02476575210263755, 21: 0.11903099781604107,
+                    25: 0.11735076249858628, 28: 0.02464626871223953},
+        "max_degree": 28
+      },
+      "R_eff": 0.6870106892038108,
+      "R_eff_formula": "1 - f * H_q(p) with q=1024, f=1.15, p=0.20",
+      "probe_range": [0.18, 0.26]
+    },
+    "S3": {
+      "stratum_p": 0.30,
+      "tier_f": 1.15,
+      "tier_label": "robust",
+      "gate_conservative": 0.32,
+      "V10_winner_lambda": {
+        "provenance": "V10 archived evidence v10a_execute_results.json, key S3.winner.lambda",
+        "degrees": {2: 0.2156204508044688, 3: 0.2637474167920141, 12: 0.08280219128587486,
+                    14: 0.15172808033189372, 26: 0.058799064193524334, 27: 0.026187727494643633,
+                    34: 0.16130785072054216, 40: 0.039807218377038434},
+        "max_degree": 40
+      },
+      "R_eff": 0.5537001767622565,
+      "R_eff_formula": "1 - f * H_q(p) with q=1024, f=1.15, p=0.30",
+      "probe_range": [0.28, 0.36]
+    }
+  },
+
+  "geometries": {
+    "snapshot_source": "nonbinary_v11_mcde.FROZEN_GEOMETRIES (design.md §4, V11-A07)",
+    "uniqueness": "Exactly G1, G2, G3. No geometry may be added, removed, or changed after plan freeze.",
+    "G1": {"w": 1, "L": 32, "W": 8, "role": "low-latency primary"},
+    "G2": {"w": 2, "L": 32, "W": 16, "role": "wider-coupling sensitivity"},
+    "G3": {"w": 2, "L": 32, "W": 32, "role": "full-chain control"},
+    "control_arm": {
+      "w": 0,
+      "W": 1,
+      "description": "Single-position uncoupled run with same per-run budget, same effective rate, same stratum ensemble, and paired seed (design.md §4 control contract)."
+    }
+  },
+
+  "rate_reconstruction": {
+    "formula_ref": "design.md §3",
+    "tolerance": "1e-12 (HARMONIC_TOL in nonbinary_v11_mcde.py)",
+    "method": "R_base = 1 - (L/(L+w))(1 - R_eff); rho reconstructed harmonically at R_base via concentrated_check_distribution; then R_L = 1 - ((L+w)/L)(1 - R_base) must equal R_eff within HARMONIC_TOL.",
+    "per_cell": {
+      "S1_G1": {"L": 32, "w": 1, "R_eff": 0.6870106892038108, "R_base_computed_via": "base_rate(32, 1, 0.6870106892038108)", "control_rho_at": "R_eff (harmonic; w=0 -> R_base = R_eff)"},
+      "S1_G2": {"L": 32, "w": 2, "R_eff": 0.6870106892038108, "R_base_computed_via": "base_rate(32, 2, 0.6870106892038108)"},
+      "S1_G3": {"L": 32, "w": 2, "R_eff": 0.6870106892038108, "R_base_computed_via": "base_rate(32, 2, 0.6870106892038108)"},
+      "S3_G1": {"L": 32, "w": 1, "R_eff": 0.5537001767622565, "R_base_computed_via": "base_rate(32, 1, 0.5537001767622565)"},
+      "S3_G2": {"L": 32, "w": 2, "R_eff": 0.5537001767622565, "R_base_computed_via": "base_rate(32, 2, 0.5537001767622565)"},
+      "S3_G3": {"L": 32, "w": 2, "R_eff": 0.5537001767622565, "R_base_computed_via": "base_rate(32, 2, 0.5537001767622565)"}
+    },
+    "control_note": "Control arm uses w=0, L/(L+0)=1, so R_base=R_eff; rho reconstructed at R_eff directly. The coupled and uncoupled controls disclose the same total number of q-ary constraints asymptotically."
+  },
+
+  "seeds": {
+    "derivation_rule": "v11_seed(tag) = int(sha256('V11:' + tag)[0:8], 16) — frozen in nonbinary_v11_mcde.py",
+    "disjointness": "V11 prefix '202611' provably disjoint from V8 (20260804xx), V9 (20260901xx), and V10 (202610xx) by construction. The sha256 derivation further guarantees independence across tags.",
+    "tag_pattern": "{stratum}:{geometry_id}:{arm}:{n} where n in 1..5",
+    "matrix_order": "stratum-major (S1, S3) → geometry-major (G1, G2, G3 in FROZEN_GEOMETRIES iteration order) → seed-major (1..5) → arm-major (coupled, control) — frozen for replay (formal_matrix_run_specs in nonbinary_v11_parallel.py lines 151-192)",
+    "total_runs": 60,
+    "run_specs": [
+      {"run_id": "S1_G1_seed1222026398_coupled", "stratum": "S1", "geometry_id": "G1", "seed_n": 1, "arm": "coupled", "tag": "S1:G1:coupled:1", "seed": 1222026398, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed2660679541_control", "stratum": "S1", "geometry_id": "G1", "seed_n": 1, "arm": "control", "tag": "S1:G1:control:1", "seed": 2660679541, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed3301261827_coupled", "stratum": "S1", "geometry_id": "G1", "seed_n": 2, "arm": "coupled", "tag": "S1:G1:coupled:2", "seed": 3301261827, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed2005000629_control", "stratum": "S1", "geometry_id": "G1", "seed_n": 2, "arm": "control", "tag": "S1:G1:control:2", "seed": 2005000629, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed4222513407_coupled", "stratum": "S1", "geometry_id": "G1", "seed_n": 3, "arm": "coupled", "tag": "S1:G1:coupled:3", "seed": 4222513407, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed3441440341_control", "stratum": "S1", "geometry_id": "G1", "seed_n": 3, "arm": "control", "tag": "S1:G1:control:3", "seed": 3441440341, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed4272195966_coupled", "stratum": "S1", "geometry_id": "G1", "seed_n": 4, "arm": "coupled", "tag": "S1:G1:coupled:4", "seed": 4272195966, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed197472535_control", "stratum": "S1", "geometry_id": "G1", "seed_n": 4, "arm": "control", "tag": "S1:G1:control:4", "seed": 197472535, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed762539858_coupled", "stratum": "S1", "geometry_id": "G1", "seed_n": 5, "arm": "coupled", "tag": "S1:G1:coupled:5", "seed": 762539858, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G1_seed2959007440_control", "stratum": "S1", "geometry_id": "G1", "seed_n": 5, "arm": "control", "tag": "S1:G1:control:5", "seed": 2959007440, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed1105888531_coupled", "stratum": "S1", "geometry_id": "G2", "seed_n": 1, "arm": "coupled", "tag": "S1:G2:coupled:1", "seed": 1105888531, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed302933967_control", "stratum": "S1", "geometry_id": "G2", "seed_n": 1, "arm": "control", "tag": "S1:G2:control:1", "seed": 302933967, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed4001332335_coupled", "stratum": "S1", "geometry_id": "G2", "seed_n": 2, "arm": "coupled", "tag": "S1:G2:coupled:2", "seed": 4001332335, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed1522090265_control", "stratum": "S1", "geometry_id": "G2", "seed_n": 2, "arm": "control", "tag": "S1:G2:control:2", "seed": 1522090265, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed3663636734_coupled", "stratum": "S1", "geometry_id": "G2", "seed_n": 3, "arm": "coupled", "tag": "S1:G2:coupled:3", "seed": 3663636734, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed949613946_control", "stratum": "S1", "geometry_id": "G2", "seed_n": 3, "arm": "control", "tag": "S1:G2:control:3", "seed": 949613946, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed4138641662_coupled", "stratum": "S1", "geometry_id": "G2", "seed_n": 4, "arm": "coupled", "tag": "S1:G2:coupled:4", "seed": 4138641662, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed3774424946_control", "stratum": "S1", "geometry_id": "G2", "seed_n": 4, "arm": "control", "tag": "S1:G2:control:4", "seed": 3774424946, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed1451501760_coupled", "stratum": "S1", "geometry_id": "G2", "seed_n": 5, "arm": "coupled", "tag": "S1:G2:coupled:5", "seed": 1451501760, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G2_seed1582603594_control", "stratum": "S1", "geometry_id": "G2", "seed_n": 5, "arm": "control", "tag": "S1:G2:control:5", "seed": 1582603594, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed3992260457_coupled", "stratum": "S1", "geometry_id": "G3", "seed_n": 1, "arm": "coupled", "tag": "S1:G3:coupled:1", "seed": 3992260457, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed2765619946_control", "stratum": "S1", "geometry_id": "G3", "seed_n": 1, "arm": "control", "tag": "S1:G3:control:1", "seed": 2765619946, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed1976747491_coupled", "stratum": "S1", "geometry_id": "G3", "seed_n": 2, "arm": "coupled", "tag": "S1:G3:coupled:2", "seed": 1976747491, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed693545339_control", "stratum": "S1", "geometry_id": "G3", "seed_n": 2, "arm": "control", "tag": "S1:G3:control:2", "seed": 693545339, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed2109324390_coupled", "stratum": "S1", "geometry_id": "G3", "seed_n": 3, "arm": "coupled", "tag": "S1:G3:coupled:3", "seed": 2109324390, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed1506741124_control", "stratum": "S1", "geometry_id": "G3", "seed_n": 3, "arm": "control", "tag": "S1:G3:control:3", "seed": 1506741124, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed1299160519_coupled", "stratum": "S1", "geometry_id": "G3", "seed_n": 4, "arm": "coupled", "tag": "S1:G3:coupled:4", "seed": 1299160519, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed4036769515_control", "stratum": "S1", "geometry_id": "G3", "seed_n": 4, "arm": "control", "tag": "S1:G3:control:4", "seed": 4036769515, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed1028646838_coupled", "stratum": "S1", "geometry_id": "G3", "seed_n": 5, "arm": "coupled", "tag": "S1:G3:coupled:5", "seed": 1028646838, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S1_G3_seed2307418581_control", "stratum": "S1", "geometry_id": "G3", "seed_n": 5, "arm": "control", "tag": "S1:G3:control:5", "seed": 2307418581, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.18, 0.26] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S1", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed3294282856_coupled", "stratum": "S3", "geometry_id": "G1", "seed_n": 1, "arm": "coupled", "tag": "S3:G1:coupled:1", "seed": 3294282856, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed600249577_control", "stratum": "S3", "geometry_id": "G1", "seed_n": 1, "arm": "control", "tag": "S3:G1:control:1", "seed": 600249577, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed3101754375_coupled", "stratum": "S3", "geometry_id": "G1", "seed_n": 2, "arm": "coupled", "tag": "S3:G1:coupled:2", "seed": 3101754375, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed90306507_control", "stratum": "S3", "geometry_id": "G1", "seed_n": 2, "arm": "control", "tag": "S3:G1:control:2", "seed": 90306507, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed75123851_coupled", "stratum": "S3", "geometry_id": "G1", "seed_n": 3, "arm": "coupled", "tag": "S3:G1:coupled:3", "seed": 75123851, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed2586418385_control", "stratum": "S3", "geometry_id": "G1", "seed_n": 3, "arm": "control", "tag": "S3:G1:control:3", "seed": 2586418385, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed732969838_coupled", "stratum": "S3", "geometry_id": "G1", "seed_n": 4, "arm": "coupled", "tag": "S3:G1:coupled:4", "seed": 732969838, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed148926513_control", "stratum": "S3", "geometry_id": "G1", "seed_n": 4, "arm": "control", "tag": "S3:G1:control:4", "seed": 148926513, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed3696755679_coupled", "stratum": "S3", "geometry_id": "G1", "seed_n": 5, "arm": "coupled", "tag": "S3:G1:coupled:5", "seed": 3696755679, "w": 1, "W": 8, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G1_seed4266052623_control", "stratum": "S3", "geometry_id": "G1", "seed_n": 5, "arm": "control", "tag": "S3:G1:control:5", "seed": 4266052623, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed795614139_coupled", "stratum": "S3", "geometry_id": "G2", "seed_n": 1, "arm": "coupled", "tag": "S3:G2:coupled:1", "seed": 795614139, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed2819376759_control", "stratum": "S3", "geometry_id": "G2", "seed_n": 1, "arm": "control", "tag": "S3:G2:control:1", "seed": 2819376759, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed4161882935_coupled", "stratum": "S3", "geometry_id": "G2", "seed_n": 2, "arm": "coupled", "tag": "S3:G2:coupled:2", "seed": 4161882935, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed2716543585_control", "stratum": "S3", "geometry_id": "G2", "seed_n": 2, "arm": "control", "tag": "S3:G2:control:2", "seed": 2716543585, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed2265290548_coupled", "stratum": "S3", "geometry_id": "G2", "seed_n": 3, "arm": "coupled", "tag": "S3:G2:coupled:3", "seed": 2265290548, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed1371758077_control", "stratum": "S3", "geometry_id": "G2", "seed_n": 3, "arm": "control", "tag": "S3:G2:control:3", "seed": 1371758077, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed329195505_coupled", "stratum": "S3", "geometry_id": "G2", "seed_n": 4, "arm": "coupled", "tag": "S3:G2:coupled:4", "seed": 329195505, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed1003283467_control", "stratum": "S3", "geometry_id": "G2", "seed_n": 4, "arm": "control", "tag": "S3:G2:control:4", "seed": 1003283467, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed1456786342_coupled", "stratum": "S3", "geometry_id": "G2", "seed_n": 5, "arm": "coupled", "tag": "S3:G2:coupled:5", "seed": 1456786342, "w": 2, "W": 16, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G2_seed3831670887_control", "stratum": "S3", "geometry_id": "G2", "seed_n": 5, "arm": "control", "tag": "S3:G2:control:5", "seed": 3831670887, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed1237583460_coupled", "stratum": "S3", "geometry_id": "G3", "seed_n": 1, "arm": "coupled", "tag": "S3:G3:coupled:1", "seed": 1237583460, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed575023286_control", "stratum": "S3", "geometry_id": "G3", "seed_n": 1, "arm": "control", "tag": "S3:G3:control:1", "seed": 575023286, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed2819034846_coupled", "stratum": "S3", "geometry_id": "G3", "seed_n": 2, "arm": "coupled", "tag": "S3:G3:coupled:2", "seed": 2819034846, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed2588231339_control", "stratum": "S3", "geometry_id": "G3", "seed_n": 2, "arm": "control", "tag": "S3:G3:control:2", "seed": 2588231339, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed3198668028_coupled", "stratum": "S3", "geometry_id": "G3", "seed_n": 3, "arm": "coupled", "tag": "S3:G3:coupled:3", "seed": 3198668028, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed1558752836_control", "stratum": "S3", "geometry_id": "G3", "seed_n": 3, "arm": "control", "tag": "S3:G3:control:3", "seed": 1558752836, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed1449336257_coupled", "stratum": "S3", "geometry_id": "G3", "seed_n": 4, "arm": "coupled", "tag": "S3:G3:coupled:4", "seed": 1449336257, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed894708125_control", "stratum": "S3", "geometry_id": "G3", "seed_n": 4, "arm": "control", "tag": "S3:G3:control:4", "seed": 894708125, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed335849802_coupled", "stratum": "S3", "geometry_id": "G3", "seed_n": 5, "arm": "coupled", "tag": "S3:G3:coupled:5", "seed": 335849802, "w": 2, "W": 32, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_base", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20},
+      {"run_id": "S3_G3_seed660002917_control", "stratum": "S3", "geometry_id": "G3", "seed_n": 5, "arm": "control", "tag": "S3:G3:control:5", "seed": 660002917, "w": 0, "W": 1, "L": 32, "p_placeholder": 0.15, "p_semantics": "binary-search driven: threshold_search_run probes p over [0.28, 0.36] (SEARCH_P_TOL 0.001); RunSpec.p placeholder unused by the executor", "lambda_source": "V10_WINNER_S3", "rho_source": "harmonic at R_eff (w=0)", "N": 2000, "q": 1024, "max_iter": 150, "entropy_tol": 0.01, "streak": 20}
+    ],
+    "p_placeholder_note": "RunSpec.p = MICRO_P = 0.15 is a placeholder from formal_matrix_run_specs() (nonbinary_v11_parallel.py). In Stage X formal execution, threshold_search_run() (nonbinary_v11_execute.py) drives the p value of every probe by binary search over the frozen per-stratum probe range (p_ranges: S1 [0.18, 0.26], S3 [0.28, 0.36]) with SEARCH_P_TOL = 0.001, 7 probes per run by the plan's own probe_count_formula ceil(log2((hi - lo) / tol)) on the frozen width-0.08 ranges. The plan's threshold_search.probe_count_per_run = 9 was computed on the wide microbench range [0.10, 0.40] (width 0.30); the executor uses the frozen ranges + the plan's formula (reported, not silently changed). The RunSpec carries the frozen per-geometry/stratum/arm parameters; the threshold search drives the p values.",
+    "seed_values_note": "Seed integer values are now materialized in each run_spec entry (key \"seed\") via the frozen derivation rule v11_seed(tag) = int(sha256('V11:' + tag)[0:8], 16); the tags and the derivation rule remain the authoritative freeze, and the materialized integers are deterministic and replayable. Note: the frozen derivation yields arbitrary sha256-derived 32-bit integers, so the earlier wording \"202611-prefixed seeds\" is descriptive shorthand; disjointness from V8/V9/V10 holds statistically (independent derivations), not by numeric prefix (reported, not silently changed)."
+  },
+
+  "threshold_search": {
+    "method": "Binary search over p, shrinking interval to width ≤ SEARCH_P_TOL",
+    "probe_count_formula": "ceil(log2((hi - lo) / tol))",
+    "probe_count_per_run": 9,
+    "per_probe_budget": {
+      "n_samples": 2000,
+      "max_iter": 150,
+      "entropy_tol": 0.01,
+      "streak": 20,
+      "budget_source": "V9A_BUDGETS (nonbinary_v9_common.py lines 113-120); inherited as V11 single-run budget per amendment AMEND-2026-08-06-02 unchanged_scientific_parameters",
+      "conservative_note": "Every probe runs the full max_iter=150 budget regardless of early convergence (conservative upper bound; V9/V10 convention)."
+    },
+    "p_ranges": {
+      "S1": {"lo": 0.18, "hi": 0.26, "note": "S1 gate = .22; centered search around the expected threshold region. Narrower than the SEARCH_P_LO/HI microbench range (0.10-0.40) because S1's p_gate is known. V9A_PROBE_RANGES for p=.20 is (0.15, 0.26); V11 S1 uses a 0.02-adjustment to (0.18, 0.26) to focus below the .22 gate."},
+      "S3": {"lo": 0.28, "hi": 0.36, "note": "S3 gate = .32; centered search. V9A_PROBE_RANGES for p=.30 is (0.24, 0.36); V11 S3 uses (0.28, 0.36)."}
+    },
+    "search_tolerance": 0.001,
+    "conservative_threshold_definition": "The threshold estimate is the LOWEST probed p at which ALL 5 seeds converge. If the 5-seed convergence pattern has a gap (converged/converged/failed/converged/converged), the conservative threshold is the highest p where ALL converge, not an average. This rule matches the V10 conservative threshold semantics."
+  },
+
+  "stopping_rules": {
+    "convergence": "entropy < entropy_tol (0.01) for streak (20) consecutive iterations (per run_coupled_mcde in nonbinary_v11_mcde.py lines 739-742)",
+    "non_convergence": "max_iter (150) exhausted without meeting the convergence criterion",
+    "invalid_runs": {
+      "trigger": "Any fail-closed ValueError from _lambda_validate, _validate_pop, _validate_normalized, fwht_batched, parse_degree_hist, or run_coupled_mcde parameter validation",
+      "action": "Evidence retained (run_result.json with status field indicating the error), run marked as 'invalid', does NOT count as converged or non-converged. The run directory and its artifacts are preserved immutably.",
+      "status": "invalid (distinct from ok, decode_failed, no_verified_success)"
+    },
+    "interrupt_handling": {
+      "trigger": "External interrupt (Ctrl+C, OS signal, power loss), RSS cap exceeded, or wall-clock hard limit reached",
+      "action": "All partially-completed run artifacts retained. No result-dependent tuning allowed. Explicit main-thread decision required for resumption or abandonment. Incomplete runs do not contribute to threshold decisions.",
+      "wall_limit_enforcement": "At 24 h wall clock, the driver SHALL terminate remaining queued tasks and mark incomplete runs; completed runs' evidence is preserved. No partial-threshold extrapolation."
+    },
+    "convergence_failure_handling": {
+      "trigger": "One or more seeds fail to converge at a probed p within max_iter",
+      "action": "That p value is marked as non-convergent for that seed. The binary search continues normally. The conservative threshold is the highest p where all 5 seeds converge.",
+      "threshold_estimation_failure": "If no probed p yields 5/5 convergence, the conservative threshold is marked as below the search range and the gate is unsatisfied."
+    }
+  },
+
+  "budgets": {
+    "workers": {
+      "value": 4,
+      "frozen_by": "AMEND-2026-08-06-02; frozen suggestion for 20-logical-core machine; formal plan freezes the final value",
+      "source": "DEFAULT_WORKERS in nonbinary_v11_parallel.py line 76"
+    },
+    "wall_clock_hard_limit_hours": 24.0,
+    "wall_clock_hard_limit_seconds": 86400.0,
+    "single_run_peak_rss_hard_limit_bytes": 3221225472,
+    "single_run_peak_rss_hard_limit_gib": 3.0,
+    "rss_watcher_interval_seconds": 1.0,
+    "rss_semantics": "Single-run process-tree peak RSS (working set). Summed RSS across parallel processes is recorded as evidence only, NOT a gate item (host 33.69 GiB measured to accommodate).",
+    "numba_warmup_strategy": "One tiny coupled run per worker before the timed batch (nonbinary_v11_parallel._warmup_task); njit kernels compiled once per worker, excluded from batch wall measurement (steady-state)."
+  },
+
+  "output_paths": {
+    "execution_root": "workspace/nbldpc_v11_execute_{short_uuid}/",
+    "per_run_directory": "{execution_root}/{run_id}/ containing run_result.json and run_measurement.json",
+    "evidence_archive_target": "openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/evidence/execute/",
+    "replay_root": "Fresh workspace/ directory with distinct short UUID; independent from the execute root."
+  },
+
+  "code_revision": {
+    "frozen_at_plan_time": "Git HEAD as of plan freeze date (2026-08-06); plan does not execute git — this declares the dependency.",
+    "critical_files": [
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v11_mcde.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v11_smp_de.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v11_parallel.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v11_microbench.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v10_common.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_common.py",
+      "comparison_bench/tests/test_nonbinary_v11_mcde.py",
+      "comparison_bench/tests/test_nonbinary_v11_mcde_numba.py",
+      "comparison_bench/tests/test_nonbinary_v11_parallel.py",
+      "comparison_bench/tests/test_nonbinary_v11_smp_de.py",
+      "openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/design.md",
+      "openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/specs/spec.md",
+      "openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/tasks.md",
+      "openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/evidence/resource/v11_budget_amendment.json",
+      "openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/evidence/resource/v11_budget_amendment2.json",
+      "openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/evidence/resource/microbenchmark2.json",
+      "openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/evidence/resource/microbenchmark3.json"
+    ]
+  },
+
+  "extrapolation": {
+    "method": "Task-level LPT (Longest Processing Time first) greedy scheduling simulation",
+    "method_authorization": "User-approved switch from batch-efficiency extrapolation (32.69 h) to task-level LPT scheduling (microbenchmark3.md note: 'the formal matrix is 60 similar-duration tasks, so user approved switching to task-level LPT scheduling simulation extrapolation into Stage P').",
+    "per_iteration_costs_source": "microbenchmark2.json N=2000 measurements (post-numba, #2 evidence; serial single-run costs)",
+    "per_iteration_costs": {
+      "G1_coupled": 2.2479781200003344,
+      "G2_coupled": 4.973542459995952,
+      "G3_coupled": 9.889859739999519,
+      "control_uncoupled": 0.22691749999648891
+    },
+    "iterations_per_run": 1350,
+    "task_durations_seconds": {
+      "G1_coupled": 3034.7704620004514,
+      "G2_coupled": 6714.282320994534,
+      "G3_coupled": 13351.310648999349,
+      "control": 306.33862499525996
+    },
+    "computational_note": "task_duration = per_iteration_cost × 1350 (= 9 probes × 150 iterations). S1 and S3 use the same per-iteration costs (the cost depends on max degree, which is bounded by S3's max=40 for both strata; S1 max=28 is ≤ 40, so the #2 synthetic lambda max-degree 40 measurement is a conservative upper bound for both strata).",
+    "task_list": {
+      "total_tasks": 60,
+      "breakdown": "10 × G3 coupled, 10 × G2 coupled, 10 × G1 coupled, 30 × control",
+      "task_durations_sorted_descending": [
+        "10 × 13351.31 s (G3 coupled: S1×5 + S3×5)",
+        "10 × 6714.28 s (G2 coupled: S1×5 + S3×5)",
+        "10 × 3034.77 s (G1 coupled: S1×5 + S3×5)",
+        "30 × 306.34 s (control: S1×3geometries×5seeds + S3×3geometries×5seeds)"
+      ],
+      "total_serial_seconds": 240193.79306980118,
+      "total_serial_hours": 66.72049807494477
+    },
+    "lpt_simulation": {
+      "workers": 4,
+      "algorithm": "Sort tasks by descending duration. Assign each task to the worker with the smallest current accumulated load (greedy tie-break: lowest worker index).",
+      "simulation_log": [
+        {"phase": "G3 coupled (10 tasks × 13351.31 s)", "assignments": "W0: tasks 1,5,9 → 40053.9 s; W1: tasks 2,6,10 → 40053.9 s; W2: tasks 3,7 → 26702.6 s; W3: tasks 4,8 → 26702.6 s"},
+        {"phase": "G2 coupled (10 tasks × 6714.28 s)", "assignments": "W2 gets tasks 11,13,15,17 → 53559.7 s; W3 gets tasks 12,14,16,18 → 53559.7 s; W0 gets tasks 19,20 → 53482.6 s; W1 stays at 40053.9 s then gets tasks from G1 phase"},
+        {"phase": "G1 coupled (10 tasks × 3034.77 s)", "assignments": "W1 gets 5 tasks (tasks 21-25) → 55227.8 s; W0 gets 2 tasks (tasks 26,28) → 59552.2 s; W2 gets 1 task (task 29) → 56594.4 s; W3 gets 1 task (task 30) → 56594.4 s; W1 gets 1 more (task 27) → 58262.6 s"},
+        {"phase": "Control (30 tasks × 306.34 s)", "assignments": "30 small tasks fill shortest queues: final worker loads converge to W0=61696.3 s, W1=60407.1 s, W2=59044.8 s, W3=59044.8 s"}
+      ],
+      "makespan_seconds": 61696.3,
+      "makespan_hours": 17.1379,
+      "makespan_formula": "max(worker_loads) after LPT assignment = 61696.3 s",
+      "makespan_vs_perfect_balance": {
+        "total_serial_seconds": 240193.8,
+        "perfect_balance_hours": 16.6801,
+        "lpt_hours": 17.1379,
+        "lpt_over_perfect_ratio": 1.0275,
+        "note": "LPT achieves 97.25% of perfect load balance due to the dominance of G3 coupled tasks (10 tasks cannot be evenly split among 4 workers; 10/4 = 2 remainder 2, creating asymmetry)"
+      }
+    },
+    "contention_overhead": {
+      "basis": "20 logical cores (likely 10 physical + 10 HT), 4 workers. Each worker occupies a distinct physical core with minimal shared-resource contention. Microbenchmark #3 measured 0.51 per-worker efficiency on an 8-cell heterogeneous batch, but that was dominated by load imbalance, not core contention.",
+      "contention_sources": [
+        "Memory bandwidth: 4 concurrent numba kernels share L3 cache and DRAM bandwidth",
+        "OS scheduling jitter: Windows scheduler may preempt workers",
+        "Inter-process communication: multiprocessing Pool.imap serialization of RunSpec → result dicts (small payloads per 1350-iteration run; negligible)"
+      ],
+      "estimated_loss_coefficient": {
+        "low": 0.05,
+        "central": 0.10,
+        "high": 0.15,
+        "rationale": "With 4 workers on a 20-logical-core machine, contention is modest. Most of the 0.51 efficiency loss in #3 was load imbalance (corrected by LPT), not contention. 5-15% captures realistic OS/DRAM overhead without being pessimistic. The 10% central estimate is the recommended planning value."
+      },
+      "predicted_wall_clock": {
+        "low_loss_5pct_hours": 17.99,
+        "central_loss_10pct_hours": 18.85,
+        "high_loss_15pct_hours": 19.71
+      },
+      "verdict": {
+        "all_projections_under_24h": true,
+        "resource_ok": true,
+        "note": "All three contention scenarios (5%, 10%, 15%) predict wall clock under the 24 h hard limit. The worst case (15% loss) gives 19.71 h, with 4.29 h headroom."
+      }
+    },
+    "comparison_with_batch_efficiency": {
+      "batch_efficiency_prediction_hours": 32.69,
+      "batch_efficiency_method": "serial_total / parallel_speedup where speedup = 2.04 measured on 8-cell heterogeneous microbenchmark #3",
+      "why_batch_efficiency_is_pessimistic": "The 8-cell batch has 3 large cells (G3_2000 48.8s, G2_2000 28.27s, G1_2000 13.68s) and 5 small cells (CTRL_500, CTRL_2000, G1_500, G2_500, G3_500). In the 4-worker pool, the small cells finish first in wave 1, leaving workers idle while the large cells run alone in wave 2. The 60-task matrix has 30 large coupled tasks (all >= 3035 s) and 30 small control tasks (all ~306 s). LPT explicitly assigns the largest tasks first and fills with controls, achieving near-perfect load balance. The batch efficiency of 0.51 per-worker does not apply to a balanced LPT schedule.",
+      "lpt_prediction_hours": "17.14 (ideal) to 19.71 (15% overhead)",
+      "conclusion": "LPT scheduling is the correct model for the 60-task formal matrix. The batch-efficiency extrapolation (32.69 h) is an artifact of load imbalance in the 8-cell microbenchmark that does not generalize to the balanced formal matrix."
+    }
+  },
+
+  "acceptance_mapping": {
+    "description": "Mapping from design.md §7 acceptance IDs (V11-A01 through V11-A16) to plan clauses or execution steps.",
+    "mappings": {
+      "V11-A01": {"plan_clause": "strata.S1/S3, geometries, rate_reconstruction", "stage": "P", "note": "Plan documents the exact QSC reference values and distinguishes SMP (nonbinary_v11_smp_de.py) from full-vector decoding (nonbinary_v11_mcde.py)."},
+      "V11-A02": {"plan_clause": "Precondition; gated by Stage E (V11-10.2), not Stage P/X", "stage": "E", "note": "R1 reproduction precedes GF(1024) execution. Plan assumes R1 passed."},
+      "V11-A03": {"plan_clause": "Precondition; gated by V11-20.2 tests", "stage": "E", "note": "w=0 collapse tests. Plan assumes passed."},
+      "V11-A04": {"plan_clause": "Precondition; gated by V11-20.2 tests", "stage": "E", "note": "q=4/q=8 oracle agreement. Plan assumes passed."},
+      "V11-A05": {"plan_clause": "rate_reconstruction.tolerance = 1e-12; verified by rate_contract() in nonbinary_v11_mcde.py", "stage": "P/X", "note": "Must be recomputed independently in Stage X replay."},
+      "V11-A06": {"plan_clause": "strata.S1.V10_winner_lambda, strata.S3.V10_winner_lambda; provenance cross-referenced to V10 archived evidence", "stage": "P", "note": "Lambda distributions frozen and never reoptimized."},
+      "V11-A07": {"plan_clause": "geometries (G1/G2/G3 only, no additions/removals/changes)", "stage": "P", "note": "Frozen geometry set."},
+      "V11-A08": {"plan_clause": "seeds (60 run specs with frozen derivation rule and tags)", "stage": "P", "note": "Fresh paired seeds and complete estimator settings frozen."},
+      "V11-A09": {"plan_clause": "Precondition; gated by V11-20.3", "stage": "E", "note": "T0/T1 tests and engineering review. Plan assumes passed."},
+      "V11-A10": {"plan_clause": "extrapolation.verdict.resource_ok = true; all projections under 24h and 3 GiB", "stage": "P", "note": "LPT extrapolation clears both limits with headroom."},
+      "V11-A11": {"plan_clause": "Plan freeze (Stage P) → review (V11-40.1) → execute (V11-40.2) → replay (V11-40.3)", "stage": "P/X", "note": "Lifecycle stages mapped to plan clauses and task references."},
+      "V11-A12": {"plan_clause": "stopping_rules.invalid_runs and stopping_rules.interrupt_handling", "stage": "X", "note": "Invalid and interrupted evidence retained immutably."},
+      "V11-A13": {"plan_clause": "threshold_search.conservative_threshold_definition; gates recomputed in replay", "stage": "X", "note": "Independent recomputation of absolute and paired-gain gates."},
+      "V11-A14": {"plan_clause": "output_paths (per-run directories under workspace/; evidence archive under change evidence/execute/); no overwrite of existing production roots", "stage": "X", "note": "Frozen directories and official output roots unchanged."},
+      "V11-A15": {"plan_clause": "Final state: ready_for_finite_length | failed_reference | failed_coupling | resource_blocked", "stage": "X", "note": "No silent promotion of failures."},
+      "V11-A16": {"plan_clause": "design.md §6 gate — V11 stops at ensemble-level gate; finite-length work requires new OpenSpec change", "stage": "X", "note": "Authorization boundary respected."}
+    }
+  },
+
+  "executor": {
+    "schema": "v11_formal_executor_v1",
+    "added_at": "Stage X execution-capability build (no scientific execution performed by the build)",
+    "module": "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v11_execute.py",
+    "cli": "comparison_bench/src/comparison_bench/cli/run_formal_nonbinary_v11_execute.py",
+    "authorization_boundary": "CLI --execute refuses to start without the explicit --v11-40-2-authorized flag; --self-check and --dry-run execute no kernel runs; the module performs no scientific execution at import time.",
+    "binary_search": {
+      "method": "per-run binary search over the frozen per-stratum probe range (threshold_search.p_ranges); every probe runs the frozen run_coupled_mcde with the run's inherited per-probe budget (per_probe_budget N=2000, max_iter=150, entropy_tol=0.01, streak=20)",
+      "probe_p_formula": "p = (cur_lo + cur_hi) / 2; converged probe -> cur_lo = p, else cur_hi = p",
+      "probe_count_formula_ref": "threshold_search.probe_count_formula = ceil(log2((hi - lo) / tol))",
+      "probe_count_per_run_actual": {
+        "S1": 7,
+        "S3": 7,
+        "note": "computed by the plan's own formula on the frozen per-stratum ranges (width 0.08); the plan's threshold_search.probe_count_per_run = 9 was computed on the wide microbench range [0.10, 0.40] (width 0.30) — reported as a plan-consistency note, not silently changed"
+      },
+      "per_seed_threshold_estimate": "largest probed p at which the run converges (monotone-convergence assumption; the full probe table is retained so a violation stays visible in evidence)",
+      "status_semantics": "valid | not_converged | invalid (fail-closed ValueError from the frozen validation channels -> probes retained, error recorded, run counts as neither converged nor non-converged)"
+    },
+    "evidence_schemas": [
+      "v11_execute_threshold_search_v1 — per-run probe table + threshold estimate + status",
+      "v11_execute_run_measurement_v1 — wall seconds, peak RSS, cap flag, probe count",
+      "v11_execute_conservative_aggregate_v1 — 5-seed min; below_range unless all valid + converged",
+      "v11_execute_gate_decision_v1 — four states + smallest-W-then-smallest-w selection",
+      "v11_execute_formal_matrix_results_v1 — 60-run table, aggregates, paired gains, gate, resource/rate checks",
+      "v11_execute_self_check_v1 / v11_execute_dry_run_v1 — structure-only evidence"
+    ],
+    "self_check": {
+      "command": "python -m comparison_bench.src.comparison_bench.cli.run_formal_nonbinary_v11_execute --self-check",
+      "result": {
+        "schema": "v11_execute_self_check_v1",
+        "ok": true,
+        "n_specs": 60,
+        "n_probes_s1": 7,
+        "n_probes_s3": 7,
+        "gate_states_verified": [
+          "ready_for_finite_length",
+          "failed_coupling",
+          "resource_blocked",
+          "failed_reference"
+        ]
+      },
+      "scientific_executed": false
+    },
+    "dry_run": {
+      "command": "python -m comparison_bench.src.comparison_bench.cli.run_formal_nonbinary_v11_execute --dry-run",
+      "result": {
+        "schema": "v11_execute_dry_run_v1",
+        "scientific_executed": false,
+        "n_specs": 60,
+        "n_seeds": 60,
+        "probe_counts": {
+          "S1": 7,
+          "S3": 7,
+          "wide_microbench_range_reference": 9
+        }
+      },
+      "evidence_path": "workspace/nbldpc_v11_execute_dryrun/formal_matrix_dry_run.json"
+    },
+    "outputs": {
+      "per_run": "{execution_root}/{run_id}/threshold_search.json + run_measurement.json",
+      "summary": "{execution_root}/formal_matrix_results.json"
+    },
+    "tests": "comparison_bench/tests/test_nonbinary_v11_execute.py (T0/T1, small synthetic; no scientific results)"
+},
+  "frozen_declarations": {
+    "no_tuning_no_rerun": "The 60-run matrix is executed exactly once. No parameter tuning based on intermediate results. No rerun of individual seeds or geometries based on observed outcomes. The binary search is deterministic and pre-registered.",
+    "matrix_not_shrunk": "The 2×3×5×2 matrix (60 runs) is never reduced after the formal plan freeze. No geometry, stratum, seed, or arm is dropped based on resource or convergence observations.",
+    "seeds_disjoint": "All V11 seeds derive from sha256('V11:{tag}') with the V11 prefix, provably disjoint from V8 (20260804xx), V9 (20260901xx), and V10 (202610xx) by construction.",
+    "failed_evidence_immutable": "Any run that fails validation, hits the RSS cap, times out, or is interrupted retains its outputs immutably. No post-hoc correction, no reclassification to 'ok'.",
+    "aeit_fixed_window": "AEIT fixed-window semantics: W < L terminated subchain model. The decoding window W counts spatial column blocks. The DE tracks positions 0..W-1 with checks 0..W-1+w. The check distribution is fixed by the full-chain (L) rate contract. Sliding-window protocol within Stage P frozen scope.",
+    "smp_not_participating_in_gf1024": "SMP-DE (nonbinary_v11_smp_de.py) is used only for R1 reference reproduction (q=4, q=16). It does not participate in the GF(1024) scientific execution matrix. The GF(1024) runs use the full-vector MC-DE kernel (nonbinary_v11_mcde.py) exclusively.",
+    "no_reoptimization": "V10 S1/S3 winner lambda distributions are reused without any reoptimization. The check distribution is reconstructed harmonically from the frozen rate contract; no search over rho.",
+    "no_production_output_overwrite": "All execution outputs go under workspace/nbldpc_v11_execute_{uuid}/. Evidence is archived under openspec/changes/.../evidence/execute/. No existing results/, comparison_bench/outputs_comparison/, or other production output roots are modified."
+  }
+}

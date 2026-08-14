@@ -1,0 +1,38 @@
+{
+  "git_commit": "b639e3d",
+  "source_files": {
+    "cascade_sweep": {
+      "path": "cascade_param_sweep_results.csv",
+      "sha256": null,
+      "status": "missing"
+    },
+    "ldpc_sweep": {
+      "path": "layered_ldpc_param_sweep_results.csv",
+      "sha256": null,
+      "status": "missing"
+    },
+    "qldpc_sweep": {
+      "path": "qldpc_param_sweep_results.csv",
+      "sha256": null,
+      "status": "missing"
+    },
+    "scalability_real": {
+      "path": "scalability/ir_benchmark_results.csv",
+      "sha256": null,
+      "status": "missing"
+    },
+    "scalability_synth": {
+      "path": "scalability_synth/ir_benchmark_results.csv",
+      "sha256": null,
+      "status": "missing"
+    },
+    "source_manifest": {
+      "path": "ir_v3_run_manifest.json",
+      "sha256": null,
+      "status": "missing"
+    }
+  },
+  "benchmark_config_snapshot": {},
+  "per_stage_config_snapshots": {},
+  "output_files": []
+}

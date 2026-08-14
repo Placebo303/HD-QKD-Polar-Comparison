@@ -1,0 +1,4 @@
+method: polar_existing
+method_variant: read_existing
+mode: read
+notes: Read frozen polar outputs first; CLI mode must be explicitly enabled.

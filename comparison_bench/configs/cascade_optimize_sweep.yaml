@@ -1,0 +1,21 @@
+global:
+  output_dir: comparison_bench/outputs_comparison/real_ir_success_first
+
+dataset:
+  frame_batch_path: comparison_bench/outputs_comparison/real_ir_success_first/representative_subset.parquet
+
+cascade:
+  block_size_schedule:
+    - [8, 4, 16, 13]
+    - [12, 6, 24, 13]
+    - [16, 32, 64, 128]
+  num_passes: [2, 3, 4]
+  permutation_mode: ["identity", "seeded_random"]
+  seed: [0, 1]
+  mapping: ["gray"]
+  bisection_mode: ["recursive_binary"]
+  verify_mode: ["crc32"]
+  frame_caps: [4]
+  max_workers: 16
+  include_all_points: true
+  force: true

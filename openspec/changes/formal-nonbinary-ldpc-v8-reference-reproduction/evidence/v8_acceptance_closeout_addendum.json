@@ -1,0 +1,42 @@
+{
+  "schema": "v8_acceptance_closeout_addendum_v1",
+  "change": "formal-nonbinary-ldpc-v8-reference-reproduction",
+  "phase": "V8-60.10 acceptance close-out (main thread)",
+  "date": "2026-08-04",
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "purpose": "Explicitly resolve the original acceptance record's A12=blocked status after the independent V8-60 review, WITHOUT rewriting evidence/v8_engineering_acceptance.json (which remains byte-identical history).",
+  "original_acceptance_state": {
+    "file": "evidence/v8_engineering_acceptance.json",
+    "status": "UNCHANGED (byte-identical; recorded A12 = blocked: 'evidence/source hashes are complete ... INDEPENDENT REVIEW IS PENDING (V8-50.6) ... status blocked until a separate reviewer confirms')",
+    "not_rewritten": true
+  },
+  "correction_phase": {
+    "change": "V8-60 audit-correction close-out: harmonic-exact concentrated check weights (sum_j rho_j/j = (1-R) * sum_i lambda_i/i solved exactly for adjacent degrees {floor(dc), ceil(dc)}), citation authors corrected to Ronny Mueller et al. (arXiv:2307.02225v2), tolerance re-derived with valid arithmetic 0.0005+0.00125+0.005+0.005 = 0.01175 <= 0.012 (frozen tolerance 0.012), one corrective reference run (100000 nodes, max_iter 150 per the paper, seed 2026080418) -> threshold_proxy 0.062421875, delta vs published DET 0.069 = 0.006578 <= 0.012 -> PASS. Full record: evidence/v8_60_correction_evidence.json and evidence/v8_reproduction_trace_corrected.json.",
+    "precorrection_trace": "evidence/v8_reproduction_trace.json preserved byte-identical (SHA256 dd5678fd2d77b67dd7f3fc7ee221a49b0d33eab37ab5d226d96e6d243b071de3) and marked as pre-correction approximate trace via evidence/v8_reproduction_trace_precorrection_annotation.json."
+  },
+  "independent_review": {
+    "file": "evidence/v8_independent_review_acceptance.json",
+    "reviewer": "reviewer-go (independent, read-only)",
+    "phase": "V8-60.9",
+    "verdict": "ACCEPTED",
+    "rerun": "T1 32 passed / 0 failed (exit 0), T2 4 passed / 0 failed (exit 0) in a fresh reviewer root; corrective search NOT re-run; T3 NOT re-run (V8-60 scope); all 6 source hashes recomputed and matching evidence/v8_source_manifest.json; original trace byte-identity verified.",
+    "blocking_findings": "none"
+  },
+  "acceptance_resolution": {
+    "A12": {
+      "original": "blocked (pending independent review)",
+      "resolved": "pass",
+      "basis": "V8-60.9 independent review accepted the corrected candidate (evidence/v8_independent_review_acceptance.json); evidence/source hashes complete and matching; original trace byte-preserved; no production runner callable from V8 modules; no V8 scientific output exists."
+    },
+    "A01_A11": "reaffirmed pass for the corrected candidate by the V8-60.9 review (see per-item verdicts in evidence/v8_independent_review_acceptance.json)",
+    "V8_A09_reproduction_gate": "pass after correction: single frozen corrective run, delta 0.006578 <= 0.012; no rerun, no tuning."
+  },
+  "cross_references": {
+    "corrected_facts_live_in": ["evidence/v8_reproduction_trace_corrected.json (corrected freeze + tolerance arithmetic + probe trace)", "evidence/v8_60_correction_evidence.json (formula old->new, constants old->new, source-hash old->new)"],
+    "original_facts_live_in": ["evidence/v8_engineering_acceptance.json (original acceptance, unchanged)", "evidence/v8_literature_provenance.json (original freeze, unchanged)", "evidence/v8_muller2024_table1_extract.txt (verbatim extract, unchanged)"],
+    "note": "evidence/v8_v9_recommendation.md cites the pre-correction run numbers; its direction is unaffected because the corrected run also passes; the corrected numbers supersede it.",
+    "non_blocking_findings": ["duplicated REPO_ROOT line in test_nonbinary_v8_mcde.py (cosmetic, no action taken)", "package __init__ eagerly binds V1-V7 modules in sys.modules (pre-existing; the frozen no-production-runner test scopes correctly)"]
+  },
+  "boundary": "V8 remains engineering/reference-only. This close-out does not authorize V9 implementation, canary, development, confirmation, real-data, N4, or formal comparison execution; no FER, readiness, qualification, promotion, or comparison claim is made. A separate V9 OpenSpec proposal remains the only authorized next step.",
+  "history_policy": "No historical evidence file was rewritten, deleted, or overwritten: v8_engineering_acceptance.json, v8_reproduction_trace.json, v8_literature_provenance.json, v8_muller2024_table1_extract.txt, v8_v7_interpretation_audit.md, v8_v9_recommendation.md all remain byte-identical to their pre-V8-60 state."
+}

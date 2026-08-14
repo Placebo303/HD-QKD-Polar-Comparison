@@ -1,0 +1,8 @@
+method: layered_ldpc_lite
+method_variant: gray_hard
+mapping: gray
+backend: sim_ldpc
+parity_check_source: builtin_wifi_like
+max_iter: 50
+verify_mode: crc32
+notes: Adapter-gated layered binary LDPC baseline.

@@ -1,0 +1,539 @@
+{
+  "byte_consistency_conclusion": "PASS",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "execute_dir": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v10a_execute\\217aa87779de4953a5aeeed24f407b1e\\execute",
+  "files_only_in_execute": [],
+  "files_only_in_replay": [],
+  "files_present_in_both": 129,
+  "normalization_note": "Before byte comparison, the plan-binding digest keys removed by the 2026-08-06 protocol amendment (present in the pre-amendment execute payloads, absent in the post-amendment replay payloads) and the run_complete.json role/stage provenance fields are stripped; all other content is compared byte-for-byte.",
+  "pairs": [
+    {
+      "file": "S1.json",
+      "identical": true
+    },
+    {
+      "file": "S2.json",
+      "identical": true
+    },
+    {
+      "file": "S3.json",
+      "identical": true
+    },
+    {
+      "file": "S4.json",
+      "identical": true
+    },
+    {
+      "file": "run_complete.json",
+      "identical": true
+    },
+    {
+      "file": "run_exitcode.json",
+      "identical": false
+    },
+    {
+      "file": "run_meta.json",
+      "identical": false
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0001.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0002.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0003.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0004.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0005.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0006.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0007.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0008.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0009.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0010.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0011.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0012.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0013.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0014.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0015.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0016.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0017.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0018.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0019.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0020.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0021.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0022.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0023.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0024.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0025.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0026.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0027.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0028.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/checkpoint_gen_0029.json",
+      "identical": true
+    },
+    {
+      "file": "search_S1/run_complete.json",
+      "identical": false
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0001.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0002.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0003.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0004.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0005.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0006.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0007.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0008.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0009.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0010.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0011.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0012.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0013.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0014.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0015.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0016.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0017.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0018.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0019.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0020.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0021.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0022.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0023.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0024.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0025.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0026.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0027.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0028.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/checkpoint_gen_0029.json",
+      "identical": true
+    },
+    {
+      "file": "search_S2/run_complete.json",
+      "identical": false
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0001.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0002.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0003.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0004.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0005.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0006.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0007.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0008.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0009.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0010.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0011.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0012.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0013.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0014.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0015.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0016.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0017.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0018.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0019.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0020.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0021.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0022.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0023.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0024.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0025.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0026.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0027.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0028.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/checkpoint_gen_0029.json",
+      "identical": true
+    },
+    {
+      "file": "search_S3/run_complete.json",
+      "identical": false
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0001.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0002.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0003.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0004.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0005.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0006.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0007.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0008.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0009.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0010.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0011.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0012.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0013.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0014.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0015.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0016.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0017.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0018.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0019.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0020.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0021.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0022.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0023.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0024.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0025.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0026.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0027.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0028.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/checkpoint_gen_0029.json",
+      "identical": true
+    },
+    {
+      "file": "search_S4/run_complete.json",
+      "identical": false
+    },
+    {
+      "file": "summary_science.json",
+      "identical": true
+    },
+    {
+      "file": "transcript.json",
+      "identical": true
+    }
+  ],
+  "provenance_allowed_diffs": [
+    "run_meta.json (pid/utc/elapsed/peak_rss)",
+    "run_exitcode.json (role)",
+    "search_S{1..4}/run_complete.json (wall_clock_seconds)"
+  ],
+  "provenance_diff_fields_verified": [
+    "run_meta.json: pid/utc/elapsed_seconds/peak_rss_bytes",
+    "search_S{1..4}/run_complete.json: wall_clock_seconds"
+  ],
+  "replay_dir": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v10a_execute\\217aa87779de4953a5aeeed24f407b1e\\replay_attempt2",
+  "schema": "v10a_replay_v1",
+  "scientific_files_byte_identical": true
+}

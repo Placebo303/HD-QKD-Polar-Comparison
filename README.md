@@ -1,11 +1,16 @@
-# High-Dimensional QKD Polar Pipeline
+# HD-QKD Polar Comparison
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+This repository contains the current HD-QKD Polar comparison workspace, including:
+- the frozen Polar baseline
+- the non-invasive `comparison_bench/` comparison layer (formal IR methods, CLIs, parameter sweeps, and tests)
+- workflow and result documentation
 
-Research pipeline for high-dimensional QKD timing data, Polar-code information reconciliation, actual-IR replay, and finite-key security accounting.
+## Current Status
 
-## Current status
+As of 2026-08-14, the current reporting line is:
+- `PRIMARY_REPORTING_MODE = actual_ir_reconciled_net_not_secure`
+- `BETA_BASELINE_ROLE = comparison_only`
+- `NIU_2016_STATUS = not_supported_by_current_observables`
 
 The default reporting line is:
 
@@ -18,11 +23,26 @@ BETA_BASELINE_ROLE = comparison_only
 NIU_2016_STATUS = not_supported_by_current_observables
 ```
 
+The authoritative latest results are **not** the older `_tmp_longrun_stage*` directories.
+Use these instead:
+- frozen baseline outputs: `results/`
+- comparison outputs: `comparison_bench/outputs_comparison/`
+
 `PIE_main` and `SKR_main_bps` are public-EC-only reconciled net metrics, not secret-key metrics. Route A correctness-side verification is formalized with per-block universal hashing. This is not a strict Zhong 2015 or full Niu 2016 proof instantiation.
 
 Route B-lite is a completed archived study. Its LLR-only gains were local and unstable, so it is not part of the mainline.
 
-See [AGENT_HANDOFF.md](AGENT_HANDOFF.md) for the current project state and [docs/CURRENT_MAINLINE.md](docs/CURRENT_MAINLINE.md) for maintained commands.
+## Main Documents
+
+- latest workflow and run method:
+  - [docs/POLAR_CODE_MAINFLOW_20260327.md](docs/POLAR_CODE_MAINFLOW_20260327.md)
+- latest results and authoritative output paths:
+  - [docs/LATEST_RESULTS_20260327.md](docs/LATEST_RESULTS_20260327.md)
+- current mainline and maintained commands:
+  - [docs/CURRENT_MAINLINE.md](docs/CURRENT_MAINLINE.md)
+- Route A correctness formalization:
+  - [docs/ROUTE_A_FORMAL_VERIFICATION_20260410.md](docs/ROUTE_A_FORMAL_VERIFICATION_20260410.md)
+  - [docs/ROUTE_A_BIT_PLANE_INTERFACE_20260414.md](docs/ROUTE_A_BIT_PLANE_INTERFACE_20260414.md)
 
 ## Repository type and installation
 
@@ -56,70 +76,42 @@ Verify the optional TimeTagger binding:
 python -c "import TimeTagger; print('TimeTagger available')"
 ```
 
-## Main workflow
+## Main Entry Points
 
-### 1. Extract and materialize timing data
+Front half:
+- [experiments/run_e2e_pipeline.py](experiments/run_e2e_pipeline.py)
+- [experiments/run_real_polar_max_pie.py](experiments/run_real_polar_max_pie.py)
 
-Use a new output directory. The command reads real `.ttbin` data and may be long-running.
+Replay / security (maintained, post-restructure):
+- [pipelines/current/round1a_build_replay_index.py](pipelines/current/round1a_build_replay_index.py)
+- [pipelines/current/round1b_run_actual_ir_replay.py](pipelines/current/round1b_run_actual_ir_replay.py)
+- [tools/security_reports/round2_build_finite_key_audit_table.py](tools/security_reports/round2_build_finite_key_audit_table.py)
+- [tools/security_reports/longrun_build_security_master_table.py](tools/security_reports/longrun_build_security_master_table.py)
 
-```powershell
-python experiments\run_e2e_pipeline.py `
-  --ttbin "PATH_TO_DATA.ttbin" `
-  --dims "1024" `
-  --bws "150" `
-  --skip-polar `
-  --force-align `
-  --out-root "results\new_e2e_run"
-```
+Refined frame-accounting pass (archived):
+- [pipelines/archive/minrerun_audit_frame_accounting_inputs.py](pipelines/archive/minrerun_audit_frame_accounting_inputs.py)
+- [pipelines/archive/minrerun_run_frame_audit.py](pipelines/archive/minrerun_run_frame_audit.py)
+- [pipelines/archive/minrerun_rebuild_security_master_20dB.py](pipelines/archive/minrerun_rebuild_security_master_20dB.py)
+- [pipelines/archive/minrerun_build_cross_loss_refined_summary.py](pipelines/archive/minrerun_build_cross_loss_refined_summary.py)
 
-`--acq-time` is retained only as a compatibility flag and is currently unused.
+Comparison benchmark entrypoints:
+- `python -m comparison_bench.src.comparison_bench.cli.build_dataset`
+- `python -m comparison_bench.src.comparison_bench.cli.run_benchmark`
+- `python -m comparison_bench.src.comparison_bench.cli.compare_methods`
 
-### 2. Run Polar evaluation from cached tables
+## Recommended Usage
 
-```powershell
-python experiments\run_real_polar_max_pie.py `
-  --grid-table "results\new_e2e_run\_tmp_grid_table.csv" `
-  --in-csv "results\new_e2e_run\_tmp_src_table.csv" `
-  --out-csv "results\new_polar_run\polar_e2e_results.csv" `
-  --prefer-sidecar-map-ser
-```
+If you only need the current best result package, read the existing outputs and do not rerun the physics front half.
 
-### 3. Run Route A replay and security reporting
+If you need to reproduce the current workflow from raw data, use the split boundary flow described in [docs/POLAR_CODE_MAINFLOW_20260327.md](docs/POLAR_CODE_MAINFLOW_20260327.md):
+1. extraction/materialization with `--skip-polar`
+2. Polar evaluation from cached `_tmp_grid_table.csv` and `_tmp_src_table.csv`
+3. actual-IR replay and security aggregation
+4. refined frame-accounting rebuild
 
-Current replay pipelines are under `pipelines/current/`. Security table builders are under `tools/security_reports/`.
-
-```powershell
-python pipelines\current\routeA_run_formal_cross_loss.py --help
-python tools\security_reports\round2_build_finite_key_audit_table.py --help
-```
-
-Do not target an existing `results/authoritative/` directory with `--overwrite`.
-
-## Cross-correlation export
-
-```powershell
-python tools\asenoise\export_ttbin_cross_correlation.py `
-  --ttbin "PATH_TO_DATA.ttbin" `
-  --ch-a 1 `
-  --ch-b 5 `
-  --bin-width-ps 10 `
-  --max-lag-ps 10000 `
-  --out-csv "results\cross_correlation.csv"
-```
-
-Lag convention: `lag_ps = t_B - t_A`.
-
-## Result packs
+## Result packs and checksum verification
 
 `results/` is local artifact storage and is ignored by Git. Authority is defined by [docs/RESULTS_MANIFEST_20260427.md](docs/RESULTS_MANIFEST_20260427.md).
-
-Current authoritative packs:
-
-- `results/authoritative/_tmp_longrun_fresh_rerun`
-- `results/authoritative/_tmp_minrerun_stageC_security_20dB`
-- `results/authoritative/_tmp_minrerun_stageD_cross_loss`
-- `results/authoritative/_tmp_routeA_correctness_formal_stageD_cross_loss`
-- `results/authoritative/e2e_*_fullgrid_pairing_v2_candidate*`
 
 Validate a transferred result set with:
 
@@ -131,6 +123,8 @@ python tools\verify_authoritative_results.py --verify docs\AUTHORITATIVE_RESULTS
 
 - `experiments/`: E2E and Polar entrypoints
 - `src/`: timing, mapping, decoder, and verification code
+- `comparison_bench/`: non-invasive IR comparison layer (methods, formal IR implementations, CLIs, sweeps, tests, outputs)
+- `openspec/`: OpenSpec change proposals, specs, and archives
 - `pipelines/current/`: maintained replay pipelines
 - `pipelines/archive/`: historical batch reruns
 - `tools/security_reports/`: finite-key and reporting builders

@@ -1,0 +1,28 @@
+{
+  "schema": "v10_s4_delta_correction_v1",
+  "change": "formal-nonbinary-ldpc-v10-de-peg-fftqspa",
+  "date": "2026-08-06",
+  "author_role": "implementation operator (coder-fast); main-thread instruction dated 2026-08-06",
+  "record_type": "correction",
+  "affected_file": "evidence/v10a_gate_decision.json",
+  "affected_field": "per_search_gates[3].delta (search_id S4)",
+  "observed_value": false,
+  "observed_value_type": "boolean",
+  "expected_value": null,
+  "expected_value_type": "null",
+  "root_cause": "evidence-generation script bug, not a scientific-computation issue: in run_v10a_execute.py build_evidence, the delta expression was \"(entry.get('validation') or {}).get('conservative_threshold') is not None and float(...) - float(entry['gate']['gate'])\". When conservative_threshold is None the is-not-None guard short-circuits to False, so the whole `and` expression evaluates to boolean False instead of None. Location: workspace/v10a_execute/217aa87779de4953a5aeeed24f407b1e/run_v10a_execute.py, build_evidence gate_decision per_search_gates delta entry.",
+  "semantic_note": "S4 has no conservative threshold (no eligible tier-1 converged candidate at the gate p), hence no delta is computable; the correct value is null, never the boolean false.",
+  "scope_impact": {
+    "s4_verdict": "FAIL unchanged (verdict derives from the reason 'no eligible (tier-1 converged) candidate at the gate p', not from delta)",
+    "overall_decision_branch": "failed_ensemble unchanged",
+    "scientific_payload": "unchanged (thresholds, winner, transcript, checkpoints unaffected)",
+    "other_evidence_files": "evidence/v10_gate_decision.json (line 55) and evidence/v10a_execute_results.json (line 40) already record S4 delta as null"
+  },
+  "disposition": "Evidence is immutable per V10-S08: evidence/v10a_gate_decision.json is NOT overwritten or re-generated. This file is the sole correction record. Readers must interpret per_search_gates[3].delta = false as null (delta undefined) when using v10a_gate_decision.json.",
+  "script_fix": {
+    "file": "workspace/v10a_execute/217aa87779de4953a5aeeed24f407b1e/run_v10a_execute.py",
+    "function": "build_evidence (gate_decision per_search_gates)",
+    "description": "Delta expression fixed to emit null when conservative_threshold is None: conservative_threshold is first bound to ct via (ct := (entry.get('validation') or {}).get('conservative_threshold')) and delta is computed as None if ct is None else float(ct) - float(entry['gate']['gate']). No other logic changed.",
+    "regeneration": "No existing evidence was re-generated and no scientific computation was re-run. The fix is for future reuse / re-generation only."
+  }
+}

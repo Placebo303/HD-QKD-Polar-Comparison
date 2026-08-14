@@ -1,0 +1,6 @@
+global:
+  output_dir: comparison_bench/outputs_comparison
+
+cascade_config: comparison_bench/configs/cascade_param_sweep.yaml
+layered_ldpc_config: comparison_bench/configs/layered_ldpc_param_sweep.yaml
+qldpc_config: comparison_bench/configs/qldpc_param_sweep.yaml

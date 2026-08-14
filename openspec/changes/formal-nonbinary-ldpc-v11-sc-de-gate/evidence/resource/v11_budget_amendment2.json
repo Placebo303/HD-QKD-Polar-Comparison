@@ -1,0 +1,28 @@
+{
+  "schema": "v11_budget_amendment_v1",
+  "change": "formal-nonbinary-ldpc-v11-sc-de-gate",
+  "amendment_id": "AMEND-2026-08-06-02",
+  "approved_at_utc": "2026-08-06T00:00:00Z",
+  "approved_by": "main thread (user decision); planner/coder operator role unchanged",
+  "trigger": "V11-30.2' microbenchmark #2 (post-numba) still returned resource_blocked: predicted wall-clock 66.72 h (G1 9.28 h + G2 19.50 h + G3 37.94 h) > 24 h hard limit; single-run peak RSS 2.68 GiB did not exceed 3 GiB. Extrapolation assumptions consistent with the V9 frozen GF(1024) budget (V9A_BUDGETS: n_samples=2000, max_iter=150), not arbitrary conservatism. numba speedup 11.65x still insufficient; user approved the parallel execution path.",
+  "change_made": {
+    "parallelism": "multiprocessing worker pool allowed to execute the formal matrix (60 runs = 2 strata x 3 geometries x 5 seeds x 2 arms, each run with its own deterministic seed); worker count and seed-to-run mapping frozen in the formal plan (Stage P); each individual run stays single-threaded and deterministic (scientific results bit-identical to serial).",
+    "rss_semantics": "3 GiB hard cap judged per single-run process-tree peak (scientific-compute memory, unchanged); summed RSS across parallel processes recorded as evidence but NOT a 24h wall-clock gate item (host 33.69 GiB RAM measured to accommodate).",
+    "determinism_requirement": "parallel execution MUST NOT change any single-run result; tests MUST assert parallel output bit-identical to serial output.",
+    "microbenchmark_authorization": "exactly one parallel re-measurement (#3, same synthetic non-gating parameters and seed 2026110000) authorized to re-freeze the budget; #1/#2 evidence remains unchanged.",
+    "design_freeze_update": "tasks.md gains V11-30.1''/30.2'' entries (see modification 2); design.md/spec.md scientific clauses unchanged."
+  },
+  "unchanged_scientific_parameters": [
+    "all seeds (202611xx prefix rule)",
+    "gates (S1 .22, S3 .32, pairing gain .002, reference tolerance .002, rate 1e-12, search tolerance .001)",
+    "frozen geometries G1/G2/G3",
+    "V10 S1/S3 lambda distribution reuse (no re-optimization)",
+    "matrix 2x3x5x2 not reduced",
+    "per-run budget inherited from V9 (n_samples=2000, max_iter=150, entropy_tol=0.01, streak=20, p_tol=0.002)",
+    "hard caps (parallel wall-clock 24 h, single-run peak RSS 3 GiB)",
+    "no-tuning/no-rerun rules; failed evidence immutable",
+    "AEIT fixed-window semantics"
+  ],
+  "no_other_changes": true,
+  "note": "Parallelization shortens wall-clock only, changes no scientific result; per-run output goes to independent directories for seed-order replay verification; budget frozen BEFORE any formal scientific result."
+}

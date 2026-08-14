@@ -1,0 +1,2 @@
+dataset_id,data_mode,dimension,bin_width_ps,frame_len_symbols,method,real_ir_success,success_classification,leak_EC_actual_bits,runtime_s
+d1,real_data,8,120,128,cascade_lite,True,real_ir_success,500.0,0.5

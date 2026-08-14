@@ -1,0 +1,191 @@
+{
+  "benchmark_config_snapshot": {
+    "cascade": {
+      "bisection_mode": [
+        "recursive_binary"
+      ],
+      "block_size_schedule": [
+        [
+          8,
+          16,
+          32,
+          64
+        ],
+        [
+          16,
+          32,
+          64,
+          128
+        ]
+      ],
+      "force": false,
+      "frame_caps": [
+        4,
+        16
+      ],
+      "include_all_points": false,
+      "mapping": [
+        "gray"
+      ],
+      "max_workers": 16,
+      "num_passes": [
+        4,
+        6
+      ],
+      "permutation_mode": [
+        "identity",
+        "seeded_random"
+      ],
+      "seed": [
+        0,
+        1
+      ],
+      "verify_mode": [
+        "crc32"
+      ]
+    },
+    "dataset": {
+      "frame_batch_path": "comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet"
+    },
+    "global": {
+      "output_dir": "comparison_bench/outputs_comparison"
+    }
+  },
+  "completed_stages": [
+    "cascade_param_sweep",
+    "layered_ldpc_param_sweep",
+    "qldpc_param_sweep",
+    "report_tables_v3"
+  ],
+  "failed_stages": [],
+  "git_commit": "b639e3d3cf1e2d3d784621d7f172baaec3853179",
+  "notes": "master runner partial completion is acceptable; failed stages logged separately; cascade tasks=0 representative_points=10; cascade tasks=0 representative_points=10",
+  "output_files": {
+    "cascade_leakage_diagnostics.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\cascade_leakage_diagnostics.csv",
+    "cascade_param_sweep": "comparison_bench/configs/cascade_param_sweep.yaml",
+    "cascade_param_sweep_frame_results.parquet": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\cascade_param_sweep_frame_results.parquet",
+    "cascade_param_sweep_results.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\cascade_param_sweep_results.csv",
+    "layered_ldpc_param_sweep": "comparison_bench/configs/layered_ldpc_param_sweep.yaml",
+    "qldpc_param_sweep": "comparison_bench/configs/qldpc_param_sweep.yaml",
+    "report_tables_v3": "comparison_bench/configs/ir_methods_v3_master.yaml",
+    "run_errors_ir_v3.csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\run_errors_ir_v3.csv"
+  },
+  "per_stage_config_snapshots": {
+    "cascade_param_sweep": {
+      "cascade": {
+        "bisection_mode": [
+          "recursive_binary"
+        ],
+        "block_size_schedule": [
+          [
+            8,
+            16,
+            32,
+            64
+          ],
+          [
+            16,
+            32,
+            64,
+            128
+          ]
+        ],
+        "force": false,
+        "frame_caps": [
+          4,
+          16
+        ],
+        "include_all_points": false,
+        "mapping": [
+          "gray"
+        ],
+        "max_workers": 16,
+        "num_passes": [
+          4,
+          6
+        ],
+        "permutation_mode": [
+          "identity",
+          "seeded_random"
+        ],
+        "seed": [
+          0,
+          1
+        ],
+        "verify_mode": [
+          "crc32"
+        ]
+      },
+      "dataset": {
+        "frame_batch_path": "comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet"
+      },
+      "global": {
+        "output_dir": "comparison_bench/outputs_comparison"
+      }
+    },
+    "qldpc_param_sweep": {
+      "cascade": {
+        "bisection_mode": [
+          "recursive_binary"
+        ],
+        "block_size_schedule": [
+          [
+            8,
+            16,
+            32,
+            64
+          ],
+          [
+            16,
+            32,
+            64,
+            128
+          ]
+        ],
+        "force": false,
+        "frame_caps": [
+          4,
+          16
+        ],
+        "include_all_points": false,
+        "mapping": [
+          "gray"
+        ],
+        "max_workers": 16,
+        "num_passes": [
+          4,
+          6
+        ],
+        "permutation_mode": [
+          "identity",
+          "seeded_random"
+        ],
+        "seed": [
+          0,
+          1
+        ],
+        "verify_mode": [
+          "crc32"
+        ]
+      },
+      "dataset": {
+        "frame_batch_path": "comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet"
+      },
+      "global": {
+        "output_dir": "comparison_bench/outputs_comparison"
+      }
+    },
+    "report_tables_v3": {
+      "cascade_config": "comparison_bench/configs/cascade_param_sweep.yaml",
+      "global": {
+        "output_dir": "comparison_bench/outputs_comparison"
+      },
+      "layered_ldpc_config": "comparison_bench/configs/layered_ldpc_param_sweep.yaml",
+      "qldpc_config": "comparison_bench/configs/qldpc_param_sweep.yaml"
+    }
+  },
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python_version": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:13:34) [MSC v.1944 64 bit (AMD64)]",
+  "runtime_total_s": 8.532727699988754,
+  "timestamp": "2026-06-15T08:50:39.190153+00:00"
+}

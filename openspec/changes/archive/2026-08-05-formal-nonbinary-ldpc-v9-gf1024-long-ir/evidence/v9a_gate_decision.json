@@ -1,0 +1,77 @@
+{
+  "schema": "v9a_gate_v1",
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "phase": "V9-20.4 frozen gate decision after completed V9A execute + strict replay",
+  "gate_decision_recorded_at_utc": "2026-08-04T15:00:00Z",
+  "basis": {
+    "execute_results": "openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/v9a_execute_results.json",
+    "replay_evidence": "openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/v9a_replay_evidence.json",
+    "plan_v2": "openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/v9a_plan_v2.json",
+    "plan_v2_sha256": "4bd6380f19008c9c893b1114fbab94a60d37acb77e3fbdf7a0d03d347092ddf2"
+  },
+  "per_search": {
+    "S1": {
+      "search_id": "S1",
+      "tier": "robust",
+      "stratum_p": 0.20,
+      "tier_f": 1.15,
+      "gate": 0.22,
+      "capacity_context_pstar": 0.23445300924647078,
+      "eligible_candidates": [],
+      "conservative_threshold": null,
+      "gate_failed_no_eligible": true,
+      "verdict": "FAIL",
+      "arithmetic": "robust S1: NO eligible candidate; every screen run at p=0.22 did not converge (recorded '< gate'); conservative threshold undefined => 0.22 gate FAIL"
+    },
+    "S2": {
+      "search_id": "S2",
+      "tier": "target",
+      "stratum_p": 0.20,
+      "tier_f": 1.08,
+      "gate": 0.215,
+      "capacity_context_pstar": 0.21826911930204423,
+      "eligible_candidates": [],
+      "conservative_threshold": null,
+      "gate_failed_no_eligible": true,
+      "verdict": "FAIL",
+      "arithmetic": "target S2: NO eligible candidate; every screen run at p=0.215 did not converge (recorded '< gate'); conservative threshold undefined => 0.215 gate FAIL"
+    },
+    "S3": {
+      "search_id": "S3",
+      "tier": "robust",
+      "stratum_p": 0.30,
+      "tier_f": 1.15,
+      "gate": 0.32,
+      "capacity_context_pstar": 0.35270359472062474,
+      "eligible_candidates": [],
+      "conservative_threshold": null,
+      "gate_failed_no_eligible": true,
+      "verdict": "FAIL",
+      "arithmetic": "robust S3: NO eligible candidate; every screen run at p=0.32 did not converge (recorded '< gate'); conservative threshold undefined => 0.32 gate FAIL"
+    },
+    "S4": {
+      "search_id": "S4",
+      "tier": "target",
+      "stratum_p": 0.30,
+      "tier_f": 1.08,
+      "gate": 0.32,
+      "capacity_context_pstar": 0.3279030142035134,
+      "eligible_candidates": [],
+      "conservative_threshold": null,
+      "gate_failed_no_eligible": true,
+      "verdict": "FAIL",
+      "arithmetic": "target S4: NO eligible candidate; every screen run at p=0.32 did not converge (recorded '< gate'); conservative threshold undefined => 0.32 gate FAIL"
+    }
+  },
+  "overall": {
+    "robust_verdict": "FAIL",
+    "target_verdict": "FAIL"
+  },
+  "downstream_tier_selection": {
+    "p20_stratum": null,
+    "p30_stratum": null
+  },
+  "stop_declared": true,
+  "next_step": "STOP before any finite codebook; V9B/V9C unreachable; evidence immutable; no tuning/rerun",
+  "note": "All four searches recorded 0 eligible candidates at their respective gates. The conservative threshold is undefined for every gate. Per the frozen plan, robust gate failure stops V9 before codebooks; target gate failure is moot because the robust gates also failed. No ensemble is accepted; no finite codebook, decoder, canary, or downstream development will be produced under this change."
+}

@@ -1,0 +1,259 @@
+{
+  "schema": "v8_engineering_v1",
+  "change": "formal-nonbinary-ldpc-v8-reference-reproduction",
+  "operator_role": "implementation operator (coder-fast); acceptance and scientific gates remain with the main thread",
+  "head_git_sha256": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "environment": {
+    "python": "3.12.12",
+    "numpy": "2.4.0",
+    "os": "win32"
+  },
+  "stage": "engineering and reference-reproduction only (V8-00..V8-50.5). No canary, development, confirmation, real-data, N4, or formal comparison execution; no V8 official output root created.",
+  "implementation_note": {
+    "error_domain": "d = s + H*y = H*(x+y); decode e under a QSC error prior centered at zero; x_hat = y + e_hat. Pure stdlib+numpy, imports only GF2mField from nonbinary_field.",
+    "oracle": "independent direct probability-domain oracle: pairwise XOR convolution O((dc-1)*q^2), sparse support-product enumeration bounded to 2_000_000 combinations, brute-force coset/MAP enumeration bounded to q^n <= 4096; imports only nonbinary_field; assert_oracle_independent() == [] (verified).",
+    "mcde": "full-vector QSC MC-DE: every message a length-q probability vector, direct pairwise XOR convolution only (no FWHT anywhere), edge-perspective degree distributions with tested node/edge conversion, exact sampled degrees per update (_degree_mode sampled), fresh channel message at every variable update (_channel_mode fresh), base-q mean message entropy convergence, seeded deterministic populations, fail-closed normalization.",
+    "degree_perspective": "lambda is the node degree distribution in edge view = EDGE perspective (Table 1 caption). Paper eq. 13 defines lambda(x) = sum lambda_i x^(i-1); the Table-1 exponents {1,3,6,9,18,25,27} correspond to variable DEGREES {2,4,7,10,19,26,28}. REPRODUCTION_LAMBDA_PUBLISHED keys are the verbatim published exponents; REPRODUCTION_LAMBDA_DEGREES = key+1 is what the MC-DE samples (the packet test-3 formula 0.107/2+0.245/4+... confirms the degree-keyed convention).",
+    "check_distribution_inference": "concentrated two-point check distribution implied by the fixed rate: dc_mean = 1/((1-R)*sum(lambda_d/degree_d)) over degrees {2,4,7,10,19,26,28} = 24.328589328768736 -> {24: 0.6714106712, 25: 0.3285893288}. Documented as inference in v8_muller2024_table1_extract.txt and v8_literature_provenance.json (the paper states only that a concentrated check distribution is implied by the fixed rate).",
+    "frozen_reproduction_decision": "params frozen BEFORE the single run (module constants + V8-40.1/40.2): q=4, rate 0.75, published lambda (exponents), DET 0.069, tolerance 0.015, n_samples 20000, max_iter 200, seed 2026080418, p_lo 0.01, p_hi 0.12, p_tol 0.0025, entropy_tol 0.01, streak 20. Single run executed once via the V8-40.3 python -c command; result threshold_proxy 0.062422, delta 0.0066 <= 0.015 -> PASS. NO rerun, NO tuning.",
+    "golden_regressions": "frozen after the first successful run (recording, not tuning): q=4 lambda {2:0.5,3:0.5} rho concentrated rate 0.5 p=0.1 n=500 iters=60 seed=2026080420 (33 iterations, converged) and q=8 lambda {3:1.0} rho regular degree 6 p=0.05 n=500 iters=60 seed=2026080421 (23 iterations, converged); the _channel_mode=omitted and _degree_mode=fixed_max runs differ from the golden traces (old R2 regression detection).",
+    "tolerance_justification": "frozen tolerance 0.015 = paper 20-step QBER sweep precision ~0.005 + seeded MC-DE finite-sample error at 20000 nodes ~0.003 + binary-search step 0.0025.",
+    "evidence_files": [
+      "v8_v7_interpretation_audit.md",
+      "v8_muller2024_table1_extract.txt",
+      "v8_literature_provenance.json",
+      "v8_source_manifest.json",
+      "v8_reproduction_trace.json",
+      "v8_v9_recommendation.md",
+      "v8_engineering_acceptance.json"
+    ]
+  },
+  "source_manifest": {
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_error_domain.py": "f422c39435479554251369bbf10d25f1f65c6b26ab8d50ac4b5c8a9340910e53",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_reference.py": "d747f0d58e218297c515ab3cdd7cd9e17c79aabf29350cbb5ce4e9fbcefbb96b",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v8_mcde.py": "bbc19cb345ea8c6ff9a6d3726e16ea1485c5f79ae3285eeaa7b3733e6452a9d2",
+    "comparison_bench/tests/test_nonbinary_v8_error_domain.py": "50397c0d0e1cd6d8497cab315679215b48802000b340f91a4f01c290cea17b7d",
+    "comparison_bench/tests/test_nonbinary_v8_reference.py": "258b67b4c7c1fcb2cc2e4220852016e64291750d4632bec59b86f7776b72a568",
+    "comparison_bench/tests/test_nonbinary_v8_mcde.py": "a89541799fb8ba2d7accf03a4a951e30c075cecefc149f95560f1f784cc076c7"
+  },
+  "extract_sha256": "d343f0204e87994e64efd32531bc12490fb4e7125cd90b52cfaf2397279b57bd",
+  "preexisting_dirty_worktree_inventory_unchanged": {
+    "modified_files": [
+      "AGENTS.md",
+      "AGENT_PROJECT_MEMORY.md",
+      "comparison_bench/README.md",
+      "docs/decision-log.md",
+      "openspec/changes/consolidate-real-ir-evidence-package/specs/spec.md",
+      "openspec/changes/expand-real-ir-optimized-evidence/tasks.md",
+      "openspec/changes/group-meeting-ir-large-comparison/specs/spec.md",
+      "openspec/changes/group-meeting-ir-large-comparison/tasks.md",
+      "openspec/changes/optimize-real-ir-methods-after-success/tasks.md",
+      "openspec/changes/real-ir-success-first/tasks.md"
+    ],
+    "note": "the ten pre-existing modified files (frozen R2 inventory) plus AGENT_HANDOFF.md and CURRENT_TASK.md (main-thread session files) remain the only tracked-modified files; the operator did not touch them; the V8 work wrote only the 6 additive source/test files, the evidence files, the tasks.md checkbox marks and the fresh workspace root; nothing was staged"
+  },
+  "tiers": {
+    "T0": {
+      "command": "python -m pytest comparison_bench/tests/test_nonbinary_v8_error_domain.py comparison_bench/tests/test_nonbinary_v8_reference.py comparison_bench/tests/test_nonbinary_v8_mcde.py -q -p no:cacheprovider --basetemp workspace/nbldpc_v8_reference_9c3f51e2a74b48d9b6c0a5f8e1d23a4b/pytest_t0 -k 'exhaustive_q4 or qsc_channel or degree_conversion or assert_oracle_independent or forbidden_import or reconstruction_roundtrip or coefficient_order or xor_conv_pairwise_hand or direct_syndrome_row_order or determinism'",
+      "exit_code": 0,
+      "passed": 11,
+      "failed": 0,
+      "deselected": 23
+    },
+    "T1": {
+      "command": "python -m pytest comparison_bench/tests/test_nonbinary_v8_error_domain.py comparison_bench/tests/test_nonbinary_v8_reference.py comparison_bench/tests/test_nonbinary_v8_mcde.py -q -p no:cacheprovider --basetemp workspace/nbldpc_v8_reference_9c3f51e2a74b48d9b6c0a5f8e1d23a4b/pytest_t1 -k 'not test_reproduction_muller2024 and not test_v8_source_manifest_readonly and not test_v8_no_production_runner_bound'",
+      "exit_code": 0,
+      "passed": 31,
+      "failed": 0,
+      "deselected": 3
+    },
+    "T2": {
+      "command": "python -m pytest comparison_bench/tests/test_nonbinary_v8_error_domain.py comparison_bench/tests/test_nonbinary_v8_reference.py comparison_bench/tests/test_nonbinary_v8_mcde.py -q -p no:cacheprovider --basetemp workspace/nbldpc_v8_reference_9c3f51e2a74b48d9b6c0a5f8e1d23a4b/pytest_t2 -k 'test_reproduction_muller2024 or test_v8_source_manifest_readonly or test_v8_no_production_runner_bound'",
+      "exit_code": 0,
+      "passed": 3,
+      "failed": 0,
+      "deselected": 31,
+      "note": "the frozen reproduction SEARCH itself ran exactly once via the V8-40.3 python -c command (evidence/v8_reproduction_trace.json); the pytest test verifies the recorded trace read-only"
+    },
+    "T3": {
+      "command": "python -m pytest comparison_bench/tests/test_nonbinary_field.py comparison_bench/tests/test_nonbinary_codebook.py comparison_bench/tests/test_nonbinary_qspa.py comparison_bench/tests/test_nonbinary_v3.py comparison_bench/tests/test_nonbinary_v5a_codebook.py comparison_bench/tests/test_nonbinary_v5a_multistage.py comparison_bench/tests/test_nonbinary_v6_codebook.py comparison_bench/tests/test_nonbinary_v6_long.py comparison_bench/tests/test_nonbinary_v6_development.py comparison_bench/tests/test_nonbinary_v7_r1a_codebook.py comparison_bench/tests/test_nonbinary_v7_r1a_long.py comparison_bench/tests/test_nonbinary_v7_r1b_codebook.py comparison_bench/tests/test_nonbinary_v7_r1b_long.py comparison_bench/tests/test_nonbinary_v7_r2_de.py comparison_bench/tests/test_nonbinary_v7_r2_codebook.py comparison_bench/tests/test_nonbinary_v7_r2_long.py -q -p no:cacheprovider --basetemp workspace/nbldpc_v8_reference_9c3f51e2a74b48d9b6c0a5f8e1d23a4b/pytest_t3",
+      "exit_code": 0,
+      "passed": 179,
+      "failed": 0,
+      "note": "frozen v5+v6+v7-R1A+R1B+R2 regression (16 files, exact file list/order of the frozen V7 T3 command); no frozen file modified (git status/diff under src experiments tools results empty afterwards)"
+    }
+  },
+  "commands": [
+    {
+      "id": "inspect",
+      "exit_code": 0,
+      "result": "HEAD a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344; the 10 pre-existing modified files plus AGENT_HANDOFF.md/CURRENT_TASK.md are the only tracked-modified files; 6 additive V8 files + evidence + change dir untracked; nothing staged"
+    },
+    {
+      "id": "compile",
+      "exit_code": 0,
+      "result": "all six files compile (python -m py_compile)"
+    },
+    {
+      "id": "T0",
+      "command": "see tiers.T0.command",
+      "exit_code": 0,
+      "result": "11 passed / 0 failed / 23 deselected"
+    },
+    {
+      "id": "T1",
+      "command": "see tiers.T1.command",
+      "exit_code": 0,
+      "result": "31 passed / 0 failed / 3 deselected"
+    },
+    {
+      "id": "T2",
+      "command": "see tiers.T2.command",
+      "exit_code": 0,
+      "result": "3 passed / 0 failed / 31 deselected (read-only reproduction-trace, source-manifest and no-production-runner verification)"
+    },
+    {
+      "id": "T3",
+      "command": "see tiers.T3.command",
+      "exit_code": 0,
+      "result": "179 passed / 0 failed in 496.81s (frozen 16-file v5+v6+v7-R1A/R1B/R2 regression)"
+    },
+    {
+      "id": "reproduction-run",
+      "exit_code": 0,
+      "result": "threshold_proxy 0.062421875; delta vs published DET 0.069 = 0.006578 <= 0.015 -> PASS; 6 probes recorded in evidence/v8_reproduction_trace.json; single run, no rerun"
+    },
+    {
+      "id": "A13-frozen-dirs",
+      "exit_code": 0,
+      "result": "git status --porcelain -- src experiments tools results and git diff --stat -- src experiments tools results are both empty"
+    },
+    {
+      "id": "A15-output-boundary",
+      "exit_code": 0,
+      "result": "no V8 directory exists under comparison_bench/outputs_comparison/formal_ir_methods/ (only pre-V8 runs); no canary/development/confirmation/real-data/N4 artifact created anywhere by this session"
+    },
+    {
+      "id": "hashes",
+      "exit_code": 0,
+      "result": "SHA256 of the 6 additive files recorded in source_manifest; the T2 source-manifest test re-verifies the on-disk hashes read-only (passed); manifest regenerated after the test-file delta (see source_manifest_delta_note); T2 source-manifest test re-verified the regenerated manifest read-only (passed)"
+    }
+  ],
+  "acceptance": {
+    "V8-A01": {
+      "status": "pass",
+      "evidence": [
+        "inspect",
+        "A13-frozen-dirs",
+        "source_manifest"
+      ],
+      "detail": "additive scope only: 3 V8 modules + 3 V8 test files + evidence + fresh workspace root; frozen baseline and all V1-V7 files unchanged (git status/diff under src experiments tools results empty; the only tracked-modified files are the frozen pre-existing 10 plus the two main-thread handoff files); nothing staged"
+    },
+    "V8-A02": {
+      "status": "pass",
+      "evidence": [
+        "evidence/v8_v7_interpretation_audit.md",
+        "A13-frozen-dirs"
+      ],
+      "detail": "additive audit distinguishes T0-T3 engineering PASS from canary failures; R1B recorded as out-of-contract extra-observation diagnostic and R2 as unvalidated scalar-DE surrogate result; no V7 evidence rewritten"
+    },
+    "V8-A03": {
+      "status": "pass",
+      "evidence": [
+        "T0/T1: test_exhaustive_q4_equivalence_all_x_y_pairs",
+        "test_bounded_q8_random_equivalence",
+        "test_reconstruction_roundtrip",
+        "test_coefficient_order_invariance",
+        "test_direct_syndrome_row_order",
+        "test_invalid_inputs",
+        "test_fail_closed_symbol_domain"
+      ],
+      "detail": "error-domain equivalence H*(x+y) == H*x + H*y == s + H*y holds exhaustively for q=4 n=1..4 (all x,y pairs, full-rank matrices incl. nonzero coefficients), for >=250 seeded random q=8 n=6 cases; reconstruction round-trip exact; coefficient-order invariant; all invalid/length/domain cases fail closed"
+    },
+    "V8-A04": {
+      "status": "pass",
+      "evidence": [
+        "T1: test_bruteforce_map_vs_reference_bp_star (4 parametrized q=4/q=8 cases)",
+        "test_bruteforce_error_map_reconstructs_x",
+        "test_bruteforce_bounds_and_invalid"
+      ],
+      "detail": "brute-force coset posterior/MAP matches one reference-BP round on cycle-free star graphs within 1e-9 with matching marginal argmax; bruteforce_error_map reconstructs x exactly for e=0 and for singleton cosets (invertible H) and returns syndrome-consistent MAPs otherwise; q^n <= 4096 bound enforced"
+    },
+    "V8-A05": {
+      "status": "pass",
+      "evidence": [
+        "T1: test_sparse_vs_dense_agree_deterministic",
+        "test_oracle_vs_production_exhaustive_q4",
+        "test_oracle_vs_production_bounded_q8",
+        "test_oracle_vs_production_one_check_gf1024"
+      ],
+      "detail": "sparse and dense oracle paths agree to 1e-12; both agree with the production FFT-QSPA check update (v7_long.check_update_fft_qspa, TEST-ONLY oracle) to 1e-9 for exhaustive q=4 dc=3/4 (all {1,2,3} coefficient combos, syndromes 0..3, 3 message sets, every target), >=40 bounded q=8 cases, and the frozen one-check GF(1024) matrix (sparse support sizes 2/3/4 + 4 dense families, syndromes {0,17,999}, coefficients {1,3,7,255} in all 24 permutations, every target)"
+    },
+    "V8-A06": {
+      "status": "pass",
+      "evidence": [
+        "T1: test_run_mcde_determinism",
+        "test_golden_q4_canonical_and_old_r2_regressions",
+        "test_golden_q8",
+        "test_fail_closed_numerical_and_parameter_boundaries",
+        "test_qsc_channel_message_and_entropy"
+      ],
+      "detail": "MC-DE is byte-for-byte deterministic for a fixed seed (identical traces), different seeds diverge; fail-closed on NaN/Inf/negative/zero-mass vectors, out-of-domain p, invalid histograms and parameter bounds; golden traces frozen after the first successful run"
+    },
+    "V8-A07": {
+      "status": "pass",
+      "evidence": [
+        "T1: test_degree_conversion_roundtrips_and_rejections",
+        "test_concentrated_check_distribution_reproduction",
+        "test_golden_q4_canonical_and_old_r2_regressions",
+        "test_golden_q8"
+      ],
+      "detail": "edge<->node perspective conversions round-trip exactly and reject unnormalized/ambiguous specs; the concentrated check distribution is implied by the rate via the frozen formula (dc_mean 24.328589328768736, two-point {24,25}) and the MC-DE samples the exact variable/check degree for every update"
+    },
+    "V8-A08": {
+      "status": "pass",
+      "evidence": [
+        "T1: test_golden_q4_canonical_and_old_r2_regressions"
+      ],
+      "detail": "_channel_mode='omitted' and _degree_mode='fixed_max' each produce traces that differ from the frozen canonical golden trace (old R2 missing-channel and fixed-dv_max behavior detected)"
+    },
+    "V8-A09": {
+      "status": "pass",
+      "evidence": [
+        "evidence/v8_reproduction_trace.json",
+        "evidence/v8_literature_provenance.json",
+        "evidence/v8_muller2024_table1_extract.txt",
+        "T2: test_reproduction_muller2024_table1_q4_rate075"
+      ],
+      "detail": "single frozen reproduction run (seed 2026080418, 20000 nodes, max 200 iterations, entropy convergence 0.01 for 20 consecutive iterations, binary search p in [0.01,0.12] tol 0.0025) of Muller et al. 2024 Table 1 row 0.75 (q=4, rate 0.75, DET 0.069): threshold_proxy 0.062422, delta 0.0066 <= frozen tolerance 0.015 -> PASS; full 6-probe trace recorded; NO rerun or tuning; provenance/extract SHA256 recorded (d343f0204e87994e64efd32531bc12490fb4e7125cd90b52cfaf2397279b57bd)"
+    },
+    "V8-A10": {
+      "status": "pass",
+      "evidence": [
+        "T3"
+      ],
+      "detail": "179 frozen v5+v6+v7-R1A+R1B+R2 regression tests (16 files, exact file list/order of the frozen V7 T3 command) pass without modifying any frozen file (frozen-dir audit empty afterwards)"
+    },
+    "V8-A11": {
+      "status": "pass",
+      "evidence": [
+        "A15-output-boundary"
+      ],
+      "detail": "no V8 directory exists under comparison_bench/outputs_comparison/formal_ir_methods/ (only pre-V8 runs); no canary/development/confirmation/real-data/N4/comparison execution or artifact created by this session; the only V8 files are the additive source/tests/evidence and the fresh workspace test root"
+    },
+    "V8-A12": {
+      "status": "blocked",
+      "evidence": [
+        "this file",
+        "evidence/v8_source_manifest.json",
+        "T2: test_v8_source_manifest_readonly, test_v8_no_production_runner_bound"
+      ],
+      "detail": "evidence/source hashes are complete and the pre-test source manifest matches the on-disk hashes (read-only test passed); the no-production-runner and import-boundary checks pass; INDEPENDENT REVIEW IS PENDING (V8-50.6) - the implementation operator must not self-accept; status blocked until a separate reviewer confirms"
+    }
+  },
+  "remaining_v8_items": {
+    "V8-50.6": "independent read-only review of the complete candidate (reviewer-go or main thread) - NOT performed by the operator",
+    "V8-50.7": "update docs/decision-log.md, CURRENT_TASK.md, AGENT_HANDOFF.md and AGENT_PROJECT_MEMORY.md only with verified final facts (a later agent owns this)"
+  },
+  "source_manifest_delta_note": "test_nonbinary_v8_reference.py changed AFTER the first manifest write (fail-closed None-path assertions added for oracle_variable_update/oracle_belief); no source module changed; evidence/v8_source_manifest.json was regenerated with manifest_regeneration_delta recorded and all tiers re-verified (T0 11, T1 31, T2 3 unchanged; the added assertions live inside an existing test)."
+}

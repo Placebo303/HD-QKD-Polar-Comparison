@@ -1,0 +1,132 @@
+{
+  "schema": "v9_00_freeze_v1",
+  "change": "formal-nonbinary-ldpc-v9-gf1024-long-ir",
+  "phase": "V9-00 freeze record (Round 1: V9-00.1 / V9-00.2 / V9-00.3)",
+  "date": "2026-08-04",
+  "operator_role": "implementation operator (coder-fast); acceptance and scientific gates remain with the main thread; acceptance is NOT self-granted",
+  "round_boundary": "Round 1 creates the V9-00 freeze record, the V9-10 kernel and its tests, and the V9-20.1 PLAN-ONLY package. NO scientific result is generated in this round: no search execution, no canary, no validation-seed run, no codebook, no decoder, no CLI.",
+  "V9_00_1_freeze_and_audit": {
+    "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+    "head_expected": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+    "head_match": true,
+    "tracked_modified": [
+      "AGENTS.md",
+      "AGENT_HANDOFF.md",
+      "AGENT_PROJECT_MEMORY.md",
+      "CURRENT_TASK.md",
+      "comparison_bench/README.md",
+      "docs/decision-log.md",
+      "openspec/changes/consolidate-real-ir-evidence-package/specs/spec.md",
+      "openspec/changes/expand-real-ir-optimized-evidence/tasks.md",
+      "openspec/changes/group-meeting-ir-large-comparison/specs/spec.md",
+      "openspec/changes/group-meeting-ir-large-comparison/tasks.md",
+      "openspec/changes/optimize-real-ir-methods-after-success/tasks.md",
+      "openspec/changes/real-ir-success-first/tasks.md"
+    ],
+    "tracked_modified_policy": "exactly the frozen 10 pre-existing files + AGENT_HANDOFF.md + CURRENT_TASK.md; verified by git status --porcelain",
+    "tracked_modified_policy_met": true,
+    "staged_files": [],
+    "staged_policy": "nothing staged; git diff --cached --name-only is EMPTY",
+    "staged_policy_met": true,
+    "frozen_dirs": ["src", "experiments", "tools", "results"],
+    "frozen_dirs_clean": true,
+    "frozen_dirs_check": "git status --porcelain -- src experiments tools results is EMPTY (no modified/untracked/diff in the frozen baseline)",
+    "v1_v8_files_untouched": true,
+    "no_v9_official_output": {
+      "root": "comparison_bench/outputs_comparison/formal_ir_methods",
+      "check": "directory listing shows only V1-V8 era run packages (20260725..20260801) and two pre-existing partial_state execution logs; NO v9* entry exists",
+      "proof": "Get-ChildItem comparison_bench/outputs_comparison/formal_ir_methods -Name: no entry starts with v9; no canary/development/qualification/confirmation/real-data/N4/comparison artifact created by this round",
+      "met": true
+    },
+    "allowed_file_manifest": [
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_mcde.py",
+      "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_common.py",
+      "comparison_bench/tests/test_nonbinary_v9_mcde.py",
+      "comparison_bench/tests/test_nonbinary_v9_common.py",
+      "openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/v9_00_freeze.json",
+      "openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/v9a_plan.json",
+      "workspace/v9a_04c9e7d25d7145659685415084d6fac7/plan_only/v9a_plan.json",
+      "workspace/v9a_04c9e7d25d7145659685415084d6fac7/plan_only/plan_manifest.json"
+    ],
+    "forbidden_actions_not_taken": [
+      "no V1-V8 file modified; no frozen src/experiments/tools/results file modified",
+      "no V9 directory created under comparison_bench/outputs_comparison/formal_ir_methods/",
+      "no dependency installation / clone / vendor / external code copy",
+      "no git add / commit / push / reset / clean",
+      "no Glob or broad recursive enumeration",
+      "no production decoder execution",
+      "no search / canary / validation-seed run; no scientific result generated"
+    ]
+  },
+  "V9_00_2_seeds_roots_and_policies": {
+    "fresh_roots": {
+      "scientific_packages": "workspace/v9a_04c9e7d25d7145659685415084d6fac7/ (this round: the plan-only package under plan_only/)",
+      "tests": "workspace/v9a_tests_f25c937f2fd7449099ee3de85b6c2431/ with pytest -p no:cacheprovider --basetemp workspace/v9a_tests_f25c937f2fd7449099ee3de85b6c2431/pytest",
+      "root_policy": "fresh additive workspace/<stage>/<uuid> roots; new uuids generated 2026-08-04; scientific packages and tests use separate roots"
+    },
+    "seed_derivation": {
+      "v9_prefix": "202609xx — disjoint from ALL prior V1-V8 seeds (V6 20260802xx, V7 20260804xx / 20260805xxxx, V8 20260804xx)",
+      "v9a_optimization_seeds": {
+        "S1_p20_robust_f115": 2026090101,
+        "S2_p20_target_f108": 2026090102,
+        "S3_p30_robust_f115": 2026090103,
+        "S4_p30_target_f108": 2026090104
+      },
+      "v9a_validation_seeds": [2026090111, 2026090112, 2026090113],
+      "validation_seed_rule": "the same three disjoint validation seeds are used for all four searches; disjoint from every optimization seed",
+      "constituent_seed_rule": "constituent_seed(P, f, k) = int(sha256(f\"{P}:frame{f}:const{k}\")[0:8], 16)",
+      "error_pattern_seed_rule": "QSC error-pattern seed: int(sha256(f\"{P}:frame{f}:const{k}:err\")[0:8], 16)",
+      "cross_stage_disjointness": "by numeric prefix: V9A optimization 20260901, V9A validation 20260901 (seed IDs disjoint from optimization), future V9B 20260902xx, V9C16 20260903xx, V9C32 canary 20260904xx, V9C32 development 20260905xx; verified dynamically against all prior V1-V8 evidence seeds and excluding the current plan during replay checks",
+      "future_reserved": {"V9B": "20260902xx", "V9C16": "20260903xx", "V9C32_canary": "20260904xx", "V9C32_development": "20260905xx"}
+    },
+    "resource_policy": {
+      "watcher": "ctypes-only process-tree RSS watcher (toolhelp32 CreateToolhelp32Snapshot + Process32FirstW; OpenProcess + GetProcessMemoryInfo summing WorkingSetSize of parent and all descendants; stdlib ctypes only; NO psutil, NO installation)",
+      "sampling": "every 10 seconds, peak recorded",
+      "cap_bytes": 3221225472,
+      "cap_gib": 3,
+      "scientific_runs": "must run under the watcher; peak process-tree RSS must stay <= 3 GiB",
+      "timeout": "hard per-superframe timeouts frozen at the canary/development stages (V9-40/50/60/70); hard timeout or RSS breach => status aborted_resource_limit with documented reason"
+    },
+    "rank_policy": {
+      "rule": "sparse GF(1024) Gaussian elimination over GF2mField tables (imported from nonbinary_field only); require rank(H)=m for every finite matrix before any plan",
+      "reconstruction": "bounded deterministic reconstruction <= 5 attempts (relabel with the next frozen label seed) then BLOCKER",
+      "round1_scope": "Round 1 freezes the policy and unit-tests the rank utility contract on small cases only (rank utility implementation and finite-codebook tests are V9B rounds)"
+    },
+    "leakage_policy": {
+      "L_recon": "10*m syndrome bits",
+      "tag": "separate fixed 64-bit correctness tag",
+      "L_total": "10*m + 64 bits",
+      "hard_caps": "exact mechanical hard caps; no other reconciliation payload",
+      "public_control": "Toeplitz verification seed bits (n*10 + 63) documented separately (accepted verifier shared.verification_result)",
+      "forbidden": "puncturing, shortening, interactive/adaptive stages, information-bearing index/control payload; blind rate adaptation deferred to a future V10 change"
+    },
+    "status_vocabulary": "shared.FORMAL_STATUSES (accepted verifier vocabulary, import-only reuse); resource/timeout breach => 'aborted_resource_limit' with reason",
+    "stop_rules": [
+      "robust V9A conservative gate failure (p=.20 < .22 or p=.30 < .32) => freeze evidence and STOP before any finite codebook",
+      "target V9A conservative gate failure (p=.20 < .215 or p=.30 < .32) => robust-only continuation with efficiency_target_not_met for that stratum",
+      "V9B/V9C canary gates: >=3/4 verified per stratum, zero forbidden, exact disclosure, median runtime and 3 GiB RSS caps; failure => freeze STOP",
+      "n=32768 development-ready: >=15/16 per stratum, zero forbidden, strict replay, median <=24h, <=3 GiB; then STOP (no qualification/confirmation/real/N4/comparison)",
+      "failed evidence is immutable; no tuning, no rerun"
+    ]
+  },
+  "V9_00_3_v8_method_only_note": {
+    "statement": "V8's q=4 reproduction (Muller et al. 2024, QIP 23:195, arXiv:2307.02225v2, Table 1 row 0.75, threshold_proxy 0.062421875, delta 0.006578 <= 0.012, evidence/v8_reproduction_trace_corrected.json) validates the METHOD and the audit machinery ONLY. It is NOT a GF(1024) threshold or a GF(1024) finite-length FER result. V9A must first build and validate the GF(1024) bridge before any new codebook exists.",
+    "consequence": "no V8 number may be cited as GF(1024) evidence; V9A thresholds are produced only by the frozen V9A package (plan-only -> review -> one execute -> one replay)"
+  },
+  "tier_evidence_round1": {
+    "compile": {"command": "python -m py_compile comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_mcde.py comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_common.py comparison_bench/tests/test_nonbinary_v9_mcde.py comparison_bench/tests/test_nonbinary_v9_common.py", "exit_code": 0},
+    "tests": {
+      "command": "python -m pytest comparison_bench/tests/test_nonbinary_v9_common.py comparison_bench/tests/test_nonbinary_v9_mcde.py -q -p no:cacheprovider --basetemp workspace/v9a_tests_f25c937f2fd7449099ee3de85b6c2431/pytest",
+      "exit_code": 0,
+      "passed": 33,
+      "failed": 0,
+      "elapsed_seconds": 11.62
+    }
+  },
+  "source_hashes_round1": {
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_mcde.py": "e31ba8f942ee9f767e6c8e4c2687ac2b3051d1007988a85e4797af38a3e28086",
+    "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v9_common.py": "96d53e55828423677dad101e23a0363628e519fd18c4158b9ab9b47d69c5d178",
+    "comparison_bench/tests/test_nonbinary_v9_mcde.py": "9c495c927faae4eaf9d994ae6a9e161a5b57bf3dbabe92de25bda1afd3f51b7e",
+    "comparison_bench/tests/test_nonbinary_v9_common.py": "3b6c1bd0d671bfd6d2936aaa988588e1b49f4c340ec87f9fc2d5ac59fc605c0a"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "v9a_plan_review_v1",
+  "reviewer": "reviewer-go (independent read-only plan review, V9A plan-only gate)",
+  "date": "2026-08-04",
+  "git_head": "a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344",
+  "review_scope": "V9A PLAN-ONLY gate of openspec change formal-nonbinary-ldpc-v9-gf1024-long-ir. Read-only: no file edited except this review artifact; no search/probe/canary/validation executed; no plan executed. Reviewed AGENTS.md, AGENT_PROJECT_MEMORY.md sections 37-41, packet (opencode-autonomous-packet.md, proposal.md, design.md, specs/spec.md, tasks.md), evidence (v9_00_freeze.json, v9a_plan.json), plan-only package (workspace/v9a_04c9e7d25d7145659685415084d6fac7/plan_only/), new V9 code (nonbinary_v9_common.py, nonbinary_v9_mcde.py, test_nonbinary_v9_common.py, test_nonbinary_v9_mcde.py), V8 references (nonbinary_v8_mcde.py, nonbinary_v8_reference.py, nonbinary_field.py, shared.py).",
+  "checks": {
+    "A_scope": {
+      "method": "git rev-parse HEAD; git status --porcelain -- src experiments tools results; git diff --cached --name-only; git diff --name-only; git ls-files --others --exclude-standard comparison_bench/outputs_comparison/formal_ir_methods/",
+      "result": "HEAD = a9c3c5d8696ad9fa967e2d5d8b9905c5a55c8344 (matches frozen). src/experiments/tools/results porcelain output EMPTY. Staged files: none (git diff --cached --name-only empty). Tracked-modified: exactly the frozen 12 (AGENTS.md, AGENT_HANDOFF.md, AGENT_PROJECT_MEMORY.md, CURRENT_TASK.md, comparison_bench/README.md, docs/decision-log.md, openspec/changes/consolidate-real-ir-evidence-package/specs/spec.md, openspec/changes/expand-real-ir-optimized-evidence/tasks.md, openspec/changes/group-meeting-ir-large-comparison/specs/spec.md, openspec/changes/group-meeting-ir-large-comparison/tasks.md, openspec/changes/optimize-real-ir-methods-after-success/tasks.md, openspec/changes/real-ir-success-first/tasks.md) - matches v9_00_freeze.json tracked_modified list exactly. No v9* entry anywhere under comparison_bench/outputs_comparison/formal_ir_methods/ (existing packages are 20260725..20260801 era only).",
+      "pass": true
+    },
+    "B_plan_completeness": {
+      "method": "Parsed evidence/v9a_plan.json and plan_only/v9a_plan.json (byte-identical, sha256 2e0a68807ca80ac92693b1829e02d6ef92828b01016e78a737d9fbe9ef1a8389, matching plan_manifest.json) against every frozen element of the packet/proposal/design/spec/tasks and the review instructions.",
+      "result": "All four searches bound: S1 (p=.20 f=1.15 seed 2026090101 gate >=.22), S2 (p=.20 f=1.08 seed 2026090102 gate >=.215), S3 (p=.30 f=1.15 seed 2026090103 gate >=.32), S4 (p=.30 f=1.08 seed 2026090104 gate >=.32), frozen order S1..S4. Validation seeds 2026090111/112/113, same three for all searches, disjoint from optimization seeds, conservative = min over 3 seeds. Candidates C1..C8 exactly as frozen (C1 {2:.35,3:.30,20:.35} .. C8 {2:.20,3:.45,30:.35}), edge-perspective, degrees <= 40, tie-break order C1..C8. Budgets n_samples=2000, max_iter=150, entropy_tol=0.01, streak=20, floor=1e-300, p_tol=0.002. Probe ranges [0.15,0.26] (p=.20) and [0.24,0.36] (p=.30). Winner rule: max threshold proxy on optimization seed, ties C1..C8. Robust gates >=.22/.32 (failure stops before codebooks); target gates >=.215/.32 (failure => robust-only efficiency_target_not_met); .215 capacity note ~.21827 consistent with H_q^{-1}(1.08*H_q(0.20)). Immutability statement present. Resource policy (ctypes toolhelp32 process-tree RSS watcher, 10s sampling, 3 GiB = 3221225472 bytes, aborted_resource_limit). Rank policy (rank(H)=m via GF2mField Gaussian elimination, <=5 bounded relabel attempts then BLOCKER, V9B-round scope). Leakage policy (L_recon=10*m, 64-bit tag, L_total=10*m+64 hard caps, forbidden payloads, V10 deferral). HEAD a9c3c5d and source hashes bound; recomputed sha256 of the 4 source files match the frozen hashes exactly.",
+      "pass": true
+    },
+    "C_kernel_correctness": {
+      "method": "Manual math review of WHT butterfly (hand q=4 check), check_update_fft permutation/shift algebra vs nonbinary_v8_reference.oracle_check_update_dense (same scaling scaled[c*x]=msg[x] and shift conv[add(syndrome, mul(coef, v))]), MC-DE semantics vs nonbinary_v8_mcde conventions, sizing formula hand-computation, harmonic rho formula vs V8, forbidden-import source scan, plus independent numeric spot checks (read-only python, no plan execution).",
+      "result": "(1) WHT butterfly hand q=4: f=[1,2,3,4] -> [10,-2,-4,0], involution /q exact; verified. (2) check_update_fft vs V8 oracle: independent spot check q=8 maxdiff 2.8e-17; exhaustive q=4 (4900 comparisons), q=8 (>=40), q=32 (>=20), q=1024 dense + sparse-support (incl. coefficients {1,3,7,255}, nonzero syndromes, every target) verified by the passing test suite at the frozen 1e-9 tolerance. (3) MC-DE: full length-q probability vectors (no scalar surrogate), exact sampled edge-view degrees, fresh channel term per iteration, batched WHT check convolution, fail-closed normalization on NaN/Inf/negative/zero mass, base-q entropy (log(q)), seeded PCG64 determinism - all confirmed in code and consistent with V8 run_mcde conventions (iteration order variable->check->belief, convergence entropy<tol for streak). (4) Sizing: formula computed, never hard-coded; independent hand computation matches to 0.0; m = 321/458 (f=1.15) and 301/430 (f=1.08) exact; informative 7-decimal values used ONLY in tests at 1e-7 (their rounding bound, documented in test comment) while formula-exactness is asserted at 1e-12 against independent recomputation - does NOT violate compute-never-hardcode. (5) Harmonic rho: formula identical to V8 concentrated_check_distribution; independent worst diff over all 8 candidates x 4 searches = 4.3e-15 <= 1e-12; reconstructed-rate worst error over 32 combos = 1.1e-16 <= 1e-12. (6) Forbidden imports: nonbinary_v9_mcde.py imports only numpy + stdlib + .nonbinary_field (GF2mField field tables); nonbinary_v9_common.py imports stdlib + .shared (accepted verifier FORMAL_STATUSES vocabulary - explicitly authorized by the frozen packet; not a V1-V8 module); V8 modules appear only in test files (test-only oracle); boundary test test_v9_no_production_import_boundary passed.",
+      "pass": true
+    },
+    "D_no_result": {
+      "method": "Directory listing of workspace/v9a_04c9e7d25d7145659685415084d6fac7/plan_only/ and openspec/changes/formal-nonbinary-ldpc-v9-gf1024-long-ir/evidence/; tasks.md checkbox audit (V9-20.2/V9-20.3 unchecked); plan round1_scope/immutability statements.",
+      "result": "plan_only/ contains exactly plan_manifest.json + v9a_plan.json (no result, outcome, threshold, probe, or validation artifacts). evidence/ contains exactly v9_00_freeze.json + v9a_plan.json. tasks.md shows V9-20.2 and V9-20.3 (optimize/execute/replay) NOT checked. Plan declares round1_scope = plan creation only, plan_frozen_before_any_result = true; freeze record states no search/canary/validation-seed run. No V9 execution has occurred.",
+      "pass": true
+    },
+    "E_test_rerun": {
+      "method": "python -m pytest comparison_bench/tests/test_nonbinary_v9_common.py comparison_bench/tests/test_nonbinary_v9_mcde.py -q -p no:cacheprovider --basetemp workspace/v9a_review_<fresh-uuid>/pytest (fresh additive root, read-only review run).",
+      "result": "33 passed in 11.74s, exit code 0 (expected 33). Matches freeze-record Tier-0/1 evidence (33 passed, 11.62s).",
+      "pass": true
+    }
+  },
+  "rerun_tier_results": {
+    "t0_compile_import": "pytest run imports both V9 modules and both test modules successfully on this host (win32); py_compile was independently recorded exit 0 in v9_00_freeze.json tier_evidence_round1",
+    "t1_kernel_unit": "33 tests passed in fresh basetemp: sizing exactness, harmonic rho vs V8 (1e-12), reconstructed rates for all 8 candidates x 4 searches (1e-12), WHT hand q=4, check_update_fft vs V8 oracle at q=4 exhaustive / q=8 / q=32 / q=1024 dense and sparse (1e-9), MC-DE determinism and q=1024 bounded end-to-end, entropy math, fail-closed boundaries, frozen plan constants, seed derivation, RSS watcher (Windows), no-production-import boundary",
+    "t2_t3": "not applicable at this plan-only gate (no lifecycle/decoder exists yet; T2/T3 are V9-30 milestone work)"
+  },
+  "findings": [
+    {
+      "id": 1,
+      "severity": "non-blocking",
+      "text": "Plan rho_rule states 'R = 1 - m/n' while the implementation/tests use the continuous design rate R = 1 - f*H_q(p) for the ensemble DE. The plan's own informative m/n values (0.3129893 etc.) equal f*H_q(p) exactly (not ceil(f*H_q*1024)/1024), so the frozen intent is the continuous design rate and there is no inconsistency in the package; the '1 - m/n' wording is the finite-length formula that applies at V9B/V9C. Recommend the execution log restate this once for clarity."
+    },
+    {
+      "id": 2,
+      "severity": "non-blocking",
+      "text": "ProcessTreeRSSWatcher.cap_exceeded uses strict '>' against cap_bytes (3221225472); an exact equality at 3 GiB would not trip, and the 10 s sampling window plus fail-open skip of transiently-exited children means the cap is a sampled bound, not a hard cgroup. Adequate for the frozen policy (documented breach status aborted_resource_limit); noting the measurement granularity only."
+    },
+    {
+      "id": 3,
+      "severity": "non-blocking",
+      "text": "The S2 target gate .215 leaves a narrow feasible window below the p=.20 f=1.08 capacity threshold ~.21827 (verified consistent: H_q(0.21827) ~= 1.08*H_q(0.20)). This is a frozen scientific decision with a pre-registered fallback (efficiency_target_not_met -> robust-only), not a defect; flagged for awareness only."
+    },
+    {
+      "id": 4,
+      "severity": "non-blocking",
+      "text": "No blocking findings. The plan, code, tests, freeze record, and manifest are mutually consistent; source hashes, plan hash, HEAD, and the frozen 12-file dirty-worktree scope all verify exactly."
+    }
+  ],
+  "blocking_findings_count": 0,
+  "overall_verdict": "READY_FOR_SINGLE_EXECUTION"
+}
