@@ -143,31 +143,31 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   scope review, output-root absence, and proof that no official qualification
   output was created. E01 is blocked until IT0--IT3 pass.
 
-## Phase E — development screen (frozen, not yet executed 2026-08-14)
+## Phase E — development screen (2026-08-14: E01 PASSED, E02 done)
 
-- [ ] **V13-E01** Freeze 64 bw200 development frames and run unchanged
+- [x] **V13-E01** Freeze 64 bw200 development frames and run unchanged
   baseline plus the sole candidate once each. Continue only if at least 1/64
   is independently exact-corrected with zero forbidden/internal/accounting
   failures, syndrome consistency, and post-decode exact equality. Zero
   successes yields `failed_existing_data_feasibility` and freezes the route.
-  (Pre-registered 2026-08-14: sorted development rows of d1024_bw200 by
-  (frame_id, frame_identity), skip first 32 (D04), take next 64:
-  [77,78,88,89,92,98,100,102,104,105,106,108,111,113,115,116,117,118,119,
-  121,123,124,125,127,128,129,134,138,139,140,142,144,145,148,151,153,159,
-  160,161,163,165,166,168,170,171,172,173,175,177,179,181,184,187,190,193,
-  194,196,198,208,212,215,216,217,221] — disjoint from D04's 32 and the 128
-  audit frames. Baseline = unchanged V7 R1A p=.20; candidate =
-  `nbldpc_v13_r3_code_v1` p=.20, each exactly once, all failures retained.)
-- [ ] **V13-E02** If E01 passes, freeze the candidate and prohibit further
-  tuning or candidate substitution.
+  (Done 2026-08-14, run `v13_e01_20260814`: candidate `nbldpc_v13_r3_code_v1`
+  exact-corrected **64/64** on the pre-registered frames; baseline (unchanged
+  V7 R1A) 13/64; zero forbidden/internal/accounting failures; syndrome
+  consistency and post-decode exact equality on all rows; gate PASSED;
+  strict read-only verifier PASS.)
+- [x] **V13-E02** If E01 passes, freeze the candidate and prohibit further
+  tuning or candidate substitution. (Done: the candidate was already frozen
+  by the R3 amendment before E01; no tuning, no substitution occurred.)
 
-## Phase A — retrospective audit and closeout (future, not authorized)
+## Phase A — retrospective audit and closeout (2026-08-14: A01 running)
 
 - [ ] **V13-A01** Run the frozen candidate once on the 128 frame-identical V5
   control/audit frames. Use the suggested readiness gate (>=120/128 exact,
   zero forbidden failures, median <=120 s/frame, disclosure <=8.75
   bits/input-symbol with tag separated). Failure is
   `retrospective_non_ready`; pass is only `ready_for_fresh_confirmation`.
+  (Running: run id `v13_a01_20260814`, candidate-only pre-registered, 128
+  frames.)
 - [ ] **V13-A02** Only after bw200 A01 passes, perform the pre-registered
   read-only bw120/bw180 cross-stratum check; do not promote.
 - [ ] **V13-C01** Complete independent acceptance and mandatory memory triage;

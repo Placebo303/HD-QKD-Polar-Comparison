@@ -1934,4 +1934,30 @@ bits/symbol——170×10/256=6.64 结构性通过）→ A02（bw120/bw180 预注
 
 **Consequences**: R3 候选实现（`comparison_bench/` 内新模块 + E01 通道 +
 IT0-IT3 测试）现在开始；E01 前必须 IT0-IT3 全过。所有失败保留；禁止
-重试/调参/替换/同义重跑 V7/V10/V11 路线。`
+重试/调参/替换/同义重跑 V7/V10/V11 路线。
+
+---
+
+### 2026-08-14: V13-E01 门通过（candidate 64/64）+ A01 开始
+
+**Decision**: E01 development screen 生产执行一次（run_id
+`v13_e01_20260814`，64 个预注册 bw200 development 帧）：R3 候选
+`nbldpc_v13_r3_code_v1`（QSC p=.20、flooding、连通 girth-8 图）**64/64
+exact_correct**，unchanged V7 R1A 基线 13/64，零 forbidden/internal/
+accounting 失败，全部行 syndrome consistency + post-decode exact equality，
+严格只读 verifier PASS。E01 门（≥1/64）**通过**；E02 无操作——候选在 R3
+amendment 中已预冻结，无调参/替换。这与此前 D05 `code` 诊断完全一致：
+把退化的 85 组件图换成同契约的连通图后，在相同先验/解码器下可解码性
+剧变。
+
+**A01 预注册（本条目固化）**: candidate-only（baseline 不在 audit 帧上
+运行——预先决定）；128 个 frame-identical V5 confirmation 帧
+（partition ranks 0..127，bw200，与 D04/E01 development 帧互斥）；门
+≥120/128 exact + 零 forbidden + median ≤120 s/frame + disclosure ≤8.75
+bits/symbol（170×10/256=6.640625 结构性满足）。通过 → 仅
+`ready_for_fresh_confirmation`；未过 → `retrospective_non_ready`。
+
+**Consequences**: A01 生产运行（`v13_a01_20260814`）已启动；其后是 A02
+（bw200 通过后预注册只读 bw120/bw180 跨层检查，不提升状态）与 C01
+（独立验收 + 记忆 triage + 用户决定 fresh acquisition）。64/64 与任何
+后续结果均不构成 promotion/qualification/fresh correction。`
