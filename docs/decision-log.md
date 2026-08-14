@@ -1857,4 +1857,37 @@ R1A 泄漏 6.64 bits/symbol ≈ 12× 经验下界）。候选排序与文献对�
 
 **Consequences**: run 统计 bug 修正只影响未来运行；修正后的聚合值用于
 后续文档引用（替代 CURRENT_TASK 中旧 8-run 表述）。信道结构观测不自动
-授权 R1 候选——R 阶段仍需 D05 + OpenSpec amendment + 主线程批准。`
+授权 R1 候选——R 阶段仍需 D05 + OpenSpec amendment + 主线程批准。
+
+---
+
+### 2026-08-14: V13-D05 根因报告 — code / diagnosis_complete（含一次无效发射修正）
+
+**Decision**: 主线程按推荐步骤授权 D05 发射。离线 girth 分析显示冻结 V7
+R1A 图**结构性退化**：170 个校验节点分成 85 个互不相连的 2-校验组件
+（每个组件 3-4 个全 degree-2 变量），check 图 girth=2、Tanner girth=4、
+逐组件最小距离 d_min=3。对 32 个 D04 development 帧的结构天花板分析：
+structural_failure_fraction=0.75 == 观测失败率 0.75，且**帧级完美对应**
+（24/24 失败帧都含 ≥2 错误组件；8/8 exact-correct 帧都不含）。D05 发射
+`diagnosis_class=code`、`run_state=diagnosis_complete`、后继 **R3
+code-only**；QSC p=.20 先验失配（校准失配 0.1229、|熵差| 2.17 bits）作为
+已记录的 co-factor（其不解释观测失败——结构单独解释 100% 失败）。
+
+**Correction**: 首次发射 `v13_d05_20260814` 因决策机制缺陷被判
+inconclusive（ceiling 文档缺 observed 分数→默认 1.0；entropy gap 为负而
+阈值用了带符号值），按 V8-60 先例：保留原包不可变 + 同级
+`v13_d05_20260814_invalid_execution_notice.json` 记录 + 修正后以新 run id
+`v13_d05_20260814_corrected` 加法重发一次（决策函数为纯函数，证据字段原
+样保留）。严格只读 verifier PASS。
+
+**Context**: 该结论与 V7 合成 canary 0/4+0/4（SER 0.20 ≈ 51 错误/帧 → 每
+组件多错）以及 V6/V7 全线 0/N 历史一致；并解释 D04 双峰行为（iter-1 成
+功/100 迭代失败）——4-cycle 消息传递的振荡是症状而非独立类别。
+
+**Consequences**: R 阶段仅解锁 **R3 code-only**（prior 与 decoder 接口不
+变，只改一个明确的 finite graph/rate 属性：把退化的 85 组件图换成同
+n/m/rate/度数、连通、girth≥8 的图）。R1/R2 锁死。R3 候选需 OpenSpec
+amendment + 独立复核后方可冻结；E01 门（≥1/64）与 A01 门（≥120/128）不
+变。D05 独立只读复核（reviewer-go）为下一科学门。最高状态仍为
+`ready_for_fresh_confirmation`，禁止 promoted/qualified/
+observed_fresh_correction。`

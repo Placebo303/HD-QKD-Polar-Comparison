@@ -1,58 +1,46 @@
 # CURRENT_TASK.md
 
-## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: D-STAGE COMPLETE THROUGH D04 (2026-08-14)
+## Current Task — V13 Existing-Data Nonbinary LDPC Diagnostics: D-STAGE COMPLETE THROUGH D05 (2026-08-14)
 
 The change
 `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/` has
-frozen planning (P01-P08 accepted, zero blockers) and a D stage complete
-through D04. D01-D03 + DT0-DT2 were completed and reviewed on 2026-08-14;
-the main thread then authorized D04, which was implemented in
-`comparison_bench/` and executed exactly once. The lane remains retrospective
-diagnostics/development on existing 10 dB Type-II, q=1024 Gray 256-symbol
-data: the rows' frame/payload identities are historical V4/V5 identities and
+frozen planning (P01-P08 accepted) and a D stage complete through D05. The
+D05 root-cause report emits **`diagnosis_class=code`,
+`run_state=diagnosis_complete`, successor R3 code-only** (prior documented as
+co-factor); independent read-only review is the next gate. The lane remains
+retrospective diagnostics/development on existing 10 dB Type-II, q=1024 Gray
+256-symbol data: the rows' identities are historical V4/V5 identities and
 cannot be fresh-canary, confirmation, qualification, or promotion evidence.
 
-- D01 no-decode channel characterization ran exactly once (run_id
-  `v13_d01_20260814`, six-file package at
-  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d01_20260814/`).
-  Ledger ready: 2304 rows = characterization 384 (128/stratum) + development
-  1536 (512/stratum) + retrospective_audit 384 (128/stratum). bw200
-  aggregates: raw SER mean 0.0771 (0.0391-0.1133); bit-plane mismatch
-  monotone 3.1e-5 (MSB) to 3.75e-2 (LSB); zero-diff mass 0.9229; 8 runs max
-  length 2 (isolated errors, no bursts); QSC p=.20 calibration mismatch
-  0.1229; model entropy 2.722 b/symbol; NLL mean 1.247; empirical conditional
-  entropy lower bound 0.547 b/symbol (labelled empirical diagnostic, not a
-  proof).
-- D02 engineering oracle implemented (noiseless/single-error/tiny-q/tiny-n);
-  D03 wrapper hook with element-for-element equivalence; V7 R1A sources
-  byte-unchanged. Tests DT0 8 + DT1 8 + DT2 5 = 21/21, extended with the
-  D04-lane DT3 tests to 27/27 in fresh `workspace/nbldpc_v13_<uuid>/` roots.
-- D04 frozen baseline probe: main-thread authorized 2026-08-14; implemented
-  (`run_d04` core lane, CLI `d04` action, verify extension); executed exactly
-  once, run_id `v13_d04_20260814`, six-file package at
-  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d04_20260814/`,
-  strict read-only verifier PASS (32 outcome rows, 32 telemetry records,
-  ledger ready). Outcome: 8/32 `syndrome_consistent` + `exact_correct` (all
-  converging at iteration 1), 24/32 `decode_failed` at the 100-iteration
-  limit, zero `decoder_error`, zero exact mismatches, zero
-  non-finite/normalisation/underflow events. Telemetry observations (empirical
-  only, no D05 conclusion): decode_failed frames end highly concentrated
-  (mean posterior max 0.986, entropy 0.103 bits) with mean 3.79 unsatisfied
-  checks; oscillation detected on 11/32 frames. Hook equivalence held on all
-  32 frames (`hook_equivalence=ok`).
-- NOT authorized and NOT run: D05 (root-cause report), R/I/E/A/C, and any
-  decoder execution beyond the 32 pre-registered D04 frames. D05 remains
-  blocked pending a separate main-thread authorization.
+- D01/D02/D03/DT0-DT2 as previously recorded (D01 `v13_d01_20260814`, D02
+  oracle, D03 hook equivalence, 27/27 tests incl. D04-lane DT3).
+- D04 baseline probe `v13_d04_20260814`: 8/32 exact_correct (all iteration 1),
+  24/32 decode_failed, zero decoder errors; verifier PASS.
+- D05 root-cause: offline girth analysis shows the frozen V7 R1A graph is
+  **85 disconnected 2-check components** (all variables degree 2, Tanner
+  girth 4, per-component d_min 3). Structural ceiling over the 32 D04 frames:
+  structural failure fraction 0.75 == observed 0.75 with **perfect frame-level
+  correspondence** (24/24 failed frames contain a >=2-error component; 8/8
+  exact-correct frames contain none). Emission
+  `v13_d05_20260814_corrected` (authoritative): code / diagnosis_complete /
+  R3; prior mismatch (calibration 0.1229, |entropy gap| 2.17 bits) recorded as
+  co-factor. First emission `v13_d05_20260814` invalidated by a
+  decision-machinery defect, preserved immutably with sibling notice
+  `v13_d05_20260814_invalid_execution_notice.json` (V8-60 precedent: fix +
+  additive re-emit once).
+- NOT authorized / NOT run: R3 candidate (requires amendment + independent
+  review of the D05 conclusion + main-thread freeze), I/E/A/C phases, and any
+  decoder execution beyond the 32 D04 baseline frames.
 - V12 remains `source_partition_blocked`; its archive is a separate
   housekeeping decision and does not block V13. Do not reopen V12-X01/X02.
 
 Claim boundary: the highest V13 state is `ready_for_fresh_confirmation`; no
-decoder correction, qualification, or promotion is established, and D05 plus
-real decode beyond D04 remain unauthorized.
+decoder correction, qualification, or promotion is established. R1/R2 are
+locked by the D05 conclusion (code); only R3 code-only may open after review.
 
 ---
 
-## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: PLAN FROZEN + D-STAGE COMPLETE (2026-08-14)
+## Previous Task — V13 Existing-Data Nonbinary LDPC Diagnostics: D-STAGE COMPLETE THROUGH D04 (2026-08-14)
 
 Earlier 2026-08-14 state, superseded by the freeze review and D stage above.
 The new planning change

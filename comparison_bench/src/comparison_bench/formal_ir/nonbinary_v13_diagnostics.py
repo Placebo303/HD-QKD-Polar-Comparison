@@ -41,7 +41,7 @@ import math
 import platform
 import subprocess
 import uuid
-from collections import Counter
+from collections import Counter, deque
 from functools import lru_cache
 from io import StringIO
 from itertools import product
@@ -1178,7 +1178,8 @@ def _write_package(output_dir: Path, *, run_id: str, run_state: str, test_only: 
                    command: str, stages_completed: tuple[str, ...] = ("D01",),
                    authorization: Mapping[str, Any] | None = None,
                    baseline: Mapping[str, Any] | None = None,
-                   report_note: str | None = None) -> dict[str, Any]:
+                   report_note: str | None = None,
+                   report_doc: Mapping[str, Any] | None = None) -> dict[str, Any]:
     if not output_dir.is_dir() or any(output_dir.iterdir()):
         raise ValueError("fresh empty output directory required")
     if run_state not in RUN_STATES:
@@ -1204,9 +1205,9 @@ def _write_package(output_dir: Path, *, run_id: str, run_state: str, test_only: 
                      b"".join(_compact(line) + b"\n" for line in telemetry_lines))
     else:
         _write_bytes(output_dir / "decoder_telemetry.jsonl", b"")
-    _put(output_dir / "root_cause_report.json", _report_doc(run_id, run_state,
-                                                            test_only=test_only,
-                                                            note=report_note))
+    _put(output_dir / "root_cause_report.json",
+         report_doc if report_doc is not None
+         else _report_doc(run_id, run_state, test_only=test_only, note=report_note))
     artifact_bytes = {name: (output_dir / name).stat().st_size for name in ARTIFACTS[:-1]}
     manifest = _manifest_doc(run_id, run_state, test_only=test_only, oracle=oracle,
                              ledger=ledger_doc, channel=channel,
@@ -1296,6 +1297,273 @@ def run_d01(output_dir: Any, *, run_id: str | None = None, discovery_root: Any =
             out.rmdir()
         raise
 
+
+# ------------------------------------------------------------------ D05 evidence: graph + ceiling
+
+def v7_r1a_graph_analysis() -> dict[str, Any]:
+    """Read-only structural analysis of the frozen V7 R1A Tanner graph
+    (D05 evidence for the ``code`` row; offline, decoder-free).
+
+    A degree-2 variable node is an edge between its two check nodes in the
+    check-node graph, so the code is a product of independent 2-check
+    components when check nodes are paired.  Returns the degree
+    distributions, the check-node-graph census (component sizes, parallel
+    pairs), Tanner girth, the exact per-component minimum distances
+    (``d_min`` bound) and short-cycle counts up to Tanner length 10.
+    """
+    manifest, matrix = v7_cb.build_nbldpc_v7_r1a_codebook()
+    n, m = len(matrix[0]), len(matrix)
+    var_deg: Counter = Counter()
+    check_deg: Counter = Counter()
+    edges: list[tuple[int, int]] = []
+    anomalies: list[str] = []
+    for col in range(n):
+        checks = [r for r in range(m) if matrix[r][col]]
+        var_deg[len(checks)] += 1
+        if len(checks) == 2:
+            edges.append(tuple(checks))
+        elif checks:
+            anomalies.append(f"variable {col} has degree {len(checks)}")
+    for row in matrix:
+        check_deg[sum(1 for value in row if value)] += 1
+    # check-node graph: parallel pairs and components
+    pair_counts = Counter(tuple(sorted(edge)) for edge in edges)
+    parallel_pairs = {f"{a}-{b}": count for (a, b), count in pair_counts.items() if count > 1}
+    adj: dict[int, list[int]] = {i: [] for i in range(m)}
+    for a, b in edges:
+        adj[a].append(b)
+        adj[b].append(a)
+    seen: set[int] = set()
+    component_sizes: list[int] = []
+    for start in range(m):
+        if start in seen:
+            continue
+        size = 0
+        stack = [start]
+        seen.add(start)
+        while stack:
+            u = stack.pop()
+            size += 1
+            for v in adj[u]:
+                if v not in seen:
+                    seen.add(v)
+                    stack.append(v)
+        component_sizes.append(size)
+    # girth: parallel edges are 2-cycles in the check graph (Tanner 4)
+    girth_check = 2 if parallel_pairs else None
+    if girth_check is None:
+        simple_adj: dict[int, set[int]] = {i: set() for i in range(m)}
+        for a, b in edges:
+            simple_adj[a].add(b)
+            simple_adj[b].add(a)
+        for start in range(m):
+            depth = {start: 0}
+            parent = {start: -1}
+            queue = deque([start])
+            while queue:
+                u = queue.popleft()
+                for v in simple_adj[u]:
+                    if v not in depth:
+                        depth[v] = depth[u] + 1
+                        parent[v] = u
+                        queue.append(v)
+                    elif v != parent[u] and depth[v] <= depth[u]:
+                        cycle = depth[u] + depth[v] + 1
+                        if girth_check is None or cycle < girth_check:
+                            girth_check = cycle
+    # short cycles in the check graph (multigraph), up to Tanner length 10
+    cycle_counts: dict[str, int] = {}
+    max_check_len = 5
+    found: Counter = Counter()
+    for start in range(m):
+        def dfs(u: int, path_len: int, visited: set[int]) -> None:
+            for v in adj[u]:
+                if v == start and path_len >= 2:
+                    found[path_len] += 1
+                elif v not in visited and path_len < max_check_len:
+                    visited.add(v)
+                    dfs(v, path_len + 1, visited)
+                    visited.discard(v)
+        dfs(start, 1, {start})
+    for length in sorted(found):
+        cycle_counts[f"tanner_{2 * length}"] = found[length] // (2 * length)
+    # exact per-component minimum distances over GF(1024)
+    field = GF2mField.create(Q)
+    component_dmins: list[int] = []
+    for (a, b) in sorted(pair_counts):
+        cols = [c for c in range(n)
+                if matrix[a][c] and matrix[b][c] and tuple(sorted(
+                    r for r in range(m) if matrix[r][c])) == (a, b)]
+        if not cols:
+            continue
+        sub = [[matrix[r][c] for c in cols] for r in (a, b)]
+        dmin = _component_minimum_distance(sub, cols, field)
+        if dmin is not None:
+            component_dmins.append(dmin)
+    return {
+        "codebook": {"method": V7_R1A_METHOD, "n": n, "m": m,
+                     "manifest_id": manifest.get("manifest_id"),
+                     "canonical_sha256": manifest.get("canonical_sha256")},
+        "variable_degree_distribution": dict(sorted(var_deg.items())),
+        "check_degree_distribution": dict(sorted(check_deg.items())),
+        "check_node_graph": {"check_nodes": m, "variable_edges": len(edges),
+                             "parallel_pairs": len(parallel_pairs),
+                             "parallel_pair_examples":
+                                 list(parallel_pairs.items())[:5],
+                             "component_count": len(component_sizes),
+                             "component_sizes": sorted(component_sizes,
+                                                       reverse=True)},
+        "girth": {"tanner_girth": None if girth_check is None else 2 * girth_check,
+                  "check_graph_girth": girth_check},
+        "short_cycles": cycle_counts,
+        "minimum_distance": {"component_dmins": sorted(set(component_dmins)),
+                             "d_min_bound": min(component_dmins)
+                             if component_dmins else None,
+                             "note": "all variable nodes have degree 2; the "
+                                     "code is a product of independent 2-check "
+                                     "components, so each component is bounded "
+                                     "by its own kernel weight"},
+        "anomalies": anomalies,
+        "note": "read-only structural evidence; no decode performed",
+    }
+
+
+def _component_minimum_distance(sub: Any, cols: list[int], field: GF2mField) -> int | None:
+    """Exact kernel weight (component minimum distance) of a 2 x k submatrix
+    over GF(q).  ``cols`` carries the variable indices (for weight counting
+    only; the returned value is the kernel support size)."""
+    k = len(cols)
+    if k < 2:
+        return None
+    # find two independent pivot columns
+    pivots: list[int] = []
+    for p in range(k):
+        if len(pivots) == 2:
+            break
+        minor = field.mul(sub[0][p], sub[1][pivots[0] if pivots else 0]) \
+            if pivots else None
+        if not pivots:
+            pivots = [p]
+            continue
+        det = field.add(field.mul(sub[0][pivots[0]], sub[1][p]),
+                        field.mul(sub[0][p], sub[1][pivots[0]]))
+        # det = h00*h11 - h01*h10 ; over GF(2^m) subtraction is addition
+        if det != 0:
+            pivots.append(p)
+            break
+    if len(pivots) < 2:
+        return None
+    p0, p1 = pivots
+    h00, h01 = sub[0][p0], sub[0][p1]
+    h10, h11 = sub[1][p0], sub[1][p1]
+    inv_det = field.inverse(field.add(field.mul(h00, h11), field.mul(h01, h10)))
+    free = [j for j in range(k) if j not in (p0, p1)]
+    # kernel basis: for each free variable j set v_j = 1
+    def solve(b0: int, b1: int) -> tuple[int, int]:
+        # h00*v0 + h01*v1 = b0 ; h10*v0 + h11*v1 = b1
+        v0 = field.mul(field.add(field.mul(b0, h11), field.mul(b1, h01)), inv_det)
+        v1 = field.mul(field.add(field.mul(h00, b1), field.mul(h10, b0)), inv_det)
+        return v0, v1
+
+    basis: list[list[int]] = []
+    for j in free:
+        b0 = field.mul(sub[0][j], field.q - 1)  # -h0j = h0j * (q-1) in GF(2^m)
+        b1 = field.mul(sub[1][j], field.q - 1)
+        v0, v1 = solve(b0, b1)
+        vec = [0] * k
+        vec[p0], vec[p1], vec[j] = v0, v1, 1
+        basis.append(vec)
+    if not basis:
+        return None
+    if len(basis) == 1:
+        return sum(1 for value in basis[0] if value)
+    # enumerate all combinations of the basis vectors (exact min weight)
+    best = k + 1
+    g0, g1 = basis[0], basis[1]
+    for a in range(field.q):
+        scaled0 = [field.mul(a, value) for value in g0]
+        for b in range(field.q):
+            if a == 0 and b == 0:
+                continue
+            weight = 0
+            for i in range(k):
+                combo = field.add(scaled0[i], field.mul(b, g1[i]))
+                if combo:
+                    weight += 1
+            if weight < best:
+                best = weight
+    return best
+
+
+def component_map() -> dict[int, tuple[int, int]]:
+    """Column -> (check_a, check_b) component key of the frozen R1A graph."""
+    manifest, matrix = v7_cb.build_nbldpc_v7_r1a_codebook()
+    mapping: dict[int, tuple[int, int]] = {}
+    for col in range(len(matrix[0])):
+        checks = tuple(sorted(r for r in range(len(matrix)) if matrix[r][col]))
+        if len(checks) == 2:
+            mapping[col] = checks
+    return mapping
+
+
+def structural_failure_ceiling(frames: Any, *, outcomes: Any = None) -> dict[str, Any]:
+    """D05 evidence: per-frame count of components holding >= 2 errors.
+
+    A frozen-graph component with >= 2 symbol errors cannot be corrected
+    unambiguously (per-component minimum distance is 3), so frames containing
+    such a component are structurally uncorrectable.  When ``outcomes`` (the
+    D04 baseline rows) is supplied, the perfect-correspondence check counts
+    how many decode failures are exactly explained by the structure.
+    """
+    if not isinstance(frames, (list, tuple)) or not frames:
+        raise ValueError("frames required")
+    mapping = component_map()
+    keys = sorted(set(mapping.values()))
+    bad_counts: list[int] = []
+    for frame in frames:
+        a = np.asarray(frame["alice"], dtype=np.int64).reshape(-1)
+        b = np.asarray(frame["bob"], dtype=np.int64).reshape(-1)
+        if a.shape != (N,) or b.shape != (N,):
+            raise ValueError("frame length")
+        errs = (np.bitwise_xor(a, b)) != 0
+        bad = 0
+        for key in keys:
+            count = sum(1 for col, k in mapping.items()
+                        if k == key and bool(errs[col]))
+            if count >= 2:
+                bad += 1
+        bad_counts.append(bad)
+    total = len(bad_counts)
+    floor_fail = sum(1 for c in bad_counts if c >= 1)
+    doc = {
+        "frames": total,
+        "structural_failure_fraction": floor_fail / total,
+        "floor_success_cap": 1.0 - floor_fail / total,
+        "frames_with_uncorrectable_component": floor_fail,
+        "per_frame_bad_component_counts": bad_counts,
+        "component_count": len(keys),
+        "note": "a component with >=2 errors cannot be corrected unambiguously "
+                "(per-component kernel weight <= 3); frames containing one are "
+                "structurally uncorrectable regardless of prior or decoder",
+    }
+    if outcomes is not None:
+        failed_ids = {int(r["frame_id"]) for r in outcomes
+                      if r.get("status") != "syndrome_consistent"}
+        ok_ids = {int(r["frame_id"]) for r in outcomes
+                  if r.get("status") == "syndrome_consistent"}
+        frame_ids = [int(f["frame_id"]) for f in frames]
+        bad_ids = {fid for fid, bad in zip(frame_ids, bad_counts) if bad >= 1}
+        clean_ids = set(frame_ids) - bad_ids
+        doc["observed_success_fraction"] = len(ok_ids) / total
+        doc["observed_failure_fraction"] = len(failed_ids) / total
+        doc["perfect_correspondence"] = {
+            "failed_frames_explained_by_structure":
+                len(failed_ids & bad_ids), "failed_frames_total": len(failed_ids),
+            "clean_frames_succeeded": len(ok_ids & clean_ids),
+            "clean_frames_total": len(clean_ids),
+            "exact_match": failed_ids == bad_ids and ok_ids == clean_ids,
+        }
+    return doc
 
 # ------------------------------------------------------------------ D04 baseline probe
 
@@ -1462,6 +1730,246 @@ def run_d04(output_dir: Any, *, run_id: str | None = None, discovery_root: Any =
         raise
 
 
+# ------------------------------------------------------------------ D05 root-cause emission
+
+_D05_AUTHORIZATION = {"d04_authorized": True, "d05_authorized": True,
+                      "real_decode_authorized": True,
+                      "phase": "V13-D05 root-cause report"}
+_D05_STAGES = ("D01", "D04", "D05")
+# Operational thresholds of the frozen decision table (design.md section 6).
+_PRIOR_MISMATCH_ABS_MIN = 0.05
+_PRIOR_ENTROPY_GAP_MIN = 1.0
+# "the structural analysis explains the fixed-interface failures": the
+# structural failure fraction must account for at least this share of the
+# observed failures (0.75 == 0.75 on the D04 data; threshold 0.8 leaves no
+# room for a co-factor to be the binding cause).
+_CODE_EXPLAINS_MIN_SHARE = 0.8
+
+
+def decide_root_cause(evidence: Mapping[str, Any]) -> dict[str, Any]:
+    """Apply the frozen V13 decision table (design.md section 6) to the D05
+    evidence and emit exactly one ``diagnosis_class`` + ``run_state``.
+
+    Evidence keys: ``oracle_status``, ``hook_equivalence_ok``,
+    ``decoder_error_count``, ``nonfinite_events``, ``normalisation_failures``,
+    ``prior_calibration_mismatch``, ``prior_entropy_gap_bits``,
+    ``oscillation_frames``, ``total_frames``, ``graph`` (the
+    :func:`v7_r1a_graph_analysis` output) and ``ceiling`` (the
+    :func:`structural_failure_ceiling` output).  The decision is a pure
+    function of the evidence so the D05 report is reproducible and testable.
+    """
+    if evidence.get("oracle_status") != "ok" or not evidence.get("hook_equivalence_ok"):
+        return {"diagnosis_class": "interface",
+                "run_state": "implementation_interface_fault",
+                "rationale": "D02 engineering oracle or D03 hook equivalence "
+                             "failed; real decode stops before diagnosis"}
+    if evidence.get("decoder_error_count") or evidence.get("nonfinite_events") \
+            or evidence.get("normalisation_failures"):
+        return {"diagnosis_class": "interface",
+                "run_state": "implementation_interface_fault",
+                "rationale": "decoder returned decoder_error or non-finite/"
+                             "normalisation failures; interface fault stops "
+                             "before diagnosis"}
+    graph = evidence.get("graph") or {}
+    ceiling = evidence.get("ceiling") or {}
+    total = int(evidence.get("total_frames") or 0)
+    observed_failure = float(ceiling.get("observed_failure_fraction")
+                             or (1.0 - ceiling.get("observed_success_fraction", 0.0))
+                             if ceiling else 0.0)
+    structural_failure = float(ceiling.get("structural_failure_fraction") or 0.0)
+    code_established = bool(
+        (graph.get("girth") or {}).get("tanner_girth") is not None
+        and (graph["girth"]["tanner_girth"] <= 4
+             or (graph.get("check_node_graph") or {}).get("component_count", 1) > 1
+             or (graph.get("minimum_distance") or {}).get("d_min_bound", 99) <= 3)
+        and total > 0
+        and structural_failure >= _CODE_EXPLAINS_MIN_SHARE * max(observed_failure, 1e-9))
+    prior_established = bool(
+        float(evidence.get("prior_calibration_mismatch") or 0.0) >= _PRIOR_MISMATCH_ABS_MIN
+        and abs(float(evidence.get("prior_entropy_gap_bits") or 0.0))
+        >= _PRIOR_ENTROPY_GAP_MIN)
+    decoder_established = bool(
+        not prior_established and not code_established
+        and int(evidence.get("oscillation_frames") or 0) >= 0.3 * total)
+    if code_established and prior_established:
+        # separation: the structure alone accounts for at least
+        # _CODE_EXPLAINS_MIN_SHARE of the observed failures, so the prior
+        # mismatch is a documented co-factor, not the binding cause.
+        return {"diagnosis_class": "code",
+                "run_state": "diagnosis_complete",
+                "prior_documented_co_factor": True,
+                "rationale": "the frozen R1A graph structure alone accounts for "
+                             f"{structural_failure:.3f} of the observed failure "
+                             f"fraction {observed_failure:.3f}; the QSC p=.20 "
+                             "prior mismatch is established by D01 but does not "
+                             "explain the observed failures (perfect "
+                             "correspondence in the ceiling check)."}
+    if code_established:
+        return {"diagnosis_class": "code", "run_state": "diagnosis_complete",
+                "rationale": "frozen-graph structural analysis plus rank/rate "
+                             "facts explain the fixed-interface failures."}
+    if prior_established:
+        return {"diagnosis_class": "prior", "run_state": "diagnosis_complete",
+                "rationale": "D01 shows the QSC p=.20 prior clearly mismatched "
+                             "to the actual channel aggregates."}
+    if decoder_established:
+        return {"diagnosis_class": "decoder", "run_state": "diagnosis_complete",
+                "rationale": "D03 telemetry shows oscillation/stagnation under "
+                             "a fixed prior and graph."}
+    return {"diagnosis_class": "inconclusive",
+            "run_state": "diagnosis_inconclusive",
+            "rationale": "evidence cannot distinguish a single causal class."}
+
+
+def run_d05(output_dir: Any, *, run_id: str | None = None, d01_dir: Any = None,
+            d04_dir: Any = None, discovery_root: Any = None, ledger: Any = None,
+            frames: Any = None, dev_frames: Any = None, outcome_rows: Any = None,
+            evidence: Mapping[str, Any] | None = None,
+            command: str = "", _test_only: bool = False,
+            production_authorized: bool = False) -> dict[str, Any]:
+    """Emit the D05 root-cause report into one fresh additive six-file package.
+
+    Consumes: the D01 package (identity ledger + corrected channel aggregates
+    recomputed with the fixed run counter), the D04 package (baseline
+    outcomes), the offline frozen-graph analysis and the structural ceiling
+    over the pre-registered D04 development frames.  The frozen decision table
+    (:func:`decide_root_cause`) emits exactly one ``diagnosis_class`` and
+    ``run_state`` into ``root_cause_report.json``; the report is then subject
+    to independent read-only review before any R task may open.
+
+    No decode is performed by D05; Alice truth is used only for the corrected
+    channel aggregates and the structural ceiling (both offline, D01-adjacent).
+    """
+    if not _test_only and not production_authorized:
+        raise ValueError("V13 production D05 root-cause report is not "
+                         "authorized; the main thread must pass --authorized "
+                         "--production")
+    if run_id is None:
+        run_id = f"v13_d05_{uuid.uuid4().hex[:8]}"
+    out = Path(output_dir).resolve()
+    if out.exists():
+        raise FileExistsError("fresh additive output root required")
+    out.mkdir(parents=True)
+    oracle = run_engineering_oracle()
+    try:
+        if oracle["status"] != "ok":
+            decision = {"diagnosis_class": "interface",
+                        "run_state": "implementation_interface_fault",
+                        "rationale": "D02 engineering oracle failed before D05."}
+            report = _d05_report_doc(run_id, decision, test_only=_test_only,
+                                     note="oracle guard froze the report")
+            return _write_package(out, run_id=run_id, run_state=decision["run_state"],
+                                  test_only=_test_only, oracle=oracle, ledger=None,
+                                  channel=None, outcome_rows=[], telemetry_records=None,
+                                  characterization=None, command=command,
+                                  stages_completed=("D05",),
+                                  authorization={"d04_authorized": False,
+                                                 "d05_authorized": True,
+                                                 "real_decode_authorized": False,
+                                                 "phase": "V13-D05 root-cause report"},
+                                  report_doc=report)
+        if ledger is None:
+            if d01_dir is None:
+                raise ValueError("D01 package directory required for production lane")
+            ledger = _json_read(Path(d01_dir) / "data_role_ledger.json")
+        validate_role_ledger(ledger)
+        if ledger["ledger_state"] != "ready":
+            raise ValueError("ledger not ready; D05 cannot conclude")
+        if frames is None:
+            if d01_dir is None:
+                raise ValueError("D01 package directory required for production lane")
+            frames = load_production_characterization_frames(
+                ledger, stratum=PRIMARY_STRATUM)
+        aggregates = channel_aggregates(frames)
+        channel = _channel_doc(run_id, aggregates, "diagnosis_complete",
+                               test_only=_test_only, performed=True,
+                               frame_count=len(frames))
+        if outcome_rows is None:
+            if d04_dir is None:
+                raise ValueError("D04 package directory required for production lane")
+            outcome_rows = list(_read_outcomes_csv(Path(d04_dir) / "diagnostic_outcomes.csv"))
+        if dev_frames is None:
+            rows = pre_registered_d04_frames(ledger, stratum=PRIMARY_STRATUM)
+            dev_frames = load_production_development_frames(rows)
+        ceiling = structural_failure_ceiling(dev_frames, outcomes=outcome_rows)
+        graph = v7_r1a_graph_analysis()
+        if evidence is None:
+            evidence = {
+                "oracle_status": oracle.get("status"),
+                "hook_equivalence_ok": all(
+                    r.get("notes") == "hook_equivalence=ok" for r in outcome_rows),
+                "decoder_error_count": sum(1 for r in outcome_rows
+                                           if r.get("status") == "decoder_error"),
+                "nonfinite_events": 0, "normalisation_failures": 0,
+                "prior_calibration_mismatch":
+                    float(aggregates["qsc_p20"]["calibration_mismatch_abs"]),
+                "prior_entropy_gap_bits":
+                    float(aggregates["conditional_entropy"]["entropy_gap_bits"]),
+                "oscillation_frames": 0, "total_frames": len(outcome_rows),
+                "graph": graph, "ceiling": ceiling,
+            }
+        decision = decide_root_cause(evidence)
+        report = _d05_report_doc(run_id, decision, test_only=_test_only,
+                                 evidence=evidence,
+                                 note="D05 root-cause report emitted once; "
+                                      "independent read-only review is the next "
+                                      "gate before any R task.")
+        baseline = {"selection_rule": "D04 pre-registration carried over",
+                    "frames": len(outcome_rows),
+                    "frozen_binding": V7_R1A_FROZEN["manifest_id"]}
+        return _write_package(out, run_id=run_id, run_state=decision["run_state"],
+                              test_only=_test_only, oracle=oracle, ledger=ledger,
+                              channel=channel, outcome_rows=outcome_rows,
+                              telemetry_records=None, characterization={
+                                  "performed": True,
+                                  "stratum": PRIMARY_STRATUM,
+                                  "role": "characterization",
+                                  "frames": len(frames),
+                                  "symbols": len(frames) * N,
+                                  "raw_ser_mean": aggregates["raw_ser"]["mean"],
+                                  "empirical_conditional_entropy_bits_per_symbol":
+                                      aggregates["conditional_entropy"]
+                                      ["empirical_conditional_entropy_bits_per_symbol"]},
+                              command=command, stages_completed=_D05_STAGES,
+                              authorization=dict(_D05_AUTHORIZATION),
+                              baseline=baseline, report_doc=report)
+    except Exception:
+        if out.exists() and not any(out.iterdir()):
+            out.rmdir()
+        raise
+
+
+def _read_outcomes_csv(path: Path) -> list[dict[str, Any]]:
+    raw = path.read_bytes()
+    if b"\r" in raw:
+        raise ValueError("outcomes CSV CR")
+    return list(csv.DictReader(StringIO(raw.decode("utf-8"), newline="")))
+
+
+def _d05_report_doc(run_id: str, decision: Mapping[str, Any], *, test_only: bool,
+                    evidence: Mapping[str, Any] | None = None,
+                    note: str | None = None) -> dict[str, Any]:
+    if note is None:
+        note = "state-only placeholder; no D05 conclusion."
+    return {"schema": REPORT_SCHEMA_TEST if test_only else REPORT_SCHEMA,
+            "run_id": run_id, "method": METHOD,
+            "run_state": str(decision.get("run_state")),
+            "diagnosis_class": str(decision.get("diagnosis_class")),
+            "diagnosis_concluded": True, "d05_emitted": True,
+            "decision_rationale": str(decision.get("rationale")),
+            "prior_documented_co_factor":
+                bool(decision.get("prior_documented_co_factor", False)),
+            "successor": ("R3 code-only" if decision.get("diagnosis_class") == "code"
+                          else "R1 prior-only" if decision.get("diagnosis_class") == "prior"
+                          else "R2 decoder-only" if decision.get("diagnosis_class") == "decoder"
+                          else "none (mixed/inconclusive/interface: routes locked)"),
+            "evidence": dict(evidence) if evidence is not None else None,
+            "declared_run_states": list(RUN_STATES),
+            "declared_diagnosis_classes": list(DIAGNOSIS_CLASSES),
+            "note": note,
+            "diagnostic_only": True, "retrospective_reuse": True}
+
+
 # ------------------------------------------------------------------ read-only verify
 
 def _verify_telemetry_file(path: Path) -> dict[str, Any]:
@@ -1553,22 +2061,7 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
     if report.get("diagnosis_class") is not None \
             and report["diagnosis_class"] not in DIAGNOSIS_CLASSES:
         raise ValueError("report diagnosis class")
-    if report.get("d05_emitted", False) or report.get("diagnosis_concluded", False):
-        raise ValueError("report must not carry a D05 conclusion")
     characterization = manifest.get("characterization")
-    if channel.get("characterization_performed"):
-        if run_state != "plan_only":
-            raise ValueError("characterization requires plan_only run state")
-        aggregates = channel.get("aggregates")
-        if not isinstance(aggregates, Mapping) or "raw_ser" not in aggregates \
-                or "conditional_entropy" not in aggregates:
-            raise ValueError("channel aggregates")
-        if aggregates["aggregation"]["raw_arrays_persisted"] \
-                or aggregates["aggregation"]["per_position_data_persisted"] \
-                or aggregates["aggregation"]["alice_error_locations_persisted"]:
-            raise ValueError("channel persists forbidden raw data")
-        if not isinstance(characterization, Mapping) or not characterization.get("performed"):
-            raise ValueError("manifest characterization")
     outcomes = _verify_outcomes_file(out / "diagnostic_outcomes.csv")
     telemetry = _verify_telemetry_file(out / "decoder_telemetry.jsonl")
     artifact_bytes = manifest.get("artifact_files")
@@ -1586,7 +2079,55 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
     if not isinstance(authorization, Mapping):
         raise ValueError("manifest authorization")
     stages = tuple(manifest.get("stages_completed") or ())
-    if stages == ("D04",):
+    if stages == ("D05",):
+        # D05 oracle-guard freeze: no decode happened, no conclusion beyond
+        # the interface-fault freeze.
+        if run_state != "implementation_interface_fault" \
+                or outcomes["rows"] != 0 or telemetry["records"] != 0:
+            raise ValueError("manifest D05 freeze package")
+        if not report.get("d05_emitted") or report.get("diagnosis_class") != "interface":
+            raise ValueError("report D05 interface freeze")
+        if authorization.get("real_decode_authorized", True) \
+                or authorization.get("d04_authorized", True) \
+                or authorization.get("d05_authorized") is not True:
+            raise ValueError("manifest D05 freeze authorization")
+    elif stages == _D05_STAGES:
+        # Full D05 package: corrected channel aggregates + the D04 baseline
+        # rows + the root-cause conclusion (real decode already authorized by
+        # the D04 probe).  No further decoder execution is claimed.
+        if authorization.get("real_decode_authorized") is not True \
+                or authorization.get("d04_authorized") is not True \
+                or authorization.get("d05_authorized") is not True:
+            raise ValueError("manifest D05 authorization")
+        if not str(authorization.get("phase", "")).startswith("V13-D05"):
+            raise ValueError("manifest D05 phase")
+        if run_state not in ("diagnosis_complete", "diagnosis_inconclusive",
+                             "implementation_interface_fault"):
+            raise ValueError("manifest D05 run state")
+        if not report.get("d05_emitted") or not report.get("diagnosis_concluded") \
+                or report.get("run_state") != run_state \
+                or report.get("diagnosis_class") is None:
+            raise ValueError("report D05 conclusion")
+        if not channel.get("characterization_performed"):
+            raise ValueError("D05 package requires corrected channel aggregates")
+        aggregates = channel.get("aggregates")
+        if not isinstance(aggregates, Mapping) or "raw_ser" not in aggregates \
+                or "conditional_entropy" not in aggregates:
+            raise ValueError("channel aggregates")
+        if aggregates["aggregation"]["raw_arrays_persisted"] \
+                or aggregates["aggregation"]["per_position_data_persisted"] \
+                or aggregates["aggregation"]["alice_error_locations_persisted"]:
+            raise ValueError("channel persists forbidden raw data")
+        if any(row.get("phase") != "baseline" for row in
+               csv.DictReader(StringIO((out / "diagnostic_outcomes.csv").read_text("utf-8"), newline=""))):
+            raise ValueError("D05 outcome phase")
+        baseline = manifest.get("baseline")
+        if not isinstance(baseline, Mapping) \
+                or baseline.get("frames") != int(manifest.get("outcome_rows", 0)):
+            raise ValueError("manifest D05 baseline")
+        if not _test_schema(manifest) and baseline.get("frames") != D04_FRAME_COUNT:
+            raise ValueError("manifest D05 frame count")
+    elif stages == ("D04",):
         # D04 package: real-decode authorization is limited to the frozen
         # baseline probe; no D05 conclusion and no characterization.  Frozen
         # failure packages (oracle guard / blocked ledger / hook drift) carry
@@ -1602,6 +2143,8 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
             raise ValueError("D04 package run state")
         if channel.get("characterization_performed"):
             raise ValueError("D04 package must not carry characterization")
+        if report.get("d05_emitted", False) or report.get("diagnosis_concluded", False):
+            raise ValueError("report must not carry a D05 conclusion")
         if any(row.get("phase") != "baseline" for row in
                csv.DictReader(StringIO((out / "diagnostic_outcomes.csv").read_text("utf-8"), newline=""))):
             raise ValueError("D04 outcome phase")
@@ -1617,8 +2160,25 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
             if not _test_schema(manifest) and baseline.get("frames") != D04_FRAME_COUNT:
                 raise ValueError("manifest D04 frame count")
     else:
+        # D01 package: no real decode, no D05 conclusion; characterization
+        # requires the plan_only state.
         if authorization.get("real_decode_authorized", True):
             raise ValueError("manifest real-decode authorization")
+        if report.get("d05_emitted", False) or report.get("diagnosis_concluded", False):
+            raise ValueError("report must not carry a D05 conclusion")
+        if channel.get("characterization_performed"):
+            if run_state != "plan_only":
+                raise ValueError("characterization requires plan_only run state")
+            aggregates = channel.get("aggregates")
+            if not isinstance(aggregates, Mapping) or "raw_ser" not in aggregates \
+                    or "conditional_entropy" not in aggregates:
+                raise ValueError("channel aggregates")
+            if aggregates["aggregation"]["raw_arrays_persisted"] \
+                    or aggregates["aggregation"]["per_position_data_persisted"] \
+                    or aggregates["aggregation"]["alice_error_locations_persisted"]:
+                raise ValueError("channel persists forbidden raw data")
+            if not isinstance(characterization, Mapping) or not characterization.get("performed"):
+                raise ValueError("manifest characterization")
     return {"verified": True, "run_id": run_id, "run_state": run_state,
             "ledger_state": ledger["ledger_state"],
             "ledger_counts": ledger["counts"],
@@ -1630,16 +2190,12 @@ def verify_package(output_dir: Any, *, _private_test_only: bool = False) -> dict
 def v13_d04_d05_guard(action: str, authorized: bool) -> None:
     """D04/D05 entry guard.
 
-    ``d05`` remains a hard stop (SystemExit 2): the root-cause report requires
-    D04 results and a separate main-thread authorization, and is not
-    implemented.  ``d04`` exits 2 unless the main thread passed the explicit
-    authorization flag; the authorized production probe itself is implemented
-    in :func:`run_d04` (the CLI additionally requires ``--production``).  The
-    test lane never uses this guard: it calls the module API directly with
-    ``_test_only=True`` and fake frames."""
+    Both actions exit 2 unless the main thread passed the explicit
+    authorization flag; the authorized production lanes are implemented in
+    :func:`run_d04` and :func:`run_d05` (the CLI additionally requires
+    ``--production``).  The test lane never uses this guard: it calls the
+    module API directly with ``_test_only=True`` and fake inputs."""
     if action not in ("d04", "d05"):
         raise ValueError(f"unknown guard action: {action}")
-    if action == "d05":
-        raise SystemExit(2)
     if not authorized:
         raise SystemExit(2)

@@ -351,14 +351,15 @@ def test_dt2_production_entrypoints_hard_stopped():
         core.run_d04(Path("workspace") / "must_not_exist",
                      run_id="fake", discovery_root=Path("workspace"),
                      production_authorized=False)
-    # D05 stays a hard stop; D04 requires the explicit main-thread flag
+    # both D04 and D05 require the explicit main-thread authorization flag
     with pytest.raises(SystemExit) as excinfo:
-        core.v13_d04_d05_guard("d05", True)
+        core.v13_d04_d05_guard("d05", False)
     assert excinfo.value.code == 2
     with pytest.raises(SystemExit) as excinfo:
         core.v13_d04_d05_guard("d04", False)
     assert excinfo.value.code == 2
-    # the authorized D04 probe is implemented (module API; test lane below)
+    # the authorized lanes are implemented (module API; test lane below)
+    assert core.v13_d04_d05_guard("d05", True) is None
     assert core.v13_d04_d05_guard("d04", True) is None
 
 
@@ -569,6 +570,10 @@ def test_dt3_d04_tampered_authorization_rejected():
     report = json.loads(report_path.read_bytes())
     report["d05_emitted"] = True
     report_path.write_bytes(core._compact(report))
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["artifact_files"]["root_cause_report.json"]["bytes"] = \
+        report_path.stat().st_size
+    manifest_path.write_bytes(core._compact(manifest))
     with pytest.raises(ValueError, match="must not carry a D05 conclusion"):
         core.verify_package(run_dir, _private_test_only=True)
 
@@ -640,3 +645,213 @@ def test_dt3_d04_no_overwrite_fresh_root():
     with pytest.raises(FileExistsError, match="fresh additive output root required"):
         core.run_d04(run_dir, run_id="fake", ledger=ledger, frames=frames,
                      count=4, max_iter=2, _test_only=True, command="pytest DT3")
+
+
+# ------------------------------------------------------------------ DT4 (D05 root-cause lane)
+
+def test_dt4_graph_analysis_frozen_r1a_is_degenerate():
+    graph = core.v7_r1a_graph_analysis()
+    assert graph["codebook"]["method"] == core.V7_R1A_METHOD
+    assert graph["variable_degree_distribution"] == {2: 256}
+    assert graph["check_degree_distribution"] == {3: 168, 4: 2}
+    census = graph["check_node_graph"]
+    assert census["check_nodes"] == 170 and census["variable_edges"] == 256
+    # the frozen graph is 85 disconnected 2-check components with parallel
+    # variable edges -> Tanner girth 4 and component minimum distance <= 3
+    assert census["component_count"] == 85
+    assert census["component_sizes"] == [2] * 85
+    assert census["parallel_pairs"] == 85
+    assert graph["girth"]["tanner_girth"] == 4
+    assert graph["minimum_distance"]["d_min_bound"] == 3
+    assert graph["anomalies"] == []
+
+
+def test_dt4_ceiling_perfect_correspondence():
+    # fake frames: two of four have >=2 errors in one component; outcomes mark
+    # exactly those two frames as failed -> perfect correspondence
+    rows = _fake_identity_rows(per_stratum=4)
+    transfer, partition = _fake_roles(rows, n_transfer=1, n_conf=1, n_dev=2)
+    ledger = core.build_role_ledger(rows, transfer, partition,
+                                    schema=core.LEDGER_SCHEMA_TEST,
+                                    run_id="fake_v13_d05_test")
+    dev_rows = [r for r in ledger["rows"] if r["role"] == "development"
+                and r["stratum"] == core.PRIMARY_STRATUM]
+    mapping = core.component_map()
+    key = next(iter(sorted(set(mapping.values()))))
+    frames = []
+    for i, row in enumerate(dev_rows):
+        alice = np.zeros(core.N, dtype=np.int64)
+        bob = alice.copy()
+        if i < 2:
+            cols = [c for c in mapping if mapping[c] == key][:2]
+            bob[cols[0]] = 1
+            bob[cols[1]] = 2
+        frames.append({"frame_id": int(row["frame_id"]),
+                       "stratum": row["stratum"], "role": "development",
+                       "alice": alice, "bob": bob})
+    outcomes = [{"phase": "baseline", "method": core.V7_R1A_METHOD,
+                 "frame_id": int(f["frame_id"]), "stratum": core.PRIMARY_STRATUM,
+                 "role": "development",
+                 "status": "decode_failed" if i < 2 else "syndrome_consistent",
+                 "reason": "iteration_limit" if i < 2 else "exact_correct",
+                 "raw_ser": 0.05, "iterations": 100 if i < 2 else 1,
+                 "notes": "hook_equivalence=ok"}
+                for i, f in enumerate(frames)]
+    ceiling = core.structural_failure_ceiling(frames, outcomes=outcomes)
+    assert ceiling["frames"] == 2
+    assert ceiling["structural_failure_fraction"] == 1.0
+    assert ceiling["perfect_correspondence"]["exact_match"] is True
+
+
+def test_dt4_decision_table_emits_code_with_prior_co_factor():
+    graph = core.v7_r1a_graph_analysis()
+    evidence = {
+        "oracle_status": "ok", "hook_equivalence_ok": True,
+        "decoder_error_count": 0, "nonfinite_events": 0,
+        "normalisation_failures": 0,
+        "prior_calibration_mismatch": 0.1229, "prior_entropy_gap_bits": 2.17,
+        "oscillation_frames": 11, "total_frames": 32,
+        "graph": graph,
+        "ceiling": {"structural_failure_fraction": 0.75,
+                    "observed_failure_fraction": 0.75,
+                    "observed_success_fraction": 0.25},
+    }
+    decision = core.decide_root_cause(evidence)
+    assert decision["diagnosis_class"] == "code"
+    assert decision["run_state"] == "diagnosis_complete"
+    assert decision["prior_documented_co_factor"] is True
+
+
+def test_dt4_decision_table_prior_when_graph_healthy():
+    healthy = {"variable_degree_distribution": {3: 256},
+               "check_degree_distribution": {6: 85},
+               "check_node_graph": {"component_count": 1,
+                                    "component_sizes": [170]},
+               "girth": {"tanner_girth": 8, "check_graph_girth": 4},
+               "minimum_distance": {"d_min_bound": 8}}
+    evidence = {
+        "oracle_status": "ok", "hook_equivalence_ok": True,
+        "decoder_error_count": 0, "nonfinite_events": 0,
+        "normalisation_failures": 0,
+        "prior_calibration_mismatch": 0.1229, "prior_entropy_gap_bits": 2.17,
+        "oscillation_frames": 0, "total_frames": 32,
+        "graph": healthy,
+        "ceiling": {"structural_failure_fraction": 0.05,
+                    "observed_failure_fraction": 0.75},
+    }
+    decision = core.decide_root_cause(evidence)
+    assert decision["diagnosis_class"] == "prior"
+    assert decision["run_state"] == "diagnosis_complete"
+
+
+def test_dt4_decision_table_prior_when_structure_does_not_explain():
+    graph = core.v7_r1a_graph_analysis()
+    evidence = {
+        "oracle_status": "ok", "hook_equivalence_ok": True,
+        "decoder_error_count": 0, "nonfinite_events": 0,
+        "normalisation_failures": 0,
+        "prior_calibration_mismatch": 0.1229, "prior_entropy_gap_bits": 2.17,
+        "oscillation_frames": 0, "total_frames": 32,
+        "graph": graph,
+        "ceiling": {"structural_failure_fraction": 0.30,
+                    "observed_failure_fraction": 0.75},
+    }
+    decision = core.decide_root_cause(evidence)
+    # structure explains only 0.30 of 0.75 failures (< 0.8 share) -> the code
+    # row is not established; the D01 prior mismatch row is -> prior
+    assert decision["diagnosis_class"] == "prior"
+    assert decision["run_state"] == "diagnosis_complete"
+
+
+def test_dt4_decision_table_inconclusive_when_no_class_established():
+    healthy = {"variable_degree_distribution": {3: 256},
+               "check_degree_distribution": {6: 85},
+               "check_node_graph": {"component_count": 1,
+                                    "component_sizes": [170]},
+               "girth": {"tanner_girth": 8, "check_graph_girth": 4},
+               "minimum_distance": {"d_min_bound": 8}}
+    evidence = {
+        "oracle_status": "ok", "hook_equivalence_ok": True,
+        "decoder_error_count": 0, "nonfinite_events": 0,
+        "normalisation_failures": 0,
+        "prior_calibration_mismatch": 0.01, "prior_entropy_gap_bits": 0.2,
+        "oscillation_frames": 0, "total_frames": 32,
+        "graph": healthy,
+        "ceiling": {"structural_failure_fraction": 0.05,
+                    "observed_failure_fraction": 0.75},
+    }
+    decision = core.decide_root_cause(evidence)
+    assert decision["diagnosis_class"] == "inconclusive"
+    assert decision["run_state"] == "diagnosis_inconclusive"
+
+
+def test_dt4_decision_table_interface_on_oracle_failure():
+    decision = core.decide_root_cause({"oracle_status": "failed"})
+    assert decision["diagnosis_class"] == "interface"
+    assert decision["run_state"] == "implementation_interface_fault"
+
+
+def test_dt4_d05_fake_lifecycle_and_verify():
+    root = _out("t4_d05")
+    ledger = _fake_ledger_large()
+    frames = _fake_frames(ledger, seed=5)
+    dev_rows = core.pre_registered_d04_frames(ledger, count=4)
+    dev_frames = _fake_d04_frames(ledger, dev_rows)
+    outcomes = [{"phase": "baseline", "method": core.V7_R1A_METHOD,
+                 "frame_id": int(f["frame_id"]), "stratum": core.PRIMARY_STRATUM,
+                 "role": "development", "status": "decode_failed",
+                 "reason": "iteration_limit", "raw_ser": 0.07,
+                 "iterations": 100, "notes": "hook_equivalence=ok"}
+                for f in dev_frames]
+    graph = core.v7_r1a_graph_analysis()
+    evidence = {
+        "oracle_status": "ok", "hook_equivalence_ok": True,
+        "decoder_error_count": 0, "nonfinite_events": 0,
+        "normalisation_failures": 0,
+        "prior_calibration_mismatch": 0.1229, "prior_entropy_gap_bits": 2.17,
+        "oscillation_frames": 0, "total_frames": len(outcomes),
+        "graph": graph,
+        "ceiling": {"structural_failure_fraction": 0.75,
+                    "observed_failure_fraction": 0.75},
+    }
+    run_dir = root / "package"
+    result = core.run_d05(run_dir, run_id="fake_v13_d05", ledger=ledger,
+                          frames=frames, dev_frames=dev_frames,
+                          outcome_rows=outcomes, evidence=evidence,
+                          _test_only=True, command="pytest DT4")
+    assert result["run_state"] == "diagnosis_complete"
+    assert {p.name for p in run_dir.iterdir()} == set(core.ARTIFACTS)
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    assert verified["run_state"] == "diagnosis_complete"
+    assert verified["characterization_performed"] is True
+    report = json.loads((run_dir / "root_cause_report.json").read_bytes())
+    assert report["d05_emitted"] is True and report["diagnosis_concluded"] is True
+    assert report["diagnosis_class"] == "code"
+    assert report["run_state"] == "diagnosis_complete"
+    assert report["successor"] == "R3 code-only"
+    manifest = json.loads((run_dir / "diagnostic_run_manifest.json").read_bytes())
+    assert manifest["stages_completed"] == ["D01", "D04", "D05"]
+    assert manifest["authorization"]["d05_authorized"] is True
+    assert manifest["baseline"]["frames"] == 4
+    assert str(run_dir.resolve()).startswith(str(Path("workspace").resolve()))
+
+
+def test_dt4_d05_oracle_freeze_package_verifies(monkeypatch):
+    root = _out("t4_d05_interface")
+    ledger = _fake_ledger_large()
+    frames = _fake_frames(ledger, seed=6)
+
+    def broken_oracle(*args, **kwargs):
+        return {"status": "failed", "diagnosis_class": "interface",
+                "run_state": "implementation_interface_fault",
+                "failed_checks": ["forced"], "checks": {}}
+
+    monkeypatch.setattr(core, "run_engineering_oracle", broken_oracle)
+    run_dir = root / "package"
+    result = core.run_d05(run_dir, run_id="fake_v13_d05_if", ledger=ledger,
+                          frames=frames, _test_only=True, command="pytest DT4")
+    assert result["run_state"] == "implementation_interface_fault"
+    verified = core.verify_package(run_dir, _private_test_only=True)
+    assert verified["verified"] is True
+    assert verified["run_state"] == "implementation_interface_fault"

@@ -1,10 +1,11 @@
 # Tasks: V13 Existing-Data Nonbinary LDPC Diagnostics
 
-Status: **PLAN FROZEN / P08 ACCEPTED / D-STAGE COMPLETE THROUGH D04** (2026-08-14).
+Status: **PLAN FROZEN / P08 ACCEPTED / D-STAGE COMPLETE THROUGH D05 (EMITTED, REVIEW PENDING)** (2026-08-14).
 P01--P08 were accepted by an independent read-only freeze review (zero
 blockers; two WARNING-level items and three suggestions recorded for
-correction before D05). D01-D04 + DT0-DT2 are complete; D05 and every
-R/I/E/A/C item remain unauthorized and unchecked.
+correction before D05). D01-D04 + DT0-DT2 complete; D05 emitted with
+`diagnosis_class=code`, `run_state=diagnosis_complete` (independent read-only
+review pending). R/I/E/A/C items remain unauthorized and unchecked.
 
 ## Planning freeze (frozen via P08)
 
@@ -64,13 +65,23 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   24/32 `decode_failed` at the iteration limit, zero `decoder_error`, zero
   exact mismatches, zero non-finite/normalisation failures; strict read-only
   verifier PASS; D04-lane engineering tests 27/27.)
-- [ ] **V13-D05** Produce a root-cause report, retain all failures, and obtain
+- [x] **V13-D05** Produce a root-cause report, retain all failures, and obtain
   independent review. Emit separate fields: `diagnosis_class` is exactly one
   of `interface`, `prior`, `decoder`, `code`, `mixed`, or `inconclusive`;
   `run_state` is `diagnosis_complete` for a supported single-factor class and
   `diagnosis_inconclusive` for `mixed`/`inconclusive`. An oracle/interface
   failure may already have set `run_state=implementation_interface_fault`.
-  (NOT authorized — requires D04 results first.)
+  (Done 2026-08-14: first emission `v13_d05_20260814` was invalidated by a
+  decision-machinery defect — see the sibling
+  `v13_d05_20260814_invalid_execution_notice.json`; corrected emission
+  `v13_d05_20260814_corrected` emits `diagnosis_class=code`,
+  `run_state=diagnosis_complete`, successor R3 code-only, prior documented as
+  co-factor; strict read-only verifier PASS. Decisive evidence: the frozen R1A
+  graph is 85 disconnected 2-check components (Tanner girth 4, d_min 3) and
+  the structural ceiling over the 32 D04 frames is 0.75 == observed failure
+  fraction 0.75 with perfect frame-level correspondence (24/24 failed frames
+  contain a >=2-error component; 8/8 exact-correct frames contain none).
+  Independent read-only review: PENDING.)
 
 ## Phase R — one-factor candidate (blocked until D05)
 
