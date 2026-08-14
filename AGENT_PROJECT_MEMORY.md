@@ -1959,3 +1959,35 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   不扩大搜索。选它作第一效率路线：直接对应当前数据的位面不均匀性；
   SC-LDPC 在 QSC 下负耦合增益、结构化信道下未否定，排第二；多边/
   高维 λ 搜索空间大，排第三。 [decision]
+
+## 51. P1 prepare 执行（no_eligible_frames）+ P2 V17 门实现与生产执行 (2026-08-15)
+
+- **P1（fresh acquisition）PREP 完成**：change 冻结 + 独立 freeze review
+  ACCEPT（三个警告 amendment 修复：A02 表述、规模不足规则
+  `insufficient_eligible_frames`（eligible<192 冻结）、漂移阈值引用 V13
+  D01 参考区间）。PREP 工具由 flash 子代理实现（FA1–FA5 全过、19 测试、
+  decoder-free/array-free、复用 V12 partition 排除机制、身份
+  `v13r3fresh-<stratum>-<uuid>`（sha256(seed||canonical)）、schema
+  `nbldpc_v13r3_fresh_plan_v1`/`no_eligible_v1`/`insufficient_v1`、
+  production_prepare_authorized 默认 False）。主线程独立重跑 19/19。
+  生产 prepare 执行一次（提交 17542dc4）→ **`state=no_eligible_frames`**
+  （`D:\Data` 无 fresh 10 dB Type-II 帧数据源——最新 2026-07-28 JSI
+  非帧数据）；包
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_prepare_20260815/no_eligible_package.json`
+  （decoder 不变式完整冻结）。主线程 review ACCEPT → 判定 **frozen
+  failure（数据不可得）**；execute/verify 阻塞；用户提供 fresh 数据后
+  重新 prepare（确定性工具，非失败重跑）。 [decision]
+- **P2（V17 门）实现完成**：freeze review ACCEPT（两个警告 amendment
+  修复：评估点集固定 m∈{15,16,17,18} 全集、Stage 0 锚点 A/B 具体化
+  （内部一致 ≤0.005 + 文献交叉 |δ|≤0.012，无布尔 fallback））。
+  实现由 flash 子代理完成（VA1–VA6 全过、17 测试、5 新文件：stage0/
+  channel/mcde/CLI/tests；V8/V9/V11/V13/V14 源码零改动）；主线程独立
+  重跑 17/17。Stage 1 模型从 D01 包只读构建：per-bit-plane 错误概率
+  = `aggregates.bit_plane_mismatch.mismatch_rate`（10 值 MSB→LSB 单调
+  3.05e-5→3.75e-2），joint_structure=`product_of_per_plane_marginals`
+  （D01 无联合统计，显式声明保守近似），entropy=0.549955 bits/symbol
+  （≈V13 0.547 一致）。Stage 2：3 候选（bitplane/edgelabel/planeweight）
+  × m∈{15,16,17,18}。生产 gate 执行中（2026-08-15，后台）。 [repo-observed]
+- 提交链：fb6e579d（P0）→ 240e3a2e（P1/P2 立项）→ 3a6d2990（决策日志）
+  → 037ee5a6（freeze ACCEPT+amendment）→ 757464f4（W1 完全关闭）→
+  d801427c（P1/P2 实现）→ 17542dc4（P1 prepare 包）。 [repo-observed]
