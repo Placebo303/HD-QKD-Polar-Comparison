@@ -1,7 +1,8 @@
 # Proposal: formal-nonbinary-ldpc-v16-rate-adaptive-deployment
 
-> 状态：DRAFT —— 立项前置条件：V14 gate = pass 且 V15 候选完成合成资格。
-> 本 change 是部署适配层，不引入新码。
+> 状态：**ABORTED DRAFT（2026-08-15 归档）**——V14 gate_state=fail
+> 且 V15 未立项，本 change 无前置候选、未立项；delta spec 未合并、
+> 无任何实现。原 DRAFT 状态文字保留作为规划记录（见 aborted_notice.md）。
 
 ## What
 

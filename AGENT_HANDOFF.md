@@ -1,63 +1,83 @@
 # AGENT_HANDOFF.md
 
-Last verified: **2026-08-14**
+Last verified: **2026-08-15**
 
-## Current State — V13 Existing-Data Nonbinary LDPC Diagnostics: PLAN FROZEN + D-STAGE COMPLETE (2026-08-14)
+## Current State — P0 收口完成；P1 fresh acquisition / P2 V17 位面门 (2026-08-15)
 
-Change: `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/`
+按用户更新后的目标（P0→P1→P2）继续：
 
-V13 planning is FROZEN: P01-P08 were accepted by an independent read-only
-freeze review (zero blockers) and four non-blocking corrections were applied
-to the planning docs. The D stage (D01-D03 + DT0-DT2) was authorized and
-completed on 2026-08-14. This remains a retrospective diagnostic/development
-lane on existing 10 dB Type-II q=1024 Gray 256-symbol data — not fresh
-evidence: the existing rows are already covered by V4/V5 frame/payload
-identities. Every future artifact must be marked `diagnostic_only` and
-`retrospective_reuse`; even an all-green path can reach only
-`ready_for_fresh_confirmation`.
-
-- D01 no-decode channel characterization ran exactly once (run_id
-  `v13_d01_20260814`, six-file package at
-  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d01_20260814/`).
-  Ledger ready: 2304 rows = characterization 384 (128/stratum) + development
-  1536 (512/stratum) + retrospective_audit 384 (128/stratum). bw200
-  aggregates: raw SER mean 0.0771 (0.0391-0.1133); bit-plane mismatch
-  monotone 3.1e-5 (MSB) to 3.75e-2 (LSB); zero-diff mass 0.9229; 8 runs max
-  length 2 (isolated errors, no bursts); QSC p=.20 calibration mismatch
-  0.1229; model entropy 2.722 b/symbol; NLL mean 1.247; empirical conditional
-  entropy lower bound 0.547 b/symbol (labelled empirical diagnostic, not a
-  proof).
-- D02 engineering oracle implemented (noiseless/single-error/tiny-q/tiny-n);
-  D03 wrapper hook with element-for-element equivalence; V7 R1A sources
-  byte-unchanged.
-- Tests: DT0 8 + DT1 8 + DT2 5 = 21/21 passed in fresh
-  `workspace/nbldpc_v13_<uuid>/` roots.
-- Independent read-only review: ACCEPT, zero blockers (two non-blocking
-  warnings: stale planning docs — this task; manifest time field — noted).
-- NOT authorized and NOT run: D04 (32-frame baseline probe), D05 (root-cause
-  report), R/I/E/A/C, and any real-data decoder execution. D04 remains
-  blocked pending a separate main-thread authorization.
-- V12 remains terminal `source_partition_blocked`; its archive is a separate
-  housekeeping decision and does not block V13. Do not reopen V12-X01/X02.
-- Diagnostic output stays additive under
-  `comparison_bench/outputs_comparison/nonbinary_diagnostics/<run_id>/`; frozen
-  `src/`, `experiments/`, `tools/`, `results/`, and official
-  `formal_ir_methods` roots remain untouched. The six-file diagnostic package
-  uses `diagnostic_outcomes.csv` for baseline, candidate-development, and
-  retrospective-audit rows with explicit `phase` and `method` fields.
-
-Recommended next action: none is authorized. D04 (32-frame baseline probe) and
-D05 (root-cause report) require a separate main-thread authorization; real
-decode, fresh confirmation, qualification, and promotion require a later
-OpenSpec change and explicit user decision.
-
-Claim boundary: the highest V13 state is `ready_for_fresh_confirmation`; no
-decoder correction, qualification, or promotion is established, and D04/D05
-plus real decode remain unauthorized.
+- **P0 状态收口（2026-08-15 完成，仅 housekeeping，无科学执行）**：
+  - V12 已正式归档 →
+    `openspec/changes/archive/2026-08-15-formal-nonbinary-ldpc-v12-real-micro-feasibility/`
+    （保留 `source_partition_blocked`、X01/X02 未执行、v2 prepare 包；
+    归档≠成功、不重开执行；delta spec 未合并；见 archive_note.md）。
+  - V15/V16 归档为 **aborted drafts** →
+    `openspec/changes/archive/2026-08-15-formal-nonbinary-ldpc-v15-high-rate-candidate-aborted/`
+    、`...v16-rate-adaptive-deployment-aborted/`（未立项/前置门失败；
+    delta spec 未合并；见 aborted_notice.md）。
+  - 陈旧文档已修复：CURRENT_TASK.md、V14 tasks.md（头部状态/测试数字
+    62/62→64/64/回放完成）、V13 tasks.md（C01 COMPLETE、IT0-IT3 49/49）、
+    记忆 §47/§48。
+  - 本地领先 `origin/main` **28 个提交**；push 待用户单独授权。
+- **P1（立即优先）**: V13 R3 fresh acquisition。新开独立 OpenSpec change
+  `formal-nonbinary-ldpc-v13-r3-fresh-acquisition`（不复用 V12 执行身份、
+  不自动宣称 promotion）。流程：冻结新帧/载荷身份与角色 → prepare →
+  主线程独立 review → 单次 fresh execute → 一次只读 verify →
+  fresh-confirmed / frozen failure。R3 码本/先验/迭代上限保持不变；
+  含漂移与无 eligible frame 停止规则；失败原样保留、禁替换帧/调参/重跑。
+- **P2**: 独立效率研究门 `formal-nonbinary-ldpc-v17-multibit-structured-de-gate`
+  ——只做可行性门（Cohen/多位信道机制复现 → MSB→LSB 单调失配映射为
+  冻结信道模型 → 预注册少量边标签/位面候选 → 冻结收敛/效率/预算/replay
+  标准 → 一次执行）；PASS → 另开有限码 candidate change；FAIL → 冻结，
+  不启动 V15/V16，不扩大搜索。
 
 ---
 
-## Previous State — V12 Nonbinary LDPC Real Micro-Feasibility: TERMINAL `source_partition_blocked` (2026-08-13)
+## Previous State — V13 Existing-Data Nonbinary LDPC Diagnostics: COMPLETE `ready_for_fresh_confirmation` (2026-08-14)
+
+Change: `openspec/changes/formal-nonbinary-ldpc-v13-existing-data-diagnostics/`
+
+V13 completed the full frozen route: P01-P08 accepted; D01-D04 + DT0-DT3
+(27/27); D05 `code`/`diagnosis_complete` (independent review ACCEPT,
+zero blockers); R3 code-only candidate `nbldpc_v13_r3_code_v1` (frozen
+amendment, IT0-IT3 49/49); E01 64/64 candidate exact (baseline 13/64);
+A01 128/128 → `ready_for_fresh_confirmation`; A02 bw120+bw180 128/128
+each (no promotion); **C01 independent acceptance ACCEPT (zero
+blockers)**; memory triage done (AGENT_PROJECT_MEMORY.md §47). The
+maximum V13 claim is `ready_for_fresh_confirmation` — NOT promotion/
+qualification/fresh correction. All production packages verified read-only
+and committed (ed4bb690 .. 4c0f27a4). The P1 fresh-acquisition change is
+the user-decided successor (see Current State above).
+
+- Evidence packages (all under
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/`):
+  v13_d01_20260814, v13_d04_20260814, v13_d05_20260814_corrected (+
+  v13_d05_20260814_invalid_execution_notice.json for the retained first
+  emission), v13_e01_20260814, v13_a01_20260814, v13_a02_20260814.
+- V14 (efficiency gate) executed after V13: **gate_state=fail** — see
+  Previous State below; V15/V16 aborted drafts archived 2026-08-15.
+
+---
+
+## Previous State — V14 Efficiency Gate: FAIL, route frozen (2026-08-15)
+
+Change: `openspec/changes/formal-nonbinary-ldpc-v14-efficiency-gate/`
+
+V14 executed once and closed at **`gate_state=fail`**: Stage 0 QSC
+regression PASS (proxy 0.060 vs published 0.069, |δ|=0.009≤0.012);
+Stage 1 folded small-q validation green; Stage 2 all 12 frozen points
+(3 λ × m∈{15,16,17,18}, q=1024 structured channel) non-converged
+(final base-q entropy 0.288–0.357 vs 0.01 threshold); f 1.032–1.239
+all ≤1.3 but convergence binding. E02 independent gate review ACCEPT;
+strict replay complete (scientific files byte-identical, manifest
+provenance-only diffs); C01 closeout done (decision-log, memory §49).
+Budget: wall 87 min, RSS 577 MiB. Consequence: efficiency route frozen
+per V14 discipline; V15/V16 not launched (archived as aborted drafts,
+2026-08-15). V13 R3 (f≈12.1) remains the only verified corrector.
+
+---
+
+## Previous State — V12 Nonbinary LDPC Real Micro-Feasibility: TERMINAL `source_partition_blocked`, ARCHIVED (2026-08-13; archived 2026-08-15)
 
 Change: `openspec/changes/formal-nonbinary-ldpc-v12-real-micro-feasibility/`
 

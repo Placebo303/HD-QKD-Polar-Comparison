@@ -1,7 +1,11 @@
 # Tasks: formal-nonbinary-ldpc-v14-efficiency-gate
 
-Status: **FROZEN CANDIDATE** — 设计全部五节定稿（§5 依据 DE 调研子代理报告）；
-V14-P06 独立 freeze review 进行中；review ACCEPT 前禁止任何执行。
+Status: **COMPLETE — `gate_state=fail`，效率路线冻结 (2026-08-15)**。
+全流程 P→I→E→C 完毕：freeze review ACCEPT（首轮 BLOCKERS 修复后复评）；
+实现由 flash 子代理落实、独立 verifier ACCEPT；E01 生产执行一次
+（Stage 0 PASS / Stage 1 全绿 / Stage 2 12/12 非收敛）；E02 独立 gate
+review ACCEPT；strict replay 完成（科学文件字节一致）；C01 收尾完毕。
+V15/V16 按冻结纪律不立项（已归档为 aborted drafts）。
 
 ## P — 规划与冻结（本对话完成）
 
@@ -33,7 +37,9 @@ V14-P06 独立 freeze review 进行中；review ACCEPT 前禁止任何执行。
   全部落 `evidence/`（无 <run_id> 子目录）。（Done：
   `cli/run_v14_gate.py` model/gate/replay/self-check；fail-closed 加法写。）
 - [x] **V14-T0/T1/T2/T3** 四层测试（design §4 冻结清单）全过。
-  （Done：13/13 + v13 回归 49/49 = 62/62；独立 verifier ACCEPT。）
+  （Done：修复前 13/13 + v13 回归 49/49 = 62/62；gate 按文件
+  fail-closed 修复后 15/15 + 49/49 = **64/64**——原始记录见
+  decision-log 2026-08-14；独立 verifier ACCEPT。）
 
 ## E — 执行（一次）
 
@@ -41,11 +47,12 @@ V14-P06 独立 freeze review 进行中；review ACCEPT 前禁止任何执行。
   判定（预算内）；证据落 `evidence/`；strict replay 一次。（Done
   2026-08-15：Stage 0 PASS、Stage 1 全绿、Stage 2 12/12 非收敛 →
   **gate_state=fail**；wall 87 min / RSS 577 MiB 预算内；strict replay
-  后台运行中。）
+  完成——科学文件 5/6 字节一致、manifest 仅 provenance 四字段差异
+  （V10 先例），回放证据提交 09c7ae43。）
 - [x] **V14-E02** 独立 gate review（reviewer-go 复核判定表与数值）。
   （Done 2026-08-15：**ACCEPT** —— FAIL 机械正确、纪律干净；冻结集/
-  种子/f 计算/预算/无事后改动逐项复核通过；两个非阻塞警告：回放证据
-  在途、manifest git_commit 语义。）
+  种子/f 计算/预算/无事后改动逐项复核通过；两个非阻塞警告均已消解：
+  回放证据已提交（09c7ae43）、manifest git_commit 语义已记录。）
 
 ## C — 收尾
 

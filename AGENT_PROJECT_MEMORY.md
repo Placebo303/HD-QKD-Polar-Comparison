@@ -1867,8 +1867,9 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   只读 verifier PASS、git 提交。闭环：与 D05 `code` 诊断一致——图连通性/
   girth 是根因，替换后同先验下全部精确纠错。[repo-observed]
 - 科学边界：ready_for_fresh_confirmation 不是 promotion/qualification/
-  fresh correction；fresh acquisition 需用户另开 OpenSpec change。V13
-  C01（独立验收 + 记忆 triage）进行中；V12 仍 source_partition_blocked。
+  fresh correction；fresh acquisition 已由用户决定、新开独立 change
+  （见 §50）。V13 **C01 完成**（独立验收 ACCEPT、零 blockers；本记忆
+  triage 即 C01 的记忆部分）；V12 已正式归档（2026-08-15，见 §50）。
   [decision]
 - 可复用经验：E01/A01 候选帧解码 median ~0.9–1.0 s/帧（q=1024 flooding，
   大多帧 1–2 轮收敛）；一次 E01 全屏（64 帧×2 解码）约 20–40 分钟，A01
@@ -1876,6 +1877,10 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   [repo-observed]
 
 ## 48. Nonbinary LDPC V14 效率可行性门——冻结、实现、执行中 (2026-08-14)
+
+> 2026-08-15 supersession：本节为门执行前的中间状态；门已执行完毕，
+> **gate_state=fail**、效率路线冻结（见 §49），V15/V16 归档为 aborted
+> drafts（见 §50）。
 
 - 立项依据：SciVerse 调研（docs/nonbinary-ldpc-efficiency-roadmap-survey.md）
   ——文献效率锚点 Müller 2024 f=1.078–1.14（q=8），V13 R3 f≈12.1 需高码
@@ -1920,3 +1925,37 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   普通 irregular 系综在 rate>0.93 不收敛是"可预测的负结果"——高码率
   必须换系综族而非调 profile；gate-first 纪律防止了 V15 的浪费性构造。
   [repo-observed]
+
+## 50. P0 状态收口 + P1/P2 新目标 (2026-08-15)
+
+- **P0 收口（用户更新目标，纯 housekeeping，无科学执行）**：V12 正式
+  归档 → `openspec/changes/archive/2026-08-15-formal-nonbinary-ldpc-v12-real-micro-feasibility/`
+  （保留 `source_partition_blocked`、X01/X02 未执行、v2 prepare 包；
+  归档≠成功、不重开执行；delta spec 未合并——V9/V10 先例）。
+  V15/V16 归档为 **aborted drafts**（`...v15-high-rate-candidate-aborted/`、
+  `...v16-rate-adaptive-deployment-aborted/`；未立项/前置门失败；delta
+  spec 未合并）。陈旧文档全部修复：CURRENT_TASK.md、V14 tasks.md
+  （头部状态、测试数字、回放完成）、V13 tasks.md（C01 COMPLETE、
+  IT0-IT3 49/49——原始记录为 `test_nonbinary_v13_diagnostics.py` 49 个
+  test）、AGENT_HANDOFF.md（Current State 重写）、记忆 §47/§48。
+  V14 测试数字统一：修复前 13+49=62/62 → 修复后 15+49=**64/64**
+  （decision-log 2026-08-14 原始记录）。本地领先 `origin/main` 28 个
+  提交；push 待单独授权。 [decision]
+- **P1（立即优先）**：V13 R3 fresh acquisition——新开独立 OpenSpec
+  change `formal-nonbinary-ldpc-v13-r3-fresh-acquisition`（不复用 V12
+  执行身份、不自动宣称 promotion）。冻结：新 frame/payload identities；
+  acquisition/window/stratum 设置；characterization/canary/confirmation
+  角色隔离；R3 码本（nbldpc_v13_r3_code_v1）、先验（QSC p=.20）、
+  max_iter=100 保持不变；分布漂移与无 eligible frame 停止规则；失败
+  原样保留、禁替换帧/调参/重跑。流程：冻结 → prepare → 主线程 review
+  → 单次 fresh execute → 只读 verify → fresh-confirmed / frozen
+  failure。证据收益最高、技术不确定性最低；只回答"R3 在 fresh 数据上
+  是否仍能纠错"，效率仍 f≈12。 [decision]
+- **P2**：独立效率研究门 `formal-nonbinary-ldpc-v17-multibit-structured-de-gate`
+  ——只做可行性门、不构造有限码。次序：Cohen/多位信道机制复现门 →
+  V13 已观测 MSB→LSB 单调失配映射为冻结信道模型 → 预注册少量边标签/
+  位面候选 → 执行前冻结收敛/效率/预算/replay 标准 → 一次执行。
+  PASS → 另开有限码 candidate change；FAIL → 冻结，不启动 V15/V16、
+  不扩大搜索。选它作第一效率路线：直接对应当前数据的位面不均匀性；
+  SC-LDPC 在 QSC 下负耦合增益、结构化信道下未否定，排第二；多边/
+  高维 λ 搜索空间大，排第三。 [decision]

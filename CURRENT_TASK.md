@@ -1,22 +1,48 @@
 # CURRENT_TASK.md
 
-## Current Task — V14 效率可行性门：FAIL（效率路线冻结）；V15/V16 不立项 (2026-08-15)
+## Current Task — 更新目标 P0 收口完成；P1 fresh acquisition、P2 V17 位面门推进中 (2026-08-15)
+
+按用户更新后的目标继续：
+
+- **P0（已完成，本轮）**：状态收口——V12 正式归档
+  （`openspec/changes/archive/2026-08-15-formal-nonbinary-ldpc-v12-real-micro-feasibility/`，
+  保留 `source_partition_blocked`、X01/X02 未执行、v2 prepare 包，
+  归档≠成功、不重开执行）；V15/V16 归档为 **aborted drafts**
+  （`...-aborted/`，未立项/前置门失败，delta spec 未合并）；修复全部
+  陈旧文档（本文件、V13/V14 tasks.md、AGENT_HANDOFF.md、记忆 §47/§48）；
+  V14 测试数字按原始记录统一（62/62 修复前 → 64/64 修复后）。
+  本地领先 `origin/main` 28 个提交；**push 待单独授权**。
+- **P1（立即优先）**：V13 R3 fresh acquisition——新开独立 OpenSpec
+  change `formal-nonbinary-ldpc-v13-r3-fresh-acquisition`（不复用 V12
+  执行身份、不自动宣称 promotion）；冻结新帧/载荷身份、采集/window/
+  stratum 设置、characterization/canary/confirmation 角色隔离、R3
+  码本/先验/迭代上限不变、漂移与无 eligible frame 停止规则、失败原样
+  保留；流程：冻结 → prepare → 主线程 review → 单次 fresh execute →
+  只读 verify → fresh-confirmed / frozen failure。
+- **P2**：独立效率研究门 `formal-nonbinary-ldpc-v17-multibit-structured-de-gate`
+  ——只做可行性门（Cohen/多位信道机制复现 → MSB→LSB 单调失配映射为
+  冻结信道模型 → 预注册少量边标签/位面候选 → 执行前冻结收敛/效率/
+  预算/replay 标准 → 一次执行）；PASS → 另开有限码 candidate change；
+  FAIL → 冻结，不启动 V15/V16，不扩大搜索。SC-LDPC 为第二候选，
+  多边/高维 λ 族为第三。
+
+---
+
+## Previous Task — V14 效率可行性门：FAIL（效率路线冻结）；V15/V16 不立项 (2026-08-15)
 
 V14 gate（`openspec/changes/formal-nonbinary-ldpc-v14-efficiency-gate/`）
 按冻结计划完成：Stage 0 机制回归 PASS、Stage 1 折叠验证全绿、Stage 2
 的 12 个 q=1024 冻结点（3 λ × m∈{15,16,17,18}）**全部非收敛**（最终
 base-q 熵 0.288–0.357，阈值 0.01 的 29–36 倍）→ **gate_state=fail**。
-E02 独立 gate review ACCEPT（FAIL 机械正确、纪律干净）。严格回放在途。
+E02 独立 gate review ACCEPT（FAIL 机械正确、纪律干净）；strict replay
+完成（科学文件 5/6 字节一致、manifest 仅 provenance 四字段差异，
+V10 先例）；C01 完毕（decision-log + 记忆 §49）。
 
 - 结论：冻结的普通不规则系综在 rate 0.93–0.94（f≤1.3 区间）上无 BP
   收敛点——效率路线按 V14 冻结纪律**终止**；V15/V16 提案/设计骨架
-  保留为"门未过、不立项"。
+  已于 2026-08-15 归档为 aborted drafts（见 P0）。
 - 路线状态：V13 R3（f≈12.1）仍是唯一经验证的精确纠错器；
-  fresh-confirmation-only 路线不受影响（待用户决定新采集）。
-- 待用户决定：效率路线的下一步方向（新 change + 新 DE 门先行）——
-  ① 非二元 SC-LDPC（阈值饱和）；② Cohen 2019 位面分解；③ 多边/高
-  维 λ 族；或接受冻结。另：V12 archive 决定、fresh acquisition 决定。
-- 下一项在途工作：V14 strict replay 完成 → 提交回放证据 → C01 完毕。
+  fresh-confirmation-only 路线不受影响（P1 已启动）。
 
 ---
 

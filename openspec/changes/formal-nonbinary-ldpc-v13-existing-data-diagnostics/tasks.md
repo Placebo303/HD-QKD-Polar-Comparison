@@ -104,7 +104,7 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   and max_iter=100 unchanged. New identity `nbldpc_v13_r3_code_v1`.
 - [ ] **V13-R4** mixed/inconclusive: not applicable (D05 = code).
 
-## Phase I — minimal implementation (R3 candidate; complete 2026-08-14, IT0-IT3 46/46)
+## Phase I — minimal implementation (R3 candidate; complete 2026-08-14, IT0-IT3 49/49)
 
 - [x] **V13-I01** Implement only the selected one-factor candidate under
   `comparison_bench/` (R3 codebook module `nbldpc_v13_r3_code_v1` + E01 lane);
@@ -134,17 +134,21 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   pre-registration, fake lifecycle + read-only verify, authorization tamper,
   Alice boundary, no-overwrite, frozen failure packages — total 27/27.)
 
-## Candidate implementation tests (before E01; future only)
+## Candidate implementation tests (before E01; done 2026-08-14, 49/49 total)
 
-- [ ] **V13-IT0** Compile/import, structural checks, and tiny math for the
-  single selected candidate.
-- [ ] **V13-IT1** Focused unit/boundary, Alice-isolation, role-ledger,
+- [x] **V13-IT0** Compile/import, structural checks, and tiny math for the
+  single selected candidate. (Done 2026-08-14: passed, included in 49/49.)
+- [x] **V13-IT1** Focused unit/boundary, Alice-isolation, role-ledger,
   hook-equivalence, no-overwrite, failure, and telemetry-tamper tests.
-- [ ] **V13-IT2** Complete fake candidate diagnostic lifecycle and decoder-free
-  replay in a fresh `workspace/nbldpc_v13_<uuid>/` root.
-- [ ] **V13-IT3** Scoped regression, frozen-directory checks, dirty-worktree
+  (Done 2026-08-14: passed, included in 49/49.)
+- [x] **V13-IT2** Complete fake candidate diagnostic lifecycle and decoder-free
+  replay in a fresh `workspace/nbldpc_v13_<uuid>/` root. (Done 2026-08-14:
+  passed, included in 49/49.)
+- [x] **V13-IT3** Scoped regression, frozen-directory checks, dirty-worktree
   scope review, output-root absence, and proof that no official qualification
-  output was created. E01 is blocked until IT0--IT3 pass.
+  output was created. (Done 2026-08-14: passed, included in 49/49;
+  `test_nonbinary_v13_diagnostics.py` = 49 test functions per original
+  test record.)
 
 ## Phase E — development screen (2026-08-14: E01 PASSED, E02 done)
 
@@ -162,7 +166,7 @@ beyond the 32 pre-registered D04 baseline frames is authorized.
   tuning or candidate substitution. (Done: the candidate was already frozen
   by the R3 amendment before E01; no tuning, no substitution occurred.)
 
-## Phase A — retrospective audit and closeout (2026-08-14: A01/A02 PASSED, C01 pending)
+## Phase A — retrospective audit and closeout (2026-08-14: A01/A02 PASSED, C01 COMPLETE)
 
 - [x] **V13-A01** Run the frozen candidate once on the 128 frame-identical V5
   control/audit frames. Use the suggested readiness gate (>=120/128 exact,

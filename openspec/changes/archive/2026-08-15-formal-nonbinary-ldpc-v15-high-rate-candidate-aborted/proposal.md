@@ -1,9 +1,9 @@
 # Proposal: formal-nonbinary-ldpc-v15-high-rate-candidate
 
-> 状态：DRAFT —— 本提案在 V14 门结果出来前起草；**立项前置条件是 V14
-> gate_state = pass**。门为 FAIL 时本 change 不立项（路线冻结声明见
-> V14-C01）。设计细节（选中的 λ/m 点、构造算法、资格门数值）在门结果
-> 与 freeze review 后定稿。
+> 状态：**ABORTED DRAFT（2026-08-15 归档）**——V14 gate_state=fail，
+> 本 change 未立项；delta spec 未合并、未构造任何有限码。原 DRAFT
+> 状态文字（V14 门 PASS 为立项前置条件）仍保留作为规划记录；未来
+> 重启需新 DE 门 PASS 后另开新 change（见 aborted_notice.md）。
 
 ## What
 
