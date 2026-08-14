@@ -37,12 +37,17 @@ V14-P06 独立 freeze review 进行中；review ACCEPT 前禁止任何执行。
 
 ## E — 执行（一次）
 
-- [ ] **V14-E01** 生产执行一次：Stage 0 复现 + Stage 1 验证 + Stage 2
-  判定（预算内）；证据落 `evidence/`；strict replay 一次。（进行中——
-  生产 gate 后台任务已启动。）
-- [ ] **V14-E02** 独立 gate review（reviewer-go 复核判定表与数值）。
+- [x] **V14-E01** 生产执行一次：Stage 0 复现 + Stage 1 验证 + Stage 2
+  判定（预算内）；证据落 `evidence/`；strict replay 一次。（Done
+  2026-08-15：Stage 0 PASS、Stage 1 全绿、Stage 2 12/12 非收敛 →
+  **gate_state=fail**；wall 87 min / RSS 577 MiB 预算内；strict replay
+  后台运行中。）
+- [x] **V14-E02** 独立 gate review（reviewer-go 复核判定表与数值）。
+  （Done 2026-08-15：**ACCEPT** —— FAIL 机械正确、纪律干净；冻结集/
+  种子/f 计算/预算/无事后改动逐项复核通过；两个非阻塞警告：回放证据
+  在途、manifest git_commit 语义。）
 
 ## C — 收尾
 
-- [ ] **V14-C01** decision-log 记录 gate 结论（pass→V15 立项边界；
-  fail→路线冻结声明）；记忆 triage。
+- [ ] **V14-C01** decision-log 记录 gate 结论（fail → 路线冻结声明；
+  pass 不适用）；记忆 triage；V15/V16 提案归档为"门未过、不立项"。
