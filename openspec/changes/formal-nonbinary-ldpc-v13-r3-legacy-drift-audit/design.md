@@ -60,6 +60,16 @@ Files:
 - `audit_report.json` — 三源汇总 + claim boundary + frozen binding
 - `audit_run_manifest.json` — 命令、git HEAD、parquet sha256、选择规则
 
+## 6.1 Full-data extension（2026-08-16 user-authorized continuation）
+
+- User asked to continue with the same three sources; the frozen 64-frame audit
+  is complete. A **full-data extension** is allowed under the same
+  `legacy_drift_audit` claim: select **all complete frames** per source
+  (frame_id ascending), same decoder invariants, same failure retention, same
+  additive package naming `v13r3_legacy_drift_audit_full_20260816`.
+- This does not change the 64-frame evidence package, does not alter the frozen
+  decoder, and does not grant fresh/promotion/qualification claims.
+
 ## 7. Stop rules（frozen）
 
 - 工具测试未通过 → 不执行生产。

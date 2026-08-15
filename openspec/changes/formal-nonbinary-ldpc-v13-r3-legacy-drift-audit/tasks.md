@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v13-r3-legacy-drift-audit
 
-Status: **COMPLETE — executed once 2026-08-16; verify OK; claim boundary legacy_drift_audit only**
+Status: **COMPLETE (64-frame) + full-data extension in progress — 2026-08-16**
 
 ## L — 规划与冻结
 
@@ -23,6 +23,12 @@ Status: **COMPLETE — executed once 2026-08-16; verify OK; claim boundary legac
 ## V — 只读验证
 
 - [x] **V01** `verify` 只读复核行数/选择规则/claim/frozen binding/文件字节不改动。（Done：verify OK。）
+
+## XF — Full-data extension
+
+- [~] **XF01** 启动全量审计（`--all-frames`，三源全部完整帧 8412 帧），后台执行。
+- [ ] **XF02** 全量完成后再执行只读 verify。
+- [ ] **XF03** 更新全量证据包、decision-log、CURRENT_TASK/AGENT_HANDOFF；本地提交。
 
 ## C — 收尾
 

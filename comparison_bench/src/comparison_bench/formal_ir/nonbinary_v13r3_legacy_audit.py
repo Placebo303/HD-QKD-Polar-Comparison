@@ -148,9 +148,14 @@ def validate_pairs_table(parquet: Any) -> dict[str, Any]:
             "sha256": _sha_bytes(Path(parquet).read_bytes())}
 
 
-def selected_frame_ids(source: Mapping[str, Any], count: int = FRAMES_PER_SOURCE) -> list[int]:
-    """Frozen selection: first ``count`` complete frames by ascending frame_id."""
+def selected_frame_ids(source: Mapping[str, Any], count: int | None = FRAMES_PER_SOURCE) -> list[int]:
+    """Frozen selection: first ``count`` complete frames by ascending frame_id.
+
+    ``count=None`` selects **all** complete frames (full-data extension).
+    """
     ids = list(source.get("frame_ids", []))
+    if count is None:
+        return ids
     if len(ids) < count:
         raise ValueError(f"insufficient legacy frames: {len(ids)} < {count}")
     return ids[:count]
@@ -235,7 +240,7 @@ def _outcome_row(source_tag: str, frame: Mapping[str, Any], result: Mapping[str,
 
 def _report_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
                 test_only: bool, command: str, manifest_sha256: str,
-                manifest_id: str) -> dict[str, Any]:
+                manifest_id: str, frames_per_source: int | None) -> dict[str, Any]:
     rows = [row for src in sources for row in src["outcome_rows"]]
     status_counts: dict[str, int] = {}
     for row in rows:
@@ -280,13 +285,15 @@ def _report_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
             "manifest_id": manifest_id,
             "q": Q, "n": N, "m": M, "p": P, "max_iter": MAX_ITER,
         },
-        "selection_rule": SELECTION_RULE,
-        "frames_per_source": FRAMES_PER_SOURCE,
+        "selection_rule": SELECTION_RULE + ("" if frames_per_source is not None
+                                         else "; full-data extension: all complete frames"),
+        "frames_per_source": frames_per_source,
         "attempted_frames": len(rows),
         "exact_correct_frames": exact_total,
         "status_counts": status_counts,
         "sources": source_records,
-        "verdict": "legacy_drift_audit_completed" if len(rows) == len(sources) * FRAMES_PER_SOURCE
+        "verdict": "legacy_drift_audit_completed"
+                   if len(rows) == sum(len(src["frames"]) for src in sources)
                    else "invalid_audit_execution",
         "command": command,
         "audit_run_manifest_sha256": manifest_sha256,
@@ -295,7 +302,8 @@ def _report_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
 
 def _manifest_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
                   test_only: bool, command: str, artifact_index: Mapping[str, Any],
-                  release_head: str | None, manifest_id: str) -> dict[str, Any]:
+                  release_head: str | None, manifest_id: str,
+                  frames_per_source: int | None) -> dict[str, Any]:
     comparison_head = _git_head(_repo_root())
     return {
         "schema": SCHEMA_MANIFEST_TEST if test_only else SCHEMA_MANIFEST,
@@ -303,8 +311,9 @@ def _manifest_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
         "created_at_utc": _now(),
         "command": command,
         "claim_boundary": CLAIM_BOUNDARY,
-        "selection_rule": SELECTION_RULE,
-        "frames_per_source": FRAMES_PER_SOURCE,
+        "selection_rule": SELECTION_RULE + ("" if frames_per_source is not None
+                                         else "; full-data extension: all complete frames"),
+        "frames_per_source": frames_per_source,
         "sources": [{
             "source_tag": str(src["source_tag"]),
             "parquet": str(src["parquet"]),
@@ -327,6 +336,7 @@ def _manifest_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
 def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
               run_id: str = RUN_ID, command: str = "",
               _test_only: bool = False, production_authorized: bool = False,
+              all_frames: bool = False,
               decode_fn: Callable[[Mapping[str, Any], Mapping[str, Any], Any],
                                   dict[str, Any]] | None = None) -> dict[str, Any]:
     """Execute the legacy drift audit once and write the additive package.
@@ -350,7 +360,7 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
             parquet = Path(path).resolve()
             source = validate_pairs_table(parquet)
             tag = parquet.parent.name
-            ids = selected_frame_ids(source, FRAMES_PER_SOURCE)
+            ids = selected_frame_ids(source, None if all_frames else FRAMES_PER_SOURCE)
             df = _read_pairs(parquet)
             frames = _frames_for_ids(df, ids)
             sources.append({"source_tag": tag, "parquet": parquet,
@@ -428,15 +438,16 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
         }
         release_root = Path("D:/Code/HD-QKD_Polar_Release")
         release_head = _git_head(release_root) if release_root.exists() else None
+        frames_per_source = None if all_frames else FRAMES_PER_SOURCE
         manifest_doc = _manifest_doc(run_id, sources, _test_only, command,
-                                     artifact_index, release_head, manifest_id)
+                                     artifact_index, release_head, manifest_id,
+                                     frames_per_source)
         manifest_path = out / ARTIFACTS[3]
         _put_exclusive(manifest_path, _compact(manifest_doc))
         written.append(manifest_path)
         report_doc = _report_doc(run_id, sources, _test_only, command,
-                                 manifest_doc.get("_self_sha256") if False else
                                  _sha_bytes(manifest_path.read_bytes()),
-                                 manifest_id)
+                                 manifest_id, frames_per_source)
         report_path = out / ARTIFACTS[2]
         _put_exclusive(report_path, _compact(report_doc))
         written.append(report_path)
@@ -457,7 +468,7 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
 
 
 def _verify_outcomes(path: Path, manifest: Mapping[str, Any]) -> dict[str, Any]:
-    expected = int(manifest["frames_per_source"]) * len(manifest["sources"])
+    expected = sum(len(src["selected_frame_ids"]) for src in manifest["sources"])
     rows = list(csv.DictReader(path.open("r", encoding="utf-8", newline="")))
     selected = {str(src["source_tag"]): [int(i) for i in src["selected_frame_ids"]]
                 for src in manifest["sources"]}

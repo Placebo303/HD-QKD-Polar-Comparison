@@ -30,6 +30,9 @@ def main() -> int:
                         help="explicit main-thread authorization for production execute")
     parser.add_argument("--production", action="store_true",
                         help="explicit production-lane flag for execute")
+    parser.add_argument("--all-frames", action="store_true",
+                        help="select all complete frames per source "
+                             "(full-data extension; default is first 64)")
     args = parser.parse_args()
 
     if args.action == "verify":
@@ -66,7 +69,8 @@ def main() -> int:
     try:
         result = core.run_audit(out, parquet_paths=args.parquet,
                                 run_id=args.run_id, command=" ".join(sys.argv),
-                                production_authorized=True)
+                                production_authorized=True,
+                                all_frames=args.all_frames)
     except Exception as exc:
         print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
