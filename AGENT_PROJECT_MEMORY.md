@@ -2055,3 +2055,12 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_20260816/`
 - 边界：不构成 fresh-confirmed / promotion / qualification；P1
   `no_eligible_frames` 与 P2 V17 `mechanism_unverified` 均不变。push 待授权。
+
+## 55. V13-R3 legacy drift audit——全量 8412 帧完成 (2026-08-16)
+
+- 在 192 帧审计后，用户要求继续；使用 `--all-frames --chunks 8` 并行执行全量。
+- 结果：8412 帧中 **8284 exact_correct**、**128 decode_failed**（iteration_limit）、
+  0 exact_mismatch。分源：2729/2767、1970/2000、3585/3645。
+- 8 chunk 各自 verify OK；合并包：
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_full_20260816/`
+- 边界：legacy_drift_audit only；不构成 fresh/promotion/qualification。

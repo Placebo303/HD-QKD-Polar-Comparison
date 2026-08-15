@@ -1,0 +1,80 @@
+{
+  "chunk_count": 8,
+  "chunk_directories": [
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk0",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk1",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk2",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk3",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk4",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk5",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk6",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk7"
+  ],
+  "claim_boundary": "legacy_drift_audit",
+  "data_intake_state": "data_intake_rejected_for_fresh_confirmation",
+  "decoder_binding": {
+    "codebook": "nbldpc_v13_r3_code_v1",
+    "m": 170,
+    "manifest_id": "857d25a4ca0a23fd759cea1428e2e36ac544679101c64908fabd2743f6a14d7f",
+    "max_iter": 100,
+    "n": 256,
+    "p": 0.2,
+    "q": 1024
+  },
+  "drift_precheck_state": "drift_exceeded",
+  "exact_correct_frames": 8284,
+  "exact_mismatch_frames": 0,
+  "frames_attempted": 8412,
+  "fresh_confirmed": false,
+  "method": "nbldpc_v13_r3_legacy_drift_audit",
+  "promotion": false,
+  "qualification": false,
+  "run_id": "v13r3_legacy_drift_audit_full_20260816",
+  "schema": "nbldpc_v13r3_legacy_drift_audit_full_report_v1",
+  "sources": [
+    {
+      "exact_correct": 2729,
+      "exact_mismatch": 0,
+      "frames_attempted": 2767,
+      "raw_ser_max": 0.335938,
+      "raw_ser_mean": 0.25447,
+      "raw_ser_min": 0.164062,
+      "source_tag": "type2_1p5M_20260121_183806",
+      "status_counts": {
+        "decode_failed": 38,
+        "syndrome_consistent": 2729
+      }
+    },
+    {
+      "exact_correct": 1970,
+      "exact_mismatch": 0,
+      "frames_attempted": 2000,
+      "raw_ser_max": 0.335938,
+      "raw_ser_mean": 0.239779,
+      "raw_ser_min": 0.144531,
+      "source_tag": "type2_1M_20260121_184040",
+      "status_counts": {
+        "decode_failed": 30,
+        "syndrome_consistent": 1970
+      }
+    },
+    {
+      "exact_correct": 3585,
+      "exact_mismatch": 0,
+      "frames_attempted": 3645,
+      "raw_ser_max": 0.355469,
+      "raw_ser_mean": 0.255741,
+      "raw_ser_min": 0.171875,
+      "source_tag": "type2_2M_20260121_183657",
+      "status_counts": {
+        "decode_failed": 60,
+        "syndrome_consistent": 3585
+      }
+    }
+  ],
+  "status_counts": {
+    "decode_failed": 128,
+    "syndrome_consistent": 8284
+  },
+  "verdict": "legacy_drift_audit_completed"
+}

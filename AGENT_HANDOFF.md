@@ -4,7 +4,7 @@ Last verified: **2026-08-16**
 
 ## Current State — V13-R3 legacy drift audit：用户决定用 2026-01-21 三源继续，执行完成 (2026-08-16)
 
-**状态：目标完成。** 64 帧 legacy audit 已完成并 verify OK；全量后台任务继续运行，完成后再补充。
+**状态：目标完成。** 64 帧 legacy audit 已完成并 verify OK；全量 8412 帧审计也已并行完成（8284 exact_correct / 128 decode_failed / 0 mismatch），合并证据包已生成。
 
 - 用户决定：这些是之前采集的数据，继续使用三份 `2026-01-21` Type2 源运行。
 - 新 change：`formal-nonbinary-ldpc-v13-r3-legacy-drift-audit`，claim 仅

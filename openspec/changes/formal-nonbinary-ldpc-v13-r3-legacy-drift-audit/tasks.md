@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v13-r3-legacy-drift-audit
 
-Status: **COMPLETE (64-frame) + full-data extension in progress — 2026-08-16**
+Status: **COMPLETE — 64-frame + full-data extension executed 2026-08-16**
 
 ## L — 规划与冻结
 
@@ -26,9 +26,9 @@ Status: **COMPLETE (64-frame) + full-data extension in progress — 2026-08-16**
 
 ## XF — Full-data extension
 
-- [~] **XF01** 启动全量审计（`--all-frames`，三源全部完整帧 8412 帧），后台执行。
-- [ ] **XF02** 全量完成后再执行只读 verify。
-- [ ] **XF03** 更新全量证据包、decision-log、CURRENT_TASK/AGENT_HANDOFF；本地提交。
+- [x] **XF01** 启动全量审计（`--all-frames`，三源全部完整帧 8412 帧），以 8 chunk 并行执行完成。
+- [x] **XF02** 全量完成后再执行只读 verify。（8/8 chunk verify OK，合并 8412 帧。）
+- [x] **XF03** 更新全量证据包、decision-log、CURRENT_TASK/AGENT_HANDOFF；本地提交。
 
 ## C — 收尾
 

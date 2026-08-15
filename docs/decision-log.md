@@ -2218,3 +2218,19 @@ D2 烟测 `raw_ser=0.254663`，远超 V13 D01 参考 0.0771，已触发漂移门
 `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_20260816/`。
 
 **Consequences**: 本结果仅证明 R3 候选在已知漂移 legacy 数据上 188/192 精确纠错，不构成 fresh-confirmed / promotion / qualification；P1 `no_eligible_frames` 冻结终态不变；P2 V17 `mechanism_unverified` 不变。push 仍待用户单独授权。
+
+### 2026-08-16: V13-R3 legacy drift audit——全量 8412 帧完成，8284 exact_correct / 128 decode_failed
+
+**Decision**: 用户要求继续使用三份 `2026-01-21` legacy 数据；在 192 帧审计后进一步执行全量 8412 帧审计。采用 8 chunk 并行（`--all-frames --chunks 8`），每个 chunk 独立 additive 包，claim boundary 仍仅 `legacy_drift_audit`。
+
+**Result**: 8/8 chunk verify OK；合并全量结果：
+- 总帧数：8412
+- exact_correct：**8284**
+- decode_failed：**128**（均为 iteration_limit）
+- exact_mismatch：0
+- 分源：1p5M 2729/2767，1M 1970/2000，2M 3585/3645
+- raw SER 均值：0.240–0.256（V13 D01 参考 0.0771）
+
+**Evidence**: 合并包 `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_full_20260816/` + 8 个 chunk 包。
+
+**Consequences**: 仍不构成 fresh-confirmed / promotion / qualification；P1 `no_eligible_frames` 与 P2 V17 `mechanism_unverified` 均不变。push 待用户单独授权。

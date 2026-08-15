@@ -1,0 +1,26 @@
+{
+  "chunk_count": 8,
+  "chunk_directories": [
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk0",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk1",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk2",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk3",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk4",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk5",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk6",
+    "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3_legacy_drift_audit_full_20260816_chunk7"
+  ],
+  "claim_boundary": "legacy_drift_audit",
+  "merged_artifacts": {
+    "audit_outcomes.csv": {
+      "bytes": 683264,
+      "sha256": "7810d81e3934a25ab760230d81937c2454c46b44855cec49669afd55fae10de9"
+    },
+    "decoder_telemetry.jsonl": {
+      "bytes": 23346998,
+      "sha256": "efcd75d000c31f89f6d437d96ce1ac30965350df8d59e6f39015690abf5896a3"
+    }
+  },
+  "run_id": "v13r3_legacy_drift_audit_full_20260816",
+  "schema": "nbldpc_v13r3_legacy_drift_audit_full_manifest_v1"
+}
