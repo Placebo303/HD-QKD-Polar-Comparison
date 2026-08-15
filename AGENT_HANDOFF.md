@@ -4,6 +4,8 @@ Last verified: **2026-08-16**
 
 ## Current State — V13-R3 fresh 数据准入已拒绝；D1–D5 已执行，D5 drift_exceeded；P/E/V 不进入 (2026-08-16)
 
+**状态：本目标已完成。** 安全检查（unittest 5/5、smoke_test、compileall）也已通过。
+
 - **D0（已完成）**：`2026-01-21` 三源判定为
   `data_intake_rejected_for_fresh_confirmation`。
   证据：`comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_intake_20260816/intake_decision.json`。

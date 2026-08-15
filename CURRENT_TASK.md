@@ -3,6 +3,10 @@
 
 ## Current Task — V13-R3 fresh 数据准入已拒绝；D1–D5 已执行，D5 drift_exceeded；P/E/V 不进入 (2026-08-16)
 
+**状态：本目标已完成。** D1–D5 已按文档执行并验证；D5 三源 `drift_exceeded`，
+P/E/V 不进入。另已运行 README/RUN_COMMANDS 中的安全检查：`unittest` 5/5 通过、
+`smoke_test` 通过、`compileall` 通过。
+
 按用户更新后的目标（P0→P1→P2）继续，但 **2026-01-21 三源已通过 D0 判定为
 `data_intake_rejected_for_fresh_confirmation`**，不得作为 fresh 证据进入 P/E/V。
 
