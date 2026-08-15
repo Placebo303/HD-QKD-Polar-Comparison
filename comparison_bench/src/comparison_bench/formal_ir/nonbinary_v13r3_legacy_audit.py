@@ -186,6 +186,36 @@ def _decode_frame(frame: Mapping[str, Any], manifest: Mapping[str, Any],
     return r3.decode_r3_frame(frame["bob"], syndrome, manifest, matrix, hook=True)
 
 
+def _decode_frame_prebuilt(frame: Mapping[str, Any], manifest: Mapping[str, Any],
+                           matrix: Any) -> dict[str, Any]:
+    """Production decode using the already-built/verified R3 matrix.
+
+    This mirrors ``nonbinary_v13_r3_candidate.decode_r3_frame`` exactly but
+    skips the per-frame ``build_r3_codebook()`` reconstruction.  The codebook
+    is verified once by the caller; the decoding math is the same frozen
+    flooding FFT-QSPA mirror (``_hooked_decode_flooding``).
+    """
+    from .nonbinary_field import GF2mField
+    from .nonbinary_qspa import (_declared_dense_bytes, _symbols,
+                                 nonbinary_syndrome, qsc_symbol_priors)
+    from .nonbinary_v13_diagnostics import (_hooked_decode_flooding, _matrix_edges,
+                                            _telemetry_summary)
+    field = GF2mField.create(Q)
+    syndrome = nonbinary_syndrome(matrix, frame["alice"], field)
+    bob = _symbols(frame["bob"], Q, expected=N)
+    disclosed = _symbols(syndrome, Q, expected=M)
+    priors = qsc_symbol_priors(bob, Q, P)
+    checks, variables = _matrix_edges(matrix)
+    edge_count = sum(map(len, checks))
+    declared = _declared_dense_bytes(N, edge_count, Q)
+    codebook_id = str(manifest["canonical_sha256"])
+    result, records, decoded_words = _hooked_decode_flooding(
+        bob, disclosed, matrix, checks, variables, priors, field,
+        M, codebook_id, declared, max_iter=int(MAX_ITER))
+    return {"result": result,
+            "telemetry": _telemetry_summary(records, result, decoded_words)}
+
+
 def _outcome_row(source_tag: str, frame: Mapping[str, Any], result: Mapping[str, Any]) -> dict[str, Any]:
     status = str(result.get("status", "unclassified"))
     reason: str
@@ -349,7 +379,7 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
         for src in sources:
             for frame in src["frames"]:
                 try:
-                    hook = (decode_fn or _decode_frame)(frame, manifest, matrix)
+                    hook = (decode_fn or _decode_frame_prebuilt)(frame, manifest, matrix)
                     result = hook.get("result", hook) if isinstance(hook, dict) else hook
                     if not isinstance(result, dict):
                         raise TypeError("decode callback must return a result dict")
