@@ -337,6 +337,7 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
               run_id: str = RUN_ID, command: str = "",
               _test_only: bool = False, production_authorized: bool = False,
               all_frames: bool = False,
+              progress_every: int = 0,
               decode_fn: Callable[[Mapping[str, Any], Mapping[str, Any], Any],
                                   dict[str, Any]] | None = None) -> dict[str, Any]:
     """Execute the legacy drift audit once and write the additive package.
@@ -386,6 +387,7 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
             }, None
             manifest_id = str(manifest["canonical_sha256"])
 
+        decoded_total = 0
         for src in sources:
             for frame in src["frames"]:
                 try:
@@ -413,6 +415,12 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
                     "iterations": row["iterations"],
                     "telemetry": telemetry,
                 })
+                decoded_total += 1
+                if progress_every and decoded_total % progress_every == 0:
+                    print(json.dumps({"progress": decoded_total,
+                                      "source_tag": str(src["source_tag"]),
+                                      "frame_id": int(frame["frame_id"])},
+                                     sort_keys=True), flush=True)
 
         # Write outcomes CSV and telemetry JSONL, then bind them in the manifest.
         outcomes_path = out / ARTIFACTS[0]

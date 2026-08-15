@@ -33,6 +33,8 @@ def main() -> int:
     parser.add_argument("--all-frames", action="store_true",
                         help="select all complete frames per source "
                              "(full-data extension; default is first 64)")
+    parser.add_argument("--progress-every", type=int, default=0,
+                        help="print progress every N frames (0 disables)")
     args = parser.parse_args()
 
     if args.action == "verify":
@@ -70,7 +72,8 @@ def main() -> int:
         result = core.run_audit(out, parquet_paths=args.parquet,
                                 run_id=args.run_id, command=" ".join(sys.argv),
                                 production_authorized=True,
-                                all_frames=args.all_frames)
+                                all_frames=args.all_frames,
+                                progress_every=args.progress_every)
     except Exception as exc:
         print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
