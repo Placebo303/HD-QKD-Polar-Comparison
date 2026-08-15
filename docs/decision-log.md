@@ -2134,3 +2134,42 @@ f≤1.3/预算（3 GiB/24h）/execute-once+回放 → 一次执行。PASS → �
 **Consequences**: 两个新 change 的 tasks P07 均为独立 freeze review；
 review 结果决定是否进入 PREP/实现阶段。push（30 个本地领先提交）
 仍待用户单独授权。
+
+---
+
+### 2026-08-16: V17 多位结构化 DE 门——gate_state=mechanism_unverified（FAIL 类），位面/边标签效率路线冻结
+
+**Decision**: V17 生产 gate 执行一次（wall 7026.6 s，peak RSS 541 MB
+≤ 3 GiB/24h 预算），strict replay 5/5 字节一致，E02 独立 gate review
+**ACCEPT（零 blockers）**。终态 **`mechanism_unverified`**（FAIL 类）：
+- **Stage 0 锚点 A（q=4 退化 p1=p2 内部一致性）失败**：
+  bit-plane 分解 DE 阈值 0.0525 vs 符号级 QSC DE 阈值 0.0600，
+  Δ=0.0075 > 容差 0.005 → `mechanism_verified=false`。方向性成立：
+  位面分解在 p=0.055 起 joint 未收敛（熵跃升 0.95），符号级至
+  p=0.060 仍收敛（0.0625 才翻转）——同一系综/seed/n_samples=1e5/
+  max_iter=150 下位面分解阈值严格低于符号级阈值，Cohen 式
+  位面分解机制未在冻结判据内复现。
+- **Stage 0 锚点 B（文献交叉）通过**：computed 0.0600 vs published
+  0.069，|δ|=0.009 ≤ 0.012（V14 冻结常量逐字一致）。
+- **Stage 1 模型构建成功**：V13 D01 只读聚合 → 10 个 MSB-first
+  位面误码率（3.05e-5→3.75e-2），product-of-marginals 联合近似
+  （显式声明保守假设），熵 0.549955 bits/symbol。
+- **Stage 2 诊断（diagnostic_only）**：3 候选（bitplane/edgelabel/
+  planeweight）× m∈{15,16,17,18} 全 12 点 **全部未收敛**，
+  f_achieved∈[1.065,1.279] 均 < f_limit 1.3 但收敛为绑定判据；
+  无 pass_point、无 closest/rerun/调参痕迹。
+
+**科学解读（规划层，非新结论）**: 门冻结发生在机制层而非系综层——
+Cohen 2019 多位位面分解机制未通过内部一致性锚点，故 Stage 2 的
+12 个诊断点不构成效率结论（仅记录，不引用为证据）。这与 V14
+（普通不规则系综在 rate 0.93–0.94 无 BP 收敛点）共同说明：位面/
+边标签路线在该冻结判据下不可验证，不进入有限码。
+
+**Consequences（冻结纪律的终态）**: 位面/边标签效率路线按 V17 纪律
+**冻结**；不启动 V15/V16、不扩大搜索、无"最接近"续行、无 rerun/
+调参。效率路线的下一步只能由用户决定另开新 change（候选方向：
+② SC-LDPC——QSC 下负耦合、结构化信道下未否定，仍排第二；
+③ 多边/高维 λ 族，排第三；或用户指定的其他方向）。本门无 FER/
+资格/效率实测结论；P1（V13 R3 fresh acquisition）独立推进不受
+影响，仍阻塞于 fresh 数据（用户提供后重新 prepare 即可）。
+证据：change `evidence/` 6 文件（5 科学 + replay 记账）。

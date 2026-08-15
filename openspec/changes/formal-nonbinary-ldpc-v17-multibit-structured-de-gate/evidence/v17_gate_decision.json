@@ -1,0 +1,97 @@
+{
+  "diagnostic_only": true,
+  "exists_converged_point": false,
+  "f_limit": 1.3,
+  "gate_state": "mechanism_unverified",
+  "pass_point": null,
+  "points_summary": [
+    {
+      "candidate": "bitplane",
+      "converged": false,
+      "f_achieved": 1.0654279953893333,
+      "final_entropy": 0.9996823292856063,
+      "m": 15
+    },
+    {
+      "candidate": "bitplane",
+      "converged": false,
+      "f_achieved": 1.1364565284152888,
+      "final_entropy": 0.9994742040788895,
+      "m": 16
+    },
+    {
+      "candidate": "bitplane",
+      "converged": false,
+      "f_achieved": 1.2074850614412445,
+      "final_entropy": 0.9992011738285659,
+      "m": 17
+    },
+    {
+      "candidate": "bitplane",
+      "converged": false,
+      "f_achieved": 1.2785135944672,
+      "final_entropy": 0.9988186800172766,
+      "m": 18
+    },
+    {
+      "candidate": "edgelabel",
+      "converged": false,
+      "f_achieved": 1.0654279953893333,
+      "final_entropy": 0.34705389852992763,
+      "m": 15
+    },
+    {
+      "candidate": "edgelabel",
+      "converged": false,
+      "f_achieved": 1.1364565284152888,
+      "final_entropy": 0.3241488211160807,
+      "m": 16
+    },
+    {
+      "candidate": "edgelabel",
+      "converged": false,
+      "f_achieved": 1.2074850614412445,
+      "final_entropy": 0.3206000396611102,
+      "m": 17
+    },
+    {
+      "candidate": "edgelabel",
+      "converged": false,
+      "f_achieved": 1.2785135944672,
+      "final_entropy": 0.32313928306420764,
+      "m": 18
+    },
+    {
+      "candidate": "planeweight",
+      "converged": false,
+      "f_achieved": 1.0654279953893333,
+      "final_entropy": 0.9644141263299836,
+      "m": 15
+    },
+    {
+      "candidate": "planeweight",
+      "converged": false,
+      "f_achieved": 1.1364565284152888,
+      "final_entropy": 0.9626258739240159,
+      "m": 16
+    },
+    {
+      "candidate": "planeweight",
+      "converged": false,
+      "f_achieved": 1.2074850614412445,
+      "final_entropy": 0.9517299687220673,
+      "m": 17
+    },
+    {
+      "candidate": "planeweight",
+      "converged": false,
+      "f_achieved": 1.2785135944672,
+      "final_entropy": 0.9356313831270024,
+      "m": 18
+    }
+  ],
+  "schema": "nbldpc_v17_gate_decision_v1",
+  "stage0_mechanism_verified": false,
+  "stage1_model_built": true,
+  "stage2_point_count": 12
+}

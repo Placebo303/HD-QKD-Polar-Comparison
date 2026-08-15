@@ -1,0 +1,11 @@
+{
+  "evidence_files": 5,
+  "evidence_root": "openspec\\changes\\formal-nonbinary-ldpc-v17-multibit-structured-de-gate\\evidence",
+  "matched": 5,
+  "mismatches": [],
+  "missing_in_replay": [],
+  "ok": true,
+  "replay_only": [],
+  "replay_root": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v17_replay_20260816",
+  "schema": "nbldpc_v17_replay_evidence_v1"
+}

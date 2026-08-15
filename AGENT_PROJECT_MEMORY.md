@@ -1991,3 +1991,33 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - 提交链：fb6e579d（P0）→ 240e3a2e（P1/P2 立项）→ 3a6d2990（决策日志）
   → 037ee5a6（freeze ACCEPT+amendment）→ 757464f4（W1 完全关闭）→
   d801427c（P1/P2 实现）→ 17542dc4（P1 prepare 包）。 [repo-observed]
+
+## 52. P2 V17 门生产执行完成：mechanism_unverified（FAIL 类）(2026-08-16)
+
+- **生产 gate 执行一次**（后台任务，wall 7026.6 s，peak RSS 541 MB
+  ≤ 3 GiB/24h）→ **`gate_state=mechanism_unverified`**。Stage 0
+  锚点 A（q=4 退化 p1=p2 内部一致性）**失败**：bit-plane 分解阈值
+  0.0525 vs 符号级 0.0600，Δ=0.0075 > 0.005（方向性成立：位面分解
+  p=0.055 起 joint 未收敛，符号级至 0.060 仍收敛）；锚点 B（文献
+  交叉）通过：|0.060−0.069|=0.009 ≤ 0.012。Stage 1 模型构建成功
+  （D01 只读聚合，10 位面误码率 3.05e-5→3.75e-2 MSB→LSB 单调，
+  product-of-marginals 显式保守近似，熵 0.549955）。Stage 2 诊断
+  12/12 未收敛（bitplane/edgelabel/planeweight × m∈{15..18}，
+  f_achieved∈[1.065,1.279] 全 < f_limit 1.3，收敛为绑定判据），
+  diagnostic_only=true，无 pass_point。
+- **strict replay 5/5 字节一致**（`workspace/v17_replay_20260816/`
+  副本 + `replay` 动作 ok=true，`v17_replay_evidence.json` 记账）；
+  **E02 独立 gate review ACCEPT（零 blockers）**（G1–G7 全过：
+  判定链/数值/纪律/预算/schema/回放/执行器范围）。C01 收尾完成：
+  decision-log 2026-08-16 条目 + 记忆 §52 + tasks.md I/E/C 全部
+  checked + CURRENT_TASK/AGENT_HANDOFF 同步（本地提交）。 [decision]
+- **冻结纪律生效**：位面/边标签效率路线冻结；不启动 V15/V16、不
+  扩大搜索、无"最接近"续行、无 rerun/调参；Stage 2 诊断点不构成
+  效率结论。效率路线下一步只能由用户决定另开新 change（② SC-LDPC
+  仍排第二——QSC 负耦合、结构化未否定；③ 多边/高维 λ 第三）。
+  P1（V13 R3 fresh acquisition）独立推进不受影响，仍阻塞于 fresh
+  数据（用户提供后重新 prepare 即可）。 [decision]
+- 证据：`openspec/changes/formal-nonbinary-ldpc-v17-multibit-structured-de-gate/evidence/`
+  6 文件（v17_stage0 / v17_multibit_channel_model / v17_stage2 /
+  v17_gate_decision / v17_gate_manifest + v17_replay_evidence 记账）。
+  本地领先 `origin/main` 36 个提交；push 待单独授权。 [repo-observed]

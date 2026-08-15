@@ -1,0 +1,52 @@
+{
+  "bit_planes": 10,
+  "diagnostic_only": true,
+  "entropy_bits": 0.5499550439219351,
+  "fit_source": "v13 d01 characterization aggregate (read-only)",
+  "frames_used": 128,
+  "joint_structure": "independent_bit_plane_conservative",
+  "joint_structure_form": "product_of_per_plane_marginals",
+  "joint_structure_note": "per-plane error probabilities are the V13 D01 aggregate MSB-first bit-plane mismatch rates; joint bit-plane error statistics are NOT persisted anywhere in the D01 package (aggregate-only, per-position data not persisted), so per frozen design section 3 the model DECLARES the conservative independent approximation: the joint symbol-difference distribution is the product of the per-plane marginals. This is an explicit declared modeling assumption, never a fitted joint model and never fabricated from absent data.",
+  "mapping": "gray",
+  "per_bit_plane_entropy_bits": [
+    0.000501790558681815,
+    0.001763013547630436,
+    0.0047085455356067245,
+    0.010867990073523567,
+    0.013868830684831145,
+    0.02523295851734631,
+    0.04216263992330102,
+    0.07616897019570905,
+    0.14394177435212188,
+    0.2307385305331831
+  ],
+  "per_bit_plane_error_probability_msb_first": [
+    3.0517578125e-05,
+    0.0001220703125,
+    0.0003662109375,
+    0.000946044921875,
+    0.001251220703125,
+    0.00250244140625,
+    0.00457763671875,
+    0.009307861328125,
+    0.02044677734375,
+    0.037506103515625
+  ],
+  "q": 1024,
+  "retrospective_reuse": true,
+  "run_id": "v17_multibit",
+  "schema": "nbldpc_v17_multibit_channel_model_v1",
+  "source_fields": {
+    "empirical_conditional_entropy_bits_per_symbol": 0.5469729299832656,
+    "empirical_conditional_entropy_bits_per_symbol_src": "aggregates.conditional_entropy.empirical_conditional_entropy_bits_per_symbol",
+    "empirical_ser": 0.077056884765625,
+    "empirical_ser_src": "aggregates.qsc_p20.empirical_ser",
+    "field_domain": "aggregates.domain",
+    "field_mismatch_rate": "aggregates.bit_plane_mismatch.mismatch_rate",
+    "joint_statistics_persisted": false,
+    "run_id": "v13_d01_20260814",
+    "schema": "nbldpc_v13_channel_diagnostics_v1"
+  },
+  "source_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13_d01_20260814\\channel_diagnostics.json",
+  "symbols_used": 32768
+}

@@ -1,12 +1,12 @@
 # AGENT_HANDOFF.md
 
-Last verified: **2026-08-15**
+Last verified: **2026-08-16**
 
-## Current State — P0 收口完成；P1 fresh acquisition / P2 V17 位面门 (2026-08-15)
+## Current State — P2 V17 门冻结终态 mechanism_unverified；P1 阻塞于 fresh 数据 (2026-08-16)
 
 按用户更新后的目标（P0→P1→P2）继续：
 
-- **P0 状态收口（2026-08-15 完成，仅 housekeeping，无科学执行）**：
+- **P0（2026-08-15 完成，仅 housekeeping，无科学执行）**：
   - V12 已正式归档 →
     `openspec/changes/archive/2026-08-15-formal-nonbinary-ldpc-v12-real-micro-feasibility/`
     （保留 `source_partition_blocked`、X01/X02 未执行、v2 prepare 包；
@@ -18,18 +18,28 @@ Last verified: **2026-08-15**
   - 陈旧文档已修复：CURRENT_TASK.md、V14 tasks.md（头部状态/测试数字
     62/62→64/64/回放完成）、V13 tasks.md（C01 COMPLETE、IT0-IT3 49/49）、
     记忆 §47/§48。
-  - 本地领先 `origin/main` **28 个提交**；push 待用户单独授权。
-- **P1（立即优先）**: V13 R3 fresh acquisition。新开独立 OpenSpec change
-  `formal-nonbinary-ldpc-v13-r3-fresh-acquisition`（不复用 V12 执行身份、
-  不自动宣称 promotion）。流程：冻结新帧/载荷身份与角色 → prepare →
-  主线程独立 review → 单次 fresh execute → 一次只读 verify →
-  fresh-confirmed / frozen failure。R3 码本/先验/迭代上限保持不变；
-  含漂移与无 eligible frame 停止规则；失败原样保留、禁替换帧/调参/重跑。
-- **P2**: 独立效率研究门 `formal-nonbinary-ldpc-v17-multibit-structured-de-gate`
-  ——只做可行性门（Cohen/多位信道机制复现 → MSB→LSB 单调失配映射为
-  冻结信道模型 → 预注册少量边标签/位面候选 → 冻结收敛/效率/预算/replay
-  标准 → 一次执行）；PASS → 另开有限码 candidate change；FAIL → 冻结，
-  不启动 V15/V16，不扩大搜索。
+  - 本地领先 `origin/main` **36 个提交**；push 待用户单独授权。
+- **P1（立即优先，冻结终态，阻塞于数据）**: V13 R3 fresh acquisition。
+  change `formal-nonbinary-ldpc-v13-r3-fresh-acquisition` 冻结 + freeze
+  review ACCEPT；PREP 实现（FA1–FA5，19 测试）+ 生产 prepare 执行一次
+  → **`no_eligible_frames`**（`D:\Data` 无 fresh 10 dB Type-II 帧数据
+  源，合法冻结结果；包
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_prepare_20260815/`）；
+  主线程 review ACCEPT → **frozen failure（数据不可得）**。
+  execute/verify 阻塞于 fresh 数据；用户提供新数据后重新 prepare
+  （确定性工具）即可继续，不需其他授权动作。
+- **P2（冻结终态，FAIL 类）**: 效率研究门
+  `formal-nonbinary-ldpc-v17-multibit-structured-de-gate` 生产 gate
+  执行一次 → **`gate_state=mechanism_unverified`**（Stage 0 锚点 A
+  Δ=0.0075>0.005 失败 → 机制未复现；锚点 B |δ|=0.009≤0.012 通过；
+  Stage 1 模型 product-of-marginals 熵 0.549955；Stage 2 12 点诊断
+  全部未收敛 diagnostic_only）；strict replay 5/5 字节一致；E02
+  独立 gate review **ACCEPT（零 blockers）**；C01 完成（decision-log
+  2026-08-16 + 记忆 §52）。位面/边标签效率路线**冻结**：不启动
+  V15/V16、不扩大搜索、无 rerun/调参。效率路线下一步只能由用户
+  决定另开新 change（② SC-LDPC、③ 多边/高维 λ）。
+- **无进行中后台任务**；下一步行动完全取决于用户：① 提供 fresh
+  帧数据（P1 继续）或 ② 决定效率路线新 change（或结束）。
 
 ---
 

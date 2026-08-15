@@ -1,0 +1,2807 @@
+{
+  "anchor_a": {
+    "anchor": "A",
+    "bitplane_run": {
+      "converged_at_lo": true,
+      "grid_points": [
+        0.005,
+        0.0075,
+        0.01,
+        0.0125,
+        0.015000000000000001,
+        0.0175,
+        0.02,
+        0.0225,
+        0.024999999999999998,
+        0.027499999999999997,
+        0.029999999999999995,
+        0.032499999999999994,
+        0.034999999999999996,
+        0.0375,
+        0.04,
+        0.0425,
+        0.045000000000000005,
+        0.04750000000000001,
+        0.05000000000000001,
+        0.05250000000000001,
+        0.055000000000000014,
+        0.057500000000000016,
+        0.06000000000000002,
+        0.06250000000000001,
+        0.06500000000000002,
+        0.06750000000000002,
+        0.07000000000000002,
+        0.07250000000000002,
+        0.07500000000000002,
+        0.07750000000000003,
+        0.08000000000000003,
+        0.08250000000000003,
+        0.08500000000000003,
+        0.08750000000000004,
+        0.09000000000000004,
+        0.09250000000000004,
+        0.09500000000000004,
+        0.09750000000000004,
+        0.10000000000000005,
+        0.10250000000000005,
+        0.10500000000000005,
+        0.10750000000000005,
+        0.11000000000000006,
+        0.11250000000000006,
+        0.11500000000000006,
+        0.11750000000000006,
+        0.12000000000000006,
+        0.12250000000000007,
+        0.12500000000000006,
+        0.12750000000000006,
+        0.13000000000000006,
+        0.13250000000000006,
+        0.13500000000000006,
+        0.13750000000000007,
+        0.14000000000000007,
+        0.14250000000000007,
+        0.14500000000000007,
+        0.14750000000000008,
+        0.15000000000000008,
+        0.15250000000000008,
+        0.15500000000000008,
+        0.15750000000000008,
+        0.1600000000000001,
+        0.1625000000000001,
+        0.1650000000000001,
+        0.1675000000000001,
+        0.1700000000000001,
+        0.1725000000000001,
+        0.1750000000000001,
+        0.1775000000000001,
+        0.1800000000000001,
+        0.1825000000000001,
+        0.1850000000000001,
+        0.1875000000000001,
+        0.1900000000000001,
+        0.19250000000000012,
+        0.19500000000000012,
+        0.19750000000000012,
+        0.20000000000000012,
+        0.20250000000000012,
+        0.20500000000000013,
+        0.20750000000000013,
+        0.21000000000000013,
+        0.21250000000000013,
+        0.21500000000000014,
+        0.21750000000000014,
+        0.22000000000000014,
+        0.22250000000000014,
+        0.22500000000000014,
+        0.22750000000000015,
+        0.23000000000000015,
+        0.23250000000000015,
+        0.23500000000000015,
+        0.23750000000000016,
+        0.24000000000000016,
+        0.24250000000000016,
+        0.24500000000000016,
+        0.24750000000000016,
+        0.25000000000000017
+      ],
+      "n_planes": 2,
+      "probes": [
+        {
+          "joint_converged": true,
+          "p": 0.005,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.0033333333333333335,
+              "final_entropy": 9.965784284662085e-298,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.0033333333333333335,
+              "final_entropy": 9.965784284662085e-298,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.0075,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.005,
+              "final_entropy": 9.965784284662085e-298,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.005,
+              "final_entropy": 9.965784284662085e-298,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.01,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.006666666666666667,
+              "final_entropy": 1.4842549809138486e-16,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.006666666666666667,
+              "final_entropy": 1.4842549809138486e-16,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.0125,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.008333333333333333,
+              "final_entropy": 5.4837496069905405e-17,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.008333333333333333,
+              "final_entropy": 5.4837496069905405e-17,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.015000000000000001,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.01,
+              "final_entropy": 2.0191683697052053e-13,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.01,
+              "final_entropy": 2.0191683697052053e-13,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.0175,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.011666666666666667,
+              "final_entropy": 3.4090288792914285e-13,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.011666666666666667,
+              "final_entropy": 3.4090288792914285e-13,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.02,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.013333333333333334,
+              "final_entropy": 1.091921627300789e-12,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.013333333333333334,
+              "final_entropy": 1.091921627300789e-12,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.0225,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.015,
+              "final_entropy": 7.829217204468746e-13,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.015,
+              "final_entropy": 7.829217204468746e-13,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.024999999999999998,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.016666666666666666,
+              "final_entropy": 1.9865764325791875e-11,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.016666666666666666,
+              "final_entropy": 1.9865764325791875e-11,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.027499999999999997,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.01833333333333333,
+              "final_entropy": 2.2338983452594293e-10,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.01833333333333333,
+              "final_entropy": 2.2338983452594293e-10,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.029999999999999995,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.019999999999999997,
+              "final_entropy": 1.0557717004641474e-08,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.019999999999999997,
+              "final_entropy": 1.0557717004641474e-08,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.032499999999999994,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.021666666666666664,
+              "final_entropy": 1.1932252575816936e-08,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.021666666666666664,
+              "final_entropy": 1.1932252575816936e-08,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.034999999999999996,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.02333333333333333,
+              "final_entropy": 1.0520478373119123e-07,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.02333333333333333,
+              "final_entropy": 1.0520478373119123e-07,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.0375,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.024999999999999998,
+              "final_entropy": 6.700157942801671e-08,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.024999999999999998,
+              "final_entropy": 6.700157942801671e-08,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.04,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.02666666666666667,
+              "final_entropy": 5.148370916765993e-07,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.02666666666666667,
+              "final_entropy": 5.148370916765993e-07,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.0425,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.028333333333333335,
+              "final_entropy": 1.7754880013689489e-06,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.028333333333333335,
+              "final_entropy": 1.7754880013689489e-06,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.045000000000000005,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.030000000000000002,
+              "final_entropy": 4.0958944587264055e-05,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.030000000000000002,
+              "final_entropy": 4.0958944587264055e-05,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.04750000000000001,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.03166666666666667,
+              "final_entropy": 1.7060951271014613e-05,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.03166666666666667,
+              "final_entropy": 1.7060951271014613e-05,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.05000000000000001,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.03333333333333334,
+              "final_entropy": 0.001197762365324145,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.03333333333333334,
+              "final_entropy": 0.001197762365324145,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": true,
+          "p": 0.05250000000000001,
+          "planes": [
+            {
+              "converged": true,
+              "crossover": 0.03500000000000001,
+              "final_entropy": 0.00020542419577475438,
+              "plane": 0
+            },
+            {
+              "converged": true,
+              "crossover": 0.03500000000000001,
+              "final_entropy": 0.00020542419577475438,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.055000000000000014,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.036666666666666674,
+              "final_entropy": 0.9503752306382006,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.036666666666666674,
+              "final_entropy": 0.9503752306382006,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.057500000000000016,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.038333333333333344,
+              "final_entropy": 0.9687850088938401,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.038333333333333344,
+              "final_entropy": 0.9687850088938401,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.06000000000000002,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.040000000000000015,
+              "final_entropy": 0.9767463869411843,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.040000000000000015,
+              "final_entropy": 0.9767463869411843,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.06250000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.04166666666666668,
+              "final_entropy": 0.9824603800632704,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.04166666666666668,
+              "final_entropy": 0.9824603800632704,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.06500000000000002,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.04333333333333334,
+              "final_entropy": 0.9861110738897277,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.04333333333333334,
+              "final_entropy": 0.9861110738897277,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.06750000000000002,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.04500000000000001,
+              "final_entropy": 0.9889803809380132,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.04500000000000001,
+              "final_entropy": 0.9889803809380132,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.07000000000000002,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.04666666666666668,
+              "final_entropy": 0.991077433750102,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.04666666666666668,
+              "final_entropy": 0.991077433750102,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.07250000000000002,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.048333333333333346,
+              "final_entropy": 0.9925331439190563,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.048333333333333346,
+              "final_entropy": 0.9925331439190563,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.07500000000000002,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.05000000000000002,
+              "final_entropy": 0.9937923475005689,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.05000000000000002,
+              "final_entropy": 0.9937923475005689,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.07750000000000003,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.05166666666666669,
+              "final_entropy": 0.9947945015287597,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.05166666666666669,
+              "final_entropy": 0.9947945015287597,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.08000000000000003,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.05333333333333335,
+              "final_entropy": 0.9956870521875416,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.05333333333333335,
+              "final_entropy": 0.9956870521875416,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.08250000000000003,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.05500000000000002,
+              "final_entropy": 0.9964814980473268,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.05500000000000002,
+              "final_entropy": 0.9964814980473268,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.08500000000000003,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.05666666666666669,
+              "final_entropy": 0.9971242737328375,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.05666666666666669,
+              "final_entropy": 0.9971242737328375,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.08750000000000004,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.058333333333333355,
+              "final_entropy": 0.9975757040589003,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.058333333333333355,
+              "final_entropy": 0.9975757040589003,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.09000000000000004,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.060000000000000026,
+              "final_entropy": 0.9979761105234617,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.060000000000000026,
+              "final_entropy": 0.9979761105234617,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.09250000000000004,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.061666666666666696,
+              "final_entropy": 0.9983465458420335,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.061666666666666696,
+              "final_entropy": 0.9983465458420335,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.09500000000000004,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.06333333333333337,
+              "final_entropy": 0.9986135533482343,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.06333333333333337,
+              "final_entropy": 0.9986135533482343,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.09750000000000004,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.06500000000000003,
+              "final_entropy": 0.9988473702997471,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.06500000000000003,
+              "final_entropy": 0.9988473702997471,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.10000000000000005,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.0666666666666667,
+              "final_entropy": 0.9990383611350209,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.0666666666666667,
+              "final_entropy": 0.9990383611350209,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.10250000000000005,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.06833333333333337,
+              "final_entropy": 0.999205453108085,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.06833333333333337,
+              "final_entropy": 0.999205453108085,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.10500000000000005,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.07000000000000003,
+              "final_entropy": 0.9993426727612152,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.07000000000000003,
+              "final_entropy": 0.9993426727612152,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.10750000000000005,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.0716666666666667,
+              "final_entropy": 0.999450094467453,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.0716666666666667,
+              "final_entropy": 0.999450094467453,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.11000000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.07333333333333338,
+              "final_entropy": 0.9995439505891325,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.07333333333333338,
+              "final_entropy": 0.9995439505891325,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.11250000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.07500000000000004,
+              "final_entropy": 0.9996239033230577,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.07500000000000004,
+              "final_entropy": 0.9996239033230577,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.11500000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.0766666666666667,
+              "final_entropy": 0.999687598996833,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.0766666666666667,
+              "final_entropy": 0.999687598996833,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.11750000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.07833333333333338,
+              "final_entropy": 0.9997405170441589,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.07833333333333338,
+              "final_entropy": 0.9997405170441589,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.12000000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.08000000000000004,
+              "final_entropy": 0.9997848080768457,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.08000000000000004,
+              "final_entropy": 0.9997848080768457,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.12250000000000007,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.0816666666666667,
+              "final_entropy": 0.9998204499997091,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.0816666666666667,
+              "final_entropy": 0.9998204499997091,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.12500000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.08333333333333337,
+              "final_entropy": 0.9998516455711153,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.08333333333333337,
+              "final_entropy": 0.9998516455711153,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.12750000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.08500000000000003,
+              "final_entropy": 0.9998768612210138,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.08500000000000003,
+              "final_entropy": 0.9998768612210138,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.13000000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.08666666666666671,
+              "final_entropy": 0.999897827891752,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.08666666666666671,
+              "final_entropy": 0.999897827891752,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.13250000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.08833333333333337,
+              "final_entropy": 0.9999156312104033,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.08833333333333337,
+              "final_entropy": 0.9999156312104033,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.13500000000000006,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.09000000000000004,
+              "final_entropy": 0.999930416479191,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.09000000000000004,
+              "final_entropy": 0.999930416479191,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.13750000000000007,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.09166666666666672,
+              "final_entropy": 0.9999426007756425,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.09166666666666672,
+              "final_entropy": 0.9999426007756425,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.14000000000000007,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.09333333333333338,
+              "final_entropy": 0.9999524703414063,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.09333333333333338,
+              "final_entropy": 0.9999524703414063,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.14250000000000007,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.09500000000000004,
+              "final_entropy": 0.9999608328334926,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.09500000000000004,
+              "final_entropy": 0.9999608328334926,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.14500000000000007,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.09666666666666672,
+              "final_entropy": 0.9999675732031034,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.09666666666666672,
+              "final_entropy": 0.9999675732031034,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.14750000000000008,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.09833333333333338,
+              "final_entropy": 0.9999731960427953,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.09833333333333338,
+              "final_entropy": 0.9999731960427953,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.15000000000000008,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.10000000000000005,
+              "final_entropy": 0.9999779954331842,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.10000000000000005,
+              "final_entropy": 0.9999779954331842,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.15250000000000008,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.10166666666666672,
+              "final_entropy": 0.9999818392992238,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.10166666666666672,
+              "final_entropy": 0.9999818392992238,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.15500000000000008,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.10333333333333339,
+              "final_entropy": 0.9999850529631253,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.10333333333333339,
+              "final_entropy": 0.9999850529631253,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.15750000000000008,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.10500000000000005,
+              "final_entropy": 0.9999876849601255,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.10500000000000005,
+              "final_entropy": 0.9999876849601255,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1600000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.10666666666666673,
+              "final_entropy": 0.9999898928875846,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.10666666666666673,
+              "final_entropy": 0.9999898928875846,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1625000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.10833333333333339,
+              "final_entropy": 0.9999917055600331,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.10833333333333339,
+              "final_entropy": 0.9999917055600331,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1650000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.11000000000000006,
+              "final_entropy": 0.9999932025707414,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.11000000000000006,
+              "final_entropy": 0.9999932025707414,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1675000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.11166666666666673,
+              "final_entropy": 0.9999944223578832,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.11166666666666673,
+              "final_entropy": 0.9999944223578832,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1700000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1133333333333334,
+              "final_entropy": 0.9999954358216652,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1133333333333334,
+              "final_entropy": 0.9999954358216652,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1725000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.11500000000000006,
+              "final_entropy": 0.9999962669163905,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.11500000000000006,
+              "final_entropy": 0.9999962669163905,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1750000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.11666666666666674,
+              "final_entropy": 0.9999969466367955,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.11666666666666674,
+              "final_entropy": 0.9999969466367955,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1775000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1183333333333334,
+              "final_entropy": 0.9999975056423926,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1183333333333334,
+              "final_entropy": 0.9999975056423926,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1800000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.12000000000000006,
+              "final_entropy": 0.9999979665561958,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.12000000000000006,
+              "final_entropy": 0.9999979665561958,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1825000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.12166666666666674,
+              "final_entropy": 0.9999983412078841,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.12166666666666674,
+              "final_entropy": 0.9999983412078841,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1850000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1233333333333334,
+              "final_entropy": 0.9999986482111385,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1233333333333334,
+              "final_entropy": 0.9999986482111385,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1875000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.12500000000000008,
+              "final_entropy": 0.9999988998920873,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.12500000000000008,
+              "final_entropy": 0.9999988998920873,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.1900000000000001,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.12666666666666673,
+              "final_entropy": 0.9999991060181838,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.12666666666666673,
+              "final_entropy": 0.9999991060181838,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.19250000000000012,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1283333333333334,
+              "final_entropy": 0.9999992738703103,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1283333333333334,
+              "final_entropy": 0.9999992738703103,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.19500000000000012,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1300000000000001,
+              "final_entropy": 0.9999994107387128,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1300000000000001,
+              "final_entropy": 0.9999994107387128,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.19750000000000012,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.13166666666666674,
+              "final_entropy": 0.9999995222076618,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.13166666666666674,
+              "final_entropy": 0.9999995222076618,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.20000000000000012,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.13333333333333341,
+              "final_entropy": 0.9999996128688332,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.13333333333333341,
+              "final_entropy": 0.9999996128688332,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.20250000000000012,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1350000000000001,
+              "final_entropy": 0.9999996866268467,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1350000000000001,
+              "final_entropy": 0.9999996866268467,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.20500000000000013,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.13666666666666674,
+              "final_entropy": 0.9999997466890699,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.13666666666666674,
+              "final_entropy": 0.9999997466890699,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.20750000000000013,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.13833333333333342,
+              "final_entropy": 0.9999997954264991,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.13833333333333342,
+              "final_entropy": 0.9999997954264991,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.21000000000000013,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1400000000000001,
+              "final_entropy": 0.9999998348939404,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1400000000000001,
+              "final_entropy": 0.9999998348939404,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.21250000000000013,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.14166666666666675,
+              "final_entropy": 0.9999998668621338,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.14166666666666675,
+              "final_entropy": 0.9999998668621338,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.21500000000000014,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.14333333333333342,
+              "final_entropy": 0.999999892746284,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.14333333333333342,
+              "final_entropy": 0.999999892746284,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.21750000000000014,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1450000000000001,
+              "final_entropy": 0.9999999136998036,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1450000000000001,
+              "final_entropy": 0.9999999136998036,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.22000000000000014,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.14666666666666675,
+              "final_entropy": 0.9999999306310731,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.14666666666666675,
+              "final_entropy": 0.9999999306310731,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.22250000000000014,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.14833333333333343,
+              "final_entropy": 0.9999999442871724,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.14833333333333343,
+              "final_entropy": 0.9999999442871724,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.22500000000000014,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1500000000000001,
+              "final_entropy": 0.9999999553056204,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1500000000000001,
+              "final_entropy": 0.9999999553056204,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.22750000000000015,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.15166666666666676,
+              "final_entropy": 0.9999999641833848,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.15166666666666676,
+              "final_entropy": 0.9999999641833848,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.23000000000000015,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.15333333333333343,
+              "final_entropy": 0.9999999713304878,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.15333333333333343,
+              "final_entropy": 0.9999999713304878,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.23250000000000015,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.1550000000000001,
+              "final_entropy": 0.9999999770735802,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.1550000000000001,
+              "final_entropy": 0.9999999770735802,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.23500000000000015,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.15666666666666676,
+              "final_entropy": 0.9999999816878182,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.15666666666666676,
+              "final_entropy": 0.9999999816878182,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.23750000000000016,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.15833333333333344,
+              "final_entropy": 0.9999999853892025,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.15833333333333344,
+              "final_entropy": 0.9999999853892025,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.24000000000000016,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.16000000000000011,
+              "final_entropy": 0.999999988354724,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.16000000000000011,
+              "final_entropy": 0.999999988354724,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.24250000000000016,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.16166666666666676,
+              "final_entropy": 0.999999990728214,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.16166666666666676,
+              "final_entropy": 0.999999990728214,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.24500000000000016,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.16333333333333344,
+              "final_entropy": 0.9999999926253635,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.16333333333333344,
+              "final_entropy": 0.9999999926253635,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.24750000000000016,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.16500000000000012,
+              "final_entropy": 0.9999999941418531,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.16500000000000012,
+              "final_entropy": 0.9999999941418531,
+              "plane": 1
+            }
+          ]
+        },
+        {
+          "joint_converged": false,
+          "p": 0.25000000000000017,
+          "planes": [
+            {
+              "converged": false,
+              "crossover": 0.16666666666666677,
+              "final_entropy": 0.9999999953513322,
+              "plane": 0
+            },
+            {
+              "converged": false,
+              "crossover": 0.16666666666666677,
+              "final_entropy": 0.9999999953513322,
+              "plane": 1
+            }
+          ]
+        }
+      ],
+      "threshold_proxy": 0.05250000000000001
+    },
+    "bitplane_threshold_proxy": 0.05250000000000001,
+    "bits": 2,
+    "delta": 0.007500000000000007,
+    "diagnostic_only": true,
+    "entropy_tol": 0.01,
+    "max_iter": 150,
+    "mechanism_verified": false,
+    "n_samples": 100000,
+    "q": 4,
+    "rate": 0.75,
+    "seed": 2026090118,
+    "streak": 20,
+    "symbol_level_threshold_proxy": 0.06000000000000002,
+    "symbol_run": {
+      "converged_at_lo": true,
+      "grid_points": [
+        0.005,
+        0.0075,
+        0.01,
+        0.0125,
+        0.015000000000000001,
+        0.0175,
+        0.02,
+        0.0225,
+        0.024999999999999998,
+        0.027499999999999997,
+        0.029999999999999995,
+        0.032499999999999994,
+        0.034999999999999996,
+        0.0375,
+        0.04,
+        0.0425,
+        0.045000000000000005,
+        0.04750000000000001,
+        0.05000000000000001,
+        0.05250000000000001,
+        0.055000000000000014,
+        0.057500000000000016,
+        0.06000000000000002,
+        0.06250000000000001,
+        0.06500000000000002,
+        0.06750000000000002,
+        0.07000000000000002,
+        0.07250000000000002,
+        0.07500000000000002,
+        0.07750000000000003,
+        0.08000000000000003,
+        0.08250000000000003,
+        0.08500000000000003,
+        0.08750000000000004,
+        0.09000000000000004,
+        0.09250000000000004,
+        0.09500000000000004,
+        0.09750000000000004,
+        0.10000000000000005,
+        0.10250000000000005,
+        0.10500000000000005,
+        0.10750000000000005,
+        0.11000000000000006,
+        0.11250000000000006,
+        0.11500000000000006,
+        0.11750000000000006,
+        0.12000000000000006,
+        0.12250000000000007,
+        0.12500000000000006,
+        0.12750000000000006,
+        0.13000000000000006,
+        0.13250000000000006,
+        0.13500000000000006,
+        0.13750000000000007,
+        0.14000000000000007,
+        0.14250000000000007,
+        0.14500000000000007,
+        0.14750000000000008,
+        0.15000000000000008,
+        0.15250000000000008,
+        0.15500000000000008,
+        0.15750000000000008,
+        0.1600000000000001,
+        0.1625000000000001,
+        0.1650000000000001,
+        0.1675000000000001,
+        0.1700000000000001,
+        0.1725000000000001,
+        0.1750000000000001,
+        0.1775000000000001,
+        0.1800000000000001,
+        0.1825000000000001,
+        0.1850000000000001,
+        0.1875000000000001,
+        0.1900000000000001,
+        0.19250000000000012,
+        0.19500000000000012,
+        0.19750000000000012,
+        0.20000000000000012,
+        0.20250000000000012,
+        0.20500000000000013,
+        0.20750000000000013,
+        0.21000000000000013,
+        0.21250000000000013,
+        0.21500000000000014,
+        0.21750000000000014,
+        0.22000000000000014,
+        0.22250000000000014,
+        0.22500000000000014,
+        0.22750000000000015,
+        0.23000000000000015,
+        0.23250000000000015,
+        0.23500000000000015,
+        0.23750000000000016,
+        0.24000000000000016,
+        0.24250000000000016,
+        0.24500000000000016,
+        0.24750000000000016,
+        0.25000000000000017
+      ],
+      "probes": [
+        {
+          "converged": true,
+          "final_entropy": 1.4948676426993133e-297,
+          "p": 0.005
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.4948676426993133e-297,
+          "p": 0.0075
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.4948676426993133e-297,
+          "p": 0.01
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.4948676426993133e-297,
+          "p": 0.0125
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.4948676426993133e-297,
+          "p": 0.015000000000000001
+        },
+        {
+          "converged": true,
+          "final_entropy": 7.253224026844891e-19,
+          "p": 0.0175
+        },
+        {
+          "converged": true,
+          "final_entropy": 2.4177413422816302e-18,
+          "p": 0.02
+        },
+        {
+          "converged": true,
+          "final_entropy": 3.144911203331668e-18,
+          "p": 0.0225
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.465948826849301e-15,
+          "p": 0.024999999999999998
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.91858049733419e-16,
+          "p": 0.027499999999999997
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.0038390533571852e-14,
+          "p": 0.029999999999999995
+        },
+        {
+          "converged": true,
+          "final_entropy": 6.012728263171461e-13,
+          "p": 0.032499999999999994
+        },
+        {
+          "converged": true,
+          "final_entropy": 6.952733375104177e-12,
+          "p": 0.034999999999999996
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.4865887548018766e-10,
+          "p": 0.0375
+        },
+        {
+          "converged": true,
+          "final_entropy": 8.501627510718295e-09,
+          "p": 0.04
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.3173454523641236e-10,
+          "p": 0.0425
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.265674668018281e-10,
+          "p": 0.045000000000000005
+        },
+        {
+          "converged": true,
+          "final_entropy": 2.4533824452849134e-09,
+          "p": 0.04750000000000001
+        },
+        {
+          "converged": true,
+          "final_entropy": 7.747000917828484e-08,
+          "p": 0.05000000000000001
+        },
+        {
+          "converged": true,
+          "final_entropy": 2.7629834553138213e-08,
+          "p": 0.05250000000000001
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.600045124076382e-08,
+          "p": 0.055000000000000014
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.044723912307202e-07,
+          "p": 0.057500000000000016
+        },
+        {
+          "converged": true,
+          "final_entropy": 6.930481491427112e-07,
+          "p": 0.06000000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9653106297811432,
+          "p": 0.06250000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9769503199794102,
+          "p": 0.06500000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9818398656574218,
+          "p": 0.06750000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9858078102177431,
+          "p": 0.07000000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9882796973116708,
+          "p": 0.07250000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9904912486930075,
+          "p": 0.07500000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9921717375147246,
+          "p": 0.07750000000000003
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9936022244712994,
+          "p": 0.08000000000000003
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9947382910737235,
+          "p": 0.08250000000000003
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9956325372225007,
+          "p": 0.08500000000000003
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9963762735124359,
+          "p": 0.08750000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9970100418330688,
+          "p": 0.09000000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9975246700604574,
+          "p": 0.09250000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.997947706009597,
+          "p": 0.09500000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9983063932958411,
+          "p": 0.09750000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9985879533822323,
+          "p": 0.10000000000000005
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9988184400505058,
+          "p": 0.10250000000000005
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9990247288727601,
+          "p": 0.10500000000000005
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9991893670825092,
+          "p": 0.10750000000000005
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9993269236539287,
+          "p": 0.11000000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9994393976984293,
+          "p": 0.11250000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9995339378081343,
+          "p": 0.11500000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9996149472143377,
+          "p": 0.11750000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9996801712462825,
+          "p": 0.12000000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9997342392379677,
+          "p": 0.12250000000000007
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9997791462471637,
+          "p": 0.12500000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9998158802382828,
+          "p": 0.12750000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9998471317417273,
+          "p": 0.13000000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9998738880998462,
+          "p": 0.13250000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.999896290698113,
+          "p": 0.13500000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999144091984062,
+          "p": 0.13750000000000007
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.99992930165202,
+          "p": 0.14000000000000007
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999413086786022,
+          "p": 0.14250000000000007
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999514291925997,
+          "p": 0.14500000000000007
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999598966781271,
+          "p": 0.14750000000000008
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999670921246215,
+          "p": 0.15000000000000008
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.999972846915593,
+          "p": 0.15250000000000008
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999776347824183,
+          "p": 0.15500000000000008
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999815773752594,
+          "p": 0.15750000000000008
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999848753659433,
+          "p": 0.1600000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999875708648774,
+          "p": 0.1625000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999898236141621,
+          "p": 0.1650000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999916335960392,
+          "p": 0.1675000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999931418810025,
+          "p": 0.1700000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.999994391291521,
+          "p": 0.1725000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999954214717263,
+          "p": 0.1750000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999962600528848,
+          "p": 0.1775000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.999996950921782,
+          "p": 0.1800000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999975149300729,
+          "p": 0.1825000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999979752224645,
+          "p": 0.1850000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999983529316193,
+          "p": 0.1875000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999986595065979,
+          "p": 0.1900000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999989109144293,
+          "p": 0.19250000000000012
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999991160338497,
+          "p": 0.19500000000000012
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999992837395988,
+          "p": 0.19750000000000012
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999994194133269,
+          "p": 0.20000000000000012
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999995301804008,
+          "p": 0.20250000000000012
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999996202303096,
+          "p": 0.20500000000000013
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999996932551778,
+          "p": 0.20750000000000013
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999997524232866,
+          "p": 0.21000000000000013
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.999999800332725,
+          "p": 0.21250000000000013
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999998391615934,
+          "p": 0.21500000000000014
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999998705409824,
+          "p": 0.21750000000000014
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999998959511757,
+          "p": 0.22000000000000014
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999164428537,
+          "p": 0.22250000000000014
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999329714786,
+          "p": 0.22500000000000014
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999462887345,
+          "p": 0.22750000000000015
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999570038247,
+          "p": 0.23000000000000015
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999656179847,
+          "p": 0.23250000000000015
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.999999972535677,
+          "p": 0.23500000000000015
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999780884318,
+          "p": 0.23750000000000016
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999825343212,
+          "p": 0.24000000000000016
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999860951546,
+          "p": 0.24250000000000016
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999889399952,
+          "p": 0.24500000000000016
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999912136469,
+          "p": 0.24750000000000016
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9999999930279527,
+          "p": 0.25000000000000017
+        }
+      ],
+      "threshold_proxy": 0.06000000000000002
+    },
+    "tolerance": 0.005
+  },
+  "anchor_b": {
+    "anchor": "B",
+    "computed_threshold_proxy": 0.06000000000000002,
+    "delta": 0.008999999999999987,
+    "diagnostic_only": true,
+    "max_iter": 150,
+    "mechanism_verified": true,
+    "n_samples": 100000,
+    "published_threshold": 0.069,
+    "q": 4,
+    "rate": 0.75,
+    "seed": 2026090118,
+    "symbol_run": {
+      "converged_at_lo": true,
+      "grid_points": [
+        0.01,
+        0.0125,
+        0.015000000000000001,
+        0.0175,
+        0.02,
+        0.0225,
+        0.024999999999999998,
+        0.027499999999999997,
+        0.029999999999999995,
+        0.032499999999999994,
+        0.034999999999999996,
+        0.0375,
+        0.04,
+        0.0425,
+        0.045000000000000005,
+        0.04750000000000001,
+        0.05000000000000001,
+        0.05250000000000001,
+        0.055000000000000014,
+        0.057500000000000016,
+        0.06000000000000002,
+        0.06250000000000001,
+        0.06500000000000002,
+        0.06750000000000002,
+        0.07000000000000002,
+        0.07250000000000002,
+        0.07500000000000002,
+        0.07750000000000003,
+        0.08000000000000003,
+        0.08250000000000003,
+        0.08500000000000003,
+        0.08750000000000004,
+        0.09000000000000004,
+        0.09250000000000004,
+        0.09500000000000004,
+        0.09750000000000004,
+        0.10000000000000005,
+        0.10250000000000005,
+        0.10500000000000005,
+        0.10750000000000005,
+        0.11000000000000006,
+        0.11250000000000006,
+        0.11500000000000006,
+        0.11750000000000006,
+        0.12000000000000006
+      ],
+      "probes": [
+        {
+          "converged": true,
+          "final_entropy": 1.4948676426993133e-297,
+          "p": 0.01
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.4948676426993133e-297,
+          "p": 0.0125
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.4948676426993133e-297,
+          "p": 0.015000000000000001
+        },
+        {
+          "converged": true,
+          "final_entropy": 7.253224026844891e-19,
+          "p": 0.0175
+        },
+        {
+          "converged": true,
+          "final_entropy": 2.4177413422816302e-18,
+          "p": 0.02
+        },
+        {
+          "converged": true,
+          "final_entropy": 3.144911203331668e-18,
+          "p": 0.0225
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.465948826849301e-15,
+          "p": 0.024999999999999998
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.91858049733419e-16,
+          "p": 0.027499999999999997
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.0038390533571852e-14,
+          "p": 0.029999999999999995
+        },
+        {
+          "converged": true,
+          "final_entropy": 6.012728263171461e-13,
+          "p": 0.032499999999999994
+        },
+        {
+          "converged": true,
+          "final_entropy": 6.952733375104177e-12,
+          "p": 0.034999999999999996
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.4865887548018766e-10,
+          "p": 0.0375
+        },
+        {
+          "converged": true,
+          "final_entropy": 8.501627510718295e-09,
+          "p": 0.04
+        },
+        {
+          "converged": true,
+          "final_entropy": 1.3173454523641236e-10,
+          "p": 0.0425
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.265674668018281e-10,
+          "p": 0.045000000000000005
+        },
+        {
+          "converged": true,
+          "final_entropy": 2.4533824452849134e-09,
+          "p": 0.04750000000000001
+        },
+        {
+          "converged": true,
+          "final_entropy": 7.747000917828484e-08,
+          "p": 0.05000000000000001
+        },
+        {
+          "converged": true,
+          "final_entropy": 2.7629834553138213e-08,
+          "p": 0.05250000000000001
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.600045124076382e-08,
+          "p": 0.055000000000000014
+        },
+        {
+          "converged": true,
+          "final_entropy": 4.044723912307202e-07,
+          "p": 0.057500000000000016
+        },
+        {
+          "converged": true,
+          "final_entropy": 6.930481491427112e-07,
+          "p": 0.06000000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9653106297811432,
+          "p": 0.06250000000000001
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9769503199794102,
+          "p": 0.06500000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9818398656574218,
+          "p": 0.06750000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9858078102177431,
+          "p": 0.07000000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9882796973116708,
+          "p": 0.07250000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9904912486930075,
+          "p": 0.07500000000000002
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9921717375147246,
+          "p": 0.07750000000000003
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9936022244712994,
+          "p": 0.08000000000000003
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9947382910737235,
+          "p": 0.08250000000000003
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9956325372225007,
+          "p": 0.08500000000000003
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9963762735124359,
+          "p": 0.08750000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9970100418330688,
+          "p": 0.09000000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9975246700604574,
+          "p": 0.09250000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.997947706009597,
+          "p": 0.09500000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9983063932958411,
+          "p": 0.09750000000000004
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9985879533822323,
+          "p": 0.10000000000000005
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9988184400505058,
+          "p": 0.10250000000000005
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9990247288727601,
+          "p": 0.10500000000000005
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9991893670825092,
+          "p": 0.10750000000000005
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9993269236539287,
+          "p": 0.11000000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9994393976984293,
+          "p": 0.11250000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9995339378081343,
+          "p": 0.11500000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9996149472143377,
+          "p": 0.11750000000000006
+        },
+        {
+          "converged": false,
+          "final_entropy": 0.9996801712462825,
+          "p": 0.12000000000000006
+        }
+      ],
+      "threshold_proxy": 0.06000000000000002
+    },
+    "tolerance": 0.012
+  },
+  "both_anchors_verified": false,
+  "diagnostic_only": true,
+  "gate_state": "fail",
+  "schema": "nbldpc_v17_stage0_v1"
+}

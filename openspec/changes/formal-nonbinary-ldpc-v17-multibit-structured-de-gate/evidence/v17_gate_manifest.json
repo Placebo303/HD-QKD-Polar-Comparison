@@ -1,0 +1,9 @@
+{
+  "command": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\src\\comparison_bench\\cli\\run_v17_gate.py gate --authorized --production --out openspec\\changes\\formal-nonbinary-ldpc-v17-multibit-structured-de-gate\\evidence",
+  "git_commit": "fd7fac7eadcf4d12e5117a67f9774ba38f88f9a0",
+  "peak_rss_bytes": 541769728,
+  "rss_cap_bytes": 3221225472,
+  "rss_cap_exceeded": false,
+  "schema": "nbldpc_v17_gate_manifest_v1",
+  "wall_seconds": 7026.609000000055
+}

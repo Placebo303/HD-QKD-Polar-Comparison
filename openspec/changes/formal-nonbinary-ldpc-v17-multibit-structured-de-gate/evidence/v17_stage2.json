@@ -1,0 +1,280 @@
+{
+  "bit_planes": 10,
+  "candidates": [
+    {
+      "any_point_pass": false,
+      "candidate": "bitplane",
+      "entropy_bits_channel": 0.5499550439219351,
+      "f_limit": 1.3,
+      "label": "Cohen-style bit-plane decomposition",
+      "mechanism": "bitplane",
+      "points": [
+        {
+          "candidate": "bitplane",
+          "converged": false,
+          "f_achieved": 1.0654279953893333,
+          "final_entropy": 0.9996823292856063,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.3,
+            "4": 0.45
+          },
+          "m": 15,
+          "profile": 1,
+          "rate": 0.94140625,
+          "rho": {
+            "50": 0.42724609374999994,
+            "51": 0.57275390625
+          }
+        },
+        {
+          "candidate": "bitplane",
+          "converged": false,
+          "f_achieved": 1.1364565284152888,
+          "final_entropy": 0.9994742040788895,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.3,
+            "4": 0.45
+          },
+          "m": 16,
+          "profile": 1,
+          "rate": 0.9375,
+          "rho": {
+            "47": 0.5875000000000049,
+            "48": 0.4124999999999951
+          }
+        },
+        {
+          "candidate": "bitplane",
+          "converged": false,
+          "f_achieved": 1.2074850614412445,
+          "final_entropy": 0.9992011738285659,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.3,
+            "4": 0.45
+          },
+          "m": 17,
+          "profile": 1,
+          "rate": 0.93359375,
+          "rho": {
+            "44": 0.375976562500004,
+            "45": 0.624023437499996
+          }
+        },
+        {
+          "candidate": "bitplane",
+          "converged": false,
+          "f_achieved": 1.2785135944672,
+          "final_entropy": 0.9988186800172766,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.3,
+            "4": 0.45
+          },
+          "m": 18,
+          "profile": 1,
+          "rate": 0.9296875,
+          "rho": {
+            "42": 0.8572265625000034,
+            "43": 0.1427734374999966
+          }
+        }
+      ],
+      "profile": 1
+    },
+    {
+      "any_point_pass": false,
+      "candidate": "edgelabel",
+      "entropy_bits_channel": 0.5499550439219351,
+      "f_limit": 1.3,
+      "label": "multibit edge-label symbol-level DE",
+      "mechanism": "symbol_structured",
+      "points": [
+        {
+          "candidate": "edgelabel",
+          "converged": false,
+          "f_achieved": 1.0654279953893333,
+          "final_entropy": 0.34705389852992763,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.3,
+            "4": 0.45
+          },
+          "m": 15,
+          "profile": 1,
+          "rate": 0.94140625,
+          "rho": {
+            "50": 0.42724609374999994,
+            "51": 0.57275390625
+          }
+        },
+        {
+          "candidate": "edgelabel",
+          "converged": false,
+          "f_achieved": 1.1364565284152888,
+          "final_entropy": 0.3241488211160807,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.3,
+            "4": 0.45
+          },
+          "m": 16,
+          "profile": 1,
+          "rate": 0.9375,
+          "rho": {
+            "47": 0.5875000000000049,
+            "48": 0.4124999999999951
+          }
+        },
+        {
+          "candidate": "edgelabel",
+          "converged": false,
+          "f_achieved": 1.2074850614412445,
+          "final_entropy": 0.3206000396611102,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.3,
+            "4": 0.45
+          },
+          "m": 17,
+          "profile": 1,
+          "rate": 0.93359375,
+          "rho": {
+            "44": 0.375976562500004,
+            "45": 0.624023437499996
+          }
+        },
+        {
+          "candidate": "edgelabel",
+          "converged": false,
+          "f_achieved": 1.2785135944672,
+          "final_entropy": 0.32313928306420764,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.25,
+            "3": 0.3,
+            "4": 0.45
+          },
+          "m": 18,
+          "profile": 1,
+          "rate": 0.9296875,
+          "rho": {
+            "42": 0.8572265625000034,
+            "43": 0.1427734374999966
+          }
+        }
+      ],
+      "profile": 1
+    },
+    {
+      "any_point_pass": false,
+      "candidate": "planeweight",
+      "entropy_bits_channel": 0.5499550439219351,
+      "f_limit": 1.3,
+      "label": "bit-plane-weighted structured prior",
+      "mechanism": "symbol_structured_weighted",
+      "points": [
+        {
+          "candidate": "planeweight",
+          "converged": false,
+          "f_achieved": 1.0654279953893333,
+          "final_entropy": 0.9644141263299836,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.2,
+            "3": 0.25,
+            "5": 0.55
+          },
+          "m": 15,
+          "profile": 2,
+          "rate": 0.94140625,
+          "rho": {
+            "58": 0.8156250000000055,
+            "59": 0.18437499999999452
+          }
+        },
+        {
+          "candidate": "planeweight",
+          "converged": false,
+          "f_achieved": 1.1364565284152888,
+          "final_entropy": 0.9626258739240159,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.2,
+            "3": 0.25,
+            "5": 0.55
+          },
+          "m": 16,
+          "profile": 2,
+          "rate": 0.9375,
+          "rho": {
+            "54": 0.45000000000000306,
+            "55": 0.5499999999999969
+          }
+        },
+        {
+          "candidate": "planeweight",
+          "converged": false,
+          "f_achieved": 1.2074850614412445,
+          "final_entropy": 0.9517299687220673,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.2,
+            "3": 0.25,
+            "5": 0.55
+          },
+          "m": 17,
+          "profile": 2,
+          "rate": 0.93359375,
+          "rho": {
+            "51": 0.6587499999999963,
+            "52": 0.3412500000000037
+          }
+        },
+        {
+          "candidate": "planeweight",
+          "converged": false,
+          "f_achieved": 1.2785135944672,
+          "final_entropy": 0.9356313831270024,
+          "iterations": 150,
+          "lambda": {
+            "2": 0.2,
+            "3": 0.25,
+            "5": 0.55
+          },
+          "m": 18,
+          "profile": 2,
+          "rate": 0.9296875,
+          "rho": {
+            "48": 0.5100000000000056,
+            "49": 0.48999999999999444
+          }
+        }
+      ],
+      "profile": 2
+    }
+  ],
+  "diagnostic_only": true,
+  "entropy_tol": 0.01,
+  "f_limit": 1.3,
+  "max_iter": 150,
+  "n_samples": 10000,
+  "point_set": [
+    15,
+    16,
+    17,
+    18
+  ],
+  "q": 1024,
+  "schema": "nbldpc_v17_stage2_v1",
+  "streak": 20
+}

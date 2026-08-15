@@ -1,15 +1,15 @@
 # CURRENT_TASK.md
 
-## Current Task — P1 prepare 完成（no_eligible_frames）；P2 V17 门生产执行中 (2026-08-15)
+## Current Task — P2 V17 门冻结终态 mechanism_unverified；P1 阻塞于 fresh 数据 (2026-08-16)
 
 按用户更新后的目标（P0→P1→P2）继续：
 
 - **P0（已完成）**：V12 归档（`archive/2026-08-15-formal-nonbinary-ldpc-v12-real-micro-feasibility/`，
   source_partition_blocked/X01/X02 未执行/v2 prepare 包保留）；V15/V16
   归档为 aborted drafts（`...-aborted/`）；陈旧文档全修复；V14 测试
-  数字统一（62/62→64/64）。本地领先 `origin/main` 35+ 提交；**push 待
+  数字统一（62/62→64/64）。本地领先 `origin/main` 36+ 提交；**push 待
   单独授权**。
-- **P1（PREP 完成，冻结终态）**：change
+- **P1（冻结终态，阻塞于数据）**：change
   `formal-nonbinary-ldpc-v13-r3-fresh-acquisition` 冻结 + freeze review
   ACCEPT；PREP 工具实现（FA1–FA5，19 测试）+ 生产 prepare 执行一次 →
   **`no_eligible_frames`**（`D:\Data` 无 fresh 帧数据源，合法冻结结果；
@@ -17,12 +17,22 @@
   主线程 review ACCEPT → 判定 **frozen failure（数据不可得）**。
   execute/verify 阻塞于 fresh 数据；用户提供新数据后重新 prepare
   （确定性工具）即可继续。
-- **P2（生产 gate 执行中）**：change
-  `formal-nonbinary-ldpc-v17-multibit-structured-de-gate` 冻结 + freeze
-  review ACCEPT；实现（VA1–VA6，17 测试）+ 主线程独立重跑通过；生产
-  gate（Stage 0 锚点 A/B → Stage 1 模型 → Stage 2 12 点）后台运行中。
-  完成后：strict replay → E02 独立复核 → C01 判定（PASS→另开有限码
-  change；FAIL→冻结，不启动 V15/V16、不扩大搜索）。
+- **P2（冻结终态，FAIL 类）**：change
+  `formal-nonbinary-ldpc-v17-multibit-structured-de-gate` 生产 gate
+  执行一次 → **`gate_state=mechanism_unverified`**（Stage 0 锚点 A
+  Δ=0.0075>0.005 失败；锚点 B |δ|=0.009≤0.012 通过；Stage 1 模型
+  熵 0.549955；Stage 2 12 点诊断全部未收敛）；strict replay 5/5
+  字节一致；E02 独立 gate review **ACCEPT（零 blockers）**；C01
+  收尾完成。位面/边标签效率路线**冻结**：不启动 V15/V16、不扩大
+  搜索、无 rerun/调参。效率路线下一步只能由用户决定另开新 change
+  （② SC-LDPC、③ 多边/高维 λ）。
+
+---
+
+## Previous Task — P1 prepare 完成（no_eligible_frames）；P2 V17 门生产执行 (2026-08-15)
+
+2026-08-15 状态，已被上方 2026-08-16 Current Task 取代（P2 已冻结
+关闭）。P1 `no_eligible_frames` 终态与 P2 实现/生产执行记录见上。
 
 ---
 
