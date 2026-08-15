@@ -6,6 +6,24 @@ PLANNING（2026-08-15）。独立 freeze review ACCEPT 前禁止任何 prepare /
 execute / verify 执行。本 design 全部条款在冻结后不可修改（除非经
 amendment 流程 + 主线程授权）。
 
+## 0.1 2026-08-16 Data Intake Amendment
+
+用户提供的三个 `2026-01-21` Type2 ttbin 源经 D0 准入判定为
+`data_intake_rejected_for_fresh_confirmation`，不得作为 fresh-confirmation
+证据进入 prepare/execute/verify。
+
+- 原因：时间戳早于 frozen fresh 边界；10 dB Type-II 损耗元数据不可核验；
+  folder1 已有 Release D2 smoke 观测 `raw_ser=0.254663`，远超 V13 D01
+  参考 `0.0771`。
+- 证据包：
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_intake_20260816/intake_decision.json`
+- 完整修正规划：
+  `docs/nonbinary-ldpc-v13-r3-fresh-data-intake-20260816-plan.md`
+- 执行状态：D0–D5 已完成（2026-08-16）；D5 全量预检 `drift_exceeded`；P/E/V 不进入。
+- 若用户坚持使用这些数据，必须另开 legacy drift audit change，claim
+  boundary 仅限 `legacy_drift_audit`，不得使用 `fresh-confirmed`。
+
+
 ## 1. 数据源与 acquisition 设置（frozen）
 
 - **数据源声明协议**：fresh 数据必须由用户/采集方提供，满足：

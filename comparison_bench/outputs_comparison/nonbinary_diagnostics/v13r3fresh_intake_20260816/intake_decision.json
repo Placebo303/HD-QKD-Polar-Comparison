@@ -1,0 +1,65 @@
+﻿{
+    "schema":  "nbldpc_v13r3_fresh_intake_decision_v1",
+    "created_at":  "2026-08-16T00:43:14.5927003+08:00",
+    "run_id":  "v13r3fresh_intake_20260816",
+    "execution_status":  "completed",
+    "decision":  "data_intake_rejected_for_fresh_confirmation",
+    "freshness_boundary":  "acquisition must be later than V13 historical data (\u003e= 2026-08-14 per frozen design 搂1)",
+    "sources":  [
+                    {
+                        "source_tag":  "type2_1p5M_20260121_183806",
+                        "main_ttbin":  "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.ttbin",
+                        "chunk_ttbin":  "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.1.ttbin",
+                        "acquisition_timestamp":  "2026-01-21",
+                        "freshness_status":  "not_fresh",
+                        "loss_metadata":  "unverified",
+                        "reasons":  [
+                                        "timestamp before fresh boundary",
+                                        "run_config is template, no verified 10 dB Type-II metadata",
+                                        "already materialized in Release scratch"
+                                    ]
+                    },
+                    {
+                        "source_tag":  "type2_1M_20260121_184040",
+                        "main_ttbin":  "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.ttbin",
+                        "chunk_ttbin":  "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.1.ttbin",
+                        "acquisition_timestamp":  "2026-01-21",
+                        "freshness_status":  "not_fresh",
+                        "loss_metadata":  "unverified",
+                        "reasons":  [
+                                        "timestamp before fresh boundary",
+                                        "run_config is template, no verified 10 dB Type-II metadata"
+                                    ]
+                    },
+                    {
+                        "source_tag":  "type2_2M_20260121_183657",
+                        "main_ttbin":  "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.ttbin",
+                        "chunk_ttbin":  "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.1.ttbin",
+                        "acquisition_timestamp":  "2026-01-21",
+                        "freshness_status":  "not_fresh",
+                        "loss_metadata":  "unverified",
+                        "reasons":  [
+                                        "timestamp before fresh boundary",
+                                        "run_config is template, no verified 10 dB Type-II metadata"
+                                    ]
+                    }
+                ],
+    "existing_drift_evidence":  {
+                                    "release_d2_smoke_sidecar":  "D:\\Code\\HD-QKD_Polar_Release\\workspace\\v13r3fresh_d2_smoke\\sidecar_meta.json",
+                                    "raw_ser":  0.25466334760962672,
+                                    "map_sanity_verdict":  "FAIL",
+                                    "fail_reason":  "map_ser\u003e=0.1",
+                                    "v13_d01_raw_ser_mean_reference":  0.077056884765625,
+                                    "v13_d01_raw_ser_interval":  [
+                                                                     0.0390625,
+                                                                     0.11328125
+                                                                 ]
+                                },
+    "consequence":  "Do NOT run P1 prepare/execute/verify on these sources as fresh-confirmation evidence. Keep P1 blocked on truly fresh data. If the user chooses to use these files, open a separate legacy drift audit change with claim boundary legacy_drift_audit only.",
+    "next_actions":  [
+                         "Record this decision in tasks.md and decision-log",
+                         "D1-D5 may be run later as diagnostic_only drift evidence if explicitly requested",
+                         "Obtain truly fresh 10 dB Type-II data to resume P1",
+                         "Do not push without separate user authorization"
+                     ]
+}

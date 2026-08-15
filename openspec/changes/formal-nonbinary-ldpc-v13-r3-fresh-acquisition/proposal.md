@@ -2,6 +2,11 @@
 
 > 状态：PLANNING —— 2026-08-15 按用户更新后的目标（P1：立即优先）立项。
 
+> 2026-08-16 amendment：三个 `2026-01-21` Type2 源经 D0 判定为
+> `data_intake_rejected_for_fresh_confirmation`，不得作为 fresh 证据。
+> 完整修正规划见 `docs/nonbinary-ldpc-v13-r3-fresh-data-intake-20260816-plan.md`。
+
+
 ## What
 
 对 V13 冻结候选 `nbldpc_v13_r3_code_v1` 执行**一次 fresh acquisition

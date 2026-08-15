@@ -1,5 +1,31 @@
 # CURRENT_TASK.md
 
+
+## Current Task — V13-R3 fresh 数据准入已拒绝；D1–D5 已执行，D5 drift_exceeded；P/E/V 不进入 (2026-08-16)
+
+按用户更新后的目标（P0→P1→P2）继续，但 **2026-01-21 三源已通过 D0 判定为
+`data_intake_rejected_for_fresh_confirmation`**，不得作为 fresh 证据进入 P/E/V。
+
+- **D0（已完成）**：新增 `v13r3fresh_intake_20260816` 证据包，判定三个
+  `2026-01-21` Type2 源不满足 frozen fresh 条件（时间戳早于 V13 历史、损耗
+  元数据不可核验；folder1 已有 D2 烟测 `raw_ser=0.254663`，远超 V13 D01
+  参考 0.0771）。完整规划：
+  `docs/nonbinary-ldpc-v13-r3-fresh-data-intake-20260816-plan.md`。
+- **D1–D5（已完成）**：按修正参数执行完毕（2026-08-16，shell 可用后）：
+  D1 环境/git 基线、D2/D3 三源 sidecar 提取（`map_sanity` 全 FAIL）、
+  D4 三源 pairs-table + manifest、D5 全量漂移预检。
+  D5 结果：**三源全部 `precheck_state=drift_exceeded`**（raw SER mean
+  ≈0.240–0.256，偏差远超 0.03 阈值）→ 自动停止，不进入 P/E/V。
+- **P1（历史冻结终态保持）**：`v13r3fresh_prepare_20260815/no_eligible_package.json`
+  不变；P1 仍阻塞于真正 fresh 数据。
+- **P2（V17）**：保持 `mechanism_unverified` 冻结终态；位面/边标签效率路线冻结。
+- **push**：仍待用户单独授权；本地文档/证据可先提交。
+- **下一步**：若用户提供真正 fresh 10 dB Type-II 数据，则重新进入 D1–D5→P1；
+  若用户坚持用 2026-01-21 数据，则另开 legacy drift audit change，不能叫
+  fresh-confirmed。
+
+---
+
 ## Current Task — P2 V17 门冻结终态 mechanism_unverified；P1 阻塞于 fresh 数据 (2026-08-16)
 
 按用户更新后的目标（P0→P1→P2）继续：

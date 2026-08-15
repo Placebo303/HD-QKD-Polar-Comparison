@@ -2021,3 +2021,21 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   6 文件（v17_stage0 / v17_multibit_channel_model / v17_stage2 /
   v17_gate_decision / v17_gate_manifest + v17_replay_evidence 记账）。
   本地领先 `origin/main` 36 个提交；push 待单独授权。 [repo-observed]
+
+
+## 53. V13-R3 fresh 数据准入——2026-01-21 三源拒绝 (2026-08-16)
+
+- 用户提供三个 `D:\Data\Raw Data\2026.1.21\...` Type2 ttbin 源后，按修正后的
+  “v13r3fresh_20260816” 规划执行 **D0 数据准入**：判定
+  `data_intake_rejected_for_fresh_confirmation`。
+- 原因：时间戳 2026-01-21 早于 frozen fresh 边界；损耗/10 dB 元数据不可核验；
+  folder1 已有 Release D2 烟测 `raw_ser=0.254663`，远超 V13 D01 参考 0.0771。
+- 证据包：
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_intake_20260816/intake_decision.json`。
+- 修正规划：
+  `docs/nonbinary-ldpc-v13-r3-fresh-data-intake-20260816-plan.md`。
+- D1–D5 已于 2026-08-16（shell 可用后）执行完毕：D1 环境/git 基线、
+  D2/D3 三源 sidecar（`map_sanity` 全 FAIL）、D4 三源 pairs-table + manifest、
+  D5 全量漂移预检。D5 三源全部 `precheck_state=drift_exceeded`
+  （raw SER mean ≈0.240–0.256，偏差远超 0.03 阈值），自动停止，不进入 P/E/V。
+  真正 fresh 数据到达前，P1 保持 `no_eligible_frames`；push 仍待用户单独授权。

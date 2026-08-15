@@ -6,6 +6,37 @@ ACCEPT（零 blockers）；三个非阻塞警告已按 amendment 修复：A02 �
 insufficient_eligible_frames）、§5 漂移阈值引用 V13 D01 参考区间。
 ACCEPT 后允许 prepare；execute 需 review ACCEPT 且数据可用。
 
+## 2026-08-16 Data Intake Amendment（V13 R3 fresh 数据准入）
+
+> 原“v16 规划”已审查并替换为本文档；不要把本阶段称为 V16。
+> 完整规划见 `docs/nonbinary-ldpc-v13-r3-fresh-data-intake-20260816-plan.md`。
+
+- [x] **D0** 数据准入/新鲜度门：判定三个 `2026-01-21` Type2 源为
+  `data_intake_rejected_for_fresh_confirmation`。
+  证据包：`comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_intake_20260816/intake_decision.json`。
+  （完成：基于时间戳、损耗元数据缺失、已有 D2 烟测漂移 `raw_ser=0.254663`。）
+- [x] **D1** Release/Comparison 环境与 git 基线记录；Release scratch 快照。
+  （完成：`workspace/v13r3fresh_20260816/d1_baseline.json` 已生成；Release
+  HEAD=581cd05、Comparison HEAD=e31dedf 已记录。由于 D0 已拒绝数据，D1
+  不作为 fresh 路径继续条件。）
+- [x] **D2** 修正参数单源烟测（`--block-index 0 --materialize-max-pairs 0
+  --materialize-occupancy-filter 1 --materialize-diagnostics 1`）。
+  （完成：三源均执行，`map_sanity.verdict=FAIL` 且 `raw_ser≈0.24–0.26`，
+  证据保留；D0 已拒绝 fresh 路径，属诊断。）
+- [x] **D3** 三源全量（每个源独立 out-root + staging 隔离；block_index 恒为 0）。
+  （完成：`workspace/v13r3fresh_20260816/sidecars/<source_tag>/` 三套 sidecar
+  均已生成。）
+- [x] **D4** 三源 pairs-table parquet + build_manifest + load/normalize 自验。
+  （完成：`comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/<tag>/pairs.parquet`
+  三个文件 + `build_manifest.json`；`pairs_check_*.json` 自验通过。）
+- [x] **D5** 只读漂移预检（SER/条件熵/位面单调 vs V13 D01）；任一超界 →
+  `drift_exceeded` 自动停止，不进入 P/E/V。
+  （完成：全量预检 `workspace/v13r3fresh_20260816/precheck_report.json`；
+  三源 `precheck_state=drift_exceeded`，均因 `raw_ser_mean_deviation_exceeded`。）
+- [ ] **E0** 若 D0/D5 通过：实现 `run_v13r3_fresh_execute` / `verify_v13r3_fresh_execute`
+  及 T0/T1 测试（当前不存在，必须补）。
+- [ ] **P1/P2/E1/V1/C** 仅在 D0 新鲜性 + D5 全过后才可继续；否则保持阻塞。
+
 ## P — 规划与冻结（本对话完成）
 
 - [x] **P01** 冻结数据源/acquisition/window/stratum 设置（design §1）。

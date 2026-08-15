@@ -1,0 +1,88 @@
+{
+  "schema": "nbldpc_v13r3_fresh_pairs_build_manifest_v1",
+  "run_id": "v13r3fresh_pairs_20260816",
+  "created_at": "2026-08-15T16:44:41.017446+00:00",
+  "release_head": "581cd0547855bfa91cff544095f9f12836e58b7c",
+  "comparison_head": "e31dedfaecc8fe4e526b321065b534a5c2518762",
+  "processing": {
+    "point": "1024,200",
+    "factor": 1,
+    "block_index": 0,
+    "pairing_mode": "nearest",
+    "processing_rule_version": "legacy_v1",
+    "occupancy_filter": 1,
+    "joint_source_mode": "from_ttbin",
+    "sequence_source_mode": "strict"
+  },
+  "sources": [
+    {
+      "source_tag": "type2_1p5M_20260121_183806",
+      "main_ttbin": {
+        "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.ttbin",
+        "size": 21264,
+        "sha256": "b3d308c3faa2da3c5a9efae27f9f9ba694566a689154ff3ba846c33a88dc8e5d"
+      },
+      "chunk_ttbin": {
+        "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.1.ttbin",
+        "size": 31014064,
+        "sha256": "d040a1a24ceab863175c6eca8f2e842fc2682cbb320fcb7358d36e3726d21410"
+      },
+      "sidecar_meta": {
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1p5M_20260121_183806\\sidecar_meta.json",
+        "size": 6874,
+        "sha256": "532d08ffc19577f075dc2667ace5d8dfa269735078fe2029af24068d546ea695"
+      },
+      "pairs_parquet": {
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_1p5M_20260121_183806\\pairs.parquet",
+        "size": 1869178,
+        "sha256": "ca351e5205e76600530121066af4e0e1e5278061745c0797368a49443570a06b"
+      }
+    },
+    {
+      "source_tag": "type2_1M_20260121_184040",
+      "main_ttbin": {
+        "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.ttbin",
+        "size": 21264,
+        "sha256": "505fcadb17587336b034e63298201466892e8862f330f163adbe4067ff0885f1"
+      },
+      "chunk_ttbin": {
+        "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.1.ttbin",
+        "size": 22025840,
+        "sha256": "4282d95d1c07d3a9211cfeff9c15fcee300bef79d893a5a0cdda6205823eb04b"
+      },
+      "sidecar_meta": {
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1M_20260121_184040\\sidecar_meta.json",
+        "size": 6863,
+        "sha256": "59a24ccf58883b9470064962ee594d0c56db2929b8f6948ed3c4b99ca21b6f49"
+      },
+      "pairs_parquet": {
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_1M_20260121_184040\\pairs.parquet",
+        "size": 1354289,
+        "sha256": "1b89728751bc3535ea5917fccb581ee446f411ba0cf38c6b3f1a23fd9081af93"
+      }
+    },
+    {
+      "source_tag": "type2_2M_20260121_183657",
+      "main_ttbin": {
+        "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.ttbin",
+        "size": 21264,
+        "sha256": "099259fbe79b70e116ac1fce1f39341e5896c97485f53d4a6c37937fa0395af7"
+      },
+      "chunk_ttbin": {
+        "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.1.ttbin",
+        "size": 41768912,
+        "sha256": "b40b9b4f4b1661cd3ee6b7f75b99db056ae247d8d9c5a26da12eb96f414a3c94"
+      },
+      "sidecar_meta": {
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_2M_20260121_183657\\sidecar_meta.json",
+        "size": 6878,
+        "sha256": "4dd6f3b414429eb622244d1e3d497031e009d79f122bf4517394765abbf3a8fd"
+      },
+      "pairs_parquet": {
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_2M_20260121_183657\\pairs.parquet",
+        "size": 2458335,
+        "sha256": "d5a36eec8a03ce7e801bba4fd4b2e62cf8aef13c1efe1166766db79364ffc307"
+      }
+    }
+  ]
+}

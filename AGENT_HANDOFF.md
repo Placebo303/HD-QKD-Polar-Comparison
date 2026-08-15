@@ -2,6 +2,22 @@
 
 Last verified: **2026-08-16**
 
+## Current State — V13-R3 fresh 数据准入已拒绝；D1–D5 已执行，D5 drift_exceeded；P/E/V 不进入 (2026-08-16)
+
+- **D0（已完成）**：`2026-01-21` 三源判定为
+  `data_intake_rejected_for_fresh_confirmation`。
+  证据：`comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_intake_20260816/intake_decision.json`。
+  完整修正规划：`docs/nonbinary-ldpc-v13-r3-fresh-data-intake-20260816-plan.md`。
+- **D1–D5（已完成）**：shell 可用后按修正参数执行；三源 sidecar/pairs/manifest
+  已生成，`precheck_report.json` 全量预检三源均为 `drift_exceeded`
+  （raw SER mean ≈0.240–0.256，偏差远超 0.03 阈值）。P/E/V 不进入。
+- **P1**：保持 `v13r3fresh_prepare_20260815/no_eligible_package.json` 冻结终态；
+  真正 fresh 数据到达后重新 prepare。
+- **P2**：V17 `mechanism_unverified` 终态不变；效率路线冻结。
+- **push**：待用户单独授权。
+- **用户决策点**：提供真正 fresh 数据，或另开 legacy drift audit change。
+
+
 ## Current State — P2 V17 门冻结终态 mechanism_unverified；P1 阻塞于 fresh 数据 (2026-08-16)
 
 按用户更新后的目标（P0→P1→P2）继续：

@@ -2173,3 +2173,37 @@ Cohen 2019 多位位面分解机制未通过内部一致性锚点，故 Stage 2 
 资格/效率实测结论；P1（V13 R3 fresh acquisition）独立推进不受
 影响，仍阻塞于 fresh 数据（用户提供后重新 prepare 即可）。
 证据：change `evidence/` 6 文件（5 科学 + replay 记账）。
+
+
+### 2026-08-16: V13-R3 fresh 数据准入——2026-01-21 三源判定为 data_intake_rejected
+
+**Decision**: 用户提供的三个 `2026-01-21` Type2 ttbin 源不能作为 V13 R3
+fresh-confirmation 数据源。新增 D0 准入证据包
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_intake_20260816/intake_decision.json`，
+判定 `data_intake_rejected_for_fresh_confirmation`。不进入 P1 prepare/execute/verify。
+
+**Context**: frozen design §1 要求 fresh 数据晚于 V13 历史且为可核验 10 dB
+Type-II 帧数据。三个源时间戳为 2026-01-21、损耗元数据缺失；且 folder1 已有
+D2 烟测 `raw_ser=0.254663`，远超 V13 D01 参考 0.0771，已触发漂移门。
+
+**Alternatives considered**:
+- 按原“v16”规划继续 prepare/execute：拒绝，因数据不 fresh 且烟测已漂移。
+- 降级为 legacy drift audit：可另开新 change，但不得使用 fresh-confirmed/
+  promotion/qualification 声明。
+
+**Consequences**: P1 保持 `no_eligible_frames` 阻塞态；D1–D5 仅在诊断标签下
+可后续执行；真正 fresh 数据到达后重新进入 D1–D5→P1。push 仍待用户单独授权。
+
+### 2026-08-16: V13-R3 fresh 数据准入——D1–D5 诊断执行完成，D5 drift_exceeded
+
+**Decision**: shell 可用后按修正参数执行 D1–D5 诊断，完成三源 sidecar/pairs/manifest 与全量漂移预检。D5 三源全部 `drift_exceeded`，按冻结停止规则自动停止，不进入 P/E/V。
+
+**Context**: D0 已判定 `2026-01-21` 三源 `data_intake_rejected_for_fresh_confirmation`；D1–D5 作为只读诊断仍按修正参数执行，以固定证据并确认漂移幅度。
+
+**Evidence**:
+- D1: `workspace/v13r3fresh_20260816/d1_baseline.json`
+- D2/D3 sidecars: `workspace/v13r3fresh_20260816/sidecars/<source_tag>/`（`map_sanity.verdict=FAIL`，raw SER ≈0.240–0.256）
+- D4 pairs: `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/<source_tag>/pairs.parquet` + `build_manifest.json`
+- D5: `workspace/v13r3fresh_20260816/precheck_report.json`，三源 `precheck_state=drift_exceeded`，fail reason 均为 `raw_ser_mean_deviation_exceeded`
+
+**Consequences**: P1 仍保持 `no_eligible_frames` 冻结终态；P/E/V 不进入。真正 fresh 数据到达后重新进入 D1–D5→P1；若用户坚持使用 2026-01-21 数据，另开 legacy drift audit change。push 仍待用户单独授权。
