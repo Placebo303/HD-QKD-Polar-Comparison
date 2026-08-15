@@ -240,7 +240,8 @@ def _outcome_row(source_tag: str, frame: Mapping[str, Any], result: Mapping[str,
 
 def _report_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
                 test_only: bool, command: str, manifest_sha256: str,
-                manifest_id: str, frames_per_source: int | None) -> dict[str, Any]:
+                manifest_id: str, frames_per_source: int | None,
+                chunk_index: int = 0, chunk_count: int = 1) -> dict[str, Any]:
     rows = [row for src in sources for row in src["outcome_rows"]]
     status_counts: dict[str, int] = {}
     for row in rows:
@@ -268,6 +269,7 @@ def _report_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
             "raw_ser_max": float(np.max(ser)) if ser else None,
         })
     exact_total = int(sum(1 for r in rows if r["exact_correct"]))
+    chunk_note = "" if chunk_count <= 1 else f"; chunk {chunk_index + 1}/{chunk_count}"
     return {
         "schema": SCHEMA_REPORT_TEST if test_only else SCHEMA_REPORT,
         "run_id": run_id,
@@ -286,7 +288,7 @@ def _report_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
             "q": Q, "n": N, "m": M, "p": P, "max_iter": MAX_ITER,
         },
         "selection_rule": SELECTION_RULE + ("" if frames_per_source is not None
-                                         else "; full-data extension: all complete frames"),
+                                         else "; full-data extension: all complete frames") + chunk_note,
         "frames_per_source": frames_per_source,
         "attempted_frames": len(rows),
         "exact_correct_frames": exact_total,
@@ -303,8 +305,10 @@ def _report_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
 def _manifest_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
                   test_only: bool, command: str, artifact_index: Mapping[str, Any],
                   release_head: str | None, manifest_id: str,
-                  frames_per_source: int | None) -> dict[str, Any]:
+                  frames_per_source: int | None,
+                  chunk_index: int = 0, chunk_count: int = 1) -> dict[str, Any]:
     comparison_head = _git_head(_repo_root())
+    chunk_note = "" if chunk_count <= 1 else f"; chunk {chunk_index + 1}/{chunk_count}"
     return {
         "schema": SCHEMA_MANIFEST_TEST if test_only else SCHEMA_MANIFEST,
         "run_id": run_id,
@@ -312,7 +316,7 @@ def _manifest_doc(run_id: str, sources: Sequence[Mapping[str, Any]],
         "command": command,
         "claim_boundary": CLAIM_BOUNDARY,
         "selection_rule": SELECTION_RULE + ("" if frames_per_source is not None
-                                         else "; full-data extension: all complete frames"),
+                                         else "; full-data extension: all complete frames") + chunk_note,
         "frames_per_source": frames_per_source,
         "sources": [{
             "source_tag": str(src["source_tag"]),
@@ -338,6 +342,8 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
               _test_only: bool = False, production_authorized: bool = False,
               all_frames: bool = False,
               progress_every: int = 0,
+              chunk_index: int = 0,
+              chunk_count: int = 1,
               decode_fn: Callable[[Mapping[str, Any], Mapping[str, Any], Any],
                                   dict[str, Any]] | None = None) -> dict[str, Any]:
     """Execute the legacy drift audit once and write the additive package.
@@ -362,6 +368,11 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
             source = validate_pairs_table(parquet)
             tag = parquet.parent.name
             ids = selected_frame_ids(source, None if all_frames else FRAMES_PER_SOURCE)
+            if chunk_count > 1:
+                if chunk_index < 0 or chunk_index >= chunk_count:
+                    raise ValueError("chunk_index out of range")
+                chunk_size = (len(ids) + chunk_count - 1) // chunk_count
+                ids = ids[chunk_index * chunk_size:(chunk_index + 1) * chunk_size]
             df = _read_pairs(parquet)
             frames = _frames_for_ids(df, ids)
             sources.append({"source_tag": tag, "parquet": parquet,
@@ -449,13 +460,14 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
         frames_per_source = None if all_frames else FRAMES_PER_SOURCE
         manifest_doc = _manifest_doc(run_id, sources, _test_only, command,
                                      artifact_index, release_head, manifest_id,
-                                     frames_per_source)
+                                     frames_per_source, chunk_index, chunk_count)
         manifest_path = out / ARTIFACTS[3]
         _put_exclusive(manifest_path, _compact(manifest_doc))
         written.append(manifest_path)
         report_doc = _report_doc(run_id, sources, _test_only, command,
                                  _sha_bytes(manifest_path.read_bytes()),
-                                 manifest_id, frames_per_source)
+                                 manifest_id, frames_per_source,
+                                 chunk_index, chunk_count)
         report_path = out / ARTIFACTS[2]
         _put_exclusive(report_path, _compact(report_doc))
         written.append(report_path)

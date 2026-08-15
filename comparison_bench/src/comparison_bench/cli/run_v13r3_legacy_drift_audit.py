@@ -35,6 +35,10 @@ def main() -> int:
                              "(full-data extension; default is first 64)")
     parser.add_argument("--progress-every", type=int, default=0,
                         help="print progress every N frames (0 disables)")
+    parser.add_argument("--chunk-index", type=int, default=0,
+                        help="zero-based chunk index (requires --chunks > 1)")
+    parser.add_argument("--chunks", type=int, default=1,
+                        help="split full-data audit into this many chunks")
     args = parser.parse_args()
 
     if args.action == "verify":
@@ -73,7 +77,9 @@ def main() -> int:
                                 run_id=args.run_id, command=" ".join(sys.argv),
                                 production_authorized=True,
                                 all_frames=args.all_frames,
-                                progress_every=args.progress_every)
+                                progress_every=args.progress_every,
+                                chunk_index=args.chunk_index,
+                                chunk_count=args.chunks)
     except Exception as exc:
         print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
