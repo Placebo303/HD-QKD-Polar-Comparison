@@ -1,7 +1,32 @@
 # CURRENT_TASK.md
 
 
-## Current Task — V13-R3 fresh 数据准入已拒绝；D1–D5 已执行，D5 drift_exceeded；P/E/V 不进入 (2026-08-16)
+## Current Task — V13-R3 legacy drift audit：按用户决定使用 2026-01-21 三源执行 (2026-08-16)
+
+用户明确表示这些是之前采集的数据、纠错算法对具体数据源要求没那么高，并要求
+**使用这三份 `2026-01-21` 数据继续进行**。按冻结规则，不以 fresh-confirmation
+路径进入 P/E/V，而是另开独立 change
+`formal-nonbinary-ldpc-v13-r3-legacy-drift-audit`，claim boundary **仅限
+`legacy_drift_audit`**。
+
+- **实现/测试**：新增 `nonbinary_v13r3_legacy_audit.py`、
+  `run_v13r3_legacy_drift_audit.py` + 8 个测试，全部通过。
+- **生产执行（一次）**：三源各取前 64 个完整帧（frame_id 0..63，共 192 帧），
+  不变 R3 候选（`nbldpc_v13_r3_code_v1`，p=.20，flooding，max_iter=100）解码一次。
+  结果：**188/192 exact_correct**；4 帧 `decode_failed`（`iteration_limit`：
+  1M 源 frame 15/20，2M 源 frame 52/56），全部原样保留。
+- **verify**：只读验证通过（192 行、claim/frozen binding/hash 全部 OK）。
+- **证据包**：
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_20260816/`
+- **P1**：`v13r3fresh_prepare_20260815/no_eligible_package.json` 冻结终态不变；
+  本结果不构成 fresh-confirmed/promotion/qualification。
+- **P2（V17）**：`mechanism_unverified` 终态不变。
+- **push**：仍待用户单独授权；本地文档/证据已提交。
+
+---
+
+## Previous Task — V13-R3 fresh 数据准入已拒绝；D1–D5 已执行，D5 drift_exceeded；P/E/V 不进入 (2026-08-16)
+
 
 **状态：本目标已完成。** D1–D5 已按文档执行并验证；D5 三源 `drift_exceeded`，
 P/E/V 不进入。另已运行 README/RUN_COMMANDS 中的安全检查：`unittest` 5/5 通过、

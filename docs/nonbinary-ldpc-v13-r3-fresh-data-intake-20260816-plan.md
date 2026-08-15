@@ -1,6 +1,9 @@
 # V13-R3 Fresh Data Intake / Drift Precheck Plan (2026-08-16)
 
 Status: **AMENDED PLAN — D0–D5 executed; D5 drift_exceeded; P/E/V gated**
+Follow-up (2026-08-16): user chose to continue with these legacy sources under a separate
+change `formal-nonbinary-ldpc-v13-r3-legacy-drift-audit` (claim boundary `legacy_drift_audit`
+only; 192 frames executed, 188 exact_correct / 4 decode_failed).
 Change: `formal-nonbinary-ldpc-v13-r3-fresh-acquisition`
 
 > This document supersedes the draft that was colloquially called “v16”.

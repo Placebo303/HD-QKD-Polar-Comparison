@@ -2,7 +2,21 @@
 
 Last verified: **2026-08-16**
 
-## Current State — V13-R3 fresh 数据准入已拒绝；D1–D5 已执行，D5 drift_exceeded；P/E/V 不进入 (2026-08-16)
+## Current State — V13-R3 legacy drift audit：用户决定用 2026-01-21 三源继续，执行完成 (2026-08-16)
+
+- 用户决定：这些是之前采集的数据，继续使用三份 `2026-01-21` Type2 源运行。
+- 新 change：`formal-nonbinary-ldpc-v13-r3-legacy-drift-audit`，claim 仅
+  `legacy_drift_audit`。
+- 生产执行一次：每源前 64 完整帧、共 192 帧，不变 R3 解码；**188 exact_correct、
+  4 decode_failed（iteration_limit）**；只读 verify OK。
+- 证据包：
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_20260816/`
+- P1 `no_eligible_frames` 冻结终态不变；本结果不构成 fresh/promotion/qualification。
+- P2 V17 `mechanism_unverified` 终态不变。
+- push 待用户单独授权。
+
+## Previous State — V13-R3 fresh 数据准入已拒绝；D1–D5 已执行，D5 drift_exceeded；P/E/V 不进入 (2026-08-16)
+
 
 **状态：本目标已完成。** 安全检查（unittest 5/5、smoke_test、compileall）也已通过。
 

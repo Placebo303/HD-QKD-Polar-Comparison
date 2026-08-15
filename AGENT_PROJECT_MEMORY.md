@@ -2039,3 +2039,19 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   D5 全量漂移预检。D5 三源全部 `precheck_state=drift_exceeded`
   （raw SER mean ≈0.240–0.256，偏差远超 0.03 阈值），自动停止，不进入 P/E/V。
   真正 fresh 数据到达前，P1 保持 `no_eligible_frames`；push 仍待用户单独授权。
+
+## 54. V13-R3 legacy drift audit——2026-01-21 三源执行 (2026-08-16)
+
+- 用户决定：使用三份 `2026-01-21` Type2 数据继续，不要求 fresh 边界。
+- 新 change：`formal-nonbinary-ldpc-v13-r3-legacy-drift-audit`；claim boundary
+  仅 `legacy_drift_audit`。
+- 实现：`formal_ir/nonbinary_v13r3_legacy_audit.py`、
+  `cli/run_v13r3_legacy_drift_audit.py`、8 个测试。
+- 生产执行一次：每源前 64 完整帧（frame_id 0..63），共 192 帧；不变 R3
+  候选 `nbldpc_v13_r3_code_v1` 解码。结果 **188 exact_correct**、
+  **4 decode_failed**（`iteration_limit`：type2_1M frame 15/20、
+  type2_2M frame 52/56）；失败原样保留；只读 verify OK。
+- 证据包：
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_20260816/`
+- 边界：不构成 fresh-confirmed / promotion / qualification；P1
+  `no_eligible_frames` 与 P2 V17 `mechanism_unverified` 均不变。push 待授权。
