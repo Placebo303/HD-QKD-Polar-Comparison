@@ -1,0 +1,22 @@
+{
+  "schema": "nbldpc_v19_retry_probe_v1",
+  "claim_boundary": "diagnostic_only",
+  "q": 1024,
+  "n": 256,
+  "m": 28,
+  "rate": 0.890625,
+  "f_plain_qary": 1.9887989247267341,
+  "max_iter": 10,
+  "retries_per_frame": 5,
+  "perturbation": "prior_mix_eps_0_0.02_0.04_0.06_0.08_0.10",
+  "n_frames": 4,
+  "n_success": 0,
+  "n_decode_failed": 4,
+  "rows": [
+    {"frame_id": 0, "success": false, "used_retry": 0, "decoder_status": "max_iter_reached"},
+    {"frame_id": 1, "success": false, "used_retry": 0, "decoder_status": "converged_no_syndrome"},
+    {"frame_id": 2, "success": false, "used_retry": 0, "decoder_status": "converged_no_syndrome"},
+    {"frame_id": 3, "success": false, "used_retry": 0, "decoder_status": "converged_no_syndrome"}
+  ],
+  "conclusion": "Prior-perturbation retries did not recover any R=0.89 q=1024 frame with the current decoder."
+}
