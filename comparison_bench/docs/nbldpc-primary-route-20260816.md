@@ -200,6 +200,7 @@ fresh/promotion/qualification.
     (`..._full_osd1_n64_probe.json`) but not a second
     (`..._full_osd1_n64_probe_seed2055.json`). Prior-retry + full OSD-1 on
     the non-recovered frame also failed (`..._retry_full_osd1_n64_seed2055.json`).
+    Broad OSD-2 on the same frame also failed (`..._osd2_n64_seed2055.json`).
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
