@@ -23,3 +23,13 @@ def test_m2_plan_written():
         assert (root / "m2_plan.json").exists()
     finally:
         shutil.rmtree(root, ignore_errors=True)
+
+
+def test_m2_smoke_runs():
+    root = Path("workspace") / f"nbldpc_v18_b2_smoke_{uuid.uuid4().hex}"
+    try:
+        doc = core.run_smoke(q=8, out_dir=root, n_samples=200, max_iter=3)
+        assert doc["schema"] == "nbldpc_v18_b2_structured_de_smoke_v1"
+        assert (root / "smoke.json").exists()
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
