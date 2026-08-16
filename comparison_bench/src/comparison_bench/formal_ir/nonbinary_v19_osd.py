@@ -12,7 +12,7 @@ import numpy as np
 
 from .nonbinary_field import GF2mField
 
-__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2"]
+__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2", "osd_decode_candidates_fast"]
 
 
 def _reliability(beliefs: np.ndarray, hard: Sequence[int]) -> dict[int, float]:
@@ -266,4 +266,64 @@ def osd_decode_candidates_order2(*, field: GF2mField, matrix: Any, syndrome: Seq
                         candidates.append(sol)
                         if len(candidates) >= max_candidates:
                             return candidates
+    return candidates
+
+
+def osd_decode_candidates_fast(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
+                               beliefs: Any = None, e_hat: Sequence[int] | None = None,
+                               top_info: int | None = None,
+                               max_candidates: int = 200000) -> list[list[int]]:
+    """Fast full/partial OSD-1 candidate enumeration.
+
+    Uses the precomputed RREF linear map so each single-flip candidate costs
+    O(m) rather than O(m*n).  ``top_info=None`` enumerates all free variables.
+    """
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    m, n = matrix.shape
+    rref, pivots = gf_rref(field, matrix.tolist(), list(syndrome))
+    pivot_set = set(int(p) for p in pivots)
+    free_cols = [j for j in range(n) if j not in pivot_set]
+    if top_info is not None:
+        if beliefs is not None:
+            beliefs = np.asarray(beliefs, dtype=np.float64)
+            hard_all = [int(np.argmax(beliefs[i])) for i in range(n)] if e_hat is None else [int(x) for x in e_hat]
+            rel = _reliability(beliefs, hard_all)
+            free_cols = sorted(free_cols, key=lambda i: rel.get(i, 0.0))[:int(top_info)]
+        else:
+            free_cols = free_cols[:int(top_info)]
+    if e_hat is not None:
+        hard = [int(x) for x in e_hat]
+    elif beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        hard = [int(np.argmax(beliefs[i])) for i in range(n)]
+    else:
+        hard = [0] * n
+    assign = {i: hard[i] for i in free_cols}
+    base = solve_with_free(field, rref, pivots, assign, n)
+    if base is None:
+        return []
+    candidates = [base]
+    # coeff[p_idx][free_idx]
+    pivot_to_row = {int(p): idx for idx, p in enumerate(pivots)}
+    coeff = {}
+    for p in pivots:
+        row_idx = pivot_to_row[int(p)]
+        coeff[int(p)] = {j: int(rref[row_idx][j]) for j in free_cols}
+    for i in free_cols:
+        old = int(hard[i])
+        for cand in range(field.q):
+            if cand == old:
+                continue
+            d = field.add(old, cand)  # old XOR cand in GF(2^m)
+            new_sol = list(base)
+            new_sol[i] = cand
+            for p in pivots:
+                factor = coeff[int(p)].get(i, 0)
+                if factor != 0:
+                    new_sol[p] = field.add(new_sol[p], field.mul(factor, d))
+            candidates.append(new_sol)
+            if len(candidates) >= max_candidates:
+                return candidates
     return candidates
