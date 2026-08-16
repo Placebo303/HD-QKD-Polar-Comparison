@@ -185,6 +185,78 @@ def _single_symbol_postprocess(field: GF2mField, matrix: np.ndarray,
     return None
 
 
+def _bounded_osd_postprocess(field: GF2mField, matrix: np.ndarray,
+                               syndrome: Sequence[int], e_hat: np.ndarray,
+                               beliefs: Any = None,
+                               max_vars: int = 8,
+                               top_symbols: int = 16) -> np.ndarray | None:
+    """Bounded two-symbol OSD-like post-processing.
+
+    Starting from a BP error estimate, consider the ``max_vars`` least reliable
+    variables.  For every pair among them and every candidate symbol drawn from
+    the top ``top_symbols`` posterior symbols (plus the current symbol), test
+    whether a two-symbol change makes the syndrome consistent.  This is a
+    diagnostic list decoder, not a full OSD.
+    """
+    m_rows, n_cols = matrix.shape
+    syndrome = [int(x) for x in syndrome]
+    current = np.asarray(e_hat, dtype=np.int64).copy()
+    cur_syn = np.asarray(qspa.syndrome_of(field, matrix, current.tolist()), dtype=np.int64)
+    if beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        if beliefs.shape == (n_cols, field.q):
+            reliability = beliefs.max(axis=1)
+            order = np.argsort(reliability)[:int(max_vars)]
+        else:
+            order = np.arange(min(n_cols, int(max_vars)))
+    else:
+        order = np.arange(min(n_cols, int(max_vars)))
+    order = [int(i) for i in order]
+    # Precompute column contributions and candidate lists for selected vars.
+    cols = {}
+    cands = {}
+    for i in order:
+        old = int(current[i])
+        old_col = np.asarray([field.mul(int(matrix[r, i]), old) for r in range(m_rows)],
+                             dtype=np.int64)
+        cols[i] = (old, old_col)
+        if beliefs is not None and beliefs.shape == (n_cols, field.q):
+            # Top posterior symbols, always include current symbol.
+            top = set(np.argsort(beliefs[i])[::-1][:int(top_symbols)].tolist())
+            top.add(old)
+            cands[i] = sorted(top)
+        else:
+            cands[i] = list(range(field.q))
+    for idx_a in range(len(order)):
+        i = order[idx_a]
+        old_i, old_col_i = cols[i]
+        for idx_b in range(idx_a + 1, len(order)):
+            j = order[idx_b]
+            old_j, old_col_j = cols[j]
+            for a in cands[i]:
+                new_col_a = np.asarray([field.mul(int(matrix[r, i]), a) for r in range(m_rows)],
+                                       dtype=np.int64)
+                for b in cands[j]:
+                    if a == old_i and b == old_j:
+                        continue
+                    new_col_b = np.asarray([field.mul(int(matrix[r, j]), b) for r in range(m_rows)],
+                                           dtype=np.int64)
+                    ok = True
+                    for r in range(m_rows):
+                        delta = field.add(int(old_col_i[r]), int(new_col_a[r]))
+                        delta = field.add(delta, int(old_col_j[r]))
+                        delta = field.add(delta, int(new_col_b[r]))
+                        if field.add(int(cur_syn[r]), delta) != syndrome[r]:
+                            ok = False
+                            break
+                    if ok:
+                        fixed = current.copy()
+                        fixed[i] = a
+                        fixed[j] = b
+                        return fixed
+    return None
+
+
 def execute_synthetic_frames(*, q: int, n: int, m: int,
                              lambda_edge: Mapping[int, float], w: Any,
                              n_frames: int, seed: int, max_iter: int = 100,
@@ -253,6 +325,21 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                     x_hat = [int(field.add(int(y), int(e))) for y, e in zip(bob, e_hat)]
                     syndrome_ok = qspa.syndrome_of(field, matrix, x_hat) == list(s_x)
                     exact = bool(syndrome_ok and np.array_equal(x_hat, alice))
+                if not exact:
+                    # Bounded two-symbol OSD-like post-processing (diagnostic).
+                    e_fixed = _bounded_osd_postprocess(
+                        field, matrix,
+                        [int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                        np.asarray(e_hat, dtype=np.int64),
+                        beliefs=result.get("beliefs"),
+                        max_vars=6 if n <= 512 else 4,
+                        top_symbols=12)
+                    if e_fixed is not None:
+                        postprocess_used = True
+                        e_hat = e_fixed.tolist()
+                        x_hat = [int(field.add(int(y), int(e))) for y, e in zip(bob, e_hat)]
+                        syndrome_ok = qspa.syndrome_of(field, matrix, x_hat) == list(s_x)
+                        exact = bool(syndrome_ok and np.array_equal(x_hat, alice))
             if exact:
                 status = "exact_correct"
                 n_exact += 1
