@@ -46,7 +46,8 @@
     sweep (5 seeds) at f=1.296 all exact_mismatch. max_iter=50 + OSD still
     exact_mismatch (not iteration-limited). n=2048,m=126 f=1.119 OSD also
     exact_mismatch. Improved OSD reliability ordering (max-second-max) still
-    exact_mismatch at f=1.296. Created V20
+    exact_mismatch at f=1.296. V18-B2 optimized lambda with exact two-degree
+    rho at f=1.296 also exact_mismatch. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
