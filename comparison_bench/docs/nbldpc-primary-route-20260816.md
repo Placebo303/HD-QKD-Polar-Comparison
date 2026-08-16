@@ -211,7 +211,8 @@ fresh/promotion/qualification.
     5/8 and 0/8 across two batches (`..._lambda062_8f_2204/`,
     `..._lambda062_8f_2212/`), combined FER=0.6875. `{2:0.58,3:0.42}` gave
     6/16 exact, FER=0.625 (`..._lambda058_8f_2220/`, `..._lambda058_8f_2228/`).
-    `{2:0.59,3:0.41}` gave 1/8 exact, FER=0.875 (`..._lambda059_8f_2236/`).
+    `{2:0.59,3:0.41}` gave 1/8 exact, FER=0.875 (`..._lambda059_8f_2236/`);
+    `{2:0.61,3:0.39}` gave 2/8 exact, FER=0.75 (`..._lambda061_8f_2244/`).
   - n=64 fast OSD with lambda `{2:0.7,3:0.3}`: 2/8 exact, FER=0.75
     (`..._fast_osd_lambdac_8f_2152/`); lambda `{2:0.8,3:0.2}` also 2/8
     exact, FER=0.75 (`..._fast_osd_lambdad_8f_2160/`); lambda
