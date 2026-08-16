@@ -160,6 +160,9 @@ fresh/promotion/qualification.
     exact_mismatch.
   - Wider OSD-2 probe (`n4_finite_q1024_f129_osd2_wide_probe.json`,
     top_info=4, top_symbols=16, 1531 candidates): still no exact match.
+  - PEG seed sweep (`n4_finite_q1024_f129_seed_sweep_summary.json`):
+    seeds 2026082028/33/36/37/38 all exact_mismatch; construction seed alone
+    does not unlock exact decoding.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
