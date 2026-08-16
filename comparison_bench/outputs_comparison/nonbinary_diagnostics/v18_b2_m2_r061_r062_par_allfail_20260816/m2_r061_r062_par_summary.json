@@ -1,0 +1,148 @@
+{
+  "conclusion": "q=16 folded real structured channel: rate 0.61 and 0.62 both not reachable with 8 independent DE searches each at current budget. Verified converging boundary is rate=0.60 (f~4.18); rates >0.60 not found.",
+  "max_gen": 20,
+  "max_iter": 100,
+  "n_converged": 0,
+  "n_failed": 16,
+  "n_runs": 16,
+  "n_samples": 10000,
+  "pop_size": 20,
+  "q_small": 16,
+  "rates": [
+    0.61,
+    0.62
+  ],
+  "rows": [
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.61,
+      "seed": 2026082300,
+      "seed_index": 0
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.61,
+      "seed": 2026082301,
+      "seed_index": 1
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.61,
+      "seed": 2026082302,
+      "seed_index": 2
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.61,
+      "seed": 2026082303,
+      "seed_index": 3
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.61,
+      "seed": 2026082304,
+      "seed_index": 4
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.61,
+      "seed": 2026082305,
+      "seed_index": 5
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.61,
+      "seed": 2026082306,
+      "seed_index": 6
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.61,
+      "seed": 2026082307,
+      "seed_index": 7
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.62,
+      "seed": 2026082400,
+      "seed_index": 0
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.62,
+      "seed": 2026082401,
+      "seed_index": 1
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.62,
+      "seed": 2026082402,
+      "seed_index": 2
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.62,
+      "seed": 2026082403,
+      "seed_index": 3
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.62,
+      "seed": 2026082404,
+      "seed_index": 4
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.62,
+      "seed": 2026082405,
+      "seed_index": 5
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.62,
+      "seed": 2026082406,
+      "seed_index": 6
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "rate": 0.62,
+      "seed": 2026082407,
+      "seed_index": 7
+    }
+  ],
+  "run_id": "v18_b2_m2_r061_r062_par_allfail_20260816",
+  "schema": "nbldpc_v18_b2_m2_r061_r062_par_summary_v1",
+  "status": "all_failed"
+}
