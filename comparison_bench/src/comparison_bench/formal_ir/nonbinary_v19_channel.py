@@ -30,6 +30,7 @@ __all__ = [
     "folded_entropy_bits",
     "f_plain_qary",
     "f_full_two_stage",
+    "lsb_public_capacity_f",
     "build_channel_doc",
 ]
 
@@ -121,6 +122,40 @@ def f_full_two_stage(*, syndrome_bits_per_symbol: float,
             or not math.isfinite(float(h_full_bits)) or float(h_full_bits) <= 0.0:
         raise ValueError("h_full_bits must be positive and finite")
     return (float(syndrome_bits_per_symbol) + float(public_bits_per_symbol)) / float(h_full_bits)
+
+
+def lsb_public_capacity_f(*, public_lsb_planes: int,
+                           per_plane_error: Any = V17_PER_PLANE_ERROR,
+                           h_full_bits: float = H_FULL_Q1024) -> dict:
+    """Capacity-ideal LSB-public two-step leakage estimate.
+
+    If the ``public_lsb_planes`` least-significant Gray planes are publicly
+    disclosed (one bit per symbol each), the remaining high-bit planes still
+    need reconciliation.  This function returns the public-bit cost, the
+    residual high-plane entropy (ideal syndrome cost in bits/symbol), and the
+    resulting ideal f.  This is a diagnostic bound, not a code construction.
+    """
+    if isinstance(public_lsb_planes, bool) or not isinstance(public_lsb_planes, int) \
+            or not 0 <= int(public_lsb_planes) <= 10:
+        raise ValueError("public_lsb_planes must be an integer in 0..10")
+    l = int(public_lsb_planes)
+    rates = np.asarray(per_plane_error, dtype=np.float64)
+    if rates.shape != (10,) or not np.all(np.isfinite(rates)) or np.any(rates < 0.0) \
+            or np.any(rates > 1.0):
+        raise ValueError("per_plane_error must be a 10-vector in [0,1]")
+    # MSB-first list: indices 0..9; the l least-significant planes are indices 10-l..9.
+    high_h2 = float(sum(binary_entropy_bits(float(p)) for p in rates[:10 - l]))
+    ideal_syndrome = high_h2
+    public_bits = float(l)
+    f_ideal = (public_bits + ideal_syndrome) / float(h_full_bits)
+    return {
+        "public_lsb_planes": l,
+        "public_bits_per_symbol": public_bits,
+        "residual_high_plane_entropy_bits_per_symbol": high_h2,
+        "ideal_syndrome_bits_per_symbol": ideal_syndrome,
+        "ideal_f_full": float(f_ideal),
+        "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+    }
 
 
 def build_channel_doc(*, q_small: int = 16, qsc_p: float = 0.038,

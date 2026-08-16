@@ -1,0 +1,96 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "conclusion": "At capacity-ideal bound, publicly disclosing LSB planes does not reduce full f: it adds public bits while only removing low-entropy disclosed planes. Full q=1024 coding (l=0) has ideal f=1.0; practical DE/code construction is the binding gap.",
+  "h_full_q1024": 0.549955,
+  "rows": [
+    {
+      "ideal_f_full": 1.0000000798645983,
+      "ideal_syndrome_bits_per_symbol": 0.5499550439219351,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 0.0,
+      "public_lsb_planes": 0,
+      "residual_high_plane_entropy_bits_per_symbol": 0.5499550439219351
+    },
+    {
+      "ideal_f_full": 2.39877174203117,
+      "ideal_syndrome_bits_per_symbol": 0.31921651338875195,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 1.0,
+      "public_lsb_planes": 1,
+      "residual_high_plane_entropy_bits_per_symbol": 0.31921651338875195
+    },
+    {
+      "ideal_f_full": 3.9553686011339657,
+      "ideal_syndrome_bits_per_symbol": 0.17527473903663007,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 2.0,
+      "public_lsb_planes": 2,
+      "residual_high_plane_entropy_bits_per_symbol": 0.17527473903663007
+    },
+    {
+      "ideal_f_full": 5.63519882325085,
+      "ideal_syndrome_bits_per_symbol": 0.09910576884092102,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 3.0,
+      "public_lsb_planes": 3,
+      "residual_high_plane_entropy_bits_per_symbol": 0.09910576884092102
+    },
+    {
+      "ideal_f_full": 7.376863795978981,
+      "ideal_syndrome_bits_per_symbol": 0.056943128917619996,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 4.0,
+      "public_lsb_planes": 4,
+      "residual_high_plane_entropy_bits_per_symbol": 0.056943128917619996
+    },
+    {
+      "ideal_f_full": 9.149312526298104,
+      "ideal_syndrome_bits_per_symbol": 0.031710170400273685,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 5.0,
+      "public_lsb_planes": 5,
+      "residual_high_plane_entropy_bits_per_symbol": 0.031710170400273685
+    },
+    {
+      "ideal_f_full": 10.94242499789154,
+      "ideal_syndrome_bits_per_symbol": 0.017841339715442543,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 6.0,
+      "public_lsb_planes": 6,
+      "residual_high_plane_entropy_bits_per_symbol": 0.017841339715442543
+    },
+    {
+      "ideal_f_full": 12.74099398976629,
+      "ideal_syndrome_bits_per_symbol": 0.006973349641918976,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 7.0,
+      "public_lsb_planes": 7,
+      "residual_high_plane_entropy_bits_per_symbol": 0.006973349641918976
+    },
+    {
+      "ideal_f_full": 14.550762888065956,
+      "ideal_syndrome_bits_per_symbol": 0.002264804106312251,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 8.0,
+      "public_lsb_planes": 8,
+      "residual_high_plane_entropy_bits_per_symbol": 0.002264804106312251
+    },
+    {
+      "ideal_f_full": 16.3658877372852,
+      "ideal_syndrome_bits_per_symbol": 0.000501790558681815,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 9.0,
+      "public_lsb_planes": 9,
+      "residual_high_plane_entropy_bits_per_symbol": 0.000501790558681815
+    },
+    {
+      "ideal_f_full": 18.183305906846925,
+      "ideal_syndrome_bits_per_symbol": 0.0,
+      "note": "capacity-ideal diagnostic bound; real finite codes will be worse",
+      "public_bits_per_symbol": 10.0,
+      "public_lsb_planes": 10,
+      "residual_high_plane_entropy_bits_per_symbol": 0.0
+    }
+  ],
+  "schema": "nbldpc_v19_lsb_public_capacity_v1"
+}

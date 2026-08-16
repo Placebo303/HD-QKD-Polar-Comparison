@@ -30,7 +30,19 @@ fresh/promotion/qualification.
 - This is consistent with the prior V18-B2 plain structured-channel ceiling:
   R≈0.60 / f≈4.18.
 
-### N2c — Extended-degree probe
+### N2b — Channel-aware diagnostic bound: LSB-public two-step
+
+- Evidence: `n2b_channel_aware_bounds/lsb_public_capacity.json`
+- Capacity-ideal bound for 0..10 public LSB planes.
+- Publicly disclosing LSBs does **not** lower ideal full f: the added public
+  bits exceed the entropy removed from the protected high-bit alphabet.
+  - l=0 (full q=1024 coding): ideal f≈1.00.
+  - l=1: ideal f≈2.40.
+- Conclusion: the route to f≤1.3 must target **full q=1024 DE/code
+  construction**, not simple LSB-public disclosure; per-symbol-class puncture
+  remains the more promising channel-aware mechanism.
+
+## N2c — Extended-degree probe
 
 - Evidence: `n2_extended_probe/extended_degree_probe.json`
 - Two candidates with degrees up to 48 and 60 at rate 0.65 both failed to

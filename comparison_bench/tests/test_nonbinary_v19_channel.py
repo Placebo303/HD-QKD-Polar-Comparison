@@ -32,3 +32,12 @@ def test_channel_doc():
     assert doc["schema"] == "nbldpc_v19_channel_v1"
     assert len(doc["folded_w"]) == 16
     assert "folded_w" in doc
+
+
+def test_lsb_public_capacity_bound():
+    d0 = ch.lsb_public_capacity_f(public_lsb_planes=0)
+    d1 = ch.lsb_public_capacity_f(public_lsb_planes=1)
+    # Disclosing LSBs adds public bits, so capacity-ideal f is not below 1.0.
+    assert d0["ideal_f_full"] >= 1.0 - 1e-9
+    assert d1["public_bits_per_symbol"] == 1.0
+    assert d1["residual_high_plane_entropy_bits_per_symbol"] < d0["residual_high_plane_entropy_bits_per_symbol"]

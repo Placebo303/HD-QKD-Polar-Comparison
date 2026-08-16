@@ -18,6 +18,8 @@
     `n2_extended_probe_q1024/extended_degree_probe.json` (tiny DE probe,
     non-converged). `n6_comparison_v2_q1024` includes the q=1024 row and
     `leakage_decomposition.json` (q16 honest f≈3.016; q1024 n128 f≈7.245).
+  - N2b capacity bound: `n2b_channel_aware_bounds/lsb_public_capacity.json`
+    LSB-public does not reduce ideal f; full q=1024 coding is the binding target.
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
     `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
 - Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;
