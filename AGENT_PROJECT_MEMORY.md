@@ -75,7 +75,8 @@
     (`osd_decode_candidates_fast`) integrated for n<=256 (~0.6s at n=64).
     Fast broad OSD-2 (`osd_decode_candidates_order2_fast`) also integrated
     for n<=128; fast bounded OSD-3 added; seed2055 still not recovered with
-    top12/top8 or OSD-4 top8/top2/top4. Comprehensive blocker summary
+    top12/top8 or OSD-4 top8/top2/top4; fast OSD-1/2/3/4 integrated for
+    n<=64, seed2055 still non-recovered. Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
