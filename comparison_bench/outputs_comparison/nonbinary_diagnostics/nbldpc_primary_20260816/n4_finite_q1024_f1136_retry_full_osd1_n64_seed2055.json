@@ -1,0 +1,34 @@
+{
+  "f_plain_qary": 1.1364566191779328,
+  "found_exact": false,
+  "m": 4,
+  "n": 64,
+  "q": 1024,
+  "results": [
+    {
+      "decoder_status": "converged_no_syndrome",
+      "eps": 0.0,
+      "found": false,
+      "n_candidates": 61381
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "eps": 0.05,
+      "found": false,
+      "n_candidates": 61381
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "eps": 0.1,
+      "found": false,
+      "n_candidates": 61381
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "eps": 0.2,
+      "found": false,
+      "n_candidates": 61381
+    }
+  ],
+  "schema": "nbldpc_v19_retry_full_osd1_n64_probe_v1"
+}
