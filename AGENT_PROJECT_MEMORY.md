@@ -1,3 +1,9 @@
+## 2026-08-16 V19 Polar N=8192 negative result
+
+- Tested N=8192, GA mask, CA-SCL list=128, plane 9, f≈1.3 per-plane target.
+- Single frame decode took ~122 s and still failed.
+- This closes the Polar/SCL scaling path with the current decoder; next recommendation is a different code family / optimized LDPC DE-gated design. [repo-observed, diagnostic_only]
+
 ## 2026-08-16 V19 Polar GA frozen-set attempt
 
 - Added `v19_polar_ga.py` implementing GA/J-function reliability for per-plane BSC Polar construction.
