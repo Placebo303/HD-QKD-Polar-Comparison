@@ -1,12 +1,12 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; POLAR_MLC_F13_BLOCKED; NEXT_LDPC_DE_GATED
+Status: THREE_WAY_COMPARISON_PLAN_READY — next work in a NEW conversation per user decision
 
-## Current State — Polar MLC f≤1.3 已穷尽；下一步 V19 DE-gated LDPC (2026-08-16)
+## Current State — 三路并行对比已立项：Binary Polar / Binary LDPC / Nonbinary LDPC (2026-08-16)
 
-- Route A/B M1/M2 完成；QSC 对照证明信道结构限制。
-- V19 prototype 现有 binary MLC 500 帧全部纠正，f≈4.17。
-- PW/MC/GA + CA-SCL list32/128 + N=2048/4096/8192 均未达到 f≤1.3。
-- 结论：当前 Polar/SCL 路径受阻；下一步转向 V19 DE-gated LDPC 码设计（需新 change/用户批准）。
-- D1/D3 仍阻塞。
+- 用户决策：三条路线都做并对比，不再只做 Polar。
+- 执行契约：`docs/three-way-ir-comparison-plan-20260816.md`。
+- 已有资产：Polar GA/CRC/CA-SCL32/128；binary v4/v5 MLC + BpOsdDecoder + DE screener；nonbinary V18 B2 structured DE。
+- 统一目标：同口径 f/FER/syndrome/runtime 对比，目标 f≤1.3；不达标则记录最佳 f。
+- 本仓库当前只保存计划；执行在用户新对话中继续。D1/D3 仍阻塞。
 
 # AGENT_HANDOFF.md
 

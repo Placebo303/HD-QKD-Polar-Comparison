@@ -1,15 +1,15 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; POLAR_MLC_F13_BLOCKED; NEXT_LDPC_DE_GATED
+Status: THREE_WAY_COMPARISON_PLAN_READY — next work in a NEW conversation per user decision
 
-## Current Task — Polar MLC f≤1.3 路径已穷尽（PW/MC/GA、N≤8192、list≤128 均失败）；下一步转向 V19 DE-gated LDPC 或用户决策 (2026-08-16)
+## Current Task — 三路并行对比已立项：Binary Polar / Binary LDPC / Nonbinary LDPC (2026-08-16)
 
-Route A/B M1/M2 完成；QSC 对照证明信道结构限制。
-V19 binary-MLC prototype 用现有 v4/v5 码本可跑通（f≈4.17），但为达到 f≤1.3 尝试了：
-PW、Monte-Carlo、GA 冻结集；CA-SCL list 32/128；N=2048/4096/8192，均未在目标码率下成功。
-当前 Polar/SCL 路径已到实验性终点。
+用户决定不再单独押注 Polar，而是在同一 V17 信道上并行推进三路并对比：
+1. Binary Polar MLC（已有 GA/CRC/CA-SCL list32/128 资产）
+2. Binary LDPC MLC（已有 v4/v5 codebook、BpOsdDecoder、DE screener）
+3. Nonbinary LDPC（已有 V18 B2 structured DE、q=16 folded、QSC control 证据）
 
-- 相关文档：`docs/v19-binary-mlc-prototype-result-20260816.md`
-- v19 OpenSpec draft：`openspec/changes/formal-nonbinary-ldpc-v19-channel-aware-de-gate/`
-- 下一步：转向 V19 DE-gated LDPC 码设计（新 change/用户批准），或明确接受当前 f≈4.17；D1/D3 仍阻塞。
+目标：每路产出统一口径的 f/FER/syndrome/runtime 证据，目标 f≤1.3；不达标则如实记录最佳 f。
+执行契约：`docs/three-way-ir-comparison-plan-20260816.md`。
+本仓库当前仅保存计划；后续执行在用户新开的对话中进行。
 
 ---
 
