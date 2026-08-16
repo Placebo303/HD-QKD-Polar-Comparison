@@ -38,6 +38,8 @@ DRAFT — based on V19 primary-route evidence.
   one frame (121738 candidates) but not on a second frame.
 - At n=64, m=4, f≈1.136 full OSD-1 recovered 3/8 frames (FER=0.625);
   fast OSD-1..10 over 64 frames achieved 18/64 exact (FER=0.71875).
+  With lambda {2:0.6,3:0.4}, n=64 fast OSD achieved 10/24 exact
+  (FER=0.5833); at n=128 the same lambda gave 0/4.
 - Broad OSD-2 did not recover any of the five n=64 non-full-OSD-1 frames.
 - This proves exact q=1024 f≤1.3 decoding is possible with stronger OSD,
   but reliability/scale remains the open problem.
