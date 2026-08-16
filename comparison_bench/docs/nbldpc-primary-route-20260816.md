@@ -181,6 +181,8 @@ fresh/promotion/qualification.
     5 exact_mismatch / 0 decode_failed, FER=0.625.
   - `n4_finite_q1024_f1279_n512_1f/`: n=512, m=36, f≈1.279, OSD still
     exact_mismatch.
+  - `n4_finite_q1024_f1279_n128_1f/`: n=128, m=9, f≈1.279, OSD still
+    exact_mismatch.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
