@@ -1,6 +1,6 @@
-Status: ROUTE_A_RUNNING
+Status: ROUTE_A_COMPLETE
 
-## Current Task — Route A 失败诊断启动；Route B/C/D 已规划待决策 (2026-08-16)
+## Current Task — Route A 失败诊断完成；结论：非迭代不足；Route B/C/D 待决策 (2026-08-16)
 
 根据已完成的 legacy drift audit 与文献审查，后续路线 A–D 已写入
 `docs/nonbinary-ldpc-v13-r3-legacy-drift-audit-review-and-plan-20260816.md`。
@@ -9,7 +9,8 @@ Status: ROUTE_A_RUNNING
 
 - A1 失败帧特征：raw SER、位面失配、先验失配、解码熵轨迹。
 - A2 结构化信道模型：V17 product-of-marginals 思路 + 全量 pairs。
-- A3 诊断试验：max_iter=200/500 重解码 128 个失败帧，仅 diagnostic_only。
+- A3 诊断试验：max_iter=200 全量 128 帧 + max_iter=500 抽样 8 帧，均 0 exact_correct。
+- 结论：失败帧不是单纯迭代不足，更可能是先验/信道模型或图结构限制（diagnostic_only）。
 
 ---
 

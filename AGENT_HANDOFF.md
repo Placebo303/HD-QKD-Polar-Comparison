@@ -1,6 +1,6 @@
-Status: ROUTE_A_RUNNING
+Status: ROUTE_A_COMPLETE
 
-## Current State — Route A 失败诊断进行中；Route B/C/D 已规划 (2026-08-16)
+## Current State — Route A 失败诊断完成；Route B/C/D 已规划待决策 (2026-08-16)
 
 - Route A–D 已写入 review/plan 文档。
 - 当前执行 Route A：128 失败帧诊断 + max_iter 敏感性诊断试验。
