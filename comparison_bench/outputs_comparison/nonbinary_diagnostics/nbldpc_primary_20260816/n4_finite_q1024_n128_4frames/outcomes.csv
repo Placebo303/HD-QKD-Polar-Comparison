@@ -1,0 +1,5 @@
+frame_id,status,exact_correct,iterations,decoder_status,runtime_s,syndrome_symbols,syndrome_bits
+0,exact_correct,True,2,success,0.329,51,510
+1,exact_correct,True,2,success,0.328,51,510
+2,exact_correct,True,2,success,0.312,51,510
+3,exact_correct,True,2,success,0.328,51,510

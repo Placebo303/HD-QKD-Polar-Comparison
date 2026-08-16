@@ -1,0 +1,103 @@
+{
+  "channel_entropy_bits_per_symbol": 0.549955043921941,
+  "claim_boundary": "diagnostic_only",
+  "codebook": {
+    "construction": {
+      "check_counts": {
+        "6": 50,
+        "7": 1
+      },
+      "edge_label_seed": 72495453,
+      "m": 51,
+      "max_trials": 20,
+      "n": 128,
+      "parallel_edges": 0,
+      "rank": 51,
+      "schema": "v10_peg_manifest_v1",
+      "seed": 2026082007,
+      "status": "ok",
+      "total_sockets": 307,
+      "trials_used": 1,
+      "triples_count": 307,
+      "var_counts": {
+        "2": 77,
+        "3": 51
+      }
+    },
+    "field_id": "c53f194db6af8b1afdfdcb189ce1b91617f7172937ab025a08001f609385c79a",
+    "lambda_edge": {
+      "2": 0.5,
+      "3": 0.5
+    },
+    "m": 51,
+    "n": 128,
+    "q": 1024,
+    "rank": 51,
+    "rate": 0.6015625,
+    "requested_m": 51,
+    "rho_edge": {
+      "6": 0.9726562499999992,
+      "7": 0.027343750000000777
+    },
+    "schema": "nbldpc_v19_codebook_v1",
+    "seed": 2026082007
+  },
+  "f_plain_qary": 7.244910368647389,
+  "fer": 0.0,
+  "m": 51,
+  "n": 128,
+  "n_decode_failed": 0,
+  "n_exact_correct": 4,
+  "n_exact_mismatch": 0,
+  "n_frames": 4,
+  "outcomes": [
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 0,
+      "iterations": 2,
+      "runtime_s": 0.329,
+      "status": "exact_correct",
+      "syndrome_bits": 510,
+      "syndrome_symbols": 51
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 1,
+      "iterations": 2,
+      "runtime_s": 0.328,
+      "status": "exact_correct",
+      "syndrome_bits": 510,
+      "syndrome_symbols": 51
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 2,
+      "iterations": 2,
+      "runtime_s": 0.312,
+      "status": "exact_correct",
+      "syndrome_bits": 510,
+      "syndrome_symbols": 51
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 3,
+      "iterations": 2,
+      "runtime_s": 0.328,
+      "status": "exact_correct",
+      "syndrome_bits": 510,
+      "syndrome_symbols": 51
+    }
+  ],
+  "q": 1024,
+  "rate": 0.6015625,
+  "requested_m": 51,
+  "schema": "nbldpc_v19_finite_execute_v1",
+  "seed": 2026082007,
+  "syndrome_bits_per_frame": 510,
+  "syndrome_bits_per_symbol": 3.984375,
+  "wall_seconds": 3.203
+}

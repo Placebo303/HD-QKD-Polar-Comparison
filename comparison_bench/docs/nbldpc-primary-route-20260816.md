@@ -66,7 +66,8 @@ fresh/promotion/qualification.
 - q=1024 (full V17 structured channel via `build_real_w_q1024`),
   simple degree distribution `{2:0.5, 3:0.5}`.
   - n=64, m=24, rate=0.625: 2/2 exact_correct, FER=0, f_plain≈6.819.
-  - n=128, m=51, rate≈0.602: 2/2 exact_correct, FER=0, f_plain≈7.245.
+  - n=128, m=51, rate≈0.602: 4/4 exact_correct (2-frame and 4-frame runs),
+    FER=0, f_plain≈7.245.
 - syndrome bits/frame = 240 (n=64) / 510 (n=128).
 - This shows the full q=1024 V19 pipeline (PEG + FFT-QSPA + structured
   channel prior) is executable at two small block lengths, while the leakage
