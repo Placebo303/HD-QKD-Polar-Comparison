@@ -192,7 +192,8 @@ fresh/promotion/qualification.
     OSD-4 top8/top2 or top8/top4. Fast OSD-1/2/3/4 integrated for n<=64;
     seed2055 still non-recovered (`..._fast_osd1234_seed2055`), and
     prior-retry + fast OSD-1/2/3/4 also failed
-    (`..._retry_osd1234_seed2055.json`).
+    (`..._retry_osd1234_seed2055.json`). Generic fast OSD-k (order5/6,
+    top8/top2) also failed (`..._osd_generic_seed2055.json`).
   - Full OSD-1 aggregate summary:
     `n4_full_osd1_summary.json`.
   - n=64 fast OSD-1/2/3/4 batches: first 4/8 exact (FER=0.5), second 0/8
