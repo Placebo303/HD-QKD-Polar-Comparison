@@ -24,7 +24,10 @@
     R=0.891 f=1.989 FER=0.8125 (3/16 exact); all mismatches retained;
     `n6_comparison_v3_q1024_rates` records the tradeoff. A further n=1024,
     m=73, R≈0.929, f≈1.296 run ended 4/4 decode_failed (FER=1.0); corrected
-    statuses in `n6_comparison_v4_corrected_statuses`. [repo-observed]
+    statuses in `n6_comparison_v4_corrected_statuses`. A 30-iteration probe and
+    alternate degree-2/3 distributions all still decode_failed at f≈1.296, so
+    the next step requires a new OpenSpec change for improved finite-length
+    code/decoder design. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
     `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
 - Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;

@@ -47,8 +47,9 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 ev
 
 边界：全部 `diagnostic_only`；不构成 fresh/promotion/qualification。
 P1/P2/V13 legacy 等既有冻结终态均不变。
-下一步：若需继续冲击 f≤1.3，按已冻结纪律需另开 OpenSpec change 预注册大规模
-rate-ladder / channel-aware DE（per-symbol-class puncture、LSB-public 两步法）并获批准。
+下一步：q=1024 泄漏点 f≈1.296 已数值触达，但 4/4 解码 decode_failed（FER=1.0）；
+继续提升解码可靠性需要新 OpenSpec change（改进有限长码构造 / OSD 后处理 /
+channel-aware DE 预注册）并由用户批准后再执行。
 
 ---
 
