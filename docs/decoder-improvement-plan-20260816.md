@@ -78,3 +78,11 @@ Status: PLAN — literature-grounded; implementation steps are ordered
 4. If Polar still fails, implement v19 dc>13 binary DE screener + MET-LDPC high-rate
    prototype for low-error planes.
 5. Only after one of these reaches f≤1.3, go back to full MLC and honest leakage accounting.
+
+## Progress after plan creation
+- Implemented `v19_polar_crc.py`: CRC-16/CCITT encoder that matches the frozen C++
+  `check_crc16`; now CA-SCL receives valid CRC bits and can use CRC path selection.
+- Plane 9, N=2048, PW-order, SCL list=128, proper CRC:
+  - 13/20 frames correct (FER≈0.35), vs 0 correct before proper CRC integration.
+- This is a real improvement but still not enough for f≈1.3.
+- Next: Tal-Vardy / polar-spectrum construction and/or SCL-flip, while keeping the CRC-aided pipeline.
