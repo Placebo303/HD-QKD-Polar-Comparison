@@ -1,17 +1,15 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; NEXT_DE_GATE_USER_GATED
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; SCL32/128_INFRA_DONE; OPTIMIZED_CODE_DESIGN_OPEN
 
-## Current Task — V19 binary-MLC 原型已跑通：合成 500 帧全部纠正，f≈4.17；下一步是更高码率 per-plane 设计/DE gate (2026-08-16)
+## Current Task — V19 binary-MLC 原型已跑通 f≈4.17；CA-SCL list32/128 实验已搭建，但 f≈1.3 仍需优化码构造 (2026-08-16)
 
 Route A/B M1/M2 已完成；QSC 对照证明信道结构是 plain NB-LDPC 的限制项。
-V19 scoping 显示理想 binary-MLC f≈1.0；V19 prototype 用现有 v4 H1 + v5 H2 fallback
-在 V17 位面误差模型下合成 500 帧全部纠正，实测 f≈4.17（现有码本保守，未到 1.3）。
+V19 scoping 理想 f≈1.0；V19 prototype 用现有 v4 H1 + v5 H2 fallback 合成 500 帧全部纠正，f≈4.17。
+已新增 V19 CA-SCL list=32/128 实验解码器（未改 frozen src），但简单 PW/MC 冻结集在 N=2048/4096
+目标 f≈1.3 下仍有帧错误。下一步需要 GA/定制冻结集或换码族，而不是继续加 list。
 
-- M2 边界：`docs/route-b-m2-boundary-20260816.md`
-- QSC 对照：`docs/route-b-m2-qsc-control-result-20260816.md`
-- V19 scoping：`comparison_bench/outputs_comparison/nonbinary_diagnostics/v19_channel_scoping_20260816/`
-- V19 prototype：`comparison_bench/outputs_comparison/nonbinary_diagnostics/v19_binary_mlc_prototype_20260816/`
+- 相关文档：`docs/v19-binary-mlc-prototype-result-20260816.md`
 - v19 OpenSpec draft：`openspec/changes/formal-nonbinary-ldpc-v19-channel-aware-de-gate/`
-- 下一步：用户批准后执行更高码率 per-plane DE gate / Route C1；D1/D3 仍阻塞。
+- 下一步：优化 Polar/LDPC 码构造（GA/CRC/更大 N 等）或另立新 change；D1/D3 仍阻塞。
 
 ---
 

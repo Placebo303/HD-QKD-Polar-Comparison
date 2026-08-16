@@ -1,12 +1,11 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; NEXT_DE_GATE_USER_GATED
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; SCL32/128_INFRA_DONE; OPTIMIZED_CODE_DESIGN_OPEN
 
-## Current State — V19 binary-MLC 原型已跑通；f≈4.17；下一步更高码率 per-plane DE gate (2026-08-16)
+## Current State — V19 prototype f≈4.17；SCL32/128 已搭建但 f≈1.3 需优化码构造 (2026-08-16)
 
 - Route A/B M1/M2 完成；QSC 对照证明信道结构限制。
-- V19 scoping：逐位面 h2 之和 = H_full≈0.550 → 理想 binary-MLC f≈1.0。
-- V19 prototype：v4 H1 + v5 H2 fallback，V17 位面误差模型下 500 帧全部纠正，f≈4.17。
-- 已产出：v19 OpenSpec draft、Route C1 design draft、scoping CLI、binary-MLC prototype。
-- 下一步：用户批准后执行更高码率 per-plane DE gate / Route C1；D1/D3 仍阻塞。
+- V19 scoping 理想 f≈1.0；V19 prototype 现有 binary MLC 500 帧全部纠正，f≈4.17。
+- 新增 CA-SCL list=32/128 实验解码器（未改 frozen src），简单构造在 f≈1.3 目标仍有帧错误。
+- 下一步：优化 Polar/LDPC 冻结集/码构造（GA、CRC、更大 N 等）或另立新 change；D1/D3 仍阻塞。
 
 # AGENT_HANDOFF.md
 
