@@ -35,3 +35,10 @@ Status: COMPLETE (prototype, diagnostic_only)
 - Both SC and SCL still had many frame errors at the target high rates.
 - This indicates that reaching f≤1.3 needs better polar construction / larger list / CRC-aided design or optimized LDPC, not just reusing the current PW-order SC/SCL decoder as-is.
 - Exploratory outputs: `workspace/v19_mlc_polar_test.out`, `workspace/v19_mlc_scl_test.out`.
+
+## CA-SCL list=32 experimental decoder
+- Added an experimental copy of the CA-SCL decoder with `kListSize=32` under
+  `comparison_bench/src/comparison_bench/formal_ir/v19_ca_scl.cpp` + wrapper.
+- Noiseless test passes, so the wrapper/decoder plumbing is correct.
+- At N=2048/4096 and target f≈1.3, simple PW-order + list=32 still has frame errors on multiple planes.
+- This confirms that reaching f≤1.3 needs further code construction work (GA/tailored frozen sets, CRC, larger list, or different code family), not just a list-size bump.
