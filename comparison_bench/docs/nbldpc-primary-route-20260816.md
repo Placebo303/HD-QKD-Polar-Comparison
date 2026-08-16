@@ -198,9 +198,10 @@ fresh/promotion/qualification.
     (`..._full_osd1_plus_osd2_seed2050.json`), and broad OSD-2 probes
     (top20/top4 and top20/top16) also failed
     (`..._osd2_broad_seed2050.json`, `..._osd2_broad16_seed2050.json`).
-  - Full OSD-1 at n=64, m=4, f≈1.136 recovered 3/6 frames
+  - Full OSD-1 at n=64, m=4, f≈1.136 recovered 3/8 frames
     (`..._full_osd1_n64_probe*.json`; seeds 2054/2057/2058 true,
-    2055/2056/2059 false), FER=0.5. Prior-retry + full OSD-1 and broad
+    2055/2056/2059/2062/2063 false), FER=0.625. Prior-retry + full OSD-1
+    and broad
     OSD-2 on a
     non-recovered frame also failed
     (`..._retry_full_osd1_n64_seed2055.json`,
