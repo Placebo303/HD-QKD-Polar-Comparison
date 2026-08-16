@@ -1,3 +1,10 @@
+## 2026-08-16 V19 LDPC DE screener
+
+- Added per-plane BSC DE-gated LDPC screener using frozen `binary_bsc_threshold`.
+- With frozen DE bound dc<=13, only planes 8/9 found regular ensembles meeting f≈1.3 target.
+- Planes 0–7 require very high-rate codes (small m/N) not reachable by regular dc<=13 LDPC.
+- This explains the need for irregular/structured high-rate codes or extended DE tooling. [repo-observed, diagnostic_only]
+
 ## 2026-08-16 V19 Polar N=8192 negative result
 
 - Tested N=8192, GA mask, CA-SCL list=128, plane 9, f≈1.3 per-plane target.
