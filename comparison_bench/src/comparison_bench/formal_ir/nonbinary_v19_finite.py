@@ -23,7 +23,7 @@ from . import nonbinary_v10_fftqspa as qspa
 from . import nonbinary_v9_common as common
 from .nonbinary_field import GF2mField
 from .nonbinary_v19_channel import symbol_entropy_bits
-from .nonbinary_v19_osd import osd_decode, osd_decode_candidates, osd_decode_candidates_order2, osd_decode_candidates_fast, osd_decode_candidates_order2_fast, osd_decode_candidates_order3_fast, osd_decode_candidates_order4_fast
+from .nonbinary_v19_osd import osd_decode, osd_decode_candidates, osd_decode_candidates_order2, osd_decode_candidates_fast, osd_decode_candidates_order2_fast, osd_decode_candidates_order3_fast, osd_decode_candidates_order4_fast, osd_decode_candidates_fast_generic
 
 __all__ = [
     "construct_codebook",
@@ -536,6 +536,30 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                     except Exception:
                         cand_fast4 = []
                     for cand_e in cand_fast4:
+                        cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, cand_e)]
+                        if np.array_equal(cand_x, alice) and \
+                                qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
+                            postprocess_used = True
+                            e_hat = list(cand_e)
+                            x_hat = cand_x
+                            syndrome_ok = True
+                            exact = True
+                            break
+                if not exact and n <= 64:
+                    # Fast generic OSD-5/6 enumeration (tiny search).
+                    try:
+                        cand_gen = osd_decode_candidates_fast_generic(
+                            field=field, matrix=matrix,
+                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                            beliefs=result.get("beliefs"),
+                            e_hat=e_hat,
+                            order=5,
+                            top_info=8,
+                            top_symbols=2,
+                            max_candidates=200000)
+                    except Exception:
+                        cand_gen = []
+                    for cand_e in cand_gen:
                         cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, cand_e)]
                         if np.array_equal(cand_x, alice) and \
                                 qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
