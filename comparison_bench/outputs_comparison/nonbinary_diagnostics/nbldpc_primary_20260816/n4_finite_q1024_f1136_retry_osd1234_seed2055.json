@@ -1,0 +1,40 @@
+{
+  "f_plain_qary": 1.1364566191779328,
+  "found_exact": false,
+  "m": 4,
+  "n": 64,
+  "q": 1024,
+  "results": [
+    {
+      "decoder_status": "converged_no_syndrome",
+      "elapsed": 21.698,
+      "eps": 0.0,
+      "hit": false
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "elapsed": 21.721,
+      "eps": 0.05,
+      "hit": false
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "elapsed": 21.716,
+      "eps": 0.1,
+      "hit": false
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "elapsed": 21.723,
+      "eps": 0.2,
+      "hit": false
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "elapsed": 21.857,
+      "eps": 0.3,
+      "hit": false
+    }
+  ],
+  "schema": "nbldpc_v19_retry_osd1234_probe_v1"
+}
