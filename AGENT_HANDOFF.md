@@ -1,4 +1,4 @@
-Status: ROUTE_A_COMPLETE
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1_RUNNING
 
 ## Current State — Route A 失败诊断完成；Route B/C/D 已规划待决策 (2026-08-16)
 

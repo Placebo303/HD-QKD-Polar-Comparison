@@ -1,4 +1,4 @@
-Status: ROUTE_A_COMPLETE
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1_RUNNING
 
 ## Current Task — Route A 失败诊断完成；结论：非迭代不足；Route B/C/D 待决策 (2026-08-16)
 
@@ -800,3 +800,10 @@ remain unauthorized.
   plan/execute/replay; 4/16/32 constituent provenance; `rank(H)=m`; n=32768
   canary 24h hard timeout and <=16h median; fixed-rate syndrome/tag only.
   Blind adaptation is prohibited in V9 and deferred to V10.
+
+## Current progress — Route A complete, Route B M1 running (2026-08-16)
+
+- Route A prior-calibration probe: Oracle 128/128 fail, p-grid 40/40 fail.
+- Conclusion: failures not iteration-limited and not QSC prior-limited; likely structured-channel or code/graph limitation.
+- Route B M0 complete (V18-B1 q4/q8 smoke passed).
+- Route B M1 production q=4 DE reproduction running in background (workspace/nbldpc_v18_b1_exec_q4).
