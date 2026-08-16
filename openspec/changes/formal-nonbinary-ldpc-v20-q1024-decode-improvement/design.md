@@ -33,6 +33,14 @@ DRAFT — based on V19 primary-route evidence.
 - Use `build_high_plane_w` and per-symbol-class puncture models to pre-register
   a DE gate only if capacity analysis shows a path to f≤1.3.
 
+## V19 full-OSD breakthrough
+- Full OSD-1 enumeration at q=1024, n=128, m=9, f≈1.279 recovered Alice on
+  one frame (121738 candidates) but not on a second frame.
+- This proves exact q=1024 f≤1.3 decoding is possible with stronger OSD,
+  but reliability/scale remains the open problem.
+- V20 should focus on efficient full/partial OSD enumeration, better
+  information-set selection, and/or smaller n with rate-compatible framing.
+
 ## V19 prototype evidence
 - `nonbinary_v19_osd.py` implements OSD-0/1 plus bounded OSD-2 candidate search.
 - R=0.89 q=1024: OSD improves to 2 exact / 2 exact_mismatch / 0 decode_failed.
