@@ -1,3 +1,15 @@
+## 2026-08-16 V19 binary-MLC prototype and high-rate code design attempts
+
+- Added v19 channel scoping CLI: per-plane h2 sum = H_full≈0.549955, ideal binary-MLC f≈1.0.
+  Existing binary v4 H1 f≈4.148; v5 H1+H2 f≈6.932. [repo-observed]
+- Added v19 binary-MLC prototype using frozen v4 H1 + v5 H2 fallback on V17 per-plane BSC:
+  50 frames/plane, 0 failures, average syndrome 587 bits/frame, measured f≈4.169. [repo-observed]
+- Exploratory high-rate designs:
+  - Random LDPC N=2048 target f≈1.22: many failures.
+  - Polar SC and CA-SCL(list=4) N=2048 target f≈1.32: many failures.
+  Conclusion: reaching f≤1.3 requires optimized code design (better polar construction/larger list/CRC or optimized LDPC), not naive random or current PW-order SC/SCL. [repo-observed, diagnostic_only]
+- Next: v19 DE gate / optimized per-plane code design remains user-gated/new change. [decision]
+
 ## 2026-08-16 Route B M2 diagnosis: structured channel is the DE ceiling; QSC control converges
 
 - Route A completed: 128 decode_failed frames are not iteration-limited and not QSC prior mismatch
