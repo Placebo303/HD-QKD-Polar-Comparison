@@ -16,6 +16,7 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
   - n2_extended_probe_q1024/extended_degree_probe.json（q=1024 rate=0.6 小样本未收敛）
   - n2b_channel_aware_bounds/lsb_public_capacity.json（LSB-public capacity bound）
   - n2b_channel_aware_bounds/high_plane_channels.json（残余高位有效信道）
+  - n2b_channel_aware_bounds/lsb_public_de_probe_q512.json（q=512 R=0.92 小样本未收敛）
   - n6_comparison/comparison_table.csv + comparison_summary.json
   - n6_comparison_v2_q1024/comparison_table.csv + comparison_summary.json
   - n6_comparison_v2_q1024/leakage_decomposition.json（q16 honest f≈3.016; q1024 n128 f≈7.245）
