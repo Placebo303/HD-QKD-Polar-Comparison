@@ -59,8 +59,8 @@ P1/P2/V13 legacy 等既有冻结终态均不变。
 下一步：q=1024 泄漏点 f≈1.296 已数值触达，但 4/4 解码 decode_failed（FER=1.0）；
 已创建新 OpenSpec change draft：
 `openspec/changes/formal-nonbinary-ldpc-v20-q1024-decode-improvement/`
-（proposal/design/tasks），下一步按该 draft 冻结后实现 bounded q-ary OSD /
-改进构造 / 重试等。
+（proposal/design/tasks），V19 OSD prototype 已实现并记录到 design/tasks；
+下一步按该 draft 冻结后继续完整 OSD / 改进构造。
 
 ---
 
