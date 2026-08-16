@@ -33,6 +33,12 @@ DRAFT — based on V19 primary-route evidence.
 - Use `build_high_plane_w` and per-symbol-class puncture models to pre-register
   a DE gate only if capacity analysis shows a path to f≤1.3.
 
+## V19 prototype evidence
+- `nonbinary_v19_osd.py` implements OSD-0/1 plus bounded OSD-2 candidate search.
+- R=0.89 q=1024: OSD improves to 2 exact / 2 exact_mismatch / 0 decode_failed.
+- f=1.296 q=1024 n=1024: OSD-0/1/2 and wide OSD-2 still only exact_mismatch.
+- This motivates V20 to go beyond bounded OSD-2 or improve code construction.
+
 ## Acceptance criteria (draft)
 - T0: all V20 tests pass.
 - E01: deterministic q=1024 synthetic run with at least one configuration
