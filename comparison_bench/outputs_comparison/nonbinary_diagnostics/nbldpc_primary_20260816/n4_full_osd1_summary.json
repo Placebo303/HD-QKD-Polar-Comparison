@@ -15,8 +15,8 @@
       "fer": 0.75,
       "m": 9,
       "n": 128,
-      "n_exact": 1,
-      "n_frames": 4
+      "n_exact": 2,
+      "n_frames": 8
     }
   ],
   "schema": "nbldpc_v19_full_osd1_summary_v1"
