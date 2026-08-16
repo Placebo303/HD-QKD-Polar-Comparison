@@ -1,0 +1,2 @@
+frame_id,status,exact_correct,syndrome_ok,iterations,decoder_status,runtime_s,syndrome_symbols,syndrome_bits
+0,decode_failed,False,False,30,max_iter_reached,114.703,73,730

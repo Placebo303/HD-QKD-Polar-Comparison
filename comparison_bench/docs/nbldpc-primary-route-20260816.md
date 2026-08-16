@@ -104,6 +104,9 @@ fresh/promotion/qualification.
 - This honestly records that the leakage target is numerically reachable, but
   the current simple PEG/FFT-QSPA construction does **not** produce reliable
   decoding at this rate.
+- Additional one-frame probes with degree distributions `{2:0.7,3:0.3}` and
+  `{2:0.8,3:0.2}` also ended `decode_failed` at max_iter=10
+  (`n4_finite_q1024_f129_c_lambda_1f/`, `n4_finite_q1024_f129_d_lambda_1f/`).
 
 ## Status correction
 
