@@ -70,7 +70,7 @@
     {2:0.7,3:0.3} gave 0/2. Broad OSD-2 also failed on non-recovered seeds
     2056/2059. max_iter=50 + full OSD-1 also failed on seed2055; alternate
     code seeds 3001-3004 for the same frame also failed. Full OSD-1 summary:
-    n=64 FER=0.625 (3/8), n=128 FER=0.75 (1/4); broad OSD-2 did not recover
+    n=64 FER=0.6875 (5/16), n=128 FER=0.75 (1/4); broad OSD-2 did not recover
     any of the five n=64 non-recovered frames. Fast full OSD-1 enumeration
     (`osd_decode_candidates_fast`) integrated for n<=256 (~0.6s at n=64).
     Comprehensive blocker summary
