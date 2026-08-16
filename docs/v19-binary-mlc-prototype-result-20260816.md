@@ -23,3 +23,9 @@ Status: COMPLETE (prototype, diagnostic_only)
 ## Evidence
 - `comparison_bench/outputs_comparison/nonbinary_diagnostics/v19_binary_mlc_prototype_20260816/binary_mlc_prototype.json`
 - CLI: `comparison_bench/src/comparison_bench/cli/run_v19_binary_mlc_prototype.py`
+
+## Exploratory high-rate random LDPC attempt (not accepted)
+- Tried N=2048 random LDPC with per-plane syndrome rows set to `max(ceil(log2 N), ceil(N*h2(p)*1.2))`, target f≈1.22.
+- Random regular/light construction failed on many planes (especially p≥0.0046), so this is **not** a usable f≤1.3 code yet.
+- It confirms that reaching f≈1.3 requires optimized code design / Polar-like capacity-approaching codes, not naive random LDPC.
+- This exploratory attempt is recorded in `workspace/v19_mlc_highrate_test.out`; it is not a production claim.
