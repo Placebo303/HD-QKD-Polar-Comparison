@@ -1,0 +1,181 @@
+{
+  "conclusion": "q=32 seeded searches at rate 0.70/0.75 with a larger moderate budget also all failed. This strengthens the practical conclusion that larger folded q does not currently provide an easy efficiency improvement with the existing DE search framework.",
+  "max_gen": 15,
+  "max_iter": 60,
+  "n_converged": 0,
+  "n_failed": 16,
+  "n_runs": 16,
+  "n_samples": 3000,
+  "pop_size": 15,
+  "q": 32,
+  "rates": [
+    0.7,
+    0.75
+  ],
+  "rows": [
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.7,
+      "seed": 2026083300,
+      "seed_index": 0,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.7,
+      "seed": 2026083301,
+      "seed_index": 1,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.7,
+      "seed": 2026083302,
+      "seed_index": 2,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.7,
+      "seed": 2026083303,
+      "seed_index": 3,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.7,
+      "seed": 2026083304,
+      "seed_index": 4,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.7,
+      "seed": 2026083305,
+      "seed_index": 5,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.7,
+      "seed": 2026083306,
+      "seed_index": 6,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.7,
+      "seed": 2026083307,
+      "seed_index": 7,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.75,
+      "seed": 2026083400,
+      "seed_index": 0,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.75,
+      "seed": 2026083401,
+      "seed_index": 1,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.75,
+      "seed": 2026083402,
+      "seed_index": 2,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.75,
+      "seed": 2026083403,
+      "seed_index": 3,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.75,
+      "seed": 2026083404,
+      "seed_index": 4,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.75,
+      "seed": 2026083405,
+      "seed_index": 5,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.75,
+      "seed": 2026083406,
+      "seed_index": 6,
+      "seeded": true
+    },
+    {
+      "converged_iter": 1000000000,
+      "entropy_converged": false,
+      "error_prob": 1e+18,
+      "q": 32,
+      "rate": 0.75,
+      "seed": 2026083407,
+      "seed_index": 7,
+      "seeded": true
+    }
+  ],
+  "run_id": "v18_b2_m2_q32_r070_r075_seeded_allfail_20260816",
+  "schema": "nbldpc_v18_b2_m2_q32_r070_r075_seeded_allfail_summary_v1",
+  "seeded_with": "with rate=0.60 q=16 successful lambda",
+  "status": "all_failed"
+}
