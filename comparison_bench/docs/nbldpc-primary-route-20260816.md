@@ -193,7 +193,9 @@ fresh/promotion/qualification.
     n=128 frames, full OSD-1 recovered 1/4 exact (FER=0.75), proving exact
     recovery is possible but not yet reliable. A non-recovered frame
     (seed2050) also failed full OSD-1 + bounded OSD-2
-    (`..._full_osd1_plus_osd2_seed2050.json`).
+    (`..._full_osd1_plus_osd2_seed2050.json`), and broad OSD-2 probes
+    (top20/top4 and top20/top16) also failed
+    (`..._osd2_broad_seed2050.json`, `..._osd2_broad16_seed2050.json`).
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
