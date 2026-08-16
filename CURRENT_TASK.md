@@ -24,7 +24,9 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 ev
   f_plain≈4.183，FER=0.25；exact_mismatch 原样保留。
 - **q=1024 主攻推进**：
   - `n4_finite_q1024_simple/finite_execute.json`：q=1024 n=64 m=24 rate=0.625，
-    2 帧 2/2 exact_correct，FER=0，f≈6.819。
+    2 帧 2/2 exact_correct，FER=0，f≈6.819；
+    `n4_finite_q1024_n128_simple/finite_execute.json`：n=128 m=51 rate≈0.602，
+    2/2 exact_correct，FER=0，f≈7.245。
   - `n2_extended_probe_q1024/extended_degree_probe.json`：q=1024 rate=0.6
     simple lambda 小样本 DE probe 未收敛（diagnostic）。
   - `n6_comparison_v2_q1024/`：三路表新增 `nonbinary_ldpc_q1024` 行。

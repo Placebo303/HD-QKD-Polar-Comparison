@@ -12,6 +12,7 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
   - n2_extended_probe/extended_degree_probe.json（degree 48/60 不收敛）
   - n4_finite_q16_r060_simple/finite_execute.json（3 exact / 1 mismatch / 0 fail, f≈4.183）
   - n4_finite_q1024_simple/finite_execute.json（q=1024, 2/2 exact, f≈6.819）
+  - n4_finite_q1024_n128_simple/finite_execute.json（q=1024 n=128, 2/2 exact, f≈7.245）
   - n2_extended_probe_q1024/extended_degree_probe.json（q=1024 rate=0.6 小样本未收敛）
   - n6_comparison/comparison_table.csv + comparison_summary.json
   - n6_comparison_v2_q1024/comparison_table.csv + comparison_summary.json

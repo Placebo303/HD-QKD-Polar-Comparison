@@ -50,13 +50,15 @@ fresh/promotion/qualification.
 ## N3/N4 — q=1024 finite code construction and synthetic execute
 
 - Evidence: `n4_finite_q1024_simple/finite_execute.json` (+ outcomes.csv)
+  and `n4_finite_q1024_n128_simple/finite_execute.json` (+ outcomes.csv).
 - q=1024 (full V17 structured channel via `build_real_w_q1024`),
-  n=64, m=24, rate=0.625, simple degree distribution `{2:0.5, 3:0.5}`.
-- 2 deterministic synthetic frames: **2 exact_correct**, 0 exact_mismatch,
-  0 decode_failed; FER=0.
-- syndrome bits/frame = 240; f_plain_qary = 6.819.
+  simple degree distribution `{2:0.5, 3:0.5}`.
+  - n=64, m=24, rate=0.625: 2/2 exact_correct, FER=0, f_plain≈6.819.
+  - n=128, m=51, rate≈0.602: 2/2 exact_correct, FER=0, f_plain≈7.245.
+- syndrome bits/frame = 240 (n=64) / 510 (n=128).
 - This shows the full q=1024 V19 pipeline (PEG + FFT-QSPA + structured
-  channel prior) is executable, while the leakage is still far above 1.3.
+  channel prior) is executable at two small block lengths, while the leakage
+  is still far above 1.3.
 
 ## N2c — q=1024 extended-degree DE probe
 

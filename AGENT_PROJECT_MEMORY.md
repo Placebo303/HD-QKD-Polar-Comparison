@@ -12,7 +12,9 @@
   - N3/N4 finite q=16 n=512 m=205 R≈0.5996 synthetic 4 frames:
     3 exact_correct / 1 exact_mismatch / 0 decode_failed, FER=0.25, f≈4.183.
   - q=1024 progress: `n4_finite_q1024_simple/finite_execute.json` (q=1024,
-    n=64, m=24, R=0.625, 2/2 exact_correct, f≈6.819) and
+    n=64, m=24, R=0.625, 2/2 exact_correct, f≈6.819),
+    `n4_finite_q1024_n128_simple/finite_execute.json` (q=1024, n=128, m=51,
+    R≈0.602, 2/2 exact_correct, f≈7.245), and
     `n2_extended_probe_q1024/extended_degree_probe.json` (tiny DE probe,
     non-converged). `n6_comparison_v2_q1024` includes the q=1024 row.
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
