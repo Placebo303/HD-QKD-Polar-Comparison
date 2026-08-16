@@ -192,7 +192,8 @@ def _decode_frame(frame: Mapping[str, Any], manifest: Mapping[str, Any],
 
 
 def _decode_frame_prebuilt(frame: Mapping[str, Any], manifest: Mapping[str, Any],
-                           matrix: Any, *, max_iter: int = MAX_ITER) -> dict[str, Any]:
+                           matrix: Any, *, max_iter: int = MAX_ITER,
+                           p: float = P) -> dict[str, Any]:
     """Production decode using the already-built/verified R3 matrix.
 
     This mirrors ``nonbinary_v13_r3_candidate.decode_r3_frame`` exactly but
@@ -209,7 +210,7 @@ def _decode_frame_prebuilt(frame: Mapping[str, Any], manifest: Mapping[str, Any]
     syndrome = nonbinary_syndrome(matrix, frame["alice"], field)
     bob = _symbols(frame["bob"], Q, expected=N)
     disclosed = _symbols(syndrome, Q, expected=M)
-    priors = qsc_symbol_priors(bob, Q, P)
+    priors = qsc_symbol_priors(bob, Q, p)
     checks, variables = _matrix_edges(matrix)
     edge_count = sum(map(len, checks))
     declared = _declared_dense_bytes(N, edge_count, Q)
