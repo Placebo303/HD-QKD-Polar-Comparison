@@ -75,7 +75,8 @@ def run_rate_ladder(*, q: int, w: Any, rates: list[float],
             max_gen=max_gen, F=F, CR=CR, n_samples=n_samples,
             max_iter=max_iter)
         if warm_start and previous_lambda is not None:
-            search_kwargs["seed_lambda"] = previous_lambda
+            if len(previous_lambda) == 8 and len(set(previous_lambda)) == 8:
+                search_kwargs["seed_lambda"] = previous_lambda
         doc = v18.run_structured_de_search(**search_kwargs)
         best = doc["best_objective"]
         converged = bool(best["entropy_converged"])
