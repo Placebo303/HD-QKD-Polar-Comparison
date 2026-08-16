@@ -192,7 +192,7 @@ def _decode_frame(frame: Mapping[str, Any], manifest: Mapping[str, Any],
 
 
 def _decode_frame_prebuilt(frame: Mapping[str, Any], manifest: Mapping[str, Any],
-                           matrix: Any) -> dict[str, Any]:
+                           matrix: Any, *, max_iter: int = MAX_ITER) -> dict[str, Any]:
     """Production decode using the already-built/verified R3 matrix.
 
     This mirrors ``nonbinary_v13_r3_candidate.decode_r3_frame`` exactly but
@@ -216,7 +216,7 @@ def _decode_frame_prebuilt(frame: Mapping[str, Any], manifest: Mapping[str, Any]
     codebook_id = str(manifest["canonical_sha256"])
     result, records, decoded_words = _hooked_decode_flooding(
         bob, disclosed, matrix, checks, variables, priors, field,
-        M, codebook_id, declared, max_iter=int(MAX_ITER))
+        M, codebook_id, declared, max_iter=int(max_iter))
     return {"result": result,
             "telemetry": _telemetry_summary(records, result, decoded_words)}
 
