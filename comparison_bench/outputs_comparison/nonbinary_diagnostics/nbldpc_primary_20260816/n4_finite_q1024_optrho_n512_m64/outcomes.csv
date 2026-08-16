@@ -1,0 +1,5 @@
+frame_id,status,exact_correct,syndrome_ok,iterations,decoder_status,runtime_s,syndrome_symbols,syndrome_bits
+0,decode_failed,False,False,3,converged_no_syndrome,15.594,64,640
+1,decode_failed,False,False,3,converged_no_syndrome,15.453,64,640
+2,decode_failed,False,False,3,converged_no_syndrome,15.312,64,640
+3,decode_failed,False,False,3,converged_no_syndrome,15.469,64,640

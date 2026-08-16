@@ -41,6 +41,8 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 ev
     4/4 decode_failed, FER=1.0）；
     `n6_comparison_v4_corrected_statuses/` 记录 corrected statuses
     （exact_mismatch 仅指 syndrome-consistent wrong word）。
+  - 增加可选 `rho_edge` 精确 socket rho 构造；`n4_finite_q1024_optrho_n512_m64/`
+    使用 V18-B2 优化 lambda + 三点 rho 在 R=0.875 仍 4/4 decode_failed。
 - N6 three-way comparison（v1 q=16）: `n6_comparison/comparison_table.csv` + `comparison_summary.json`
   Binary LDPC MLC f≈4.169（FER=0）；Nonbinary LDPC f≈4.183（FER=0.25）；
   Polar MLC 在 release repo 中，当前表标记 `not_available` 直到提供 clean evidence JSON。

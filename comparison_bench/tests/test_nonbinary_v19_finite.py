@@ -26,3 +26,16 @@ def test_execute_synthetic_frames_tiny():
     assert doc["n_frames"] == 2
     assert len(doc["outcomes"]) == 2
     assert doc["syndrome_bits_per_frame"] == m * 4
+
+
+def test_construct_codebook_with_explicit_rho():
+    from comparison_bench.src.comparison_bench.formal_ir import nonbinary_v9_common as common
+    lam = {2: 0.5, 3: 0.5}
+    conc = common.concentrated_check_distribution(1 - 24 / 64, lam)
+    rho = {int(conc["dc_lo"]): float(conc["w_lo"]),
+           int(conc["dc_hi"]): float(conc["w_hi"])}
+    rho = {d: w for d, w in rho.items() if w > 0.0}
+    code = fin.construct_codebook(n=64, m=24, lambda_edge=lam, q=16, seed=2026082018,
+                                  rho_edge=rho)
+    assert code["rank"] == code["m"]
+    assert code["construction"]["status"] == "ok"

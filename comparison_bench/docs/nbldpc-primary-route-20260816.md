@@ -107,6 +107,10 @@ fresh/promotion/qualification.
 - Additional one-frame probes with degree distributions `{2:0.7,3:0.3}` and
   `{2:0.8,3:0.2}` also ended `decode_failed` at max_iter=10
   (`n4_finite_q1024_f129_c_lambda_1f/`, `n4_finite_q1024_f129_d_lambda_1f/`).
+- A custom exact-socket rho attempt with the V18-B2 optimized lambda at
+  n=512, m=64, R=0.875 also ended 4/4 `decode_failed`
+  (`n4_finite_q1024_optrho_n512_m64/`). This extends `construct_codebook` /
+  `execute_synthetic_frames` with an optional `rho_edge` (additive feature).
 
 ## Status correction
 

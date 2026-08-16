@@ -65,7 +65,8 @@ def _find_consistent_m(*, n: int, target_m: int, lambda_edge: Mapping[int, float
 def construct_codebook(*, n: int, m: int, lambda_edge: Mapping[int, float],
                        q: int, seed: int, max_trials: int = 20,
                        edge_label_seed: int | None = None,
-                       search_m: bool = True) -> dict:
+                       search_m: bool = True,
+                       rho_edge: Mapping[int, float] | None = None) -> dict:
     """Construct a PEG q-ary LDPC matrix from a variable-degree distribution.
 
     If the requested ``m`` does not give exact socket consistency (due to
@@ -82,14 +83,20 @@ def construct_codebook(*, n: int, m: int, lambda_edge: Mapping[int, float],
         raise ValueError("q must be a power of two >= 2")
     n, m, q = int(n), int(m), int(q)
     requested_m = m
-    if search_m:
+    if search_m and rho_edge is None:
         var_sockets, check_sockets = _socket_counts(n=n, m=m, lambda_edge=lambda_edge)
         if var_sockets != check_sockets:
             m = _find_consistent_m(n=n, target_m=m, lambda_edge=lambda_edge)
     rate = 1.0 - m / float(n)
-    conc = common.concentrated_check_distribution(rate, lambda_edge)
-    rho = {int(conc["dc_lo"]): float(conc["w_lo"]),
-           int(conc["dc_hi"]): float(conc["w_hi"])}
+    if rho_edge is None:
+        conc = common.concentrated_check_distribution(rate, lambda_edge)
+        rho = {int(conc["dc_lo"]): float(conc["w_lo"]),
+               int(conc["dc_hi"]): float(conc["w_hi"])}
+        rho = {d: float(w) for d, w in rho.items() if float(w) > 0.0}
+    else:
+        rho = {int(d): float(w) for d, w in rho_edge.items() if float(w) > 0.0}
+        if not rho:
+            raise ValueError("rho_edge must contain positive weights")
     field = GF2mField.create(q)
     construction = peg.peg_construct(
         n=n, m=m, lambda_edge=lambda_edge, rho_edge=rho, seed=seed,
@@ -129,6 +136,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                              lambda_edge: Mapping[int, float], w: Any,
                              n_frames: int, seed: int, max_iter: int = 100,
                              streak: int = 3,
+                             rho_edge: Mapping[int, float] | None = None,
                              out_dir: str | Path | None = None) -> dict:
     """Run deterministic synthetic frames through a constructed q-ary code.
 
@@ -148,7 +156,8 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
         raise ValueError("w must be a finite non-negative length-q vector")
     if not np.isclose(float(w.sum()), 1.0, atol=1e-9):
         w = w / float(w.sum())
-    code = construct_codebook(n=n, m=m, lambda_edge=lambda_edge, q=q, seed=seed)
+    code = construct_codebook(n=n, m=m, lambda_edge=lambda_edge, q=q, seed=seed,
+                              rho_edge=rho_edge)
     actual_m = int(code["m"])
     matrix = np.asarray(code["matrix"], dtype=np.int64)
     field = GF2mField.create(q)

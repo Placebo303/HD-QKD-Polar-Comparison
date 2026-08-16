@@ -27,7 +27,9 @@
     statuses in `n6_comparison_v4_corrected_statuses`. A 30-iteration probe and
     alternate degree-2/3 distributions all still decode_failed at f≈1.296, so
     the next step requires a new OpenSpec change for improved finite-length
-    code/decoder design. [repo-observed]
+    code/decoder design. Added optional `rho_edge` construction and a custom
+    3-point rho probe at R=0.875 (`n4_finite_q1024_optrho_n512_m64`) also
+    decode_failed. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
     `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
 - Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;
