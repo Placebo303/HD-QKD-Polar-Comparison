@@ -1,0 +1,48 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "h_full_q1024": 0.549955,
+  "notes": [
+    "Binary Polar MLC row is marked not_available until a clean per-plane MLC evidence JSON is produced.",
+    "Binary LDPC MLC row is from v19_binary_mlc_prototype_20260816 (f~4.17, 0 failures).",
+    "Nonbinary LDPC row is diagnostic_only; statuses preserve decode_failed/exact_mismatch."
+  ],
+  "rows": [
+    {
+      "FER": null,
+      "N": null,
+      "f": null,
+      "public_bits": null,
+      "q": 2,
+      "rate": null,
+      "route": "binary_polar_mlc",
+      "runtime": null,
+      "status": "not_available",
+      "syndrome_bits": null
+    },
+    {
+      "FER": 0.0,
+      "N": 256,
+      "f": 4.169375,
+      "public_bits": 0,
+      "q": 2,
+      "rate": 0.770703,
+      "route": "binary_ldpc_mlc",
+      "runtime": 0.01154,
+      "status": "ok",
+      "syndrome_bits": 587
+    },
+    {
+      "FER": 0.25,
+      "N": 512,
+      "f": 4.182593,
+      "public_bits": 0,
+      "q": 16,
+      "rate": 0.599609,
+      "route": "nonbinary_ldpc",
+      "runtime": 1.52725,
+      "status": "has_exact_mismatch",
+      "syndrome_bits": 820
+    }
+  ],
+  "schema": "nbldpc_v19_three_way_comparison_v1"
+}

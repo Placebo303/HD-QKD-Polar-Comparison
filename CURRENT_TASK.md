@@ -1,6 +1,39 @@
-Status: NBLDPC_FOCUS_PLAN_READY — Polar / binary LDPC 已实现并作为只读基线；下一步在新对话主攻 NBLDPC
+Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 evidence generated
 
-## Current Task — 主攻 Nonbinary LDPC；Polar 与 binary LDPC 仅做对比基线 (2026-08-16)
+## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
+
+用户最新决策：
+- Binary Polar MLC 已实现（release repo: `D:\Code\HD-QKD_Polar_Release`），只读基线。
+- Binary LDPC MLC 已实现（f≈4.17，500 帧全过），只读基线。
+- **Nonbinary LDPC 是当前唯一主攻目标。**
+
+执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+本轮完成：
+- 新增 V19 模块（`nonbinary_v19_channel.py`, `nonbinary_v19_de_search.py`,
+  `nonbinary_v19_finite.py`）、两个 CLI（`run_v19_nbldpc.py`, `run_v19_three_way_compare.py`）、
+  4 个测试文件；11 个 V19 测试通过。
+- N1 channel evidence: `nbldpc_primary_20260816/n1_channel/channel.json`
+  （folded q=16 H≈0.382911；full q=1024 H_full=0.549955）。
+- N2a warm-started rate ladder: `n2_rate_ladder/rate_ladder.json`
+  从 rate-0.60 best 暖启动后，小预算下 rate=0.65 不收敛；与既有 plain 天花板一致。
+- N2c extended-degree probe: `n2_extended_probe/extended_degree_probe.json`
+  degree 48/60 候选在 rate=0.65 结构化信道上均不收敛。
+- N3/N4 finite q=16 synthetic execute-once:
+  `n4_finite_q16_r060_simple/finite_execute.json`
+  n=512, m=205, rate≈0.5996；4 帧 3 exact_correct / 1 exact_mismatch / 0 decode_failed；
+  f_plain≈4.183，FER=0.25；exact_mismatch 原样保留。
+- N6 three-way comparison: `n6_comparison/comparison_table.csv` + `comparison_summary.json`
+  Binary LDPC MLC f≈4.169（FER=0）；Nonbinary LDPC f≈4.183（FER=0.25）；
+  Polar MLC 在 release repo 中，当前表标记 `not_available` 直到提供 clean evidence JSON。
+
+边界：全部 `diagnostic_only`；不构成 fresh/promotion/qualification。
+P1/P2/V13 legacy 等既有冻结终态均不变。
+下一步：若需继续冲击 f≤1.3，按已冻结纪律需另开 OpenSpec change 预注册大规模
+rate-ladder / channel-aware DE（per-symbol-class puncture、LSB-public 两步法）并获批准。
+
+---
+
+## Previous Task — 主攻 Nonbinary LDPC；Polar 与 binary LDPC 仅做对比基线（计划就绪）(2026-08-16)
 
 用户最新决策：
 - Binary Polar MLC 已实现，只读作为基线。
@@ -10,7 +43,7 @@ Status: NBLDPC_FOCUS_PLAN_READY — Polar / binary LDPC 已实现并作为只读
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
 关键复用：V18 B2 structured DE（q=16 folded rate=0.60 f≈4.18）、V10 DE/PEG/FFT-QSPA、
 V14 structured MC-DE、QSC 等熵对照证据。
-本仓库当前仅保存计划；执行在用户新对话中继续。
+本仓库当时仅保存计划；执行在后续对话中继续。
 
 ---
 

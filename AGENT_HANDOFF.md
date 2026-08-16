@@ -1,14 +1,21 @@
-Status: NBLDPC_FOCUS_PLAN_READY — Polar / binary LDPC 已实现并作为只读基线；下一步在新对话主攻 NBLDPC
+Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
 
-## Current State — 主攻 Nonbinary LDPC；Polar 与 binary LDPC 只做对比基线 (2026-08-16)
+## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
-- 用户最新决策：Binary Polar MLC 与 Binary LDPC MLC 均已实现，只读作为基线。
-- 当前唯一未实现目标：**Nonbinary LDPC**。
+- 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
+  Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
-- 已有 NBLDPC 资产：V18 B2 structured DE、q=16 folded rate=0.60 f≈4.18、QSC 对照、
-  V10 DE/PEG/FFT-QSPA、V14 structured MC-DE。
-- 统一对比指标：f/FER/syndrome/public_bits/runtime；目标 f≤1.3，不达标记录最佳 f。
-- 本仓库当前只保存计划；执行在用户新对话中继续。D1/D3 仍阻塞。
+- 本轮新增 V19 模块 + CLI + 4 个测试（11 passed），并生成 additive 证据包：
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/`
+  - n1_channel/channel.json
+  - n2_rate_ladder/rate_ladder.json（暖启动 rate=0.65 小预算不收敛）
+  - n2_extended_probe/extended_degree_probe.json（degree 48/60 不收敛）
+  - n4_finite_q16_r060_simple/finite_execute.json（3 exact / 1 mismatch / 0 fail, f≈4.183）
+  - n6_comparison/comparison_table.csv + comparison_summary.json
+- 结论：V19 工程路线打通；DE 仍受 structured-channel plain ceiling 限制（R≈0.60）。
+- 下一步（用户批准）：大规模 rate-ladder / channel-aware DE 新 OpenSpec change，
+  per-symbol-class puncture / LSB-public 两步法。
+- 既有 P1/P2/V13 legacy 等冻结终态不变；push 仍待单独授权。
 
 # AGENT_HANDOFF.md
 

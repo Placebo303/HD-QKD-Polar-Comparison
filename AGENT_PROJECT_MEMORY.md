@@ -1,3 +1,21 @@
+## 2026-08-16 V19 NBLDPC primary route diagnostics (Route N0-N6 first pass)
+
+- Added V19 nonbinary LDPC modules/CLIs/tests under comparison_bench only:
+  `nonbinary_v19_channel.py`, `nonbinary_v19_de_search.py`, `nonbinary_v19_finite.py`,
+  `cli/run_v19_nbldpc.py`, `cli/run_v19_three_way_compare.py`, 4 test files (11 passed).
+- Evidence package:
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/`
+  - N1 channel: folded q=16 H=0.382911, full q=1024 H=0.549955.
+  - N2a warm-started rate ladder from V18-B2 R=0.60 best at 0.65 small budget:
+    non-converged, consistent with plain structured ceiling.
+  - N2c extended-degree probe (degrees 48/60 at R=0.65): non-converged.
+  - N3/N4 finite q=16 n=512 m=205 R≈0.5996 synthetic 4 frames:
+    3 exact_correct / 1 exact_mismatch / 0 decode_failed, FER=0.25, f≈4.183.
+  - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
+    `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
+- Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;
+  local git commit only; push still user-gated. [decision]
+
 ## 2026-08-16 Proper CRC-aided SCL progress
 
 - Implemented v19_polar_crc.py matching frozen C++ check_crc16.
