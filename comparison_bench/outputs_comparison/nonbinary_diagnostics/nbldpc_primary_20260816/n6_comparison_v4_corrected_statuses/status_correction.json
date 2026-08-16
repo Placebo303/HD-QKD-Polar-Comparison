@@ -1,0 +1,57 @@
+[
+  {
+    "fer_corrected": 0.25,
+    "file": "n4_finite_q16_r060_simple/finite_execute.json",
+    "n_decode_failed_corrected": 1,
+    "n_decode_failed_old": 0,
+    "n_exact_correct_corrected": 3,
+    "n_exact_correct_old": 3,
+    "n_exact_mismatch_corrected": 0,
+    "n_exact_mismatch_old": 1,
+    "route": "nonbinary_ldpc_q16"
+  },
+  {
+    "fer_corrected": 0.0,
+    "file": "n4_finite_q1024_n128_4frames/finite_execute.json",
+    "n_decode_failed_corrected": 0,
+    "n_decode_failed_old": 0,
+    "n_exact_correct_corrected": 4,
+    "n_exact_correct_old": 4,
+    "n_exact_mismatch_corrected": 0,
+    "n_exact_mismatch_old": 0,
+    "route": "nonbinary_ldpc_q1024_r060_n128"
+  },
+  {
+    "fer_corrected": 0.5,
+    "file": "n4_finite_q1024_r084_simple_16f/finite_execute.json",
+    "n_decode_failed_corrected": 8,
+    "n_decode_failed_old": 0,
+    "n_exact_correct_corrected": 8,
+    "n_exact_correct_old": 8,
+    "n_exact_mismatch_corrected": 0,
+    "n_exact_mismatch_old": 8,
+    "route": "nonbinary_ldpc_q1024_r084"
+  },
+  {
+    "fer_corrected": 0.8125,
+    "file": "n4_finite_q1024_r089_simple/finite_execute.json",
+    "n_decode_failed_corrected": 13,
+    "n_decode_failed_old": 0,
+    "n_exact_correct_corrected": 3,
+    "n_exact_correct_old": 3,
+    "n_exact_mismatch_corrected": 0,
+    "n_exact_mismatch_old": 13,
+    "route": "nonbinary_ldpc_q1024_r089"
+  },
+  {
+    "fer_corrected": 1.0,
+    "file": "n4_finite_q1024_f129_n1024_4f/finite_execute.json",
+    "n_decode_failed_corrected": 4,
+    "n_decode_failed_old": 0,
+    "n_exact_correct_corrected": 0,
+    "n_exact_correct_old": 0,
+    "n_exact_mismatch_corrected": 0,
+    "n_exact_mismatch_old": 4,
+    "route": "nonbinary_ldpc_q1024_f129_n1024"
+  }
+]

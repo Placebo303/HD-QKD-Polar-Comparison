@@ -84,15 +84,34 @@ fresh/promotion/qualification.
 
 - Evidence:
   - `n4_finite_q1024_r084_simple_16f/finite_execute.json`: q=1024, n=256,
-    m=41, R≈0.840, f≈2.912, **8/16 exact_correct, 8/16 exact_mismatch,
-    FER=0.5**.
+    m=41, R≈0.840, f≈2.912, **8/16 exact_correct, 8/16 decode_failed
+    (corrected), FER=0.5**.
   - `n4_finite_q1024_r089_simple/finite_execute.json`: q=1024, n=256,
-    m=28, R≈0.891, f≈1.989, **3/16 exact_correct, 13/16 exact_mismatch,
-    FER=0.8125**.
-- Both high-rate rows retain `exact_mismatch`; no `decode_failed` was observed
-  with the simple degree distribution and max_iter=10.
+    m=28, R≈0.891, f≈1.989, **3/16 exact_correct, 13/16 decode_failed
+    (corrected), FER=0.8125**.
+- Under the corrected status rule, these are mostly `decode_failed`
+  (non-success, non-exact); only a true syndrome-consistent wrong word is
+  `exact_mismatch`.
 - This gives an honest q=1024 best-f/FER tradeoff: lower leakage is possible
   (f≈1.99) but current simple PEG/FFT-QSPA is not reliable at those rates.
+
+## N3/N4 — q=1024 f≤1.3 leakage-point attempt (n=1024, m=73)
+
+- Evidence: `n4_finite_q1024_f129_n1024_4f/finite_execute.json`
+- q=1024, n=1024, m=73, rate≈0.9287, f_plain≈**1.296** (within f≤1.3 leakage target).
+- 4/4 frames ended as **decode_failed** (`max_iter_reached`; corrected status;
+  no syndrome-consistent wrong word was returned).
+- This honestly records that the leakage target is numerically reachable, but
+  the current simple PEG/FFT-QSPA construction does **not** produce reliable
+  decoding at this rate.
+
+## Status correction
+
+- V19 finite executor has been corrected: `exact_mismatch` is reserved for a
+  success (syndrome-consistent) but wrong codeword; non-success non-exact
+  outcomes are `decode_failed`.  Corrected per-run aggregates are in
+  `n6_comparison_v4_corrected_statuses/status_correction.json` and the v4
+  comparison table.
 
 ## N6 — Three-way comparison
 
@@ -100,7 +119,10 @@ fresh/promotion/qualification.
   (v1: q=16 proxy); `n6_comparison_v2_q1024/comparison_table.csv` and
   `comparison_summary.json` (v2: includes q=1024 primary);
   `n6_comparison_v3_q1024_rates/comparison_table.csv` + `comparison_summary.json`
-  (v3: q=1024 rate tradeoff rows).
+  (v3: q=1024 rate tradeoff rows);
+  `n6_comparison_v4_corrected_statuses/comparison_table.csv` +
+  `comparison_summary.json` + `status_correction.json`
+  (v4: corrected statuses; f≤1.3-point f≈1.296 with FER=1.0).
 - Leakage decomposition: `n6_comparison_v2_q1024/leakage_decomposition.json`
   - q=16 folded honest full-channel f≈3.016
     (syndrome 1.602 + uncovered 6-MSB public cost 0.057 / H_full 0.550).
@@ -108,7 +130,9 @@ fresh/promotion/qualification.
 - Binary LDPC MLC baseline imported from existing
   `v19_binary_mlc_prototype_20260816`: f≈4.169, FER=0.
 - Nonbinary LDPC q=16 diagnostic row: f≈4.183, FER=0.25.
-- Nonbinary LDPC q=1024 diagnostic row: f≈6.819 (n=64) / f≈7.245 (n=128), FER=0.
+- Nonbinary LDPC q=1024 diagnostic rows: f≈7.245 (n=128, FER=0); f≈2.912
+  (n=256 R≈0.84, FER=0.5 corrected to decode_failed); f≈1.989
+  (n=256 R≈0.89); f≈1.296 (n=1024 R≈0.929, FER=1.0 decode_failed).
 - Binary Polar MLC is available in the separate release repo
   `D:\Code\HD-QKD_Polar_Release`; this package marks it `not_available` until a
   clean evidence JSON is supplied.

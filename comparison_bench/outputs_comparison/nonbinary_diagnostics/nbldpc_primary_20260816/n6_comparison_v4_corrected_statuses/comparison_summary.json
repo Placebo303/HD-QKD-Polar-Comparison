@@ -1,0 +1,149 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "corrections": [
+    {
+      "fer_corrected": 0.25,
+      "file": "n4_finite_q16_r060_simple/finite_execute.json",
+      "n_decode_failed_corrected": 1,
+      "n_decode_failed_old": 0,
+      "n_exact_correct_corrected": 3,
+      "n_exact_correct_old": 3,
+      "n_exact_mismatch_corrected": 0,
+      "n_exact_mismatch_old": 1,
+      "route": "nonbinary_ldpc_q16"
+    },
+    {
+      "fer_corrected": 0.0,
+      "file": "n4_finite_q1024_n128_4frames/finite_execute.json",
+      "n_decode_failed_corrected": 0,
+      "n_decode_failed_old": 0,
+      "n_exact_correct_corrected": 4,
+      "n_exact_correct_old": 4,
+      "n_exact_mismatch_corrected": 0,
+      "n_exact_mismatch_old": 0,
+      "route": "nonbinary_ldpc_q1024_r060_n128"
+    },
+    {
+      "fer_corrected": 0.5,
+      "file": "n4_finite_q1024_r084_simple_16f/finite_execute.json",
+      "n_decode_failed_corrected": 8,
+      "n_decode_failed_old": 0,
+      "n_exact_correct_corrected": 8,
+      "n_exact_correct_old": 8,
+      "n_exact_mismatch_corrected": 0,
+      "n_exact_mismatch_old": 8,
+      "route": "nonbinary_ldpc_q1024_r084"
+    },
+    {
+      "fer_corrected": 0.8125,
+      "file": "n4_finite_q1024_r089_simple/finite_execute.json",
+      "n_decode_failed_corrected": 13,
+      "n_decode_failed_old": 0,
+      "n_exact_correct_corrected": 3,
+      "n_exact_correct_old": 3,
+      "n_exact_mismatch_corrected": 0,
+      "n_exact_mismatch_old": 13,
+      "route": "nonbinary_ldpc_q1024_r089"
+    },
+    {
+      "fer_corrected": 1.0,
+      "file": "n4_finite_q1024_f129_n1024_4f/finite_execute.json",
+      "n_decode_failed_corrected": 4,
+      "n_decode_failed_old": 0,
+      "n_exact_correct_corrected": 0,
+      "n_exact_correct_old": 0,
+      "n_exact_mismatch_corrected": 0,
+      "n_exact_mismatch_old": 4,
+      "route": "nonbinary_ldpc_q1024_f129_n1024"
+    }
+  ],
+  "h_full_q1024": 0.549955,
+  "note": "Reclassification rule: exact_mismatch only when decoder_status=success with wrong but syndrome-consistent word; otherwise non-success non-exact outcomes are decode_failed.",
+  "rows": [
+    {
+      "FER": null,
+      "N": null,
+      "f": null,
+      "public_bits": 0,
+      "q": 2,
+      "rate": null,
+      "route": "binary_polar_mlc",
+      "runtime": null,
+      "status": "not_available",
+      "syndrome_bits": null
+    },
+    {
+      "FER": 0.0,
+      "N": 256,
+      "f": 4.169374888623591,
+      "public_bits": 0,
+      "q": 2,
+      "rate": 0.770703,
+      "route": "binary_ldpc_mlc",
+      "runtime": 0.01154,
+      "status": "ok",
+      "syndrome_bits": 587
+    },
+    {
+      "FER": 0.25,
+      "N": 512,
+      "f": 4.182592530188362,
+      "public_bits": 0,
+      "q": 16,
+      "rate": 0.599609375,
+      "route": "nonbinary_ldpc_q16",
+      "runtime": 1.52725,
+      "status": "has_decode_failed",
+      "syndrome_bits": 820
+    },
+    {
+      "FER": 0.0,
+      "N": 128,
+      "f": 7.244910368647389,
+      "public_bits": 0,
+      "q": 1024,
+      "rate": 0.6015625,
+      "route": "nonbinary_ldpc_q1024_r060_n128",
+      "runtime": 0.80075,
+      "status": "exact_correct_all",
+      "syndrome_bits": 510
+    },
+    {
+      "FER": 0.5,
+      "N": 256,
+      "f": 2.9121698540641465,
+      "public_bits": 0,
+      "q": 1024,
+      "rate": 0.83984375,
+      "route": "nonbinary_ldpc_q1024_r084",
+      "runtime": 3.560563,
+      "status": "has_decode_failed",
+      "syndrome_bits": 410
+    },
+    {
+      "FER": 0.8125,
+      "N": 256,
+      "f": 1.9887989247267341,
+      "public_bits": 0,
+      "q": 1024,
+      "rate": 0.890625,
+      "route": "nonbinary_ldpc_q1024_r089",
+      "runtime": 5.714875,
+      "status": "has_decode_failed",
+      "syndrome_bits": 280
+    },
+    {
+      "FER": 1.0,
+      "N": 1024,
+      "f": 1.296270727723675,
+      "public_bits": 0,
+      "q": 1024,
+      "rate": 0.9287109375,
+      "route": "nonbinary_ldpc_q1024_f129_n1024",
+      "runtime": 37.1485,
+      "status": "has_decode_failed",
+      "syndrome_bits": 730
+    }
+  ],
+  "schema": "nbldpc_v19_three_way_comparison_v4_corrected"
+}

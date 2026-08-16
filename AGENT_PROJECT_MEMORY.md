@@ -22,7 +22,9 @@
     LSB-public does not reduce ideal f; full q=1024 coding is the binding target.
   - q=1024 high-rate finite attempts: R=0.840 f=2.912 FER=0.5 (8/16 exact),
     R=0.891 f=1.989 FER=0.8125 (3/16 exact); all mismatches retained;
-    `n6_comparison_v3_q1024_rates` records the tradeoff. [repo-observed]
+    `n6_comparison_v3_q1024_rates` records the tradeoff. A further n=1024,
+    m=73, R≈0.929, f≈1.296 run ended 4/4 decode_failed (FER=1.0); corrected
+    statuses in `n6_comparison_v4_corrected_statuses`. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
     `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
 - Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;

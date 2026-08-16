@@ -180,13 +180,19 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
             if exact:
                 status = "exact_correct"
                 n_exact += 1
-            else:
+            elif syndrome_ok:
+                # Decoder returned a valid codeword but it is not Alice's word.
                 status = "exact_mismatch"
                 n_mismatch += 1
+            else:
+                # No valid syndrome-consistent decoding was reached.
+                status = "decode_failed"
+                n_failed += 1
         outcomes.append({
             "frame_id": int(frame_id),
             "status": status,
             "exact_correct": bool(exact),
+            "syndrome_ok": bool(syndrome_ok) if e_hat is not None else False,
             "iterations": int(result.get("iterations") or 0),
             "decoder_status": result.get("status"),
             "runtime_s": round(runtime, 6),
