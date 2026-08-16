@@ -52,6 +52,8 @@ fresh/promotion/qualification.
   H=0.056943; l=6 q=16 H=0.017841.
 - This gives the DE input for a Pacher-style LSB-public two-step if a future
   change decides to evaluate that mechanism.
+- Initial tiny DE probe on l=1 high-plane q=512 at target R=0.92:
+  non-converged (`n2b_channel_aware_bounds/lsb_public_de_probe_q512.json`).
 
 ## N2c — Extended-degree probe
 
