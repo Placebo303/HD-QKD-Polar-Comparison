@@ -12,7 +12,7 @@ import numpy as np
 
 from .nonbinary_field import GF2mField
 
-__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2", "osd_decode_candidates_fast", "osd_decode_candidates_order2_fast"]
+__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2", "osd_decode_candidates_fast", "osd_decode_candidates_order2_fast", "osd_decode_candidates_order3_fast"]
 
 
 def _reliability(beliefs: np.ndarray, hard: Sequence[int]) -> dict[int, float]:
@@ -403,4 +403,88 @@ def osd_decode_candidates_order2_fast(*, field: GF2mField, matrix: Any, syndrome
                     candidates.append(new_sol)
                     if len(candidates) >= max_candidates:
                         return candidates
+    return candidates
+
+
+def osd_decode_candidates_order3_fast(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
+                                      beliefs: Any = None, e_hat: Sequence[int] | None = None,
+                                      top_info: int = 10, top_symbols: int = 4,
+                                      max_candidates: int = 200000) -> list[list[int]]:
+    """Fast bounded OSD-3 candidate enumeration.
+
+    Uses the RREF linear map; each three-flip candidate costs O(m).
+    This is a diagnostic higher-order OSD search.
+    """
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    m, n = matrix.shape
+    rref, pivots = gf_rref(field, matrix.tolist(), list(syndrome))
+    pivot_set = set(int(p) for p in pivots)
+    free_cols = [j for j in range(n) if j not in pivot_set]
+    if e_hat is not None:
+        hard = [int(x) for x in e_hat]
+    elif beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        hard = [int(np.argmax(beliefs[i])) for i in range(n)]
+    else:
+        hard = [0] * n
+    if beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        rel = _reliability(beliefs, hard)
+        free_ordered = sorted(free_cols, key=lambda i: rel.get(i, 0.0))[:int(top_info)]
+    else:
+        free_ordered = list(free_cols)[:int(top_info)]
+    assign = {i: hard[i] for i in free_cols}
+    base = solve_with_free(field, rref, pivots, assign, n)
+    if base is None:
+        return []
+    candidates = [base]
+    pivot_to_row = {int(p): idx for idx, p in enumerate(pivots)}
+    coeff = {}
+    for p in pivots:
+        row_idx = pivot_to_row[int(p)]
+        coeff[int(p)] = {j: int(rref[row_idx][j]) for j in free_cols}
+    cands = {}
+    for i in free_ordered:
+        if beliefs is not None and beliefs.shape == (n, field.q):
+            top = set(np.argsort(beliefs[i])[::-1][:int(top_symbols)].tolist())
+            top.add(int(hard[i]))
+            cands[i] = sorted(top)
+        else:
+            cands[i] = list(range(field.q))
+    for idx_a in range(len(free_ordered)):
+        i = free_ordered[idx_a]
+        old_i = int(hard[i])
+        for idx_b in range(idx_a + 1, len(free_ordered)):
+            j = free_ordered[idx_b]
+            old_j = int(hard[j])
+            for idx_c in range(idx_b + 1, len(free_ordered)):
+                k = free_ordered[idx_c]
+                old_k = int(hard[k])
+                for a in cands[i]:
+                    d_i = field.add(old_i, a)
+                    for b in cands[j]:
+                        d_j = field.add(old_j, b)
+                        for c in cands[k]:
+                            if a == old_i and b == old_j and c == old_k:
+                                continue
+                            d_k = field.add(old_k, c)
+                            new_sol = list(base)
+                            new_sol[i] = a; new_sol[j] = b; new_sol[k] = c
+                            for p in pivots:
+                                val = new_sol[p]
+                                f_i = coeff[int(p)].get(i, 0)
+                                if f_i != 0:
+                                    val = field.add(val, field.mul(f_i, d_i))
+                                f_j = coeff[int(p)].get(j, 0)
+                                if f_j != 0:
+                                    val = field.add(val, field.mul(f_j, d_j))
+                                f_k = coeff[int(p)].get(k, 0)
+                                if f_k != 0:
+                                    val = field.add(val, field.mul(f_k, d_k))
+                                new_sol[p] = val
+                            candidates.append(new_sol)
+                            if len(candidates) >= max_candidates:
+                                return candidates
     return candidates
