@@ -28,6 +28,7 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
     （single-symbol / two-symbol OSD-like postprocess，均未恢复）
   - n4_finite_q1024_f129_muller_2deg_1f/ 与 n4_finite_q1024_r089_muller_4f/
     （Müller 归一化 lambda，仍 decode_failed）
+  - n4_finite_q1024_f118_n2048_1f/（长块 f≈1.181，仍 decode_failed）
 - 结论：V19 工程路线已在 q=16 代理和 q=1024 全域跑通（构造+FFT-QSPA+结构化信道）；
   DE 仍受 structured-channel plain ceiling 限制（R≈0.60 / q=1024 需更高 rate）。
 - 下一步（用户批准）：q=1024 f≈1.296 已触达但解码不可靠（4/4 decode_failed，

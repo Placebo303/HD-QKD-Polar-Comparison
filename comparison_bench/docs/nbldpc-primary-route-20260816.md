@@ -124,6 +124,10 @@ fresh/promotion/qualification.
   n=512, m=64, R=0.875 also ended 4/4 `decode_failed`
   (`n4_finite_q1024_optrho_n512_m64/`). This extends `construct_codebook` /
   `execute_synthetic_frames` with an optional `rho_edge` (additive feature).
+- Tested a longer q=1024 block at n=2048, m=133, R≈0.935, f≈1.181
+  (`n4_finite_q1024_f118_n2048_1f/`): 1/1 decode_failed at max_iter=3.
+  Longer block length alone did not unlock reliable f≤1.3 decoding with the
+  current simple PEG/FFT-QSPA.
 - Added `find_two_degree_rho` to build exact-socket integer two-degree check
   distributions for arbitrary lambda (useful for literature distributions).
 - Tested normalized Müller-et-al q=4 degree distribution on q=1024:
