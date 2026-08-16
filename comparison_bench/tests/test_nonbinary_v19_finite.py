@@ -39,3 +39,13 @@ def test_construct_codebook_with_explicit_rho():
                                   rho_edge=rho)
     assert code["rank"] == code["m"]
     assert code["construction"]["status"] == "ok"
+
+
+def test_find_two_degree_rho():
+    from comparison_bench.src.comparison_bench.formal_ir import nonbinary_v10_common as common
+    raw = common.MULLER_Q4_LAMBDA_PUBLISHED_DEGREES
+    scale = sum(raw.values())
+    lam = {d: v / scale for d, v in raw.items()}
+    r = fin.find_two_degree_rho(n=1024, m=73, lambda_edge=lam, max_degree=200)
+    assert r["socket_total"] == r["target_socket_total"]
+    assert abs(sum(r["rho"].values()) - 1.0) < 1e-12

@@ -124,6 +124,15 @@ fresh/promotion/qualification.
   n=512, m=64, R=0.875 also ended 4/4 `decode_failed`
   (`n4_finite_q1024_optrho_n512_m64/`). This extends `construct_codebook` /
   `execute_synthetic_frames` with an optional `rho_edge` (additive feature).
+- Added `find_two_degree_rho` to build exact-socket integer two-degree check
+  distributions for arbitrary lambda (useful for literature distributions).
+- Tested normalized Müller-et-al q=4 degree distribution on q=1024:
+  - `n4_finite_q1024_f129_muller_2deg_1f/` (n=1024, m=73, f≈1.296):
+    1/1 decode_failed.
+  - `n4_finite_q1024_r089_muller_4f/` (n=256, m=28, f≈1.989):
+    0/4 exact, 4/4 decode_failed.
+  The literature-inspired irregular distribution also does not decode
+  reliably at these high rates with the current FFT-QSPA decoder.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
   finite executor.
   - `n4_finite_q1024_r089_simple_pp/`: single-symbol post-processor; run

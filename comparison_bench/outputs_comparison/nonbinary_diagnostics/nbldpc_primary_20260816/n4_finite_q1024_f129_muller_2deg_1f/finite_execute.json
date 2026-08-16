@@ -1,0 +1,85 @@
+{
+  "channel_entropy_bits_per_symbol": 0.549955043921941,
+  "claim_boundary": "diagnostic_only",
+  "codebook": {
+    "construction": {
+      "check_counts": {
+        "77": 14,
+        "87": 59
+      },
+      "edge_label_seed": 3628085041,
+      "m": 73,
+      "max_trials": 20,
+      "n": 1024,
+      "parallel_edges": 0,
+      "rank": 73,
+      "schema": "v10_peg_manifest_v1",
+      "seed": 2026082023,
+      "status": "ok",
+      "total_sockets": 6211,
+      "trials_used": 1,
+      "triples_count": 6211,
+      "var_counts": {
+        "2": 333,
+        "4": 381,
+        "7": 171,
+        "10": 21,
+        "19": 68,
+        "26": 39,
+        "28": 11
+      }
+    },
+    "field_id": "c53f194db6af8b1afdfdcb189ce1b91617f7172937ab025a08001f609385c79a",
+    "lambda_edge": {
+      "2": 0.10753768844221107,
+      "4": 0.24623115577889446,
+      "7": 0.192964824120603,
+      "10": 0.03417085427135678,
+      "19": 0.20804020100502513,
+      "26": 0.16180904522613065,
+      "28": 0.04924623115577889
+    },
+    "m": 73,
+    "n": 1024,
+    "q": 1024,
+    "rank": 73,
+    "rate": 0.9287109375,
+    "requested_m": 73,
+    "rho_edge": {
+      "77": 0.1917808219178082,
+      "87": 0.8082191780821918
+    },
+    "schema": "nbldpc_v19_codebook_v1",
+    "seed": 2026082023
+  },
+  "f_plain_qary": 1.296270727723675,
+  "fer": 1.0,
+  "m": 73,
+  "n": 1024,
+  "n_decode_failed": 1,
+  "n_exact_correct": 0,
+  "n_exact_mismatch": 0,
+  "n_frames": 1,
+  "outcomes": [
+    {
+      "decoder_status": "converged_no_syndrome",
+      "exact_correct": false,
+      "frame_id": 0,
+      "iterations": 3,
+      "postprocess_used": false,
+      "runtime_s": 61.797,
+      "status": "decode_failed",
+      "syndrome_bits": 730,
+      "syndrome_ok": false,
+      "syndrome_symbols": 73
+    }
+  ],
+  "q": 1024,
+  "rate": 0.9287109375,
+  "requested_m": 73,
+  "schema": "nbldpc_v19_finite_execute_v1",
+  "seed": 2026082023,
+  "syndrome_bits_per_frame": 730,
+  "syndrome_bits_per_symbol": 0.712890625,
+  "wall_seconds": 83.625
+}

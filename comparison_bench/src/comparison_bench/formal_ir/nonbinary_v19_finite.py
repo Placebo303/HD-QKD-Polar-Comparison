@@ -28,6 +28,7 @@ __all__ = [
     "construct_codebook",
     "execute_synthetic_frames",
     "build_finite_doc",
+    "find_two_degree_rho",
 ]
 
 
@@ -60,6 +61,51 @@ def _find_consistent_m(*, n: int, target_m: int, lambda_edge: Mapping[int, float
     raise ValueError(
         f"no consistent m in [{target_m - search_radius}, {target_m + search_radius}] "
         f"for n={n}, target_m={target_m}")
+
+
+def find_two_degree_rho(*, n: int, m: int, lambda_edge: Mapping[int, float],
+                         max_degree: int = 300) -> dict:
+    """Find an integer two-check-degree distribution with exact socket count.
+
+    Returns a dict with ``rho``, ``counts``, ``harmonic_error`` and the
+    integer check counts.  This is useful for constructing exact-socket
+    finite codes from arbitrary degree distributions without relying on the
+    concentrated two-point distribution.
+    """
+    if isinstance(n, bool) or not isinstance(n, Integral) or int(n) <= 0:
+        raise ValueError("n must be a positive integer")
+    if isinstance(m, bool) or not isinstance(m, Integral) or int(m) <= 0:
+        raise ValueError("m must be a positive integer")
+    n, m = int(n), int(m)
+    var_counts = peg.node_view_counts(lambda_edge, n)
+    V = sum(int(d) * int(c) for d, c in var_counts.items())
+    rate = 1.0 - m / float(n)
+    h = (1.0 - rate) * sum(float(w) / int(d) for d, w in lambda_edge.items())
+    S = m * h
+    best = None
+    for a in range(2, int(max_degree) + 1):
+        for b in range(a + 1, int(max_degree) + 1):
+            num = V - m * b
+            den = a - b
+            if den == 0 or num % den != 0:
+                continue
+            ca = num // den
+            cb = m - ca
+            if ca < 0 or cb < 0 or ca > m or cb > m:
+                continue
+            harm = ca / float(a) + cb / float(b)
+            err = abs(harm - S)
+            if best is None or err < best["harmonic_error"]:
+                best = {
+                    "a": a, "b": b, "ca": int(ca), "cb": int(cb),
+                    "rho": {a: ca / float(m), b: cb / float(m)},
+                    "harmonic_error": float(err),
+                    "socket_total": int(ca * a + cb * b),
+                    "target_socket_total": V,
+                }
+    if best is None:
+        raise ValueError("no two-degree integer rho found")
+    return best
 
 
 def construct_codebook(*, n: int, m: int, lambda_edge: Mapping[int, float],
