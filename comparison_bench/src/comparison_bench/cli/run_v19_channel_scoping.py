@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
+from ..formal_ir import codebook_v4
 from ..formal_ir import nonbinary_v18_b2_structured_de as v18
 
 
@@ -29,6 +30,11 @@ def compute_scoping() -> dict:
     with np.errstate(divide="ignore"):
         h_full = float(-np.sum(w * np.log2(np.where(w > 0.0, w, 1.0))))
     ideal_sum_h2 = float(sum(per_plane_h2))
+    n = codebook_v4.BLOCK_LENGTH
+    h1_rows = list(codebook_v4.ROW_COUNTS)
+    h2_rows = [16, 16, 16, 24, 24, 32, 48, 80, 88, 48]
+    existing_v4_h1_f = float(sum(h1_rows) / n / h_full)
+    existing_v5_h1_h2_f = float((sum(h1_rows) + sum(h2_rows)) / n / h_full)
     return {
         "schema": "nbldpc_v19_channel_scoping_v1",
         "per_plane_error": per_plane,
@@ -36,6 +42,8 @@ def compute_scoping() -> dict:
         "h_full_q1024": h_full,
         "sum_h2_per_plane": ideal_sum_h2,
         "ideal_binary_mlc_f": ideal_sum_h2 / h_full if h_full else None,
+        "existing_binary_v4_h1_f": existing_v4_h1_f,
+        "existing_binary_v5_h1_h2_f": existing_v5_h1_h2_f,
         "note": "Per-plane binary MLC ideal leakage equals channel entropy when V17 independent bit-plane model holds; this is the target direction for f~1.3.",
     }
 

@@ -1,4 +1,6 @@
 {
+  "existing_binary_v4_h1_f": 4.1480663287157595,
+  "existing_binary_v5_h1_h2_f": 6.932384823333187,
   "h_full_q1024": 0.549955043921941,
   "ideal_binary_mlc_f": 0.9999999999999893,
   "note": "Per-plane binary MLC ideal leakage equals channel entropy when V17 independent bit-plane model holds; this is the target direction for f~1.3.",
