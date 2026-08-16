@@ -84,8 +84,8 @@
     {2:0.7,3:0.3} gave FER=0.75 (2/8); {2:0.8,3:0.2} also FER=0.75 (2/8);
     {2:0.4,3:0.3,4:0.3} gave FER=0.625 (3/8); {2:0.55,3:0.45} gave
     FER=0.875 (1/8); {2:0.65,3:0.35} gave FER=0.625 (3/8). Best lambda
-    {2:0.6,3:0.4} over 24 frames: FER=0.5833 (10/24). Comprehensive blocker
-    summary
+    {2:0.6,3:0.4} over 24 frames: FER=0.5833 (10/24); at n=128 same lambda
+    gave 0/4. Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
