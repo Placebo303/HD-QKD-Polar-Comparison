@@ -77,7 +77,8 @@
     for n<=128; fast bounded OSD-3 added; seed2055 still not recovered with
     top12/top8 or OSD-4 top8/top2/top4; fast OSD-1/2/3/4 integrated for
     n<=64, seed2055 still non-recovered. A new n=64 fast OSD-1/2/3/4 batch
-    gave FER=0.5 (4/8). Comprehensive blocker summary
+    gave FER=0.5 (4/8), second batch 0/8; combined 4/16 FER=0.75.
+    Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
