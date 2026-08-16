@@ -11,11 +11,15 @@ from ..formal_ir import nonbinary_v18_b2_structured_de as core
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out-dir", required=True)
-    ap.add_argument("--mode", choices=("plan","smoke"), default="plan")
+    ap.add_argument("--mode", choices=("plan","smoke","search-smoke"), default="plan")
     ap.add_argument("--q-small", type=int, default=16)
     args = ap.parse_args()
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
+    if args.mode == "search-smoke":
+        doc = core.run_search_smoke(q=args.q_small, out_dir=out)
+        print(json.dumps({"schema": doc["schema"], "q": doc["q"], "best": doc["best_objective"]}, sort_keys=True))
+        return 0
     if args.mode == "smoke":
         doc = core.run_smoke(q=args.q_small, out_dir=out)
         print(json.dumps({"schema": doc["schema"], "q": doc["q"], "converged": doc["run"]["converged"]}, sort_keys=True))

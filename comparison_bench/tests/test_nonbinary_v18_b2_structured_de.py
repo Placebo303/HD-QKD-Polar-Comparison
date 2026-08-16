@@ -33,3 +33,14 @@ def test_m2_smoke_runs():
         assert (root / "smoke.json").exists()
     finally:
         shutil.rmtree(root, ignore_errors=True)
+
+
+def test_m2_search_smoke_runs():
+    root = Path("workspace") / f"nbldpc_v18_b2_search_{uuid.uuid4().hex}"
+    try:
+        doc = core.run_search_smoke(q=8, out_dir=root, n_samples=100, max_iter=3,
+                                    pop_size=4, max_gen=1)
+        assert doc["schema"] == "nbldpc_v18_b2_structured_de_search_v1"
+        assert (root / "search_result.json").exists()
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
