@@ -1,0 +1,25 @@
+{
+  "best_lambda": {
+    "11": 0.08386624303440991,
+    "2": 0.14324406276955126,
+    "20": 0.10785696944911491,
+    "26": 0.06371275700173983,
+    "3": 0.030472579529242084,
+    "38": 0.19664792038876985,
+    "4": 0.24458622759926676,
+    "7": 0.12961324022790535
+  },
+  "channel_entropy_bits_per_symbol": 0.38291143314595694,
+  "claim_boundary": "diagnostic_only / M2 structured-DE search",
+  "converged": true,
+  "converged_iter": 85,
+  "efficiency_f": 4.17851195211013,
+  "error_prob": 0.0,
+  "final_entropy": 0.0006483489667115005,
+  "leak_bits_per_symbol": 1.6,
+  "q": 16,
+  "rate": 0.6,
+  "run_id": "v18_b2_m2_r06_par_seed7_20260816",
+  "schema": "nbldpc_v18_b2_m2_r06_par_seed7_result_v1",
+  "seed": 2026081707
+}
