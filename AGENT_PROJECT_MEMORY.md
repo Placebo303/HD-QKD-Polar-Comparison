@@ -1,3 +1,11 @@
+## 2026-08-16 V19 CA-SCL experimental decoders (list 32/128)
+
+- Added experimental CA-SCL copies under comparison_bench (not frozen src):
+  - `v19_ca_scl.cpp` (list=32), `v19_ca_scl128.cpp` (list=128), compiled DLLs, and wrapper `v19_ca_scl_wrapper.py`.
+- Noiseless wrapper test passes; corrected output ordering (C++ returns info bits in ascending index order).
+- At N=2048/4096 with PW-order or Monte-Carlo info selection, both list=32 and list=128 still fail to reach f≈1.3 target rates on multiple planes.
+- Conclusion: reaching f≤1.3 needs GA/tailored frozen-set construction or a different code family; list size alone is not sufficient. [repo-observed, diagnostic_only]
+
 ## 2026-08-16 V19 binary-MLC prototype and high-rate code design attempts
 
 - Added v19 channel scoping CLI: per-plane h2 sum = H_full≈0.549955, ideal binary-MLC f≈1.0.
