@@ -36,7 +36,9 @@
     postprocessors (`n4_finite_q1024_r089_simple_pp*`), which did not recover
     the tested frames. Added `find_two_degree_rho` and tested normalized
     Müller degree distribution at f≈1.296/f≈1.989; both still decode_failed.
-    A longer n=2048,m=133 f≈1.181 attempt also decode_failed. [repo-observed]
+    A longer n=2048,m=133 f≈1.181 attempt also decode_failed. Created V20
+    OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
+    (proposal/design/tasks) as the next step. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
     `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
 - Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;

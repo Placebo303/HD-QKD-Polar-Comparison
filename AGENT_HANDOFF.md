@@ -31,8 +31,9 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
   - n4_finite_q1024_f118_n2048_1f/（长块 f≈1.181，仍 decode_failed）
 - 结论：V19 工程路线已在 q=16 代理和 q=1024 全域跑通（构造+FFT-QSPA+结构化信道）；
   DE 仍受 structured-channel plain ceiling 限制（R≈0.60 / q=1024 需更高 rate）。
-- 下一步（用户批准）：q=1024 f≈1.296 已触达但解码不可靠（4/4 decode_failed，
-  FER=1.0）；需新 OpenSpec change 做改进有限长码/解码器或 channel-aware DE。
+- 下一步（用户批准）：已创建 V20 OpenSpec draft
+  `openspec/changes/formal-nonbinary-ldpc-v20-q1024-decode-improvement/`；
+  冻结后实现 bounded q-ary OSD / 改进构造 / retry。
 - 既有 P1/P2/V13 legacy 等冻结终态不变；push 仍待单独授权。
 
 # AGENT_HANDOFF.md
