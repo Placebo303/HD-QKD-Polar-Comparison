@@ -10,7 +10,7 @@ from ..formal_ir import nonbinary_v18_b1_repro as core
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=("smoke", "production"), default="smoke")
+    ap.add_argument("--mode", choices=("smoke", "production", "m1b"), default="smoke")
     ap.add_argument("--q", type=int, default=core.SMOKE_Q)
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--seed", type=int, default=None)
@@ -20,7 +20,10 @@ def main() -> int:
         print("out-dir must be empty/fresh", file=__import__("sys").stderr)
         return 2
     out.mkdir(parents=True, exist_ok=True)
-    if args.mode == "production":
+    if args.mode == "m1b":
+        seed = core.M1B_SEED if args.seed is None else args.seed
+        doc = core.run_m1b(out_dir=out, seed=seed)
+    elif args.mode == "production":
         seed = core.PRODUCTION_SEED if args.seed is None else args.seed
         doc = core.run_production(out_dir=out, seed=seed)
     else:

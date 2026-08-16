@@ -182,3 +182,49 @@ def run_execute(q: int = SMOKE_Q, out_dir: str | Path | None = None,
     if out is not None:
         (out / "repro.json").write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return doc
+
+
+# --- M1b corrected screening p_gate ---
+# V8 reproduction threshold_proxy ~0.0624; using published DET 0.069 as the
+# DE screening gate is above our MC-DE threshold and yields 0 eligible.
+# M1b is a new attempt with a corrected gate, not a rerun of M1.
+M1B_P_GATE = 0.062
+M1B_SEED = 2026081604
+
+
+def run_m1b(out_dir: str | Path, seed: int = M1B_SEED) -> dict:
+    """Corrected M1b production DE search: screen at p_gate=0.062."""
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    plan_path = out / "pre_run_plan.json"
+    if plan_path.exists():
+        raise ValueError(f"refusing to overwrite frozen plan: {plan_path}")
+    plan = production_plan()
+    plan["seed"] = int(seed)
+    plan["p_gate"] = M1B_P_GATE
+    plan["attempt"] = "M1b corrected screening p_gate"
+    plan_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    result = de.run_de_search(
+        q=PRODUCTION_Q, p_gate=M1B_P_GATE, rate=PRODUCTION_RATE,
+        search_seed=int(seed),
+        pop_size=PRODUCTION_POP_SIZE, max_gen=PRODUCTION_MAX_GEN,
+        f=PRODUCTION_F, cr=PRODUCTION_CR,
+        n_samples=PRODUCTION_N_SAMPLES, max_iter=PRODUCTION_MAX_ITER,
+        entropy_tol=PRODUCTION_ENTROPY_TOL, streak=PRODUCTION_STREAK,
+        threshold_p_lo=PRODUCTION_P_LO, threshold_p_hi=PRODUCTION_P_HI,
+        threshold_p_tol=PRODUCTION_P_TOL, compute_threshold=True,
+        out_dir=str(out / "de_search"),
+    )
+    doc = {
+        "schema": SCHEMA,
+        "mode": "m1b",
+        "q": PRODUCTION_Q,
+        "rate": PRODUCTION_RATE,
+        "p_gate": M1B_P_GATE,
+        "seed": int(seed),
+        "plan": plan,
+        "result": result,
+        "reproduction": evaluate_reproduction(result),
+    }
+    (out / "repro.json").write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return doc
