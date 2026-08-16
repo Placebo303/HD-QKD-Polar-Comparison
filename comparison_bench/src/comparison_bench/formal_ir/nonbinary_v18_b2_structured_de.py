@@ -178,3 +178,53 @@ def run_search_smoke(*, q=8, out_dir=None, seed=2026081605, n_samples=200,
     return run_structured_de_search(
         q=q, rate=0.5, w=w, search_seed=seed, pop_size=pop_size, max_gen=max_gen,
         F=F, CR=CR, n_samples=n_samples, max_iter=max_iter, out_dir=out_dir)
+
+
+# --------------------------------------------------------------------------- #
+# Real structured channel w from V17 per-bit-plane model
+# --------------------------------------------------------------------------- #
+
+_V17_PER_PLANE_ERROR = [
+    3.0517578125e-05, 0.0001220703125, 0.0003662109375, 0.000946044921875,
+    0.001251220703125, 0.00250244140625, 0.00457763671875, 0.009307861328125,
+    0.02044677734375, 0.037506103515625,
+]
+
+
+def build_real_w_q1024() -> "np.ndarray":
+    """Averaged raw-XOR symbol-difference distribution under Gray mapping.
+
+    For each raw diff d, average over Alice symbol s of the V17 product
+    per-bit-plane error probability for the Gray bit difference between s and
+    s^d.  This is a translation-averaged approximation; it is diagnostic.
+    """
+    import numpy as np
+    from ..utils.bitops import gray_encode
+    q = 1024
+    bits = 10
+    w = np.zeros(q, dtype=np.float64)
+    # Precompute gray bit arrays
+    gray = np.array([gray_encode(np.array([s]))[0] for s in range(q)], dtype=np.int64)
+    bit = np.array([[(g >> k) & 1 for k in range(bits)] for g in gray], dtype=np.int64)
+    p = np.array(_V17_PER_PLANE_ERROR, dtype=np.float64)
+    for s in range(q):
+        gs = bit[s]
+        for d in range(q):
+            gd = bit[s ^ d]
+            diff = gs ^ gd
+            prob = 1.0
+            for k in range(bits):
+                prob *= (p[k] if diff[k] else 1.0 - p[k])
+            w[d] += prob
+    w /= w.sum()
+    return w
+
+
+def build_folded_w(q_small: int = 16) -> "np.ndarray":
+    """Build a small-q structured w by folding the real q=1024 averaged w."""
+    import numpy as np
+    from . import nonbinary_v14_channel as v14ch
+    if q_small not in (2, 4, 8, 16, 32, 64, 128, 256, 512, 1024):
+        raise ValueError("q_small must be a power of two <= 1024")
+    m_bits = int(round(np.log2(q_small)))
+    return v14ch.fold(build_real_w_q1024(), m_bits)

@@ -44,3 +44,11 @@ def test_m2_search_smoke_runs():
         assert (root / "search_result.json").exists()
     finally:
         shutil.rmtree(root, ignore_errors=True)
+
+
+def test_real_folded_w():
+    import numpy as np
+    w = core.build_folded_w(16)
+    assert w.shape == (16,)
+    assert abs(float(w.sum()) - 1.0) < 1e-9
+    assert np.all(w >= 0.0)
