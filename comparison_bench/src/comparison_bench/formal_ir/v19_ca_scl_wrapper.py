@@ -16,9 +16,9 @@ import numpy as np
 
 
 class V19CA_SCLDecoder:
-    def __init__(self, repo_root: str | Path | None = None) -> None:
+    def __init__(self, repo_root: str | Path | None = None, lib_stem: str = "v19_ca_scl") -> None:
         root = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[4]
-        self._lib_path = root / "comparison_bench" / "src" / "comparison_bench" / "formal_ir" / "v19_ca_scl.dll"
+        self._lib_path = root / "comparison_bench" / "src" / "comparison_bench" / "formal_ir" / f"{lib_stem}.dll"
         if not self._lib_path.exists():
             raise FileNotFoundError(f"V19 CA-SCL DLL not found: {self._lib_path}")
         self._add_dll_dirs()
