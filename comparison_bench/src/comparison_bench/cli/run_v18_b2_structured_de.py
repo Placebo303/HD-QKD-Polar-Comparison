@@ -14,15 +14,20 @@ def main() -> int:
     ap.add_argument("--mode", choices=("plan","smoke","search-smoke","real-search"), default="plan")
     ap.add_argument("--q-small", type=int, default=16)
     ap.add_argument("--rate", type=float, default=0.75)
+    ap.add_argument("--pop-size", type=int, default=15)
+    ap.add_argument("--max-gen", type=int, default=10)
+    ap.add_argument("--n-samples", type=int, default=5000)
+    ap.add_argument("--max-iter", type=int, default=50)
+    ap.add_argument("--seed", type=int, default=2026081606)
     args = ap.parse_args()
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     if args.mode == "real-search":
         w = core.build_folded_w(args.q_small)
         doc = core.run_structured_de_search(
-            q=args.q_small, rate=args.rate, w=w, search_seed=2026081606,
-            pop_size=15, max_gen=10, F=0.85, CR=0.7,
-            n_samples=5000, max_iter=50, out_dir=out)
+            q=args.q_small, rate=args.rate, w=w, search_seed=args.seed,
+            pop_size=args.pop_size, max_gen=args.max_gen, F=0.85, CR=0.7,
+            n_samples=args.n_samples, max_iter=args.max_iter, out_dir=out)
         print(json.dumps({"schema": doc["schema"], "q": doc["q"], "best": doc["best_objective"]}, sort_keys=True))
         return 0
     if args.mode == "search-smoke":
