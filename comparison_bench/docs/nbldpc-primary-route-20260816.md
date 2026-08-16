@@ -155,6 +155,9 @@ fresh/promotion/qualification.
   - Added `osd_decode_candidates` and checked all OSD-1 single-flip candidate
     codewords (`n4_finite_q1024_f129_simple_pp_osdcand1_1f/`); still no exact
     match at f≈1.296.
+  - Added bounded OSD-2 candidate search (`osd_decode_candidates_order2`) and
+    tested at f≈1.296 (`n4_finite_q1024_f129_simple_pp_osd2_1f/`): still
+    exact_mismatch.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the

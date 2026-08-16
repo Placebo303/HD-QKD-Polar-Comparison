@@ -12,7 +12,7 @@ import numpy as np
 
 from .nonbinary_field import GF2mField
 
-__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates"]
+__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2"]
 
 
 def gf_rref(field: GF2mField, matrix: Any, syndrome: Sequence[int]):
@@ -190,4 +190,66 @@ def osd_decode_candidates(*, field: GF2mField, matrix: Any, syndrome: Sequence[i
                 candidates.append(sol)
                 if len(candidates) >= max_candidates:
                     return candidates
+    return candidates
+
+
+def osd_decode_candidates_order2(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
+                                 beliefs: Any = None, e_hat: Sequence[int] | None = None,
+                                 top_info: int = 4, top_symbols: int = 12,
+                                 max_candidates: int = 4000) -> list[list[int]]:
+    """Bounded OSD-2 candidate enumeration.
+
+    Enumerates pairs of free-variable flips using only the ``top_symbols``
+    most likely alternative symbols per variable.  This is a diagnostic
+    approximation of order-2 OSD that is feasible for q=1024.
+    """
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    m, n = matrix.shape
+    rref, pivots = gf_rref(field, matrix.tolist(), list(syndrome))
+    free_cols = [j for j in range(n) if j not in set(int(p) for p in pivots)]
+    if e_hat is not None:
+        hard = [int(x) for x in e_hat]
+    elif beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        hard = [int(np.argmax(beliefs[i])) for i in range(n)]
+    else:
+        hard = [0] * n
+    if beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        rel = {i: float(beliefs[i, hard[i]]) for i in free_cols}
+        free_ordered = sorted(free_cols, key=lambda i: rel.get(i, 0.0))[:int(top_info)]
+    else:
+        free_ordered = list(free_cols)[:int(top_info)]
+    candidates: list[list[int]] = []
+    assign0 = {i: hard[i] for i in free_cols}
+    sol0 = solve_with_free(field, rref, pivots, assign0, n)
+    if sol0 is not None:
+        candidates.append(sol0)
+    # Precompute candidate symbol lists.
+    cands = {}
+    for i in free_ordered:
+        if beliefs is not None and beliefs.shape == (n, field.q):
+            top = set(np.argsort(beliefs[i])[::-1][:int(top_symbols)].tolist())
+            top.add(hard[i])
+            cands[i] = sorted(top)
+        else:
+            cands[i] = list(range(field.q))
+    for idx_a in range(len(free_ordered)):
+        i = free_ordered[idx_a]
+        for idx_b in range(idx_a + 1, len(free_ordered)):
+            j = free_ordered[idx_b]
+            for a in cands[i]:
+                for b in cands[j]:
+                    if a == hard[i] and b == hard[j]:
+                        continue
+                    assign = dict(assign0)
+                    assign[i] = a
+                    assign[j] = b
+                    sol = solve_with_free(field, rref, pivots, assign, n)
+                    if sol is not None:
+                        candidates.append(sol)
+                        if len(candidates) >= max_candidates:
+                            return candidates
     return candidates
