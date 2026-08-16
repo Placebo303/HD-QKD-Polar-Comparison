@@ -62,8 +62,9 @@
     exact_mismatch, and n=128,m=9 bounded OSD also exact_mismatch. However,
     full OSD-1 on n=128,m=9 f=1.279 enumerated 121738 candidates and found
     Alice's codeword — first exact q=1024 f≤1.3 recovery. A second full
-    OSD-1 frame at n=128 was not recovered, so it is not yet reliable.
-    Comprehensive blocker summary written into V20 proposal/tasks. Created V20
+    OSD-1 frame at n=128 was not recovered; across four n=128 frames full
+    OSD-1 recovered 1/4 exact (FER=0.75). Comprehensive blocker summary
+    written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
