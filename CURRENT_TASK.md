@@ -1,16 +1,15 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1_FAIL; NO_AUTO_NEXT
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_BOUNDARY_REACHED; ROUTE_C_PENDING
 
-## Current Task — Route A 失败诊断完成；结论：非迭代不足；Route B/C/D 待决策 (2026-08-16)
+## Current Task — Route B M2 结构化 DE 达到当前搜索边界：q=16 rate=0.60 f≈4.18；Route C/D 待推进 (2026-08-16)
 
-根据已完成的 legacy drift audit 与文献审查，后续路线 A–D 已写入
-`docs/nonbinary-ldpc-v13-r3-legacy-drift-audit-review-and-plan-20260816.md`。
-当前开始运行 **Route A**：失败帧特征归因、结构化信道/先验失配分析、
-仅诊断的 max_iter 敏感性试验。Route B/C/D 需用户决策后立项。
+Route A 已完成（128 失败帧非迭代不足、非 QSC 先验失配）。Route B M0/M1/M1b 已完成，
+M2 在 q=16 folded 真实信道上找到 rate=0.60 收敛候选（f≈4.18），但所有 rate>0.60
+尝试（随机与 seeded）均失败；q=32 探索性搜索也全部失败。当前 M2 已到现有 DE 框架的
+实际边界。下一步优先考虑 Route C（复杂度/工程化）或更强的 DE/信道建模，而不是继续 q=16 细扫。
 
-- A1 失败帧特征：raw SER、位面失配、先验失配、解码熵轨迹。
-- A2 结构化信道模型：V17 product-of-marginals 思路 + 全量 pairs。
-- A3 诊断试验：max_iter=200 全量 128 帧 + max_iter=500 抽样 8 帧，均 0 exact_correct。
-- 结论：失败帧不是单纯迭代不足，更可能是先验/信道模型或图结构限制（diagnostic_only）。
+- 最佳：q=16, rate=0.60, f≈4.18（证据 `v18_b2_m2_r06_par_seed7_20260816`）。
+- 负结果：rate 0.61/0.62/0.63/0.65 all-fail；seeded 0.62/0.63 all-fail；q=32 多档 all-fail。
+- 边界文档：`docs/route-b-m2-boundary-20260816.md`。
 
 ---
 

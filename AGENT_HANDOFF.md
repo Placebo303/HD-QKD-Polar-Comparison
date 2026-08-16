@@ -1,10 +1,12 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1_FAIL; NO_AUTO_NEXT
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_BOUNDARY_REACHED; ROUTE_C_PENDING
 
-## Current State — Route A 失败诊断完成；Route B/C/D 已规划待决策 (2026-08-16)
+## Current State — Route B M2 达到 q=16 folded DE 搜索边界：rate=0.60 f≈4.18 (2026-08-16)
 
-- Route A–D 已写入 review/plan 文档。
-- 当前执行 Route A：128 失败帧诊断 + max_iter 敏感性诊断试验。
-- Route B（效率）、Route C（复杂度）、Route D（数据边界）待用户决策后立项。
+- Route A 完成：128 失败帧非迭代不足、非 QSC 先验失配。
+- Route B M0/M1/M1b 完成；M2 实现并跑出 q=16 folded 真实信道 rate=0.60 收敛候选（f≈4.18）。
+- rate>0.60（0.61/0.62/0.63/0.65）随机与 seeded 均 all-fail；q=32 探索也 all-fail。
+- 边界文档：`docs/route-b-m2-boundary-20260816.md`。
+- 下一步：Route C 复杂度/工程化，或更强的 DE/信道建模（需用户/新 change 决策方向）。
 
 # AGENT_HANDOFF.md
 
