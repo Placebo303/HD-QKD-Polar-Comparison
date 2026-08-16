@@ -1,3 +1,11 @@
+## 2026-08-16 Decoder improvement plan (literature-grounded)
+
+- Polar path: current CA-SCL does not actually receive CRC bits from our MLC payload; next concrete step is proper CRC-aided SCL integration (reserve 16/24 CRC bits).
+- Construction: replace PW/GA with Tal-Vardy quantization or polar-spectrum UBW/SUBW; consider SCL-flip/ADSCL.
+- LDPC path: extend binary DE to dc>13 in v19, use MET-LDPC/degree-one VN and rate-compatible puncture/shorten for low-error high-rate planes.
+- HD-QKD anchor: Mueller et al. 2024 f≈1.078–1.14 requires full DE-optimized irregular q-ary + blind reconciliation.
+- Plan doc: docs/decoder-improvement-plan-20260816.md. [repo-observed, plan]
+
 ## 2026-08-16 V19 LDPC DE screener
 
 - Added per-plane BSC DE-gated LDPC screener using frozen `binary_bsc_threshold`.
