@@ -204,7 +204,8 @@ fresh/promotion/qualification.
   - n=64 fast OSD with lambda `{2:0.6,3:0.4}`: 7/16 exact, FER=0.5625
     (`..._fast_osd_lambdab_8f_2136/`, `..._fast_osd_lambdab_8f_2144/`).
   - n=64 fast OSD with lambda `{2:0.7,3:0.3}`: 2/8 exact, FER=0.75
-    (`..._fast_osd_lambdac_8f_2152/`).
+    (`..._fast_osd_lambdac_8f_2152/`); lambda `{2:0.8,3:0.2}` also 2/8
+    exact, FER=0.75 (`..._fast_osd_lambdad_8f_2160/`).
   - **Full OSD-1 exact recovery**:
     `n4_finite_q1024_f1279_full_osd1_n128_probe.json`
     n=128, m=9, f≈1.279; enumerating all single free-variable flips
