@@ -40,7 +40,8 @@
     bounded q-ary OSD-0/1 (`nonbinary_v19_osd.py`); R=0.89 q=1024 improved to
     2 exact / 2 exact_mismatch / 0 decode_failed, while f=1.296 n=1024 OSD-0
     still exact_mismatch. Added `osd_decode_candidates` and enumerated all
-    OSD-1 single-flip candidates at f=1.296; still no exact match. Created V20
+    OSD-1 single-flip candidates at f=1.296; still no exact match. Added
+    bounded OSD-2 candidate search; f=1.296 probe still exact_mismatch. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
