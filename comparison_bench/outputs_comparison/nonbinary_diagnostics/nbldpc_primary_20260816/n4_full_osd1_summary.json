@@ -17,6 +17,15 @@
       "n": 128,
       "n_exact": 2,
       "n_frames": 8
+    },
+    {
+      "f_plain_qary": 1.1364566191779328,
+      "fer": 0.5,
+      "label": "n64_fast_osd1234",
+      "m": 4,
+      "n": 64,
+      "n_exact": 4,
+      "n_frames": 8
     }
   ],
   "schema": "nbldpc_v19_full_osd1_summary_v1"
