@@ -47,12 +47,33 @@ fresh/promotion/qualification.
 - syndrome bits/frame = 820; f_plain_qary = 4.183.
 - The `exact_mismatch` is retained, not converted to ok.
 
+## N3/N4 — q=1024 finite code construction and synthetic execute
+
+- Evidence: `n4_finite_q1024_simple/finite_execute.json` (+ outcomes.csv)
+- q=1024 (full V17 structured channel via `build_real_w_q1024`),
+  n=64, m=24, rate=0.625, simple degree distribution `{2:0.5, 3:0.5}`.
+- 2 deterministic synthetic frames: **2 exact_correct**, 0 exact_mismatch,
+  0 decode_failed; FER=0.
+- syndrome bits/frame = 240; f_plain_qary = 6.819.
+- This shows the full q=1024 V19 pipeline (PEG + FFT-QSPA + structured
+  channel prior) is executable, while the leakage is still far above 1.3.
+
+## N2c — q=1024 extended-degree DE probe
+
+- Evidence: `n2_extended_probe_q1024/extended_degree_probe.json`
+- q=1024, rate=0.6, simple lambda `{2:0.5, 3:0.5}`,
+  n_samples=100, max_iter=3: non-converged (final base-q entropy ≈0.0477).
+- This is a tiny diagnostic probe, not a production DE search.
+
 ## N6 — Three-way comparison
 
 - Evidence: `n6_comparison/comparison_table.csv` and `comparison_summary.json`
+  (v1: q=16 proxy); `n6_comparison_v2_q1024/comparison_table.csv` and
+  `comparison_summary.json` (v2: includes q=1024 primary).
 - Binary LDPC MLC baseline imported from existing
   `v19_binary_mlc_prototype_20260816`: f≈4.169, FER=0.
-- Nonbinary LDPC diagnostic row: f≈4.183, FER=0.25.
+- Nonbinary LDPC q=16 diagnostic row: f≈4.183, FER=0.25.
+- Nonbinary LDPC q=1024 diagnostic row: f≈6.819, FER=0.
 - Binary Polar MLC is available in the separate release repo
   `D:\Code\HD-QKD_Polar_Release`; this package marks it `not_available` until a
   clean evidence JSON is supplied.

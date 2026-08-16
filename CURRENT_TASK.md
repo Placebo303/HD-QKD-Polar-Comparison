@@ -22,7 +22,13 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 ev
   `n4_finite_q16_r060_simple/finite_execute.json`
   n=512, m=205, rate≈0.5996；4 帧 3 exact_correct / 1 exact_mismatch / 0 decode_failed；
   f_plain≈4.183，FER=0.25；exact_mismatch 原样保留。
-- N6 three-way comparison: `n6_comparison/comparison_table.csv` + `comparison_summary.json`
+- **q=1024 主攻推进**：
+  - `n4_finite_q1024_simple/finite_execute.json`：q=1024 n=64 m=24 rate=0.625，
+    2 帧 2/2 exact_correct，FER=0，f≈6.819。
+  - `n2_extended_probe_q1024/extended_degree_probe.json`：q=1024 rate=0.6
+    simple lambda 小样本 DE probe 未收敛（diagnostic）。
+  - `n6_comparison_v2_q1024/`：三路表新增 `nonbinary_ldpc_q1024` 行。
+- N6 three-way comparison（v1 q=16）: `n6_comparison/comparison_table.csv` + `comparison_summary.json`
   Binary LDPC MLC f≈4.169（FER=0）；Nonbinary LDPC f≈4.183（FER=0.25）；
   Polar MLC 在 release repo 中，当前表标记 `not_available` 直到提供 clean evidence JSON。
 

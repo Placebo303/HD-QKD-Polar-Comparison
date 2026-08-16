@@ -94,7 +94,20 @@ def _load_lambda(path: str | None) -> dict[int, float] | None:
     if path is None:
         return None
     data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if isinstance(data, list):
+        raise ValueError("_load_lambda expects a single mapping; use _load_candidates for lists")
     return {int(k): float(v) for k, v in data.items()}
+
+
+def _load_candidates(path: str | None) -> list[dict[int, float]] | None:
+    if path is None:
+        return None
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if isinstance(data, list):
+        return [{int(k): float(v) for k, v in item.items()} for item in data]
+    if isinstance(data, dict):
+        return [{int(k): float(v) for k, v in data.items()}]
+    raise ValueError("candidate JSON must be a mapping or list of mappings")
 
 
 def cmd_channel(args) -> int:
@@ -134,15 +147,13 @@ def cmd_qsc_control(args) -> int:
 def cmd_extended_probe(args) -> int:
     q = int(args.q_small)
     w = build_folded_w(q)
-    candidates = _load_lambda(args.candidate_json)
+    candidates = _load_candidates(args.candidate_json)
     if candidates is None:
         # Default extended-degree candidates for the smoke path.
         candidates = [
             {2: 0.3, 3: 0.3, 4: 0.2, 48: 0.2},
             {2: 0.35, 3: 0.25, 4: 0.15, 60: 0.25},
         ]
-    elif isinstance(candidates, dict):
-        candidates = [candidates]
     doc = de_search.run_extended_degree_probe(
         q=q, rate=args.rate, w=w, candidates=candidates,
         n_samples=args.n_samples, max_iter=args.max_iter, seed=args.seed,

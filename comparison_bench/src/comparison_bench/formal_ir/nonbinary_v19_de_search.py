@@ -179,6 +179,11 @@ def evaluate_extended_lambda(*, q: int, rate: float, w: Any,
     conc = common.concentrated_check_distribution(float(rate), lam)
     rho = {int(conc["dc_lo"]): float(conc["w_lo"]),
            int(conc["dc_hi"]): float(conc["w_hi"])}
+    # Drop zero-weight degree(s) from integer rho edge; the MC-DE parser
+    # requires all weights positive.
+    rho = {d: float(weight) for d, weight in rho.items() if float(weight) > 0.0}
+    if not rho:
+        raise ValueError("concentrated check distribution produced no positive degree")
     result = v14.run_mcde(
         q, lam, rho, n_samples=n_samples, max_iter=max_iter, seed=seed,
         channel_mode="structured", w=w, entropy_tol=entropy_tol, streak=streak)

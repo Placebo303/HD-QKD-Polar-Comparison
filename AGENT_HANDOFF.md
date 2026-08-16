@@ -11,8 +11,12 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
   - n2_rate_ladder/rate_ladder.json（暖启动 rate=0.65 小预算不收敛）
   - n2_extended_probe/extended_degree_probe.json（degree 48/60 不收敛）
   - n4_finite_q16_r060_simple/finite_execute.json（3 exact / 1 mismatch / 0 fail, f≈4.183）
+  - n4_finite_q1024_simple/finite_execute.json（q=1024, 2/2 exact, f≈6.819）
+  - n2_extended_probe_q1024/extended_degree_probe.json（q=1024 rate=0.6 小样本未收敛）
   - n6_comparison/comparison_table.csv + comparison_summary.json
-- 结论：V19 工程路线打通；DE 仍受 structured-channel plain ceiling 限制（R≈0.60）。
+  - n6_comparison_v2_q1024/comparison_table.csv + comparison_summary.json
+- 结论：V19 工程路线已在 q=16 代理和 q=1024 全域跑通（构造+FFT-QSPA+结构化信道）；
+  DE 仍受 structured-channel plain ceiling 限制（R≈0.60 / q=1024 需更高 rate）。
 - 下一步（用户批准）：大规模 rate-ladder / channel-aware DE 新 OpenSpec change，
   per-symbol-class puncture / LSB-public 两步法。
 - 既有 P1/P2/V13 legacy 等冻结终态不变；push 仍待单独授权。

@@ -24,10 +24,12 @@ def test_compare_schema(tmp_path):
     out = tmp_path / "out"
     doc = run_compare(nonbinary_path=nb, out_dir=out)
     assert doc["schema"] == "nbldpc_v19_three_way_comparison_v1"
-    assert len(doc["rows"]) == 3
+    assert len(doc["rows"]) == 4
     routes = {r["route"] for r in doc["rows"]}
-    assert routes == {"binary_polar_mlc", "binary_ldpc_mlc", "nonbinary_ldpc"}
+    assert routes == {"binary_polar_mlc", "binary_ldpc_mlc", "nonbinary_ldpc",
+                      "nonbinary_ldpc_q1024"}
     assert (out / "comparison_table.csv").exists()
     assert (out / "comparison_summary.json").exists()
     # Statuses must be preserved; no decode_failed converted to ok.
     assert doc["rows"][2]["status"] == "exact_correct_all"
+    assert doc["rows"][3]["status"] == "not_available"

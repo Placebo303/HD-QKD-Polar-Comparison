@@ -114,16 +114,29 @@ def _polar_row(doc: dict | None) -> dict:
 
 def run_compare(*, binary_ldpc_path: str | Path | None = None,
                 nonbinary_path: str | Path | None = None,
+                nonbinary_q1024_path: str | Path | None = None,
                 polar_path: str | Path | None = None,
                 out_dir: str | Path | None = None) -> dict:
     binary_doc = _load_json(binary_ldpc_path or DEFAULT_BINARY_LDPC)
     nonbinary_doc = _load_json(nonbinary_path)
+    nonbinary_q1024_doc = _load_json(nonbinary_q1024_path)
     polar_doc = _load_json(polar_path)
     rows = [_polar_row(polar_doc), _binary_ldpc_row(binary_doc), _nonbinary_row(nonbinary_doc)]
     # Keep only rows whose evidence exists; missing nonbinary is a hard error
     # for a meaningful N6, but we still emit all rows with explicit status.
     if nonbinary_doc is None:
         rows[2]["status"] = "not_available"
+    if nonbinary_q1024_doc is not None:
+        row = _nonbinary_row(nonbinary_q1024_doc)
+        row["route"] = "nonbinary_ldpc_q1024"
+        rows.append(row)
+    else:
+        rows.append({
+            "route": "nonbinary_ldpc_q1024",
+            "N": None, "q": 1024, "rate": None, "syndrome_bits": None,
+            "public_bits": 0, "f": None, "FER": None, "runtime": None,
+            "status": "not_available",
+        })
     summary = {
         "schema": SCHEMA,
         "h_full_q1024": H_FULL_Q1024,
@@ -132,7 +145,7 @@ def run_compare(*, binary_ldpc_path: str | Path | None = None,
         "notes": [
             "Binary Polar MLC row is marked not_available until a clean per-plane MLC evidence JSON is produced.",
             "Binary LDPC MLC row is from v19_binary_mlc_prototype_20260816 (f~4.17, 0 failures).",
-            "Nonbinary LDPC row is diagnostic_only; statuses preserve decode_failed/exact_mismatch.",
+            "Nonbinary LDPC rows are diagnostic_only; statuses preserve decode_failed/exact_mismatch.",
         ],
     }
     if out_dir is not None:
@@ -152,10 +165,12 @@ def main() -> int:
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--binary-ldpc-json", default=None)
     ap.add_argument("--nonbinary-json", required=True)
+    ap.add_argument("--nonbinary-q1024-json", default=None)
     ap.add_argument("--polar-json", default=None)
     args = ap.parse_args()
     doc = run_compare(binary_ldpc_path=args.binary_ldpc_json,
                       nonbinary_path=args.nonbinary_json,
+                      nonbinary_q1024_path=args.nonbinary_q1024_json,
                       polar_path=args.polar_json,
                       out_dir=Path(args.out_dir))
     print(json.dumps(doc, sort_keys=True))
