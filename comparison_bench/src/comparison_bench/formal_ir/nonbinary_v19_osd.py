@@ -12,7 +12,7 @@ import numpy as np
 
 from .nonbinary_field import GF2mField
 
-__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2", "osd_decode_candidates_fast", "osd_decode_candidates_order2_fast", "osd_decode_candidates_order3_fast"]
+__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2", "osd_decode_candidates_fast", "osd_decode_candidates_order2_fast", "osd_decode_candidates_order3_fast", "osd_decode_candidates_order4_fast"]
 
 
 def _reliability(beliefs: np.ndarray, hard: Sequence[int]) -> dict[int, float]:
@@ -487,4 +487,80 @@ def osd_decode_candidates_order3_fast(*, field: GF2mField, matrix: Any, syndrome
                             candidates.append(new_sol)
                             if len(candidates) >= max_candidates:
                                 return candidates
+    return candidates
+
+
+def osd_decode_candidates_order4_fast(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
+                                      beliefs: Any = None, e_hat: Sequence[int] | None = None,
+                                      top_info: int = 8, top_symbols: int = 2,
+                                      max_candidates: int = 200000) -> list[list[int]]:
+    """Fast bounded OSD-4 candidate enumeration (diagnostic)."""
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    m, n = matrix.shape
+    rref, pivots = gf_rref(field, matrix.tolist(), list(syndrome))
+    pivot_set = set(int(p) for p in pivots)
+    free_cols = [j for j in range(n) if j not in pivot_set]
+    if e_hat is not None:
+        hard = [int(x) for x in e_hat]
+    elif beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        hard = [int(np.argmax(beliefs[i])) for i in range(n)]
+    else:
+        hard = [0] * n
+    if beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        rel = _reliability(beliefs, hard)
+        free_ordered = sorted(free_cols, key=lambda i: rel.get(i, 0.0))[:int(top_info)]
+    else:
+        free_ordered = list(free_cols)[:int(top_info)]
+    assign = {i: hard[i] for i in free_cols}
+    base = solve_with_free(field, rref, pivots, assign, n)
+    if base is None:
+        return []
+    candidates = [base]
+    pivot_to_row = {int(p): idx for idx, p in enumerate(pivots)}
+    coeff = {}
+    for p in pivots:
+        row_idx = pivot_to_row[int(p)]
+        coeff[int(p)] = {j: int(rref[row_idx][j]) for j in free_cols}
+    cands = {}
+    for i in free_ordered:
+        if beliefs is not None and beliefs.shape == (n, field.q):
+            top = set(np.argsort(beliefs[i])[::-1][:int(top_symbols)].tolist())
+            top.add(int(hard[i]))
+            cands[i] = sorted(top)
+        else:
+            cands[i] = list(range(field.q))
+    for ia in range(len(free_ordered)):
+        i = free_ordered[ia]; old_i = int(hard[i])
+        for ib in range(ia+1, len(free_ordered)):
+            j = free_ordered[ib]; old_j = int(hard[j])
+            for ic in range(ib+1, len(free_ordered)):
+                k = free_ordered[ic]; old_k = int(hard[k])
+                for id_ in range(ic+1, len(free_ordered)):
+                    l = free_ordered[id_]; old_l = int(hard[l])
+                    for a in cands[i]:
+                        d_i = field.add(old_i, a)
+                        for b in cands[j]:
+                            d_j = field.add(old_j, b)
+                            for c in cands[k]:
+                                d_k = field.add(old_k, c)
+                                for e in cands[l]:
+                                    if a==old_i and b==old_j and c==old_k and e==old_l:
+                                        continue
+                                    d_l = field.add(old_l, e)
+                                    new_sol = list(base)
+                                    new_sol[i]=a; new_sol[j]=b; new_sol[k]=c; new_sol[l]=e
+                                    for p in pivots:
+                                        val = new_sol[p]
+                                        for idx, dlt in [(i,d_i),(j,d_j),(k,d_k),(l,d_l)]:
+                                            f = coeff[int(p)].get(idx,0)
+                                            if f != 0:
+                                                val = field.add(val, field.mul(f, dlt))
+                                        new_sol[p]=val
+                                    candidates.append(new_sol)
+                                    if len(candidates) >= max_candidates:
+                                        return candidates
     return candidates
