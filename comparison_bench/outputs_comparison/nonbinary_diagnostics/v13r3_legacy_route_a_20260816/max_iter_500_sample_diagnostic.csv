@@ -1,0 +1,9 @@
+source_tag,frame_id,raw_ser,max_iter,status,iterations,exact_correct
+type2_1M_20260121_184040,15,0.23046875,500,decode_failed,500,False
+type2_1M_20260121_184040,1175,0.265625,500,decode_failed,500,False
+type2_1p5M_20260121_183806,457,0.25,500,decode_failed,500,False
+type2_1p5M_20260121_183806,1610,0.24609375,500,decode_failed,500,False
+type2_2M_20260121_183657,471,0.2890625,500,decode_failed,500,False
+type2_2M_20260121_183657,1526,0.203125,500,decode_failed,500,False
+type2_2M_20260121_183657,2474,0.22265625,500,decode_failed,500,False
+type2_2M_20260121_183657,3606,0.28125,500,decode_failed,500,False

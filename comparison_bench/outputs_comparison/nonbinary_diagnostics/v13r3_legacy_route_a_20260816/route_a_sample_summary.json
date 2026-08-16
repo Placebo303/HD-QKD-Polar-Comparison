@@ -1,0 +1,43 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "decode_failed": 8,
+  "exact_correct": 0,
+  "max_iter": 500,
+  "run_id": "v13r3_legacy_route_a_sample_20260816",
+  "sample_frame_ids": [
+    [
+      "type2_1M_20260121_184040",
+      15
+    ],
+    [
+      "type2_1M_20260121_184040",
+      1175
+    ],
+    [
+      "type2_1p5M_20260121_183806",
+      457
+    ],
+    [
+      "type2_1p5M_20260121_183806",
+      1610
+    ],
+    [
+      "type2_2M_20260121_183657",
+      471
+    ],
+    [
+      "type2_2M_20260121_183657",
+      1526
+    ],
+    [
+      "type2_2M_20260121_183657",
+      2474
+    ],
+    [
+      "type2_2M_20260121_183657",
+      3606
+    ]
+  ],
+  "sample_size": 8,
+  "schema": "nbldpc_v13r3_route_a_sample_v1"
+}

@@ -1,0 +1,14 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "conclusion": "failures_not_iteration_limited",
+  "interpretation": "Raising max_iter from 100 to 200 (all 128 failures) and 500 (8 representative failures) did not recover any frame. The remaining failures are therefore not simply iteration-limited; they are consistent with prior/channel mismatch or code/graph limitations under the current frozen R3 candidate.",
+  "run_id": "v13r3_legacy_route_a_20260816",
+  "schema": "nbldpc_v13r3_route_a_conclusion_v1",
+  "summary": {
+    "max_iter_200_exact_correct": 0,
+    "max_iter_200_full_failures": 128,
+    "max_iter_500_sample_exact_correct": 0,
+    "max_iter_500_sample_failures": 8,
+    "max_iter_500_sample_size": 8
+  }
+}
