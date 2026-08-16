@@ -211,7 +211,8 @@ fresh/promotion/qualification.
     max_iter=50 + full OSD-1 also failed on seed2055
     (`..._full_osd1_iter50_n64_seed2055.json`). Fixed-frame alternate code
     seeds 3001/3002 also failed on seed2055
-    (`..._n64_frame2055_codeseed3001/02.json`).
+    (`..._n64_frame2055_codeseed3001/02.json`), as did 3003/3004
+    (`..._codeseed3003/04.json`).
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
