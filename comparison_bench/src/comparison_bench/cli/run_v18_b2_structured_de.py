@@ -13,13 +13,14 @@ def main() -> int:
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--mode", choices=("plan","smoke","search-smoke","real-search"), default="plan")
     ap.add_argument("--q-small", type=int, default=16)
+    ap.add_argument("--rate", type=float, default=0.75)
     args = ap.parse_args()
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     if args.mode == "real-search":
         w = core.build_folded_w(args.q_small)
         doc = core.run_structured_de_search(
-            q=args.q_small, rate=0.75, w=w, search_seed=2026081606,
+            q=args.q_small, rate=args.rate, w=w, search_seed=2026081606,
             pop_size=15, max_gen=10, F=0.85, CR=0.7,
             n_samples=5000, max_iter=50, out_dir=out)
         print(json.dumps({"schema": doc["schema"], "q": doc["q"], "best": doc["best_objective"]}, sort_keys=True))
