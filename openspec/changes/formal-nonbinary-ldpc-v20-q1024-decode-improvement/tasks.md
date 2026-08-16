@@ -2,6 +2,11 @@
 
 Status: DRAFT — V19 OSD prototype implemented; V20 freeze still pending
 
+## Current blocker
+V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3
+result in `exact_mismatch`. V20 must start from this blocker and select a
+strictly stronger decoder/construction before execute.
+
 ## T0 Planning
 - [ ] P0: freeze proposal/design/tasks and get main-thread/acceptance review
 - [ ] P1: select M1/M2/M3/M4 subset and pre-register budgets/seeds/stop rules

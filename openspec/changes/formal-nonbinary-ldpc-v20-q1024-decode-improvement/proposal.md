@@ -36,5 +36,14 @@ V19 diagnostics established:
 - Real-data `.ttbin`/legacy execution unless separately authorized.
 - Unbounded tuning/rerunning of V19 evidence.
 
+## V19 blocker evidence
+- q=1024 f≈1.296 / f≈1.279 / f≈1.119 configurations all produce
+  `exact_mismatch` with BP + bounded OSD.
+- Block lengths n=128/256/512/1024/2048 tested; none gave exact at f≤1.3.
+- Comprehensive summary:
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n4_finite_q1024_f129_blocker_summary.json`
+- V20 must therefore implement a decoder/construction that goes beyond
+  bounded OSD-2 and the current PEG/FFT-QSPA.
+
 ## Claim boundary
 `diagnostic_only` until a frozen gate review accepts the V20 protocol.
