@@ -73,7 +73,8 @@
     n=64 FER=0.6875 (5/16), n=128 FER=0.75 (1/4); broad OSD-2 did not recover
     any of the five n=64 non-recovered frames. Fast full OSD-1 enumeration
     (`osd_decode_candidates_fast`) integrated for n<=256 (~0.6s at n=64).
-    Comprehensive blocker summary
+    Fast broad OSD-2 (`osd_decode_candidates_order2_fast`) also integrated
+    for n<=128. Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
