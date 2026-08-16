@@ -1,3 +1,21 @@
+## 2026-08-16 Route B M2 diagnosis: structured channel is the DE ceiling; QSC control converges
+
+- Route A completed: 128 decode_failed frames are not iteration-limited and not QSC prior mismatch
+  (max_iter 200/500, oracle prior, p-grid all failed). [repo-observed, diagnostic_only]
+- Route B M0/M1/M1b completed: V18-B1 q=4 DE reproduction gate PASS after M1b correction
+  (`threshold_proxy≈0.06758`, delta≈0.00142). [repo-observed]
+- Route B M2: implemented structured-DE using V17 per-bit-plane + Gray + fold to q=16.
+  Best plain result: rate=0.60, seed 2026081707, f≈4.18 (syndrome 1.6 bits/H_fold 0.3829).
+  All rate>0.60 attempts failed (0.61/0.62/0.63/0.65, random and seeded).
+  q=32 exploratory searches also all failed. [repo-observed]
+- Decisive control: equal-entropy QSC(q=16, p=0.038, H≈0.3815) converged 16/16 at rate 0.63/0.65
+  with the same DE budget; folded real structured channel 0/16. Conclusion: **channel structure limits
+  plain irregular NB-LDPC DE, not search budget**. [repo-observed, diagnostic_only]
+- Next automatic artifacts created: channel-aware DE gate proposal draft and Route C1 design draft.
+  Execution of those routes remains a user-gated decision per plan
+  `docs/route-b-c-d-next-steps-plan-20260819.md`. [decision]
+- Local commits made; push still requires separate user authorization. [repo-observed]
+
 # AGENT_PROJECT_MEMORY.md
 
 ## 2026-08-13 Mainline fusion merge — main = db00174d, two lines re-fused
