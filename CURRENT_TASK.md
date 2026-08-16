@@ -34,6 +34,10 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 ev
   - `n6_comparison_v2_q1024/`：三路表新增 `nonbinary_ldpc_q1024` 行；
     `leakage_decomposition.json` 记录 q=16 folded 全信道诚实 f≈3.016、
     q=1024 n=128 f≈7.245。
+  - **q=1024 high-rate 有限码尝试**：
+    `n4_finite_q1024_r084_simple_16f/`（R≈0.84, f≈2.912, FER=0.5）、
+    `n4_finite_q1024_r089_simple/`（R≈0.89, f≈1.989, FER=0.8125）；
+    `n6_comparison_v3_q1024_rates/` 记录 rate-f/FER tradeoff，exact_mismatch 原样保留。
 - N6 three-way comparison（v1 q=16）: `n6_comparison/comparison_table.csv` + `comparison_summary.json`
   Binary LDPC MLC f≈4.169（FER=0）；Nonbinary LDPC f≈4.183（FER=0.25）；
   Polar MLC 在 release repo 中，当前表标记 `not_available` 直到提供 clean evidence JSON。

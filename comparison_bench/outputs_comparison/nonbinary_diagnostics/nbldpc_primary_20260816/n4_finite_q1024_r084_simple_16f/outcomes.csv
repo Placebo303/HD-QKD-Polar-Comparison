@@ -1,0 +1,17 @@
+frame_id,status,exact_correct,iterations,decoder_status,runtime_s,syndrome_symbols,syndrome_bits
+0,exact_mismatch,False,10,max_iter_reached,4.844,41,410
+1,exact_mismatch,False,10,max_iter_reached,4.797,41,410
+2,exact_correct,True,6,success,2.859,41,410
+3,exact_correct,True,6,success,2.891,41,410
+4,exact_mismatch,False,10,max_iter_reached,4.828,41,410
+5,exact_mismatch,False,10,max_iter_reached,4.844,41,410
+6,exact_correct,True,4,success,1.937,41,410
+7,exact_correct,True,4,success,1.906,41,410
+8,exact_correct,True,5,success,2.407,41,410
+9,exact_correct,True,3,success,1.468,41,410
+10,exact_mismatch,False,8,converged_no_syndrome,3.891,41,410
+11,exact_correct,True,2,success,0.984,41,410
+12,exact_mismatch,False,10,max_iter_reached,4.86,41,410
+13,exact_mismatch,False,10,max_iter_reached,4.859,41,410
+14,exact_correct,True,6,success,2.828,41,410
+15,exact_mismatch,False,10,max_iter_reached,4.875,41,410

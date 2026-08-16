@@ -1,0 +1,7 @@
+route,N,q,rate,syndrome_bits,public_bits,f,FER,runtime,status
+binary_polar_mlc,,2,,,,,,,not_available
+binary_ldpc_mlc,256,2,0.770703,587,0,4.169374888623591,0.0,0.01154,ok
+nonbinary_ldpc_q16,512,16,0.599609375,820,0,4.182592530188362,0.25,1.52725,has_exact_mismatch
+nonbinary_ldpc_q1024_r060_n128,128,1024,0.6015625,510,0,7.244910368647389,0.0,0.80075,exact_correct_all
+nonbinary_ldpc_q1024_r084,256,1024,0.83984375,410,0,2.9121698540641465,0.5,3.560563,has_exact_mismatch
+nonbinary_ldpc_q1024_r089,256,1024,0.890625,280,0,1.9887989247267341,0.8125,5.714875,has_exact_mismatch

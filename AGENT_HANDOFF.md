@@ -18,6 +18,8 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
   - n6_comparison/comparison_table.csv + comparison_summary.json
   - n6_comparison_v2_q1024/comparison_table.csv + comparison_summary.json
   - n6_comparison_v2_q1024/leakage_decomposition.json（q16 honest f≈3.016; q1024 n128 f≈7.245）
+  - n4_finite_q1024_r084_simple_16f/（f≈2.912, FER=0.5）与 n4_finite_q1024_r089_simple/（f≈1.989, FER=0.8125）
+  - n6_comparison_v3_q1024_rates/（q=1024 rate-f/FER tradeoff）
 - 结论：V19 工程路线已在 q=16 代理和 q=1024 全域跑通（构造+FFT-QSPA+结构化信道）；
   DE 仍受 structured-channel plain ceiling 限制（R≈0.60 / q=1024 需更高 rate）。
 - 下一步（用户批准）：大规模 rate-ladder / channel-aware DE 新 OpenSpec change，

@@ -1,0 +1,223 @@
+{
+  "channel_entropy_bits_per_symbol": 0.549955043921941,
+  "claim_boundary": "diagnostic_only",
+  "codebook": {
+    "construction": {
+      "check_counts": {
+        "14": 1,
+        "15": 40
+      },
+      "edge_label_seed": 389353621,
+      "m": 41,
+      "max_trials": 20,
+      "n": 256,
+      "parallel_edges": 0,
+      "rank": 41,
+      "schema": "v10_peg_manifest_v1",
+      "seed": 2026082009,
+      "status": "ok",
+      "total_sockets": 614,
+      "trials_used": 1,
+      "triples_count": 614,
+      "var_counts": {
+        "2": 154,
+        "3": 102
+      }
+    },
+    "field_id": "c53f194db6af8b1afdfdcb189ce1b91617f7172937ab025a08001f609385c79a",
+    "lambda_edge": {
+      "2": 0.5,
+      "3": 0.5
+    },
+    "m": 41,
+    "n": 256,
+    "q": 1024,
+    "rank": 41,
+    "rate": 0.83984375,
+    "requested_m": 41,
+    "rho_edge": {
+      "14": 0.013671874999999232,
+      "15": 0.9863281250000008
+    },
+    "schema": "nbldpc_v19_codebook_v1",
+    "seed": 2026082009
+  },
+  "f_plain_qary": 2.9121698540641465,
+  "fer": 0.5,
+  "m": 41,
+  "n": 256,
+  "n_decode_failed": 0,
+  "n_exact_correct": 8,
+  "n_exact_mismatch": 8,
+  "n_frames": 16,
+  "outcomes": [
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 0,
+      "iterations": 10,
+      "runtime_s": 4.844,
+      "status": "exact_mismatch",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 1,
+      "iterations": 10,
+      "runtime_s": 4.797,
+      "status": "exact_mismatch",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 2,
+      "iterations": 6,
+      "runtime_s": 2.859,
+      "status": "exact_correct",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 3,
+      "iterations": 6,
+      "runtime_s": 2.891,
+      "status": "exact_correct",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 4,
+      "iterations": 10,
+      "runtime_s": 4.828,
+      "status": "exact_mismatch",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 5,
+      "iterations": 10,
+      "runtime_s": 4.844,
+      "status": "exact_mismatch",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 6,
+      "iterations": 4,
+      "runtime_s": 1.937,
+      "status": "exact_correct",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 7,
+      "iterations": 4,
+      "runtime_s": 1.906,
+      "status": "exact_correct",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 8,
+      "iterations": 5,
+      "runtime_s": 2.407,
+      "status": "exact_correct",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 9,
+      "iterations": 3,
+      "runtime_s": 1.468,
+      "status": "exact_correct",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "exact_correct": false,
+      "frame_id": 10,
+      "iterations": 8,
+      "runtime_s": 3.891,
+      "status": "exact_mismatch",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 11,
+      "iterations": 2,
+      "runtime_s": 0.984,
+      "status": "exact_correct",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 12,
+      "iterations": 10,
+      "runtime_s": 4.86,
+      "status": "exact_mismatch",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 13,
+      "iterations": 10,
+      "runtime_s": 4.859,
+      "status": "exact_mismatch",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 14,
+      "iterations": 6,
+      "runtime_s": 2.828,
+      "status": "exact_correct",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    },
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 15,
+      "iterations": 10,
+      "runtime_s": 4.875,
+      "status": "exact_mismatch",
+      "syndrome_bits": 410,
+      "syndrome_symbols": 41
+    }
+  ],
+  "q": 1024,
+  "rate": 0.83984375,
+  "requested_m": 41,
+  "schema": "nbldpc_v19_finite_execute_v1",
+  "seed": 2026082009,
+  "syndrome_bits_per_frame": 410,
+  "syndrome_bits_per_symbol": 1.6015625,
+  "wall_seconds": 56.969
+}

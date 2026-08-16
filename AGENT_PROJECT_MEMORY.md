@@ -20,6 +20,9 @@
     `leakage_decomposition.json` (q16 honest f≈3.016; q1024 n128 f≈7.245).
   - N2b capacity bound: `n2b_channel_aware_bounds/lsb_public_capacity.json`
     LSB-public does not reduce ideal f; full q=1024 coding is the binding target.
+  - q=1024 high-rate finite attempts: R=0.840 f=2.912 FER=0.5 (8/16 exact),
+    R=0.891 f=1.989 FER=0.8125 (3/16 exact); all mismatches retained;
+    `n6_comparison_v3_q1024_rates` records the tradeoff. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
     `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
 - Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;

@@ -80,11 +80,27 @@ fresh/promotion/qualification.
   n_samples=100, max_iter=3: non-converged (final base-q entropy ≈0.0477).
 - This is a tiny diagnostic probe, not a production DE search.
 
+## N3/N4 — q=1024 high-rate finite attempts (R≈0.84 / R≈0.89)
+
+- Evidence:
+  - `n4_finite_q1024_r084_simple_16f/finite_execute.json`: q=1024, n=256,
+    m=41, R≈0.840, f≈2.912, **8/16 exact_correct, 8/16 exact_mismatch,
+    FER=0.5**.
+  - `n4_finite_q1024_r089_simple/finite_execute.json`: q=1024, n=256,
+    m=28, R≈0.891, f≈1.989, **3/16 exact_correct, 13/16 exact_mismatch,
+    FER=0.8125**.
+- Both high-rate rows retain `exact_mismatch`; no `decode_failed` was observed
+  with the simple degree distribution and max_iter=10.
+- This gives an honest q=1024 best-f/FER tradeoff: lower leakage is possible
+  (f≈1.99) but current simple PEG/FFT-QSPA is not reliable at those rates.
+
 ## N6 — Three-way comparison
 
 - Evidence: `n6_comparison/comparison_table.csv` and `comparison_summary.json`
   (v1: q=16 proxy); `n6_comparison_v2_q1024/comparison_table.csv` and
-  `comparison_summary.json` (v2: includes q=1024 primary).
+  `comparison_summary.json` (v2: includes q=1024 primary);
+  `n6_comparison_v3_q1024_rates/comparison_table.csv` + `comparison_summary.json`
+  (v3: q=1024 rate tradeoff rows).
 - Leakage decomposition: `n6_comparison_v2_q1024/leakage_decomposition.json`
   - q=16 folded honest full-channel f≈3.016
     (syndrome 1.602 + uncovered 6-MSB public cost 0.057 / H_full 0.550).
