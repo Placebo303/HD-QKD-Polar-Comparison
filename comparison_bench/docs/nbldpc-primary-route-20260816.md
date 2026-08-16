@@ -183,6 +183,8 @@ fresh/promotion/qualification.
     exact_mismatch.
   - `n4_finite_q1024_f1279_n128_1f/`: n=128, m=9, f≈1.279, OSD still
     exact_mismatch.
+  - Full OSD-1 aggregate summary:
+    `n4_full_osd1_summary.json`.
   - **Full OSD-1 exact recovery**:
     `n4_finite_q1024_f1279_full_osd1_n128_probe.json`
     n=128, m=9, f≈1.279; enumerating all single free-variable flips
