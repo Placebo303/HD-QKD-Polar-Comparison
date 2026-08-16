@@ -29,3 +29,9 @@ Status: COMPLETE (prototype, diagnostic_only)
 - Random regular/light construction failed on many planes (especially p≥0.0046), so this is **not** a usable f≤1.3 code yet.
 - It confirms that reaching f≈1.3 requires optimized code design / Polar-like capacity-approaching codes, not naive random LDPC.
 - This exploratory attempt is recorded in `workspace/v19_mlc_highrate_test.out`; it is not a production claim.
+
+## Exploratory Polar SC/SCL attempt (not accepted)
+- Tried Polar SC and existing CA-SCL (list size 4) with N=2048, PW-order construction, per-plane syndrome rows targeting f≈1.32.
+- Both SC and SCL still had many frame errors at the target high rates.
+- This indicates that reaching f≤1.3 needs better polar construction / larger list / CRC-aided design or optimized LDPC, not just reusing the current PW-order SC/SCL decoder as-is.
+- Exploratory outputs: `workspace/v19_mlc_polar_test.out`, `workspace/v19_mlc_scl_test.out`.
