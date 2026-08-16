@@ -1,11 +1,12 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; SCL32/128_INFRA_DONE; OPTIMIZED_CODE_DESIGN_OPEN
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; POLAR_MLC_F13_BLOCKED; NEXT_LDPC_DE_GATED
 
-## Current State — V19 prototype f≈4.17；SCL32/128 已搭建但 f≈1.3 需优化码构造 (2026-08-16)
+## Current State — Polar MLC f≤1.3 已穷尽；下一步 V19 DE-gated LDPC (2026-08-16)
 
 - Route A/B M1/M2 完成；QSC 对照证明信道结构限制。
-- V19 scoping 理想 f≈1.0；V19 prototype 现有 binary MLC 500 帧全部纠正，f≈4.17。
-- 新增 CA-SCL list=32/128 实验解码器（未改 frozen src），简单构造在 f≈1.3 目标仍有帧错误。
-- 下一步：优化 Polar/LDPC 冻结集/码构造（GA、CRC、更大 N 等）或另立新 change；D1/D3 仍阻塞。
+- V19 prototype 现有 binary MLC 500 帧全部纠正，f≈4.17。
+- PW/MC/GA + CA-SCL list32/128 + N=2048/4096/8192 均未达到 f≤1.3。
+- 结论：当前 Polar/SCL 路径受阻；下一步转向 V19 DE-gated LDPC 码设计（需新 change/用户批准）。
+- D1/D3 仍阻塞。
 
 # AGENT_HANDOFF.md
 

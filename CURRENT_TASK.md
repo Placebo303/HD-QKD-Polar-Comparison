@@ -1,15 +1,15 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; SCL32/128_INFRA_DONE; OPTIMIZED_CODE_DESIGN_OPEN
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; POLAR_MLC_F13_BLOCKED; NEXT_LDPC_DE_GATED
 
-## Current Task — V19 binary-MLC 原型已跑通 f≈4.17；CA-SCL list32/128 实验已搭建，但 f≈1.3 仍需优化码构造 (2026-08-16)
+## Current Task — Polar MLC f≤1.3 路径已穷尽（PW/MC/GA、N≤8192、list≤128 均失败）；下一步转向 V19 DE-gated LDPC 或用户决策 (2026-08-16)
 
-Route A/B M1/M2 已完成；QSC 对照证明信道结构是 plain NB-LDPC 的限制项。
-V19 scoping 理想 f≈1.0；V19 prototype 用现有 v4 H1 + v5 H2 fallback 合成 500 帧全部纠正，f≈4.17。
-已新增 V19 CA-SCL list=32/128 实验解码器（未改 frozen src），但简单 PW/MC 冻结集在 N=2048/4096
-目标 f≈1.3 下仍有帧错误。下一步需要 GA/定制冻结集或换码族，而不是继续加 list。
+Route A/B M1/M2 完成；QSC 对照证明信道结构限制。
+V19 binary-MLC prototype 用现有 v4/v5 码本可跑通（f≈4.17），但为达到 f≤1.3 尝试了：
+PW、Monte-Carlo、GA 冻结集；CA-SCL list 32/128；N=2048/4096/8192，均未在目标码率下成功。
+当前 Polar/SCL 路径已到实验性终点。
 
 - 相关文档：`docs/v19-binary-mlc-prototype-result-20260816.md`
 - v19 OpenSpec draft：`openspec/changes/formal-nonbinary-ldpc-v19-channel-aware-de-gate/`
-- 下一步：优化 Polar/LDPC 码构造（GA/CRC/更大 N 等）或另立新 change；D1/D3 仍阻塞。
+- 下一步：转向 V19 DE-gated LDPC 码设计（新 change/用户批准），或明确接受当前 f≈4.17；D1/D3 仍阻塞。
 
 ---
 
