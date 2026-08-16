@@ -1,3 +1,10 @@
+## 2026-08-16 V19 Polar GA frozen-set attempt
+
+- Added `v19_polar_ga.py` implementing GA/J-function reliability for per-plane BSC Polar construction.
+- Tested GA masks with CA-SCL list=128 at N=2048 for planes 9/8/7; still frame errors at f≈1.3 target.
+- Combined with earlier PW/MC attempts, cheap frozen-set construction is not sufficient for f≤1.3 with current Polar SC/SCL at N≤4096.
+- Future path: larger N, CRC-aided SCL with tailored construction, different code family, or finite-length f relaxation. [repo-observed, diagnostic_only]
+
 ## 2026-08-16 V19 CA-SCL experimental decoders (list 32/128)
 
 - Added experimental CA-SCL copies under comparison_bench (not frozen src):
