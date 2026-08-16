@@ -208,7 +208,8 @@ fresh/promotion/qualification.
     `..._osd2_n64_seed2055.json`). Two n=64 frames with lambda
     `{2:0.7,3:0.3}` both failed full OSD-1
     (`..._full_osd1_n64_lamc_seed2060/61.json`). Broad OSD-2 also failed on
-    non-recovered seeds 2056/2059 (`..._osd2_n64_seed2056/59.json`).
+    non-recovered seeds 2056/2059 (`..._osd2_n64_seed2056/59.json`) and
+    2062/2063 (`..._osd2_n64_seed2062/63.json`).
     max_iter=50 + full OSD-1 also failed on seed2055
     (`..._full_osd1_iter50_n64_seed2055.json`). Fixed-frame alternate code
     seeds 3001/3002 also failed on seed2055
