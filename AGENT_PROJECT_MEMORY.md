@@ -16,7 +16,8 @@
     `n4_finite_q1024_n128_simple/finite_execute.json` (q=1024, n=128, m=51,
     R≈0.602, 2/2 exact_correct, f≈7.245), and
     `n2_extended_probe_q1024/extended_degree_probe.json` (tiny DE probe,
-    non-converged). `n6_comparison_v2_q1024` includes the q=1024 row.
+    non-converged). `n6_comparison_v2_q1024` includes the q=1024 row and
+    `leakage_decomposition.json` (q16 honest f≈3.016; q1024 n128 f≈7.245).
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
     `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
 - Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;

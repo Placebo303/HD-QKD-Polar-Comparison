@@ -72,10 +72,14 @@ fresh/promotion/qualification.
 - Evidence: `n6_comparison/comparison_table.csv` and `comparison_summary.json`
   (v1: q=16 proxy); `n6_comparison_v2_q1024/comparison_table.csv` and
   `comparison_summary.json` (v2: includes q=1024 primary).
+- Leakage decomposition: `n6_comparison_v2_q1024/leakage_decomposition.json`
+  - q=16 folded honest full-channel f≈3.016
+    (syndrome 1.602 + uncovered 6-MSB public cost 0.057 / H_full 0.550).
+  - q=1024 n=128 full-syndrome f≈7.245.
 - Binary LDPC MLC baseline imported from existing
   `v19_binary_mlc_prototype_20260816`: f≈4.169, FER=0.
 - Nonbinary LDPC q=16 diagnostic row: f≈4.183, FER=0.25.
-- Nonbinary LDPC q=1024 diagnostic row: f≈6.819, FER=0.
+- Nonbinary LDPC q=1024 diagnostic row: f≈6.819 (n=64) / f≈7.245 (n=128), FER=0.
 - Binary Polar MLC is available in the separate release repo
   `D:\Code\HD-QKD_Polar_Release`; this package marks it `not_available` until a
   clean evidence JSON is supplied.

@@ -1,0 +1,23 @@
+{
+  "claims": "diagnostic_only",
+  "h_full_q1024": 0.549955,
+  "rows": [
+    {
+      "f_full": 3.0157115198836637,
+      "f_plain_folded": 4.182592530188362,
+      "public_bits_note": "sum h2 of 6 MSB planes not covered by q=16 folded proxy",
+      "public_msb_lsb_bits_per_original_symbol": 0.056943128917619996,
+      "route": "nonbinary_ldpc_q16_folded",
+      "syndrome_bits_per_original_symbol": 1.6015625
+    },
+    {
+      "f_full": 7.244910947259322,
+      "f_plain_qary": 7.244910368647389,
+      "public_bits_note": "full q=1024 syndrome covers all 10 Gray planes",
+      "public_msb_lsb_bits_per_original_symbol": 0.0,
+      "route": "nonbinary_ldpc_q1024_n128",
+      "syndrome_bits_per_original_symbol": 3.984375
+    }
+  ],
+  "schema": "nbldpc_v19_leakage_decomposition_v1"
+}
