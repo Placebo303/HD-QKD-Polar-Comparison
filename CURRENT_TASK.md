@@ -1,15 +1,16 @@
-Status: THREE_WAY_COMPARISON_PLAN_READY — next work in a NEW conversation per user decision
+Status: NBLDPC_FOCUS_PLAN_READY — Polar / binary LDPC 已实现并作为只读基线；下一步在新对话主攻 NBLDPC
 
-## Current Task — 三路并行对比已立项：Binary Polar / Binary LDPC / Nonbinary LDPC (2026-08-16)
+## Current Task — 主攻 Nonbinary LDPC；Polar 与 binary LDPC 仅做对比基线 (2026-08-16)
 
-用户决定不再单独押注 Polar，而是在同一 V17 信道上并行推进三路并对比：
-1. Binary Polar MLC（已有 GA/CRC/CA-SCL list32/128 资产）
-2. Binary LDPC MLC（已有 v4/v5 codebook、BpOsdDecoder、DE screener）
-3. Nonbinary LDPC（已有 V18 B2 structured DE、q=16 folded、QSC control 证据）
+用户最新决策：
+- Binary Polar MLC 已实现，只读作为基线。
+- Binary LDPC MLC 已实现（f≈4.17，500 帧全过），只读作为基线。
+- **Nonbinary LDPC 是当前唯一未实现、需全力攻克的目标。**
 
-目标：每路产出统一口径的 f/FER/syndrome/runtime 证据，目标 f≤1.3；不达标则如实记录最佳 f。
-执行契约：`docs/three-way-ir-comparison-plan-20260816.md`。
-本仓库当前仅保存计划；后续执行在用户新开的对话中进行。
+执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+关键复用：V18 B2 structured DE（q=16 folded rate=0.60 f≈4.18）、V10 DE/PEG/FFT-QSPA、
+V14 structured MC-DE、QSC 等熵对照证据。
+本仓库当前仅保存计划；执行在用户新对话中继续。
 
 ---
 
