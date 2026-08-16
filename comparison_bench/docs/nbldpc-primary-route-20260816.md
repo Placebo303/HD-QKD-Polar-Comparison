@@ -158,6 +158,8 @@ fresh/promotion/qualification.
   - Added bounded OSD-2 candidate search (`osd_decode_candidates_order2`) and
     tested at f≈1.296 (`n4_finite_q1024_f129_simple_pp_osd2_1f/`): still
     exact_mismatch.
+  - Wider OSD-2 probe (`n4_finite_q1024_f129_osd2_wide_probe.json`,
+    top_info=4, top_symbols=16, 1531 candidates): still no exact match.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
