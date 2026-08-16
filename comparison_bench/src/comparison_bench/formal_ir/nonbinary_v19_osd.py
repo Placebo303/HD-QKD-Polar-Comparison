@@ -15,6 +15,20 @@ from .nonbinary_field import GF2mField
 __all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2"]
 
 
+def _reliability(beliefs: np.ndarray, hard: Sequence[int]) -> dict[int, float]:
+    """Return per-variable reliability as max-posterior minus second-max.
+
+    Lower values mean less reliable, which is a better OSD ordering than the
+    raw max posterior when all variables have similar scales.
+    """
+    out = {}
+    for i in range(len(hard)):
+        row = beliefs[i]
+        top = np.sort(row)[::-1]
+        out[i] = float(top[0] - top[1]) if len(top) > 1 else float(top[0])
+    return out
+
+
 def gf_rref(field: GF2mField, matrix: Any, syndrome: Sequence[int]):
     """Return (rref, pivot_cols) for the augmented system [H | s] over GF(q).
 
@@ -119,7 +133,7 @@ def osd_decode(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
     # Reliability ordering for free cols.
     if beliefs is not None:
         beliefs = np.asarray(beliefs, dtype=np.float64)
-        rel = {i: float(beliefs[i, hard[i]]) for i in free_cols}
+        rel = _reliability(beliefs, hard)
         free_ordered = sorted(free_cols, key=lambda i: rel.get(i, 0.0))
     else:
         free_ordered = list(free_cols)
@@ -168,7 +182,7 @@ def osd_decode_candidates(*, field: GF2mField, matrix: Any, syndrome: Sequence[i
         hard = [0] * n
     if beliefs is not None:
         beliefs = np.asarray(beliefs, dtype=np.float64)
-        rel = {i: float(beliefs[i, hard[i]]) for i in free_cols}
+        rel = _reliability(beliefs, hard)
         free_ordered = sorted(free_cols, key=lambda i: rel.get(i, 0.0))
     else:
         free_ordered = list(free_cols)
@@ -218,7 +232,7 @@ def osd_decode_candidates_order2(*, field: GF2mField, matrix: Any, syndrome: Seq
         hard = [0] * n
     if beliefs is not None:
         beliefs = np.asarray(beliefs, dtype=np.float64)
-        rel = {i: float(beliefs[i, hard[i]]) for i in free_cols}
+        rel = _reliability(beliefs, hard)
         free_ordered = sorted(free_cols, key=lambda i: rel.get(i, 0.0))[:int(top_info)]
     else:
         free_ordered = list(free_cols)[:int(top_info)]
