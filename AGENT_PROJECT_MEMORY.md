@@ -64,7 +64,8 @@
     Alice's codeword — first exact q=1024 f≤1.3 recovery. A second full
     OSD-1 frame at n=128 was not recovered; across four n=128 frames full
     OSD-1 recovered 1/4 exact (FER=0.75). A non-recovered frame also failed
-    full OSD-1 + bounded OSD-2. Comprehensive blocker summary
+    full OSD-1 + bounded OSD-2 and broad OSD-2 (top20/top4, top20/top16).
+    Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
