@@ -183,6 +183,8 @@ fresh/promotion/qualification.
     exact_mismatch.
   - `n4_finite_q1024_f1279_n128_1f/`: n=128, m=9, f≈1.279, OSD still
     exact_mismatch.
+  - Fast full OSD-1 enumeration (`osd_decode_candidates_fast`) integrated for
+    n<=256; n=64 full OSD-1 dropped from ~50s to ~0.6s.
   - Full OSD-1 aggregate summary:
     `n4_full_osd1_summary.json`.
   - **Full OSD-1 exact recovery**:
