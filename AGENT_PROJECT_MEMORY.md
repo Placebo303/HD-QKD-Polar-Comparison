@@ -66,8 +66,8 @@
     OSD-1 recovered 1/4 exact (FER=0.75). A non-recovered frame also failed
     full OSD-1 + bounded OSD-2 and broad OSD-2 (top20/top4, top20/top16).
     n=64,m=4 f=1.136 full OSD-1 recovered one frame but not a second; prior
-    retry + full OSD-1 also failed on the non-recovered frame. Comprehensive
-    blocker summary
+    retry + full OSD-1 and broad OSD-2 also failed on the non-recovered
+    frame. Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
