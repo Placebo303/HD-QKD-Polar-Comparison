@@ -196,10 +196,11 @@ fresh/promotion/qualification.
     top8/top2) also failed (`..._osd_generic_seed2055.json`).
   - Full OSD-1 aggregate summary:
     `n4_full_osd1_summary.json`.
-  - n=64 fast OSD-1..10 batches: 14/48 exact overall, FER=0.7083
+  - n=64 fast OSD-1..10 batches: 17/56 exact overall, FER=0.6964
     (`..._fast_osd1234_8f_2072/`, `..._fast_osd1234_8f_2080/`,
     `..._fast_osd12345_8f_2088/`, `..._fast_osd123456_8f_2096/`,
-    `..._fast_osd12345678_8f_2104/`, `..._fast_osd1_10_8f_2112/`).
+    `..._fast_osd12345678_8f_2104/`, `..._fast_osd1_10_8f_2112/`,
+    `..._fast_osd1_10_8f_2120/`).
   - **Full OSD-1 exact recovery**:
     `n4_finite_q1024_f1279_full_osd1_n128_probe.json`
     n=128, m=9, f≈1.279; enumerating all single free-variable flips
