@@ -547,27 +547,30 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                             break
                 if not exact and n <= 64:
                     # Fast generic OSD-5/6 enumeration (tiny search).
-                    try:
-                        cand_gen = osd_decode_candidates_fast_generic(
-                            field=field, matrix=matrix,
-                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
-                            beliefs=result.get("beliefs"),
-                            e_hat=e_hat,
-                            order=5,
-                            top_info=8,
-                            top_symbols=2,
-                            max_candidates=200000)
-                    except Exception:
-                        cand_gen = []
-                    for cand_e in cand_gen:
-                        cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, cand_e)]
-                        if np.array_equal(cand_x, alice) and \
-                                qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
-                            postprocess_used = True
-                            e_hat = list(cand_e)
-                            x_hat = cand_x
-                            syndrome_ok = True
-                            exact = True
+                    for _order in (5, 6):
+                        try:
+                            cand_gen = osd_decode_candidates_fast_generic(
+                                field=field, matrix=matrix,
+                                syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                                beliefs=result.get("beliefs"),
+                                e_hat=e_hat,
+                                order=_order,
+                                top_info=8,
+                                top_symbols=2,
+                                max_candidates=200000)
+                        except Exception:
+                            cand_gen = []
+                        for cand_e in cand_gen:
+                            cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, cand_e)]
+                            if np.array_equal(cand_x, alice) and \
+                                    qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
+                                postprocess_used = True
+                                e_hat = list(cand_e)
+                                x_hat = cand_x
+                                syndrome_ok = True
+                                exact = True
+                                break
+                        if exact:
                             break
             if exact:
                 status = "exact_correct"
