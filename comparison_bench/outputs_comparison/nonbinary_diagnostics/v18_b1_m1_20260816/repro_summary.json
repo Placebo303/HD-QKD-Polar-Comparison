@@ -1,0 +1,51 @@
+{
+  "best_lambda": {
+    "16": 0.03260947579500811,
+    "2": 0.11214781329160649,
+    "20": 0.02468210108757377,
+    "29": 0.026377468357718294,
+    "3": 0.2845062601450376,
+    "34": 0.4397354385953124,
+    "4": 0.035846907479879314,
+    "7": 0.044094535247864046
+  },
+  "best_objective": {
+    "canonical_tuple": [
+      2,
+      3,
+      4,
+      7,
+      16,
+      20,
+      29,
+      34,
+      0.11214781329160649,
+      0.2845062601450376,
+      0.035846907479879314,
+      0.044094535247864046,
+      0.03260947579500811,
+      0.02468210108757377,
+      0.026377468357718294,
+      0.4397354385953124
+    ],
+    "converged_iter": 1000000000,
+    "entropy_converged": false,
+    "error_prob": 1e+18,
+    "final_entropy": 1e+18,
+    "penalty": 0.0,
+    "threshold_proxy": null
+  },
+  "eligible_candidates": 0,
+  "evaluations": 600,
+  "gate": "FAIL",
+  "generations_completed": 29,
+  "mode": "production",
+  "p_gate": 0.069,
+  "q": 4,
+  "rate": 0.75,
+  "reason": "eligible_candidates=0; threshold_proxy=None; best candidate did not converge (entropy_converged=False)",
+  "run_id": "v18_b1_m1_20260816",
+  "schema": "nbldpc_v18_b1_m1_result_v1",
+  "seed": 2026081602,
+  "verdict": "NO_THRESHOLD"
+}
