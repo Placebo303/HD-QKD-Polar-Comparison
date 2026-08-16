@@ -173,6 +173,8 @@ fresh/promotion/qualification.
     `n4_finite_q1024_f129_rel_osd2_1f/` still exact_mismatch.
   - `n4_finite_q1024_f129_opt_osd_1f/`: V18-B2 optimized lambda + exact
     two-degree rho at f=1.296, OSD still exact_mismatch.
+  - `n4_finite_q1024_f129_osd_4f/`: 4-frame OSD run at f=1.296, 4/4
+    exact_mismatch, 0 exact, FER=1.0.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
