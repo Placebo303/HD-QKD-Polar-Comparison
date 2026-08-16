@@ -1,0 +1,41 @@
+{
+  "f_plain_qary": 1.1364566191779328,
+  "m": 4,
+  "n": 64,
+  "q": 1024,
+  "results": [
+    {
+      "elapsed": 0.007,
+      "found": false,
+      "n_candidates": 193,
+      "order": 5,
+      "top_info": 6,
+      "top_symbols": 2
+    },
+    {
+      "elapsed": 0.004,
+      "found": false,
+      "n_candidates": 65,
+      "order": 6,
+      "top_info": 6,
+      "top_symbols": 2
+    },
+    {
+      "elapsed": 0.036,
+      "found": false,
+      "n_candidates": 1793,
+      "order": 5,
+      "top_info": 8,
+      "top_symbols": 2
+    },
+    {
+      "elapsed": 0.036,
+      "found": false,
+      "n_candidates": 1793,
+      "order": 6,
+      "top_info": 8,
+      "top_symbols": 2
+    }
+  ],
+  "schema": "nbldpc_v19_osd_generic_seed2055_probe_v1"
+}
