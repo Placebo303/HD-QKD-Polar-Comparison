@@ -68,8 +68,9 @@
     n=64,m=4 f=1.136 full OSD-1 recovered 3/6 frames (FER=0.5); prior retry +
     full OSD-1 and broad OSD-2 also failed on a non-recovered frame; lambda
     {2:0.7,3:0.3} gave 0/2. Broad OSD-2 also failed on non-recovered seeds
-    2056/2059. max_iter=50 + full OSD-1 also failed on seed2055.
-    Comprehensive blocker summary
+    2056/2059. max_iter=50 + full OSD-1 also failed on seed2055; alternate
+    code seeds 3001/3002 for the same frame also failed. Comprehensive
+    blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
