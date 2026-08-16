@@ -177,6 +177,8 @@ fresh/promotion/qualification.
     exact_mismatch, 0 exact, FER=1.0.
   - Consolidated blocker summary:
     `n4_finite_q1024_f129_blocker_summary.json`.
+  - `n4_finite_q1024_r084_osd_8f/`: R=0.84 q=1024 with OSD, 3 exact /
+    5 exact_mismatch / 0 decode_failed, FER=0.625.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
