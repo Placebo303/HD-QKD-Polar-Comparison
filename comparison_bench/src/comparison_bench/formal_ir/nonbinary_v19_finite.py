@@ -547,7 +547,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                             break
                 if not exact and n <= 64:
                     # Fast generic OSD-5/6 enumeration (tiny search).
-                    for _order in (5, 6, 7, 8):
+                    for _order in (5, 6, 7, 8, 9, 10):
                         try:
                             cand_gen = osd_decode_candidates_fast_generic(
                                 field=field, matrix=matrix,
