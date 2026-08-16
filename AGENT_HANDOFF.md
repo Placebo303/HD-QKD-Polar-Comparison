@@ -1,13 +1,13 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; CHANNEL_STRUCTURE_LIMIT; NEXT_PROPOSALS_DRAFT
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_SCOPING_DONE; NEXT_EXECUTION_USER_GATED
 
-## Current State — M2 QSC 对照证明结构化信道是限制项；接下来写提案草案 (2026-08-16)
+## Current State — 自动诊断与草案完成；v19 scoping 指向 binary-MLC f≈1 (2026-08-16)
 
 - Route A 完成；Route B M0/M1/M1b 完成。
 - M2 plain-DE 边界：q=16 folded 真实信道 rate=0.60 f≈4.18。
-- QSC 等熵对照：rate 0.63/0.65 各 8 seeds 全部收敛；folded 结构化信道同预算全部失败。
-- 结论：信道结构限制 plain irregular NB-LDPC DE，不是搜索预算。
-- 文档：`docs/route-b-m2-qsc-control-result-20260816.md`、`docs/route-b-m2-boundary-20260816.md`。
-- 下一步：channel-aware 新 change 草案、Route C1 设计草案（执行待用户门）。
+- QSC 等熵对照：rate 0.63/0.65 8+8 seeds 全部收敛；folded 结构化同预算全部失败。
+- V19 scoping：逐位面 h2 之和 = H_full≈0.550 → 理想 binary-MLC f≈1.0；这是 f≤1.3 的正确方向。
+- 已产出：v19 OpenSpec draft、Route C1 design draft、v19 channel scoping CLI/evidence。
+- 下一步：用户批准 v19 DE gate 后执行；D1/D3 仍阻塞。
 
 # AGENT_HANDOFF.md
 

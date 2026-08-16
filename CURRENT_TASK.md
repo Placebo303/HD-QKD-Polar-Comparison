@@ -1,15 +1,17 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; CHANNEL_STRUCTURE_LIMIT; NEXT_PROPOSALS_DRAFT
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_SCOPING_DONE; NEXT_EXECUTION_USER_GATED
 
-## Current Task — M2 QSC 对照证明“结构化信道形状”是限制项；下一步写 channel-aware 新 change 草案与 Route C1 草案 (2026-08-16)
+## Current Task — 自动诊断与草案完成：信道结构是限制；v19 channel scoping 显示 binary-MLC 理想 f≈1；执行仍走用户门 (2026-08-16)
 
-Route A 完成；Route B M0/M1/M1b 完成；M2 plain-DE 边界为 q=16 rate=0.60 f≈4.18。
-关键对照实验：等熵 QSC (p=0.038, H≈0.3815) 在 rate=0.63/0.65 上 **16/16 收敛**，
-而同预算 folded 真实结构化信道 0/16 收敛。结论：不是搜索预算不足，而是信道结构
-（位面失配/Gray fold）限制 plain irregular NB-LDPC 的 DE 天花板。
+Route A 完成；Route B M0/M1/M1b 完成；M2 plain-DE 边界 q=16 rate=0.60 f≈4.18。
+QSC 对照：等熵 QSC 16/16 收敛，folded 结构化 0/16 → 信道结构限制 plain NB-LDPC。
+V19 scoping：V17 位面独立模型下逐位面 h2 之和 = H_full≈0.550，理想 binary-MLC f≈1.0，
+说明逐位面/MLC 路线是接近 f≤1.3 的正确方向。
 
 - M2 边界：`docs/route-b-m2-boundary-20260816.md`
 - QSC 对照：`docs/route-b-m2-qsc-control-result-20260816.md`
-- 下一步：撰写 channel-aware 构造/B2 门提案草案、Route C1 设计草案；执行仍走用户门。
+- v19 cli/evidence：`comparison_bench/outputs_comparison/nonbinary_diagnostics/v19_channel_scoping_20260816/`
+- v19 OpenSpec draft：`openspec/changes/formal-nonbinary-ldpc-v19-channel-aware-de-gate/`
+- 下一步：用户批准后执行 v19 DE gate / Route C1；D1/D3 仍需数据/push 授权。
 
 ---
 
