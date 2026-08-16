@@ -47,7 +47,7 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
   DE 仍受 structured-channel plain ceiling 限制（R≈0.60 / q=1024 需更高 rate）。
 - 下一步（用户批准）：已创建 V20 OpenSpec draft
   `openspec/changes/formal-nonbinary-ldpc-v20-q1024-decode-improvement/`；
-  冻结后实现 bounded q-ary OSD / 改进构造 / retry。
+  V19 comprehensive blocker 已写入，冻结后需实现严格更强的解码/构造。
 - 既有 P1/P2/V13 legacy 等冻结终态不变；push 仍待单独授权。
 
 # AGENT_HANDOFF.md

@@ -60,7 +60,8 @@ P1/P2/V13 legacy 等既有冻结终态均不变。
 已创建新 OpenSpec change draft：
 `openspec/changes/formal-nonbinary-ldpc-v20-q1024-decode-improvement/`
 （proposal/design/tasks），V19 OSD prototype 已实现并记录到 design/tasks；
-下一步按该 draft 冻结后继续完整 OSD / 改进构造。
+V19 comprehensive blocker 已写入 proposal/tasks；下一步按该 draft 冻结后
+实现严格更强的解码/构造。
 
 ---
 
