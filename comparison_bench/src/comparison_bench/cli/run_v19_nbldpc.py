@@ -84,6 +84,10 @@ def main() -> int:
     p.add_argument("--max-iter", type=int, default=60)
     p.add_argument("--seed-lambda-json", type=str, required=True,
                    help="JSON mapping of the lambda degree distribution")
+    p.add_argument("--osd-order", type=int, default=None,
+                   help="Override OSD order (0 or 1)")
+    p.add_argument("--osd-top-info", type=int, default=4,
+                   help="Number of least-reliable free variables for OSD-1")
     p.set_defaults(func=cmd_finite)
 
     args = ap.parse_args()
@@ -178,6 +182,7 @@ def cmd_finite(args) -> int:
     doc = finite.execute_synthetic_frames(
         q=q, n=args.n, m=m, lambda_edge=lam, w=w,
         n_frames=args.n_frames, seed=args.seed, max_iter=args.max_iter,
+        osd_order=args.osd_order, osd_top_info=args.osd_top_info,
         out_dir=Path(args.out_dir))
     print(json.dumps({k: v for k, v in doc.items() if k != "outcomes"}, sort_keys=True))
     return 0

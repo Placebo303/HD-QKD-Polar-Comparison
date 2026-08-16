@@ -309,6 +309,8 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                              n_frames: int, seed: int, max_iter: int = 100,
                              streak: int = 3,
                              rho_edge: Mapping[int, float] | None = None,
+                             osd_order: int | None = None,
+                             osd_top_info: int = 4,
                              out_dir: str | Path | None = None) -> dict:
     """Run deterministic synthetic frames through a constructed q-ary code.
 
@@ -390,13 +392,14 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                 if not exact:
                     # Bounded q-ary OSD-0/1 post-processing (diagnostic).
                     try:
+                        _osd_order = int(osd_order) if osd_order is not None else (1 if n <= 256 else 0)
                         e_fixed = osd_decode(
                             field=field, matrix=matrix,
                             syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
                             beliefs=result.get("beliefs"),
                             e_hat=e_hat,
-                            order=1 if n <= 256 else 0,
-                            top_info=4)
+                            order=_osd_order,
+                            top_info=int(osd_top_info))
                     except Exception:
                         e_fixed = None
                     if e_fixed is not None:
