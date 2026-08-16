@@ -1,0 +1,16 @@
+{
+  "schema": "nbldpc_v19_f129_seed_sweep_v1",
+  "claim_boundary": "diagnostic_only",
+  "q": 1024,
+  "n": 1024,
+  "m": 73,
+  "rate": 0.9287109375,
+  "f_plain_qary": 1.296270727723675,
+  "max_iter": 10,
+  "osd": "bounded OSD-0/1/2 integrated",
+  "seeds_tested": [2026082028, 2026082033, 2026082036, 2026082037, 2026082038],
+  "n_exact_correct_total": 0,
+  "n_exact_mismatch_total": 5,
+  "n_decode_failed_total": 0,
+  "conclusion": "Across multiple PEG construction seeds, q=1024 f=1.296 consistently yields syndrome-consistent exact_mismatch with the current decoder/OSD; construction seed alone does not unlock exact decoding."
+}
