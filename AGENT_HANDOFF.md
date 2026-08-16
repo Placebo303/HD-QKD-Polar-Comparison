@@ -43,7 +43,8 @@ Status: NBLDPC_PRIMARY_V19_BLOCKED — V19 route exhausted; next requires V20 fr
   - n4_finite_q1024_r084_osd_8f/（R=0.84 OSD：3 exact / 5 mismatch / 0 failed）
   - n4_finite_q1024_f1279_n512_1f/（n=512 f=1.279 OSD 仍 exact_mismatch）
   - n4_finite_q1024_f1279_n128_1f/（n=128 f=1.279 bounded OSD exact_mismatch）
-  - n4_finite_q1024_f1279_full_osd1_n128_probe.json（full OSD-1 121738 candidates 找到 exact）
+  - n4_finite_q1024_f1279_full_osd1_n128_probe.json（full OSD-1 找到 exact）
+  - ..._full_osd1_n128_probe_seed2050.json（第二帧未恢复）
 - 结论：V19 工程路线已在 q=16 代理和 q=1024 全域跑通（构造+FFT-QSPA+结构化信道）；
   DE 仍受 structured-channel plain ceiling 限制（R≈0.60 / q=1024 需更高 rate）。
 - 下一步（用户批准）：已创建 V20 OpenSpec draft
