@@ -1,0 +1,13 @@
+{
+  "elapsed_s": 184.657,
+  "f_plain_qary": 1.2785136965751744,
+  "found_any": false,
+  "found_full_osd1": false,
+  "found_osd2": false,
+  "full_osd1_candidates": 121738,
+  "m": 9,
+  "n": 128,
+  "osd2_candidates": 1531,
+  "q": 1024,
+  "schema": "nbldpc_v19_full_osd1_plus_osd2_probe_v1"
+}
