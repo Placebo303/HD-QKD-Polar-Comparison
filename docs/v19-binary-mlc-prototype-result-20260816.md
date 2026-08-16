@@ -42,3 +42,4 @@ Status: COMPLETE (prototype, diagnostic_only)
 - Noiseless test passes, so the wrapper/decoder plumbing is correct.
 - At N=2048/4096 and target f≈1.3, simple PW-order + list=32 still has frame errors on multiple planes.
 - This confirms that reaching f≤1.3 needs further code construction work (GA/tailored frozen sets, CRC, larger list, or different code family), not just a list-size bump.
+- Also tried CA-SCL list=128 at N=2048 with PW-order; plane 9 still had frame errors at the f≈1.3 target. This further indicates the bottleneck is construction/rate, not just list size.
