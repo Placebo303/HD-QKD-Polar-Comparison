@@ -24,6 +24,8 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
   - n4_finite_q1024_f129_n1024_4f/（f≈1.296, FER=1.0 decode_failed）
   - n6_comparison_v3_q1024_rates/ 与 n6_comparison_v4_corrected_statuses/
   - n4_finite_q1024_optrho_n512_m64/（自定义 rho，仍 decode_failed）
+  - n4_finite_q1024_r089_simple_pp/ 与 n4_finite_q1024_r089_simple_pp2/
+    （single-symbol / two-symbol OSD-like postprocess，均未恢复）
 - 结论：V19 工程路线已在 q=16 代理和 q=1024 全域跑通（构造+FFT-QSPA+结构化信道）；
   DE 仍受 structured-channel plain ceiling 限制（R≈0.60 / q=1024 需更高 rate）。
 - 下一步（用户批准）：q=1024 f≈1.296 已触达但解码不可靠（4/4 decode_failed，

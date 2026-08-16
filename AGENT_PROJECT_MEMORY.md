@@ -32,7 +32,9 @@
     the next step requires a new OpenSpec change for improved finite-length
     code/decoder design. Added optional `rho_edge` construction and a custom
     3-point rho probe at R=0.875 (`n4_finite_q1024_optrho_n512_m64`) also
-    decode_failed. [repo-observed]
+    decode_failed. Added bounded single-symbol and two-symbol OSD-like
+    postprocessors (`n4_finite_q1024_r089_simple_pp*`), which did not recover
+    the tested frames. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
     `not_available` until clean evidence from `D:\Code\HD-QKD_Polar_Release`.
 - Claim boundary: diagnostic_only. Frozen baselines untouched; outputs additive;
