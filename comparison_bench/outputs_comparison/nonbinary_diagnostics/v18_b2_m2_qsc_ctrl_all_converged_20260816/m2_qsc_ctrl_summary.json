@@ -1,0 +1,183 @@
+{
+  "conclusion": "With an equal-entropy QSC channel (p=0.038, H\u22480.3815), the same DE search budget/seed pattern converges at both rate 0.63 and 0.65 in all 8 independent runs each. The same searches on the folded real structured channel all failed. Therefore the plain-DE ceiling at rate\u22480.60 is caused by the structured channel shape (product-of-marginals/Gray-fold), not by insufficient DE search budget.",
+  "folded_real_h": 0.382911,
+  "max_gen": 20,
+  "max_iter": 100,
+  "n_converged": 16,
+  "n_failed": 0,
+  "n_runs": 16,
+  "n_samples": 10000,
+  "pop_size": 20,
+  "q": 16,
+  "qsc_entropy_h": 0.3815077351975742,
+  "qsc_p": 0.038,
+  "rates": [
+    0.63,
+    0.65
+  ],
+  "rows": [
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.63,
+      "seed": 2026084000,
+      "seed_index": 0
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.63,
+      "seed": 2026084001,
+      "seed_index": 1
+    },
+    {
+      "converged_iter": 22,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.63,
+      "seed": 2026084002,
+      "seed_index": 2
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.63,
+      "seed": 2026084003,
+      "seed_index": 3
+    },
+    {
+      "converged_iter": 22,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.63,
+      "seed": 2026084004,
+      "seed_index": 4
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.63,
+      "seed": 2026084005,
+      "seed_index": 5
+    },
+    {
+      "converged_iter": 22,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.63,
+      "seed": 2026084006,
+      "seed_index": 6
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.63,
+      "seed": 2026084007,
+      "seed_index": 7
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.65,
+      "seed": 2026084100,
+      "seed_index": 0
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.65,
+      "seed": 2026084101,
+      "seed_index": 1
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.65,
+      "seed": 2026084102,
+      "seed_index": 2
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.65,
+      "seed": 2026084103,
+      "seed_index": 3
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.65,
+      "seed": 2026084104,
+      "seed_index": 4
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.65,
+      "seed": 2026084105,
+      "seed_index": 5
+    },
+    {
+      "converged_iter": 22,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.65,
+      "seed": 2026084106,
+      "seed_index": 6
+    },
+    {
+      "converged_iter": 23,
+      "entropy_converged": true,
+      "error_prob": 0.0,
+      "final_entropy": 3.737169106748282e-297,
+      "mode": "qsc_equal_entropy",
+      "rate": 0.65,
+      "seed": 2026084107,
+      "seed_index": 7
+    }
+  ],
+  "run_id": "v18_b2_m2_qsc_ctrl_all_converged_20260816",
+  "schema": "nbldpc_v18_b2_m2_qsc_ctrl_summary_v1",
+  "status": "all_converged"
+}
