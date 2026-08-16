@@ -85,3 +85,19 @@ def test_osd_decode_candidates_fast_matches_small():
     old = __import__('comparison_bench.src.comparison_bench.formal_ir.nonbinary_v19_osd', fromlist=['osd_decode_candidates']).osd_decode_candidates(
         field=field, matrix=H, syndrome=s, e_hat=x, order=1, top_info=1000, max_candidates=100)
     assert len(fast) == len(old)
+
+
+def test_osd_decode_candidates_order2_fast_matches_small():
+    from comparison_bench.src.comparison_bench.formal_ir.nonbinary_v19_osd import osd_decode_candidates_order2_fast
+    field = GF2mField.create(4)
+    H = [[1, 1, 0], [0, 1, 1]]
+    x = [1, 2, 3]
+    s = []
+    for row in H:
+        acc = 0
+        for coeff, val in zip(row, x):
+            acc = field.add(acc, field.mul(coeff, val))
+        s.append(acc)
+    fast = osd_decode_candidates_order2_fast(field=field, matrix=H, syndrome=s, e_hat=x,
+                                             top_info=2, top_symbols=4, max_candidates=100)
+    assert x in fast
