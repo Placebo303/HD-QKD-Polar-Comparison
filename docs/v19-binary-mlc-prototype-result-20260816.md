@@ -47,3 +47,6 @@ Status: COMPLETE (prototype, diagnostic_only)
 - Tested GA masks with CA-SCL list=128 at N=2048 for planes 9/8/7; still frame errors at the f≈1.3 target.
 - This closes the cheap mask-construction attempts: PW, Monte-Carlo, and GA all fail to reach f≤1.3 with the current Polar SC/SCL implementation at N≤4096.
 - Reaching f≤1.3 now likely requires either much larger N, CRC-aided SCL with tailored construction, a different code family, or accepting a higher f for finite length.
+- Tested N=8192, GA mask, CA-SCL list=128 on plane 9 (single frame). Decode took ~122 s and still failed.
+- This is a decisive negative for the current Polar/SCL MLC path: even 8192-block at f≈1.3 per-plane target does not decode with the existing CA-SCL implementation.
+- Conclusion: pivot to a different code family / optimized LDPC DE-gated design is the recommended next step; do not keep scaling Polar N with this decoder.
