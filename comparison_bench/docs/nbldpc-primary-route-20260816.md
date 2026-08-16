@@ -163,6 +163,8 @@ fresh/promotion/qualification.
   - PEG seed sweep (`n4_finite_q1024_f129_seed_sweep_summary.json`):
     seeds 2026082028/33/36/37/38 all exact_mismatch; construction seed alone
     does not unlock exact decoding.
+  - `n4_finite_q1024_f129_iter50_osd_1f/`: max_iter=50 + OSD still
+    exact_mismatch; the failure is not iteration-limited.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
