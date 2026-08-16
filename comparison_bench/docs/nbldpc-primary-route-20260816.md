@@ -137,6 +137,13 @@ fresh/promotion/qualification.
     0/4 exact, 4/4 decode_failed.
   The literature-inspired irregular distribution also does not decode
   reliably at these high rates with the current FFT-QSPA decoder.
+- Implemented bounded q-ary OSD-0/1 (`nonbinary_v19_osd.py`) and integrated it
+  into the finite executor.
+  - `n4_finite_q1024_r089_simple_pp_osd/`: R=0.89 q=1024, 4 frames,
+    **2/4 exact_correct, 2/4 exact_mismatch, 0 decode_failed**, FER=0.5.
+  - `n4_finite_q1024_f129_simple_pp_osd_1f/`: f≈1.296 n=1024,
+    0/1 exact_correct, 1/1 exact_mismatch (OSD-0 finds a valid codeword but
+    not Alice's word).
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the

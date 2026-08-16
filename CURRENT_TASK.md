@@ -46,7 +46,10 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 ev
     使用 V18-B2 优化 lambda + 三点 rho 在 R=0.875 仍 4/4 decode_failed；
     `find_two_degree_rho` 增加整数两度 rho 构造；Müller 归一化 lambda 在
     f≈1.296（n=1024）与 f≈1.989（n=256）仍 decode_failed；
-    n=2048 m=133 f≈1.181 长块尝试也 decode_failed。
+    n=2048 m=133 f≈1.181 长块尝试也 decode_failed；
+    实现 bounded q-ary OSD-0/1（`nonbinary_v19_osd.py`）后，R=0.89 q=1024
+    4 帧提升为 2 exact / 2 exact_mismatch / 0 decode_failed（FER=0.5）；
+    f≈1.296 n=1024 1 帧仍 exact_mismatch（OSD-0 找到合法码字但非 Alice）。
 - N6 three-way comparison（v1 q=16）: `n6_comparison/comparison_table.csv` + `comparison_summary.json`
   Binary LDPC MLC f≈4.169（FER=0）；Nonbinary LDPC f≈4.183（FER=0.25）；
   Polar MLC 在 release repo 中，当前表标记 `not_available` 直到提供 clean evidence JSON。

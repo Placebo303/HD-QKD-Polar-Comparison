@@ -23,6 +23,7 @@ from . import nonbinary_v10_fftqspa as qspa
 from . import nonbinary_v9_common as common
 from .nonbinary_field import GF2mField
 from .nonbinary_v19_channel import symbol_entropy_bits
+from .nonbinary_v19_osd import osd_decode
 
 __all__ = [
     "construct_codebook",
@@ -383,6 +384,24 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                     if e_fixed is not None:
                         postprocess_used = True
                         e_hat = e_fixed.tolist()
+                        x_hat = [int(field.add(int(y), int(e))) for y, e in zip(bob, e_hat)]
+                        syndrome_ok = qspa.syndrome_of(field, matrix, x_hat) == list(s_x)
+                        exact = bool(syndrome_ok and np.array_equal(x_hat, alice))
+                if not exact:
+                    # Bounded q-ary OSD-0/1 post-processing (diagnostic).
+                    try:
+                        e_fixed = osd_decode(
+                            field=field, matrix=matrix,
+                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                            beliefs=result.get("beliefs"),
+                            e_hat=e_hat,
+                            order=1 if n <= 256 else 0,
+                            top_info=4)
+                    except Exception:
+                        e_fixed = None
+                    if e_fixed is not None:
+                        postprocess_used = True
+                        e_hat = e_fixed
                         x_hat = [int(field.add(int(y), int(e))) for y, e in zip(bob, e_hat)]
                         syndrome_ok = qspa.syndrome_of(field, matrix, x_hat) == list(s_x)
                         exact = bool(syndrome_ok and np.array_equal(x_hat, alice))
