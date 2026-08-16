@@ -4,11 +4,11 @@
   "rows": [
     {
       "f_plain_qary": 1.1364566191779328,
-      "fer": 0.625,
+      "fer": 0.6875,
       "m": 4,
       "n": 64,
-      "n_exact": 3,
-      "n_frames": 8
+      "n_exact": 5,
+      "n_frames": 16
     },
     {
       "f_plain_qary": 1.2785136965751744,
