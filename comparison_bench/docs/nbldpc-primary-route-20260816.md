@@ -137,6 +137,8 @@ fresh/promotion/qualification.
     0/4 exact, 4/4 decode_failed.
   The literature-inspired irregular distribution also does not decode
   reliably at these high rates with the current FFT-QSPA decoder.
+- Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
+  4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
   finite executor.
   - `n4_finite_q1024_r089_simple_pp/`: single-symbol post-processor; run
