@@ -70,7 +70,7 @@
     {2:0.7,3:0.3} gave 0/2. Broad OSD-2 also failed on non-recovered seeds
     2056/2059. max_iter=50 + full OSD-1 also failed on seed2055; alternate
     code seeds 3001-3004 for the same frame also failed. Full OSD-1 summary:
-    n=64 FER=0.5, n=128 FER=0.75. Comprehensive blocker summary
+    n=64 FER=0.625 (3/8), n=128 FER=0.75 (1/4). Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
