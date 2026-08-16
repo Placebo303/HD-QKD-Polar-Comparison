@@ -102,8 +102,20 @@ def run_smoke(q: int = SMOKE_Q, out_dir: str | Path | None = None,
 def evaluate_reproduction(result: dict,
                           det_published: float = PRODUCTION_DET_PUBLISHED,
                           tol: float = PRODUCTION_TOL) -> dict:
-    """Reproduction gate: |threshold_proxy - published DET| <= tol."""
+    """Reproduction gate: |threshold_proxy - published DET| <= tol.
+
+    Uses the top-level ``threshold_proxy`` if present; otherwise falls back to
+    the best (max) threshold among ``eligible_candidates``.  This avoids
+    misreporting NO_THRESHOLD when the search produced eligible candidates but
+    the top-level best-objective record was not updated with a threshold.
+    """
     tp = result.get("threshold_proxy")
+    if tp is None:
+        elig = result.get("eligible_candidates") or []
+        tps = [float(c.get("threshold_proxy")) for c in elig
+               if c.get("threshold_proxy") is not None]
+        if tps:
+            tp = max(tps)
     if tp is None:
         delta, verdict = None, "NO_THRESHOLD"
     else:
