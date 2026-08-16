@@ -146,6 +146,8 @@ fresh/promotion/qualification.
     not Alice's word).
   - `n4_finite_q1024_f129_simple_pp_osd1_1f/`: same point with OSD-1
     top_info=1, still 0/1 exact_correct / 1/1 exact_mismatch.
+  - `n4_finite_q1024_f129_simple_pp_osd1_top2_1f/`: OSD-1 top_info=2,
+    still 0/1 exact_correct / 1/1 exact_mismatch.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
