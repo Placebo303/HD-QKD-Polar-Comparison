@@ -1,0 +1,22 @@
+{
+  "schema": "nbldpc_v19_retry_osd_probe_v1",
+  "claim_boundary": "diagnostic_only",
+  "q": 1024,
+  "n": 1024,
+  "m": 73,
+  "rate": 0.9287109375,
+  "f_plain_qary": 1.296270727723675,
+  "max_iter": 10,
+  "osd_order": 1,
+  "osd_top_info": 4,
+  "retry_eps": [0.0, 0.02, 0.05, 0.1, 0.2],
+  "found_exact": false,
+  "results": [
+    {"eps": 0.0, "decoder_status": "max_iter_reached", "status": "osd_mismatch"},
+    {"eps": 0.02, "decoder_status": "max_iter_reached", "status": "osd_mismatch"},
+    {"eps": 0.05, "decoder_status": "max_iter_reached", "status": "osd_mismatch"},
+    {"eps": 0.1, "decoder_status": "converged_no_syndrome", "status": "osd_mismatch"},
+    {"eps": 0.2, "decoder_status": "converged_no_syndrome", "status": "osd_mismatch"}
+  ],
+  "conclusion": "Prior-perturbation retries combined with OSD-1(top4) still did not recover Alice's codeword at f=1.296."
+}
