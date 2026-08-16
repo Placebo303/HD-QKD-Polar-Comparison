@@ -41,3 +41,14 @@ def test_lsb_public_capacity_bound():
     assert d0["ideal_f_full"] >= 1.0 - 1e-9
     assert d1["public_bits_per_symbol"] == 1.0
     assert d1["residual_high_plane_entropy_bits_per_symbol"] < d0["residual_high_plane_entropy_bits_per_symbol"]
+
+
+def test_build_high_plane_w():
+    import numpy as np
+    w0 = ch.build_high_plane_w(public_lsb_planes=0)
+    assert w0.shape == (1024,)
+    assert abs(float(w0.sum()) - 1.0) < 1e-9
+    w1 = ch.build_high_plane_w(public_lsb_planes=1)
+    assert w1.shape == (512,)
+    assert abs(float(w1.sum()) - 1.0) < 1e-9
+    assert ch.symbol_entropy_bits(w1) < ch.symbol_entropy_bits(w0)

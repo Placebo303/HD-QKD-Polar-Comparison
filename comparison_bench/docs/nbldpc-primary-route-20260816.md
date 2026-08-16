@@ -42,6 +42,17 @@ fresh/promotion/qualification.
   construction**, not simple LSB-public disclosure; per-symbol-class puncture
   remains the more promising channel-aware mechanism.
 
+## N2b — High-plane effective channels for LSB-public DE prep
+
+- Evidence: `n2b_channel_aware_bounds/high_plane_channels.json`
+- Added `build_high_plane_w(public_lsb_planes)` to construct the residual
+  high-bit Gray symbol-difference channel after publicly disclosing L LSB
+  planes.
+- Entropies: l=0 q=1024 H=0.549955; l=1 q=512 H=0.319217; l=4 q=64
+  H=0.056943; l=6 q=16 H=0.017841.
+- This gives the DE input for a Pacher-style LSB-public two-step if a future
+  change decides to evaluate that mechanism.
+
 ## N2c — Extended-degree probe
 
 - Evidence: `n2_extended_probe/extended_degree_probe.json`

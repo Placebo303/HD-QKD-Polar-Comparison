@@ -20,6 +20,8 @@
     `leakage_decomposition.json` (q16 honest f≈3.016; q1024 n128 f≈7.245).
   - N2b capacity bound: `n2b_channel_aware_bounds/lsb_public_capacity.json`
     LSB-public does not reduce ideal f; full q=1024 coding is the binding target.
+    Added `build_high_plane_w` and `high_plane_channels.json` for residual
+    high-bit effective channels (l=0..6). [repo-observed]
   - q=1024 high-rate finite attempts: R=0.840 f=2.912 FER=0.5 (8/16 exact),
     R=0.891 f=1.989 FER=0.8125 (3/16 exact); all mismatches retained;
     `n6_comparison_v3_q1024_rates` records the tradeoff. A further n=1024,

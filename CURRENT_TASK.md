@@ -30,7 +30,8 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 ev
   - `n2_extended_probe_q1024/extended_degree_probe.json`：q=1024 rate=0.6
     simple lambda 小样本 DE probe 未收敛（diagnostic）。
   - `n2b_channel_aware_bounds/lsb_public_capacity.json`：capacity-ideal 显示
-    LSB-public 不能降低 f（l=0 ideal f≈1.00, l=1 ideal f≈2.40），主攻应继续 full q=1024。
+    LSB-public 不能降低 f（l=0 ideal f≈1.00, l=1 ideal f≈2.40），主攻应继续 full q=1024；
+    `high_plane_channels.json` 生成 LSB-public 残余高位有效信道（l=0..6）供后续 DE。
   - `n6_comparison_v2_q1024/`：三路表新增 `nonbinary_ldpc_q1024` 行；
     `leakage_decomposition.json` 记录 q=16 folded 全信道诚实 f≈3.016、
     q=1024 n=128 f≈7.245。

@@ -31,6 +31,7 @@ __all__ = [
     "f_plain_qary",
     "f_full_two_stage",
     "lsb_public_capacity_f",
+    "build_high_plane_w",
     "build_channel_doc",
 ]
 
@@ -122,6 +123,46 @@ def f_full_two_stage(*, syndrome_bits_per_symbol: float,
             or not math.isfinite(float(h_full_bits)) or float(h_full_bits) <= 0.0:
         raise ValueError("h_full_bits must be positive and finite")
     return (float(syndrome_bits_per_symbol) + float(public_bits_per_symbol)) / float(h_full_bits)
+
+
+def build_high_plane_w(*, public_lsb_planes: int,
+                        per_plane_error: Any = V17_PER_PLANE_ERROR) -> np.ndarray:
+    """Build the effective symbol-difference distribution for the high-bit
+    planes that remain after publicly disclosing the ``public_lsb_planes``
+    least-significant Gray planes.
+
+    This is the channel model for a Pacher-style LSB-public two-step route.
+    The result is a length ``2^(10-public_lsb_planes)`` distribution over the
+    high-bit XOR differences, averaged over all high-bit Alice symbols.
+    """
+    if isinstance(public_lsb_planes, bool) or not isinstance(public_lsb_planes, int) \
+            or not 0 <= int(public_lsb_planes) <= 10:
+        raise ValueError("public_lsb_planes must be an integer in 0..10")
+    l = int(public_lsb_planes)
+    rates = np.asarray(per_plane_error, dtype=np.float64)
+    if rates.shape != (10,) or not np.all(np.isfinite(rates)) or np.any(rates < 0.0) \
+            or np.any(rates > 1.0):
+        raise ValueError("per_plane_error must be a 10-vector in [0,1]")
+    n_high = 10 - l
+    q_high = 1 << n_high
+    if n_high == 0:
+        return np.array([1.0], dtype=np.float64)
+    # Gray code for high-bit indices 0..n_high-1 (MSB-first plane order).
+    gray = np.array([(i ^ (i >> 1)) for i in range(q_high)], dtype=np.int64)
+    bit = np.array([[(g >> k) & 1 for k in range(n_high)] for g in gray], dtype=np.int64)
+    p = rates[:n_high]
+    w = np.zeros(q_high, dtype=np.float64)
+    for s in range(q_high):
+        gs = bit[s]
+        for d in range(q_high):
+            gd = bit[s ^ d]
+            diff = gs ^ gd
+            prob = 1.0
+            for k in range(n_high):
+                prob *= (float(p[k]) if diff[k] else 1.0 - float(p[k]))
+            w[d] += prob
+    w /= w.sum()
+    return w
 
 
 def lsb_public_capacity_f(*, public_lsb_planes: int,
