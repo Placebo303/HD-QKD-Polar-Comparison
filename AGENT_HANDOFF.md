@@ -1,4 +1,4 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1_RUNNING
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1_FAIL; NO_AUTO_NEXT
 
 ## Current State — Route A 失败诊断完成；Route B/C/D 已规划待决策 (2026-08-16)
 
@@ -1810,3 +1810,6 @@ discovered by an independent audit of the accepted V8 candidate:
   <=16h; V9C fixed-rate leakage is syndrome `10*m` plus a separate 64-bit tag.
   Blind adaptation is forbidden in V9 and deferred to V10.
 
+
+## 自动执行终点
+V18-B1 M1 FAIL (NO_THRESHOLD)；无自动下一步，等待用户决策。

@@ -1,4 +1,4 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1_RUNNING
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1_FAIL; NO_AUTO_NEXT
 
 ## Current Task — Route A 失败诊断完成；结论：非迭代不足；Route B/C/D 待决策 (2026-08-16)
 
@@ -807,3 +807,10 @@ remain unauthorized.
 - Conclusion: failures not iteration-limited and not QSC prior-limited; likely structured-channel or code/graph limitation.
 - Route B M0 complete (V18-B1 q4/q8 smoke passed).
 - Route B M1 production q=4 DE reproduction running in background (workspace/nbldpc_v18_b1_exec_q4).
+
+## 当前自动执行终点
+
+- V18-B1 M1 生产复现：NO_THRESHOLD / FAIL，eligible_candidates=0，best 未收敛。
+- 按 no-rerun/no-tuning 纪律，Route B M2 不自动启动。
+- Route C/D 依赖科学路线或用户决策；当前无进一步自动步骤。
+- 下一步需用户决定：是否开新 change 调整 DE 预算/参数，或转向其他路线。
