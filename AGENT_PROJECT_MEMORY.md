@@ -81,8 +81,8 @@
     seed2055 remained non-recovered after prior-retry + OSD-1/2/3/4 and
     generic OSD order5/6. n=64 fast OSD-1..10 combined FER=0.71875
     (18/64); lambda {2:0.6,3:0.4} gave FER=0.5625 (7/16); lambda
-    {2:0.7,3:0.3} gave FER=0.75 (2/8); {2:0.8,3:0.2} also FER=0.75 (2/8).
-    Comprehensive blocker summary
+    {2:0.7,3:0.3} gave FER=0.75 (2/8); {2:0.8,3:0.2} also FER=0.75 (2/8);
+    {2:0.4,3:0.3,4:0.3} gave FER=0.625 (3/8). Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
