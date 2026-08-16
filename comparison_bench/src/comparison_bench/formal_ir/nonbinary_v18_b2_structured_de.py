@@ -118,17 +118,49 @@ def evaluate_vector_structured(x, *, q, rate, w, seed, n_samples, max_iter,
                                          n_samples=n_samples, max_iter=max_iter,
                                          entropy_tol=entropy_tol, streak=streak)
 
+def lambda_to_vector(lambda_edge) -> "np.ndarray":
+    """Encode a K-entry degree distribution into a V10 DE vector.
+
+    The vector is the inverse of ``de.decode_vector``: degree slots are stored
+    as degree-2 and logits as log(weight) (softmax reproduces the weights).
+    """
+    import numpy as np
+    if not isinstance(lambda_edge, dict) or len(lambda_edge) != de._K:
+        raise ValueError(f"seed lambda must be a dict with exactly {de._K} entries")
+    degrees = sorted(int(d) for d in lambda_edge)
+    weights = [float(lambda_edge[d]) for d in degrees]
+    if len(set(degrees)) != de._K or any(w <= 0.0 for w in weights):
+        raise ValueError("seed lambda must have K distinct positive weights")
+    total = sum(weights)
+    logits = np.log(np.asarray(weights, dtype=np.float64) / total)
+    slots = np.asarray(degrees, dtype=np.float64) - 2.0
+    return np.concatenate([slots, logits])
+
+
+def seeded_population(pop_size: int, search_seed: int,
+                      lambda_edge: dict) -> "np.ndarray":
+    """Return the deterministic V10 population with the first member replaced
+    by a known degree distribution (``lambda_edge``).  The remaining members are
+    untouched random DE starts, so the search can locally explore around a
+    previously successful distribution while retaining diversity."""
+    import numpy as np
+    population = de.init_population(pop_size, search_seed)
+    population[0] = lambda_to_vector(lambda_edge)
+    return population
 
 def run_structured_de_search(*, q, rate, w, search_seed, pop_size, max_gen,
                              F, CR, n_samples, max_iter, entropy_tol=0.01,
-                             streak=20, out_dir=None):
+                             streak=20, seed_lambda=None, out_dir=None):
     """Minimal DE/rand/1/bin search over the structured channel.
 
     This is a trimmed copy of V10's loop; no checkpoints/resume.  It returns
     the final best lambda and objective.
     """
     import numpy as np
-    population = de.init_population(pop_size, search_seed)
+    if seed_lambda is None:
+        population = de.init_population(pop_size, search_seed)
+    else:
+        population = seeded_population(pop_size, search_seed, seed_lambda)
     objectives = [evaluate_vector_structured(population[i], q=q, rate=rate, w=w,
                                              seed=search_seed, n_samples=n_samples,
                                              max_iter=max_iter, entropy_tol=entropy_tol,

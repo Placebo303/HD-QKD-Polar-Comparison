@@ -52,3 +52,24 @@ def test_real_folded_w():
     assert w.shape == (16,)
     assert abs(float(w.sum()) - 1.0) < 1e-9
     assert np.all(w >= 0.0)
+
+
+def test_lambda_to_vector_roundtrip():
+    lam = {2: 0.2, 3: 0.3, 4: 0.4, 5: 0.05, 6: 0.02,
+           7: 0.01, 8: 0.01, 9: 0.01}
+    vec = core.lambda_to_vector(lam)
+    assert vec.shape == (16,)
+    dec = core.de.decode_vector(vec)
+    assert abs(dec[2] - 0.2) < 1e-9
+    assert abs(dec[3] - 0.3) < 1e-9
+    assert abs(dec[4] - 0.4) < 1e-9
+
+
+def test_seeded_population_keeps_seed_vector():
+    lam = {2: 0.5, 3: 0.2, 4: 0.1, 5: 0.05, 6: 0.05,
+           7: 0.03, 8: 0.03, 9: 0.04}
+    pop = core.seeded_population(10, 123, lam)
+    assert pop.shape == (10, 16)
+    dec = core.de.decode_vector(pop[0])
+    assert abs(dec[2] - 0.5) < 1e-9
+    assert abs(dec[3] - 0.2) < 1e-9

@@ -8,6 +8,17 @@ from pathlib import Path
 from ..formal_ir import nonbinary_v18_b2_structured_de as core
 
 
+import json as _json
+from pathlib import Path as _Path
+
+
+def load_seed_lambda(path: str | None):
+    if path is None:
+        return None
+    data = _json.loads(_Path(path).read_text(encoding="utf-8"))
+    return {int(k): float(v) for k, v in data.items()}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out-dir", required=True)
@@ -19,6 +30,8 @@ def main() -> int:
     ap.add_argument("--n-samples", type=int, default=5000)
     ap.add_argument("--max-iter", type=int, default=50)
     ap.add_argument("--seed", type=int, default=2026081606)
+    ap.add_argument("--seed-lambda-json", type=str, default=None,
+                        help="Optional JSON file with a K-entry degree distribution to seed one DE population member")
     args = ap.parse_args()
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -27,7 +40,8 @@ def main() -> int:
         doc = core.run_structured_de_search(
             q=args.q_small, rate=args.rate, w=w, search_seed=args.seed,
             pop_size=args.pop_size, max_gen=args.max_gen, F=0.85, CR=0.7,
-            n_samples=args.n_samples, max_iter=args.max_iter, out_dir=out)
+            n_samples=args.n_samples, max_iter=args.max_iter,
+            seed_lambda=load_seed_lambda(args.seed_lambda_json), out_dir=out)
         print(json.dumps({"schema": doc["schema"], "q": doc["q"], "best": doc["best_objective"]}, sort_keys=True))
         return 0
     if args.mode == "search-smoke":
