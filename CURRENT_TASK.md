@@ -56,10 +56,10 @@ Status: NBLDPC_PRIMARY_V19_BLOCKED — 当前诊断路线已穷尽；f≤1.3 q=1
 
 边界：全部 `diagnostic_only`；不构成 fresh/promotion/qualification。
 P1/P2/V13 legacy 等既有冻结终态均不变。
-结论：当前诊断路线已穷尽（Route N0–N6 的 V19 阶段）。q=1024 f≤1.3 泄漏点可达，
-但所有 PEG/FFT-QSPA + bounded OSD 尝试均无法 exact 解码。下一步唯一路径是
-冻结 V20 OpenSpec change（`formal-nonbinary-ldpc-v20-q1024-decode-improvement`）
-并实现严格更强的解码/构造；在此之前无更多自动可执行步骤。
+结论：V19 诊断已推进到 full OSD-1 方向。q=1024 f≤1.3 下，n=64 full OSD-1
+FER=0.5（3/6 exact），n=128 FER=0.75（1/4 exact），证明 exact 可行但尚不可靠。
+下一步需冻结 V20 OpenSpec change（`formal-nonbinary-ldpc-v20-q1024-decode-improvement`）
+并实现更高效/更高阶 OSD 或改进码构造。
 
 ---
 
