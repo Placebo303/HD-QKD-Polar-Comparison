@@ -1,3 +1,12 @@
+## 2026-08-16 V19 NBLDPC primary route — ROUTE EXHAUSTED (blocker)
+
+- V19 diagnostics exhausted all current PEG/FFT-QSPA + bounded OSD attempts for
+  q=1024 f≤1.3: every configuration yields `exact_mismatch` (0 exact).
+- Comprehensive evidence:
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n4_finite_q1024_f129_blocker_summary.json`
+- Next step is V20 OpenSpec change `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
+  (draft exists). No further automatic step is available until that change is frozen/approved.
+
 ## 2026-08-16 V19 NBLDPC primary route diagnostics (Route N0-N6 first pass)
 
 - Added V19 nonbinary LDPC modules/CLIs/tests under comparison_bench only:

@@ -1,4 +1,4 @@
-Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — first V19 evidence generated
+Status: NBLDPC_PRIMARY_V19_BLOCKED — V19 route exhausted; next requires V20 freeze
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 

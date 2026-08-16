@@ -1,4 +1,4 @@
-Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 evidence generated
+Status: NBLDPC_PRIMARY_V19_BLOCKED — 当前诊断路线已穷尽；f≤1.3 q=1024 解码需 V20 新 change
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -56,12 +56,10 @@ Status: NBLDPC_PRIMARY_V19_DIAGNOSTIC — Route N0–N6 已启动；first V19 ev
 
 边界：全部 `diagnostic_only`；不构成 fresh/promotion/qualification。
 P1/P2/V13 legacy 等既有冻结终态均不变。
-下一步：q=1024 泄漏点 f≈1.296 已数值触达，但 4/4 解码 decode_failed（FER=1.0）；
-已创建新 OpenSpec change draft：
-`openspec/changes/formal-nonbinary-ldpc-v20-q1024-decode-improvement/`
-（proposal/design/tasks），V19 OSD prototype 已实现并记录到 design/tasks；
-V19 comprehensive blocker 已写入 proposal/tasks；下一步按该 draft 冻结后
-实现严格更强的解码/构造。
+结论：当前诊断路线已穷尽（Route N0–N6 的 V19 阶段）。q=1024 f≤1.3 泄漏点可达，
+但所有 PEG/FFT-QSPA + bounded OSD 尝试均无法 exact 解码。下一步唯一路径是
+冻结 V20 OpenSpec change（`formal-nonbinary-ldpc-v20-q1024-decode-improvement`）
+并实现严格更强的解码/构造；在此之前无更多自动可执行步骤。
 
 ---
 
