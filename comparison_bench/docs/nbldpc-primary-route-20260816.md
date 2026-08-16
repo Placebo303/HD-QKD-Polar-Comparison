@@ -183,6 +183,11 @@ fresh/promotion/qualification.
     exact_mismatch.
   - `n4_finite_q1024_f1279_n128_1f/`: n=128, m=9, f≈1.279, OSD still
     exact_mismatch.
+  - **Full OSD-1 exact recovery**:
+    `n4_finite_q1024_f1279_full_osd1_n128_probe.json`
+    n=128, m=9, f≈1.279; enumerating all single free-variable flips
+    (121738 candidates) found Alice's codeword. This is the first exact
+    q=1024 f≤1.3 recovery evidence.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
