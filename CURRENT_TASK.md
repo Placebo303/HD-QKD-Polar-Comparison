@@ -1,15 +1,15 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_BOUNDARY_REACHED; ROUTE_C_PENDING
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; CHANNEL_STRUCTURE_LIMIT; NEXT_PROPOSALS_DRAFT
 
-## Current Task — Route B M2 结构化 DE 达到当前搜索边界：q=16 rate=0.60 f≈4.18；Route C/D 待推进 (2026-08-16)
+## Current Task — M2 QSC 对照证明“结构化信道形状”是限制项；下一步写 channel-aware 新 change 草案与 Route C1 草案 (2026-08-16)
 
-Route A 已完成（128 失败帧非迭代不足、非 QSC 先验失配）。Route B M0/M1/M1b 已完成，
-M2 在 q=16 folded 真实信道上找到 rate=0.60 收敛候选（f≈4.18），但所有 rate>0.60
-尝试（随机与 seeded）均失败；q=32 探索性搜索也全部失败。当前 M2 已到现有 DE 框架的
-实际边界。下一步优先考虑 Route C（复杂度/工程化）或更强的 DE/信道建模，而不是继续 q=16 细扫。
+Route A 完成；Route B M0/M1/M1b 完成；M2 plain-DE 边界为 q=16 rate=0.60 f≈4.18。
+关键对照实验：等熵 QSC (p=0.038, H≈0.3815) 在 rate=0.63/0.65 上 **16/16 收敛**，
+而同预算 folded 真实结构化信道 0/16 收敛。结论：不是搜索预算不足，而是信道结构
+（位面失配/Gray fold）限制 plain irregular NB-LDPC 的 DE 天花板。
 
-- 最佳：q=16, rate=0.60, f≈4.18（证据 `v18_b2_m2_r06_par_seed7_20260816`）。
-- 负结果：rate 0.61/0.62/0.63/0.65 all-fail；seeded 0.62/0.63 all-fail；q=32 多档 all-fail。
-- 边界文档：`docs/route-b-m2-boundary-20260816.md`。
+- M2 边界：`docs/route-b-m2-boundary-20260816.md`
+- QSC 对照：`docs/route-b-m2-qsc-control-result-20260816.md`
+- 下一步：撰写 channel-aware 构造/B2 门提案草案、Route C1 设计草案；执行仍走用户门。
 
 ---
 
