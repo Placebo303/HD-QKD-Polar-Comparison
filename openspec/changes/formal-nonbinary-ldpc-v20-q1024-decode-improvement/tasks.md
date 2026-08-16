@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-Status: DRAFT — V19 OSD prototype implemented; V20 freeze still pending
+Status: DRAFT — V19 OSD prototype implemented; V20 freeze still pending. V19 data supports full-OSD direction (n=64 FER=0.5, n=128 FER=0.75) but requires more efficient/higher-order OSD.
 
 ## Current blocker
 V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3
