@@ -12,7 +12,7 @@ import numpy as np
 
 from .nonbinary_field import GF2mField
 
-__all__ = ["gf_rref", "solve_with_free", "osd_decode"]
+__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates"]
 
 
 def gf_rref(field: GF2mField, matrix: Any, syndrome: Sequence[int]):
@@ -141,3 +141,53 @@ def osd_decode(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
             if sol is not None:
                 return sol
     return None
+
+
+def osd_decode_candidates(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
+                          beliefs: Any = None, e_hat: Sequence[int] | None = None,
+                          order: int = 1, top_info: int = 4,
+                          max_candidates: int = 2000) -> list[list[int]]:
+    """Return multiple OSD candidate solutions (diagnostic).
+
+    Similar to :func:`osd_decode`, but collects up to ``max_candidates`` valid
+    syndrome-consistent solutions from OSD-0 and OSD-1 flips.  This lets a
+    caller test whether any candidate equals Alice's word.
+    """
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    m, n = matrix.shape
+    rref, pivots = gf_rref(field, matrix.tolist(), list(syndrome))
+    free_cols = [j for j in range(n) if j not in set(int(p) for p in pivots)]
+    if e_hat is not None:
+        hard = [int(x) for x in e_hat]
+    elif beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        hard = [int(np.argmax(beliefs[i])) for i in range(n)]
+    else:
+        hard = [0] * n
+    if beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        rel = {i: float(beliefs[i, hard[i]]) for i in free_cols}
+        free_ordered = sorted(free_cols, key=lambda i: rel.get(i, 0.0))
+    else:
+        free_ordered = list(free_cols)
+    candidates: list[list[int]] = []
+    assign = {i: hard[i] for i in free_cols}
+    sol = solve_with_free(field, rref, pivots, assign, n)
+    if sol is not None:
+        candidates.append(sol)
+    if order < 1:
+        return candidates
+    for i in free_ordered[:top_info]:
+        for cand in range(field.q):
+            if cand == hard[i]:
+                continue
+            assign2 = dict(assign)
+            assign2[i] = cand
+            sol = solve_with_free(field, rref, pivots, assign2, n)
+            if sol is not None:
+                candidates.append(sol)
+                if len(candidates) >= max_candidates:
+                    return candidates
+    return candidates

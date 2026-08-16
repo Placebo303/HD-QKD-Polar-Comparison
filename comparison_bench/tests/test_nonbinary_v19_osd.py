@@ -32,3 +32,20 @@ def test_osd_decode_returns_solution():
         s.append(acc)
     sol = osd_decode(field=field, matrix=H, syndrome=s, e_hat=x)
     assert sol == x
+
+
+def test_osd_decode_candidates_returns_at_least_one():
+    from comparison_bench.src.comparison_bench.formal_ir.nonbinary_v19_osd import osd_decode_candidates
+    field = GF2mField.create(4)
+    H = [[1, 1, 0], [0, 1, 1]]
+    x = [1, 2, 3]
+    s = []
+    for row in H:
+        acc = 0
+        for coeff, val in zip(row, x):
+            acc = field.add(acc, field.mul(coeff, val))
+        s.append(acc)
+    cands = osd_decode_candidates(field=field, matrix=H, syndrome=s, e_hat=x,
+                                  order=1, top_info=1, max_candidates=10)
+    assert len(cands) >= 1
+    assert x in cands
