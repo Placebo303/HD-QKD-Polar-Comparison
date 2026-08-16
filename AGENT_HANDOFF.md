@@ -1,13 +1,12 @@
-Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_SCOPING_DONE; NEXT_EXECUTION_USER_GATED
+Status: ROUTE_A_COMPLETE; ROUTE_B_M1/M2_DIAGNOSIS_COMPLETE; V19_PROTOTYPE_DONE; NEXT_DE_GATE_USER_GATED
 
-## Current State — 自动诊断与草案完成；v19 scoping 指向 binary-MLC f≈1 (2026-08-16)
+## Current State — V19 binary-MLC 原型已跑通；f≈4.17；下一步更高码率 per-plane DE gate (2026-08-16)
 
-- Route A 完成；Route B M0/M1/M1b 完成。
-- M2 plain-DE 边界：q=16 folded 真实信道 rate=0.60 f≈4.18。
-- QSC 等熵对照：rate 0.63/0.65 8+8 seeds 全部收敛；folded 结构化同预算全部失败。
-- V19 scoping：逐位面 h2 之和 = H_full≈0.550 → 理想 binary-MLC f≈1.0；这是 f≤1.3 的正确方向。
-- 已产出：v19 OpenSpec draft、Route C1 design draft、v19 channel scoping CLI/evidence。
-- 下一步：用户批准 v19 DE gate 后执行；D1/D3 仍阻塞。
+- Route A/B M1/M2 完成；QSC 对照证明信道结构限制。
+- V19 scoping：逐位面 h2 之和 = H_full≈0.550 → 理想 binary-MLC f≈1.0。
+- V19 prototype：v4 H1 + v5 H2 fallback，V17 位面误差模型下 500 帧全部纠正，f≈4.17。
+- 已产出：v19 OpenSpec draft、Route C1 design draft、scoping CLI、binary-MLC prototype。
+- 下一步：用户批准后执行更高码率 per-plane DE gate / Route C1；D1/D3 仍阻塞。
 
 # AGENT_HANDOFF.md
 
