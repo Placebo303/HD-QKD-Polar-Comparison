@@ -1,0 +1,45 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "grid": {
+    "by_p": {
+      "0.16": {
+        "decode_failed": 8,
+        "exact_correct": 0
+      },
+      "0.2": {
+        "decode_failed": 8,
+        "exact_correct": 0
+      },
+      "0.24": {
+        "decode_failed": 8,
+        "exact_correct": 0
+      },
+      "0.28": {
+        "decode_failed": 8,
+        "exact_correct": 0
+      },
+      "0.32": {
+        "decode_failed": 8,
+        "exact_correct": 0
+      }
+    },
+    "decodes": 40,
+    "exact_correct": 0,
+    "p_values": [
+      0.16,
+      0.2,
+      0.24,
+      0.28,
+      0.32
+    ],
+    "sample_size": 8
+  },
+  "oracle": {
+    "decode_failed": 128,
+    "exact_correct": 0,
+    "frames": 128,
+    "syndrome_consistent": 0
+  },
+  "run_id": "v13r3_legacy_route_a_prior_probe_20260816",
+  "schema": "nbldpc_v13r3_route_a_prior_probe_v1"
+}
