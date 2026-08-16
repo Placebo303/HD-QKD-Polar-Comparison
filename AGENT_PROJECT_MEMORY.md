@@ -43,7 +43,8 @@
     OSD-1 single-flip candidates at f=1.296; still no exact match. Added
     bounded OSD-2 candidate search; f=1.296 probe still exact_mismatch, and a
     wider OSD-2 probe (top4/top16, 1531 candidates) also no exact. A PEG seed
-    sweep (5 seeds) at f=1.296 all exact_mismatch. Created V20
+    sweep (5 seeds) at f=1.296 all exact_mismatch. max_iter=50 + OSD still
+    exact_mismatch (not iteration-limited). Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
