@@ -165,6 +165,8 @@ fresh/promotion/qualification.
     does not unlock exact decoding.
   - `n4_finite_q1024_f129_iter50_osd_1f/`: max_iter=50 + OSD still
     exact_mismatch; the failure is not iteration-limited.
+  - `n4_finite_q1024_f112_n2048_1f/`: n=2048, m=126, f≈1.119, OSD still
+    exact_mismatch; longer block with lower f also does not unlock exact.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
