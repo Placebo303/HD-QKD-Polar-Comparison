@@ -207,7 +207,9 @@ fresh/promotion/qualification.
     (`..._full_osd1_n64_lamc_seed2060/61.json`). Broad OSD-2 also failed on
     non-recovered seeds 2056/2059 (`..._osd2_n64_seed2056/59.json`).
     max_iter=50 + full OSD-1 also failed on seed2055
-    (`..._full_osd1_iter50_n64_seed2055.json`).
+    (`..._full_osd1_iter50_n64_seed2055.json`). Fixed-frame alternate code
+    seeds 3001/3002 also failed on seed2055
+    (`..._n64_frame2055_codeseed3001/02.json`).
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
