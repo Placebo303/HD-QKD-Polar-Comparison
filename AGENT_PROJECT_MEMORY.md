@@ -49,7 +49,8 @@
     exact_mismatch at f=1.296. V18-B2 optimized lambda with exact two-degree
     rho at f=1.296 also exact_mismatch. A 4-frame OSD run at f=1.296 gave
     4/4 exact_mismatch, FER=1.0. At R=0.84 OSD gave 3 exact / 5 mismatch /
-    0 decode_failed in an 8-frame run. Created V20
+    0 decode_failed in an 8-frame run. n=512,m=36 f=1.279 OSD also
+    exact_mismatch. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
   - N6 comparison table vs binary LDPC MLC (f≈4.169, FER=0); Polar MLC row
