@@ -36,7 +36,8 @@ DRAFT — based on V19 primary-route evidence.
 ## V19 full-OSD breakthrough
 - Full OSD-1 enumeration at q=1024, n=128, m=9, f≈1.279 recovered Alice on
   one frame (121738 candidates) but not on a second frame.
-- At n=64, m=4, f≈1.136 full OSD-1 recovered 3/6 frames (FER=0.5).
+- At n=64, m=4, f≈1.136 full OSD-1 recovered 3/8 frames (FER=0.625).
+- Broad OSD-2 did not recover any of the five n=64 non-full-OSD-1 frames.
 - This proves exact q=1024 f≤1.3 decoding is possible with stronger OSD,
   but reliability/scale remains the open problem.
 - V20 should focus on efficient full/partial OSD enumeration, better
