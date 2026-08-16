@@ -187,6 +187,8 @@ fresh/promotion/qualification.
     n<=256; n=64 full OSD-1 dropped from ~50s to ~0.6s.
   - Fast broad OSD-2 enumeration (`osd_decode_candidates_order2_fast`)
     integrated for n<=128.
+  - Fast bounded OSD-3 enumeration (`osd_decode_candidates_order3_fast`) added;
+    seed2055 not recovered with top10/top4 or top20/top4.
   - Full OSD-1 aggregate summary:
     `n4_full_osd1_summary.json`.
   - **Full OSD-1 exact recovery**:
