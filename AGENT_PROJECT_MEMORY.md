@@ -1,3 +1,9 @@
+## 2026-08-16 Proper CRC-aided SCL progress
+
+- Implemented v19_polar_crc.py matching frozen C++ check_crc16.
+- Plane 9, N=2048, PW-order, CA-SCL list=128 with valid CRC: 13/20 correct vs 0 before.
+- FER still ~0.35; next is Tal-Vardy/polar-spectrum construction and/or SCL-flip. [repo-observed]
+
 ## 2026-08-16 Decoder improvement plan (literature-grounded)
 
 - Polar path: current CA-SCL does not actually receive CRC bits from our MLC payload; next concrete step is proper CRC-aided SCL integration (reserve 16/24 CRC bits).
