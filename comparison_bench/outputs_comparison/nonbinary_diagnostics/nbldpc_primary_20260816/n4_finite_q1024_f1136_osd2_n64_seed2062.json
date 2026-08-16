@@ -1,0 +1,12 @@
+{
+  "elapsed_s": 44.295,
+  "f_plain_qary": 1.1364566191779328,
+  "found_exact": false,
+  "m": 4,
+  "n": 64,
+  "n_candidates": 48451,
+  "q": 1024,
+  "schema": "nbldpc_v19_osd2_n64_probe_v1",
+  "top_info": 20,
+  "top_symbols": 16
+}
