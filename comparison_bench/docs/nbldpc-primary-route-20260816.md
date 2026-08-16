@@ -175,6 +175,8 @@ fresh/promotion/qualification.
     two-degree rho at f=1.296, OSD still exact_mismatch.
   - `n4_finite_q1024_f129_osd_4f/`: 4-frame OSD run at f=1.296, 4/4
     exact_mismatch, 0 exact, FER=1.0.
+  - Consolidated blocker summary:
+    `n4_finite_q1024_f129_blocker_summary.json`.
 - Added a prior-perturbation retry probe (`n4_finite_q1024_r089_retry_probe.json`):
   4 frames x 5 retries at R=0.89 q=1024, 0 successes.
 - Added bounded single-symbol and two-symbol OSD-like post-processors to the
