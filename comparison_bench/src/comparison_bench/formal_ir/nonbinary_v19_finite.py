@@ -132,6 +132,59 @@ def _sample_frame(rng: np.random.Generator, n: int, q: int, w: np.ndarray,
     return alice, errors, bob
 
 
+def _single_symbol_postprocess(field: GF2mField, matrix: np.ndarray,
+                                  syndrome: Sequence[int], e_hat: np.ndarray,
+                                  beliefs: Any = None,
+                                  max_vars: int | None = None) -> np.ndarray | None:
+    """Single-symbol flip post-processing.
+
+    Starting from a BP error estimate ``e_hat``, try flipping each variable to
+    every other field symbol and test whether the syndrome becomes consistent.
+    Returns the first syndrome-consistent error vector found, or None.
+    This is a bounded diagnostic OSD-like post-processor (not a full OSD).
+    """
+    m_rows, n_cols = matrix.shape
+    syndrome = [int(x) for x in syndrome]
+    current = np.asarray(e_hat, dtype=np.int64).copy()
+    # Current syndrome (could be recomputed; use incremental checks below).
+    # Precompute current syndrome once.
+    cur_syn = np.asarray(qspa.syndrome_of(field, matrix, current.tolist()), dtype=np.int64)
+    if beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        if beliefs.shape == (n_cols, field.q):
+            # Least reliable first: low max posterior probability.
+            order = np.argsort(beliefs.max(axis=1))
+        else:
+            order = np.arange(n_cols)
+    else:
+        order = np.arange(n_cols)
+    if max_vars is not None and max_vars < n_cols:
+        order = order[:int(max_vars)]
+    for i in order:
+        i = int(i)
+        old = int(current[i])
+        # Precompute old column contribution for each row.
+        old_col = np.asarray([field.mul(int(matrix[r, i]), old) for r in range(m_rows)],
+                             dtype=np.int64)
+        for cand in range(field.q):
+            if cand == old:
+                continue
+            new_col = np.asarray([field.mul(int(matrix[r, i]), cand) for r in range(m_rows)],
+                                 dtype=np.int64)
+            # delta = old_col + new_col (char 2 subtraction = addition)
+            ok = True
+            for r in range(m_rows):
+                val = field.add(int(old_col[r]), int(new_col[r]))
+                if field.add(int(cur_syn[r]), val) != syndrome[r]:
+                    ok = False
+                    break
+            if ok:
+                fixed = current.copy()
+                fixed[i] = cand
+                return fixed
+    return None
+
+
 def execute_synthetic_frames(*, q: int, n: int, m: int,
                              lambda_edge: Mapping[int, float], w: Any,
                              n_frames: int, seed: int, max_iter: int = 100,
@@ -178,6 +231,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
             max_iter=max_iter, streak=streak)
         runtime = time.monotonic() - frame_start
         e_hat = result.get("e_hat")
+        postprocess_used = False
         if e_hat is None:
             status = "decode_failed"
             n_failed += 1
@@ -186,6 +240,19 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
             x_hat = [int(field.add(int(y), int(e))) for y, e in zip(bob, e_hat)]
             syndrome_ok = qspa.syndrome_of(field, matrix, x_hat) == list(s_x)
             exact = bool(syndrome_ok and np.array_equal(x_hat, alice))
+            if not exact:
+                # Bounded single-symbol flip post-processing (diagnostic).
+                e_fixed = _single_symbol_postprocess(
+                    field, matrix, [int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                    np.asarray(e_hat, dtype=np.int64),
+                    beliefs=result.get("beliefs"),
+                    max_vars=None if n <= 512 else 256)
+                if e_fixed is not None:
+                    postprocess_used = True
+                    e_hat = e_fixed.tolist()
+                    x_hat = [int(field.add(int(y), int(e))) for y, e in zip(bob, e_hat)]
+                    syndrome_ok = qspa.syndrome_of(field, matrix, x_hat) == list(s_x)
+                    exact = bool(syndrome_ok and np.array_equal(x_hat, alice))
             if exact:
                 status = "exact_correct"
                 n_exact += 1
@@ -202,6 +269,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
             "status": status,
             "exact_correct": bool(exact),
             "syndrome_ok": bool(syndrome_ok) if e_hat is not None else False,
+            "postprocess_used": bool(postprocess_used),
             "iterations": int(result.get("iterations") or 0),
             "decoder_status": result.get("status"),
             "runtime_s": round(runtime, 6),

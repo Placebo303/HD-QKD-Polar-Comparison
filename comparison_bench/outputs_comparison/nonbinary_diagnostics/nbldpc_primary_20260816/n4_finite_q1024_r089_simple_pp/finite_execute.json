@@ -1,0 +1,111 @@
+{
+  "channel_entropy_bits_per_symbol": 0.549955043921941,
+  "claim_boundary": "diagnostic_only",
+  "codebook": {
+    "construction": {
+      "check_counts": {
+        "21": 2,
+        "22": 26
+      },
+      "edge_label_seed": 3460911148,
+      "m": 28,
+      "max_trials": 20,
+      "n": 256,
+      "parallel_edges": 0,
+      "rank": 28,
+      "schema": "v10_peg_manifest_v1",
+      "seed": 2026082018,
+      "status": "ok",
+      "total_sockets": 614,
+      "trials_used": 1,
+      "triples_count": 614,
+      "var_counts": {
+        "2": 154,
+        "3": 102
+      }
+    },
+    "field_id": "c53f194db6af8b1afdfdcb189ce1b91617f7172937ab025a08001f609385c79a",
+    "lambda_edge": {
+      "2": 0.5,
+      "3": 0.5
+    },
+    "m": 28,
+    "n": 256,
+    "q": 1024,
+    "rank": 28,
+    "rate": 0.890625,
+    "requested_m": 28,
+    "rho_edge": {
+      "21": 0.054687499999998446,
+      "22": 0.9453125000000016
+    },
+    "schema": "nbldpc_v19_codebook_v1",
+    "seed": 2026082018
+  },
+  "f_plain_qary": 1.9887989247267341,
+  "fer": 0.75,
+  "m": 28,
+  "n": 256,
+  "n_decode_failed": 3,
+  "n_exact_correct": 1,
+  "n_exact_mismatch": 0,
+  "n_frames": 4,
+  "outcomes": [
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 0,
+      "iterations": 10,
+      "postprocess_used": false,
+      "runtime_s": 6.843,
+      "status": "decode_failed",
+      "syndrome_bits": 280,
+      "syndrome_ok": false,
+      "syndrome_symbols": 28
+    },
+    {
+      "decoder_status": "converged_no_syndrome",
+      "exact_correct": false,
+      "frame_id": 1,
+      "iterations": 8,
+      "postprocess_used": false,
+      "runtime_s": 5.484,
+      "status": "decode_failed",
+      "syndrome_bits": 280,
+      "syndrome_ok": false,
+      "syndrome_symbols": 28
+    },
+    {
+      "decoder_status": "success",
+      "exact_correct": true,
+      "frame_id": 2,
+      "iterations": 6,
+      "postprocess_used": false,
+      "runtime_s": 4.078,
+      "status": "exact_correct",
+      "syndrome_bits": 280,
+      "syndrome_ok": true,
+      "syndrome_symbols": 28
+    },
+    {
+      "decoder_status": "max_iter_reached",
+      "exact_correct": false,
+      "frame_id": 3,
+      "iterations": 10,
+      "postprocess_used": false,
+      "runtime_s": 6.875,
+      "status": "decode_failed",
+      "syndrome_bits": 280,
+      "syndrome_ok": false,
+      "syndrome_symbols": 28
+    }
+  ],
+  "q": 1024,
+  "rate": 0.890625,
+  "requested_m": 28,
+  "schema": "nbldpc_v19_finite_execute_v1",
+  "seed": 2026082018,
+  "syndrome_bits_per_frame": 280,
+  "syndrome_bits_per_symbol": 1.09375,
+  "wall_seconds": 53.344
+}

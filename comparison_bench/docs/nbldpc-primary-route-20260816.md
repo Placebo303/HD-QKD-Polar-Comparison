@@ -111,6 +111,10 @@ fresh/promotion/qualification.
   n=512, m=64, R=0.875 also ended 4/4 `decode_failed`
   (`n4_finite_q1024_optrho_n512_m64/`). This extends `construct_codebook` /
   `execute_synthetic_frames` with an optional `rho_edge` (additive feature).
+- Added a bounded single-symbol flip post-processor to the finite executor.
+  In a 4-frame R=0.89 q=1024 run (`n4_finite_q1024_r089_simple_pp/`),
+  post-processing was not triggered successfully and the run remained
+  1/4 exact_correct / 3/4 decode_failed.
 
 ## Status correction
 

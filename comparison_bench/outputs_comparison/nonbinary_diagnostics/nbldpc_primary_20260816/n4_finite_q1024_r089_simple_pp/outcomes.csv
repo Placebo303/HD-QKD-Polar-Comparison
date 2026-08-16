@@ -1,0 +1,5 @@
+frame_id,status,exact_correct,syndrome_ok,postprocess_used,iterations,decoder_status,runtime_s,syndrome_symbols,syndrome_bits
+0,decode_failed,False,False,False,10,max_iter_reached,6.843,28,280
+1,decode_failed,False,False,False,8,converged_no_syndrome,5.484,28,280
+2,exact_correct,True,True,False,6,success,4.078,28,280
+3,decode_failed,False,False,False,10,max_iter_reached,6.875,28,280
