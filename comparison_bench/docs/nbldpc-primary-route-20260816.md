@@ -190,7 +190,9 @@ fresh/promotion/qualification.
   - Fast bounded OSD-3 enumeration (`osd_decode_candidates_order3_fast`) added;
     seed2055 not recovered with top10/top4, top20/top4, top12/top8, or
     OSD-4 top8/top2 or top8/top4. Fast OSD-1/2/3/4 integrated for n<=64;
-    seed2055 still non-recovered (`..._fast_osd1234_seed2055`).
+    seed2055 still non-recovered (`..._fast_osd1234_seed2055`), and
+    prior-retry + fast OSD-1/2/3/4 also failed
+    (`..._retry_osd1234_seed2055.json`).
   - Full OSD-1 aggregate summary:
     `n4_full_osd1_summary.json`.
   - n=64 fast OSD-1/2/3/4 batches: first 4/8 exact (FER=0.5), second 0/8
