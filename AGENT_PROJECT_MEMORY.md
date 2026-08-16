@@ -74,7 +74,7 @@
     any of the five n=64 non-recovered frames. Fast full OSD-1 enumeration
     (`osd_decode_candidates_fast`) integrated for n<=256 (~0.6s at n=64).
     Fast broad OSD-2 (`osd_decode_candidates_order2_fast`) also integrated
-    for n<=128. Comprehensive blocker summary
+    for n<=128; fast bounded OSD-3 added. Comprehensive blocker summary
     written into V20 proposal/tasks. Created V20
     OpenSpec draft `formal-nonbinary-ldpc-v20-q1024-decode-improvement`
     (proposal/design/tasks) as the next step. [repo-observed]
