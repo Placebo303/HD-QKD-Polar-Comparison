@@ -1,3 +1,9 @@
+## 2026-08-16 V22 DE_NOT_READY closeout
+
+- q1024 r0.9375 structured DE non-converged across tools/budgets.
+- V22 frozen scientific_not_ready; no finite construction.
+- Next: MET/protograph DE (V23). [repo-observed]
+
 ## 2026-08-16 V22b budget scan still non-converged
 
 - q1024 r0.9375 degree_max=512 n200 iter30: 3/3 non-converged.

@@ -1,4 +1,4 @@
-Status: NBLDPC_V22_IN_PROGRESS — V22b iter30/n200 still non-converged at target rate
+Status: NBLDPC_V22_DE_NOT_READY — structured target-rate DE frozen as scientific_not_ready
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,11 @@ Status: NBLDPC_V22_IN_PROGRESS — V22b iter30/n200 still non-converged at targe
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 收尾（2026-08-16）
+- V22 结构化 DE 在 q=1024, rate=0.9375 不收敛（含 n200/iter30/degree_max=512）。
+- 冻结为 `scientific_not_ready`，不进入有限码构造；
+- 决策记录写入 decision-log。下一步候选：MET/protograph DE（V23）。
 
 ## V22b 更大预算扫描（2026-08-16）
 - q=1024, rate=0.9375, degree_max=512, n_samples=200, max_iter=30：

@@ -2275,3 +2275,17 @@ All >= 0.45, so stop gate is triggered. Short-block OSD/top-K branch is frozen a
 
 **Consequences**: No fresh qualification; next phase is V22 DE-gated MET/protograph
 or SC-LDPC construction. push still user-gated.
+
+### 2026-08-16: V22 structured DE declared not-ready for target f
+
+**Decision**: V22 structured DE gate at q=1024, rate=0.9375 does not converge
+with current SC-LDPC/plain tools even at n_samples=200, max_iter=30,
+degree_max=512. V22 is frozen as `scientific_not_ready` pending a MET/protograph
+multi-edge DE implementation. No finite-code construction is started.
+
+**Context**: plain structured DE ceiling confirmed; SC-LDPC V10 winners only pass
+at low QSC p=0.05, not target rate. degree cap unblocked by V22b but candidates
+still non-converged.
+
+**Consequences**: no finite construction, no fresh qualification. Next candidate
+is a MET/protograph DE (V23) or acceptance of current not-ready state.

@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v22-structured-construction
 
-Status: IN_PROGRESS — V22b runs; q1024 r0.9375 non-converged at iter10/iter30 n200; structured target-rate DE not passing
+Status: DE_NOT_READY — structured target-rate DE does not converge with current SC/plain tools; frozen as scientific_not_ready pending MET/protograph
 
 ## T0 Planning
 - [x] P0: freeze V22 task packet (approach: additive V22b structured MC-DE with configurable DEGREE_MAX, then SC-LDPC structured adaptation)
@@ -10,7 +10,7 @@ Status: IN_PROGRESS — V22b runs; q1024 r0.9375 non-converged at iter10/iter30 
 - [x] I01: implement V22 DE gate harness (structured MC-DE wrapper)
 - [x] I02: DE gate CLI + tests
 - [x] I02b: implement SC-LDPC DE gate via V11 (`nonbinary_v22_sc_de_gate.py` + CLI + test)
-- [ ] I03: finite construction if DE passes
+- [ ] I03: finite construction if DE passes (blocked: DE not ready)
 - [x] I04: implement additive V22b structured MC-DE with configurable DEGREE_MAX (>=128) to unblock high-rate DE
 
 ## T2 Execute

@@ -1,10 +1,14 @@
-Status: NBLDPC_V22_IN_PROGRESS — iter30/n200 non-converged at target rate
+Status: NBLDPC_V22_DE_NOT_READY — target-rate DE frozen scientific_not_ready
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 closeout
+- Structured target-rate DE non-converged; frozen scientific_not_ready.
+- Next candidate: MET/protograph DE (V23).
 
 ## V22b budget scan
 - q1024 r0.9375 degree_max=512 n200 iter30: still non-converged (3/3).
