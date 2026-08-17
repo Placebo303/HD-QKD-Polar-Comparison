@@ -1,3 +1,10 @@
+## 2026-08-16 Round 90 — frame_offset 分块支持；n80 top-K 无净提升
+
+- 新增 `frame_offset`（API + CLI），支持分块跑有限码实验。
+- n=80,m=5 seed=2026082300 top-K=2 分块完整集成：2/8 exact，与 V19 相同。
+- n64 bounded4 仍为最佳：31/64, FER=0.515625。
+- 新增 frame_offset 测试；全量 32 passed。 [repo-observed]
+
 ## 2026-08-16 Round 89 — top-K list decoding implemented; n80 potential
 
 - `bounded_weight_ml_decode_candidates`（max_weight=5, top_k=4）实现并测试。

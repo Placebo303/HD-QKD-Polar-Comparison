@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 89: top-K list decoding 已实现；n80 有恢复潜力
+Status: NBLDPC_V20_IN_PROGRESS — Round 90: frame_offset 分块支持；n80 top-K 无净提升，n64 仍 31/64
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,12 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 89: top-K list decoding 已实现；n80
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 90 更新（2026-08-16）
+- 新增 `frame_offset` 支持（API + CLI `--frame-offset`），用于分块跑长有限码实验。
+- n=80,m=5 seed=2026082300 用 top-K=2 分块完整集成：仍 **2/8 exact**（与 V19 相同，无净提升）。
+- 结论：n80 的 bounded5/top-K 在当前单 seed 上不能超过 V19；n64 bounded4 仍是唯一实际改进点（31/64, FER=0.515625）。
+- 新增 frame_offset 测试；全量 32 passed。
 
 ## Round 89 更新（2026-08-16）
 - 实现 V20 top-K 列表解码：`bounded_weight_ml_decode_candidates`（max_weight=5, top_k=4）。

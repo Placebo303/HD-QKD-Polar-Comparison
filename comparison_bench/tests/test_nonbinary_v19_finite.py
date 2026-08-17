@@ -64,3 +64,20 @@ def test_execute_synthetic_frames_frame_seed_separate():
     assert doc["frame_seed"] == 2026082055
     assert doc["seed"] == 2026083001
     assert len(doc["outcomes"]) == 1
+
+
+def test_execute_synthetic_frames_frame_offset():
+    q = 16
+    n = 64
+    m = 24
+    lam = {2: 0.5, 3: 0.5}
+    w = build_folded_w(q)
+    doc0 = fin.execute_synthetic_frames(
+        q=q, n=n, m=m, lambda_edge=lam, w=w,
+        n_frames=2, seed=2026084001, frame_offset=0, max_iter=10)
+    doc1 = fin.execute_synthetic_frames(
+        q=q, n=n, m=m, lambda_edge=lam, w=w,
+        n_frames=1, seed=2026084001, frame_offset=1, max_iter=10)
+    assert doc0["outcomes"][1]["frame_id"] == 1
+    assert doc1["outcomes"][0]["frame_id"] == 0
+    assert doc1["frame_offset"] == 1

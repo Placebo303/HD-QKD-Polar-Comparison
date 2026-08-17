@@ -83,6 +83,8 @@ def main() -> int:
     p.add_argument("--seed", type=int, default=2026082003)
     p.add_argument("--frame-seed", type=int, default=None,
                    help="Optional separate seed for frame sampling (code uses --seed)")
+    p.add_argument("--frame-offset", type=int, default=0,
+                   help="Skip this many frames before sampling (for chunked runs)")
     p.add_argument("--max-iter", type=int, default=60)
     p.add_argument("--seed-lambda-json", type=str, required=True,
                    help="JSON mapping of the lambda degree distribution")
@@ -186,6 +188,7 @@ def cmd_finite(args) -> int:
         n_frames=args.n_frames, seed=args.seed, max_iter=args.max_iter,
         osd_order=args.osd_order, osd_top_info=args.osd_top_info,
         frame_seed=args.frame_seed,
+        frame_offset=args.frame_offset,
         out_dir=Path(args.out_dir))
     print(json.dumps({k: v for k, v in doc.items() if k != "outcomes"}, sort_keys=True))
     return 0

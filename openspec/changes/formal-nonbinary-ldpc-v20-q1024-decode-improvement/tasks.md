@@ -25,6 +25,7 @@ strictly stronger decoder/construction before execute.
 - [x] I09 (V20): optimize/evaluate bounded-weight max_weight=4 on deterministic q=1024 frames (numba ML; integrated as post-decoder)
 - [x] I10 (V20): extend bounded-weight ML to max_weight=5 / n=80,m=5 (single-ML did not improve n80 seed2300; lower-weight wrong candidates outrank Alice)
 - [x] I11 (V20): implement top-K list decoding `bounded_weight_ml_decode_candidates` (max_weight=5, top_k=4); direct frame0 test includes Alice in top4
+- [x] I12 (V20): add frame_offset support for chunked finite runs; n80 seed2300 chunked integration confirms 2/8 (no net gain over V19)
 
 ## T2 Execute
 - [x] E01: execute once on deterministic q=1024 synthetic frames (M5 bounded-ML post-decoder; 3 verified seeds)

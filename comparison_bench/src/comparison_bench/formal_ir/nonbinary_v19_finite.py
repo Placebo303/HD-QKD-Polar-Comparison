@@ -319,6 +319,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                              osd_order: int | None = None,
                              osd_top_info: int = 4,
                              frame_seed: int | None = None,
+                             frame_offset: int = 0,
                              out_dir: str | Path | None = None) -> dict:
     """Run deterministic synthetic frames through a constructed q-ary code.
 
@@ -344,6 +345,12 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
     matrix = np.asarray(code["matrix"], dtype=np.int64)
     field = GF2mField.create(q)
     rng = np.random.default_rng(seed if frame_seed is None else frame_seed)
+    if isinstance(frame_offset, bool) or not isinstance(frame_offset, Integral) or int(frame_offset) < 0:
+        raise ValueError("frame_offset must be a non-negative integer")
+    frame_offset = int(frame_offset)
+    for _ in range(frame_offset):
+        _ = rng.integers(0, q, size=n)
+        _ = rng.choice(q, size=n, p=w)
     outcomes = []
     n_exact = 0
     n_mismatch = 0
@@ -694,7 +701,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                             syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
                             w=w,
                             max_weight=5,
-                            top_k=4)
+                            top_k=2)
                     except Exception:
                         cands_ml5 = []
                     for cand_e in cands_ml5:
@@ -743,6 +750,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
         "rate": float(1.0 - actual_m / float(n)),
         "seed": int(seed),
         "frame_seed": int(frame_seed) if frame_seed is not None else None,
+        "frame_offset": int(frame_offset),
         "n_frames": total,
         "n_exact_correct": n_exact,
         "n_exact_mismatch": n_mismatch,
