@@ -1,4 +1,4 @@
-Status: NBLDPC_V22_IN_PROGRESS — V22b high-degree DE implemented; q1024 r0.9375 runs
+Status: NBLDPC_V22_IN_PROGRESS — V22b iter30/n200 still non-converged at target rate
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V22_IN_PROGRESS — V22b high-degree DE implemented; q1024 r0.937
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22b 更大预算扫描（2026-08-16）
+- q=1024, rate=0.9375, degree_max=512, n_samples=200, max_iter=30：
+  - 3 候选仍全部 non-converged。
+- 证据：`nbldpc_v22_20260816/v22b_de_gate_q1024_r09375_dmax512_iter30_n200/de_gate.json`。
+- 说明：结构化信道下目标 rate 的 plain/SC 候选在当前工具范围内不收敛；
+  需 MET/protograph 或接受 `scientific_not_ready`。
 
 ## V22b 实现（2026-08-16）
 - 新增 `nonbinary_v22b_mcde.py`（临时提升 V14 DEGREE_MAX）+ `nonbinary_v22b_de_gate.py` + CLI + 测试。

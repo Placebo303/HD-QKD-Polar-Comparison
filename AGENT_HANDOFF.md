@@ -1,10 +1,14 @@
-Status: NBLDPC_V22_IN_PROGRESS — V22b high-degree DE implemented
+Status: NBLDPC_V22_IN_PROGRESS — iter30/n200 non-converged at target rate
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22b budget scan
+- q1024 r0.9375 degree_max=512 n200 iter30: still non-converged (3/3).
+- Need MET/protograph or accept scientific_not_ready.
 
 ## V22b implementation
 - Added nonbinary_v22b_mcde.py, nonbinary_v22b_de_gate.py, CLI, tests.

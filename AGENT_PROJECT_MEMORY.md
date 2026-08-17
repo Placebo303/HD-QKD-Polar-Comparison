@@ -1,3 +1,8 @@
+## 2026-08-16 V22b budget scan still non-converged
+
+- q1024 r0.9375 degree_max=512 n200 iter30: 3/3 non-converged.
+- Structured target-rate DE not passing; need MET/protograph or accept not-ready. [repo-observed]
+
 ## 2026-08-16 V22b high-degree DE implemented
 
 - 新增 nonbinary_v22b_mcde.py + de_gate + CLI + tests（临时提升 V14 DEGREE_MAX）。
