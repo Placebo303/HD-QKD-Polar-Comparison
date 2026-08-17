@@ -49,3 +49,18 @@ def test_find_two_degree_rho():
     r = fin.find_two_degree_rho(n=1024, m=73, lambda_edge=lam, max_degree=200)
     assert r["socket_total"] == r["target_socket_total"]
     assert abs(sum(r["rho"].values()) - 1.0) < 1e-12
+
+
+def test_execute_synthetic_frames_frame_seed_separate():
+    q = 16
+    n = 64
+    m = 24
+    lam = {2: 0.5, 3: 0.5}
+    w = build_folded_w(q)
+    doc = fin.execute_synthetic_frames(
+        q=q, n=n, m=m, lambda_edge=lam, w=w,
+        n_frames=1, seed=2026083001, frame_seed=2026082055, max_iter=10)
+    assert doc["schema"] == "nbldpc_v19_finite_execute_v1"
+    assert doc["frame_seed"] == 2026082055
+    assert doc["seed"] == 2026083001
+    assert len(doc["outcomes"]) == 1

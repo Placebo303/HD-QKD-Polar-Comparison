@@ -1,10 +1,12 @@
 # Tasks: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-Status: DRAFT — V19 OSD prototype implemented; V20 freeze still pending. V19 data supports full-OSD direction (n=64 FER=0.5, n=128 FER=0.75) but requires more efficient/higher-order OSD.
+Status: DRAFT — V19 OSD/MRB-OSD prototype implemented; V20 freeze still pending. Round 83-84 evidence shows V19 OSD family exhausted; ready for freeze review.
 
 ## Current blocker
 V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3
-result in `exact_mismatch`. V20 must start from this blocker and select a
+result in `exact_mismatch` (or high FER at best point n=64 f=1.136: 28/64 exact).
+Round 83-84 added MRB-OSD, rho variants, and fixed-frame code-seed sweeps; none
+recovered the hard frame seed 2055. V20 must start from this blocker and select a
 strictly stronger decoder/construction before execute.
 
 ## T0 Planning
@@ -18,6 +20,7 @@ strictly stronger decoder/construction before execute.
 - [ ] I04: add retry/blind-reconciliation helper if M3 selected
 - [ ] I05: add channel-aware DE gate CLI if M4 selected
 - [x] I06 (V19 prototype): tests for OSD helpers in `test_nonbinary_v19_osd.py`
+- [x] I07 (V19 prototype): implement reliability-sorted MRB-OSD `osd_decode_candidates_mrb` and integrate MRB OSD-1/2
 
 ## T2 Execute
 - [ ] E01: execute once on deterministic q=1024 synthetic frames

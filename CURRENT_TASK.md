@@ -1,4 +1,4 @@
-Status: NBLDPC_PRIMARY_V19_ACTIVE — Round 83: 扩展 n=64 f=1.136 统计并实现 MRB-OSD 诊断
+Status: NBLDPC_PRIMARY_V19_EXHAUSTED — Round 84: V19 OSD/构造诊断穷尽，V20 已就绪待冻结审查
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,16 @@ Status: NBLDPC_PRIMARY_V19_ACTIVE — Round 83: 扩展 n=64 f=1.136 统计并实
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 84 更新（2026-08-16）
+- 新增 `frame_seed` 分离支持（`nonbinary_v19_finite.execute_synthetic_frames` + CLI `--frame-seed`），
+  新增 1 个测试。
+- 固定 hard frame seed 2055、换 code seed 3001-3005：全部 `exact_mismatch`，未恢复。
+- rho 变体 {35,39}、{33,41}、{30,44} 在 frame 2055 上仍 `exact_mismatch`。
+- 直接 MRB-OSD probe（OSD-2 all-free/symbols 4-8、OSD-3/4 bounded、OSD-3 all-free/symbols 2）
+  均未找到 Alice 码字。
+- 结论：V19 PEG/FFT-QSPA/OSD 家族在 q=1024 f≤1.3 已穷尽；V20 草稿已补充 Round 83-84 证据，
+  状态置为 ready for freeze review。下一步需用户/主线程批准 V20 冻结。
 
 ## Round 83 更新（2026-08-16）
 - 扩展最佳配置 n=64, m=4, lambda {2:0.6,3:0.4}, f≈1.136 到 64 帧：

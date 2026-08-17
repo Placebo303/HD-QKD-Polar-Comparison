@@ -1,10 +1,20 @@
-Status: NBLDPC_PRIMARY_V19_ACTIVE — Round 83: n=64 f=1.136 扩样 + MRB-OSD 实现
+Status: NBLDPC_PRIMARY_V19_EXHAUSTED — Round 84: V19 OSD/构造穷尽，V20 ready for freeze review
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 84
+- `frame_seed` 分离支持已加入 CLI/API；测试通过。
+- hard frame 2055 固定帧、code seed 3001-3005 全部 exact_mismatch；
+  rho 变体与 MRB-OSD 更高阶 probe 也均未恢复。
+- V20 proposal/design/tasks 已补充 Round 83-84 证据，标记 ready for freeze review。
+- 本地证据新增：
+  `n4_finite_q1024_f1136_mrb_lambdab_1f_2055`，
+  `n4_finite_q1024_f1136_rho_{35_39,33_41,30_44}_1f_2055`，
+  `n4_finite_q1024_f1136_framefixed2055_codeseed{3001..3005}_1f`。
 
 ## Round 83
 - 新增证据：`n4_finite_q1024_f1136_fast_osd_lambdab_8f_2026082260/2268/2276/2284`，

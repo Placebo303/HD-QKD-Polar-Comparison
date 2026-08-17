@@ -316,6 +316,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                              rho_edge: Mapping[int, float] | None = None,
                              osd_order: int | None = None,
                              osd_top_info: int = 4,
+                             frame_seed: int | None = None,
                              out_dir: str | Path | None = None) -> dict:
     """Run deterministic synthetic frames through a constructed q-ary code.
 
@@ -340,7 +341,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
     actual_m = int(code["m"])
     matrix = np.asarray(code["matrix"], dtype=np.int64)
     field = GF2mField.create(q)
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(seed if frame_seed is None else frame_seed)
     outcomes = []
     n_exact = 0
     n_mismatch = 0
@@ -660,6 +661,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
         "requested_m": int(m),
         "rate": float(1.0 - actual_m / float(n)),
         "seed": int(seed),
+        "frame_seed": int(frame_seed) if frame_seed is not None else None,
         "n_frames": total,
         "n_exact_correct": n_exact,
         "n_exact_mismatch": n_mismatch,

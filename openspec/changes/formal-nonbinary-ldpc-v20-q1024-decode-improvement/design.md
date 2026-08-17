@@ -48,6 +48,22 @@ DRAFT — based on V19 primary-route evidence.
 - V20 should focus on efficient full/partial OSD enumeration, better
   information-set selection, and/or smaller n with rate-compatible framing.
 
+## Round 83-84 MRB-OSD and exhaustion evidence
+- Implemented reliability-sorted MRB-OSD (`osd_decode_candidates_mrb`) to make
+  the information set align with the most reliable columns.
+- Integrated MRB OSD-1 full + MRB OSD-2 broad into `nonbinary_v19_finite`.
+- Paired comparisons on seed 2252 (5/8) and seed 2276 (2/8) showed no change;
+  hard frame 2055 remained `exact_mismatch`.
+- Direct MRB probes on frame 2055 (OSD-2 all-free with 4/8 symbols, OSD-3/4
+  bounded, OSD-3 all-free with 2 symbols) did not recover Alice.
+- Fixed-frame code-seed sweep (seeds 3001-3005) and rho variants
+  ({35,39}, {33,41}, {30,44}) all failed on frame 2055.
+- Best honest 64-frame statistic: n=64,m=4,lambda {2:0.6,3:0.4},f=1.136,
+  28/64 exact (FER=0.5625).
+- Conclusion: the V19 PEG/FFT-QSPA/OSD family is exhausted; V20 should not
+  spend more effort on the same OSD variants unless paired with a fundamentally
+  different construction/decoder.
+
 ## V19 prototype evidence
 - `nonbinary_v19_osd.py` implements OSD-0/1 plus bounded OSD-2 candidate search.
 - R=0.89 q=1024: OSD improves to 2 exact / 2 exact_mismatch / 0 decode_failed.

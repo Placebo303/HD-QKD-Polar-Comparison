@@ -1,6 +1,6 @@
 # Proposal: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-> Status: DRAFT — prepared from V19 diagnostic evidence; production execution requires freeze review/acceptance.
+> Status: DRAFT — prepared from V19 diagnostic evidence; production execution requires freeze review/acceptance. Round 83-84 evidence added; ready for freeze review.
 
 ## What
 Improve q=1024 Nonbinary LDPC finite-length decoding so that the already-reachable
@@ -44,6 +44,22 @@ V19 diagnostics established:
   `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n4_finite_q1024_f129_blocker_summary.json`
 - V20 must therefore implement a decoder/construction that goes beyond
   bounded OSD-2 and the current PEG/FFT-QSPA.
+
+## Updated V19 blocker evidence (Round 83-84)
+- Best finite-length point remains n=64,m=4,lambda {2:0.6,3:0.4},f≈1.136:
+  **28/64 exact_correct, FER=0.5625** (64-frame honest sample; 32-frame was 15/32).
+- Same-f block lengths n=80,m=5 and n=96,m=6 are worse (2/8 and 1/8 exact).
+- Reliability-sorted MRB-OSD was implemented (`osd_decode_candidates_mrb`) and
+  integrated as MRB OSD-1 full + MRB OSD-2 broad; on seed 2252/2276 it did not
+  change outcomes, and on hard frame seed 2055 it still did not recover.
+- Direct MRB probes on frame 2055 (OSD-2 all-free/symbols 4-8, OSD-3/4 bounded,
+  OSD-3 all-free/symbols 2) also did not find Alice's codeword.
+- Code-seed sweep on the same hard frame (code seeds 3001-3005, frame fixed 2055)
+  all yielded `exact_mismatch`; rho variants {35,39}, {33,41}, {30,44} also failed.
+- Conclusion: the V19 PEG/FFT-QSPA + OSD family is exhausted at q=1024 f≤1.3;
+  V20 must select a strictly stronger code construction/decoder or a pre-registered
+  different mechanism (e.g. blind reconciliation, SC/MET, better information-set
+  decoding with larger n).
 
 ## Claim boundary
 `diagnostic_only` until a frozen gate review accepts the V20 protocol.

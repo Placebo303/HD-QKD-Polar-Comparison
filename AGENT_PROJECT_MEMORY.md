@@ -1,3 +1,14 @@
+## 2026-08-16 Round 84 — V19 OSD/构造穷尽，V20 就绪待冻结
+
+- 新增 `frame_seed` 参数（API + CLI `--frame-seed`），可固定帧数据、更换 code seed。
+- hard frame seed 2055 固定帧、code seed 3001-3005 全部 `exact_mismatch`；
+  rho 变体 {35,39}/{33,41}/{30,44} 仍失败。
+- 直接 MRB-OSD probe（OSD-2 all-free/symbols 4-8、OSD-3/4 bounded、OSD-3 all-free/symbols 2）
+  均未找到 Alice 码字；MRB-OSD 对 seed 2252/2276 也无变化。
+- 结论：V19 PEG/FFT-QSPA/OSD 家族在 q=1024 f≤1.3 已穷尽。
+- V20 proposal/design/tasks 已补充 Round 83-84 证据，标记 ready for freeze review；
+  下一步需用户/主线程批准 V20 冻结。 [repo-observed]
+
 ## 2026-08-16 Round 83 — n=64 f=1.136 扩样 + MRB-OSD 诊断
 
 - 最佳配置 n=64,m=4,lambda {2:0.6,3:0.4},f≈1.136 扩到 64 帧：
