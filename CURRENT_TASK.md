@@ -1,4 +1,4 @@
-Status: NBLDPC_V22_IN_PROGRESS — SC-LDPC DE gate via V11 implemented; q1024 p0.20 smoke all non-converged
+Status: NBLDPC_V22_IN_PROGRESS — SC-LDPC DE gate passes at q1024 p=0.05 iter50
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V22_IN_PROGRESS — SC-LDPC DE gate via V11 implemented; q1024 p0
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 进展 4（2026-08-16）
+- q=1024 SC-LDPC DE gate 扫描：
+  - p=0.20/0.10/0.05，max_iter=20 均 non-converged；
+  - **p=0.05, max_iter=50：6/6 全部 converged，gate_passed=true**。
+- 证据：`nbldpc_v22_20260816/sc_de_gate_q1024_p005_iter50_smoke/sc_de_gate.json`。
+- 说明：SC-LDPC DE 在低 QSC 噪声点可通过；下一步需映射到 V17 结构化信道/目标 f。
 
 ## V22 进展 3（2026-08-16）
 - 新增 SC-LDPC DE gate：`nonbinary_v22_sc_de_gate.py` + CLI + 测试（复用 V11 frozen kernel/geometries）。

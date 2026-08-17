@@ -1,3 +1,9 @@
+## 2026-08-16 V22 SC-LDPC DE gate pass at p=0.05
+
+- q1024, p=0.05, max_iter=50: 6/6 SC-LDPC rows converged, gate_passed=true.
+- p=0.20/0.10 max_iter=20 non-converged.
+- Evidence: nbldpc_v22_20260816/sc_de_gate_q1024_p005_iter50_smoke/sc_de_gate.json. [repo-observed]
+
 ## 2026-08-16 V22 SC-LDPC DE gate smoke
 
 - 新增 `nonbinary_v22_sc_de_gate.py` + CLI + 测试（复用 V11 SC-MC-DE）。
