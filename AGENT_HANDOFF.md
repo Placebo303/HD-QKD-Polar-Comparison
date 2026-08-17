@@ -1,10 +1,14 @@
-Status: NBLDPC_V21_STOP_GATE — Bob-only FER S0=0.625, S1/S2=0.5625; V22 drafted
+Status: NBLDPC_V22_IN_PROGRESS — V22 DE gate harness implemented
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 progress
+- Added nonbinary_v22_de_gate.py + CLI + tests.
+- q16 smoke gate completed; q1024 gate pending.
 
 ## V21 execution
 - Implemented V21 module/CLI/tests; 64 fresh frames Bob-only.

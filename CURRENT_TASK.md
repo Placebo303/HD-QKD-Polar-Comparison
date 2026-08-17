@@ -1,4 +1,4 @@
-Status: NBLDPC_V21_STOP_GATE — Bob-only 64 帧 FER S0=0.625, S1/S2=0.5625，触发停止门；V22 已草拟
+Status: NBLDPC_V22_IN_PROGRESS — V22 DE gate harness implemented; q16 smoke done, q1024 pending
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,11 @@ Status: NBLDPC_V21_STOP_GATE — Bob-only 64 帧 FER S0=0.625, S1/S2=0.5625，�
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 进展（2026-08-16）
+- 新增 `nonbinary_v22_de_gate.py` + CLI `run_v22_de_gate.py` + 测试。
+- q=16 smoke gate：3 个合法 8-degree 候选，全部 non-converged（rate=0.6, 小预算）。
+- 下一步：在 q=1024 结构化信道上运行 DE gate（需选择合法候选与预算）。
 
 ## V21 执行结果（2026-08-16）
 - 实现 `nonbinary_v21_bob_only.py` + CLI + 测试（3 passed）。

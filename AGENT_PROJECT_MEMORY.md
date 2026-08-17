@@ -1,3 +1,9 @@
+## 2026-08-16 V22 DE gate harness
+
+- 新增 `nonbinary_v22_de_gate.py` + CLI + 测试。
+- q16 smoke gate：3 个合法 8-degree 候选 non-converged。
+- 下一步 q1024 DE gate。 [repo-observed]
+
 ## 2026-08-16 V21 Bob-only stop gate triggered
 
 - 实现 V21 Bob-only 模块/CLI/测试；64 全新帧：
