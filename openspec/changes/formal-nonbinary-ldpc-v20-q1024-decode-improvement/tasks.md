@@ -31,6 +31,7 @@ strictly stronger decoder/construction before execute.
 - [x] I15 (V20): n80 seed2301 top-K=4 list integration improves 4/8 -> 5/8 (frame5 recovered)
 - [x] I16 (V20): n80 seed2303 top-K=4 list integration improves 3/8 -> 4/8 (frame1 recovered)
 - [x] I17 (V20): n80 seed2304 top-K=4 integration no gain (3/8 -> 3/8); 4-seed aggregate 14/32 FER=0.5625
+- [x] I18 (V20): n80 seed2305 top-K=4 integration 3/8 -> 4/8; 5-seed aggregate 18/40 FER=0.55
 
 ## T2 Execute
 - [x] E01: execute once on deterministic q=1024 synthetic frames (M5 bounded-ML post-decoder; 3 verified seeds)

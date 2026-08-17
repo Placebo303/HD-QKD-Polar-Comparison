@@ -10,8 +10,9 @@
     "2026082300": {"baseline_exact": 2, "integrated_exact": 2, "gain": 0},
     "2026082301": {"baseline_exact": 4, "integrated_exact": 5, "gain": 1},
     "2026082303": {"baseline_exact": 3, "integrated_exact": 4, "gain": 1},
-    "2026082304": {"baseline_exact": 3, "integrated_exact": 3, "gain": 0}
+    "2026082304": {"baseline_exact": 3, "integrated_exact": 3, "gain": 0},
+    "2026082305": {"baseline_exact": 3, "integrated_exact": 4, "gain": 1}
   },
-  "aggregate_4_seeds": {"baseline_exact": 12, "integrated_exact": 14, "frames": 32, "baseline_fer": 0.625, "integrated_fer": 0.5625},
-  "note": "n80 top-K improves 2301/2303 but not 2300/2304; aggregate 32f FER=0.5625, not yet better than n64 0.515625."
+  "aggregate_5_seeds": {"baseline_exact": 15, "integrated_exact": 18, "frames": 40, "baseline_fer": 0.625, "integrated_fer": 0.55},
+  "note": "n80 top-K improves 2301/2303/2305, no gain on 2300/2304; aggregate 40f FER=0.55, still slightly above n64 0.515625."
 }
