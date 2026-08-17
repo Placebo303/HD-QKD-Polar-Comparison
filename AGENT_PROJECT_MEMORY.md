@@ -1,3 +1,9 @@
+## 2026-08-16 Round 101 — n80 9 seeds 略优于 n64
+
+- n80 seed2309: baseline 3/8 -> integrated 4/8。
+- 9 seeds 汇总：baseline 28/72 -> integrated 35/72（FER 0.6111 -> 0.5139），略优于 n64 0.515625。
+- 正收益：2301、2303、2305、2306、2307、2308、2309；无增益：2300、2304。 [repo-observed]
+
 ## 2026-08-16 Round 100 — n80 8 seeds 与 n64 打平
 
 - n80 seed2308: baseline 2/8 -> integrated 3/8。
