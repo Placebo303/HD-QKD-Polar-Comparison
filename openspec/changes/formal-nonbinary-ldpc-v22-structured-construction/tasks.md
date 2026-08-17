@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v22-structured-construction
 
-Status: IN_PROGRESS — DE gate harness implemented; q16 smoke run completed; q1024 gate pending
+Status: IN_PROGRESS — DE gate q16+q1024 smoke completed; gate_passed=false; need structured ensemble or larger budget
 
 ## T0 Planning
 - [ ] P0: freeze V22 task packet
@@ -12,7 +12,7 @@ Status: IN_PROGRESS — DE gate harness implemented; q16 smoke run completed; q1
 - [ ] I03: finite construction if DE passes
 
 ## T2 Execute
-- [ ] E01: DE gate on V17 structured channel (q16 smoke done; q1024 pending)
+- [x] E01: DE gate on V17 structured channel (q16 smoke + q1024 smoke done; all non-converged/error, gate_passed=false)
 - [ ] E02: finite Bob-only FER / f_total
 
 ## T3 Verify/Closeout

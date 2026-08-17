@@ -1,3 +1,9 @@
+## 2026-08-16 V22 q1024 DE gate smoke
+
+- q1024 rate0.9375, 3 valid 8-degree candidates: all non-converged/error, gate_passed=false.
+- Evidence: nbldpc_v22_20260816/de_gate_q1024_r09375_smoke/de_gate.json.
+- Need real structured ensemble or larger budget. [repo-observed]
+
 ## 2026-08-16 V22 DE gate harness
 
 - 新增 `nonbinary_v22_de_gate.py` + CLI + 测试。

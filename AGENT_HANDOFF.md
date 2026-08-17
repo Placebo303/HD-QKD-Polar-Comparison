@@ -1,10 +1,14 @@
-Status: NBLDPC_V22_IN_PROGRESS — V22 DE gate harness implemented
+Status: NBLDPC_V22_IN_PROGRESS — DE gate q16+q1024 smoke done; gate_passed=false
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 progress 2
+- q1024 DE gate smoke: all 3 candidates non-converged/error, gate_passed=false.
+- Need real structured ensemble or larger DE budget.
 
 ## V22 progress
 - Added nonbinary_v22_de_gate.py + CLI + tests.
