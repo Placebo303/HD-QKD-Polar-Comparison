@@ -1,0 +1,20 @@
+{
+  "schema": "nbldpc_v23_de_not_reachable_summary_v1",
+  "q": 1024,
+  "rate_target": 0.9375,
+  "channel": "V17 structured (build_real_w_q1024)",
+  "engine": "V22b run_mcde_high_degree (structured)",
+  "scan_parameters": {"n_samples": 200, "max_iter": 50, "degree_max": 512},
+  "regular_protographs": {
+    "(2,32)": {"final_entropy": 0.336},
+    "(3,48)": {"final_entropy": 0.196},
+    "(4,64)": {"final_entropy": 0.200},
+    "(6,96)": {"final_entropy": 0.200},
+    "(8,128)": {"final_entropy": 0.200}
+  },
+  "irregular_scan_entropies": [0.2386, 0.2421, 0.2611, 0.259, 0.2585],
+  "all_converged": false,
+  "conclusion": "q=1024 structured DE does not converge at rate 0.9375 with plain/SC/regular-protograph/irregular ensembles tested; entropy floor ~0.19-0.34, far above 0.01 tolerance.",
+  "implication": "f<=1.3 structured high-rate reconciliation not reachable with current ensembles; further work needs full DE optimization (Muller-style) or different channel decomposition.",
+  "claim_boundary": "diagnostic_only"
+}

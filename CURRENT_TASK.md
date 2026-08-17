@@ -1,4 +1,4 @@
-Status: NBLDPC_V23_IN_PROGRESS — protograph scan implemented; regular protographs all non-converged
+Status: NBLDPC_V23_DE_NOT_REACHABLE — q1024 structured DE non-convergent across ensembles
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V23_IN_PROGRESS — protograph scan implemented; regular protogra
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V23 收尾（2026-08-16）
+- q=1024 structured rate0.9375 DE 在 plain/SC/regular-protograph/irregular 系综下均不收敛；
+  entropy 下限约 0.19–0.34，远高于 0.01 容差。
+- 结论：现有系综下 f≤1.3 结构化高 rate 协调不可达；
+  进一步需要完整 DE 优化（Müller 风格）或其他信道分解。
+- 证据：`nbldpc_v23_20260816/de_not_reachable_summary.json`。
 
 ## V23 Protograph 扫描（2026-08-16）
 - 新增 `nonbinary_v23_protograph.py` + CLI + 测试。

@@ -2289,3 +2289,15 @@ still non-converged.
 
 **Consequences**: no finite construction, no fresh qualification. Next candidate
 is a MET/protograph DE (V23) or acceptance of current not-ready state.
+
+### 2026-08-16: V23 DE not reachable with current ensembles
+
+**Decision**: q=1024, rate=0.9375 structured-channel DE does not converge with
+plain irregular, SC-LDPC, regular protograph, or simple irregular protograph
+ensembles (entropy floor ~0.19-0.34, tolerance 0.01). V23 status set to
+`DE_NOT_REACHABLE`. Further progress requires full DE optimization
+(Müller-style) or a different channel decomposition; no finite-code construction
+is started.
+
+**Consequences**: f<=1.3 structured high-rate reconciliation is not demonstrated
+with current tooling; record as scientific limitation. push still user-gated.

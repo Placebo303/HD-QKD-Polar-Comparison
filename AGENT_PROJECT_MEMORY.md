@@ -1,3 +1,9 @@
+## 2026-08-16 V23 DE not reachable conclusion
+
+- q1024 structured rate0.9375 DE non-convergent across plain/SC/regular-protograph/irregular ensembles.
+- entropy floor ~0.19-0.34; further needs full DE optimization or different channel decomposition.
+- Evidence: nbldpc_v23_20260816/de_not_reachable_summary.json. [repo-observed]
+
 ## 2026-08-16 V23 protograph scan implemented
 
 - 新增 nonbinary_v23_protograph.py + CLI + 测试。
