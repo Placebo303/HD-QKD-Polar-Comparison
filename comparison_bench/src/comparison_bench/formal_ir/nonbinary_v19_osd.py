@@ -12,7 +12,13 @@ import numpy as np
 
 from .nonbinary_field import GF2mField
 
-__all__ = ["gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates", "osd_decode_candidates_order2", "osd_decode_candidates_fast", "osd_decode_candidates_order2_fast", "osd_decode_candidates_order3_fast", "osd_decode_candidates_order4_fast", "osd_decode_candidates_fast_generic"]
+__all__ = [
+    "gf_rref", "solve_with_free", "osd_decode", "osd_decode_candidates",
+    "osd_decode_candidates_order2", "osd_decode_candidates_fast",
+    "osd_decode_candidates_order2_fast", "osd_decode_candidates_order3_fast",
+    "osd_decode_candidates_order4_fast", "osd_decode_candidates_fast_generic",
+    "osd_decode_candidates_mrb",
+]
 
 
 def _reliability(beliefs: np.ndarray, hard: Sequence[int]) -> dict[int, float]:
@@ -640,3 +646,110 @@ def osd_decode_candidates_fast_generic(*, field: GF2mField, matrix: Any, syndrom
         if len(candidates) >= max_candidates:
             return candidates
     return candidates
+
+
+def osd_decode_candidates_mrb(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
+                              beliefs: Any = None, e_hat: Sequence[int] | None = None,
+                              order: int = 1, top_info: int | None = None,
+                              top_symbols: int | None = None,
+                              max_candidates: int = 200000) -> list[list[int]]:
+    """Reliability-sorted (most-reliable-basis) OSD candidate enumeration.
+
+    Unlike the existing OSD helpers, this function first permutes the parity
+    columns by increasing reliability.  Gaussian elimination then tends to
+    select the least-reliable columns as pivots, leaving the most-reliable
+    columns as the free/information set.  This is the standard OSD ordering
+    and is expected to improve the chance of recovering Alice's codeword.
+
+    Returned candidates are in the original column order.
+    """
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    if int(order) < 0:
+        raise ValueError("order must be >=0")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    m, n = matrix.shape
+    if e_hat is not None:
+        hard = [int(x) for x in e_hat]
+    elif beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        hard = [int(np.argmax(beliefs[i])) for i in range(n)]
+    else:
+        hard = [0] * n
+    # Reliability in original coordinates.
+    if beliefs is not None:
+        beliefs = np.asarray(beliefs, dtype=np.float64)
+        rel = _reliability(beliefs, hard)
+        rel_list = [rel.get(i, 0.0) for i in range(n)]
+        # Least reliable first => they become pivot columns when possible.
+        perm = sorted(range(n), key=lambda i: rel_list[i])
+    else:
+        rel_list = [0.0] * n
+        perm = list(range(n))
+    M_perm = matrix[:, perm]
+    hard_perm = [hard[p] for p in perm]
+    rref, pivots = gf_rref(field, M_perm.tolist(), list(syndrome))
+    pivot_set = set(int(p) for p in pivots)
+    free_cols = [j for j in range(n) if j not in pivot_set]
+    if top_info is not None:
+        free_ordered = sorted(free_cols, key=lambda j: rel_list[perm[j]])[:int(top_info)]
+    else:
+        free_ordered = list(free_cols)
+    assign = {i: hard_perm[i] for i in free_cols}
+    base = solve_with_free(field, rref, pivots, assign, n)
+    if base is None:
+        return []
+
+    def to_orig(x_perm: Sequence[int]) -> list[int]:
+        x = [0] * n
+        for j, val in enumerate(x_perm):
+            x[perm[j]] = int(val)
+        return x
+
+    candidates = [base]
+    candidates_orig = [to_orig(base)]
+    if int(order) == 0:
+        return candidates_orig
+    pivot_to_row = {int(p): idx for idx, p in enumerate(pivots)}
+    coeff = {}
+    for p in pivots:
+        row_idx = pivot_to_row[int(p)]
+        coeff[int(p)] = {j: int(rref[row_idx][j]) for j in free_cols}
+    cands = {}
+    for i in free_ordered:
+        if top_symbols is None:
+            cands[i] = list(range(field.q))
+        elif beliefs is not None and beliefs.shape == (n, field.q):
+            orig_i = perm[i]
+            top = set(np.argsort(beliefs[orig_i])[::-1][:int(top_symbols)].tolist())
+            top.add(int(hard_perm[i]))
+            cands[i] = sorted(top)
+        else:
+            cands[i] = list(range(field.q))
+    import itertools
+    for combo in itertools.combinations(free_ordered, int(order)):
+        def rec(pos: int, cur: list[int], changed: bool) -> None:
+            nonlocal candidates, candidates_orig
+            if len(candidates) >= max_candidates:
+                return
+            if pos == len(combo):
+                if changed:
+                    candidates.append(list(cur))
+                    candidates_orig.append(to_orig(cur))
+                return
+            var = combo[pos]
+            old = int(hard_perm[var])
+            for sym in cands[var]:
+                cur2 = list(cur)
+                d = field.add(old, sym)
+                if d != 0:
+                    for p in pivots:
+                        f = coeff[int(p)].get(var, 0)
+                        if f != 0:
+                            cur2[p] = field.add(cur2[p], field.mul(f, d))
+                cur2[var] = sym
+                rec(pos + 1, cur2, changed or (sym != old))
+        rec(0, base, False)
+        if len(candidates) >= max_candidates:
+            return candidates_orig
+    return candidates_orig

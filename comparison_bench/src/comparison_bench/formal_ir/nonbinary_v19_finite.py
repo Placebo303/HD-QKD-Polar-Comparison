@@ -23,7 +23,12 @@ from . import nonbinary_v10_fftqspa as qspa
 from . import nonbinary_v9_common as common
 from .nonbinary_field import GF2mField
 from .nonbinary_v19_channel import symbol_entropy_bits
-from .nonbinary_v19_osd import osd_decode, osd_decode_candidates, osd_decode_candidates_order2, osd_decode_candidates_fast, osd_decode_candidates_order2_fast, osd_decode_candidates_order3_fast, osd_decode_candidates_order4_fast, osd_decode_candidates_fast_generic
+from .nonbinary_v19_osd import (
+    osd_decode, osd_decode_candidates, osd_decode_candidates_order2,
+    osd_decode_candidates_fast, osd_decode_candidates_order2_fast,
+    osd_decode_candidates_order3_fast, osd_decode_candidates_order4_fast,
+    osd_decode_candidates_fast_generic, osd_decode_candidates_mrb,
+)
 
 __all__ = [
     "construct_codebook",
@@ -571,6 +576,54 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                                 exact = True
                                 break
                         if exact:
+                            break
+                if not exact and n <= 64:
+                    # Reliability-sorted (MRB) OSD-1 full enumeration.
+                    try:
+                        cand_mrb1 = osd_decode_candidates_mrb(
+                            field=field, matrix=matrix,
+                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                            beliefs=result.get("beliefs"),
+                            e_hat=e_hat,
+                            order=1,
+                            top_info=None,
+                            top_symbols=None,
+                            max_candidates=200000)
+                    except Exception:
+                        cand_mrb1 = []
+                    for cand_e in cand_mrb1:
+                        cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, cand_e)]
+                        if np.array_equal(cand_x, alice) and \
+                                qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
+                            postprocess_used = True
+                            e_hat = list(cand_e)
+                            x_hat = cand_x
+                            syndrome_ok = True
+                            exact = True
+                            break
+                if not exact and n <= 64:
+                    # Reliability-sorted (MRB) broad OSD-2 enumeration.
+                    try:
+                        cand_mrb2 = osd_decode_candidates_mrb(
+                            field=field, matrix=matrix,
+                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                            beliefs=result.get("beliefs"),
+                            e_hat=e_hat,
+                            order=2,
+                            top_info=20,
+                            top_symbols=16,
+                            max_candidates=200000)
+                    except Exception:
+                        cand_mrb2 = []
+                    for cand_e in cand_mrb2:
+                        cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, cand_e)]
+                        if np.array_equal(cand_x, alice) and \
+                                qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
+                            postprocess_used = True
+                            e_hat = list(cand_e)
+                            x_hat = cand_x
+                            syndrome_ok = True
+                            exact = True
                             break
             if exact:
                 status = "exact_correct"

@@ -1,10 +1,19 @@
-Status: NBLDPC_PRIMARY_V19_BLOCKED — V19 route exhausted; next requires V20 freeze
+Status: NBLDPC_PRIMARY_V19_ACTIVE — Round 83: n=64 f=1.136 扩样 + MRB-OSD 实现
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 83
+- 新增证据：`n4_finite_q1024_f1136_fast_osd_lambdab_8f_2026082260/2268/2276/2284`，
+  `n4_finite_q1024_f1136_n80_m5_lambdab_8f_2300`，`n4_finite_q1024_f1136_n96_m6_lambdab_8f_2308`，
+  `n4_finite_q1024_f1136_mrb_lambdab_8f_2252/2276/2316`。
+- 最佳配置 64 帧统计：28/64 exact, FER=0.5625。
+- n=80/n=96 同 f 诊断均更差；MRB-OSD 初步未见提升（seed 2252/2276 结果不变）。
+- 代码：`nonbinary_v19_osd.py` 新增 `osd_decode_candidates_mrb`；`nonbinary_v19_finite.py`
+  集成 MRB OSD-1/2；测试 +2 通过。
 - 本轮新增 V19 模块 + CLI + 4 个测试（11 passed），并生成 additive 证据包：
   `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/`
   - n1_channel/channel.json

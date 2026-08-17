@@ -1,4 +1,4 @@
-Status: NBLDPC_PRIMARY_V19_BLOCKED — 当前诊断路线已穷尽；f≤1.3 q=1024 解码需 V20 新 change
+Status: NBLDPC_PRIMARY_V19_ACTIVE — Round 83: 扩展 n=64 f=1.136 统计并实现 MRB-OSD 诊断
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,16 @@ Status: NBLDPC_PRIMARY_V19_BLOCKED — 当前诊断路线已穷尽；f≤1.3 q=1
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 83 更新（2026-08-16）
+- 扩展最佳配置 n=64, m=4, lambda {2:0.6,3:0.4}, f≈1.136 到 64 帧：
+  28/64 exact_correct, FER=0.5625（比 32 帧的 15/32=0.53125 略高，但样本更大更诚实）。
+- 同 f 中间块长诊断：n=80,m=5 → 2/8 exact (FER=0.75)；n=96,m=6 → 1/8 exact (FER=0.875)，
+  均差于 n=64；n=64 仍是该 f 点最佳块长。
+- 实现可靠性排序信息集 OSD（MRB-OSD）：`osd_decode_candidates_mrb`，
+  新增 2 个测试；集成到 `nonbinary_v19_finite`（n<=64 自动追加 MRB OSD-1 full + MRB OSD-2 broad）。
+- MRB-OSD 初步对照：seed 2252 仍是 5/8，seed 2276 仍是 2/8，当前未见提升；
+  需在更多 hard seeds 上评估。
 本轮完成：
 - 新增 V19 模块（`nonbinary_v19_channel.py`, `nonbinary_v19_de_search.py`,
   `nonbinary_v19_finite.py`）、两个 CLI（`run_v19_nbldpc.py`, `run_v19_three_way_compare.py`）、

@@ -1,3 +1,15 @@
+## 2026-08-16 Round 83 — n=64 f=1.136 扩样 + MRB-OSD 诊断
+
+- 最佳配置 n=64,m=4,lambda {2:0.6,3:0.4},f≈1.136 扩到 64 帧：
+  **28/64 exact_correct, FER=0.5625**（32 帧时 15/32=0.53125；更大样本略差，诚实记录）。
+- 同 f 中间块长：n=80,m=5 -> 2/8 exact (FER=0.75)；n=96,m=6 -> 1/8 exact (FER=0.875)。
+  n=64 仍是该 f 点最佳。
+- 新增 MRB-OSD：`nonbinary_v19_osd.osd_decode_candidates_mrb`（按可靠性升序置换列，
+  使最不可靠列优先成为 pivot，信息集偏向最可靠列）；2 个新测试通过。
+- `nonbinary_v19_finite` 对 n<=64 自动追加 MRB OSD-1 full + MRB OSD-2 broad。
+- 初步对照：seed 2252 5/8、seed 2276 2/8，与旧 OSD 相同；MRB 尚未带来提升，
+  下一步在更多 hard seeds / 更高阶 MRB 上评估，或转向 V20 冻结。 [repo-observed]
+
 ## 2026-08-16 V19 NBLDPC primary route — ROUTE EXHAUSTED (blocker)
 
 - V19 diagnostics exhausted all current PEG/FFT-QSPA + bounded OSD attempts for
