@@ -1,3 +1,9 @@
+## 2026-08-16 V22 SC-LDPC DE gate smoke
+
+- 新增 `nonbinary_v22_sc_de_gate.py` + CLI + 测试（复用 V11 SC-MC-DE）。
+- q1024 p=0.20 smoke：S1/S3 × G1/G2/G3 全部 non-converged。
+- 证据：nbldpc_v22_20260816/sc_de_gate_q1024_p020_smoke/sc_de_gate.json。 [repo-observed]
+
 ## 2026-08-16 V22 q1024 DE gate smoke
 
 - q1024 rate0.9375, 3 valid 8-degree candidates: all non-converged/error, gate_passed=false.

@@ -1,0 +1,68 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "gate_passed": false,
+  "max_iter": 10,
+  "n_rows": 6,
+  "n_samples": 100,
+  "p": 0.2,
+  "q": 1024,
+  "rows": [
+    {
+      "candidate": "S1",
+      "converged": false,
+      "error_prob": null,
+      "final_entropy": null,
+      "geometry": "G1",
+      "iterations": 10,
+      "rate": 0.6870106892038108
+    },
+    {
+      "candidate": "S1",
+      "converged": false,
+      "error_prob": null,
+      "final_entropy": null,
+      "geometry": "G2",
+      "iterations": 10,
+      "rate": 0.6870106892038108
+    },
+    {
+      "candidate": "S1",
+      "converged": false,
+      "error_prob": null,
+      "final_entropy": null,
+      "geometry": "G3",
+      "iterations": 10,
+      "rate": 0.6870106892038108
+    },
+    {
+      "candidate": "S3",
+      "converged": false,
+      "error_prob": null,
+      "final_entropy": null,
+      "geometry": "G1",
+      "iterations": 10,
+      "rate": 0.5537001767622565
+    },
+    {
+      "candidate": "S3",
+      "converged": false,
+      "error_prob": null,
+      "final_entropy": null,
+      "geometry": "G2",
+      "iterations": 10,
+      "rate": 0.5537001767622565
+    },
+    {
+      "candidate": "S3",
+      "converged": false,
+      "error_prob": null,
+      "final_entropy": null,
+      "geometry": "G3",
+      "iterations": 10,
+      "rate": 0.5537001767622565
+    }
+  ],
+  "schema": "nbldpc_v22_sc_de_gate_v1",
+  "seed": 2026095001,
+  "wall_seconds": 15.891
+}
