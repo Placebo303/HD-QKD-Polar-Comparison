@@ -1,3 +1,9 @@
+## 2026-08-16 Round 96 — n80 扩样后平均未优于 n64
+
+- n80 seed2304: baseline 3/8 -> integrated 3/8（无增益）。
+- 4 seeds 汇总：baseline 12/32 -> integrated 14/32（FER 0.625 -> 0.5625），尚未优于 n64 0.515625。
+- 正收益 seeds 仍为 2301/2303。 [repo-observed]
+
 ## 2026-08-16 Round 95 — n80 top-K 多 seed 正收益
 
 - n80 seed2303: baseline 3/8 -> integrated 4/8。

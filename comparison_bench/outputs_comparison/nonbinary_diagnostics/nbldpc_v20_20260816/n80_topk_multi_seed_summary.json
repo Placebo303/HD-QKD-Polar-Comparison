@@ -9,7 +9,9 @@
   "seeds": {
     "2026082300": {"baseline_exact": 2, "integrated_exact": 2, "gain": 0},
     "2026082301": {"baseline_exact": 4, "integrated_exact": 5, "gain": 1},
-    "2026082303": {"baseline_exact": 3, "integrated_exact": 4, "gain": 1}
+    "2026082303": {"baseline_exact": 3, "integrated_exact": 4, "gain": 1},
+    "2026082304": {"baseline_exact": 3, "integrated_exact": 3, "gain": 0}
   },
-  "aggregate_positive_seeds_2301_2303": {"baseline_exact": 7, "integrated_exact": 9, "frames": 16, "baseline_fer": 0.5625, "integrated_fer": 0.4375}
+  "aggregate_4_seeds": {"baseline_exact": 12, "integrated_exact": 14, "frames": 32, "baseline_fer": 0.625, "integrated_fer": 0.5625},
+  "note": "n80 top-K improves 2301/2303 but not 2300/2304; aggregate 32f FER=0.5625, not yet better than n64 0.515625."
 }
