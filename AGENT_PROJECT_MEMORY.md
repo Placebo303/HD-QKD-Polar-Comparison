@@ -1,3 +1,9 @@
+## 2026-08-16 V22b high-degree DE implemented
+
+- 新增 nonbinary_v22b_mcde.py + de_gate + CLI + tests（临时提升 V14 DEGREE_MAX）。
+- q1024 r0.9375 degree_max=512 可运行，non-converged at iter10。
+- 证据：nbldpc_v22_20260816/v22b_de_gate_q1024_r09375_dmax512_smoke/de_gate.json。 [repo-observed]
+
 ## 2026-08-16 V22 task packet frozen
 
 - 方案：additive V22b structured MC-DE with DEGREE_MAX>=128，然后 SC-LDPC 结构化适配。

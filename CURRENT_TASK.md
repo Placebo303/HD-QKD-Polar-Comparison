@@ -1,4 +1,4 @@
-Status: NBLDPC_V22_PLANNED — V22 task packet frozen; need degree-cap-extended DE or MET
+Status: NBLDPC_V22_IN_PROGRESS — V22b high-degree DE implemented; q1024 r0.9375 runs
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,14 @@ Status: NBLDPC_V22_PLANNED — V22 task packet frozen; need degree-cap-extended 
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22b 实现（2026-08-16）
+- 新增 `nonbinary_v22b_mcde.py`（临时提升 V14 DEGREE_MAX）+ `nonbinary_v22b_de_gate.py` + CLI + 测试。
+- q=1024, rate=0.9375, degree_max=512, n_samples=100, max_iter=10：
+  - 可运行（不再触发 degree cap）；
+  - 3 候选均 non-converged。
+- 证据：`nbldpc_v22_20260816/v22b_de_gate_q1024_r09375_dmax512_smoke/de_gate.json`。
+- 下一步：增大 DE 预算/优化候选，或 SC-LDPC 结构化适配。
 
 ## V22 规划决定（2026-08-16）
 - V22 task packet 已冻结：
