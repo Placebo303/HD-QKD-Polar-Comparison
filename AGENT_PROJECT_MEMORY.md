@@ -1,3 +1,9 @@
+## 2026-08-16 V22 structured DE diagnostic
+
+- q1024 structured rate0.70: runs, non-converged.
+- rate0.9375: rho check degree >64 cap in V14 MC-DE.
+- Need MET/protograph or higher check-degree support to reach f<=1.3. [repo-observed]
+
 ## 2026-08-16 V22 SC-LDPC DE gate pass at p=0.05
 
 - q1024, p=0.05, max_iter=50: 6/6 SC-LDPC rows converged, gate_passed=true.

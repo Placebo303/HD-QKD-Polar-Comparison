@@ -1,4 +1,4 @@
-Status: NBLDPC_V22_IN_PROGRESS — SC-LDPC DE gate passes at q1024 p=0.05 iter50
+Status: NBLDPC_V22_IN_PROGRESS — structured r0.70 smoke non-converged; r0.9375 hits rho cap
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,14 @@ Status: NBLDPC_V22_IN_PROGRESS — SC-LDPC DE gate passes at q1024 p=0.05 iter50
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 进展 5（2026-08-16）
+- q=1024 结构化 DE gate 诊断：
+  - rate=0.70：可运行（penalty=0），3 候选 non-converged；
+  - rate=0.9375：因 concentrated rho 的 check degree >64，触发 V14 MC-DE cap，无法运行。
+- 说明：现有 V14 结构化 MC-DE 在高 rate（f≤1.3 对应）受 check-degree cap 限制；
+  SC-LDPC V10 winners 只能在低 rate 通过，尚不匹配目标 f。
+- 证据：`nbldpc_v22_20260816/de_gate_q1024_r070_structured_smoke/de_gate.json`。
 
 ## V22 进展 4（2026-08-16）
 - q=1024 SC-LDPC DE gate 扫描：

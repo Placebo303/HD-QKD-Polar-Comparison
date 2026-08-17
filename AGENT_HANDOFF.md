@@ -1,10 +1,15 @@
-Status: NBLDPC_V22_IN_PROGRESS — SC-LDPC DE gate passes at q1024 p=0.05 iter50
+Status: NBLDPC_V22_IN_PROGRESS — structured r0.70 smoke non-converged; r0.9375 rho cap
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 progress 5
+- q1024 structured DE r0.70: runs, non-converged.
+- r0.9375: rho degree >64 cap in V14 MC-DE.
+- Need MET/protograph or higher check-degree support to reach target f.
 
 ## V22 progress 4
 - q1024 p=0.05 max_iter=50: all 6 SC-LDPC rows converged, gate_passed=true.

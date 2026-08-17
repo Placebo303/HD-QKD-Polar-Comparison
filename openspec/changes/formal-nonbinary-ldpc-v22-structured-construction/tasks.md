@@ -13,7 +13,7 @@ Status: IN_PROGRESS — SC-LDPC DE gate passes at q1024 p=0.05 max_iter=50; high
 - [ ] I03: finite construction if DE passes
 
 ## T2 Execute
-- [x] E01: DE gate on V17 structured channel (q16+q1024 irregular smoke; q1024 SC-LDPC p=0.20/0.10/0.05 smoke; p=0.05 iter50 passes all 6 rows)
+- [x] E01: DE gate on V17 structured channel (q16+q1024 irregular smoke; q1024 SC-LDPC p=0.05 pass; q1024 structured r0.70 smoke non-converged; r0.9375 hits rho degree cap)
 - [ ] E02: finite Bob-only FER / f_total
 
 ## T3 Verify/Closeout
