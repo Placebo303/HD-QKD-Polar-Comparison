@@ -1,6 +1,6 @@
 # Proposal: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-> Status: APPROVED — user approved direct V20 planning/execution after V19 review (2026-08-16).
+> Status: CONCLUDED_PENDING_SCIENTIFIC_CORRECTION_AND_ARCHIVE — V20 oracle reclassification required; see archive_note.md and docs/nbldpc-v21-bob-only-plan-20260816.md.
 
 ## What
 Improve q=1024 Nonbinary LDPC finite-length decoding so that the already-reachable

@@ -17,3 +17,11 @@ Status: ARCHIVED (M5 complete, 2026-08-16)
   - `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n6_comparison_v6_q1024_v20_final/`
 - Tests: 33 passed.
 - Claim boundary: diagnostic_only.
+
+## Audit addendum (2026-08-16)
+- `31/64` reclassified as `oracle_aided_best_of_cascade_upper_bound` (not executable FER).
+- `40/96` reclassified as `top4_oracle_list_coverage` (not executable FER).
+- standalone bounded4 `30/64` = `unverified_bob_only_estimate`.
+- `v01_readonly_verify.json` = `counting_only_verifier` (not semantic acceptance, not strict replay).
+- Actual archive moves to `openspec/changes/archive/` after Phase 0 closeout per
+  `docs/nbldpc-v21-bob-only-plan-20260816.md`.

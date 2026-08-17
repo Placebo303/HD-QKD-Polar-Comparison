@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-Status: ARCHIVED — V20 M5 archived per subagent recommendation; best diagnostic n64+bounded4 FER=0.515625.
+Status: CONCLUDED_PENDING_SCIENTIFIC_CORRECTION_AND_ARCHIVE — 31/64 is oracle-aided upper bound; 40/96 is top-4 oracle coverage; V01 is counting-only.
 
 ## Current blocker
 V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3

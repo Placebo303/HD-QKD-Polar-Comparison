@@ -1,6 +1,6 @@
 # NBLDPC Focus Plan — 主攻 nonbinary LDPC，与已有 Polar / Binary LDPC 基线对比 (2026-08-16)
 
-Status: PLAN — this is the executable contract for the next DSH conversation
+Status: PLAN — superseded for the next phase by `docs/nbldpc-v21-bob-only-plan-20260816.md` (V20 oracle reclassification + V21 Bob-only validation). This file remains as historical N0–N6 contract.
 
 ## 0. 用户最新决策
 - **Binary Polar MLC：已实现**，只读作为对比基线。

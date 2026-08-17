@@ -2234,3 +2234,29 @@ D2 烟测 `raw_ser=0.254663`，远超 V13 D01 参考 0.0771，已触发漂移门
 **Evidence**: 合并包 `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_full_20260816/` + 8 个 chunk 包。
 
 **Consequences**: 仍不构成 fresh-confirmed / promotion / qualification；P1 `no_eligible_frames` 与 P2 V17 `mechanism_unverified` 均不变。push 待用户单独授权。
+
+### 2026-08-16: V20 scientific reclassification and V21 Bob-only plan
+
+**Decision**: 接受外部审查结论，V20 的 `31/64`、`40/96` 不得标为可执行 FER：
+- `31/64` = oracle-aided best-of cascade upper bound；
+- `40/96` = top-4 oracle list coverage；
+- standalone bounded4 `30/64` = unverified Bob-only estimate；
+- V01 = counting-only verifier。
+V20 状态改为 `CONCLUDED_PENDING_SCIENTIFIC_CORRECTION_AND_ARCHIVE`，语义修正后
+再归档。新建 V21 plan：`docs/nbldpc-v21-bob-only-plan-20260816.md`，只验证
+Bob-only 策略 S0/S1/S2，Alice 仅出现在最终指标阶段；停止门 FER≥0.45 则冻结
+短块 OSD/top-K 路线，转 V22 结构化构造。
+
+**Context**: V20 cascade 用 `np.array_equal(x_hat, alice)` 决定是否调用
+bounded4 以及从 top-K 中选谁；Bob 无法知道 syndrome-consistent 候选是否是
+exact mismatch，因此该策略不可执行。n64 最多只剩 5 bits 公开预算，n80 只剩
+7 bits，16/32-bit 验证标签会使 f 升到 1.50–2.05，top-K+public hash 不能直接
+立项。
+
+**Alternatives considered**:
+- 继续扩样 n80 top-K：拒绝，因 oracle coverage 与可执行 FER 混同；
+- 直接进入 fresh qualification：拒绝，必须先完成 Bob-only 重分类与验证；
+- 直接归档不修语义：拒绝，因会固化错误 FER 标签。
+
+**Consequences**: V20 保持 active 直到 Phase 0 addendum 完成并真正移动到
+archive；下一阶段执行 V21 Bob-only 验证；push 仍待用户单独授权。

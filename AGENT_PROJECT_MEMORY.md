@@ -1,3 +1,10 @@
+## 2026-08-16 V21 Bob-only plan frozen (post-review)
+
+- 新契约：`docs/nbldpc-v21-bob-only-plan-20260816.md`。
+- V20 addendum：31/64=oracle upper bound；40/96=top-4 oracle coverage；30/64=unverified Bob-only estimate；V01=counting-only。
+- V20 status: CONCLUDED_PENDING_SCIENTIFIC_CORRECTION_AND_ARCHIVE。
+- 下一步：Phase 0 收口 → V21 S0/S1/S2 Bob-only 验证。 [repo-observed]
+
 ## 2026-08-16 Round 108 — V20 M5 归档
 
 - 使用规划 subagent 评估：建议归档 V20 M5。

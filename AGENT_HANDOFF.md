@@ -1,10 +1,15 @@
-Status: NBLDPC_V20_ARCHIVED — Round 108: archived per subagent
+Status: NBLDPC_V21_PLANNED — V21 Bob-only plan frozen; V20 pending correction+archive
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V21 planning
+- Contract: `docs/nbldpc-v21-bob-only-plan-20260816.md`.
+- V20 addendum: oracle reclassification; status unified pending archive.
+- Next: Phase 0 closeout, then V21 S0/S1/S2 Bob-only verification.
 
 ## Round 108
 - Subagent recommendation: archive V20 M5.

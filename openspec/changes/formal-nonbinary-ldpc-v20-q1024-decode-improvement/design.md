@@ -1,7 +1,7 @@
 # Design: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
 ## Status
-APPROVED — user approved V20 planning/execution after V19 review.
+CONCLUDED_PENDING_SCIENTIFIC_CORRECTION_AND_ARCHIVE — oracle reclassification required.
 
 ## Problem
 - f≤1.3 leakage point is reachable: n=1024, m=73, R=0.929, f≈1.296.

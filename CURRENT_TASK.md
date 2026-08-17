@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_ARCHIVED — Round 108: 按 subagent 建议归档 V20 M5
+Status: NBLDPC_V21_PLANNED — V20 待科学修正归档；V21 Bob-only 计划已冻结待执行
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,16 @@ Status: NBLDPC_V20_ARCHIVED — Round 108: 按 subagent 建议归档 V20 M5
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V21 规划更新（2026-08-16）
+- 新增执行契约：`docs/nbldpc-v21-bob-only-plan-20260816.md`。
+- V20 审查结论已写入 audit addendum 与 decision-log：
+  - 31/64 → oracle upper bound；
+  - 40/96 → top-4 oracle coverage；
+  - standalone bounded4 30/64 → unverified Bob-only estimate；
+  - V01 → counting-only。
+- V20 status 统一为 `CONCLUDED_PENDING_SCIENTIFIC_CORRECTION_AND_ARCHIVE`。
+- 下一步执行 Phase 0 收口，然后启动 V21 实现/验证。
 
 ## Round 108 更新（2026-08-16）
 - 使用规划 subagent 评估：建议 **归档 V20 M5**，保留 n64+bounded4 31/64 (FER=0.515625) 为最佳诊断结果；

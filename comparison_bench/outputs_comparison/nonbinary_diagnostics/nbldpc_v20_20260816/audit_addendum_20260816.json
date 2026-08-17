@@ -1,0 +1,37 @@
+{
+  "schema": "nbldpc_v20_audit_addendum_v1",
+  "review_basis": "external scientific review of HEAD de743358",
+  "claim_boundary": "diagnostic_only",
+  "reclassifications": {
+    "n64_31_64": {
+      "old_label": "integrated FER",
+      "new_label": "oracle_aided_best_of_cascade_upper_bound",
+      "reason": "bounded4 is only invoked after np.array_equal(x_hat, alice) is false, and candidates are selected with Alice truth; Bob cannot replicate this policy."
+    },
+    "n80_40_96": {
+      "old_label": "integrated FER",
+      "new_label": "top4_oracle_list_coverage",
+      "reason": "top-4 candidates are selected by comparing each candidate with Alice; it measures list inclusion, not single-selected-candidate success."
+    },
+    "standalone_bounded4_30_64": {
+      "old_label": "summary note only",
+      "new_label": "unverified_bob_only_estimate",
+      "reason": "not independently packaged/verified; bounded_weight_ml_decode itself is Bob-only but the 30/64 number is only a summary statement."
+    },
+    "v01_readonly_verify": {
+      "old_label": "V01 verification",
+      "new_label": "counting_only_verifier",
+      "reason": "it re-counts 31/64 and checks file existence; it does not check selector executability and is not strict replay."
+    }
+  },
+  "hash_budget_gate": {
+    "n64_syndrome_bits": 40,
+    "n80_syndrome_bits": 50,
+    "n64_max_public_bits_at_f_1_3": 5,
+    "n80_max_public_bits_at_f_1_3": 7,
+    "16bit_tag_f_n64": 1.591,
+    "16bit_tag_f_n80": 1.5,
+    "conclusion": "top-K + public hash cannot be a next implementation task until leakage and collision gates are passed."
+  },
+  "next_plan": "docs/nbldpc-v21-bob-only-plan-20260816.md"
+}
