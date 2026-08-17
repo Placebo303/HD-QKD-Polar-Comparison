@@ -1,0 +1,9 @@
+frame_id,status,exact_correct,syndrome_ok,postprocess_used,iterations,decoder_status,runtime_s,syndrome_symbols,syndrome_bits
+0,exact_mismatch,False,True,True,3,converged_no_syndrome,0.703,4,40
+1,exact_correct,True,True,False,3,success,0.687,4,40
+2,exact_correct,True,True,False,3,success,0.688,4,40
+3,exact_correct,True,True,False,3,success,0.703,4,40
+4,exact_correct,True,True,False,3,success,0.688,4,40
+5,exact_mismatch,False,True,True,3,converged_no_syndrome,0.656,4,40
+6,exact_mismatch,False,True,True,17,converged_no_syndrome,3.328,4,40
+7,exact_mismatch,False,True,True,3,converged_no_syndrome,0.625,4,40

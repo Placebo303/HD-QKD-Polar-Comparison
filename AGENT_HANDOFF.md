@@ -1,10 +1,15 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 86: V20 approved; M5 bounded-ML FER 0.515625
+Status: NBLDPC_V20_IN_PROGRESS — Round 87: full 64-frame integrated 31/64, FER=0.515625
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 87
+- 完整跑完 8 个 seed 的 V20 bounded-ML 集成管线：**31/64 exact, FER=0.515625**。
+- 新增 N6 v5 对比表：`n6_comparison_v5_q1024_v20_bwml/`。
+- 下一步可继续压低 FER（如改进构造/更高阶 bounded-ML 扩展）或更新三路对比结论。
 
 ## Round 86
 - V20 已获用户批准，proposal/design/tasks 标记 APPROVED/IN PROGRESS。

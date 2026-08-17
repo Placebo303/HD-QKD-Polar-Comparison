@@ -1,3 +1,10 @@
+## 2026-08-16 Round 87 — V20 bounded-ML 64 帧完整验证：31/64 exact, FER=0.515625
+
+- 8 个 seed 全部用含 bounded-ML 的完整管线运行，确认 **31/64 exact_correct, FER=0.515625**。
+- 新增 N6 v5 对比表：
+  `n6_comparison_v5_q1024_v20_bwml/comparison_table.csv` + `comparison_summary.json`。
+- 当前 q=1024 f≈1.136 最佳 FER=0.515625（diagnostic_only）。 [repo-observed]
+
 ## 2026-08-16 Round 86 — V20 批准；M5 bounded-ML 将 64 帧 FER 降至 0.515625
 
 - 用户批准 V20 直接规划/执行；V20 status -> APPROVED/IN PROGRESS。

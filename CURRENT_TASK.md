@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 86: V20 已批准，M5 bounded-ML 使 64 帧 FER 降至 0.515625
+Status: NBLDPC_V20_IN_PROGRESS — Round 87: 64 帧完整集成验证 31/64，FER=0.515625
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,15 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 86: V20 已批准，M5 bounded-ML 使 6
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 87 更新（2026-08-16）
+- 完成 V20 bounded-ML 的 **64 帧完整集成验证**：
+  - 8 个 seed 全部用含 bounded-ML 的完整管线运行；
+  - 总计 **31/64 exact_correct, FER=0.515625**（较 V19 28/64 提升 3 帧）。
+- 新增 N6 对比表 v5：
+  `n6_comparison_v5_q1024_v20_bwml/comparison_table.csv` + `comparison_summary.json`，
+  加入 `nonbinary_ldpc_q1024_f1136_v19` 与 `..._v20_bwml` 两行。
+- 当前 q=1024 f≈1.136 最佳 FER=0.515625（仍为 diagnostic_only）。
 
 ## Round 86 更新（2026-08-16）—— V20 已批准并开始执行
 - 用户批准直接进行 V20 规划与执行；V20 proposal/design/tasks 状态改为 APPROVED/IN PROGRESS。
