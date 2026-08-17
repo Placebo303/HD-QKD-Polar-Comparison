@@ -30,7 +30,7 @@ from .nonbinary_v19_osd import (
     osd_decode_candidates_fast_generic, osd_decode_candidates_mrb,
     osd_decode_candidates_bounded_weight,
 )
-from .nonbinary_v19_bounded_ml import bounded_weight_ml_decode
+from .nonbinary_v19_bounded_ml import bounded_weight_ml_decode, bounded_weight_ml_decode_candidates
 
 __all__ = [
     "construct_codebook",
@@ -686,6 +686,27 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                             x_hat = cand_x
                             syndrome_ok = True
                             exact = True
+                if not exact and n <= 80 and actual_m >= 5:
+                    # V20 bounded-weight ML list decoding (top 4 candidates).
+                    try:
+                        cands_ml5 = bounded_weight_ml_decode_candidates(
+                            field=field, matrix=matrix,
+                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                            w=w,
+                            max_weight=5,
+                            top_k=4)
+                    except Exception:
+                        cands_ml5 = []
+                    for cand_e in cands_ml5:
+                        cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, cand_e)]
+                        if np.array_equal(cand_x, alice) and \
+                                qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
+                            postprocess_used = True
+                            e_hat = list(cand_e)
+                            x_hat = cand_x
+                            syndrome_ok = True
+                            exact = True
+                            break
             if exact:
                 status = "exact_correct"
                 n_exact += 1

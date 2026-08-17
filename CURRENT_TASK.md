@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 88: bounded-ML 扩展 max_weight=5；n80 单 ML 未提升，n64 保持 31/64
+Status: NBLDPC_V20_IN_PROGRESS — Round 89: top-K list decoding 已实现；n80 有恢复潜力
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 88: bounded-ML 扩展 max_weight=5；n8
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 89 更新（2026-08-16）
+- 实现 V20 top-K 列表解码：`bounded_weight_ml_decode_candidates`（max_weight=5, top_k=4）。
+- 直接测试 n=80,m=5 seed=2026082300 frame0：Alice 在 top4 候选内（列表第 1 位）。
+- 单帧完整管线验证 frame0 可 exact；完整 8 帧因 top-K 枚举较慢超时，需后续优化。
+- n64 bounded4 单 ML 仍保持 31/64, FER=0.515625。
+- 新增测试 candidates；全量 31 passed。
 
 ## Round 88 更新（2026-08-16）
 - 将 V20 bounded-weight ML 扩展支持 `max_weight=5`（n=80,m=5，同 f≈1.136），新增 numba k=5 枚举与测试。

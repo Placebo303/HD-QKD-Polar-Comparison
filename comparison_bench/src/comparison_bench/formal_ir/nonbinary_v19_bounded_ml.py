@@ -17,7 +17,7 @@ import numpy as np
 from .nonbinary_field import GF2mField
 from .nonbinary_v19_osd import osd_decode_candidates_bounded_weight
 
-__all__ = ["bounded_weight_ml_decode"]
+__all__ = ["bounded_weight_ml_decode", "bounded_weight_ml_decode_candidates"]
 
 
 def _log_score(e: Sequence[int], logw: np.ndarray) -> float:
@@ -214,6 +214,55 @@ try:
                                 found = True
         return best, found, best_score
 
+
+    @njit(cache=True)
+    def _bounded5_topk(H: np.ndarray, s: np.ndarray, logw: np.ndarray,
+                       exp: np.ndarray, log: np.ndarray, q: int, K: int):
+        n = H.shape[1]
+        top_scores = np.full(K, -1e100)
+        top_data = np.zeros((K, 10), dtype=np.int64)
+        base_log0 = logw[0] * (n - 5)
+        for i0 in range(n):
+            for i1 in range(i0 + 1, n):
+                for i2 in range(i1 + 1, n):
+                    for i3 in range(i2 + 1, n):
+                        for i4 in range(i3 + 1, n):
+                            A = np.empty((5, 5), dtype=np.int64)
+                            A[0,0]=H[0,i0]; A[0,1]=H[0,i1]; A[0,2]=H[0,i2]; A[0,3]=H[0,i3]; A[0,4]=H[0,i4]
+                            A[1,0]=H[1,i0]; A[1,1]=H[1,i1]; A[1,2]=H[1,i2]; A[1,3]=H[1,i3]; A[1,4]=H[1,i4]
+                            A[2,0]=H[2,i0]; A[2,1]=H[2,i1]; A[2,2]=H[2,i2]; A[2,3]=H[2,i3]; A[2,4]=H[2,i4]
+                            A[3,0]=H[3,i0]; A[3,1]=H[3,i1]; A[3,2]=H[3,i2]; A[3,3]=H[3,i3]; A[3,4]=H[3,i4]
+                            A[4,0]=H[4,i0]; A[4,1]=H[4,i1]; A[4,2]=H[4,i2]; A[4,3]=H[4,i3]; A[4,4]=H[4,i4]
+                            x, ok = _solve5(A, s, exp, log, q)
+                            if not ok:
+                                continue
+                            ok2 = True
+                            for r in range(5):
+                                acc = 0
+                                acc ^= _gf_mul(H[r,i0], x[0], exp, log, q)
+                                acc ^= _gf_mul(H[r,i1], x[1], exp, log, q)
+                                acc ^= _gf_mul(H[r,i2], x[2], exp, log, q)
+                                acc ^= _gf_mul(H[r,i3], x[3], exp, log, q)
+                                acc ^= _gf_mul(H[r,i4], x[4], exp, log, q)
+                                if acc != s[r]:
+                                    ok2 = False
+                                    break
+                            if not ok2:
+                                continue
+                            score = base_log0 + logw[x[0]] + logw[x[1]] + logw[x[2]] + logw[x[3]] + logw[x[4]]
+                            # Insert into top K if applicable.
+                            if score > top_scores[K - 1]:
+                                pos = K - 1
+                                while pos > 0 and score > top_scores[pos - 1]:
+                                    top_scores[pos] = top_scores[pos - 1]
+                                    for t in range(10):
+                                        top_data[pos, t] = top_data[pos - 1, t]
+                                    pos -= 1
+                                top_scores[pos] = score
+                                top_data[pos, 0]=i0; top_data[pos,1]=i1; top_data[pos,2]=i2; top_data[pos,3]=i3; top_data[pos,4]=i4
+                                top_data[pos,5]=x[0]; top_data[pos,6]=x[1]; top_data[pos,7]=x[2]; top_data[pos,8]=x[3]; top_data[pos,9]=x[4]
+        return top_scores, top_data
+
     _HAS_NUMBA = True
 except Exception:  # pragma: no cover - optional dependency guard
     _HAS_NUMBA = False
@@ -301,3 +350,76 @@ def bounded_weight_ml_decode(*, field: GF2mField, matrix: Any,
             best = e
             best_score = float(score5)
     return best
+
+
+def bounded_weight_ml_decode_candidates(*, field: GF2mField, matrix: Any,
+                                        syndrome: Sequence[int], w: Any,
+                                        max_weight: int = 5,
+                                        top_k: int = 4) -> list[list[int]]:
+    """Return up to ``top_k`` most likely bounded-weight error vectors.
+
+    This is the list-decoding variant of :func:`bounded_weight_ml_decode`.
+    It is intended for V20 diagnostic evaluation where a short public hash could
+    later select among the returned candidates.  Currently supports
+    ``max_weight=5`` / n<=80,m>=5.
+    """
+    if int(max_weight) != 5:
+        raise ValueError("bounded_weight_ml_decode_candidates currently supports max_weight=5 only")
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    n = matrix.shape[1]
+    m = matrix.shape[0]
+    if n > 80 or m < 5:
+        raise ValueError("max_weight=5 list decoding is intended for n<=80 and m>=5")
+    w = np.asarray(w, dtype=np.float64)
+    if w.shape != (field.q,):
+        raise ValueError("w must be a length-q vector")
+    if not np.all(np.isfinite(w)) or np.any(w < 0.0):
+        raise ValueError("w must be finite and non-negative")
+    if not np.isclose(float(w.sum()), 1.0, atol=1e-9):
+        w = w / float(w.sum())
+    logw = np.log(np.maximum(w, 1e-300))
+    syndrome = [int(x) for x in syndrome]
+    K = int(top_k)
+    if K < 1:
+        raise ValueError("top_k must be >=1")
+
+    # k<=3 candidates from the existing bounded-weight enumerator.
+    cands3 = osd_decode_candidates_bounded_weight(
+        field=field, matrix=matrix, syndrome=syndrome,
+        max_weight=3, max_candidates=2000000)
+    scored: list[tuple[float, list[int]]] = []
+    for e in cands3:
+        sc = _log_score(e, logw)
+        scored.append((sc, list(e)))
+    # k=5 top candidates from numba.
+    if _HAS_NUMBA:
+        exp = np.asarray(field.nonzero_cycle, dtype=np.int64)
+        log = np.full(field.q, -1, dtype=np.int64)
+        for idx, v in enumerate(exp):
+            log[v] = idx
+        top_scores, top_data = _bounded5_topk(
+            matrix, np.asarray(syndrome, dtype=np.int64), logw, exp, log,
+            field.q, K)
+        for r in range(K):
+            if top_scores[r] <= -1e99:
+                continue
+            e = [0] * n
+            e[int(top_data[r,0])] = int(top_data[r,5])
+            e[int(top_data[r,1])] = int(top_data[r,6])
+            e[int(top_data[r,2])] = int(top_data[r,7])
+            e[int(top_data[r,3])] = int(top_data[r,8])
+            e[int(top_data[r,4])] = int(top_data[r,9])
+            scored.append((float(top_scores[r]), e))
+    # Deduplicate by tuple and keep top K.
+    seen = set()
+    uniq: list[tuple[float, list[int]]] = []
+    for sc, e in scored:
+        t = tuple(e)
+        if t in seen:
+            continue
+        seen.add(t)
+        uniq.append((sc, e))
+    uniq.sort(key=lambda x: x[0], reverse=True)
+    return [e for _, e in uniq[:K]]

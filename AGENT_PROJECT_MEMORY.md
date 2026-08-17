@@ -1,3 +1,10 @@
+## 2026-08-16 Round 89 — top-K list decoding implemented; n80 potential
+
+- `bounded_weight_ml_decode_candidates`（max_weight=5, top_k=4）实现并测试。
+- n=80,m=5 seed=2026082300 frame0 直接验证 Alice 在 top4；单帧完整管线可 exact。
+- 完整 8 帧 top-K 集成因计算量超时；后续需优化 numba top-K 或降低 K/帧数。
+- n64 bounded4 单 ML 仍为 31/64, FER=0.515625。 [repo-observed]
+
 ## 2026-08-16 Round 88 — bounded-ML 扩展 max_weight=5；n80 单 ML 未提升
 
 - `nonbinary_v19_bounded_ml.py` 增加 numba k=5 枚举，支持 n=80,m=5,max_weight=5。
