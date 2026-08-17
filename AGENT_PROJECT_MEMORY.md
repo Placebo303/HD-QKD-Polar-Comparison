@@ -1,3 +1,8 @@
+## 2026-08-16 Round 105 — V20 M5 最终结论
+
+- 最终 N6 v6 表：n64+bounded4 主推 FER=0.515625；n80+bounded5 top-K 备选 FER=0.5833（12 seeds）。
+- V20 M5 CONCLUDED。 [repo-observed]
+
 ## 2026-08-16 Round 104 — n80 12 seeds 仍差于 n64
 
 - n80 seed2312: baseline 1/8 -> integrated 1/8（无增益）。

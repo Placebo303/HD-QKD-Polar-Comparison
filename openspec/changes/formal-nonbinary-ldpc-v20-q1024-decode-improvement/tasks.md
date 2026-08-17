@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-Status: APPROVED/IN PROGRESS — V20 M5 extended: n80 top-K list shows positive single-seed result (5/8 vs baseline 4/8).
+Status: APPROVED/M5_CONCLUDED — V20 M5 concluded: n64 bounded4 primary best FER=0.515625; n80 top-K alternative high-variance FER=0.5833 (12 seeds).
 
 ## Current blocker
 V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3
@@ -39,6 +39,7 @@ strictly stronger decoder/construction before execute.
 - [x] I23 (V20): n80 seed2310 top-K=4 integration 0/8 -> 0/8; 10-seed aggregate 35/80 FER=0.5625 (high variance)
 - [x] I24 (V20): n80 seed2311 top-K=4 integration 4/8 -> 4/8; 11-seed aggregate 39/88 FER=0.5568
 - [x] I25 (V20): n80 seed2312 top-K=4 integration 1/8 -> 1/8; 12-seed aggregate 40/96 FER=0.5833
+- [x] I26 (V20): final N6 v6 comparison table records n64 primary and n80 alternative
 
 ## T2 Execute
 - [x] E01: execute once on deterministic q=1024 synthetic frames (M5 bounded-ML post-decoder; 3 verified seeds)

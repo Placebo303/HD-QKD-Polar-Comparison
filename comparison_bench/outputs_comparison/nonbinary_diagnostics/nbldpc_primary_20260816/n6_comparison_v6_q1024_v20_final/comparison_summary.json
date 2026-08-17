@@ -1,0 +1,17 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "h_full_q1024": 0.549955,
+  "note": "Final V20 diagnostic comparison. n64 bounded4 remains primary best (31/64, FER=0.515625). n80 bounded5 top-K is alternative with high variance (40/96, FER=0.5833 across 12 seeds).",
+  "rows": [
+    {"route": "binary_polar_mlc", "status": "not_available"},
+    {"route": "binary_ldpc_mlc", "f": 4.169374888623591, "fer": 0.0, "status": "ok"},
+    {"route": "nonbinary_ldpc_q16", "f": 4.182592530188362, "fer": 0.25, "status": "has_decode_failed"},
+    {"route": "nonbinary_ldpc_q1024_r060_n128", "f": 7.244910368647389, "fer": 0.0, "status": "exact_correct_all"},
+    {"route": "nonbinary_ldpc_q1024_r084", "f": 2.9121698540641465, "fer": 0.5, "status": "has_decode_failed"},
+    {"route": "nonbinary_ldpc_q1024_r089", "f": 1.9887989247267341, "fer": 0.8125, "status": "has_decode_failed"},
+    {"route": "nonbinary_ldpc_q1024_f129_n1024", "f": 1.296270727723675, "fer": 1.0, "status": "has_decode_failed"},
+    {"route": "nonbinary_ldpc_q1024_f1136_n64_v19", "f": 1.1364565284152766, "fer": 0.5625, "status": "has_exact_mismatch"},
+    {"route": "nonbinary_ldpc_q1024_f1136_n64_v20_bwml", "f": 1.1364565284152766, "fer": 0.515625, "status": "has_exact_mismatch"},
+    {"route": "nonbinary_ldpc_q1024_f1136_n80_v20_topk", "f": 1.1364565284152766, "fer": 0.5833333333333334, "status": "has_exact_mismatch"}
+  ]
+}

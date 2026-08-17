@@ -1,10 +1,15 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 104: n80 12 seeds 40/96 FER=0.5833, still worse
+Status: NBLDPC_V20_M5_CONCLUDED — Round 105: n64 primary FER=0.515625; n80 alternative
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 105
+- Final N6 v6 table created.
+- Conclusion: n64+bounded4 primary (31/64, FER=0.515625); n80+bounded5 top-K alternative (40/96, FER=0.5833).
+- V20 M5 concluded.
 
 ## Round 104
 - n80 seed2312: baseline 1/8 -> integrated 1/8 (no gain).
