@@ -1,0 +1,5 @@
+frame_id,status,exact_correct,syndrome_ok,postprocess_used,iterations,decoder_status,runtime_s,syndrome_symbols,syndrome_bits
+0,exact_mismatch,False,True,True,3,converged_no_syndrome,0.859,5,50
+1,exact_mismatch,False,True,True,11,converged_no_syndrome,3.156,5,50
+2,exact_mismatch,False,True,True,17,converged_no_syndrome,4.891,5,50
+3,exact_mismatch,False,True,True,3,converged_no_syndrome,0.86,5,50

@@ -1,3 +1,9 @@
+## 2026-08-16 Round 104 — n80 12 seeds 仍差于 n64
+
+- n80 seed2312: baseline 1/8 -> integrated 1/8（无增益）。
+- 12 seeds 汇总：baseline 33/96 -> integrated 40/96（FER 0.6563 -> 0.5833），差于 n64 0.515625。
+- 建议停止 n80 扩样，回到 n64 主推或探索混合策略。 [repo-observed]
+
 ## 2026-08-16 Round 103 — n80 11 seeds 仍差于 n64
 
 - n80 seed2311: baseline 4/8 -> integrated 4/8（无增益）。
