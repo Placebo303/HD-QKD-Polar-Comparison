@@ -1,3 +1,9 @@
+## 2026-08-16 Round 103 — n80 11 seeds 仍差于 n64
+
+- n80 seed2311: baseline 4/8 -> integrated 4/8（无增益）。
+- 11 seeds 汇总：baseline 32/88 -> integrated 39/88（FER 0.6364 -> 0.5568），差于 n64 0.515625。
+- n80 top-K 有正收益但整体不稳定。 [repo-observed]
+
 ## 2026-08-16 Round 102 — n80 高方差回落
 
 - n80 seed2310: baseline 0/8 -> integrated 0/8。
