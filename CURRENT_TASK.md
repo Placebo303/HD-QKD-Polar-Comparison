@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 90: frame_offset 分块支持；n80 top-K 无净提升，n64 仍 31/64
+Status: NBLDPC_V20_IN_PROGRESS — Round 91: 附加 n64 lambda/rho 探针无提升；最佳仍 31/64
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,14 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 90: frame_offset 分块支持；n80 top
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 91 更新（2026-08-16）
+- 附加 n64 bounded4 探针：
+  - lambda {2:0.62,3:0.38} seed2204：5/8（与无 bounded4 相同）
+  - lambda {2:0.58,3:0.42} seed2220：4/8（与无 bounded4 相同）
+  - rho {35,39} seed2252：3/8（比默认 rho 的 5/8 差）
+- 结论：bounded4 在当前 lambda/rho 邻域没有进一步增益；n64 最佳仍 31/64, FER=0.515625。
+- V20 M5 已覆盖主要变体，下一步需转向其他机制或收尾。
 
 ## Round 90 更新（2026-08-16）
 - 新增 `frame_offset` 支持（API + CLI `--frame-offset`），用于分块跑长有限码实验。

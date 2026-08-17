@@ -1,10 +1,16 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 90: frame_offset added; n80 top-K no net gain
+Status: NBLDPC_V20_IN_PROGRESS — Round 91: extra n64 probes no gain; best 31/64
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 91
+- lambda062 seed2204 bounded4: 5/8（无提升）
+- lambda058 seed2220 bounded4: 4/8（无提升）
+- rho35_39 seed2252 bounded4: 3/8（更差）
+- 结论：V20 M5 邻域已基本穷尽；最佳仍 n64 31/64, FER=0.515625。
 
 ## Round 90
 - 新增 `frame_offset`，支持分块运行。

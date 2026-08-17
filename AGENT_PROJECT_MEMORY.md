@@ -1,3 +1,10 @@
+## 2026-08-16 Round 91 — 附加 n64 lambda/rho 探针无提升
+
+- lambda062 seed2204 bounded4: 5/8（无提升）
+- lambda058 seed2220 bounded4: 4/8（无提升）
+- rho35_39 seed2252 bounded4: 3/8（更差）
+- V20 M5 邻域基本穷尽；最佳仍 n64 31/64, FER=0.515625。 [repo-observed]
+
 ## 2026-08-16 Round 90 — frame_offset 分块支持；n80 top-K 无净提升
 
 - 新增 `frame_offset`（API + CLI），支持分块跑有限码实验。
