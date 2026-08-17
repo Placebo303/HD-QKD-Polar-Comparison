@@ -1,4 +1,4 @@
-Status: NBLDPC_V23_DE_NOT_REACHABLE — q1024 structured DE non-convergent across ensembles
+Status: NBLDPC_V19_TO_V23_CONCLUDED — consolidated review summary written; short-block not-ready, structured DE not-reachable
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,11 @@ Status: NBLDPC_V23_DE_NOT_REACHABLE — q1024 structured DE non-convergent acros
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## 最终汇总（2026-08-16）
+- 新增 `docs/nbldpc-v19-v23-review-summary-20260816.md`。
+- 汇总 V19→V23：oracle 重分类、Bob-only 停止门、结构化 DE not-reachable。
+- 42 测试通过；当前无新的可自动推进方向，除非用户提供新目标/方法。
 
 ## V23 收尾（2026-08-16）
 - q=1024 structured rate0.9375 DE 在 plain/SC/regular-protograph/irregular 系综下均不收敛；

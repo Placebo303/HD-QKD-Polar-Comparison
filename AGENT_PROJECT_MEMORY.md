@@ -1,3 +1,9 @@
+## 2026-08-16 V19→V23 final review summary
+
+- `docs/nbldpc-v19-v23-review-summary-20260816.md` written.
+- Short-block OSD/top-K: scientific_not_ready; structured DE target f: not reachable.
+- No new automatic direction without user input. [repo-observed]
+
 ## 2026-08-16 V23 DE not reachable conclusion
 
 - q1024 structured rate0.9375 DE non-convergent across plain/SC/regular-protograph/irregular ensembles.

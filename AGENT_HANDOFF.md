@@ -1,10 +1,14 @@
-Status: NBLDPC_V23_DE_NOT_REACHABLE — q1024 structured DE non-convergent across ensembles
+Status: NBLDPC_V19_TO_V23_CONCLUDED — review summary written; no new auto direction
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Final summary
+- Wrote docs/nbldpc-v19-v23-review-summary-20260816.md.
+- No new automatic direction unless user provides new target/method.
 
 ## V23 closeout
 - q1024 structured r0.9375 DE non-convergent across plain/SC/protograph/irregular.
