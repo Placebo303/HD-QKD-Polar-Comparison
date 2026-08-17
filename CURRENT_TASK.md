@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 101: n80 9 seeds integrated 35/72 FER=0.5139，略优于 n64
+Status: NBLDPC_V20_IN_PROGRESS — Round 102: n80 10 seeds 35/80 FER=0.5625，高方差回落
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,14 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 101: n80 9 seeds integrated 35/72 FER=0
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 102 更新（2026-08-16）
+- 新增 n80 seed=2026082310：baseline 0/8 -> integrated 0/8（无增益，潜在 0/8）。
+- 目前 10 个 n80 seeds 汇总：
+  - baseline 28/80 (FER=0.65)
+  - integrated 35/80 (FER=0.5625)
+- n80 高方差：9 seeds 时曾 0.5139，加入 2310 后回落至 0.5625，已差于 n64 0.515625。
+- 结论：n80 top-K 有正收益但不够稳定，尚不能作为确定更优配置。
 
 ## Round 101 更新（2026-08-16）
 - 新增 n80 seed=2026082309 top-K=4 集成：

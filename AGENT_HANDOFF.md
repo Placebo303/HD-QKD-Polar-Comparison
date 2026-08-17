@@ -1,10 +1,15 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 101: n80 9 seeds integrated 35/72 FER=0.5139, slightly better
+Status: NBLDPC_V20_IN_PROGRESS — Round 102: n80 10 seeds 35/80 FER=0.5625, high variance
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 102
+- n80 seed2310: baseline 0/8 -> integrated 0/8 (no gain).
+- 10-seed aggregate: 28/80 -> 35/80 (FER 0.65 -> 0.5625), worse than n64 0.515625.
+- n80 high variance; not yet reliably better.
 
 ## Round 101
 - n80 seed2309: baseline 3/8 -> integrated 4/8 (gain).

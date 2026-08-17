@@ -15,8 +15,9 @@
     "2026082306": {"baseline_exact": 4, "integrated_exact": 5, "gain": 1},
     "2026082307": {"baseline_exact": 4, "integrated_exact": 5, "gain": 1},
     "2026082308": {"baseline_exact": 2, "integrated_exact": 3, "gain": 1},
-    "2026082309": {"baseline_exact": 3, "integrated_exact": 4, "gain": 1}
+    "2026082309": {"baseline_exact": 3, "integrated_exact": 4, "gain": 1},
+    "2026082310": {"baseline_exact": 0, "integrated_exact": 0, "gain": 0}
   },
-  "aggregate_9_seeds": {"baseline_exact": 28, "integrated_exact": 35, "frames": 72, "baseline_fer": 0.6111111111111112, "integrated_fer": 0.5138888888888888},
-  "note": "n80 top-K improves 2301/2303/2305/2306/2307/2308/2309, no gain on 2300/2304; aggregate 72f FER=0.5139, now slightly better than n64 0.515625."
+  "aggregate_10_seeds": {"baseline_exact": 28, "integrated_exact": 35, "frames": 80, "baseline_fer": 0.65, "integrated_fer": 0.5625},
+  "note": "n80 top-K improves many seeds but high variance; aggregate 80f FER=0.5625, worse than n64 0.515625."
 }

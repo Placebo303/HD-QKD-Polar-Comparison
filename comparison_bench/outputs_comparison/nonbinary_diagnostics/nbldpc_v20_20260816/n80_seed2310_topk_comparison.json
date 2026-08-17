@@ -1,0 +1,17 @@
+{
+  "schema": "nbldpc_v20_n80_topk_comparison_v1",
+  "q": 1024,
+  "n": 80,
+  "m": 5,
+  "lambda_edge": {"2": 0.6, "3": 0.4},
+  "f_plain_qary": 1.1364565284152766,
+  "seed": 2026082310,
+  "claim_boundary": "diagnostic_only",
+  "baseline_without_bounded_ml": {"n_exact_correct": 0, "n_frames": 8, "fer": 1.0},
+  "integrated_bounded5_topk4": {"n_exact_correct": 0, "n_frames": 8, "fer": 1.0},
+  "recovered_frame_id": null,
+  "evidence": [
+    "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n4_finite_q1024_f1136_bwml5list4_n80_m5_lambdab_4f_2310_off0/finite_execute.json",
+    "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n4_finite_q1024_f1136_bwml5list4_n80_m5_lambdab_4f_2310_off4/finite_execute.json"
+  ]
+}
