@@ -1,3 +1,9 @@
+## 2026-08-16 Round 93 — V20 M5 收尾完成
+
+- V01 只读验证：8 个 bwml 输出合计 31/64 exact, FER=0.515625，无计数问题。
+- V20 tasks M5 COMPLETE；V01/C01/C02 完成。
+- 自动路线已到终点；进一步需新机制或用户方向。 [repo-observed]
+
 ## 2026-08-16 Round 92 — edge-label sweep 无提升
 
 - 新增 `edge_label_seed`（API + CLI）。

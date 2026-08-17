@@ -1,0 +1,10 @@
+{
+  "claim_boundary": "diagnostic_only",
+  "fer": 0.515625,
+  "issues": [],
+  "n6_v5_exists": true,
+  "schema": "nbldpc_v20_v01_readonly_verify_v1",
+  "total_exact_correct": 31,
+  "total_frames": 64,
+  "verified_seed_count": 8
+}

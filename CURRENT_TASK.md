@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 92: edge-label sweep 无提升；最佳仍 31/64
+Status: NBLDPC_V20_M5_COMPLETE — Round 93: M5 收尾完成；best FER=0.515625，等待新方向
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,12 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 92: edge-label sweep 无提升；最佳
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 93 更新（2026-08-16）—— V20 M5 收尾
+- 执行 V01 只读验证：8 个 bwml 输出共 **31/64 exact，FER=0.515625**，无计数问题；N6 v5 存在。
+- V20 tasks 标记 M5 COMPLETE，V01/C01/C02 完成。
+- 当前状态：V20 M5 已达到本路线能自动推进的终点；进一步降低 FER 需要新机制（如真正可用的盲协调/公开哈希选择、更强构造）或用户新方向。
+- 验证文件：`nbldpc_v20_20260816/v01_readonly_verify.json`。
 
 ## Round 92 更新（2026-08-16）
 - 新增 `edge_label_seed` 支持（API + CLI `--edge-label-seed`）。

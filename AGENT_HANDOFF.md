@@ -1,10 +1,15 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 92: edge-label sweep no gain; best 31/64
+Status: NBLDPC_V20_M5_COMPLETE — Round 93: V20 M5 closed; best FER=0.515625
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 93
+- V01 只读验证完成：31/64 exact, FER=0.515625, no issues.
+- V20 tasks M5 COMPLETE; C01/C02 done.
+- 下一步需要新机制或用户方向。
 
 ## Round 92
 - 新增 `edge_label_seed` 支持。

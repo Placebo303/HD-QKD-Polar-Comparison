@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-Status: APPROVED/IN PROGRESS — user approved V20 planning/execution; first execution focuses on M5 bounded-weight exhaustive decoding.
+Status: APPROVED/M5_COMPLETE — user approved V20; M5 bounded-ML completed with best FER=0.515625; further improvement needs new mechanism/user direction.
 
 ## Current blocker
 V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3
@@ -34,6 +34,6 @@ strictly stronger decoder/construction before execute.
 - [x] E02: record exact_correct / decode_failed / FER / f / runtime / status (31/64 exact, FER=0.515625)
 
 ## T3 Verify/Closeout
-- [ ] V01: read-only strict replay
-- [ ] C01: update CURRENT_TASK.md, AGENT_HANDOFF.md, AGENT_PROJECT_MEMORY.md
-- [ ] C02: local git commit only; no push
+- [x] V01: read-only verification of M5 integrated outputs (31/64, no issues)
+- [x] C01: update CURRENT_TASK.md, AGENT_HANDOFF.md, AGENT_PROJECT_MEMORY.md
+- [x] C02: local git commit only; no push
