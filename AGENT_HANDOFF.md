@@ -1,10 +1,15 @@
-Status: NBLDPC_V23_PROTOGRAPH — V23 draft; 2x32 protograph non-converged
+Status: NBLDPC_V23_IN_PROGRESS — protograph scan implemented; all non-converged
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V23 protograph scan
+- Added nonbinary_v23_protograph.py + CLI + tests.
+- Regular (2..8)x32..128 at r0.9375: all non-converged (entropy plateau ~0.2).
+- Next: irregular/optimized protograph or MET.
 
 ## V23 protograph DE
 - V23 OpenSpec draft created.

@@ -1,3 +1,9 @@
+## 2026-08-16 V23 protograph scan implemented
+
+- 新增 nonbinary_v23_protograph.py + CLI + 测试。
+- Regular protographs (2..8)x32..128 r0.9375 q1024 structured: all non-converged, entropy plateau ~0.2.
+- Evidence: nbldpc_v23_20260816/protograph_scan_r09375_smoke/scan.json. [repo-observed]
+
 ## 2026-08-16 V23 protograph DE smoke
 
 - V23 OpenSpec draft created.

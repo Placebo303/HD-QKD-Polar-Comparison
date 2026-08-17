@@ -1,4 +1,4 @@
-Status: NBLDPC_V23_PROTOGRAPH_DE — V23 draft; 2x32 protograph non-converged
+Status: NBLDPC_V23_IN_PROGRESS — protograph scan implemented; regular protographs all non-converged
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V23_PROTOGRAPH_DE — V23 draft; 2x32 protograph non-converged
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V23 Protograph 扫描（2026-08-16）
+- 新增 `nonbinary_v23_protograph.py` + CLI + 测试。
+- 扫描 regular protographs：(2,32),(3,48),(4,64),(6,96),(8,128) rate≈0.9375，q=1024 结构化 V22b：
+  - 全部 non-converged；final entropy 从 0.336 降到 ~0.20（var degree≥3 后平台）。
+- 证据：`nbldpc_v23_20260816/protograph_scan_r09375_smoke/scan.json`。
+- 下一步：不规则/优化的 protograph 或 MET。
 
 ## V23 Protograph DE 启动（2026-08-16）
 - 立项 `formal-nonbinary-ldpc-v23-met-protograph-de`（DRAFT）。
