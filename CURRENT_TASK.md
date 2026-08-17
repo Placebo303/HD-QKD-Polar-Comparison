@@ -1,4 +1,4 @@
-Status: NBLDPC_V22_DE_NOT_READY — structured target-rate DE frozen as scientific_not_ready
+Status: NBLDPC_V23_PROTOGRAPH_DE — V23 draft; 2x32 protograph non-converged
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V22_DE_NOT_READY — structured target-rate DE frozen as scientif
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V23 Protograph DE 启动（2026-08-16）
+- 立项 `formal-nonbinary-ldpc-v23-met-protograph-de`（DRAFT）。
+- 首个 protograph smoke：B=ones(2,32)，rate=0.9375，lambda={2:1}，rho={32:1}；
+  q=1024 结构化 V22b，n200/iter50/degree_max=512 → non-converged（final entropy≈0.336）。
+- 证据：`nbldpc_v22_20260816/v23_protograph_2x32_ones_smoke.json`。
+- 下一步：扫描小 protograph 网格；必要时加 MET。
 
 ## V22 收尾（2026-08-16）
 - V22 结构化 DE 在 q=1024, rate=0.9375 不收敛（含 n200/iter30/degree_max=512）。

@@ -1,10 +1,15 @@
-Status: NBLDPC_V22_DE_NOT_READY — target-rate DE frozen scientific_not_ready
+Status: NBLDPC_V23_PROTOGRAPH — V23 draft; 2x32 protograph non-converged
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V23 protograph DE
+- V23 OpenSpec draft created.
+- 2x32 all-ones protograph at r0.9375 q1024 structured: non-converged.
+- Next: small protograph grid scan / MET.
 
 ## V22 closeout
 - Structured target-rate DE non-converged; frozen scientific_not_ready.

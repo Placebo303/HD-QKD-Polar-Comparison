@@ -1,0 +1,17 @@
+{
+  "schema": "nbldpc_v23_protograph_de_smoke_v1",
+  "q": 1024,
+  "base_matrix": "ones(2,32)",
+  "rate": 0.9375,
+  "lambda_edge": {"2": 1.0},
+  "rho_edge": {"32": 1.0},
+  "channel": "V17 structured (build_real_w_q1024)",
+  "mcde": "V22b run_mcde_high_degree",
+  "n_samples": 200,
+  "max_iter": 50,
+  "degree_max": 512,
+  "converged": false,
+  "final_entropy_base_q": 0.3363709158811833,
+  "conclusion": "simple 2x32 regular protograph does not converge at target rate on structured channel",
+  "claim_boundary": "diagnostic_only"
+}
