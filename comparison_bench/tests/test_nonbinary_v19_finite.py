@@ -81,3 +81,16 @@ def test_execute_synthetic_frames_frame_offset():
     assert doc0["outcomes"][1]["frame_id"] == 1
     assert doc1["outcomes"][0]["frame_id"] == 0
     assert doc1["frame_offset"] == 1
+
+
+def test_execute_synthetic_frames_edge_label_seed():
+    q = 16
+    n = 64
+    m = 24
+    lam = {2: 0.5, 3: 0.5}
+    w = build_folded_w(q)
+    doc = fin.execute_synthetic_frames(
+        q=q, n=n, m=m, lambda_edge=lam, w=w,
+        n_frames=1, seed=2026085001, edge_label_seed=12345, max_iter=10)
+    assert doc["edge_label_seed"] == 12345
+    assert doc["schema"] == "nbldpc_v19_finite_execute_v1"

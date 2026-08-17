@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 91: 附加 n64 lambda/rho 探针无提升；最佳仍 31/64
+Status: NBLDPC_V20_IN_PROGRESS — Round 92: edge-label sweep 无提升；最佳仍 31/64
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 91: 附加 n64 lambda/rho 探针无提�
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 92 更新（2026-08-16）
+- 新增 `edge_label_seed` 支持（API + CLI `--edge-label-seed`）。
+- 固定 frame seed=2026082252、code seed=2026082252，edge-label-seed 1/2/3：
+  三个变体均为 **5/8 exact**，无提升。
+- 结论：仅换 edge label 不能改善 n64 bounded4 结果；M2 简单变体也无增益。
+- 新增 edge_label_seed 测试；全量 33 passed。
 
 ## Round 91 更新（2026-08-16）
 - 附加 n64 bounded4 探针：

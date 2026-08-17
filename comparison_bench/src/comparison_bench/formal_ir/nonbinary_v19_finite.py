@@ -320,6 +320,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                              osd_top_info: int = 4,
                              frame_seed: int | None = None,
                              frame_offset: int = 0,
+                             edge_label_seed: int | None = None,
                              out_dir: str | Path | None = None) -> dict:
     """Run deterministic synthetic frames through a constructed q-ary code.
 
@@ -340,7 +341,8 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
     if not np.isclose(float(w.sum()), 1.0, atol=1e-9):
         w = w / float(w.sum())
     code = construct_codebook(n=n, m=m, lambda_edge=lambda_edge, q=q, seed=seed,
-                              rho_edge=rho_edge)
+                              rho_edge=rho_edge,
+                              edge_label_seed=edge_label_seed)
     actual_m = int(code["m"])
     matrix = np.asarray(code["matrix"], dtype=np.int64)
     field = GF2mField.create(q)
@@ -751,6 +753,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
         "seed": int(seed),
         "frame_seed": int(frame_seed) if frame_seed is not None else None,
         "frame_offset": int(frame_offset),
+        "edge_label_seed": int(edge_label_seed) if edge_label_seed is not None else None,
         "n_frames": total,
         "n_exact_correct": n_exact,
         "n_exact_mismatch": n_mismatch,

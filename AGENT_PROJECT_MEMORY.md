@@ -1,3 +1,9 @@
+## 2026-08-16 Round 92 — edge-label sweep 无提升
+
+- 新增 `edge_label_seed`（API + CLI）。
+- 固定 frame 2252 的 edge-label 1/2/3 均为 5/8 exact，无提升。
+- 最佳仍 n64 31/64, FER=0.515625。 [repo-observed]
+
 ## 2026-08-16 Round 91 — 附加 n64 lambda/rho 探针无提升
 
 - lambda062 seed2204 bounded4: 5/8（无提升）
