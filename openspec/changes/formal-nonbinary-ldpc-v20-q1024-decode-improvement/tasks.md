@@ -29,6 +29,7 @@ strictly stronger decoder/construction before execute.
 - [x] I13 (V20): additional n64 bounded4 probes on lambda062/058 and rho35_39 show no improvement over current best
 - [x] I14 (V20): add edge_label_seed support; fixed-frame edge-label sweep els1/2/3 on seed2252 all 5/8 (no gain)
 - [x] I15 (V20): n80 seed2301 top-K=4 list integration improves 4/8 -> 5/8 (frame5 recovered)
+- [x] I16 (V20): n80 seed2303 top-K=4 list integration improves 3/8 -> 4/8 (frame1 recovered)
 
 ## T2 Execute
 - [x] E01: execute once on deterministic q=1024 synthetic frames (M5 bounded-ML post-decoder; 3 verified seeds)

@@ -1,0 +1,15 @@
+{
+  "schema": "nbldpc_v20_n80_topk_multi_seed_summary_v1",
+  "q": 1024,
+  "n": 80,
+  "m": 5,
+  "lambda_edge": {"2": 0.6, "3": 0.4},
+  "f_plain_qary": 1.1364565284152766,
+  "claim_boundary": "diagnostic_only",
+  "seeds": {
+    "2026082300": {"baseline_exact": 2, "integrated_exact": 2, "gain": 0},
+    "2026082301": {"baseline_exact": 4, "integrated_exact": 5, "gain": 1},
+    "2026082303": {"baseline_exact": 3, "integrated_exact": 4, "gain": 1}
+  },
+  "aggregate_positive_seeds_2301_2303": {"baseline_exact": 7, "integrated_exact": 9, "frames": 16, "baseline_fer": 0.5625, "integrated_fer": 0.4375}
+}

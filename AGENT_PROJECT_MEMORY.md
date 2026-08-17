@@ -1,3 +1,9 @@
+## 2026-08-16 Round 95 — n80 top-K 多 seed 正收益
+
+- n80 seed2303: baseline 3/8 -> integrated 4/8。
+- 正收益 seeds：2301、2303；合计 baseline 7/16 -> integrated 9/16（FER 0.5625 -> 0.4375）。
+- 2300 无增益；2302 潜在 2/8 待集成。 [repo-observed]
+
 ## 2026-08-16 Round 94 — n80 top-K 正结果
 
 - n=80,m=5 seed=2026082301：
