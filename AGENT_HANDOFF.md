@@ -1,10 +1,14 @@
-Status: NBLDPC_V20_M5_CONCLUDED — Round 105: n64 primary FER=0.515625; n80 alternative
+Status: NBLDPC_V20_M5_COMPLETE — Round 106: regression pass; awaiting M2/M3 or archive
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 106
+- Full regression: 33 passed.
+- V20 M5 COMPLETE; no automatic next step.
 
 ## Round 105
 - Final N6 v6 table created.

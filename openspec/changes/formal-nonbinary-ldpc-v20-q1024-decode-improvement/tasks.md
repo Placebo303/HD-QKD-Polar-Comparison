@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-Status: APPROVED/M5_CONCLUDED — V20 M5 concluded: n64 bounded4 primary best FER=0.515625; n80 top-K alternative high-variance FER=0.5833 (12 seeds).
+Status: APPROVED/M5_COMPLETE — V20 M5 complete: n64 bounded4 primary FER=0.515625; n80 top-K alternative high-variance. Awaiting user direction for M2/M3 or archive.
 
 ## Current blocker
 V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3
@@ -11,7 +11,7 @@ strictly stronger decoder/construction before execute.
 
 ## T0 Planning
 - [x] P0: freeze proposal/design/tasks and get main-thread/acceptance review (user approved)
-- [ ] P1: select M1/M2/M3/M4/M5 subset and pre-register budgets/seeds/stop rules
+- [x] P1: select M1/M2/M3/M4/M5 subset and pre-register budgets/seeds/stop rules (M5 selected and executed)
 
 ## T1 Engineering
 - [x] I01 (V19 prototype): implement bounded q-ary OSD order-0/1 using GF(q) field tables (`nonbinary_v19_osd.py`)

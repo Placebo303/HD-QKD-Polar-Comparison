@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_M5_CONCLUDED — Round 105: 最终结论 n64 主推 FER=0.515625，n80 备选高方差
+Status: NBLDPC_V20_M5_COMPLETE — Round 106: 最终回归通过，等待 M2/M3 或归档
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,11 @@ Status: NBLDPC_V20_M5_CONCLUDED — Round 105: 最终结论 n64 主推 FER=0.515
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 106 更新（2026-08-16）
+- 全量回归测试通过：**33 passed**。
+- V20 M5 标记 COMPLETE；P1 完成（M5 已选择并执行）。
+- 当前无自动下一步；继续需要用户选择 M2/M3 或接受归档。
 
 ## Round 105 更新（2026-08-16）—— V20 M5 最终结论
 - 生成最终 N6 v6 对比表：`n6_comparison_v6_q1024_v20_final/`。
