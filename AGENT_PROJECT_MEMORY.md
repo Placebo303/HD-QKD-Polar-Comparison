@@ -1,3 +1,9 @@
+## 2026-08-16 Round 99 — n80 top-K 成为新最佳（FER=0.5）
+
+- n80 seed2307: baseline 4/8 -> integrated 5/8。
+- 7 seeds 汇总：baseline 23/56 -> integrated 28/56（FER 0.5893 -> 0.5），**优于 n64 0.515625**。
+- 新最佳配置：n=80,m=5 + bounded5 top-K=4。 [repo-observed]
+
 ## 2026-08-16 Round 98 — n80 第 4 个正收益 seed，几乎追平 n64
 
 - n80 seed2306: baseline 4/8 -> integrated 5/8。
