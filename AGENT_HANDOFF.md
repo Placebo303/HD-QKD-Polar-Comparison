@@ -1,10 +1,14 @@
-Status: NBLDPC_V20_M5_COMPLETE — Round 106: regression pass; awaiting M2/M3 or archive
+Status: NBLDPC_V20_IN_PROGRESS — Round 107: M2 random-dense probe negative
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 107
+- Random dense H + bounded4 on seed2252: 3/8, worse than PEG+bounded4 5/8.
+- M2 simple variant no gain.
 
 ## Round 106
 - Full regression: 33 passed.

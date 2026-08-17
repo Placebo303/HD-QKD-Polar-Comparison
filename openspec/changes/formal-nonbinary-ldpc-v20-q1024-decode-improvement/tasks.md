@@ -40,6 +40,7 @@ strictly stronger decoder/construction before execute.
 - [x] I24 (V20): n80 seed2311 top-K=4 integration 4/8 -> 4/8; 11-seed aggregate 39/88 FER=0.5568
 - [x] I25 (V20): n80 seed2312 top-K=4 integration 1/8 -> 1/8; 12-seed aggregate 40/96 FER=0.5833
 - [x] I26 (V20): final N6 v6 comparison table records n64 primary and n80 alternative
+- [x] I27 (V20): M2 random dense parity-check probe on seed2252 gives 3/8, worse than PEG 5/8
 
 ## T2 Execute
 - [x] E01: execute once on deterministic q=1024 synthetic frames (M5 bounded-ML post-decoder; 3 verified seeds)

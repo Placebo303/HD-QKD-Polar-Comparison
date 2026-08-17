@@ -1,0 +1,16 @@
+{
+  "schema": "nbldpc_v20_m2_random_dense_probe_v1",
+  "q": 1024,
+  "n": 64,
+  "m": 4,
+  "seed": 2026082252,
+  "claim_boundary": "diagnostic_only",
+  "construction": "random dense parity-check matrix (rank 4) instead of PEG",
+  "result": {
+    "exact_correct": 3,
+    "n_frames": 8,
+    "fer": 0.625
+  },
+  "comparison": "PEG + bounded4 on same seed gives 5/8; random dense is worse.",
+  "conclusion": "Random dense construction does not improve over PEG for n64 bounded4."
+}

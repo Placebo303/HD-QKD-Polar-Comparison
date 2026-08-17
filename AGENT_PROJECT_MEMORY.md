@@ -1,3 +1,8 @@
+## 2026-08-16 Round 107 — M2 random dense 不优于 PEG
+
+- random dense H + bounded4 seed2252：3/8，差于 PEG+bounded4 5/8。
+- M2 简单变体无增益。 [repo-observed]
+
 ## 2026-08-16 Round 106 — V20 M5 完成，等待新方向
 
 - 全量回归 33 passed。

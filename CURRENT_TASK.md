@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_M5_COMPLETE — Round 106: 最终回归通过，等待 M2/M3 或归档
+Status: NBLDPC_V20_IN_PROGRESS — Round 107: M2 random-dense probe 3/8，差于 PEG
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,12 @@ Status: NBLDPC_V20_M5_COMPLETE — Round 106: 最终回归通过，等待 M2/M3 
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 107 更新（2026-08-16）
+- 尝试 V20 M2 随机 dense 校验矩阵构造（n=64,m=4, seed=2252）：
+  - random dense + bounded4：**3/8 exact**
+  - PEG + bounded4 同 seed：**5/8 exact**
+- 结论：随机 dense 构造不优于 PEG；M2 简单变体仍无增益。
 
 ## Round 106 更新（2026-08-16）
 - 全量回归测试通过：**33 passed**。
