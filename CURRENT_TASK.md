@@ -1,4 +1,4 @@
-Status: NBLDPC_PRIMARY_V19_EXHAUSTED — Round 84: V19 OSD/构造诊断穷尽，V20 已就绪待冻结审查
+Status: NBLDPC_PRIMARY_V19_BLOCKED — Round 85: V19 含 BP-retry 已穷尽，等待 V20 冻结审批
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,15 @@ Status: NBLDPC_PRIMARY_V19_EXHAUSTED — Round 84: V19 OSD/构造诊断穷尽，
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 85 更新（2026-08-16）
+- 新增 BP 随机先验扰动重试诊断（blind-reconciliation 风格预研）：
+  - hard frame 2055：beta=0.01/0.05/0.1/0.2 各 50 次重试均未恢复；
+    beta=0.5 因数值溢出/超时未完成。
+  - seed 2252 的 3 个 mismatch 帧：beta=0.05 各 20 次重试均未恢复。
+- 结论：BP 重试/随机扰动在当前码族上不能有效跳出 exact_mismatch；
+  V19 路线（PEG/FFT-QSPA/OSD/MRB/BP-retry）已穷尽。
+- 下一步唯一可自动推进的是 V20 冻结；否则需要用户提供新方向/新数据。
 
 ## Round 84 更新（2026-08-16）
 - 新增 `frame_seed` 分离支持（`nonbinary_v19_finite.execute_synthetic_frames` + CLI `--frame-seed`），

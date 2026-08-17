@@ -1,0 +1,23 @@
+{
+  "schema": "nbldpc_v19_bp_retry_diag_v1",
+  "q": 1024,
+  "n": 64,
+  "m": 4,
+  "lambda_edge": {"2": 0.6, "3": 0.4},
+  "f_plain_qary": 1.1364565284152766,
+  "claim_boundary": "diagnostic_only",
+  "results": {
+    "hard_frame_seed_2055": {
+      "beta_0.01_50_retries": "no_exact",
+      "beta_0.05_50_retries": "no_exact",
+      "beta_0.1_50_retries": "no_exact",
+      "beta_0.2_50_retries": "no_exact",
+      "beta_0.5_50_retries": "not_completed_numerical_overflow"
+    },
+    "seed_2252_mismatch_frames": {
+      "frame_ids": [0, 2, 7],
+      "beta_0.05_20_retries_per_frame": "no_exact"
+    }
+  },
+  "conclusion": "BP random-prior retries did not recover any tested exact_mismatch frame; V19 BP-retry route also exhausted."
+}

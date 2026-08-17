@@ -1,10 +1,16 @@
-Status: NBLDPC_PRIMARY_V19_EXHAUSTED — Round 84: V19 OSD/构造穷尽，V20 ready for freeze review
+Status: NBLDPC_PRIMARY_V19_BLOCKED — Round 85: V19 含 BP-retry 已穷尽，等待 V20 冻结审批
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 85
+- BP 随机先验扰动重试（blind-reconciliation 风格）：
+  - hard frame 2055：beta=0.01/0.05/0.1/0.2 各 50 次未恢复；beta=0.5 数值溢出未完成。
+  - seed 2252 mismatch 帧：beta=0.05 各 20 次未恢复。
+- 结论：V19 的 PEG/FFT-QSPA/OSD/MRB/BP-retry 路线已穷尽；V20 冻结是下一步。
 
 ## Round 84
 - `frame_seed` 分离支持已加入 CLI/API；测试通过。

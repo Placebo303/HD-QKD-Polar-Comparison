@@ -60,7 +60,8 @@ DRAFT — based on V19 primary-route evidence.
   ({35,39}, {33,41}, {30,44}) all failed on frame 2055.
 - Best honest 64-frame statistic: n=64,m=4,lambda {2:0.6,3:0.4},f=1.136,
   28/64 exact (FER=0.5625).
-- Conclusion: the V19 PEG/FFT-QSPA/OSD family is exhausted; V20 should not
+- BP random-prior retry probes on hard frame 2055 and seed 2252 mismatch frames also failed.
+- Conclusion: the V19 PEG/FFT-QSPA/OSD/BP-retry family is exhausted; V20 should not
   spend more effort on the same OSD variants unless paired with a fundamentally
   different construction/decoder.
 

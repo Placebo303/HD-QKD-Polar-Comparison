@@ -56,7 +56,9 @@ V19 diagnostics established:
   OSD-3 all-free/symbols 2) also did not find Alice's codeword.
 - Code-seed sweep on the same hard frame (code seeds 3001-3005, frame fixed 2055)
   all yielded `exact_mismatch`; rho variants {35,39}, {33,41}, {30,44} also failed.
-- Conclusion: the V19 PEG/FFT-QSPA + OSD family is exhausted at q=1024 f≤1.3;
+- BP random-prior retry probes (blind-reconciliation style) on hard frame 2055 and
+  seed 2252 mismatch frames also failed to recover Alice.
+- Conclusion: the V19 PEG/FFT-QSPA + OSD/BP-retry family is exhausted at q=1024 f≤1.3;
   V20 must select a strictly stronger code construction/decoder or a pre-registered
   different mechanism (e.g. blind reconciliation, SC/MET, better information-set
   decoding with larger n).

@@ -1,3 +1,13 @@
+## 2026-08-16 Round 85 — BP-retry 诊断未恢复，V19 全路线穷尽
+
+- 实现并运行 BP 随机先验扰动重试（blind-reconciliation 风格预研）：
+  - hard frame 2055：beta=0.01/0.05/0.1/0.2 各 50 次，均未恢复；
+    beta=0.5 因数值溢出/超时未完成。
+  - seed 2252 的 3 个 mismatch 帧：beta=0.05 各 20 次，均未恢复。
+- 至此 V19 已覆盖：PEG/FFT-QSPA、bounded/full OSD、MRB-OSD、rho 变体、
+  code-seed sweep、BP-retry，均未把 f≤1.3 的 FER 降到可用水平。
+- 下一步唯一可自动推进的是 V20 冻结；否则需用户提供新方向/新数据。 [repo-observed]
+
 ## 2026-08-16 Round 84 — V19 OSD/构造穷尽，V20 就绪待冻结
 
 - 新增 `frame_seed` 参数（API + CLI `--frame-seed`），可固定帧数据、更换 code seed。
