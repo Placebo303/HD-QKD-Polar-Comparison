@@ -183,3 +183,19 @@ def test_osd_decode_candidates_mrb_order2_small():
                                       order=2, top_info=2, top_symbols=4,
                                       max_candidates=100)
     assert x in cands
+
+
+def test_osd_decode_candidates_bounded_weight_small():
+    from comparison_bench.src.comparison_bench.formal_ir.nonbinary_v19_osd import osd_decode_candidates_bounded_weight
+    field = GF2mField.create(4)
+    H = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    x = [1, 2, 3]
+    s = []
+    for row in H:
+        acc = 0
+        for coeff, val in zip(row, x):
+            acc = field.add(acc, field.mul(coeff, val))
+        s.append(acc)
+    cands = osd_decode_candidates_bounded_weight(
+        field=field, matrix=H, syndrome=s, max_weight=3, max_candidates=100)
+    assert x in cands

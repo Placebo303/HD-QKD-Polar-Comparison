@@ -1,0 +1,205 @@
+"""V20 bounded-weight maximum-likelihood list decoder (diagnostic).
+
+For very short high-rate q-ary LDPC codes (n<=64, m small) this module
+implements a bounded-support ML decoder: it enumerates all error supports of
+size up to ``max_weight``, solves the GF(q) linear system for each support, and
+returns the syndrome-consistent error vector with the largest channel prior
+score.  It is independent of BP/OSD information-set ordering.
+
+The heavy k=4 enumeration is implemented with numba for speed.
+"""
+from __future__ import annotations
+
+from typing import Any, Sequence
+
+import numpy as np
+
+from .nonbinary_field import GF2mField
+from .nonbinary_v19_osd import osd_decode_candidates_bounded_weight
+
+__all__ = ["bounded_weight_ml_decode"]
+
+
+def _log_score(e: Sequence[int], logw: np.ndarray) -> float:
+    return float(np.sum(logw[np.asarray(e, dtype=np.int64)]))
+
+
+def _python_ml_up_to_3(*, field: GF2mField, matrix: Any, syndrome: Sequence[int],
+                       logw: np.ndarray, max_weight: int) -> list[int] | None:
+    """Exact ML search over supports of size 1..max_weight (max_weight<=3)."""
+    if int(max_weight) > 3:
+        raise ValueError("python ML path only supports max_weight<=3")
+    cands = osd_decode_candidates_bounded_weight(
+        field=field, matrix=matrix, syndrome=syndrome,
+        max_weight=int(max_weight), max_candidates=2000000)
+    if not cands:
+        return None
+    best = None
+    best_score = -1e100
+    for e in cands:
+        sc = _log_score(e, logw)
+        if sc > best_score:
+            best_score = sc
+            best = list(e)
+    return best
+
+
+# ---------------------------------------------------------------------------
+# Numba k=4 ML enumeration
+# ---------------------------------------------------------------------------
+try:
+    from numba import njit
+
+    @njit(cache=True)
+    def _gf_mul(a: int, b: int, exp: np.ndarray, log: np.ndarray, q: int) -> int:
+        if a == 0 or b == 0:
+            return 0
+        return exp[(log[a] + log[b]) % (q - 1)]
+
+    @njit(cache=True)
+    def _solve4(A: np.ndarray, s: np.ndarray, exp: np.ndarray,
+                log: np.ndarray, q: int):
+        M = np.empty((4, 5), dtype=np.int64)
+        for i in range(4):
+            for j in range(4):
+                M[i, j] = A[i, j]
+            M[i, 4] = s[i]
+        row = 0
+        for col in range(4):
+            piv = -1
+            for i in range(row, 4):
+                if M[i, col] != 0:
+                    piv = i
+                    break
+            if piv == -1:
+                return np.zeros(4, dtype=np.int64), False
+            if piv != row:
+                for j in range(5):
+                    tmp = M[row, j]
+                    M[row, j] = M[piv, j]
+                    M[piv, j] = tmp
+            v = M[row, col]
+            inv = exp[(-log[v]) % (q - 1)] if v != 0 else 0
+            for j in range(col, 5):
+                M[row, j] = _gf_mul(M[row, j], inv, exp, log, q)
+            for i in range(4):
+                if i != row and M[i, col] != 0:
+                    factor = M[i, col]
+                    for j in range(col, 5):
+                        M[i, j] ^= _gf_mul(factor, M[row, j], exp, log, q)
+            row += 1
+        x = np.zeros(4, dtype=np.int64)
+        for i in range(4):
+            x[i] = M[i, 4]
+        return x, True
+
+    @njit(cache=True)
+    def _bounded4_ml(H: np.ndarray, s: np.ndarray, logw: np.ndarray,
+                     exp: np.ndarray, log: np.ndarray, q: int):
+        n = H.shape[1]
+        best_score = -1e100
+        best = np.zeros(8, dtype=np.int64)
+        found = False
+        base_log0 = logw[0] * (n - 4)
+        for i in range(n):
+            for j in range(i + 1, n):
+                for k in range(j + 1, n):
+                    for l in range(k + 1, n):
+                        A = np.empty((4, 4), dtype=np.int64)
+                        A[0, 0] = H[0, i]; A[0, 1] = H[0, j]; A[0, 2] = H[0, k]; A[0, 3] = H[0, l]
+                        A[1, 0] = H[1, i]; A[1, 1] = H[1, j]; A[1, 2] = H[1, k]; A[1, 3] = H[1, l]
+                        A[2, 0] = H[2, i]; A[2, 1] = H[2, j]; A[2, 2] = H[2, k]; A[2, 3] = H[2, l]
+                        A[3, 0] = H[3, i]; A[3, 1] = H[3, j]; A[3, 2] = H[3, k]; A[3, 3] = H[3, l]
+                        x, ok = _solve4(A, s, exp, log, q)
+                        if not ok:
+                            continue
+                        ok2 = True
+                        for r in range(4):
+                            acc = 0
+                            acc ^= _gf_mul(H[r, i], x[0], exp, log, q)
+                            acc ^= _gf_mul(H[r, j], x[1], exp, log, q)
+                            acc ^= _gf_mul(H[r, k], x[2], exp, log, q)
+                            acc ^= _gf_mul(H[r, l], x[3], exp, log, q)
+                            if acc != s[r]:
+                                ok2 = False
+                                break
+                        if not ok2:
+                            continue
+                        score = base_log0 + logw[x[0]] + logw[x[1]] + logw[x[2]] + logw[x[3]]
+                        if score > best_score:
+                            best_score = score
+                            best[0] = i; best[1] = j; best[2] = k; best[3] = l
+                            best[4] = x[0]; best[5] = x[1]; best[6] = x[2]; best[7] = x[3]
+                            found = True
+        return best, found, best_score
+
+    _HAS_NUMBA = True
+except Exception:  # pragma: no cover - optional dependency guard
+    _HAS_NUMBA = False
+
+
+def bounded_weight_ml_decode(*, field: GF2mField, matrix: Any,
+                             syndrome: Sequence[int], w: Any,
+                             max_weight: int = 4) -> list[int] | None:
+    """Return the most likely bounded-weight error vector, or None.
+
+    ``w`` is the length-q channel prior (or per-symbol prior is not supported
+    here).  Only small ``max_weight`` (<=4) and n<=64 are intended.
+    """
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    if int(max_weight) < 1 or int(max_weight) > 4:
+        raise ValueError("max_weight must be in 1..4")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    n = matrix.shape[1]
+    if n > 64:
+        raise ValueError("bounded_weight_ml_decode is intended for n<=64")
+    w = np.asarray(w, dtype=np.float64)
+    if w.shape != (field.q,):
+        raise ValueError("w must be a length-q vector")
+    if not np.all(np.isfinite(w)) or np.any(w < 0.0):
+        raise ValueError("w must be finite and non-negative")
+    if not np.isclose(float(w.sum()), 1.0, atol=1e-9):
+        w = w / float(w.sum())
+    logw = np.log(np.maximum(w, 1e-300))
+    syndrome = [int(x) for x in syndrome]
+
+    best: list[int] | None = None
+    best_score = -1e100
+    if int(max_weight) <= 3:
+        cand = _python_ml_up_to_3(
+            field=field, matrix=matrix, syndrome=syndrome,
+            logw=logw, max_weight=int(max_weight))
+        if cand is not None:
+            sc = _log_score(cand, logw)
+            if sc > best_score:
+                best_score = sc
+                best = cand
+        return best
+
+    # max_weight == 4: combine python k<=3 and numba k=4
+    cand3 = _python_ml_up_to_3(
+        field=field, matrix=matrix, syndrome=syndrome,
+        logw=logw, max_weight=3)
+    if cand3 is not None:
+        sc = _log_score(cand3, logw)
+        if sc > best_score:
+            best_score = sc
+            best = cand3
+    if not _HAS_NUMBA:  # pragma: no cover - optional dependency guard
+        return best
+    exp = np.asarray(field.nonzero_cycle, dtype=np.int64)
+    log = np.full(field.q, -1, dtype=np.int64)
+    for idx, v in enumerate(exp):
+        log[v] = idx
+    best4, found4, score4 = _bounded4_ml(
+        matrix, np.asarray(syndrome, dtype=np.int64), logw, exp, log, field.q)
+    if found4 and score4 > best_score:
+        e = [0] * n
+        e[int(best4[0])] = int(best4[4])
+        e[int(best4[1])] = int(best4[5])
+        e[int(best4[2])] = int(best4[6])
+        e[int(best4[3])] = int(best4[7])
+        best = e
+        best_score = float(score4)
+    return best

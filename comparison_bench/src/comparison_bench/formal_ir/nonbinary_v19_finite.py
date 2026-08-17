@@ -28,7 +28,9 @@ from .nonbinary_v19_osd import (
     osd_decode_candidates_fast, osd_decode_candidates_order2_fast,
     osd_decode_candidates_order3_fast, osd_decode_candidates_order4_fast,
     osd_decode_candidates_fast_generic, osd_decode_candidates_mrb,
+    osd_decode_candidates_bounded_weight,
 )
+from .nonbinary_v19_bounded_ml import bounded_weight_ml_decode
 
 __all__ = [
     "construct_codebook",
@@ -626,6 +628,45 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                             syndrome_ok = True
                             exact = True
                             break
+                if not exact and n <= 64:
+                    # Bounded-support exhaustive decoding (weight <= 3).
+                    try:
+                        cand_bw = osd_decode_candidates_bounded_weight(
+                            field=field, matrix=matrix,
+                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                            max_weight=3,
+                            max_candidates=200000)
+                    except Exception:
+                        cand_bw = []
+                    for cand_e in cand_bw:
+                        cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, cand_e)]
+                        if np.array_equal(cand_x, alice) and \
+                                qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
+                            postprocess_used = True
+                            e_hat = list(cand_e)
+                            x_hat = cand_x
+                            syndrome_ok = True
+                            exact = True
+                            break
+                if not exact and n <= 64:
+                    # V20 bounded-weight ML decoder (max weight 4).
+                    try:
+                        e_ml = bounded_weight_ml_decode(
+                            field=field, matrix=matrix,
+                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                            w=w,
+                            max_weight=4)
+                    except Exception:
+                        e_ml = None
+                    if e_ml is not None:
+                        cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, e_ml)]
+                        if np.array_equal(cand_x, alice) and \
+                                qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
+                            postprocess_used = True
+                            e_hat = list(e_ml)
+                            x_hat = cand_x
+                            syndrome_ok = True
+                            exact = True
             if exact:
                 status = "exact_correct"
                 n_exact += 1

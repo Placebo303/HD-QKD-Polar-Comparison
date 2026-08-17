@@ -1,6 +1,6 @@
 # Proposal: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-> Status: DRAFT — prepared from V19 diagnostic evidence; production execution requires freeze review/acceptance. Round 83-84 evidence added; ready for freeze review.
+> Status: APPROVED — user approved direct V20 planning/execution after V19 review (2026-08-16).
 
 ## What
 Improve q=1024 Nonbinary LDPC finite-length decoding so that the already-reachable
@@ -27,6 +27,8 @@ V19 diagnostics established:
      retry with public hashes.
   4. Pre-registered channel-aware DE gate (per-symbol-class puncture) if a
      mechanism survives capacity analysis.
+  5. Bounded-support exhaustive list decoding (small n, small weight) as a
+     BP/OSD-independent decoder for q=1024 high-rate short blocks.
 - Execute-once deterministic synthetic q=1024 diagnostics; strict read-only
   verification.
 

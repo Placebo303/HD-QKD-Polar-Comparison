@@ -1,4 +1,4 @@
-Status: NBLDPC_PRIMARY_V19_BLOCKED — Round 85: V19 含 BP-retry 已穷尽，等待 V20 冻结审批
+Status: NBLDPC_V20_IN_PROGRESS — Round 86: V20 已批准，M5 bounded-ML 使 64 帧 FER 降至 0.515625
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,16 @@ Status: NBLDPC_PRIMARY_V19_BLOCKED — Round 85: V19 含 BP-retry 已穷尽，�
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 86 更新（2026-08-16）—— V20 已批准并开始执行
+- 用户批准直接进行 V20 规划与执行；V20 proposal/design/tasks 状态改为 APPROVED/IN PROGRESS。
+- 新增 V20 M5：`nonbinary_v19_bounded_ml.py`（bounded-weight ML 解码，max_weight=4，numba 加速）。
+- 集成到 `nonbinary_v19_finite`：在 V19 OSD 全失败后追加 bounded-ML post-decoder。
+- 结果（n=64, m=4, lambda {2:0.6,3:0.4}, f≈1.136, 64 帧）：
+  - 原 V19 最佳：28/64 exact, FER=0.5625
+  - 加 bounded-ML 后：**31/64 exact, FER=0.515625**
+  - 恢复的 mismatch 帧 seeds：2026082260、2026082144、2026082192（均已用完整管线验证）。
+- 新测试：`test_nonbinary_v19_bounded_ml.py`；全量测试 28 passed（待最终确认）。
 
 ## Round 85 更新（2026-08-16）
 - 新增 BP 随机先验扰动重试诊断（blind-reconciliation 风格预研）：

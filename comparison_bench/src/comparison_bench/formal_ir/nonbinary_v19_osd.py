@@ -18,6 +18,7 @@ __all__ = [
     "osd_decode_candidates_order2_fast", "osd_decode_candidates_order3_fast",
     "osd_decode_candidates_order4_fast", "osd_decode_candidates_fast_generic",
     "osd_decode_candidates_mrb",
+    "osd_decode_candidates_bounded_weight",
 ]
 
 
@@ -753,3 +754,48 @@ def osd_decode_candidates_mrb(*, field: GF2mField, matrix: Any, syndrome: Sequen
         if len(candidates) >= max_candidates:
             return candidates_orig
     return candidates_orig
+
+
+def osd_decode_candidates_bounded_weight(*, field: GF2mField, matrix: Any,
+                                         syndrome: Sequence[int],
+                                         max_weight: int = 3,
+                                         max_candidates: int = 200000) -> list[list[int]]:
+    """Bounded-support exhaustive syndrome decoding (diagnostic).
+
+    Enumerates every error support of size ``1..max_weight`` and, for each
+    support, solves the linear system over GF(q).  This is a true bounded-weight
+    list decoder and is independent of BP/OSD information-set ordering.  It is
+    only feasible for very small ``max_weight`` and small n (e.g. n<=64,
+    max_weight<=3 in interactive time; max_weight=4 is heavier).
+    """
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be GF2mField")
+    if int(max_weight) < 1:
+        raise ValueError("max_weight must be >=1")
+    matrix = np.asarray(matrix, dtype=np.int64)
+    m, n = matrix.shape
+    syndrome = [int(x) for x in syndrome]
+    import itertools
+    candidates: list[list[int]] = []
+    for k in range(1, int(max_weight) + 1):
+        for comb in itertools.combinations(range(n), k):
+            sub = [[int(matrix[r][i]) for i in comb] for r in range(m)]
+            try:
+                rref, piv = gf_rref(field, sub, syndrome)
+            except ValueError:
+                continue
+            if len(piv) != k:
+                continue
+            try:
+                sol = solve_with_free(field, rref, piv, {}, k)
+            except Exception:
+                continue
+            if sol is None:
+                continue
+            e = [0] * n
+            for idx, val in zip(comb, sol):
+                e[idx] = int(val)
+            candidates.append(e)
+            if len(candidates) >= max_candidates:
+                return candidates
+    return candidates

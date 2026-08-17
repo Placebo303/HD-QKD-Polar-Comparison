@@ -1,7 +1,7 @@
 # Design: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
 ## Status
-DRAFT — based on V19 primary-route evidence.
+APPROVED — user approved V20 planning/execution after V19 review.
 
 ## Problem
 - f≤1.3 leakage point is reachable: n=1024, m=73, R=0.929, f≈1.296.
@@ -32,6 +32,14 @@ DRAFT — based on V19 primary-route evidence.
 ### M4: Channel-aware DE gate
 - Use `build_high_plane_w` and per-symbol-class puncture models to pre-register
   a DE gate only if capacity analysis shows a path to f≤1.3.
+
+### M5: Bounded-support exhaustive list decoding
+- For very short blocks (n=64, m=4), enumerate error supports of size up to a
+  pre-registered small `max_weight` and solve the GF(q) linear system for each
+  support.
+- Already prototyped as `osd_decode_candidates_bounded_weight` with max_weight=3.
+- Next V20 step is to make max_weight=4 feasible/evaluated on deterministic
+  q=1024 frames; this is independent of BP/OSD information-set ordering.
 
 ## V19 full-OSD breakthrough
 - Full OSD-1 enumeration at q=1024, n=128, m=9, f≈1.279 recovered Alice on

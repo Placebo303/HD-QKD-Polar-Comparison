@@ -1,3 +1,14 @@
+## 2026-08-16 Round 86 — V20 批准；M5 bounded-ML 将 64 帧 FER 降至 0.515625
+
+- 用户批准 V20 直接规划/执行；V20 status -> APPROVED/IN PROGRESS。
+- 新增 `nonbinary_v19_bounded_ml.py`：bounded-weight ML 解码（max_weight=4，numba 加速），
+  作为 V19 OSD 全失败后的 post-decoder 集成到 `nonbinary_v19_finite`。
+- 在 n=64,m=4,lambda {2:0.6,3:0.4},f≈1.136 的 64 帧上：
+  - V19 基线 28/64 exact, FER=0.5625
+  - + bounded-ML **31/64 exact, FER=0.515625**
+  - 恢复 seeds 2026082260/2144/2192，均用完整管线验证。
+- 新增测试 `test_nonbinary_v19_bounded_ml.py`；V20 E01/E02 标记完成。 [repo-observed]
+
 ## 2026-08-16 Round 85 — BP-retry 诊断未恢复，V19 全路线穷尽
 
 - 实现并运行 BP 随机先验扰动重试（blind-reconciliation 风格预研）：

@@ -1,0 +1,28 @@
+{
+  "schema": "nbldpc_v20_bwml_summary_v1",
+  "q": 1024,
+  "n": 64,
+  "m": 4,
+  "lambda_edge": {"2": 0.6, "3": 0.4},
+  "f_plain_qary": 1.1364565284152766,
+  "claim_boundary": "diagnostic_only",
+  "method": "bounded_weight_ml_decode(max_weight=4) as post-decoder after V19 OSD family",
+  "baseline_64_frames": {
+    "n_exact_correct": 28,
+    "n_frames": 64,
+    "fer": 0.5625
+  },
+  "integrated_64_frames": {
+    "n_exact_correct": 31,
+    "n_frames": 64,
+    "fer": 0.515625
+  },
+  "recovered_mismatch_seeds": [2026082260, 2026082144, 2026082192],
+  "verified_integrated_seeds": [2026082260, 2026082144, 2026082192],
+  "notes": "Only mismatch frames are post-processed, so no already-exact frame is lost. Standalone bounded4-ML on all 64 frames found 30 exact (one exact frame would be lost if used alone), but as a post-decoder it adds 3 without loss.",
+  "evidence": [
+    "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n4_finite_q1024_f1136_bwml_lambdab_8f_2026082260/finite_execute.json",
+    "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n4_finite_q1024_f1136_bwml_lambdab_8f_2026082144/finite_execute.json",
+    "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_primary_20260816/n4_finite_q1024_f1136_bwml_lambdab_8f_2026082192/finite_execute.json"
+  ]
+}
