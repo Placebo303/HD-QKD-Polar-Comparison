@@ -34,6 +34,7 @@ strictly stronger decoder/construction before execute.
 - [x] I18 (V20): n80 seed2305 top-K=4 integration 3/8 -> 4/8; 5-seed aggregate 18/40 FER=0.55
 - [x] I19 (V20): n80 seed2306 top-K=4 integration 4/8 -> 5/8; 6-seed aggregate 23/48 FER=0.5208
 - [x] I20 (V20): n80 seed2307 top-K=4 integration 4/8 -> 5/8; 7-seed aggregate 28/56 FER=0.5 (new best)
+- [x] I21 (V20): n80 seed2308 top-K=4 integration 2/8 -> 3/8; 8-seed aggregate 31/64 FER=0.515625 (ties n64)
 
 ## T2 Execute
 - [x] E01: execute once on deterministic q=1024 synthetic frames (M5 bounded-ML post-decoder; 3 verified seeds)

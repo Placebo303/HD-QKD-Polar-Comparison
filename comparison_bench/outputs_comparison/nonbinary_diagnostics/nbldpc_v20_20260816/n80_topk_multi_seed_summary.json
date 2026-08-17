@@ -13,8 +13,9 @@
     "2026082304": {"baseline_exact": 3, "integrated_exact": 3, "gain": 0},
     "2026082305": {"baseline_exact": 3, "integrated_exact": 4, "gain": 1},
     "2026082306": {"baseline_exact": 4, "integrated_exact": 5, "gain": 1},
-    "2026082307": {"baseline_exact": 4, "integrated_exact": 5, "gain": 1}
+    "2026082307": {"baseline_exact": 4, "integrated_exact": 5, "gain": 1},
+    "2026082308": {"baseline_exact": 2, "integrated_exact": 3, "gain": 1}
   },
-  "aggregate_7_seeds": {"baseline_exact": 23, "integrated_exact": 28, "frames": 56, "baseline_fer": 0.5892857142857143, "integrated_fer": 0.5},
-  "note": "n80 top-K improves 2301/2303/2305/2306/2307, no gain on 2300/2304; aggregate 56f FER=0.5, now better than n64 0.515625."
+  "aggregate_8_seeds": {"baseline_exact": 25, "integrated_exact": 31, "frames": 64, "baseline_fer": 0.609375, "integrated_fer": 0.515625},
+  "note": "n80 top-K improves 2301/2303/2305/2306/2307/2308, no gain on 2300/2304; aggregate 64f FER=0.515625, ties n64 best."
 }

@@ -1,3 +1,9 @@
+## 2026-08-16 Round 100 — n80 8 seeds 与 n64 打平
+
+- n80 seed2308: baseline 2/8 -> integrated 3/8。
+- 8 seeds 汇总：baseline 25/64 -> integrated 31/64（FER 0.6094 -> 0.515625），与 n64 最佳打平。
+- 正收益：2301、2303、2305、2306、2307、2308；无增益：2300、2304。 [repo-observed]
+
 ## 2026-08-16 Round 99 — n80 top-K 成为新最佳（FER=0.5）
 
 - n80 seed2307: baseline 4/8 -> integrated 5/8。
