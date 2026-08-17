@@ -1,16 +1,17 @@
 # Tasks: formal-nonbinary-ldpc-v22-structured-construction
 
-Status: IN_PROGRESS — SC-LDPC DE gate passes at q1024 p=0.05 max_iter=50; higher p/non-structured still pending
+Status: PLANNED — V22 task packet frozen; need degree-cap-extended structured DE or MET
 
 ## T0 Planning
-- [ ] P0: freeze V22 task packet
-- [ ] P1: select ensemble and DE budget/seeds/stop rules
+- [x] P0: freeze V22 task packet (approach: additive V22b structured MC-DE with configurable DEGREE_MAX, then SC-LDPC structured adaptation)
+- [x] P1: select ensemble and DE budget/seeds/stop rules (V10 S1/S3 + V11 G1/G2/G3; q1024; n_samples=100; max_iter=50; p scan 0.05-0.20; stop on any pass at target f)
 
 ## T1 Engineering
 - [x] I01: implement V22 DE gate harness (structured MC-DE wrapper)
 - [x] I02: DE gate CLI + tests
 - [x] I02b: implement SC-LDPC DE gate via V11 (`nonbinary_v22_sc_de_gate.py` + CLI + test)
 - [ ] I03: finite construction if DE passes
+- [ ] I04: implement additive V22b structured MC-DE with configurable DEGREE_MAX (>=128) to unblock high-rate DE
 
 ## T2 Execute
 - [x] E01: DE gate on V17 structured channel (q16+q1024 irregular smoke; q1024 SC-LDPC p=0.05 pass; q1024 structured r0.70 smoke non-converged; r0.9375 hits rho degree cap)

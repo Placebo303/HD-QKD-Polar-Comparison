@@ -1,4 +1,4 @@
-Status: NBLDPC_V22_IN_PROGRESS — structured r0.70 smoke non-converged; r0.9375 hits rho cap
+Status: NBLDPC_V22_PLANNED — V22 task packet frozen; need degree-cap-extended DE or MET
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V22_IN_PROGRESS — structured r0.70 smoke non-converged; r0.9375
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V22 规划决定（2026-08-16）
+- V22 task packet 已冻结：
+  - 方案：新增 additive V22b structured MC-DE，支持 configurable DEGREE_MAX>=128；
+  - 之后再做 SC-LDPC 结构化信道适配。
+- 原因：V14/V11 MC-DE 的 check degree cap=64，导致 q=1024 rate≈0.9375 无法运行。
+- 下一步实现 I04。
 
 ## V22 进展 5（2026-08-16）
 - q=1024 结构化 DE gate 诊断：

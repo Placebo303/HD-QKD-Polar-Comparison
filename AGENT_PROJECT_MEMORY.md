@@ -1,3 +1,8 @@
+## 2026-08-16 V22 task packet frozen
+
+- 方案：additive V22b structured MC-DE with DEGREE_MAX>=128，然后 SC-LDPC 结构化适配。
+- 阻塞：V14/V11 check degree cap=64，q1024 rate0.9375 无法运行。 [repo-observed]
+
 ## 2026-08-16 V22 structured DE diagnostic
 
 - q1024 structured rate0.70: runs, non-converged.
