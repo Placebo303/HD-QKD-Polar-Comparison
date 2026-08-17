@@ -1,3 +1,9 @@
+## 2026-08-16 Round 108 — V20 M5 归档
+
+- 使用规划 subagent 评估：建议归档 V20 M5。
+- 已添加 archive_note.md；V20 tasks 状态 ARCHIVED。
+- 最佳诊断：n64+bounded4 31/64, FER=0.515625。 [repo-observed]
+
 ## 2026-08-16 Round 107 — M2 random dense 不优于 PEG
 
 - random dense H + bounded4 seed2252：3/8，差于 PEG+bounded4 5/8。

@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 107: M2 random-dense probe 3/8，差于 PEG
+Status: NBLDPC_V20_ARCHIVED — Round 108: 按 subagent 建议归档 V20 M5
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,12 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 107: M2 random-dense probe 3/8，差于
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 108 更新（2026-08-16）
+- 使用规划 subagent 评估：建议 **归档 V20 M5**，保留 n64+bounded4 31/64 (FER=0.515625) 为最佳诊断结果；
+  若继续，另开新 change 做 top-K + 公开哈希/盲协调。
+- 已按建议添加 `archive_note.md`，V20 tasks 状态改为 ARCHIVED。
+- 当前主线阶段性收尾完成。
 
 ## Round 107 更新（2026-08-16）
 - 尝试 V20 M2 随机 dense 校验矩阵构造（n=64,m=4, seed=2252）：

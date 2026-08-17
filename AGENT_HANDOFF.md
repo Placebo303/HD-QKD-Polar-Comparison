@@ -1,10 +1,15 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 107: M2 random-dense probe negative
+Status: NBLDPC_V20_ARCHIVED — Round 108: archived per subagent
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 108
+- Subagent recommendation: archive V20 M5.
+- Added archive_note.md; V20 status ARCHIVED.
+- Best diagnostic remains n64+bounded4 31/64 FER=0.515625.
 
 ## Round 107
 - Random dense H + bounded4 on seed2252: 3/8, worse than PEG+bounded4 5/8.

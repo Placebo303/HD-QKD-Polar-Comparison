@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-Status: APPROVED/M5_COMPLETE — V20 M5 complete: n64 bounded4 primary FER=0.515625; n80 top-K alternative high-variance. Awaiting user direction for M2/M3 or archive.
+Status: ARCHIVED — V20 M5 archived per subagent recommendation; best diagnostic n64+bounded4 FER=0.515625.
 
 ## Current blocker
 V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3
