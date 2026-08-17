@@ -201,10 +201,11 @@ fresh/promotion/qualification.
     `..._fast_osd12345_8f_2088/`, `..._fast_osd123456_8f_2096/`,
     `..._fast_osd12345678_8f_2104/`, `..._fast_osd1_10_8f_2112/`,
     `..._fast_osd1_10_8f_2120/`, `..._fast_osd1_10_8f_2128/`).
-  - n=64 fast OSD with lambda `{2:0.6,3:0.4}`: 10/24 exact, FER=0.5833
+  - n=64 fast OSD with lambda `{2:0.6,3:0.4}`: 15/32 exact, FER=0.53125
     (`..._fast_osd_lambdab_8f_2136/`, `..._fast_osd_lambdab_8f_2144/`,
-    `..._fast_osd_lambdab_8f_2192/`). At n=128 the same lambda gave 0/4
-    exact, FER=1.0 (`..._fast_osd_lambdab_4f_2200/`).
+    `..._fast_osd_lambdab_8f_2192/`, `..._fast_osd_lambdab_8f_2252/`).
+    At n=128 the same lambda gave 0/4 exact, FER=1.0
+    (`..._fast_osd_lambdab_4f_2200/`).
     Nearby `{2:0.55,3:0.45}` gave 1/8 exact, FER=0.875
     (`..._fast_osd_lambda055_8f_2176/`); `{2:0.65,3:0.35}` gave 3/8 exact,
     FER=0.625 (`..._fast_osd_lambda065_8f_2184/`); `{2:0.62,3:0.38}` gave
