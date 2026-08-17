@@ -2301,3 +2301,14 @@ is started.
 
 **Consequences**: f<=1.3 structured high-rate reconciliation is not demonstrated
 with current tooling; record as scientific limitation. push still user-gated.
+
+### 2026-08-16: NBLDPC structured high-rate route end (awaiting user direction)
+
+**Decision**: After V19→V23 diagnostics, q=1024 structured f<=1.3 is not
+reachable with current ensembles (DE non-convergent; Bob-only FER>=0.45 for
+short blocks). No further automatic step is justified without a user decision
+among: (a) full structured DE optimization, (b) adjusted target (higher f /
+smaller q / channel decomposition), (c) MET multi-edge implementation, or
+(d) accept current not-ready state and archive.
+
+**Consequences**: Objective stays active as a blocker; push remains user-gated.

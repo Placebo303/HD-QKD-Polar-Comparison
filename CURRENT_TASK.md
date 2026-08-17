@@ -1,4 +1,4 @@
-Status: NBLDPC_V19_TO_V23_CONCLUDED — consolidated review summary written; short-block not-ready, structured DE not-reachable
+Status: NBLDPC_ROUTE_BLOCKED — 结构化高 rate f≤1.3 现有工具不可达；等待用户选择新方向
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,11 @@ Status: NBLDPC_V19_TO_V23_CONCLUDED — consolidated review summary written; sho
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## 阻塞声明（2026-08-16）
+- 已写入 decision-log：本路线（q=1024 结构化 f≤1.3）在现有工具/系综下不可达；
+- 无新的可自动推进步骤；等待用户从 4 个选项中决策：
+  (a) 完整结构化 DE 优化；(b) 调整目标；(c) MET 多边；(d) 接受现状并归档。
 
 ## 最终汇总（2026-08-16）
 - 新增 `docs/nbldpc-v19-v23-review-summary-20260816.md`。

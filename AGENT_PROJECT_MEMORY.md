@@ -1,3 +1,8 @@
+## 2026-08-16 Route blocked awaiting user
+
+- q1024 structured f<=1.3 not reachable with current tooling.
+- Awaiting user choice: DE optimization / adjust target / MET / archive. [repo-observed]
+
 ## 2026-08-16 V19→V23 final review summary
 
 - `docs/nbldpc-v19-v23-review-summary-20260816.md` written.
