@@ -1,4 +1,4 @@
-Status: NBLDPC_V21_PLANNED — V20 待科学修正归档；V21 Bob-only 计划已冻结待执行
+Status: NBLDPC_V21_STOP_GATE — Bob-only 64 帧 FER S0=0.625, S1/S2=0.5625，触发停止门；V22 已草拟
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,16 @@ Status: NBLDPC_V21_PLANNED — V20 待科学修正归档；V21 Bob-only 计划�
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V21 执行结果（2026-08-16）
+- 实现 `nonbinary_v21_bob_only.py` + CLI + 测试（3 passed）。
+- 全新 64 帧 Bob-only 结果：
+  - S0 BP-only：24/64，FER=0.625
+  - S1 bounded4-only：28/64，FER=0.5625
+  - S2 BP-first-fallback-bounded4：28/64，FER=0.5625
+- 停止门触发（全部 ≥0.45）：冻结短块 OSD/top-K 分支为 `scientific_not_ready`。
+- V22 OpenSpec 草稿已创建：`formal-nonbinary-ldpc-v22-structured-construction`。
+- V20 已移入 `openspec/changes/archive/2026-08-16-formal-nonbinary-ldpc-v20-q1024-decode-improvement/`。
 
 ## V21 规划更新（2026-08-16）
 - 新增执行契约：`docs/nbldpc-v21-bob-only-plan-20260816.md`。

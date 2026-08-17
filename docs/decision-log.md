@@ -2260,3 +2260,18 @@ exact mismatch，因此该策略不可执行。n64 最多只剩 5 bits 公开预
 
 **Consequences**: V20 保持 active 直到 Phase 0 addendum 完成并真正移动到
 archive；下一阶段执行 V21 Bob-only 验证；push 仍待用户单独授权。
+
+### 2026-08-16: V21 Bob-only stop gate triggered
+
+**Decision**: V21 Bob-only validation on 64 fresh n=64 frames:
+- S0 BP-only: 24/64, FER=0.625
+- S1 bounded4-only: 28/64, FER=0.5625
+- S2 BP-first-fallback-bounded4: 28/64, FER=0.5625
+All >= 0.45, so stop gate is triggered. Short-block OSD/top-K branch is frozen as
+`scientific_not_ready`. V20 moved to archive; V22 structured construction drafted.
+
+**Context**: This confirms the external review: Bob-only executable FER is around
+0.56-0.63, not the oracle upper bounds 0.5156/0.5.
+
+**Consequences**: No fresh qualification; next phase is V22 DE-gated MET/protograph
+or SC-LDPC construction. push still user-gated.

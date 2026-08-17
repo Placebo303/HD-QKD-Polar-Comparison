@@ -1,3 +1,10 @@
+## 2026-08-16 V21 Bob-only stop gate triggered
+
+- 实现 V21 Bob-only 模块/CLI/测试；64 全新帧：
+  S0 FER=0.625, S1 FER=0.5625, S2 FER=0.5625。
+- 停止门触发：短块 OSD/top-K 分支冻结为 scientific_not_ready。
+- V20 已移入 archive；V22 OpenSpec 草稿创建。 [repo-observed]
+
 ## 2026-08-16 V21 Bob-only plan frozen (post-review)
 
 - 新契约：`docs/nbldpc-v21-bob-only-plan-20260816.md`。

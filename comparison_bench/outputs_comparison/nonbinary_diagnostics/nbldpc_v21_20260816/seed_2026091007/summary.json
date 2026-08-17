@@ -1,0 +1,23 @@
+{
+  "runs": [
+    {
+      "exact": 5,
+      "fer": 0.375,
+      "frames": 8,
+      "strategy": "S0"
+    },
+    {
+      "exact": 5,
+      "fer": 0.375,
+      "frames": 8,
+      "strategy": "S1"
+    },
+    {
+      "exact": 5,
+      "fer": 0.375,
+      "frames": 8,
+      "strategy": "S2"
+    }
+  ],
+  "schema": "nbldpc_v21_run_summary_v1"
+}

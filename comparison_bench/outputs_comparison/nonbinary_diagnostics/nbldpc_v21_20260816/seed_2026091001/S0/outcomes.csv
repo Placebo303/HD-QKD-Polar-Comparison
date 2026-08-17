@@ -1,0 +1,9 @@
+frame_id,status,exact_correct,syndrome_ok,decoder_status
+0,decode_failed,False,False,bob_only
+1,decode_failed,False,False,bob_only
+2,exact_correct,True,True,bob_only
+3,exact_correct,True,True,bob_only
+4,decode_failed,False,False,bob_only
+5,decode_failed,False,False,bob_only
+6,exact_correct,True,True,bob_only
+7,exact_correct,True,True,bob_only

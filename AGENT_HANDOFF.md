@@ -1,10 +1,16 @@
-Status: NBLDPC_V21_PLANNED — V21 Bob-only plan frozen; V20 pending correction+archive
+Status: NBLDPC_V21_STOP_GATE — Bob-only FER S0=0.625, S1/S2=0.5625; V22 drafted
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## V21 execution
+- Implemented V21 module/CLI/tests; 64 fresh frames Bob-only.
+- S0=24/64 (0.625), S1=28/64 (0.5625), S2=28/64 (0.5625).
+- Stop gate triggered; short-block branch frozen.
+- V22 OpenSpec draft created; V20 archived.
 
 ## V21 planning
 - Contract: `docs/nbldpc-v21-bob-only-plan-20260816.md`.
