@@ -1,3 +1,10 @@
+## 2026-08-16 Round 94 — n80 top-K 正结果
+
+- n=80,m=5 seed=2026082301：
+  - baseline（无 bounded-ML）：4/8 exact
+  - + bounded5 top-K=4：5/8 exact（frame5 恢复）
+- 首个 n80 正收益；需更多 seeds 统计平均。 [repo-observed]
+
 ## 2026-08-16 Round 93 — V20 M5 收尾完成
 
 - V01 只读验证：8 个 bwml 输出合计 31/64 exact, FER=0.515625，无计数问题。

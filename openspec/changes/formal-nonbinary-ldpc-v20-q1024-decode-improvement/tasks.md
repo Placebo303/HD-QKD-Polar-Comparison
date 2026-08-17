@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v20-q1024-decode-improvement
 
-Status: APPROVED/M5_COMPLETE — user approved V20; M5 bounded-ML completed with best FER=0.515625; further improvement needs new mechanism/user direction.
+Status: APPROVED/IN PROGRESS — V20 M5 extended: n80 top-K list shows positive single-seed result (5/8 vs baseline 4/8).
 
 ## Current blocker
 V19 showed all current PEG/FFT-QSPA + bounded OSD attempts at q=1024 f≤1.3
@@ -28,6 +28,7 @@ strictly stronger decoder/construction before execute.
 - [x] I12 (V20): add frame_offset support for chunked finite runs; n80 seed2300 chunked integration confirms 2/8 (no net gain over V19)
 - [x] I13 (V20): additional n64 bounded4 probes on lambda062/058 and rho35_39 show no improvement over current best
 - [x] I14 (V20): add edge_label_seed support; fixed-frame edge-label sweep els1/2/3 on seed2252 all 5/8 (no gain)
+- [x] I15 (V20): n80 seed2301 top-K=4 list integration improves 4/8 -> 5/8 (frame5 recovered)
 
 ## T2 Execute
 - [x] E01: execute once on deterministic q=1024 synthetic frames (M5 bounded-ML post-decoder; 3 verified seeds)

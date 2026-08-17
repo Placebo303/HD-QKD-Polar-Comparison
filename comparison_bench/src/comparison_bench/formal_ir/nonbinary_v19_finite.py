@@ -703,7 +703,7 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                             syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
                             w=w,
                             max_weight=5,
-                            top_k=2)
+                            top_k=4)
                     except Exception:
                         cands_ml5 = []
                     for cand_e in cands_ml5:

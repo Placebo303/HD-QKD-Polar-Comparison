@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_M5_COMPLETE — Round 93: M5 收尾完成；best FER=0.515625，等待新方向
+Status: NBLDPC_V20_IN_PROGRESS — Round 94: n80 top-K 正结果 5/8 vs baseline 4/8
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,14 @@ Status: NBLDPC_V20_M5_COMPLETE — Round 93: M5 收尾完成；best FER=0.515625
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 94 更新（2026-08-16）
+- n=80,m=5 seed=2026082301 top-K=4 列表集成：
+  - baseline（无 bounded-ML）：**4/8 exact**
+  - + bounded5 top-K 列表：**5/8 exact**（frame5 被恢复）
+- 这是 n80 首个正收益证据；FER 从 0.5 降到 0.375（单 seed）。
+- 说明 n80+m5+bounded5 top-K 有潜力超过 n64 当前 31/64。
+- 下一步需跑更多 n80 seeds 统计平均 FER。
 
 ## Round 93 更新（2026-08-16）—— V20 M5 收尾
 - 执行 V01 只读验证：8 个 bwml 输出共 **31/64 exact，FER=0.515625**，无计数问题；N6 v5 存在。
