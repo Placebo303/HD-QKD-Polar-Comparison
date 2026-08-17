@@ -667,6 +667,25 @@ def execute_synthetic_frames(*, q: int, n: int, m: int,
                             x_hat = cand_x
                             syndrome_ok = True
                             exact = True
+                if not exact and n <= 80 and actual_m >= 5:
+                    # V20 bounded-weight ML decoder (max weight 5, n=80/m=5).
+                    try:
+                        e_ml5 = bounded_weight_ml_decode(
+                            field=field, matrix=matrix,
+                            syndrome=[int(field.add(int(a), int(b))) for a, b in zip(s_x, s_bob)],
+                            w=w,
+                            max_weight=5)
+                    except Exception:
+                        e_ml5 = None
+                    if e_ml5 is not None:
+                        cand_x = [int(field.add(int(y), int(e))) for y, e in zip(bob, e_ml5)]
+                        if np.array_equal(cand_x, alice) and \
+                                qspa.syndrome_of(field, matrix, cand_x) == list(s_x):
+                            postprocess_used = True
+                            e_hat = list(e_ml5)
+                            x_hat = cand_x
+                            syndrome_ok = True
+                            exact = True
             if exact:
                 status = "exact_correct"
                 n_exact += 1

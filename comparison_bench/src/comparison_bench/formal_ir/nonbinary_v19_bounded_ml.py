@@ -133,6 +133,87 @@ try:
                             found = True
         return best, found, best_score
 
+
+    @njit(cache=True)
+    def _solve5(A: np.ndarray, s: np.ndarray, exp: np.ndarray,
+                log: np.ndarray, q: int):
+        M = np.empty((5, 6), dtype=np.int64)
+        for i in range(5):
+            for j in range(5):
+                M[i, j] = A[i, j]
+            M[i, 5] = s[i]
+        row = 0
+        for col in range(5):
+            piv = -1
+            for i in range(row, 5):
+                if M[i, col] != 0:
+                    piv = i
+                    break
+            if piv == -1:
+                return np.zeros(5, dtype=np.int64), False
+            if piv != row:
+                for j in range(6):
+                    tmp = M[row, j]
+                    M[row, j] = M[piv, j]
+                    M[piv, j] = tmp
+            v = M[row, col]
+            inv = exp[(-log[v]) % (q - 1)] if v != 0 else 0
+            for j in range(col, 6):
+                M[row, j] = _gf_mul(M[row, j], inv, exp, log, q)
+            for i in range(5):
+                if i != row and M[i, col] != 0:
+                    factor = M[i, col]
+                    for j in range(col, 6):
+                        M[i, j] ^= _gf_mul(factor, M[row, j], exp, log, q)
+            row += 1
+        x = np.zeros(5, dtype=np.int64)
+        for i in range(5):
+            x[i] = M[i, 5]
+        return x, True
+
+    @njit(cache=True)
+    def _bounded5_ml(H: np.ndarray, s: np.ndarray, logw: np.ndarray,
+                     exp: np.ndarray, log: np.ndarray, q: int):
+        n = H.shape[1]
+        best_score = -1e100
+        best = np.zeros(10, dtype=np.int64)
+        found = False
+        base_log0 = logw[0] * (n - 5)
+        for i0 in range(n):
+            for i1 in range(i0 + 1, n):
+                for i2 in range(i1 + 1, n):
+                    for i3 in range(i2 + 1, n):
+                        for i4 in range(i3 + 1, n):
+                            A = np.empty((5, 5), dtype=np.int64)
+                            A[0,0]=H[0,i0]; A[0,1]=H[0,i1]; A[0,2]=H[0,i2]; A[0,3]=H[0,i3]; A[0,4]=H[0,i4]
+                            A[1,0]=H[1,i0]; A[1,1]=H[1,i1]; A[1,2]=H[1,i2]; A[1,3]=H[1,i3]; A[1,4]=H[1,i4]
+                            A[2,0]=H[2,i0]; A[2,1]=H[2,i1]; A[2,2]=H[2,i2]; A[2,3]=H[2,i3]; A[2,4]=H[2,i4]
+                            A[3,0]=H[3,i0]; A[3,1]=H[3,i1]; A[3,2]=H[3,i2]; A[3,3]=H[3,i3]; A[3,4]=H[3,i4]
+                            A[4,0]=H[4,i0]; A[4,1]=H[4,i1]; A[4,2]=H[4,i2]; A[4,3]=H[4,i3]; A[4,4]=H[4,i4]
+                            x, ok = _solve5(A, s, exp, log, q)
+                            if not ok:
+                                continue
+                            ok2 = True
+                            for r in range(5):
+                                acc = 0
+                                acc ^= _gf_mul(H[r,i0], x[0], exp, log, q)
+                                acc ^= _gf_mul(H[r,i1], x[1], exp, log, q)
+                                acc ^= _gf_mul(H[r,i2], x[2], exp, log, q)
+                                acc ^= _gf_mul(H[r,i3], x[3], exp, log, q)
+                                acc ^= _gf_mul(H[r,i4], x[4], exp, log, q)
+                                if acc != s[r]:
+                                    ok2 = False
+                                    break
+                            if not ok2:
+                                continue
+                            score = base_log0 + logw[x[0]] + logw[x[1]] + logw[x[2]] + logw[x[3]] + logw[x[4]]
+                            if score > best_score:
+                                best_score = score
+                                best[0]=i0; best[1]=i1; best[2]=i2; best[3]=i3; best[4]=i4
+                                best[5]=x[0]; best[6]=x[1]; best[7]=x[2]; best[8]=x[3]; best[9]=x[4]
+                                found = True
+        return best, found, best_score
+
     _HAS_NUMBA = True
 except Exception:  # pragma: no cover - optional dependency guard
     _HAS_NUMBA = False
@@ -144,16 +225,20 @@ def bounded_weight_ml_decode(*, field: GF2mField, matrix: Any,
     """Return the most likely bounded-weight error vector, or None.
 
     ``w`` is the length-q channel prior (or per-symbol prior is not supported
-    here).  Only small ``max_weight`` (<=4) and n<=64 are intended.
+    here).  Only small ``max_weight`` (<=4 for n<=64; max_weight=5 for n<=80)
+    is intended.
     """
     if not isinstance(field, GF2mField):
         raise ValueError("field must be GF2mField")
-    if int(max_weight) < 1 or int(max_weight) > 4:
-        raise ValueError("max_weight must be in 1..4")
+    if int(max_weight) < 1 or int(max_weight) > 5:
+        raise ValueError("max_weight must be in 1..5")
     matrix = np.asarray(matrix, dtype=np.int64)
     n = matrix.shape[1]
-    if n > 64:
-        raise ValueError("bounded_weight_ml_decode is intended for n<=64")
+    m = matrix.shape[0]
+    if int(max_weight) <= 4 and n > 64:
+        raise ValueError("bounded_weight_ml_decode max_weight<=4 is intended for n<=64")
+    if int(max_weight) == 5 and (n > 80 or m < 5):
+        raise ValueError("bounded_weight_ml_decode max_weight=5 is intended for n<=80 and m>=5")
     w = np.asarray(w, dtype=np.float64)
     if w.shape != (field.q,):
         raise ValueError("w must be a length-q vector")
@@ -177,7 +262,7 @@ def bounded_weight_ml_decode(*, field: GF2mField, matrix: Any,
                 best = cand
         return best
 
-    # max_weight == 4: combine python k<=3 and numba k=4
+    # Combine python k<=3 with the numba k=4 or k=5 search.
     cand3 = _python_ml_up_to_3(
         field=field, matrix=matrix, syndrome=syndrome,
         logw=logw, max_weight=3)
@@ -192,14 +277,27 @@ def bounded_weight_ml_decode(*, field: GF2mField, matrix: Any,
     log = np.full(field.q, -1, dtype=np.int64)
     for idx, v in enumerate(exp):
         log[v] = idx
-    best4, found4, score4 = _bounded4_ml(
-        matrix, np.asarray(syndrome, dtype=np.int64), logw, exp, log, field.q)
-    if found4 and score4 > best_score:
-        e = [0] * n
-        e[int(best4[0])] = int(best4[4])
-        e[int(best4[1])] = int(best4[5])
-        e[int(best4[2])] = int(best4[6])
-        e[int(best4[3])] = int(best4[7])
-        best = e
-        best_score = float(score4)
+    if int(max_weight) == 4:
+        best4, found4, score4 = _bounded4_ml(
+            matrix, np.asarray(syndrome, dtype=np.int64), logw, exp, log, field.q)
+        if found4 and score4 > best_score:
+            e = [0] * n
+            e[int(best4[0])] = int(best4[4])
+            e[int(best4[1])] = int(best4[5])
+            e[int(best4[2])] = int(best4[6])
+            e[int(best4[3])] = int(best4[7])
+            best = e
+            best_score = float(score4)
+    else:  # max_weight == 5
+        best5, found5, score5 = _bounded5_ml(
+            matrix, np.asarray(syndrome, dtype=np.int64), logw, exp, log, field.q)
+        if found5 and score5 > best_score:
+            e = [0] * n
+            e[int(best5[0])] = int(best5[5])
+            e[int(best5[1])] = int(best5[6])
+            e[int(best5[2])] = int(best5[7])
+            e[int(best5[3])] = int(best5[8])
+            e[int(best5[4])] = int(best5[9])
+            best = e
+            best_score = float(score5)
     return best

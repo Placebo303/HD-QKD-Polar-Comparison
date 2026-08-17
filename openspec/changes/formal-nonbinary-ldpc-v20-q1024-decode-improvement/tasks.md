@@ -23,6 +23,7 @@ strictly stronger decoder/construction before execute.
 - [x] I07 (V19 prototype): implement reliability-sorted MRB-OSD `osd_decode_candidates_mrb` and integrate MRB OSD-1/2
 - [x] I08 (V20 prototype): implement `osd_decode_candidates_bounded_weight` (max_weight<=3) and integrate into finite pipeline
 - [x] I09 (V20): optimize/evaluate bounded-weight max_weight=4 on deterministic q=1024 frames (numba ML; integrated as post-decoder)
+- [x] I10 (V20): extend bounded-weight ML to max_weight=5 / n=80,m=5 (single-ML did not improve n80 seed2300; lower-weight wrong candidates outrank Alice)
 
 ## T2 Execute
 - [x] E01: execute once on deterministic q=1024 synthetic frames (M5 bounded-ML post-decoder; 3 verified seeds)

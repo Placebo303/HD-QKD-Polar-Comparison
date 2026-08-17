@@ -1,4 +1,4 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 87: 64 帧完整集成验证 31/64，FER=0.515625
+Status: NBLDPC_V20_IN_PROGRESS — Round 88: bounded-ML 扩展 max_weight=5；n80 单 ML 未提升，n64 保持 31/64
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
@@ -8,6 +8,13 @@ Status: NBLDPC_V20_IN_PROGRESS — Round 87: 64 帧完整集成验证 31/64，FE
 - **Nonbinary LDPC 是当前唯一主攻目标。**
 
 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 88 更新（2026-08-16）
+- 将 V20 bounded-weight ML 扩展支持 `max_weight=5`（n=80,m=5，同 f≈1.136），新增 numba k=5 枚举与测试。
+- n=80,m=5 seed2300 完整集成验证：仍 **2/8 exact**（与 V19 OSD 相同）。
+  原因：单 ML 会选到 weight<=3 的错误码字（先验得分高于 Alice），bounded5 的 Alice 候选不是全局最高分。
+- 结论：n80 需要 top-K 列表 + 公开校验/哈希才能利用 bounded5；n64 bounded4 单 ML 仍是最佳实际改进点（31/64, FER=0.515625）。
+- 新增测试 `test_bounded_weight_ml_decode_max5_small_identity`；全量 30 passed。
 
 ## Round 87 更新（2026-08-16）
 - 完成 V20 bounded-ML 的 **64 帧完整集成验证**：

@@ -1,10 +1,15 @@
-Status: NBLDPC_V20_IN_PROGRESS — Round 87: full 64-frame integrated 31/64, FER=0.515625
+Status: NBLDPC_V20_IN_PROGRESS — Round 88: max_weight=5 added; n80 single-ML no gain
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 
 - 用户最新决策：Binary Polar MLC release 在 `D:\Code\HD-QKD_Polar_Release`，只读；
   Binary LDPC MLC f≈4.17，只读；Nonbinary LDPC 继续主攻。
 - 执行契约：`docs/nbldpc-focus-plan-20260816.md`（Route N0–N6）。
+
+## Round 88
+- `bounded_weight_ml_decode` 扩展支持 max_weight=5（n=80,m=5），新增 numba k=5 + 测试。
+- n80 seed2300 完整集成仍 2/8 exact；单 ML 被 weight<=3 高先验错误候选压制。
+- 下一步可评估 top-K 列表 + 哈希，或继续聚焦 n64 bounded4（31/64, FER=0.515625）。
 
 ## Round 87
 - 完整跑完 8 个 seed 的 V20 bounded-ML 集成管线：**31/64 exact, FER=0.515625**。

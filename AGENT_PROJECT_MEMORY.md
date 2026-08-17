@@ -1,3 +1,11 @@
+## 2026-08-16 Round 88 — bounded-ML 扩展 max_weight=5；n80 单 ML 未提升
+
+- `nonbinary_v19_bounded_ml.py` 增加 numba k=5 枚举，支持 n=80,m=5,max_weight=5。
+- n80 seed2300 完整集成仍 2/8 exact；原因：weight<=3 错误候选先验得分高于 Alice，
+  单 ML 不选 Alice；需 top-K 列表 + 公开校验/哈希。
+- n64 bounded4 单 ML 仍是最佳实际改进：31/64, FER=0.515625。
+- 新增测试 max5 identity；全量 30 passed。 [repo-observed]
+
 ## 2026-08-16 Round 87 — V20 bounded-ML 64 帧完整验证：31/64 exact, FER=0.515625
 
 - 8 个 seed 全部用含 bounded-ML 的完整管线运行，确认 **31/64 exact_correct, FER=0.515625**。
