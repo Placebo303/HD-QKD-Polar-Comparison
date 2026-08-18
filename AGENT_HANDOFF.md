@@ -14,7 +14,17 @@
   - 24h completed-DE-call resource gate enabled (86400s, stop-on-limit).
 - Next: poll gate progress; when complete, run read-only verifier, record
   decision (likely FAIL), then M3 closeout (docs/memory/decision-log).
+- I11 engineering acceptance recorded (evidence/engineering_review_i11.json in the
+  V24 change). Separate-model subagent review timed out (no output); structured
+  read-only review used instead.
+- HOW TO RESUME / poll the background gate:
+  ROOT=comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod
+  wc -l "$ROOT/screen_evaluations.jsonl"   # expect 270 then refine then holdout
+  When decision.json appears, run:
+    PYTHONPATH=. python -m comparison_bench.src.comparison_bench.cli.run_v24_single_edge_de --verify-only "$ROOT"
+  Then do M3 closeout (decision-log/handoff/memory) and commit; no push.
 - Push remains NOT authorized.
+
 
 
 Status: NBLDPC_CURRENT_SINGLE_EDGE_TOOLING_BLOCKED — V24 P06 ACCEPT; P07 user authorization pending
