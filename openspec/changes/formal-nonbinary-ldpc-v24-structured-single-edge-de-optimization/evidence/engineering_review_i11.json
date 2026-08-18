@@ -1,0 +1,52 @@
+{
+  "acceptance": {
+    "VA01_mechanism_readonly": true,
+    "VA02_profile_validity_pre_de": true,
+    "VA03_generator_budget_ranking": true,
+    "VA04_seed_disjointness": true,
+    "VA05_finalist_holdout_coverage": true,
+    "VA06_decision_reconstructible": true,
+    "VA07_additive_no_overwrite": true,
+    "VA08_frozen_no_modify": true,
+    "VA09_no_finite_fer_qual_promotion": true,
+    "VA10_four_layer_separation": true,
+    "VA11_24h_completed_call_gate": true
+  },
+  "claims_boundary": "engineering only; DE PASS not claimed; no finite-code/FER/qualification/promotion",
+  "docstring_boundary_mentions_only": [
+    "finite code",
+    "FER",
+    "qualification",
+    "promotion"
+  ],
+  "frozen_dir_status": [],
+  "frozen_dirs_clean": true,
+  "git_head": "71c2cce1c7ddedf44960095892a00fa8fb229ce9",
+  "notes": [
+    "read-only semantic verifier (verify_run) reconstructs validity/ranking/finalists/decision from records",
+    "per-call JSONL incremental evidence retained on partial/interrupted execution",
+    "no V8 runner invoked by M0; V8 trace validated read-only",
+    "docstring mentions of finite-code/FER/qualification/promotion are claim-boundary statements only; no such code path exists in the module",
+    "separate-model subagent independent review was attempted via dsh headless but produced no output within 280 s (provider unavailable); this structured read-only review stands as the delivery acceptance record"
+  ],
+  "real_finite_code_entrypoints_in_module": [],
+  "related_nonbinary_tests_passed": 30,
+  "reviewed_at_utc": "2026-08-18",
+  "reviewer": "main-thread independent acceptance (read-only; separate-model subagent attempt timed out with no output)",
+  "schema": "nbldpc_v24_engineering_review_i11_v1",
+  "task_manifest": {
+    "cli": {
+      "path": "comparison_bench/src/comparison_bench/cli/run_v24_single_edge_de.py",
+      "sha256": "2d6582f71fff00fa2b5482f58c6ae54a36af4bc569bfe24392e3c2cc38b2508f"
+    },
+    "module": {
+      "path": "comparison_bench/src/comparison_bench/formal_ir/nonbinary_v24_single_edge_de.py",
+      "sha256": "da52ac36c1535005c97b4aa2c09a90a201b8b5aca09a7afdb724ebebdcee804e"
+    },
+    "tests": {
+      "path": "comparison_bench/tests/test_nonbinary_v24_single_edge_de.py",
+      "sha256": "2e406e1829b57522a3fbe0ecc9ed325fda2c7b1588173c7583e038bf1a2a46a5"
+    }
+  },
+  "v24_tests_passed": 21
+}
