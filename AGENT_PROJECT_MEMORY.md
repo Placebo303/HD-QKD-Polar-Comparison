@@ -1,3 +1,21 @@
+## 2026-08-18 V25 M0-M4 complete (pass_ready_for_de_change)
+
+- V25 P102 ACCEPT (main-thread): +-1 adjacent-bin errors with source/delay_used_ps
+  direction = source/delay-conditioned channel (not alignment blocker). [decision]
+- V25 engineering+science done: F01-F05 MSB->LSB factorization x {natural,Gray},
+  N_ab/P(A|B) direction, chain-rule M3, C01-C06 M1, M0/M2 diagnostics, M4.
+  [repo-observed]
+- Empirical channel: H(A|B)~0.80 bits; holdout NLL of empirical delta models
+  0.81-0.83 vs QSC 3.2 / V17 product 3.3-3.5; direction stable over time and
+  flips with delay sign (-50->+1, +50->-1). [repo-observed]
+- M4: high-field F01(GF512)+GF2, mid-field F03(GF32)+GF32 for V26; status
+  pass_ready_for_de_change. Chain-rule closed (err<=5e-9). [repo-observed]
+- Evidence: nbldpc_v25_20260818/run_04/ (12 files, verifier ok=true). [repo-observed]
+- Successor: V26 channel-informed DE is a NEW change requiring user auth; V25
+  PASS only proposes V26, never auto-starts. No finite/FER/MET/qualification/
+  public-residual/oracle; no push. [decision]
+---
+
 ## 2026-08-18 V25 立项（文档 + OpenSpec 草稿）
 
 - 用户交付 V25 冻结任务包并指示“更新至文档”；已落盘

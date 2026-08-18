@@ -2405,3 +2405,25 @@ user decision. No automatic fallback runs. No push was performed.
 
 **Evidence**: `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/`
 (read-only verifier: ok=True, recomputed terminal fail).
+
+---
+
+## 2026-08-18 — V25 M0-M4 complete: pass_ready_for_de_change
+
+**Context**: main-thread freeze decision accepted the +-1 empirical regularity as a
+source/delay-conditioned channel (not alignment blocker); P102 ACCEPT; M0-M4 authorized.
+
+**Result**:
+- Empirical timestamp channel: H(A|B) ~ 0.80 bits; errors ~ {-1,0,+1} adjacent bins;
+  direction flips with delay_used_ps sign (-50 -> +1, +50 -> -1), stable over time.
+- M1: empirical delta conditional models (C03/C04/C05) beat QSC (3.20-3.35) and V17
+  independent-plane product (3.32-3.50) on every source's holdout (NLL 0.81-0.83).
+- M3: chain-rule closure error <= 5e-9 across F01-F05 x {natural, Gray}.
+- M4: high-field candidate F01/GF512(+GF2), mid-field control F03/GF32(+GF32) for V26;
+  terminal state = pass_ready_for_de_change.
+- Evidence root: comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/
+- Read-only verifier ok=true.
+
+**Successor**: V26 small-scale channel-informed DE is a NEW change requiring explicit user
+authorization; V25 PASS only proposes V26 and does not auto-start it. No finite code / FER /
+MET / fresh qualification / public residual / Alice-oracle; no push.

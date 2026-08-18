@@ -1,3 +1,18 @@
+## 2026-08-18 V25 M0–M4 complete (pass_ready_for_de_change)
+
+- P102 ACCEPT; 5 minor spec edits applied+committed (f1197ce6).
+- Implemented nonbinary_v25_gate.py + CLI run_v25_gate.py + tests (10 pass).
+  M0-M4 ran on the 3 fresh Type2 sources (run_04), read-only verifier ok=true.
+- Result: empirical timestamp channel massively beats QSC/V17 (holdout NLL
+  0.81-0.83 vs 3.2-3.5); chain-rule closes; M4 => high F01(GF512)+mid F03(GF32)
+  for V26; status = pass_ready_for_de_change.
+- Evidence: comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/
+- Report: docs/nbldpc-v25-empirical-channel-and-factorization-report-20260818.md
+- RESUME next: propose V26 (small channel-informed DE on GF512 F01 and GF32 F03)
+  as a NEW change with explicit user authorization; V25 does not auto-start V26.
+- No finite/FER/MET/fresh-qualification/public-residual/oracle; no push.
+---
+
 ## 2026-08-18 V25 立项（文档 + OpenSpec 草稿）
 
 - 用户提供 V25 冻结任务包并指示“更新至文档”。

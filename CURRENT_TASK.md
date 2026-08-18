@@ -1,3 +1,25 @@
+Status: V25 COMPLETE — M0–M4 已实现并运行；终态 pass_ready_for_de_change（高域 F01/GF512 + 中域 F03/GF32 供 V26）
+
+## 2026-08-18 V25 M0–M4 实现完成
+
+- P102 ACCEPT（主线程决策）：±1 相邻偏移 + 方向随 source/delay_used_ps 变化 =
+  source/delay-conditioned channel（非 alignment blocker）；不重读 .ttbin、不重估亚
+  bin delay。
+- 五项 minor spec edits 已应用并提交（N_ab/P(A|B) 方向、F01–F05 MSB→LSB 切分、
+  frame/symbol/tail 计数、M2 改写、inventory 持久化）。
+- 实现：`nonbinary_v25_gate.py`（labeling/factorization/N_ab/P(A|B)/chain-rule/
+  M0-M4/verifier）+ CLI + 测试（10 passed）。
+- 运行结果（run_04，只读 verifier ok=true）：
+  - H(A|B)≈0.80 bits；M0 ±1 结构、M2 方向时间稳定（delay −50→+1、+50→−1）；
+  - M1：经验 delta 模型 holdout NLL≈0.81–0.83 远优于 QSC(3.2)/V17(3.3)；
+  - M3：chain-rule 闭合（err≤5e-9），F01–F05×L01/L02 分层熵已记录；
+  - M4：高域 F01(GF512) + 中域 F03(GF32)，**status=pass_ready_for_de_change**。
+- 输出：comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/
+- 报告：docs/nbldpc-v25-empirical-channel-and-factorization-report-20260818.md。
+- V25 PASS 仅提出 V26（小规模 channel-informed DE），不自动启动；禁止有限码/FER/
+  MET/fresh qual/public residual/oracle；本地提交，不 push。
+---
+
 Status: V25 DRAFT — 已记录冻结任务包并建立 OpenSpec 草稿；待 P0 只读审计 + 独立 freeze review
 
 ## 2026-08-18 V25 立项（文档记录 + OpenSpec 草稿）

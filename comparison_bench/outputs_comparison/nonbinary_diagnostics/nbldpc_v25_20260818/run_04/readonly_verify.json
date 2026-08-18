@@ -1,0 +1,6 @@
+{
+  "schema": "nbldpc_v25_readonly_verify_v1",
+  "ok": true,
+  "problems": [],
+  "checked_root": "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04"
+}
