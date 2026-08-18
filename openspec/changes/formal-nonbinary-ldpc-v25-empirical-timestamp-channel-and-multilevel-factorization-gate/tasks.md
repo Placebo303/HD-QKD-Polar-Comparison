@@ -1,6 +1,6 @@
 # Tasks: formal-nonbinary-ldpc-v25-empirical-timestamp-channel-and-multilevel-factorization-gate
 
-Status: **DRAFT_PENDING_P0_AUDIT_AND_FREEZE_REVIEW**（未实现、未执行）
+Status: **FROZEN_ACCEPTED — P102 ACCEPT（主线程 2026-08-18）；五项 minor spec edits 已应用；M0–M4 实现已授权**
 
 ## P0 — read-only state/input audit
 
@@ -8,15 +8,15 @@ Status: **DRAFT_PENDING_P0_AUDIT_AND_FREEZE_REVIEW**（未实现、未执行）
   AGENT_HANDOFF.md、docs/decision-log.md。
 - [ ] **P002** 只读审查 V17–V24 evidence/report/archive；确认 V24 只排除 bounded
   single-edge、不排除 GF512/256/multilevel/source-conditioned/MET。
-- [ ] **P003** 定位 pairs build manifest、sidecar metadata、数据源 provenance、
+- [x] **P003** 定位 pairs build manifest、sidecar metadata、数据源 provenance、
   D01/V17 证据、legacy pairs；产出 `data_inventory.json`（路径/source ID/时间/
   frame 数/symbol 数/bin width/frame period/delay/pairing/provenance/角色/可否
   train-holdout-qualification）。
-- [ ] **P004** 本阶段不修改代码、不运行 DE、不读取重型原始数据。
+- [x] **P004** 本阶段不修改代码、不运行 DE、不读取重型原始数据。
 
 ## P1 — OpenSpec freeze
 
-- [ ] **P101** proposal/design/tasks/spec 冻结定义、输入清单、切分、factorization、
+- [x] **P101** proposal/design/tasks/spec 冻结定义、输入清单、切分、factorization、
   labeling、输出 schema、gate、禁止事项、失败终态。
 - [ ] **P102** 独立 freeze review ACCEPT 前不得开始实现。
 
@@ -57,12 +57,14 @@ Status: **DRAFT_PENDING_P0_AUDIT_AND_FREEZE_REVIEW**（未实现、未执行）
 - [ ] **M001** 生成 data_inventory.json。
 - [ ] **M0** 时间戳误差图谱（16 项指标，按 source/file/time block）。
 - [ ] **M1** 模型比较 C01–C06（validation + sealed holdout；per-source + pooled 补充）。
-- [ ] **M2** delay/alignment 门（train 估 delay→锁死→validation/holdout 校准对比）。
+- [x] **M2** ±1 结构 / 方向 / 时间稳定性分析（既有 delay 配置，不重估 delay、不读
+  .ttbin）；方向随 source/delay_used_ps 变化视为待建模 channel 特征。
 - [ ] **M3** multilevel factorization gate（F01–F05 × L01–L02；chain rule 闭合；
   R_i_ref；复杂度代理）。
-- [ ] **M4** 架构选择终态：pass_ready_for_de_change /
+- [ ] **M4** 产出供 V26 的信道候选：**高域候选 GF(512)/GF(256)** + **中域对照
+  GF(32)/GF(16)/GF(8)**；同时给出总状态（pass_ready_for_de_change /
   fail_no_stable_factorization / blocked_insufficient_joint_data /
-  blocked_alignment_unresolved。
+  blocked_alignment_unresolved）。M4 不选唯一方案。
 
 ## V — verification / closeout
 

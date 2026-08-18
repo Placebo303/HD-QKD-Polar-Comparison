@@ -1,6 +1,6 @@
 # Proposal: formal-nonbinary-ldpc-v25-empirical-timestamp-channel-and-multilevel-factorization-gate
 
-> Status: DRAFT_PENDING_P0_AUDIT_AND_FREEZE_REVIEW. 本 change 只做经验信道表征与
+> Status: FROZEN_ACCEPTED（P102 ACCEPT，主线程 2026-08-18；M0–M4 实现已授权）。 本 change 只做经验信道表征与
 > 多层分解门；不实现 DE、MET、有限码、解码器、FER、qualification、promotion。
 > 按 docs/nbldpc-v25-empirical-channel-and-factorization-plan-20260818.md 冻结执行。
 
@@ -31,8 +31,9 @@ accidentals 的影响。
 - 候选分层 F01–F05、labeling L01–L02 严格预注册。
 - 经验信道主模型 `P(A|B,Z)`；诊断量 signed/modular delta、Gray XOR mask 只作诊断、
   不混用为解码信道。
-- M0 误差图谱、M1 信道模型比较（C01–C06）、M2 delay/alignment 门、M3 chain-rule
-  分解门、M4 架构选择（仅四个终态）。
+- M0 误差图谱、M1 信道模型比较（C01–C06）、M2 ±1 结构/方向/时间稳定性分析（既有
+  delay 配置）、M3 chain-rule 分解门、M4 架构候选（高域 GF512/GF256 + 中域
+  GF32/GF16/GF8 供 V26）。
 - 数据切分：每 source/file 按时间 60/20/20（train/validation/holdout）。
 - 输出：additive `nbldpc_v25_YYYYMMDD/run_<ts>/` 全套 JSON/CSV/NPZ + 只读 verifier。
 
@@ -52,6 +53,12 @@ accidentals 的影响。
 - `fail_no_stable_factorization`
 - `blocked_insufficient_joint_data`
 - `blocked_alignment_unresolved`
+
+主线程决策（2026-08-18）：三 Type2 source 的误差几乎全部为 {−1,0,+1} 相邻 bin 偏移；
+偏移方向随 source/delay_used_ps 变化，**视为需要建模的 source/delay-conditioned
+channel，不是 V25 的 alignment blocker**。V25 不重新读取 .ttbin、不重新估计亚
+bin delay。M4 不选唯一方案：返回一个高域候选 GF(512)/GF(256) 和一个中域对照
+GF(32)/GF(16)/GF(8) 供 V26 分别做小规模 channel-informed DE。
 
 V25 PASS 仅允许提出 V26，不得自动启动 V26。
 

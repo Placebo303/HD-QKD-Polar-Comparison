@@ -1,0 +1,381 @@
+{
+  "schema": "nbldpc_v25_p0_data_inventory_v1",
+  "run_id": "nbldpc_v25_p0_20260818",
+  "created_utc": "2026-08-18",
+  "scope_note": "P0 read-only input audit for V25 empirical timestamp channel + multilevel factorization gate. No production code changed; no DE; no raw .ttbin read; no commit/push.",
+  "primary_joint_data_sources": [
+    {
+      "source_id": "type2_1M_20260121_184040",
+      "pairs_parquet": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_184040/pairs.parquet",
+      "parquet_columns": [
+        "frame_id",
+        "pair_idx",
+        "alice_symbol",
+        "bob_symbol"
+      ],
+      "parquet_rows": 512000,
+      "sidecar_meta": "workspace/v13r3fresh_20260816/sidecars/type2_1M_20260121_184040/sidecar_meta.json",
+      "sidecar_artifacts": {
+        "a_eff.npy": "workspace/v13r3fresh_20260816/sidecars/type2_1M_20260121_184040/a_eff.npy",
+        "b_eff.npy": "workspace/v13r3fresh_20260816/sidecars/type2_1M_20260121_184040/b_eff.npy",
+        "chan_ll_table.npy_shape": [
+          1024,
+          1024
+        ],
+        "joint_counts_sparse_nonzero": 2545,
+        "joint_counts_sparse_total_count": 512151,
+        "delta_hist.csv": "workspace/v13r3fresh_20260816/sidecars/type2_1M_20260121_184040/delta_hist.csv",
+        "seq_pair_stats.json": "workspace/v13r3fresh_20260816/sidecars/type2_1M_20260121_184040/seq_pair_stats.json",
+        "occupancy_filter_summary.csv": "workspace/v13r3fresh_20260816/sidecars/type2_1M_20260121_184040/occupancy_filter_summary.csv"
+      },
+      "acquisition": {
+        "date": "2026.1.21",
+        "type2_settings": "1M"
+      },
+      "bin_width_ps": 200,
+      "frame_period_ps": 204800,
+      "delay_used_ps": -50,
+      "pairing_mode": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "raw_ser": 0.23977303568674083,
+      "modular_delta_top": [
+        [
+          0,
+          0.7602269643132592
+        ],
+        [
+          1,
+          0.23843749206776907
+        ],
+        [
+          1023,
+          0.0013355436189717487
+        ]
+      ],
+      "provenance_raw_ttbin": "D:\\Data\\Raw Data\\2026.1.21\\type2_1M_3s_2026-01-21_184040\\...ttbin (EXTERNAL, not read in P0)",
+      "data_role": "characterization/empirical-joint (NOT qualification; may be split train/validation/holdout)",
+      "allowed_uses": "characterization; channel-model comparison; factorization gate; source-drift analysis; train/validation/holdout split by time",
+      "forbidden_uses": "fresh qualification; promotion; final FER claim"
+    },
+    {
+      "source_id": "type2_1p5M_20260121_183806",
+      "pairs_parquet": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_183806/pairs.parquet",
+      "parquet_columns": [
+        "frame_id",
+        "pair_idx",
+        "alice_symbol",
+        "bob_symbol"
+      ],
+      "parquet_rows": 708352,
+      "sidecar_meta": "workspace/v13r3fresh_20260816/sidecars/type2_1p5M_20260121_183806/sidecar_meta.json",
+      "sidecar_artifacts": {
+        "a_eff.npy": "workspace/v13r3fresh_20260816/sidecars/type2_1p5M_20260121_183806/a_eff.npy",
+        "b_eff.npy": "workspace/v13r3fresh_20260816/sidecars/type2_1p5M_20260121_183806/b_eff.npy",
+        "chan_ll_table.npy_shape": [
+          1024,
+          1024
+        ],
+        "joint_counts_sparse_nonzero": 2610,
+        "joint_counts_sparse_total_count": 708443,
+        "delta_hist.csv": "workspace/v13r3fresh_20260816/sidecars/type2_1p5M_20260121_183806/delta_hist.csv",
+        "seq_pair_stats.json": "workspace/v13r3fresh_20260816/sidecars/type2_1p5M_20260121_183806/seq_pair_stats.json",
+        "occupancy_filter_summary.csv": "workspace/v13r3fresh_20260816/sidecars/type2_1p5M_20260121_183806/occupancy_filter_summary.csv"
+      },
+      "acquisition": {
+        "date": "2026.1.21",
+        "type2_settings": "1P5M"
+      },
+      "bin_width_ps": 200,
+      "frame_period_ps": 204800,
+      "delay_used_ps": 50,
+      "pairing_mode": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "raw_ser": 0.25447213113828493,
+      "modular_delta_top": [
+        [
+          0,
+          0.7455278688617151
+        ],
+        [
+          1023,
+          0.25326384762076837
+        ],
+        [
+          1,
+          0.00012082835175165823
+        ]
+      ],
+      "provenance_raw_ttbin": "D:\\Data\\Raw Data\\2026.1.21\\type2_1p5M_3s_2026-01-21_183806\\...ttbin (EXTERNAL, not read in P0)",
+      "data_role": "characterization/empirical-joint (NOT qualification; may be split train/validation/holdout)",
+      "allowed_uses": "characterization; channel-model comparison; factorization gate; source-drift analysis; train/validation/holdout split by time",
+      "forbidden_uses": "fresh qualification; promotion; final FER claim"
+    },
+    {
+      "source_id": "type2_2M_20260121_183657",
+      "pairs_parquet": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_183657/pairs.parquet",
+      "parquet_columns": [
+        "frame_id",
+        "pair_idx",
+        "alice_symbol",
+        "bob_symbol"
+      ],
+      "parquet_rows": 933120,
+      "sidecar_meta": "workspace/v13r3fresh_20260816/sidecars/type2_2M_20260121_183657/sidecar_meta.json",
+      "sidecar_artifacts": {
+        "a_eff.npy": "workspace/v13r3fresh_20260816/sidecars/type2_2M_20260121_183657/a_eff.npy",
+        "b_eff.npy": "workspace/v13r3fresh_20260816/sidecars/type2_2M_20260121_183657/b_eff.npy",
+        "chan_ll_table.npy_shape": [
+          1024,
+          1024
+        ],
+        "joint_counts_sparse_nonzero": 2821,
+        "joint_counts_sparse_total_count": 933156,
+        "delta_hist.csv": "workspace/v13r3fresh_20260816/sidecars/type2_2M_20260121_183657/delta_hist.csv",
+        "seq_pair_stats.json": "workspace/v13r3fresh_20260816/sidecars/type2_2M_20260121_183657/seq_pair_stats.json",
+        "occupancy_filter_summary.csv": "workspace/v13r3fresh_20260816/sidecars/type2_2M_20260121_183657/occupancy_filter_summary.csv"
+      },
+      "acquisition": {
+        "date": "2026.1.21",
+        "type2_settings": "2M"
+      },
+      "bin_width_ps": 200,
+      "frame_period_ps": 204800,
+      "delay_used_ps": 50,
+      "pairing_mode": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "raw_ser": 0.25574180522870776,
+      "modular_delta_top": [
+        [
+          0,
+          0.7442581947712923
+        ],
+        [
+          1023,
+          0.2542575946572706
+        ],
+        [
+          1,
+          0.0014484210571437145
+        ]
+      ],
+      "provenance_raw_ttbin": "D:\\Data\\Raw Data\\2026.1.21\\type2_2M_3s_2026-01-21_183657\\...ttbin (EXTERNAL, not read in P0)",
+      "data_role": "characterization/empirical-joint (NOT qualification; may be split train/validation/holdout)",
+      "allowed_uses": "characterization; channel-model comparison; factorization gate; source-drift analysis; train/validation/holdout split by time",
+      "forbidden_uses": "fresh qualification; promotion; final FER claim"
+    }
+  ],
+  "frozen_aggregate_evidence": [
+    {
+      "id": "D01",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d01_20260814/channel_diagnostics.json",
+      "contains": [
+        "per-bit-plane BER (aggregate)",
+        "characterization_frame_count"
+      ],
+      "has_raw_joint_arrays": false,
+      "role": "frozen aggregate control (SER/BER/entropy cross-check); NOT usable to rebuild P(A|B)"
+    },
+    {
+      "id": "V17_model",
+      "path": "openspec/changes/formal-nonbinary-ldpc-v17-multibit-structured-de-gate/evidence/v17_multibit_channel_model.json",
+      "contains": [
+        "q=1024",
+        "bit_planes=10",
+        "entropy_bits=0.5499550439219351",
+        "product_of_per_plane_marginals"
+      ],
+      "role": "frozen aggregate channel model (independent-plane product)"
+    },
+    {
+      "id": "V17_gate",
+      "path": "openspec/changes/formal-nonbinary-ldpc-v17-multibit-structured-de-gate/evidence/v17_gate_decision.json",
+      "role": "frozen V17 DE-gate decision"
+    },
+    {
+      "id": "v13_a01_20260814",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_a01_20260814/channel_diagnostics.json",
+      "contains": [
+        "per-bit-plane BER (aggregate)"
+      ],
+      "has_raw_joint_arrays": false,
+      "role": "v13 aggregate diagnostics (legacy/corrected)"
+    },
+    {
+      "id": "v13_a02_20260814",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_a02_20260814/channel_diagnostics.json",
+      "contains": [
+        "per-bit-plane BER (aggregate)"
+      ],
+      "has_raw_joint_arrays": false,
+      "role": "v13 aggregate diagnostics (legacy/corrected)"
+    },
+    {
+      "id": "v13_d04_20260814",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d04_20260814/channel_diagnostics.json",
+      "contains": [
+        "per-bit-plane BER (aggregate)"
+      ],
+      "has_raw_joint_arrays": false,
+      "role": "v13 aggregate diagnostics (legacy/corrected)"
+    },
+    {
+      "id": "v13_d05_20260814",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d05_20260814/channel_diagnostics.json",
+      "contains": [
+        "per-bit-plane BER (aggregate)"
+      ],
+      "has_raw_joint_arrays": false,
+      "role": "v13 aggregate diagnostics (legacy/corrected)"
+    },
+    {
+      "id": "v13_d05_20260814_corrected",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_d05_20260814_corrected/channel_diagnostics.json",
+      "contains": [
+        "per-bit-plane BER (aggregate)"
+      ],
+      "has_raw_joint_arrays": false,
+      "role": "v13 aggregate diagnostics (legacy/corrected)"
+    },
+    {
+      "id": "v13_e01_20260814",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13_e01_20260814/channel_diagnostics.json",
+      "contains": [
+        "per-bit-plane BER (aggregate)"
+      ],
+      "has_raw_joint_arrays": false,
+      "role": "v13 aggregate diagnostics (legacy/corrected)"
+    }
+  ],
+  "legacy_drift_audit": [
+    {
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_full_20260816/full_audit_report.json",
+      "verdict": "legacy_drift_audit_completed",
+      "status_counts": {
+        "syndrome_consistent": 8284,
+        "decode_failed": 128
+      },
+      "note": "distinguish old (known-buggy) run counts from corrected implementations; V25 must not reuse known-wrong old run counts",
+      "role": "source-drift/audit diagnostic"
+    }
+  ],
+  "v17_v24_evidence": [
+    {
+      "id": "V8_trace",
+      "path": "openspec/changes/formal-nonbinary-ldpc-v8-reference-reproduction/evidence/v8_reproduction_trace_corrected.json",
+      "role": "M0 mechanism evidence for DE kernels (not V25 channel input)"
+    },
+    {
+      "id": "V22",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v22_20260816/",
+      "role": "single-edge structured DE diagnostics (negative for tested candidates)"
+    },
+    {
+      "id": "V23",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v23_20260816/de_not_reachable_summary.json",
+      "role": "aggregate single-edge DE negative summary"
+    },
+    {
+      "id": "V24",
+      "path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/",
+      "role": "bounded single-edge M0-M2 gate FAIL; read-only verifier ok=true"
+    }
+  ],
+  "data_role_map": {
+    "fresh_joint_sidecars": "train/validation/holdout empirical P(A|B,Z) (characterization; split per source/file by time 60/20/20)",
+    "D01/V17": "frozen aggregate control only (SER/BER/entropy cross-check); cannot rebuild joint P(A|B)",
+    "legacy_pairs/audit": "characterization/drift analysis only; not fresh qualification",
+    "raw_ttbin": "EXTERNAL provenance only; NOT read in P0; heavy raw pipeline requires new authorization"
+  },
+  "raw_ttbin_provenance": [
+    {
+      "source": "type2_1M_20260121_184040",
+      "main": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.ttbin",
+      "sha256": "505fcadb17587336b034e63298201466892e8862f330f163adbe4067ff0885f1"
+    },
+    {
+      "source": "type2_1p5M_20260121_183806",
+      "main": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.ttbin",
+      "sha256": "b3d308c3faa2da3c5a9efae27f9f9ba694566a689154ff3ba846c33a88dc8e5d"
+    },
+    {
+      "source": "type2_2M_20260121_183657",
+      "main": "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.ttbin",
+      "sha256": "099259fbe79b70e116ac1fce1f39341e5896c97485f53d4a6c37937fa0395af7"
+    }
+  ],
+  "key_empirical_findings": [
+    "All three fresh type2 sources (q=1024, bw=200 ps, frame_period 204800 ps) already have full (1024,1024) chan_ll_table.npy AND sparse joint_counts N[A,B] in their sidecar dirs -- V25 will NOT be blocked_insufficient_joint_data for these sources.",
+    "Error is overwhelmingly near-neighbor: modular delta histogram is ~74-76% at 0, and the rest almost entirely at +1 or -1 (1023); intermediate/large offsets are essentially zero.",
+    "Dominant error direction FLIPS with delay_used_ps sign: source delay -50 -> mostly +1 (23.8%); sources delay +50 -> mostly -1 (25.3%/25.4%). This is a delay/calibration signature that M2 must separate from an encoding channel.",
+    "raw_ser ~0.240-0.256 (well above the 0.01 DE target regime); but errors are one-bin jitter, so factorization/conditioning may move much of it into a small GF(2)/GF(4) residual.",
+    "Only 3 type2 sources (all 2026.1.21) have fresh joint pairs; no fresh type1/type3 in this package (source-conditioned generalization limited to count-rate settings 1M/1.5M/2M)."
+  ],
+  "not_available": [
+    "D01/V17 archive does NOT preserve raw joint arrays N[A,B] (frozen aggregate only) -- cannot rebuild P(A|B) from D01.",
+    "No raw .ttbin inside repo (external D:\\Data\\Raw Data\\2026.1.21\\...); reading them is explicitly outside P0.",
+    "No fresh non-type2 source types in the v13r3fresh package.",
+    "chan_ll_table.npy semantics (P(B|A) vs P(A|B); log vs probability; smoothing) NOT frozen yet (ambiguity for P1).",
+    "real_sidecars_frame_batch has framed alice/bob pairs but no per-source chan_ll_table/joint_counts in this same artifact (sidecar ll tables live externally with the .ttbin grid)."
+  ],
+  "primary_joint_data_sources_build_manifest": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/build_manifest.json",
+  "additional_derived_real_batch": {
+    "path": "comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet",
+    "rows": 1032128,
+    "columns": [
+      "dataset_id",
+      "frame_id",
+      "pair_idx",
+      "alice_symbol",
+      "bob_symbol",
+      "dimension",
+      "frame_len_symbols",
+      "rows_input",
+      "rows_used",
+      "rows_dropped_tail",
+      "source_path",
+      "loss_db",
+      "bin_width_ps",
+      "n_eff_pairs",
+      "threshold_ps",
+      "processing_rule_version",
+      "pairing_path_tag",
+      "data_mode"
+    ],
+    "n_unique_dataset_id": 121,
+    "datasets": "real_typeii_20db_d{dim}_bw{ps}_blk0",
+    "dimensions": [
+      4,
+      8,
+      16,
+      32,
+      64,
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096
+    ],
+    "bin_width_ps": [
+      20,
+      30,
+      40,
+      50,
+      60,
+      80,
+      100,
+      120,
+      150,
+      180,
+      200
+    ],
+    "loss_db": [
+      20.0
+    ],
+    "processing_rule_version": "sidecar_a_eff_b_eff_v1",
+    "data_mode": "real_data",
+    "source_path_prefix": "D:\\Data\\Raw Data\\QKD_Loss\\TypeII_776.1nm_3s\\Type2_5s_20dB_2026-01-30_224943\\... (EXTERNAL, not read in P0)",
+    "data_role": "legacy/real derived pairs (characterization only; NOT qualification)",
+    "note": "provides broader source/bin-width diversity (different date/source than the 3 fresh type2); whether V25 should include it for source-conditioning is an unfrozen ambiguity"
+  }
+}
