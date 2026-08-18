@@ -1,4 +1,48 @@
-Status: NBLDPC_ROUTE_BLOCKED — awaiting user direction; no auto next step
+
+## 2026-08-18 V24 engineering + archive + gate launch
+
+- Archived V21->V22->V23 (user-authorized by current objective). Dirs moved to
+  openspec/changes/archive/ with `2026-08-18-` prefix and archive notes.
+- V24 engineering complete: module, CLI, tests (21 passed).
+  - Module: comparison_bench/src/comparison_bench/formal_ir/nonbinary_v24_single_edge_de.py
+  - CLI: comparison_bench/src/comparison_bench/cli/run_v24_single_edge_de.py
+  - Tests: comparison_bench/tests/test_nonbinary_v24_single_edge_de.py
+- Pre-registered M0-M2 scientific gate launched in background:
+  - Evidence root: comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/
+  - M0 mechanism gate PASS. M1 screen in progress (non-converged ~0.3 entropy).
+  - Full gate ~7h expected (135 valid candidates, multi-stage DE).
+  - 24h completed-DE-call resource gate enabled (86400s, stop-on-limit).
+- Next: poll gate progress; when complete, run read-only verifier, record
+  decision (likely FAIL), then M3 closeout (docs/memory/decision-log).
+- Push remains NOT authorized.
+
+
+Status: NBLDPC_CURRENT_SINGLE_EDGE_TOOLING_BLOCKED — V24 P06 ACCEPT; P07 user authorization pending
+
+## Current State Correction — 2026-08-17
+
+- Completed this round: scientific wording correction, V21/V22/V23 incomplete
+  task classification, closeout plan, and V24 P06-accepted frozen OpenSpec only.
+- Not performed: code changes, DE/FER execution, scientific output, archive
+  movement, push.
+- V21=`CONCLUDED_STOP_GATE_TRIGGERED_PENDING_ARCHIVE`; runtime Alice-injection
+  verifier/V01 NOT_RUN.
+- V22=`CONCLUDED_CURRENT_KERNEL_NEGATIVE_PENDING_ARCHIVE`; conclusion is only
+  for tested candidates/current kernel; finite path cancelled by DE gate.
+- V23=`CONCLUDED_SINGLE_EDGE_DIAGNOSTIC_PENDING_ARCHIVE`; base-matrix-derived
+  aggregate lambda/rho -> V22b only; true protograph/MET untested; raw scan has
+  3 matrices and extra consolidated points lack independent raw/verify.
+- Canonical plan:
+  `docs/nbldpc-v21-v24-closeout-and-successor-plan-20260817.md`.
+- Independent read-only closeout and V24 freeze review returned ACCEPT;
+  P01–P06 are complete. Next action is the user's P07 implementation +
+  scientific execution decision. Archive V21->V22->V23 and push remain
+  separate user-authorized actions.
+
+The historical handoff below is retained for chronology; route-wide blocked
+and MET/protograph-failure wording is superseded.
+
+---
 
 ## Current State — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 

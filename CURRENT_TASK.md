@@ -1,4 +1,53 @@
-Status: NBLDPC_ROUTE_BLOCKED — 结构化高 rate f≤1.3 现有工具不可达；等待用户选择新方向
+
+Status: V24 ENGINEERING DONE (I01-I11) — M0 mechanism gate PASS; M1 screen in progress (background run); archive V21->V22->V23 DONE
+
+## 2026-08-18 V24 engineering + archive + gate launch
+
+- 正式归档 V21/V22/V23 完成，移至 archive（archive note 已写）：
+  - `openspec/changes/archive/2026-08-18-formal-nonbinary-ldpc-v21-bob-only-selector-validation/`
+  - `openspec/changes/archive/2026-08-18-formal-nonbinary-ldpc-v22-structured-construction/`
+  - `openspec/changes/archive/2026-08-18-formal-nonbinary-ldpc-v23-met-protograph-de/`
+- V24 工程实现完成（I01-I11）：
+  - `comparison_bench/src/comparison_bench/formal_ir/nonbinary_v24_single_edge_de.py`
+  - `comparison_bench/src/comparison_bench/cli/run_v24_single_edge_de.py`
+  - `comparison_bench/tests/test_nonbinary_v24_single_edge_de.py`（21 tests, all pass）
+- 关键实现点：frozen indexed proposal generator（SeedSequence([24000,k])，lambda 先 rho 后）、
+  profile validity 仅基于 lambda/rho/rate/f（不含 DE 结果）、M0 read-only V8/V17 校验、
+  M1 screen/refine、M2 holdout all-five-seeds，stage-generic ranking，
+  per-call JSONL incremental evidence + 24h completed-DE-call resource gate，
+  read-only semantic verifier。
+- 已启动预注册 M0-M2 scientific gate（background nohup，24h 资源门）：
+  - 证据根：`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/`
+  - M0 mechanism PASS；screen 正在写入（非收敛，final entropy ~0.3，与 V22/V23 一致）。
+  - 预算：8192 attempts → 135 valid unique；screen 270 calls、refine 24、holdout 20；
+    DE 单 call 成本 8-18s(n200) / 257s(n1000) / ~11min(n2000)。
+- 预计 gate 时长约 7h；terminal state 大概率 FAIL（当前系综单边 DE 非收敛一致性）。
+- P07 由当前 objective 授权；无 push。
+
+---
+
+Status: NBLDPC_CURRENT_SINGLE_EDGE_TOOLING_BLOCKED — V24 P06 ACCEPT，等待 P07 用户授权
+
+## 2026-08-17 current-state correction（supersedes below route-wide wording）
+
+- 本轮只完成 planning/docs；无 code、DE、FER、archive、push。
+- V21：`CONCLUDED_STOP_GATE_TRIGGERED_PENDING_ARCHIVE`；保留 S0/S1/S2
+  数值，但 P0/P1 未预冻结，runtime Alice-injection/V01 未运行。
+- V22：`CONCLUDED_CURRENT_KERNEL_NEGATIVE_PENDING_ARCHIVE`；仅限 tested
+  candidates/current V22b kernel；I03=`CANCELLED_BY_DE_GATE`，
+  E02/V01=`NOT_RUN`。
+- V23：`CONCLUDED_SINGLE_EDGE_DIAGNOSTIC_PENDING_ARCHIVE`；实现仅 aggregate
+  single-edge lambda/rho -> V22b，不是真 protograph/MET；raw scan 仅 3 matrices。
+- 旧 `NBLDPC_ROUTE_BLOCKED`/全局不可达/MET failed 表述均 superseded。
+- 详细计划：`docs/nbldpc-v21-v24-closeout-and-successor-plan-20260817.md`。
+- P06 经三次独立只读 review 最终 ACCEPT；两轮 blocker 均已闭合，P01–P06
+  已完成。P07 用户授权前不得实现或执行；实际 archive 与 push 均需另行
+  用户授权。
+
+---
+
+The historical status below is retained for chronology and is superseded by
+the correction above.
 
 ## Current Task — V19 Nonbinary LDPC primary-route diagnostics (2026-08-16)
 

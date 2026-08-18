@@ -2312,3 +2312,66 @@ smaller q / channel decomposition), (c) MET multi-edge implementation, or
 (d) accept current not-ready state and archive.
 
 **Consequences**: Objective stays active as a blocker; push remains user-gated.
+
+### 2026-08-17: Correct NBLDPC route-wide conclusion and plan bounded V24 successor
+
+**Decision**: Supersede `NBLDPC_ROUTE_BLOCKED` and any route-wide “unreachable”
+or “MET failed” wording with `NBLDPC_CURRENT_SINGLE_EDGE_TOOLING_BLOCKED`.
+V21 concluded its observed stop gate but lacks pre-freeze and runtime
+Alice-injection/V01 verification. V22 is negative only for tested candidates
+under the current kernel. V23 reduced base matrices to aggregate single-edge
+`lambda/rho` and called V22b; it did not implement topology-preserving
+protograph DE or MET DE. Its raw scan contains three matrices, while additional
+consolidated points lack independent raw/verify packages.
+
+**Context**: The 2026-08-16 closeout wording overreached the actual evidence and
+collapsed engineering tests, scientific verification, candidate coverage, and
+unimplemented MET into one route-wide conclusion.
+
+**Consequences**:
+- V21, V22, and V23 are respectively
+  `CONCLUDED_STOP_GATE_TRIGGERED_PENDING_ARCHIVE`,
+  `CONCLUDED_CURRENT_KERNEL_NEGATIVE_PENDING_ARCHIVE`, and
+  `CONCLUDED_SINGLE_EDGE_DIAGNOSTIC_PENDING_ARCHIVE`.
+- This round performs documentation/planning only; no code, DE/FER execution,
+  scientific output, archive movement, or push.
+- Actual archive order is V21 -> V22 -> V23 only after independent read-only
+  closeout ACCEPT and explicit user authorization.
+- V24 is frozen pending P07 user authorization for bounded q=1024 V17
+  structured single-edge optimization.
+  DE PASS precedes any finite-code proposal. True MET is untested and can only
+  become a separate user-authorized change after V24 FAIL.
+
+**Freeze-review addendum**: V24 P06 independent read-only review returned
+ACCEPT on 2026-08-17 after the frozen V8-trace reuse, deterministic indexed
+generator, ranking/error semantics, and resource-stop contract were made
+unambiguous. P01–P06 are complete. P07 user authorization remains required
+before implementation or scientific execution.
+
+---
+
+## 2026-08-18 — V24 archived predecessor + engineering + gate launch
+
+**Context**: The current objective granted P07 (implement + scientific
+execution) and asked to formally archive V21->V22->V23 first.
+
+**Decisions**:
+- V21/V22/V23 archives moved:
+  `openspec/changes/archive/2026-08-18-*` with archive notes. Archive direction
+  V21 -> V22 -> V23 preserved.
+- V24 engineering (I01-I11) implemented and all 21 focused tests pass
+  (T0/T1/T2/T3). No frozen predecessor source modified.
+- Pre-registered M0-M2 scientific gate launched in background with a 24 h
+  completed-DE-call resource ceiling; M0 mechanism gate passed.
+
+**Observed**:
+- Proposal sparsity: 135 unique valid in-band candidates across the 8192
+  attempt ceiling.
+- Screen DE calls non-converged (final base-q entropy ~0.3), consistent with
+  the V22/V23 single-edge negative diagnostics.
+- Evidence root:
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/`.
+
+**Pending**: gate completion (~7 h) and independent verifier; terminal state
+(pass/fail/resource_blocked) recorded in M3. No finite code/FER/qualification/
+promotion before a DE PASS, and no push.

@@ -1,4 +1,58 @@
-## 2026-08-16 Route blocked awaiting user
+
+## 2026-08-18 V24 engineering + archive + gate launch
+
+- V21/V22/V23 formally archived (user-authorized): moved under
+  openspec/changes/archive/2026-08-18-* with archive notes. [decision]
+- V24 engineering (I01-I11) complete, all 21 focused tests pass. New files:
+  [repo-observed]
+  - comparison_bench/src/comparison_bench/formal_ir/nonbinary_v24_single_edge_de.py
+  - comparison_bench/src/comparison_bench/cli/run_v24_single_edge_de.py
+  - comparison_bench/tests/test_nonbinary_v24_single_edge_de.py
+- V24 implementation facts (frozen packet): indexed proposal generator =
+  SeedSequence([24000,k]) per attempt; 1-8 nonzero degrees/side; lambda degree
+  2..64, rho degree 2..512; counts sum 64; profile validity is pre-DE and never
+  depends on entropy; N_valid fixed regardless of DE error/nonfinite.
+  [repo-observed]
+- Proposal sparsity measured: only 135 unique valid in-band candidates across
+  8192 attempts (band R in [0.9375, 0.94140625]).
+- Pre-registered M0-M2 gate launched 2026-08-18 background; M0 mechanism PASS;
+  screen in progress; evidence root under
+  comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/.
+  24h completed-DE-call resource gate enabled. [repo-observed]
+- Expected terminal state likely `fail` (single-edge DE non-convergence ~0.3
+  entropy is consistent across all prior V22/V23 ensembles). PASS/FINAL relay
+  only after full gate + verifier. [pending]
+
+
+## 2026-08-17 NBLDPC current single-edge tooling correction and V24 planning
+
+- Current state is `NBLDPC_CURRENT_SINGLE_EDGE_TOOLING_BLOCKED`, limited to
+  tested candidates/current V22b aggregate single-edge kernel. The prior
+  route-wide unreachable conclusion is superseded. [decision]
+- V21=`CONCLUDED_STOP_GATE_TRIGGERED_PENDING_ARCHIVE`: S0/S1/S2 FER
+  0.625/0.5625/0.5625 retained; P0/P1 not pre-frozen; runtime Alice-injection
+  verifier and V01 not run. AST tests do not establish runtime semantic
+  verification. [repo-observed]
+- V22=`CONCLUDED_CURRENT_KERNEL_NEGATIVE_PENDING_ARCHIVE`: tested target
+  candidates negative; finite I03/E02 and Bob-only V01 cancelled/not run after
+  DE gate. [repo-observed]
+- V23=`CONCLUDED_SINGLE_EDGE_DIAGNOSTIC_PENDING_ARCHIVE`: historical name
+  notwithstanding, implementation aggregates base matrices to single-edge
+  lambda/rho and invokes V22b; true topology-preserving protograph/MET DE was
+  not implemented. Raw scan has 3 matrices; extra consolidated points lack
+  independent raw/verify packages. [repo-observed]
+- Closeout plan:
+  `docs/nbldpc-v21-v24-closeout-and-successor-plan-20260817.md`. This round is
+  planning/docs only: no code, DE, archive, scientific output, or push. The
+  independent closeout/V24 freeze review returned ACCEPT after all contract
+  blockers were closed; archive still requires later user authorization. [decision]
+- V24 is `FROZEN_PENDING_USER_AUTHORIZATION`: P01–P06 complete and P07 is the
+  next boundary. It covers bounded q1024 V17 structured single-edge lambda/rho
+  DE optimization only. MET/finite/FER/qualification/promotion are out of scope;
+  true MET is a separate change candidate only after V24 FAIL and user
+  authorization. [decision]
+
+## 2026-08-16 Route blocked awaiting user (superseded 2026-08-17)
 
 - q1024 structured f<=1.3 not reachable with current tooling.
 - Awaiting user choice: DE optimization / adjust target / MET / archive. [repo-observed]
