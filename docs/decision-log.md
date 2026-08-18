@@ -2375,3 +2375,33 @@ execution) and asked to formally archive V21->V22->V23 first.
 **Pending**: gate completion (~7 h) and independent verifier; terminal state
 (pass/fail/resource_blocked) recorded in M3. No finite code/FER/qualification/
 promotion before a DE PASS, and no push.
+
+---
+
+## 2026-08-18 — V24 M0-M2 gate result: FAIL (bounded single-edge route closed)
+
+**Gate**: pre-registered V24 M0-M2 scientific gate completed in background
+(314 DE calls, 4.87 h accumulated completed-DE-call time, well under the 24 h
+ceiling; 0 errors; 0 converged).
+
+**Result**:
+- M0 mechanism/accounting gate: PASS.
+- 135 unique valid candidates found in 8192 attempts (search band
+  R in [0.9375, 0.94140625]).
+- Screen (270 calls): 0/135 converged; entropy floor ~0.20-0.32.
+- Refine (24 calls): 0/8 converged; entropy ~0.29-0.30.
+- Holdout (20 calls, 4 pre-declared finalists x 5 seeds): 0 finalists converged
+  on all five seeds (final base-q entropy ~0.29-0.30).
+- Terminal state: **`fail`** = `single_edge_bounded_optimization_failed`.
+
+**Interpretation**: The bounded single-edge `lambda/rho` optimization over the
+frozen V17 q=1024 structured channel at target f<=1.3 found no DE-convergent
+candidate. This is an asymptotic ensemble result only (VA09/VA10): no
+finite-code, FER, qualification, promotion, or MET claim is made.
+
+**Successor rule**: true MET/multi-edge DE is only a new user-authorized
+change candidate; adjusting q / channel decomposition / f target is a separate
+user decision. No automatic fallback runs. No push was performed.
+
+**Evidence**: `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/`
+(read-only verifier: ok=True, recomputed terminal fail).

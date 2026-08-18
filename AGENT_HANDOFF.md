@@ -1,4 +1,20 @@
 
+
+## 2026-08-18 V24 gate COMPLETE: FAIL
+
+- M0-M2 gate finished: terminal_state `fail`
+  (`single_edge_bounded_optimization_failed`). 0 finalist passed all 5
+  holdout seeds (entropy ~0.29-0.30). Read-only verifier ok=True.
+- 314 DE calls, 4.87 h accumulated (< 24 h ceiling), 0 errors.
+- Evidence root:
+  comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/
+- Report: docs/nbldpc-v24-gate-report-20260818.md.
+- STOP condition met (V24 FAIL): bounded single-edge optimization closes.
+  No finite code / FER / qualification / promotion / MET runs.
+  True MET and any target/q/channel change require a NEW explicit user
+  authorization. No push.
+- M3 closeout docs updated; V24 archived (see archive).
+
 ## 2026-08-18 V24 engineering + archive + gate launch
 
 - Archived V21->V22->V23 (user-authorized by current objective). Dirs moved to

@@ -1,4 +1,20 @@
 
+## 2026-08-18 V24 gate result: FAIL — bounded single-edge route closed
+
+- Pre-registered V24 M0-M2 gate completed: terminal_state `fail`
+  (`single_edge_bounded_optimization_failed`). [decision]
+- M0 mechanism PASS; 135 valid candidates from 8192 attempts; screen/refine/
+  holdout all 0-converged (~0.20-0.32 entropy floor); 0/4 finalists passed all
+  five holdout seeds. 314 DE calls, 4.87 h accumulated (<24 h). Read-only
+  verifier ok=True. [repo-observed]
+- Evidence:
+  comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/
+- V21/V22/V23 archived under openspec/changes/archive/2026-08-18-*. [decision]
+- Successor: true MET is a separate user-authorized change candidate only;
+  adjusting q/channel/f target is a separate user decision. No automatic
+  fallback; no push. [decision]
+
+
 ## 2026-08-18 V24 engineering + archive + gate launch
 
 - V21/V22/V23 formally archived (user-authorized): moved under

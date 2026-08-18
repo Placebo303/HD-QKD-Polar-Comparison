@@ -1,4 +1,30 @@
 
+Status: V24 M0–M2 GATE FAIL (single_edge_bounded_optimization_failed) — bounded single-edge route closed; V21/V22/V23 ARCHIVED
+
+## 2026-08-18 V24 gate result: FAIL + M3 closeout
+
+- V24 pre-registered M0-M2 gate completed (background, 314 DE calls, 4.87 h
+  accumulated, 0 errors, 0 converged).
+- Terminal state: `fail` = `single_edge_bounded_optimization_failed`.
+  - M0 mechanism gate PASS;
+  - 135 valid unique candidates in 8192 attempts;
+  - screen 270 calls 0 converged (entropy floor 0.20-0.32);
+  - refine 24 calls 0 converged (entropy ~0.29-0.30);
+  - holdout 20 calls (4 finalists x 5 seeds) 0 finalist converged on all seeds
+    (final entropy ~0.29-0.30);
+  - read-only verifier ok=True, recomputed terminal fail.
+- Evidence: `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v24_20260818/run_20260818T135145_prod/`.
+- Report: `docs/nbldpc-v24-gate-report-20260818.md`.
+- Interpretation: asymptotic DE-only negative; NO finite-code/FER/qualification/
+  promotion/MET claim. True MET or target/q/channel adjustments are separate
+  user decisions; no automatic fallback. No push.
+- V21/V22/V23 archived under `openspec/changes/archive/2026-08-18-*`.
+- STOP per V24 FAIL rule: no further scientific work in this route without
+  explicit new user authorization.
+
+---
+
+
 Status: V24 ENGINEERING DONE (I01-I11) — M0 mechanism gate PASS; M1 screen in progress (background run); archive V21->V22->V23 DONE
 
 ## 2026-08-18 V24 engineering + archive + gate launch
