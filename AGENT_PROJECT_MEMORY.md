@@ -1,3 +1,21 @@
+## 2026-08-18 V25 立项（文档 + OpenSpec 草稿）
+
+- 用户交付 V25 冻结任务包并指示“更新至文档”；已落盘
+  `docs/nbldpc-v25-empirical-channel-and-factorization-plan-20260818.md`。 [decision]
+- V25 OpenSpec change 已建（DRAFT_PENDING_P0_AUDIT_AND_FREEZE_REVIEW）：
+  `openspec/changes/formal-nonbinary-ldpc-v25-empirical-timestamp-channel-and-multilevel-factorization-gate/`
+  （proposal/design/tasks/spec）。 [repo-observed]
+- V25 冻结科学边界：V24 只排除 V17 聚合信道/GF(1024)/bounded single-edge；不排除
+  GF(512)/GF(256)/multilevel/source-conditioned/MET/重校准 delay。 [decision]
+- V25 主模型 P(A|B,Z)；编码分层（保持 1024-bin）≠ 物理 bin 合并（对照）；
+  候选 F01–F05 × L01 natural/L02 Gray；chain rule 闭合；M4 仅
+  pass_ready_for_de_change / fail_no_stable_factorization /
+  blocked_insufficient_joint_data / blocked_alignment_unresolved。 [decision]
+- 禁止：MET/有限码/FER/fresh qualification/公开 residual/coarse SER 冒充总 FER/
+  Alice-oracle 选候选/holdout 选 mapping/raw pipeline/改动冻结 Polar 基线/push。 [decision]
+- 未实现未执行；下一步 P0 只读审计 + P1 freeze review，ACCEPT 前不实现。 [pending]
+---
+
 
 ## 2026-08-18 V24 gate result: FAIL — bounded single-edge route closed
 

@@ -1,3 +1,18 @@
+Status: V25 DRAFT — 已记录冻结任务包并建立 OpenSpec 草稿；待 P0 只读审计 + 独立 freeze review
+
+## 2026-08-18 V25 立项（文档记录 + OpenSpec 草稿）
+
+- 用户交付 V25 冻结任务包：`docs/nbldpc-v25-empirical-channel-and-factorization-plan-20260818.md`。
+- 新建 OpenSpec change（DRAFT_PENDING_P0_AUDIT_AND_FREEZE_REVIEW）：
+  `openspec/changes/formal-nonbinary-ldpc-v25-empirical-timestamp-channel-and-multilevel-factorization-gate/`
+  （proposal / design / tasks / delta spec）。
+- V25 范围：保留 1024-bin 原始符号，建立经验条件信道 P(A|B,Z)，评估 F01–F05 ×
+  L01–L02 分层分解（chain-rule 门），终止于 M4 架构选择。不实现 DE/MET/有限码/FER。
+- 下一步：P0 只读输入审计（data_inventory.json）→ P1 freeze review ACCEPT →
+  工程 I01–I10 + 测试 T01–T12 → M0–M4。
+- V24 已 FAIL 并归档；V25 不自动启动任何禁止项；本地提交，不 push。
+---
+
 
 Status: V24 M0–M2 GATE FAIL (single_edge_bounded_optimization_failed) — bounded single-edge route closed; V21/V22/V23 ARCHIVED
 

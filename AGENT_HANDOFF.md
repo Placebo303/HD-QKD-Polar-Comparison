@@ -1,3 +1,18 @@
+## 2026-08-18 V25 立项（文档 + OpenSpec 草稿）
+
+- 用户提供 V25 冻结任务包并指示“更新至文档”。
+- 已落盘：docs/nbldpc-v25-empirical-channel-and-factorization-plan-20260818.md（409 行，忠实保留原内容）。
+- 已创建 V25 OpenSpec change（DRAFT）：
+  openspec/changes/formal-nonbinary-ldpc-v25-empirical-timestamp-channel-and-multilevel-factorization-gate/
+- 状态：DRAFT_PENDING_P0_AUDIT_AND_FREEZE_REVIEW；未实现、未执行。
+- 下一步/跨会话 resume：执行 P0 只读审计（列出 data_inventory.json 所需字段来源），
+  然后 P1 freeze review；freeze ACCEPT 前不得开始工程实现。
+- 关键边界：经验信道 P(A|B,Z) 主模型；编码分层 ≠ 物理 bin 合并；F01–F05/L01–L02
+  严格预注册；chain rule 闭合；M4 四个终态；禁止 MET/有限码/FER/oracle/holdout 选
+  mapping/raw pipeline；不 push。
+- V24 已归档（archive/2026-08-18-*）。
+---
+
 
 
 ## 2026-08-18 V24 gate COMPLETE: FAIL
