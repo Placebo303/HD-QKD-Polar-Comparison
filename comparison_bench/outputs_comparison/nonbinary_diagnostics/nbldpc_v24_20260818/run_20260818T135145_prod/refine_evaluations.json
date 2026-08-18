@@ -1,0 +1,246 @@
+{
+  "records": [
+    {
+      "candidate_id": 3719,
+      "converged": false,
+      "elapsed_seconds": 190.1668878999917,
+      "error": null,
+      "final_entropy": 0.29018652483726365,
+      "iterations": 150,
+      "seed": 24003,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 3719,
+      "converged": false,
+      "elapsed_seconds": 186.66571380000096,
+      "error": null,
+      "final_entropy": 0.2987476866578073,
+      "iterations": 150,
+      "seed": 24004,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 3719,
+      "converged": false,
+      "elapsed_seconds": 198.38751699999557,
+      "error": null,
+      "final_entropy": 0.2957594935148119,
+      "iterations": 150,
+      "seed": 24005,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1257,
+      "converged": false,
+      "elapsed_seconds": 163.55888300000515,
+      "error": null,
+      "final_entropy": 0.2944382093663778,
+      "iterations": 150,
+      "seed": 24003,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1257,
+      "converged": false,
+      "elapsed_seconds": 162.2531944000075,
+      "error": null,
+      "final_entropy": 0.2972912506757067,
+      "iterations": 150,
+      "seed": 24004,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1257,
+      "converged": false,
+      "elapsed_seconds": 166.09885570000915,
+      "error": null,
+      "final_entropy": 0.29711803073212295,
+      "iterations": 150,
+      "seed": 24005,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 4967,
+      "converged": false,
+      "elapsed_seconds": 212.50721460000204,
+      "error": null,
+      "final_entropy": 0.2968012365051915,
+      "iterations": 150,
+      "seed": 24003,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 4967,
+      "converged": false,
+      "elapsed_seconds": 209.72470949999115,
+      "error": null,
+      "final_entropy": 0.2980390122429598,
+      "iterations": 150,
+      "seed": 24004,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 4967,
+      "converged": false,
+      "elapsed_seconds": 209.90737990000343,
+      "error": null,
+      "final_entropy": 0.2989109639819704,
+      "iterations": 150,
+      "seed": 24005,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1663,
+      "converged": false,
+      "elapsed_seconds": 139.51815089999582,
+      "error": null,
+      "final_entropy": 0.29952020799508133,
+      "iterations": 150,
+      "seed": 24003,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1663,
+      "converged": false,
+      "elapsed_seconds": 151.28582499999902,
+      "error": null,
+      "final_entropy": 0.29914044536555434,
+      "iterations": 150,
+      "seed": 24004,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1663,
+      "converged": false,
+      "elapsed_seconds": 143.87985290000506,
+      "error": null,
+      "final_entropy": 0.29896006027169425,
+      "iterations": 150,
+      "seed": 24005,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 6240,
+      "converged": false,
+      "elapsed_seconds": 140.36112519999733,
+      "error": null,
+      "final_entropy": 0.299044915206348,
+      "iterations": 150,
+      "seed": 24003,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 6240,
+      "converged": false,
+      "elapsed_seconds": 149.97095329999865,
+      "error": null,
+      "final_entropy": 0.2989864600139904,
+      "iterations": 150,
+      "seed": 24004,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 6240,
+      "converged": false,
+      "elapsed_seconds": 150.30758440001227,
+      "error": null,
+      "final_entropy": 0.29867296601812604,
+      "iterations": 150,
+      "seed": 24005,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 2740,
+      "converged": false,
+      "elapsed_seconds": 190.20724360000168,
+      "error": null,
+      "final_entropy": 0.2956016342779434,
+      "iterations": 150,
+      "seed": 24003,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 2740,
+      "converged": false,
+      "elapsed_seconds": 189.70331110000552,
+      "error": null,
+      "final_entropy": 0.2980097931206603,
+      "iterations": 150,
+      "seed": 24004,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 2740,
+      "converged": false,
+      "elapsed_seconds": 191.56377899998915,
+      "error": null,
+      "final_entropy": 0.2983089276485878,
+      "iterations": 150,
+      "seed": 24005,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1816,
+      "converged": false,
+      "elapsed_seconds": 170.48552560000098,
+      "error": null,
+      "final_entropy": 0.29697084538453133,
+      "iterations": 150,
+      "seed": 24003,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1816,
+      "converged": false,
+      "elapsed_seconds": 177.56162400000903,
+      "error": null,
+      "final_entropy": 0.2975864868400988,
+      "iterations": 150,
+      "seed": 24004,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 1816,
+      "converged": false,
+      "elapsed_seconds": 175.98031800000172,
+      "error": null,
+      "final_entropy": 0.29849269618708496,
+      "iterations": 150,
+      "seed": 24005,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 2877,
+      "converged": false,
+      "elapsed_seconds": 190.26655759999994,
+      "error": null,
+      "final_entropy": 0.3012827564441931,
+      "iterations": 150,
+      "seed": 24003,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 2877,
+      "converged": false,
+      "elapsed_seconds": 187.94028270000126,
+      "error": null,
+      "final_entropy": 0.2984429358665767,
+      "iterations": 150,
+      "seed": 24004,
+      "stage": "refine"
+    },
+    {
+      "candidate_id": 2877,
+      "converged": false,
+      "elapsed_seconds": 190.6843499999959,
+      "error": null,
+      "final_entropy": 0.37715474190293957,
+      "iterations": 150,
+      "seed": 24005,
+      "stage": "refine"
+    }
+  ],
+  "schema": "nbldpc_v24_evaluation_v1",
+  "stage": "refine"
+}

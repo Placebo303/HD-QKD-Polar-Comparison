@@ -1,0 +1,10 @@
+{
+  "finalist_passed": false,
+  "m0_passed": true,
+  "m1_resource_blocked": false,
+  "m2_resource_blocked": false,
+  "passed": false,
+  "reason": "no finalist passed all five holdout seeds",
+  "schema": "nbldpc_v24_decision_v1",
+  "terminal_state": "fail"
+}

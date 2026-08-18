@@ -1,0 +1,950 @@
+{
+  "ranking": [
+    {
+      "candidate_id": 3719,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19954596117675205,
+      "worst_final_entropy": 0.19961205744573657
+    },
+    {
+      "candidate_id": 1257,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19967913335058646,
+      "worst_final_entropy": 0.19979889840498027
+    },
+    {
+      "candidate_id": 4967,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19982445783799038,
+      "worst_final_entropy": 0.19985730081214453
+    },
+    {
+      "candidate_id": 1663,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.1999440293050244,
+      "worst_final_entropy": 0.19994979744825284
+    },
+    {
+      "candidate_id": 6240,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.1999298582303115,
+      "worst_final_entropy": 0.19994999615637596
+    },
+    {
+      "candidate_id": 2740,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19994890523172343,
+      "worst_final_entropy": 0.19995031318012518
+    },
+    {
+      "candidate_id": 1816,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19996397126564996,
+      "worst_final_entropy": 0.1999667983084177
+    },
+    {
+      "candidate_id": 2877,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19997881092349348,
+      "worst_final_entropy": 0.19998128301619267
+    },
+    {
+      "candidate_id": 2318,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.1999793383209657,
+      "worst_final_entropy": 0.19998922159565477
+    },
+    {
+      "candidate_id": 1330,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19998853207563955,
+      "worst_final_entropy": 0.1999910527814168
+    },
+    {
+      "candidate_id": 2508,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19998948719981893,
+      "worst_final_entropy": 0.19999264033929776
+    },
+    {
+      "candidate_id": 2701,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999848703659523,
+      "worst_final_entropy": 0.19999852114230943
+    },
+    {
+      "candidate_id": 3052,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999910747616562,
+      "worst_final_entropy": 0.19999933364471828
+    },
+    {
+      "candidate_id": 509,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999789662966744,
+      "worst_final_entropy": 0.19999938083205948
+    },
+    {
+      "candidate_id": 2049,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.1999994373396181,
+      "worst_final_entropy": 0.19999946926095052
+    },
+    {
+      "candidate_id": 6958,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999970616160856,
+      "worst_final_entropy": 0.1999997318466652
+    },
+    {
+      "candidate_id": 8053,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999978766792365,
+      "worst_final_entropy": 0.1999998412888398
+    },
+    {
+      "candidate_id": 7907,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.1999998896602121,
+      "worst_final_entropy": 0.19999989110690788
+    },
+    {
+      "candidate_id": 7929,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.1999999040506172,
+      "worst_final_entropy": 0.19999991657612942
+    },
+    {
+      "candidate_id": 749,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999994908229038,
+      "worst_final_entropy": 0.1999999499417379
+    },
+    {
+      "candidate_id": 317,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999997421160537,
+      "worst_final_entropy": 0.19999997471591294
+    },
+    {
+      "candidate_id": 2888,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999998539713892,
+      "worst_final_entropy": 0.19999998794343354
+    },
+    {
+      "candidate_id": 1412,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.19999999528671752,
+      "worst_final_entropy": 0.19999999530777388
+    },
+    {
+      "candidate_id": 3285,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.20000075080881086,
+      "worst_final_entropy": 0.20000155359246122
+    },
+    {
+      "candidate_id": 885,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.20005497436906522,
+      "worst_final_entropy": 0.2001114539239842
+    },
+    {
+      "candidate_id": 7964,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.20036231692400625,
+      "worst_final_entropy": 0.20072663666672022
+    },
+    {
+      "candidate_id": 6885,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2117820081567786,
+      "worst_final_entropy": 0.22354460167397408
+    },
+    {
+      "candidate_id": 4144,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.26043403940689663,
+      "worst_final_entropy": 0.2763982942663016
+    },
+    {
+      "candidate_id": 2759,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2692076644706425,
+      "worst_final_entropy": 0.2774859679449073
+    },
+    {
+      "candidate_id": 2340,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.27176931383820474,
+      "worst_final_entropy": 0.2807935368847806
+    },
+    {
+      "candidate_id": 5536,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24628562474493834,
+      "worst_final_entropy": 0.29296501760476606
+    },
+    {
+      "candidate_id": 1941,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29170449379443203,
+      "worst_final_entropy": 0.29307355307027566
+    },
+    {
+      "candidate_id": 1705,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.27928730043020683,
+      "worst_final_entropy": 0.2937455475518729
+    },
+    {
+      "candidate_id": 8066,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24679755334150483,
+      "worst_final_entropy": 0.2939246412694559
+    },
+    {
+      "candidate_id": 5327,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29017824603357256,
+      "worst_final_entropy": 0.2946327071585607
+    },
+    {
+      "candidate_id": 101,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2954709332036002,
+      "worst_final_entropy": 0.2958070815165729
+    },
+    {
+      "candidate_id": 7998,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24849290518151548,
+      "worst_final_entropy": 0.2969858291475211
+    },
+    {
+      "candidate_id": 261,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24916579291890842,
+      "worst_final_entropy": 0.298343551292614
+    },
+    {
+      "candidate_id": 3411,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24918738448618172,
+      "worst_final_entropy": 0.29848240120006175
+    },
+    {
+      "candidate_id": 4234,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2986106225966946,
+      "worst_final_entropy": 0.2986909219360751
+    },
+    {
+      "candidate_id": 1666,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.27497067359695215,
+      "worst_final_entropy": 0.2990564591079967
+    },
+    {
+      "candidate_id": 7531,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29782093367392815,
+      "worst_final_entropy": 0.2991853561047539
+    },
+    {
+      "candidate_id": 2633,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24968146914340078,
+      "worst_final_entropy": 0.2993780675632373
+    },
+    {
+      "candidate_id": 4756,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29299188783540053,
+      "worst_final_entropy": 0.2994854478763069
+    },
+    {
+      "candidate_id": 7752,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29943583423994774,
+      "worst_final_entropy": 0.29952872895446997
+    },
+    {
+      "candidate_id": 3288,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24980073185033513,
+      "worst_final_entropy": 0.2996103049509637
+    },
+    {
+      "candidate_id": 4117,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.26804228927152873,
+      "worst_final_entropy": 0.2997398026397066
+    },
+    {
+      "candidate_id": 7560,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2498878176761017,
+      "worst_final_entropy": 0.29977576515322335
+    },
+    {
+      "candidate_id": 4299,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24989485756612106,
+      "worst_final_entropy": 0.2997906119955324
+    },
+    {
+      "candidate_id": 6864,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24989582589620135,
+      "worst_final_entropy": 0.29979318950370293
+    },
+    {
+      "candidate_id": 6215,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24994001051850648,
+      "worst_final_entropy": 0.2998800717904665
+    },
+    {
+      "candidate_id": 7561,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24992884235775356,
+      "worst_final_entropy": 0.29990349722397885
+    },
+    {
+      "candidate_id": 3505,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29989669502769145,
+      "worst_final_entropy": 0.2999101166866078
+    },
+    {
+      "candidate_id": 173,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29991110126219134,
+      "worst_final_entropy": 0.29991526199669943
+    },
+    {
+      "candidate_id": 8019,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2993730125347194,
+      "worst_final_entropy": 0.29993178615891153
+    },
+    {
+      "candidate_id": 6388,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2995759287026263,
+      "worst_final_entropy": 0.29993949484238963
+    },
+    {
+      "candidate_id": 6917,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29990348281112705,
+      "worst_final_entropy": 0.2999420243535949
+    },
+    {
+      "candidate_id": 2545,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29994459735073215,
+      "worst_final_entropy": 0.2999449519852406
+    },
+    {
+      "candidate_id": 3867,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24997308359558973,
+      "worst_final_entropy": 0.2999465684879152
+    },
+    {
+      "candidate_id": 6100,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24997490837772035,
+      "worst_final_entropy": 0.2999498339140419
+    },
+    {
+      "candidate_id": 6652,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2499752209115381,
+      "worst_final_entropy": 0.2999504432529588
+    },
+    {
+      "candidate_id": 3249,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29995375710591554,
+      "worst_final_entropy": 0.29996432814526164
+    },
+    {
+      "candidate_id": 6283,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2998562390531687,
+      "worst_final_entropy": 0.29996915887116243
+    },
+    {
+      "candidate_id": 3918,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999650630287076,
+      "worst_final_entropy": 0.29996995672905735
+    },
+    {
+      "candidate_id": 1084,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24998671165181455,
+      "worst_final_entropy": 0.2999734361459952
+    },
+    {
+      "candidate_id": 3473,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29997604353669616,
+      "worst_final_entropy": 0.29997629251976293
+    },
+    {
+      "candidate_id": 5706,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2499887331600776,
+      "worst_final_entropy": 0.29997748653944734
+    },
+    {
+      "candidate_id": 798,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24998938005116017,
+      "worst_final_entropy": 0.2999787677753765
+    },
+    {
+      "candidate_id": 7682,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24999119221094807,
+      "worst_final_entropy": 0.29998239026095924
+    },
+    {
+      "candidate_id": 1044,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29992399183859586,
+      "worst_final_entropy": 0.2999829382691727
+    },
+    {
+      "candidate_id": 5863,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2499915097023844,
+      "worst_final_entropy": 0.2999830324538385
+    },
+    {
+      "candidate_id": 2896,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2996251535135298,
+      "worst_final_entropy": 0.2999843003400594
+    },
+    {
+      "candidate_id": 1312,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24999295091786347,
+      "worst_final_entropy": 0.2999859021652209
+    },
+    {
+      "candidate_id": 150,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2508578329483272,
+      "worst_final_entropy": 0.29998667992112354
+    },
+    {
+      "candidate_id": 4668,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29998233437444194,
+      "worst_final_entropy": 0.29998719930298273
+    },
+    {
+      "candidate_id": 6462,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2499942232197453,
+      "worst_final_entropy": 0.299988447327444
+    },
+    {
+      "candidate_id": 5880,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2499942550406477,
+      "worst_final_entropy": 0.29998851075679456
+    },
+    {
+      "candidate_id": 4880,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24999464588618664,
+      "worst_final_entropy": 0.2999892988644637
+    },
+    {
+      "candidate_id": 1761,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2928960039490192,
+      "worst_final_entropy": 0.2999905983727081
+    },
+    {
+      "candidate_id": 1963,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29998771463280516,
+      "worst_final_entropy": 0.2999906069613379
+    },
+    {
+      "candidate_id": 6643,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2499956278419903,
+      "worst_final_entropy": 0.29999126760742434
+    },
+    {
+      "candidate_id": 649,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.299974811240651,
+      "worst_final_entropy": 0.2999928916720115
+    },
+    {
+      "candidate_id": 805,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29979000228270297,
+      "worst_final_entropy": 0.2999932302593497
+    },
+    {
+      "candidate_id": 6602,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29998243940673897,
+      "worst_final_entropy": 0.2999946206709875
+    },
+    {
+      "candidate_id": 7250,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999442319097114,
+      "worst_final_entropy": 0.299995839685406
+    },
+    {
+      "candidate_id": 7241,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999933451439359,
+      "worst_final_entropy": 0.2999960915906684
+    },
+    {
+      "candidate_id": 7914,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999026274568863,
+      "worst_final_entropy": 0.29999669005652846
+    },
+    {
+      "candidate_id": 4650,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999938693452492,
+      "worst_final_entropy": 0.2999969263286171
+    },
+    {
+      "candidate_id": 6640,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999940474859685,
+      "worst_final_entropy": 0.2999969797587268
+    },
+    {
+      "candidate_id": 6595,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29998167119676933,
+      "worst_final_entropy": 0.29999712706896187
+    },
+    {
+      "candidate_id": 181,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999738399520504,
+      "worst_final_entropy": 0.2999975620894926
+    },
+    {
+      "candidate_id": 2295,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29998633617786546,
+      "worst_final_entropy": 0.29999786644252957
+    },
+    {
+      "candidate_id": 753,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29995221715273906,
+      "worst_final_entropy": 0.2999979944949531
+    },
+    {
+      "candidate_id": 6336,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999240707625474,
+      "worst_final_entropy": 0.2999980595283005
+    },
+    {
+      "candidate_id": 4922,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999977389309292,
+      "worst_final_entropy": 0.299998140618982
+    },
+    {
+      "candidate_id": 33,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999978683051754,
+      "worst_final_entropy": 0.29999817307101895
+    },
+    {
+      "candidate_id": 5071,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29998569046810286,
+      "worst_final_entropy": 0.2999982536261641
+    },
+    {
+      "candidate_id": 7813,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999774016647807,
+      "worst_final_entropy": 0.2999983137090603
+    },
+    {
+      "candidate_id": 3209,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999821806756094,
+      "worst_final_entropy": 0.29999832095306905
+    },
+    {
+      "candidate_id": 6360,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999970879215788,
+      "worst_final_entropy": 0.29999842036982655
+    },
+    {
+      "candidate_id": 7215,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999968926105082,
+      "worst_final_entropy": 0.29999850609625595
+    },
+    {
+      "candidate_id": 6996,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999956381034442,
+      "worst_final_entropy": 0.2999985135103486
+    },
+    {
+      "candidate_id": 6767,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999447430430703,
+      "worst_final_entropy": 0.2999985500707544
+    },
+    {
+      "candidate_id": 7399,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999853194860515,
+      "worst_final_entropy": 0.29999855139855097
+    },
+    {
+      "candidate_id": 3557,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999975726642946,
+      "worst_final_entropy": 0.2999989550265061
+    },
+    {
+      "candidate_id": 6266,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24999951720504074,
+      "worst_final_entropy": 0.29999905732772447
+    },
+    {
+      "candidate_id": 2437,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999907856705665,
+      "worst_final_entropy": 0.2999991205657206
+    },
+    {
+      "candidate_id": 5578,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999975619373548,
+      "worst_final_entropy": 0.29999929337033476
+    },
+    {
+      "candidate_id": 4686,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999991550114494,
+      "worst_final_entropy": 0.29999930194998414
+    },
+    {
+      "candidate_id": 7747,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.24999932639475875,
+      "worst_final_entropy": 0.2999993737667797
+    },
+    {
+      "candidate_id": 4752,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999852370021585,
+      "worst_final_entropy": 0.29999939387095587
+    },
+    {
+      "candidate_id": 7868,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29998234391751166,
+      "worst_final_entropy": 0.2999994569303972
+    },
+    {
+      "candidate_id": 4217,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999994078502741,
+      "worst_final_entropy": 0.2999994749529475
+    },
+    {
+      "candidate_id": 7423,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999952911964844,
+      "worst_final_entropy": 0.2999995920768226
+    },
+    {
+      "candidate_id": 6808,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999997814734643,
+      "worst_final_entropy": 0.2999998020888936
+    },
+    {
+      "candidate_id": 2502,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2499999060633456,
+      "worst_final_entropy": 0.2999998124584095
+    },
+    {
+      "candidate_id": 4635,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999998778436742,
+      "worst_final_entropy": 0.2999998800557168
+    },
+    {
+      "candidate_id": 6483,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999988808404365,
+      "worst_final_entropy": 0.2999998970124028
+    },
+    {
+      "candidate_id": 2386,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999187816593,
+      "worst_final_entropy": 0.2999999205753436
+    },
+    {
+      "candidate_id": 3531,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999997723675215,
+      "worst_final_entropy": 0.29999992849546525
+    },
+    {
+      "candidate_id": 2433,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999323630912,
+      "worst_final_entropy": 0.2999999326259013
+    },
+    {
+      "candidate_id": 7788,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999436326609,
+      "worst_final_entropy": 0.29999994581717604
+    },
+    {
+      "candidate_id": 4673,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999435409972,
+      "worst_final_entropy": 0.29999994634015387
+    },
+    {
+      "candidate_id": 7427,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999465826916,
+      "worst_final_entropy": 0.299999950483789
+    },
+    {
+      "candidate_id": 5563,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999554926586,
+      "worst_final_entropy": 0.2999999576698902
+    },
+    {
+      "candidate_id": 4026,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29999997875528767,
+      "worst_final_entropy": 0.29999997984808063
+    },
+    {
+      "candidate_id": 187,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999798077296,
+      "worst_final_entropy": 0.2999999807872459
+    },
+    {
+      "candidate_id": 5185,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999836340075,
+      "worst_final_entropy": 0.2999999854729583
+    },
+    {
+      "candidate_id": 7296,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999909454202,
+      "worst_final_entropy": 0.29999999115613557
+    },
+    {
+      "candidate_id": 4957,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999936822575,
+      "worst_final_entropy": 0.2999999938861797
+    },
+    {
+      "candidate_id": 6676,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999947565136,
+      "worst_final_entropy": 0.29999999543778305
+    },
+    {
+      "candidate_id": 3986,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999961978499,
+      "worst_final_entropy": 0.29999999653233056
+    },
+    {
+      "candidate_id": 1153,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2999999995204211,
+      "worst_final_entropy": 0.2999999995248109
+    },
+    {
+      "candidate_id": 2158,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.30134305245534027,
+      "worst_final_entropy": 0.31663188650203
+    },
+    {
+      "candidate_id": 5684,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.33473663921372243,
+      "worst_final_entropy": 0.38369521652141153
+    }
+  ],
+  "stage": "screen"
+}

@@ -1,0 +1,197 @@
+{
+  "H_V17": 0.5499550439219351,
+  "check_count": 37,
+  "checks": [
+    {
+      "detail": "v8_reproduction_trace_corrected_v1",
+      "name": "schema",
+      "ok": true
+    },
+    {
+      "detail": "4",
+      "name": "q",
+      "ok": true
+    },
+    {
+      "detail": "0.75",
+      "name": "rate",
+      "ok": true
+    },
+    {
+      "detail": "{'1': 0.107, '3': 0.245, '6': 0.192, '9': 0.034, '18': 0.207, '25': 0.161, '27': 0.049}",
+      "name": "lambda_published",
+      "ok": true
+    },
+    {
+      "detail": "{'2': 0.107, '4': 0.245, '7': 0.192, '10': 0.034, '19': 0.207, '26': 0.161, '28': 0.049}",
+      "name": "lambda_degrees",
+      "ok": true
+    },
+    {
+      "detail": "{'24': 0.662342394447661, '25': 0.33765760555233904}",
+      "name": "rho_degrees",
+      "ok": true
+    },
+    {
+      "detail": "24.32858932876873",
+      "name": "dc_mean",
+      "ok": true
+    },
+    {
+      "detail": "0.1644156159629844",
+      "name": "integral_lambda",
+      "ok": true
+    },
+    {
+      "detail": "0.0411039039907461",
+      "name": "integral_rho",
+      "ok": true
+    },
+    {
+      "detail": "0.75 vs 0.75",
+      "name": "rate_reconstructed",
+      "ok": true
+    },
+    {
+      "detail": "100000",
+      "name": "n_samples",
+      "ok": true
+    },
+    {
+      "detail": "150",
+      "name": "max_iter",
+      "ok": true
+    },
+    {
+      "detail": "2026080418",
+      "name": "seed",
+      "ok": true
+    },
+    {
+      "detail": "0.01",
+      "name": "p_lo",
+      "ok": true
+    },
+    {
+      "detail": "0.12",
+      "name": "p_hi",
+      "ok": true
+    },
+    {
+      "detail": "0.0025",
+      "name": "p_tol",
+      "ok": true
+    },
+    {
+      "detail": "0.01",
+      "name": "entropy_tol",
+      "ok": true
+    },
+    {
+      "detail": "20",
+      "name": "streak",
+      "ok": true
+    },
+    {
+      "detail": "0.069",
+      "name": "det_published",
+      "ok": true
+    },
+    {
+      "detail": "0.012",
+      "name": "tolerance",
+      "ok": true
+    },
+    {
+      "detail": "0.06242187500000001",
+      "name": "threshold_proxy",
+      "ok": true
+    },
+    {
+      "detail": "0.006578124999999997",
+      "name": "delta_vs_published",
+      "ok": true
+    },
+    {
+      "detail": "PASS",
+      "name": "verdict",
+      "ok": true
+    },
+    {
+      "detail": "0.0005 (3-decimal published rounding of DET 0.069) + 0.00125 (binary-search half-step p_tol/2) + 0.005 (our MC-DE finite-sample threshold-estimate error at 100000 nodes) + 0.005 (paper MC-DE estimate error at its 100000 nodes) = 0.01175 <= 0.012 (frozen)",
+      "name": "tolerance_arithmetic",
+      "ok": true
+    },
+    {
+      "detail": "entropy < entropy_tol for streak consecutive iterations",
+      "name": "convergence_rule",
+      "ok": true
+    },
+    {
+      "detail": "nbldpc_v17_multibit_channel_model_v1",
+      "name": "schema",
+      "ok": true
+    },
+    {
+      "detail": "1024",
+      "name": "q",
+      "ok": true
+    },
+    {
+      "detail": "10",
+      "name": "bit_planes",
+      "ok": true
+    },
+    {
+      "detail": "gray",
+      "name": "mapping",
+      "ok": true
+    },
+    {
+      "detail": "product_of_per_plane_marginals",
+      "name": "joint_structure_form",
+      "ok": true
+    },
+    {
+      "detail": "0.5499550439219351",
+      "name": "entropy_bits",
+      "ok": true
+    },
+    {
+      "detail": "[3.0517578125e-05, 0.0001220703125, 0.0003662109375, 0.000946044921875, 0.001251220703125, 0.00250244140625, 0.00457763671875, 0.009307861328125, 0.02044677734375, 0.037506103515625]",
+      "name": "per_bit_plane_error_probability_msb_first",
+      "ok": true
+    },
+    {
+      "detail": "[24000, 24001, 24002, 24003, 24004, 24005, 24101, 24102, 24103, 24104, 24105]",
+      "name": "seed_lists_disjoint",
+      "ok": true
+    },
+    {
+      "detail": "24000",
+      "name": "proposal_seed",
+      "ok": true
+    },
+    {
+      "detail": "[24001, 24002]",
+      "name": "screen_seeds",
+      "ok": true
+    },
+    {
+      "detail": "[24003, 24004, 24005]",
+      "name": "refine_seeds",
+      "ok": true
+    },
+    {
+      "detail": "[24101, 24102, 24103, 24104, 24105]",
+      "name": "holdout_seeds",
+      "ok": true
+    }
+  ],
+  "note": "read_only_validator_no_de",
+  "passed": true,
+  "q": 1024,
+  "schema": "nbldpc_v24_m0_validation_v1",
+  "v17_channel_path": "D:\\Code\\HD-QKD_Polar_Comparison\\openspec\\changes\\formal-nonbinary-ldpc-v17-multibit-structured-de-gate\\evidence\\v17_multibit_channel_model.json",
+  "v8_trace_path": "D:\\Code\\HD-QKD_Polar_Comparison\\openspec\\changes\\formal-nonbinary-ldpc-v8-reference-reproduction\\evidence\\v8_reproduction_trace_corrected.json"
+}

@@ -1,0 +1,61 @@
+{
+  "ranking": [
+    {
+      "candidate_id": 1257,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29628249692473585,
+      "worst_final_entropy": 0.2972912506757067
+    },
+    {
+      "candidate_id": 2740,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2973067850157305,
+      "worst_final_entropy": 0.2983089276485878
+    },
+    {
+      "candidate_id": 1816,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.297683342803905,
+      "worst_final_entropy": 0.29849269618708496
+    },
+    {
+      "candidate_id": 3719,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29489790166996094,
+      "worst_final_entropy": 0.2987476866578073
+    },
+    {
+      "candidate_id": 4967,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29791707091004055,
+      "worst_final_entropy": 0.2989109639819704
+    },
+    {
+      "candidate_id": 6240,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.2989014470794881,
+      "worst_final_entropy": 0.299044915206348
+    },
+    {
+      "candidate_id": 1663,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.29920690454411,
+      "worst_final_entropy": 0.29952020799508133
+    },
+    {
+      "candidate_id": 2877,
+      "converged_count": 0,
+      "has_error": false,
+      "mean_final_entropy": 0.3256268114045698,
+      "worst_final_entropy": 0.37715474190293957
+    }
+  ],
+  "stage": "refine"
+}

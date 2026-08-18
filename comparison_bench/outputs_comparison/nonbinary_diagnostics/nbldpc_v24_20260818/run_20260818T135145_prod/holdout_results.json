@@ -1,0 +1,159 @@
+{
+  "passed": false,
+  "resource_blocked": false,
+  "results": [
+    {
+      "candidate_id": 1257,
+      "converged_all_seeds": false,
+      "profile_valid": true,
+      "profile_valid_reason": "valid",
+      "seed_results": [
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2942734858817337,
+          "seed": 24101
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.29329316683482515,
+          "seed": 24102
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2952364619326968,
+          "seed": 24103
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2938885396651912,
+          "seed": 24104
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2952146330095961,
+          "seed": 24105
+        }
+      ]
+    },
+    {
+      "candidate_id": 2740,
+      "converged_all_seeds": false,
+      "profile_valid": true,
+      "profile_valid_reason": "valid",
+      "seed_results": [
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2998190482329037,
+          "seed": 24101
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2978830100242089,
+          "seed": 24102
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.29822343375801547,
+          "seed": 24103
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.298325532607111,
+          "seed": 24104
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.29780138774425247,
+          "seed": 24105
+        }
+      ]
+    },
+    {
+      "candidate_id": 1816,
+      "converged_all_seeds": false,
+      "profile_valid": true,
+      "profile_valid_reason": "valid",
+      "seed_results": [
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2982283714216094,
+          "seed": 24101
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.29729212540473066,
+          "seed": 24102
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2985150484699799,
+          "seed": 24103
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2918600444898311,
+          "seed": 24104
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2998073750143394,
+          "seed": 24105
+        }
+      ]
+    },
+    {
+      "candidate_id": 3719,
+      "converged_all_seeds": false,
+      "profile_valid": true,
+      "profile_valid_reason": "valid",
+      "seed_results": [
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2933850695963988,
+          "seed": 24101
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2918672947174653,
+          "seed": 24102
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.295893467629737,
+          "seed": 24103
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2969932333310679,
+          "seed": 24104
+        },
+        {
+          "converged": false,
+          "error": null,
+          "final_entropy": 0.2934693170532397,
+          "seed": 24105
+        }
+      ]
+    }
+  ],
+  "stage": "holdout"
+}
