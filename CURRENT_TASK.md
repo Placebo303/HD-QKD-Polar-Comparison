@@ -1,3 +1,30 @@
+Status: V26 RUN_COMPLETE — pass_target_f13（A02 F03 GF32+GF32 f=1.3 全收敛；只读 verifier run_01/run_02 均 ok；本地归档，不 push）。V27 OpenSpec（finite-leakage-margin DE gate）已写好待主线程 freeze review，未执行。
+
+## 2026-08-19 V26 主体 + V26R closeout 完成（本地提交并归档，未 push）
+
+- V26 科学门：A02（F03 GF32+GF32）f=1.3 全收敛 30/30（2 layer × 3 source × 5 confirm
+  seed，final mean entropy 0.00000）；A01（F01 GF512+GF2）f=1.3 失败（GF2 residual 层）、
+  f=1.6 通过。终态 `pass_target_f13`。
+- 只读 verifier `verify_run`：独立从 `channel_counts.npz` 重建 adapters，重算 72 screen +
+  60 confirmation + A02@f=1.3 30/30 + rate/rho/seed/熵轨迹/终态；run_01 与 run_02 均
+  0 mismatch、ok=true；结果持久化到各 run `readonly_verify.json`。
+- 定义修正：f_i=leak_i/H_i、leak_i=(1-R_i)log2(q_i)、R_i=1-f_i·H_i/log2(q_i) 已在
+  proposal/design/spec/report/code 统一（不再出现 `f=R/H`、`R=f·H` 作为正确公式）。
+- M1 弱参考修正：`adapter_input_entropy_matches_iter0` 真实进入 MC-DE 首轮
+  （record_channel_entropy，err_replay=0）；`gf2_bsc_reference` 改为明确判定
+  （noiseless 收敛 / 可行性率收敛 / 容量附近判负）。
+- 24h 资源门实现（RESOURCE_LIMIT_SECONDS + resource_blocked 终态）；source↔delay 显式
+  元数据（SOURCE_METADATA → adapter/M0 detail/RUN_MANIFEST）。
+- run 角色：run_02=canonical、run_01=deterministic_repeat（RUN_MANIFEST + README）。
+- 证据：comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v26_20260818/
+- 报告：docs/nbldpc-v26-channel-informed-multilevel-de-report-20260819.md。
+- V26 OpenSpec 归档至 openspec/changes/archive/；测试 19 passed（含新资源门/delay/修正
+  M1 参考测试）。
+- V27：已创建 OpenSpec（F03 GF32+GF32、n={1024..8192}、64-bit tag、m_total 整数、
+  seeds 27001/27101 系列、三终态）；**只写不执行**，返回主线程 freeze review。
+- 禁止项全程遵守：无 degree 搜索、无有限码/FER/MET、无 fresh qual、无 push。
+---
+
 Status: V25 COMPLETE — M0–M4 已实现并运行；终态 pass_ready_for_de_change（高域 F01/GF512 + 中域 F03/GF32 供 V26）
 
 ## 2026-08-18 V25 M0–M4 实现完成

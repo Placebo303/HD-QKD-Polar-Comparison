@@ -1,12 +1,12 @@
 # Tasks: formal-nonbinary-ldpc-v25-empirical-timestamp-channel-and-multilevel-factorization-gate
 
-Status: **FROZEN_ACCEPTED — P102 ACCEPT（主线程 2026-08-18）；五项 minor spec edits 已应用；M0–M4 实现已授权**
+Status: **FROZEN_ACCEPTED — P102 ACCEPT（主线程 2026-08-18）；五项 minor spec edits 已应用；M0–M4 实现已授权；V26 closeout addendum 已补录（见 evidence/addendum_v26_closeout.md）**
 
 ## P0 — read-only state/input audit
 
-- [ ] **P001** 读取 AGENTS.md、AGENT_PROJECT_MEMORY.md、CURRENT_TASK.md、
+- [x] **P001** 读取 AGENTS.md、AGENT_PROJECT_MEMORY.md、CURRENT_TASK.md、
   AGENT_HANDOFF.md、docs/decision-log.md。
-- [ ] **P002** 只读审查 V17–V24 evidence/report/archive；确认 V24 只排除 bounded
+- [x] **P002** 只读审查 V17–V24 evidence/report/archive；确认 V24 只排除 bounded
   single-edge、不排除 GF512/256/multilevel/source-conditioned/MET。
 - [x] **P003** 定位 pairs build manifest、sidecar metadata、数据源 provenance、
   D01/V17 证据、legacy pairs；产出 `data_inventory.json`（路径/source ID/时间/
@@ -18,7 +18,7 @@ Status: **FROZEN_ACCEPTED — P102 ACCEPT（主线程 2026-08-18）；五项 min
 
 - [x] **P101** proposal/design/tasks/spec 冻结定义、输入清单、切分、factorization、
   labeling、输出 schema、gate、禁止事项、失败终态。
-- [ ] **P102** 独立 freeze review ACCEPT 前不得开始实现。
+- [x] **P102** 独立 freeze review ACCEPT 前不得开始实现。
 
 ## I — engineering (engineering pass only)
 

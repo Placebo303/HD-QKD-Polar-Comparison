@@ -1,3 +1,33 @@
+## 2026-08-19 V26 channel-informed DE gate complete: pass_target_f13 + V26R closeout
+
+- V26 result: A02 (F03 GF32+GF32) converges f=1.3 on all 2 layer x 3 source x 5 confirm
+  seeds (30/30, final mean entropy 0.00000); A01 (F01 GF512+GF2) f=1.3 fails on the GF2
+  residual layer, passes at f=1.6; terminal pass_target_f13. [repo-observed]
+- Read-only verifier verify_run independently recomputes 72 screen + 60 confirmation +
+  A02@f=1.3 30/30 + rate/rho/seed/entropy/terminal from channel_counts.npz; run_01 and
+  run_02 both 0 mismatch ok=true; persisted readonly_verify.json per run. [repo-observed]
+- Correct formulas: f_i=leak_i/H_i, leak_i=(1-R_i)log2(q_i)=m_i log2(q_i)/n,
+  R_i=1-f_i H_i/log2(q_i); NOT f=R/H and NOT R=f*H (would mix bit/symbol with normalized
+  leakage). Applied in proposal/design/spec/report/code and V27 planning. [decision]
+- V26 Run roles: run_02 canonical, run_01 deterministic_repeat (RUN_MANIFEST.json +
+  README at nbldpc_v26_20260818/). [decision]
+- 24h completed-call resource gate implemented as RESOURCE_LIMIT_SECONDS in
+  run_screen/run_confirmation (_run_gated_stage) -> resource_blocked terminal; V26 not
+  triggered (screen~44s + confirm~112s). [repo-observed]
+- Explicit source<->delay metadata: SOURCE_METADATA in nonbinary_v26_channel.py
+  (1M/1p5M/2M -> delay_used_ps -50/+50/+50, n_pairs 512000/708352/933120); exposed on
+  ChannelAdapter and recorded in M0 detail + RUN_MANIFEST. [repo-observed]
+- M1 reference fixes: adapter_input_entropy_matches_iter0 now runs the real MC-DE first
+  round (record_channel_entropy read-only flag on run_mcde_posterior; default off so
+  screen/confirm numerics unchanged); gf2_bsc_reference now clearly decides pass/fail
+  (noiseless must converge; feasible-rate ~0.427 must converge; at-capacity ~0.714 must
+  fail) instead of "both non-converge = agree". [repo-observed]
+- V26 closes with an archived OpenSpec change (local commit, no push). Pass_target_f13 only
+  authorizes proposing A02 finite-code/construction change; still no FER/MET/qual/promo. [decision]
+- V27 = NEW OpenSpec change (finite-leakage-margin DE gate), four parts written, returned to
+  main-thread freeze review; NOT executed in this work. [pending]
+---
+
 ## 2026-08-18 V25 M0-M4 complete (pass_ready_for_de_change)
 
 - V25 P102 ACCEPT (main-thread): +-1 adjacent-bin errors with source/delay_used_ps

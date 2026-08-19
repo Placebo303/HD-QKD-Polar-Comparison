@@ -2427,3 +2427,48 @@ source/delay-conditioned channel (not alignment blocker); P102 ACCEPT; M0-M4 aut
 **Successor**: V26 small-scale channel-informed DE is a NEW change requiring explicit user
 authorization; V25 PASS only proposes V26 and does not auto-start it. No finite code / FER /
 MET / fresh qualification / public residual / Alice-oracle; no push.
+
+## 2026-08-19 — V26 channel-informed multilevel DE gate: RUN_COMPLETE pass_target_f13 (+ closeout fixes)
+
+**Context**: V25 (pass_ready_for_de_change) proposed two preselected exploration points —
+high-field F01 GF512+GF2 (A01) and mid-field F03 GF32+GF32 (A02). V26 ran a small-scale
+channel-informed multilevel MC-DE gate on them at f in {1.3,1.6,2.0}.
+
+**Result**:
+- M0 adapter semantic gate + M1 mechanism tests all pass; A02 f=1.3 converges on all
+  2 layer x 3 source x 5 confirm-seed (30/30), final mean entropy 0.00000 bits/symbol.
+  A01 f=1.3 fails on the GF2 residual layer, passes at f=1.6. Terminal = pass_target_f13.
+- Independent read-only verifier recomputes 72 screen + 60 confirmation + A02@f=1.3 30/30
+  + rate/rho/seed/entropy/terminal; run_01 and run_02 both 0 mismatch, ok=true.
+- Fixed definitions: f_i = leak_i / H_i with leak_i = (1 - R_i) log2(q_i) and
+  R_i = 1 - f_i H_i / log2(q_i) throughout proposal/design/spec/report/code/v27 planning.
+- Corrected weak M1 references: iteration-0 test now genuinely enters the MC-DE first round
+  (record_channel_entropy); GF2 BSC reference now clearly decides pass/fail (noiseless must
+  converge; feasible-rate must converge; at-capacity must fail) instead of "both non-converge
+  = agree".
+- Implemented the declared 24h completed-call resource gate (RESOURCE_LIMIT_SECONDS) in
+  run_screen/run_confirmation + resource_blocked terminal state; not triggered in V26.
+- Added explicit source<->delay metadata (SOURCE_METADATA: 1M/1p5M/2M -> delay_used_ps
+  -50/+50/+50, n_pairs 512000/708352/933120) into ChannelAdapter, M0 detail, RUN_MANIFEST.
+- Run roles: run_02 = canonical, run_01 = deterministic_repeat (RUN_MANIFEST/README).
+
+**Consequences**:
+- pass_target_f13 only authorizes proposing A02 (F03 GF32+GF32) finite-code/construction
+  change; still no FER/qualification/promotion/MET claim.
+- V27 is a NEW change (finite-leakage-margin DE gate) to be written as OpenSpec and returned
+  to main-thread freeze review; it is NOT auto-executed here.
+- V26 archived locally; no push.
+
+---
+
+## 2026-08-19 — V27 scope freeze (OpenSpec only, no execution)
+
+**Decision**: Create V27 as a *finite-leakage-margin* DE gate OpenSpec, four-part
+(proposal/design/tasks/spec delta), frozen parameters: architecture fixed to F03 GF32+GF32;
+source/delay-conditioned empirical posterior; Bob-full sequential decoding semantics;
+lambda={2:1}; forbid degree search/MET/finite FER; n in {1024,2048,4096,8192}; 64-bit public
+verification tag counted in total leakage; integer m_total per n with total f <= 1.3;
+test only entropy-proportional m1/m2 and m1+/-1/m1+/-2; screen seeds 27001-27002,
+confirmation seeds 27101-27105; terminal states pass_finite_budget_ready /
+de_pass_no_finite_headroom / fixed_ensemble_margin_fail. After writing the four parts, return
+to the main thread for freeze review; do NOT execute V27.

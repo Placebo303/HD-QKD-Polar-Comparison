@@ -1,0 +1,62 @@
+{
+  "schema": "nbldpc_v26_m1_v1",
+  "ok": true,
+  "tests": {
+    "bruteforce_gf4_k2": {
+      "ok": true,
+      "maxerr": 0.0
+    },
+    "bruteforce_gf4_k3": {
+      "ok": true,
+      "maxerr": 5.551115123125783e-17
+    },
+    "bruteforce_gf8_k2": {
+      "ok": true,
+      "maxerr": 4.163336342344337e-17
+    },
+    "bruteforce_gf8_k3": {
+      "ok": true,
+      "maxerr": 2.7755575615628914e-17
+    },
+    "all_one_gf4": {
+      "ok": true,
+      "maxerr": 5.551115123125783e-17
+    },
+    "all_one_gf8": {
+      "ok": true,
+      "maxerr": 2.7755575615628914e-17
+    },
+    "all_one_gf32_vs_v14": {
+      "ok": true,
+      "maxerr": 0.0
+    },
+    "all_one_gf512_vs_v14": {
+      "ok": true,
+      "maxerr": 0.0
+    },
+    "adapter_entropy_iter0": {
+      "ok": true,
+      "err_replay": 0.0,
+      "err_model": 0.008954101421567717,
+      "sampling_tol": 0.03,
+      "iter0_H": 0.41753711751818817,
+      "model_H": 0.40858301609662045
+    },
+    "seed_replay": {
+      "ok": true,
+      "same": true
+    },
+    "gf2_bsc_reference": {
+      "ok": true,
+      "scheme": "noiseless_conv+pass_conv+fail_no_conv",
+      "noiseless_conv": true,
+      "pass_mine_conv": true,
+      "pass_v14_conv": true,
+      "fail_mine_conv": false,
+      "fail_v14_conv": false,
+      "rate_pass": 0.4272060857680875,
+      "rate_fail": 0.7136030428840437,
+      "agree_with_v14": true
+    }
+  }
+}

@@ -1,3 +1,27 @@
+## 2026-08-19 V26 RUN_COMPLETE (pass_target_f13) + V26R closeout, archived locally (no push)
+
+- V26 channel-informed multilevel DE gate: A02 (F03 GF32+GF32) f=1.3 converges 30/30
+  (2 layer x 3 source x 5 confirm seeds, final mean entropy 0.00000 bits/symbol).
+  A01 (F01 GF512+GF2) f=1.3 fails on GF2 residual; passes at f=1.6. Terminal pass_target_f13.
+- Independent read-only verifier (verify_run) recomputes 72 screen + 60 confirmation +
+  A02@f=1.3 30/30 + rate/rho/seed/entropy-trace/terminal from channel_counts.npz; run_01 &
+  run_02 both 0 mismatch, ok=true; persisted to each run's readonly_verify.json.
+- Corrected definitions (f_i=leak_i/H_i, leak_i=(1-R_i)log2(q_i), R_i=1-f_i H_i/log2(q_i))
+  applied in proposal/design/spec/report/code; fixed weak M1 references (iteration-0 now
+  truly enters MC-DE first round via record_channel_entropy; centered GF2 BSC reference now
+  clearly passes/fails instead of "both non-converge = agree").
+- Implemented 24h completed-call resource gate (RESOURCE_LIMIT_SECONDS -> resource_blocked);
+  explicit source<->delay metadata (SOURCE_METADATA: 1M/1p5M/2M -> delay_used_ps -50/+50/+50,
+  n_pairs 512000/708352/933120) in ChannelAdapter/M0 detail/RUN_MANIFEST.
+- Run roles: run_02 = canonical, run_01 = deterministic_repeat (RUN_MANIFEST + README).
+- Evidence: comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v26_20260818/
+- Report: docs/nbldpc-v26-channel-informed-multilevel-de-report-20260819.md
+- Tests: 19 passed (incl. resource gate, delay metadata, corrected M1 references).
+- V26 OpenSpec archived under openspec/changes/archive/; committed locally, NOT pushed.
+- RESUME next: V27 OpenSpec (finite-leakage-margin DE gate) written for main-thread freeze
+  review; DO NOT execute V27. Still no finite code/FER/MET/qualification/promotion; no push.
+---
+
 ## 2026-08-18 V25 M0–M4 complete (pass_ready_for_de_change)
 
 - P102 ACCEPT; 5 minor spec edits applied+committed (f1197ce6).

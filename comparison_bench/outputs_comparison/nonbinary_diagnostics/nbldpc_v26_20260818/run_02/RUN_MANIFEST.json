@@ -1,0 +1,59 @@
+{
+  "schema": "nbldpc_v26_run_manifest_v1",
+  "run_id": "run_02",
+  "role": "canonical",
+  "terminal_state": "pass_target_f13",
+  "best_passing_f": {
+    "A01": 1.6,
+    "A02": 1.3
+  },
+  "source_metadata": {
+    "type2_1M_20260121_184040": {
+      "label": "1M",
+      "delay_used_ps": -50,
+      "n_pairs": 512000
+    },
+    "type2_1p5M_20260121_183806": {
+      "label": "1p5M",
+      "delay_used_ps": 50,
+      "n_pairs": 708352
+    },
+    "type2_2M_20260121_183657": {
+      "label": "2M",
+      "delay_used_ps": 50,
+      "n_pairs": 933120
+    }
+  },
+  "resource": {
+    "limit_seconds": 86400,
+    "screen_resource_blocked": false,
+    "confirm_resource_blocked": false,
+    "screen_accumulated_seconds": 43.937901735305786,
+    "confirm_accumulated_seconds": 111.79003381729126,
+    "screen_completed_calls": 72,
+    "confirm_completed_calls": 60
+  },
+  "counts_basename": "channel_counts.npz",
+  "design_constants": {
+    "screen_n_samples": 400,
+    "screen_max_iter": 100,
+    "screen_seeds": [
+      26001,
+      26002
+    ],
+    "confirm_n_samples": 2000,
+    "confirm_max_iter": 200,
+    "confirm_seeds": [
+      26101,
+      26102,
+      26103,
+      26104,
+      26105
+    ],
+    "entropy_tol_bits": 0.01,
+    "streak": 20,
+    "lambda": {
+      "2": 1.0
+    }
+  }
+}

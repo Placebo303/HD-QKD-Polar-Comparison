@@ -1,0 +1,47 @@
+{
+  "schema": "nbldpc_v26_readonly_verify_v1",
+  "ok": true,
+  "problems": [],
+  "details": {
+    "m0_ok": true,
+    "m1_ok": true,
+    "screen_n_calls": 72,
+    "screen_mismatches": 0,
+    "confirm_n_calls": 60,
+    "confirm_mismatches": 0,
+    "a02_f13_confirmed": 30,
+    "a02_f13_total": 30,
+    "gate_recomputed": {
+      "status": "pass_target_f13",
+      "best_passing_f": {
+        "A01": 1.6,
+        "A02": 1.3
+      },
+      "passed": {
+        "A01": [
+          1.6
+        ],
+        "A02": [
+          1.3
+        ]
+      }
+    },
+    "gate_persisted": {
+      "status": "pass_target_f13",
+      "best_passing_f": {
+        "A01": 1.6,
+        "A02": 1.3
+      },
+      "passed": {
+        "A01": [
+          1.6
+        ],
+        "A02": [
+          1.3
+        ]
+      }
+    },
+    "calls_summary_ok": true
+  },
+  "checked_root": "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02"
+}
