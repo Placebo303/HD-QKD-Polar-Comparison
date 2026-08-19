@@ -1,4 +1,4 @@
-Status: **V27 PASS（pass_finite_budget_ready，passing_block_len=1024）** — V27R OpenSpec 已 ACCEPT（P102 记录于 commit ed9bbf9e，subagent 故障期由主线程直接执行独立 review，不阻塞）；Phase B 完成：nonbinary_v27_gate.py（最小 budget planner + V26 MC-DE 薄 wrapper）+ T0/T1（11 passed）；独立 candidate-delivery review（P-CDR）ACCEPT，修复 critical dedup bug（候选 5→1 坍缩）；一次性 additive production gate 已执行（run_01，322.9s，24h 资源门未触发）；只读 verifier ok=true（recomputed==persisted）。**pass_finite_budget_ready → 自动进 Phase C（V28）**；不 push。
+Status: **V27 PASS（pass_finite_budget_ready，block_len=1024）→ Phase C 进行中** — V27R OpenSpec ACCEPT（P102 @ ed9bbf9e）；Phase B 完成并提交（9c3f0e70）：nonbinary_v27_gate.py + T0/T1（11 passed）+ candidate-delivery review ACCEPT（修复 dedup bug）+ additive run_01（322.9s，verifier ok=true）。**V28 OpenSpec 已冻结 + freeze review ACCEPT**（GF32 母矩阵 three-shift-cyclic + FFT-QSPA 复用，leakage f<1.3 三源验证）；V28 实现（T1–T10）待下一轮。不 push。
 
 ## 2026-08-20 V27 Phase B：candidate-delivery review ACCEPT + 一次性 production gate 执行中
 
@@ -13,6 +13,15 @@ Status: **V27 PASS（pass_finite_budget_ready，passing_block_len=1024）** — 
   - 证据：frozen_config.json / screen_checkpoint.json / screen_results.json / ranking.json / confirmation_results.json / gate.json / RUN_MANIFEST.json / EXECUTION_WALLCLOCK_S.txt。
   - 禁止项全程遵守：无 degree 搜索/MET/有限码/FER/qualification/push。
 - **终态 = pass_finite_budget_ready（passing_block_len=1024，4 block_len×3 source 全部在 m1_ep offset-0 候选确认）** → 自动进 Phase C(V28 GF32×GF32 有限码工程) + Phase D(V29 retrospective finite-code gate)；在 fresh qualification 前停止。de_pass_no_finite_headroom/resource_blocked 未发生。
+
+## 2026-08-20 V28 Phase C：OpenSpec 冻结 + 独立 freeze review ACCEPT
+
+- 由 V27 `pass_finite_budget_ready`（block_len=1024）自动进入 Phase C。
+- V28 OpenSpec 创建：`openspec/changes/formal-nonbinary-ldpc-v28-gf32-finite-code-engineering/`（proposal/design/tasks/specs/.../spec.md）。
+- 设计要点：复用 `GF2mField.create(32)`（poly 0b100101）、`nonbinary_codebook` 的 three-shift-cyclic GF(32) 母矩阵构造 + `gf_rank`、以及 `nonbinary_qspa.decode_nonbinary_fft_qspa`（GF(32) FFT-QSPA）；两层 L1(高5bit)/L2(低5bit)，source 只决定公开 syndrome row prefix；最终 64-bit tag 仅计入总泄漏；终态仅 `engineering_ready_for_retrospective_gate`。
+- 参数转录自 V27（block_len=1024，m1=6 共享，m2=194/200/202 每源）；leakage = m_total·5+64，三源 f = 1.29715 / 1.29409 / 1.29495，均 < 1.3（与 V27 一致）。
+- 独立 freeze review（主线程，tmp_v28r/v28_freeze_review.md）= **ACCEPT**；复用声明已对真实代码核验。
+- V28 实现（T1–T10：config/field 绑定、母矩阵构造、syndrome 一致性、两层顺序解码、noiseless/controlled-error、source prefix 记账、seed replay、tag/leakage、readonly verifier、docs+提交）留待下一轮执行。
 
 ## 2026-08-20 V27R round 4：正式将目标标记 blocked
 

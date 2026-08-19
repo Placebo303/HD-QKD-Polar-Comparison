@@ -10,7 +10,8 @@
   + V26 MC-DE wrapper; 24h completed-call resource gate; four terminal states; read-only verifier).
 - Tests: `comparison_bench/tests/test_nonbinary_v27_gate.py` (11 passed).
 - V27R OpenSpec ACCEPTED (commit ed9bbf9e); candidate-delivery review ACCEPT
-  (`tmp_v27r/v27_candidate_delivery_review.md`). No push.
+  (`tmp_v27r/v27_candidate_delivery_review.md`). V27 committed locally (9c3f0e70). No push.
+- **V28 OpenSpec FROZEN + freeze review ACCEPT** (`openspec/changes/formal-nonbinary-ldpc-v28-gf32-finite-code-engineering/`; review `tmp_v28r/v28_freeze_review.md`). Implementation (T1-T10) pending next round.
 
 ## Next (Phase C — V28)
 - Create V28 OpenSpec (deterministic GF32xGF32 finite-code engineering); independent freeze review

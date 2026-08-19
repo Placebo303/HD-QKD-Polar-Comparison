@@ -2588,3 +2588,31 @@ infrastructure unavailable; user authorized in-conversation review, not gated on
 - Evidence: comparison_bench/outputs_comparison/nonbinary_diagnostics/
   nbldpc_v27r_finite_leakage_margin/run_01/ (frozen_config, screen/confirm checkpoints+results,
   ranking, gate, RUN_MANIFEST, EXECUTION_WALLCLOCK_S=322.9s). No push.
+
+
+---
+
+## 2026-08-20 — V28 OpenSpec frozen + freeze review ACCEPT (Phase C)
+
+**Decision**: Freeze the V28 GF32xGF32 finite-code engineering OpenSpec and ACCEPT its
+independent freeze review (in-conversation; subagent unavailable). V28 reuses existing
+`GF2mField.create(32)` (pinned poly 0b100101), `nonbinary_codebook` three-shift-cyclic GF(32)
+mother-matrix construction + `gf_rank`, and `nonbinary_qspa.decode_nonbinary_fft_qspa`
+(GF(32) FFT-QSPA). No new field/decoder science.
+
+**Context**: V27 reached `pass_finite_budget_ready` at block_len=1024; V28 must materialize
+that split `(m1=6, m2 in {194,200,202}, R1, R2)` as real GF(32) parity-check matrices + a
+Bob-only sequential decoder so V29 can run the retrospective finite-code gate on frozen V25
+holdout.
+
+**Alternatives considered**:
+- New GF(32) field/decoder: rejected — pinned `GF2mField` and FFT-QSPA already exist and are
+  verified; V28 is engineering, not new science.
+- Re-run DE to re-pick parameters: rejected — V27 already fixed the split; V28 must not
+  re-optimize (forbidden re-tuning).
+
+**Consequences**:
+- Leakage = m_total*5 + 64 bits; f = leak/(n*H_source) < 1.3 for all three sources
+  (1.29715 / 1.29409 / 1.29495), consistent with V27.
+- Terminal state only `engineering_ready_for_retrospective_gate`; no FER/qualification/
+  promotion in V28. V29 follows on frozen holdout. No push.
