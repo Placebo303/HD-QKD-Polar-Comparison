@@ -1,0 +1,30 @@
+{
+  "schema": "nbldpc_v28_frozen_config_v1",
+  "q": 32,
+  "n": 1024,
+  "m1": 6,
+  "m2_max": 202,
+  "sources": {
+    "1M": {
+      "m2": 194,
+      "h_total": 0.8010378250000001
+    },
+    "1p5M": {
+      "m2": 200,
+      "h_total": 0.825566052
+    },
+    "2M": {
+      "m2": 202,
+      "h_total": 0.832562722
+    }
+  },
+  "seed_l1": 2026082001,
+  "seed_l2": 2026082002,
+  "topology": "three_shift_cyclic_information_half_plus_identity_parity_half",
+  "coefficient_derivation": "1+sha256_ascii_NBLDPC1_coef_q_seed_row_edge_mod_q_minus_1",
+  "tag_bits": 64,
+  "field_id": "c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf",
+  "p_noiseless": 0.001,
+  "p_controlled": 0.2,
+  "max_iter": 30
+}

@@ -2616,3 +2616,32 @@ holdout.
   (1.29715 / 1.29409 / 1.29495), consistent with V27.
 - Terminal state only `engineering_ready_for_retrospective_gate`; no FER/qualification/
   promotion in V28. V29 follows on frozen holdout. No push.
+
+
+---
+
+## 2026-08-20 — V28 implementation complete + acceptance ACCEPT (Phase C)
+
+**Decision**: Implement V28 GF32xGF32 finite-code engineering and ACCEPT its independent
+main-thread acceptance review. V28 reuses `GF2mField.create(32)`, the `nonbinary_codebook`
+three-shift-cyclic GF(32) mother-matrix construction + `gf_rank`, and `nonbinary_v10_fftqspa.
+decode_error_domain` (GF(32) FFT-QSPA, Bob-only). No new field/decoder science.
+
+**Context**: V27 selected (block_len=1024, m1=6 shared, m2 in {194,200,202}). V28 materializes
+that split as real GF(32) parity-check matrices + two-layer sequential decode so V29 can run
+the retrospective finite-code gate on frozen V25 holdout.
+
+**Alternatives considered**:
+- Use `decode_nonbinary_fft_qspa`: rejected — it internally enforces the N1 n=64 family and
+  rejects V28's n=1024 matrices; the lower-level `decode_error_domain` is the correct reuse.
+- New GF(32) decoder: rejected — the pinned FFT-QSPA already exists and is verified.
+
+**Consequences**:
+- Structural + noiseless decode verified (both layers, all 3 sources recover x exactly);
+  controlled-error is fail-closed (never a false success). 11 T0/T1 tests pass.
+- Honest finding: the V27 split is a sparse high-rate code; under uniform QSC prior, iterative
+  error correction is limited (decoder reports `converged_no_syndrome`). The limiter is the
+  split, not the decoder (proven on m=32/n=64 proper code). V29 measures real FER.
+- Terminal state only `engineering_ready_for_retrospective_gate`; no FER/qualification/promotion.
+  Evidence: `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v28_gf32_finite_code/
+  run_01/` (v28_config, v28_evidence, gate, RUN_MANIFEST, verify). Local commit, no push.

@@ -1,4 +1,4 @@
-Status: **V27 PASS（pass_finite_budget_ready，block_len=1024）→ Phase C 进行中** — V27R OpenSpec ACCEPT（P102 @ ed9bbf9e）；Phase B 完成并提交（9c3f0e70）：nonbinary_v27_gate.py + T0/T1（11 passed）+ candidate-delivery review ACCEPT（修复 dedup bug）+ additive run_01（322.9s，verifier ok=true）。**V28 OpenSpec 已冻结 + freeze review ACCEPT**（GF32 母矩阵 three-shift-cyclic + FFT-QSPA 复用，leakage f<1.3 三源验证）；V28 实现（T1–T10）待下一轮。不 push。
+Status: **V28 实现完成 + 验收 ACCEPT（engineering_ready_for_retrospective_gate）→ Phase D 进行中** — V27 PASS 并提交（9c3f0e70）；V28 OpenSpec 冻结+freeze ACCEPT（95b57f82）；V28 实现完成并验收（nonbinary_v28.py + 11 T0/T1 passed + additive run_01 1.40s + verify ok=true + 主线程验收 ACCEPT）。下一步：V29 retrospective finite-code gate（冻结 V25 holdout）。不 push。
 
 ## 2026-08-20 V27 Phase B：candidate-delivery review ACCEPT + 一次性 production gate 执行中
 
@@ -13,6 +13,16 @@ Status: **V27 PASS（pass_finite_budget_ready，block_len=1024）→ Phase C 进
   - 证据：frozen_config.json / screen_checkpoint.json / screen_results.json / ranking.json / confirmation_results.json / gate.json / RUN_MANIFEST.json / EXECUTION_WALLCLOCK_S.txt。
   - 禁止项全程遵守：无 degree 搜索/MET/有限码/FER/qualification/push。
 - **终态 = pass_finite_budget_ready（passing_block_len=1024，4 block_len×3 source 全部在 m1_ep offset-0 候选确认）** → 自动进 Phase C(V28 GF32×GF32 有限码工程) + Phase D(V29 retrospective finite-code gate)；在 fresh qualification 前停止。de_pass_no_finite_headroom/resource_blocked 未发生。
+
+## 2026-08-20 V28 Phase C：实现完成 + 主线程验收 ACCEPT
+
+- 实现 `comparison_bench/src/comparison_bench/formal_ir/nonbinary_v28.py`：复用 `GF2mField.create(32)`、`nonbinary_codebook` 的 three-shift-cyclic GF(32) 母矩阵构造 + `gf_rank`、`nonbinary_v10_fftqspa.decode_error_domain`（Bob-only GF(32) FFT-QSPA，无 Alice truth）。
+- 母矩阵：`H_mother_L1` 6×1024（m1 共享）、`H_mother_L2` 202×1024（max m2）；每源 L2 = `H_mother_L2[:m2_src]`（公开 row prefix）；`gf_rank` 恒等于 m（identity parity half 保证满秩）。
+- 两层顺序解码（L1→L2，Bob-only）；64-bit tag = SHA-256(x1_hat‖x2_hat) 截断 8 字节，仅计入总泄漏；leakage = m_total·5+64，三源 f = 1.29715/1.29409/1.29495 均 < 1.3。
+- T0/T1：11 passed（维度、满秩、syndrome 一致性、source prefix、noiseless 两层恢复 x、受控错误 fail-closed、proper code 纠错验证 decoder 健全、deterministic replay、tag/leakage、Bob-only 顺序、verify_v28）。
+- additive run `run_01`（1.40s）：三源 noiseless L1+L2 均 success 恢复 x；受控错误 fail-closed（converged_no_syndrome，无虚假 success）；`verify_v28` ok=true，recomputed==persisted `engineering_ready_for_retrospective_gate`。
+- **诚实发现**：V27 选中的 split（m1=6 / m2=194–202 over n=1024）是极稀疏高码率码；在 uniform QSC 先验下迭代纠错能力有限（decoder 报 converged_no_syndrome 而非虚假 success，fail-closed）。该限制来自 split 本身（已在 m=32/n=64 proper code 上验证 decoder 可纠 1–5 错，证明 decoder 健全）。noiseless 解码（有限码主正确性）完美工作；**V29 在冻结 V25 holdout 上测真实 FER**，失败则返回有限码失败机制分析。
+- 主线程独立验收（tmp_v28r/v28_acceptance_review.md）= **ACCEPT**（所有 T1–T9 达成，T10 docs+提交本轮完成）。
 
 ## 2026-08-20 V28 Phase C：OpenSpec 冻结 + 独立 freeze review ACCEPT
 

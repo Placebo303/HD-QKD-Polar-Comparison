@@ -1,0 +1,58 @@
+{
+  "schema": "nbldpc_v28_run_manifest_v1",
+  "terminal_state": "engineering_ready_for_retrospective_gate",
+  "frozen_config_bound": "v28_config.json co-located in run root; verify_v28 reconstructs matrices + rechecks from it",
+  "sources": [
+    {
+      "label": "1M",
+      "m1": 6,
+      "m2": 194,
+      "m_total": 200,
+      "leak_bits": 1064,
+      "f": 1.2971453626425193,
+      "noiseless_L1_ok": true,
+      "noiseless_L2_ok": true,
+      "controlled_L1_ok": false,
+      "controlled_L2_ok": false,
+      "layer_order": [
+        "L1",
+        "L2"
+      ],
+      "tag_bits": "1f1511e247e7bd7d"
+    },
+    {
+      "label": "1p5M",
+      "m1": 6,
+      "m2": 200,
+      "m_total": 206,
+      "leak_bits": 1094,
+      "f": 1.2940931527063324,
+      "noiseless_L1_ok": true,
+      "noiseless_L2_ok": true,
+      "controlled_L1_ok": false,
+      "controlled_L2_ok": false,
+      "layer_order": [
+        "L1",
+        "L2"
+      ],
+      "tag_bits": "6ff93d9b45d499d5"
+    },
+    {
+      "label": "2M",
+      "m1": 6,
+      "m2": 202,
+      "m_total": 208,
+      "leak_bits": 1104,
+      "f": 1.2949474814463287,
+      "noiseless_L1_ok": true,
+      "noiseless_L2_ok": true,
+      "controlled_L1_ok": false,
+      "controlled_L2_ok": false,
+      "layer_order": [
+        "L1",
+        "L2"
+      ],
+      "tag_bits": "d36110a31817a50b"
+    }
+  ]
+}

@@ -12,6 +12,21 @@
   Phase D (V29 retrospective finite-code gate); stop before fresh qualification. No push.
   [consequence]
 
+## 2026-08-20 V28 GF32xGF32 finite-code engineering: COMPLETE + acceptance ACCEPT
+
+- V28 implemented (`nonbinary_v28.py`) + 11 T0/T1 tests pass + additive run_01 (1.40s) +
+  `verify_v28` ok=true + main-thread acceptance ACCEPT. Terminal
+  `engineering_ready_for_retrospective_gate`. [result]
+- Reuse: `GF2mField.create(32)`, `nonbinary_codebook` three-shift-cyclic GF(32) mother matrices
+  + `gf_rank`, `nonbinary_v10_fftqspa.decode_error_domain` (Bob-only GF(32) FFT-QSPA). [result]
+- Matrices: H_mother_L1 6x1024, H_mother_L2 202x1024; per-source L2 = public row prefix
+  H_mother_L2[:m2]; gf_rank full (identity parity half). Noiseless decode recovers x exactly
+  (both layers, 3 sources). [result]
+- Honest limit: V27 split is sparse high-rate; uniform-QSC iterative correction limited
+  (decoder fail-closed, converged_no_syndrome). V29 measures real FER on frozen V25 holdout.
+  [finding]
+- Leakage = m_total*5+64; f<1.3 for all 3 sources; 64-bit tag = SHA-256(x1_hat||x2_hat)[:8B. [result]
+
 ## 2026-08-19 V27R OpenSpec revision: source-adaptive finite-leakage-margin (ACCEPTED + Phase B executed)
 
 - V27 OpenSpec revised from worst-source to SOURCE-ADAPTIVE budget: each source
