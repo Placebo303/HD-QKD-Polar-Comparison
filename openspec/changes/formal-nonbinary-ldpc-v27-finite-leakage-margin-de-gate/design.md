@@ -1,7 +1,7 @@
 # Design: formal-nonbinary-ldpc-v27-finite-leakage-margin-de-gate  (V27R revision)
 
-> Status: **V27R DRAFT — source-adaptive 修订版，PENDING_FREEZE_REVIEW（2026-08-19；
-> 只写文档，不执行）**。本修订取代 change 内先前 worst-source 草案。
+> Status: **V27R ACCEPTED（2026-08-20；主线程于本对话完成独立 freeze review = ACCEPT）**。
+> 本修订取代 change 内先前 worst-source 草案。
 > 继承：V26 channel-informed multilevel DE gate（A02 F03 GF32+GF32 渐近 f=1.3 收敛
 > 30/30）与 V25 经验信道 `P(A|B, source, delay)` / `channel_counts.npz`。
 > V26 仅作 archived reference；**禁止重跑 V26 DE**。

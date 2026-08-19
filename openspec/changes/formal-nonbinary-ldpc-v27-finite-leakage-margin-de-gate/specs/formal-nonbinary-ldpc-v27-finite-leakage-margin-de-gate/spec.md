@@ -1,7 +1,7 @@
 # Spec: formal-nonbinary-ldpc-v27-finite-leakage-margin-de-gate  (V27R revision)
 
-> Status: V27R delta spec（source-adaptive 修订）。Freeze-review pending；未获主线程
-> P102 ACCEPT 前不执行任何 DE。/ V27 是 asymptotic true-predecessor-conditioned
+> Status: V27R delta spec（source-adaptive 修订）。独立 freeze review 已 ACCEPT（2026-08-20），
+> 主线程已记录 P102 ACCEPT。/ V27 是 asymptotic true-predecessor-conditioned
 > multistage DE (L2 conditioned on correct L1); 单个 64-bit tag 只计入整块总泄漏，
 > 不在层间使用。
 

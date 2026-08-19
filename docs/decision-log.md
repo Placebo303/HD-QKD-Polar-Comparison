@@ -23,6 +23,34 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-20: V27R freeze review ACCEPT (P102) — in-conversation independent review
+
+**Decision**: The V27R OpenSpec (source-adaptive finite-leakage-margin) received an
+independent freeze review run ON THE MAIN THREAD directly in this conversation (per
+user authorization; subagent not required). Verdict: ACCEPT. The main thread recorded
+P102 ACCEPT, unblocking Phase B.
+
+**Context**: subagent infrastructure was persistently unavailable (rounds 1-4). The user
+explicitly authorized running the independent review in-conversation and updating the
+goal wording accordingly (goal revision 3-4: reviews by main thread in this conversation,
+not gated on subagent availability).
+
+**Independent review findings (recomputed independently):**
+- H from channel_counts.npz (F03): 1M 0.024280547/0.776757278; 1p5M 0.025199497/0.800366555;
+  2M 0.025662049/0.806900673. Matches frozen docs.
+- m_total source-adaptive: 1M 200/413/840/1693; 1p5M 206/426/866/1745; 2M 208/430/873/1760
+  for block_len 1024/2048/4096/8192. MATCH.
+- m1_ep=round(m_total*H1/H_total): 1M 6/13/25/51; 1p5M 6/13/26/53; 2M 6/13/27/54. MATCH.
+- Realized f<1.3 all 12 cells (1.29409-1.29974). All 5 candidates per cell legal
+  (m1,m2 in [0,m_total], <n). Rates R1~0.993-0.994, R2~0.79-0.81.
+- All 14 required spec items captured (proposal/design/tasks/spec); terminal states only
+  the 4 allowed; no fixed_ensemble_margin_fail; prohibitions present; no overclaim
+  (V27 is asymptotic DE only). Item-by-item check passed.
+
+**Consequences**: V27R FREEZE ACCEPTED; P102 ACCEPT recorded by main thread (goal owns
+ACCEPT). Phase B may now proceed: minimal budget planner + V26 MC-DE adapter wrapper,
+T0/T1, screen/confirmation, readonly verifier, local commit + archive, no push.
+
 ### 2026-08-20: V27R freeze-review gate still blocked by subagent infrastructure (round 2)
 
 **Decision**: Keep V27R OpenSpec in PENDING_FREEZE_REVIEW. P102 ACCEPT is NOT recorded and

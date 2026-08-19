@@ -1,8 +1,7 @@
 # Tasks: formal-nonbinary-ldpc-v27-finite-leakage-margin-de-gate  (V27R revision)
 
-Status: **V27R DRAFT — source-adaptive 修订版，PENDING_FREEZE_REVIEW（2026-08-19）**。
-本修订取代 change 内先前 worst-source 草案。只创建 OpenSpec；freeze review ACCEPT 前
-**不实现、不执行**。ACCEPT 后按以下顺序实现。
+Status: **V27R ACCEPTED（2026-08-20；主线程于本对话完成独立 freeze review）**。
+P102 ACCEPT 已由主线程记录。以下按 Phase B 顺序实现/执行。
 
 ## Phase A — V27R OpenSpec freeze（主线程只写，Luna 独立 review）
 - [ ] **P001** 只读复核 V26 归档（evidence/v26r_closeout.md、report、run_01/run_02
