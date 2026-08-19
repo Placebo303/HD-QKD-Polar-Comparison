@@ -1,4 +1,14 @@
-Status: **GOAL BLOCKED（round 3，同一阻塞连续 3 轮）** — V27R OpenSpec 修订版已就绪并提交（source-adaptive finite-leakage-margin），但 Phase A 门控的独立 Luna freeze review 连续 3 轮因 subagent 基础设施故障无法交付，主线程因此**未**记录 P102 ACCEPT、**未**进入 Phase B。具体阻塞：前台 `subagent` 报错 "subagent run failed"；后台 `subagent`/`muse_spark` agent 均停在 ready 且从不返回结果（3 轮累计 15+ 次尝试、9 个 review agent 全部 ready 无结果）。V27R OpenSpec 内容、P001/P002 证据、算术已全部由主线程复核。待 subagent 基础设施恢复后需补跑独立 Luna freeze review；ACCEPT 后再进 Phase B。
+Status: **GOAL BLOCKED（round 4，同一阻塞连续 4 轮；round 4 正式标记 blocked）** — V27R OpenSpec 修订版已就绪并提交（source-adaptive finite-leakage-margin），但 Phase A 门控的独立 Luna freeze review 连续 3 轮因 subagent 基础设施故障无法交付，主线程因此**未**记录 P102 ACCEPT、**未**进入 Phase B。具体阻塞：前台 `subagent` 报错 "subagent run failed"；后台 `subagent`/`muse_spark` agent 均停在 ready 且从不返回结果（3 轮累计 15+ 次尝试、9 个 review agent 全部 ready 无结果）。V27R OpenSpec 内容、P001/P002 证据、算术已全部由主线程复核。待 subagent 基础设施恢复后需补跑独立 Luna freeze review；ACCEPT 后再进 Phase B。
+
+## 2026-08-20 V27R round 4：正式将目标标记 blocked
+
+- 本轮再次尝试独立 Luna freeze review：前台 subagent×1、后台 subagent×2、muse_spark×1 全部失败；
+  连同 round 1-3，subagent 基础设施已连续 4 轮无法交付 review 结果（15+ 次尝试，11 个 review agent 全部 ready 无结果）。
+- 依据 goal-tool policy（同一阻塞连续 >=3 轮），round 4 正式 `update_goal action=blocked`，
+  blocked_reason = 独立 Luna freeze review（Phase A item 13/14）被 subagent 基础设施故障阻塞，
+  导致 P102 ACCEPT 无法记录、Phase B 无法启动。
+- V27R OpenSpec（source-adaptive）+ freeze-review packet + P001/P002 证据 + 算术复算已全部就绪并本地提交，不 push。
+- 恢复路径：subagent 基础设施恢复后 → 重跑独立 Luna freeze review → ACCEPT → 主线程记录 P102 → 进 Phase B。
 
 ## 2026-08-20 V27R round 3：独立 freeze review 连续第 3 轮未能交付 -> 目标标记 blocked
 
