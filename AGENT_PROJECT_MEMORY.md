@@ -1,3 +1,33 @@
+## 2026-08-19 V27R OpenSpec revision: source-adaptive finite-leakage-margin (DRAFT, review pending)
+
+- V27 OpenSpec revised from worst-source to SOURCE-ADAPTIVE budget: each source
+  (1M/1p5M/2M) uses its own full-precision H1/H2; m_total=floor((1.3*block_len*H_source-64)/5).
+- Frozen table (block_len 1024/2048/4096/8192 -> m_total): 1M 200/413/840/1693;
+  1p5M 206/426/866/1745; 2M 208/430/873/1760. m1_ep=round(m_total*H1/H_total) (Python
+  round, round-half-to-even, frozen explicit rule); candidates m1_ep+offset, offset in
+  {-2,-1,0,+1,+2}, all five eligible; m2=m_total-m1. Realized f=(5*m_total+64)/n/H_total
+  all <1.3 (1.29409-1.29974). All arithmetic re-verified this session. [decision]
+- V27 is asymptotic true-predecessor-conditioned multistage DE (L2 conditioned on correct
+  L1; no finite-code error propagation); single 64-bit tag only in total block leakage,
+  not between layers. source/delay = public acquisition selector (posterior + syndrome
+  budget), not per-symbol side info, no repeated billing. block_len and mc_samples are
+  two distinct fields. [decision]
+- Ordering keys per (block_len,source) ascending: worst_final_entropy, mean_final_entropy,
+  abs(offset), m1. Screen fully executes, then confirmation in rank order; next candidate
+  on failure until pass or all five fail. pass = same block_len with all three sources
+  confirmed; multiple -> min block_len. [decision]
+- Terminal states ONLY: pass_finite_budget_ready / de_pass_no_finite_headroom /
+  implementation_blocked / resource_blocked (old fixed_ensemble_margin_fail removed).
+  24h global completed-call cumulative resource gate; checkpoint bound to full frozen
+  config; V26 archived reference only (no rerun). [decision]
+- V27R docs written to openspec/changes/formal-nonbinary-ldpc-v27-finite-leakage-margin-de-gate/
+  (proposal/design/tasks/spec). Old worst-source drafts backed up in tmp_v27r/old_*.md.
+- BLOCKER (review gate): independent Luna freeze review could NOT be delivered this session
+  - subagent infrastructure failed repeatedly (subagent foreground/background + muse_spark
+  all failed; background agents stayed "ready" with no result). P102 ACCEPT NOT recorded;
+  Phase B NOT started, per strict gate. Freeze review must complete (Luna) before V27
+  implementation/execution. [blocker]
+
 ## 2026-08-19 V26 channel-informed DE gate complete: pass_target_f13 + V26R closeout
 
 - V26 result: A02 (F03 GF32+GF32) converges f=1.3 on all 2 layer x 3 source x 5 confirm

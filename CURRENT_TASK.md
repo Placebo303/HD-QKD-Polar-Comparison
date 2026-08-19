@@ -1,3 +1,32 @@
+Status: V27R OpenSpec 修订版 DRAFT 已写入（source-adaptive finite-leakage-margin），PENDING_FREEZE_REVIEW——尚未 ACCEPT、未实现、未执行任何 DE。独立 Luna freeze review 因 subagent 基础设施故障未能交付（连续多次 subagent/muse_spark 启动失败，后台 agent 停留在 ready 未返回结果）；按严格门控，主线程**未**记录 P102 ACCEPT，V27R 不进入 Phase B。
+
+## 2026-08-19 V27R OpenSpec revision：source-adaptive 预算（写文档，未执行）
+
+- 依据目标 Phase A，将 V27 OpenSpec 由 worst-source 单一预算改为 **source-adaptive**：
+  每 source（1M/1p5M/2M）用自己 full-precision H1/H2；`m_total=floor((1.3·block_len·H_source−64)/5)`。
+- 冻结预算表（block_len=1024/2048/4096/8192 → m_total）：
+  1M 200/413/840/1693；1p5M 206/426/866/1745；2M 208/430/873/1760。[复算 verified]
+- m1_ep=round(m_total·H1/H_total)（Python round，round-half-to-even，冻结明确规则）；
+  候选 m1∈{m1_ep−2..m1_ep+2}、m2=m_total−m1，五候选均晋级；m1_ep 复算
+  1M=6/13/25/51、1p5M=6/13/26/53、2M=6/13/27/54；实现总 f 均<1.3（1.29409–1.29974）。[复算 verified]
+- 明确 V27 为 asymptotic true-predecessor-conditioned multistage DE（L2 条件于正确 L1，
+  不模拟有限码错误传播）；单个 64-bit tag 只计入整块总泄漏，不在层间使用。
+- source/delay 仅为公开 acquisition selector（选 posterior 与 syndrome 预算），非逐符号
+  side information，不重复计费；`block_len` 与 `mc_samples` 为两个独立字段。
+- 冻结 candidate_id=(block_len,source,m1)、去重、合法性、排序 keys：
+  worst_final_entropy → mean_final_entropy → abs(offset) → m1（升序）。
+- screen 完整执行后，每 (block_len,source) 按排序依次 confirmation；失败→下一个，直到
+  通过或 5 全失败；pass=存在同一 block_len 使三 source 均有确认通过候选。
+- 终态仅允许：pass_finite_budget_ready / de_pass_no_finite_headroom /
+  implementation_blocked / resource_blocked（已移除旧 fixed_ensemble_margin_fail）。
+- 24h 全局 completed-call 累计资源门；checkpoint 绑定完整 frozen configuration；V26 仅
+  archived reference（禁重跑）。
+- 文档已写入 openspec/changes/formal-nonbinary-ldpc-v27-finite-leakage-margin-de-gate/
+  （proposal/design/tasks/specs/…/spec.md）。旧 worst-source 四稿备份于 tmp_v27r/old_*.md。
+- 独立 Luna freeze review 尝试多次（subagent 前后台 + muse_spark）均因 subagent 基础设施
+  故障未能交付（后台 agent 停在 ready 未返回结果）；故按门控未 ACCEPT、未执行 Phase B。
+  待 review 基础设施恢复后，应补跑独立 freeze review（Luna），ACCEPT 后再进 Phase B。
+
 Status: V26 RUN_COMPLETE — pass_target_f13（A02 F03 GF32+GF32 f=1.3 全收敛；只读 verifier run_01/run_02 均 ok；本地归档，不 push）。V27 OpenSpec（finite-leakage-margin DE gate）已写好待主线程 freeze review，未执行。
 
 ## 2026-08-19 V26 主体 + V26R closeout 完成（本地提交并归档，未 push）

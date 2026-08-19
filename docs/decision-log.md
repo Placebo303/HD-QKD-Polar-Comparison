@@ -23,6 +23,40 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-19: V27R OpenSpec revision — source-adaptive finite-leakage-margin budget
+
+**Decision**: Revise V27 OpenSpec from a single worst-source budget to a **source-adaptive**
+budget: each source (1M/1p5M/2M) uses its own full-precision H1/H2 and
+`m_total = floor((1.3*block_len*H_source - 64)/5)`. Frozen table (block_len
+1024/2048/4096/8192 -> m_total): 1M 200/413/840/1693, 1p5M 206/426/866/1745,
+2M 208/430/873/1760 (arithmetic re-verified). m1_ep = round(m_total*H1/H_total) (Python
+round, round-half-to-even, frozen explicit rule); candidates m1_ep+offset for offset in
+{-2,-1,0,+1,+2}; all five eligible. V27 is asymptotic true-predecessor-conditioned
+multistage DE (L2 conditioned on correct L1; no finite-code error propagation); the
+single 64-bit tag counts only in total block leakage, not between layers. Terminal states
+only pass_finite_budget_ready / de_pass_no_finite_headroom / implementation_blocked /
+resource_blocked. 24h global completed-call cumulative resource gate; checkpoint bound
+to frozen config; V26 archived reference only (no rerun).
+
+**Context**: V26 proved asymptotic A02 (F03 GF32+GF32) DE converges 30/30 at f=1.3. The
+finite-leakage-margin gate must answer whether, at finite block length + integer code
+rate + 64-bit tag cost, the fixed ensemble retains positive convergence headroom per
+source. A single worst-source budget under-allocates 1M/1p5M.
+
+**Alternatives considered**:
+- Worst-source single budget (previous draft): rejected — under-allocates 1M/1p5M
+  headroom; replaced by source-adaptive.
+- m1/m2 search: rejected — only entropy-proportional split plus +/-2 window is tested;
+  no degree/m1/m2 search.
+
+**Consequences**: V27R docs written to openspec/changes/formal-nonbinary-ldpc-v27-.../
+(proposal/design/tasks/spec). STILL PENDING_FREEZE_REVIEW: the independent Luna freeze
+review could not be delivered this session because the subagent infrastructure failed
+repeatedly (foreground and background subagent/muse_spark all failed; background agents
+stuck in "ready" with no result). P102 ACCEPT was NOT recorded and Phase B was NOT
+started, per the strict gate. The freeze review must be completed (Luna worker) and
+accepted before any V27 implementation/execution.
+
 
 ### 2025-06-01: Non-invasive comparison layer architecture
 
