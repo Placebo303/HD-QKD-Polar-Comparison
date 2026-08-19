@@ -1,0 +1,27 @@
+{
+  "status": "pass_finite_budget_ready",
+  "passing_block_len": 1024,
+  "per_block_len_confirmed_sources": {
+    "1024": [
+      "1M",
+      "1p5M",
+      "2M"
+    ],
+    "2048": [
+      "1M",
+      "1p5M",
+      "2M"
+    ],
+    "4096": [
+      "1M",
+      "1p5M",
+      "2M"
+    ],
+    "8192": [
+      "1M",
+      "1p5M",
+      "2M"
+    ]
+  },
+  "detail": "block_len=1024 has all ['1M', '1p5M', '2M'] confirmed"
+}

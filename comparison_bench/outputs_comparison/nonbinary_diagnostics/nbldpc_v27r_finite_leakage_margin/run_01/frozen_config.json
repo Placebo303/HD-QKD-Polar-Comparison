@@ -1,0 +1,89 @@
+{
+  "schema": "nbldpc_v27_frozen_config_v1",
+  "q": 32,
+  "lambda": {
+    "2": 1.0
+  },
+  "lids": [
+    "L1",
+    "L2"
+  ],
+  "block_lens": [
+    1024,
+    2048,
+    4096,
+    8192
+  ],
+  "offsets": [
+    -2,
+    -1,
+    0,
+    1,
+    2
+  ],
+  "tag_bits": 64,
+  "f_max": 1.3,
+  "m_total": {
+    "1M": [
+      200,
+      413,
+      840,
+      1693
+    ],
+    "1p5M": [
+      206,
+      426,
+      866,
+      1745
+    ],
+    "2M": [
+      208,
+      430,
+      873,
+      1760
+    ]
+  },
+  "source_labels": [
+    "1M",
+    "1p5M",
+    "2M"
+  ],
+  "screen": {
+    "mc_samples": 400,
+    "max_iter": 100,
+    "seeds": [
+      27001,
+      27002
+    ],
+    "tol": 0.01,
+    "streak": 20
+  },
+  "confirm": {
+    "mc_samples": 2000,
+    "max_iter": 200,
+    "seeds": [
+      27101,
+      27102,
+      27103,
+      27104,
+      27105
+    ],
+    "tol": 0.01,
+    "streak": 20
+  },
+  "order_keys": [
+    "worst_final_entropy",
+    "mean_final_entropy",
+    "abs_offset",
+    "m1"
+  ],
+  "terminal_states": [
+    "pass_finite_budget_ready",
+    "de_pass_no_finite_headroom",
+    "implementation_blocked",
+    "resource_blocked"
+  ],
+  "resource_limit_seconds": 86400,
+  "m1_ep_rule": "m1_ep = round(m_total * H1 / H_total)  (Python round, round-half-to-even)",
+  "rate_rule": "R_i = 1 - m_i / block_len"
+}

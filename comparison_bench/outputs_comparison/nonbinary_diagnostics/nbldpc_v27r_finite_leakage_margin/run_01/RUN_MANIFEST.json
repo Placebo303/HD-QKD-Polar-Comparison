@@ -1,0 +1,40 @@
+{
+  "schema": "nbldpc_v27_run_manifest_v1",
+  "run_id": "run_01",
+  "role": "v27-finite-leakage-margin",
+  "frozen_config_binding": "co-located frozen_config.json in run root; verify_run reconstructs budget/terminal from it",
+  "resource_gate": {
+    "limit_seconds": 86400,
+    "screen_accumulated_seconds": 134.17273926734924,
+    "confirm_accumulated_seconds": 186.35659313201904
+  },
+  "screen_resource_blocked": false,
+  "confirm_resource_blocked": false,
+  "terminal_state": "pass_finite_budget_ready",
+  "sources": [
+    {
+      "label": "1M",
+      "source_id": "type2_1M_20260121_184040",
+      "delay_used_ps": -50,
+      "n_pairs": 512000
+    },
+    {
+      "label": "1p5M",
+      "source_id": "type2_1p5M_20260121_183806",
+      "delay_used_ps": 50,
+      "n_pairs": 708352
+    },
+    {
+      "label": "2M",
+      "source_id": "type2_2M_20260121_183657",
+      "delay_used_ps": 50,
+      "n_pairs": 933120
+    }
+  ],
+  "terminal_states_allowed": [
+    "pass_finite_budget_ready",
+    "de_pass_no_finite_headroom",
+    "implementation_blocked",
+    "resource_blocked"
+  ]
+}

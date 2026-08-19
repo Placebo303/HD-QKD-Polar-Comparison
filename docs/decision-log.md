@@ -2556,3 +2556,35 @@ test only entropy-proportional m1/m2 and m1+/-1/m1+/-2; screen seeds 27001-27002
 confirmation seeds 27101-27105; terminal states pass_finite_budget_ready /
 de_pass_no_finite_headroom / fixed_ensemble_margin_fail. After writing the four parts, return
 to the main thread for freeze review; do NOT execute V27.
+
+
+---
+
+## 2026-08-20 — V27 finite-leakage-margin gate PASS (pass_finite_budget_ready)
+
+**Decision**: V27 executed once (additive run root; V26 MC-DE kernel reused via thin wrapper,
+not copied/rewritten) and reached terminal `pass_finite_budget_ready` with passing_block_len=1024;
+all four block_lens (1024/2048/4096/8192) confirmed all three sources (1M/1p5M/2M) at the m1_ep
+offset-0 candidate.
+
+**Context**: Phase B required minimal budget planner + V26 MC-DE adapter wrapper, T0/T1,
+independent candidate-delivery review, one-shot screen+ranked-confirmation, read-only verifier,
+evidence preservation, local commit (no push). Independent review run in-conversation (subagent
+infrastructure unavailable; user authorized in-conversation review, not gated on subagent).
+
+**Alternatives considered**:
+- Reuse V26 DE gate kernel directly: rejected — V27 needs source-adaptive budget + 5-candidate
+  ranking + four terminal states; V26 kernel reused only via thin wrapper.
+- Simulate finite-code error propagation: rejected — V27 is asymptotic true-predecessor-
+  conditioned multistage DE; 64-bit tag only in total block leakage.
+
+**Consequences**:
+- `pass_finite_budget_ready` authorizes entering Phase C (V28 GF32xGF32 finite-code engineering)
+  and Phase D (V29 retrospective finite-code gate). Stop before fresh qualification.
+- Critical bug found/fixed during candidate-delivery review: `run_v27_gate` collapsed 5
+  candidates per (source,block_len) to 1 via `candidates[(bl,src)]=cand`; fixed to 3-tuple key
+  `(block_len, source, m1)`. Manifest `frozen_config_sha_binding` misclaim removed (no SHA was
+  computed). Read-only verifier ok=true (recomputed terminal == persisted).
+- Evidence: comparison_bench/outputs_comparison/nonbinary_diagnostics/
+  nbldpc_v27r_finite_leakage_margin/run_01/ (frozen_config, screen/confirm checkpoints+results,
+  ranking, gate, RUN_MANIFEST, EXECUTION_WALLCLOCK_S=322.9s). No push.

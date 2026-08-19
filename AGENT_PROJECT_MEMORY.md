@@ -1,4 +1,18 @@
-## 2026-08-19 V27R OpenSpec revision: source-adaptive finite-leakage-margin (DRAFT, review pending)
+## 2026-08-20 V27 finite-leakage-margin gate: PASS (pass_finite_budget_ready, block_len=1024)
+
+- V27 gate executed once on additive run root `comparison_bench/outputs_comparison/
+  nonbinary_diagnostics/nbldpc_v27r_finite_leakage_margin/run_01/` (322.9s wallclock). Terminal
+  `pass_finite_budget_ready`, passing_block_len=1024; all four block_lens confirmed all three
+  sources at the m1_ep offset-0 candidate. [result]
+- Independent candidate-delivery review (P-CDR, in-conversation) ACCEPT after fixing critical
+  dedup bug: `candidates[(bl,src)]=cand` collapsed 5 candidates/source to 1; fixed to 3-tuple
+  key `(block_len, source, m1)`. Read-only verifier ok=true (recomputed terminal == persisted).
+  11 T0/T1 tests pass. [result]
+- `pass_finite_budget_ready` authorizes Phase C (V28 GF32xGF32 finite-code engineering) and
+  Phase D (V29 retrospective finite-code gate); stop before fresh qualification. No push.
+  [consequence]
+
+## 2026-08-19 V27R OpenSpec revision: source-adaptive finite-leakage-margin (ACCEPTED + Phase B executed)
 
 - V27 OpenSpec revised from worst-source to SOURCE-ADAPTIVE budget: each source
   (1M/1p5M/2M) uses its own full-precision H1/H2; m_total=floor((1.3*block_len*H_source-64)/5).
