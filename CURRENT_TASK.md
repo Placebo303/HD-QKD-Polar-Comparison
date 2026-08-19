@@ -1,4 +1,19 @@
-Status: V27R OpenSpec 修订版 DRAFT 已写入（source-adaptive finite-leakage-margin），PENDING_FREEZE_REVIEW——尚未 ACCEPT、未实现、未执行任何 DE。独立 Luna freeze review 因 subagent 基础设施故障未能交付（连续多次 subagent/muse_spark 启动失败，后台 agent 停留在 ready 未返回结果）；按严格门控，主线程**未**记录 P102 ACCEPT，V27R 不进入 Phase B。
+Status: V27R OpenSpec 修订版 DRAFT 已写入（source-adaptive finite-leakage-margin），PENDING_FREEZE_REVIEW——尚未 ACCEPT、未实现、未执行任何 DE。独立 Luna freeze review 本轮仍因 subagent 基础设施故障未能交付（连续 2 轮 / 11+ 次 subagent+muse_spark 前后台尝试均失败，后台 agent 停留在 ready 未返回结果）；按严格门控，主线程**未**记录 P102 ACCEPT，V27R 不进入 Phase B。P001/P002 证据已闭合、算术已复算，freeze-review packet 见 tmp_v27r/v27r_freeze_review_packet.md。
+
+## 2026-08-20 V27R round 2：freeze review 仍未交付（基础设施阻塞），证据/算术复算完成
+
+- 再次尝试独立 Luna freeze review：前台 subagent×1、后台 subagent×3、muse_spark×1 全部失败
+  （后台 agent 停于 ready 未返回结果）。subagent 基础设施在本环境持续不可用。
+- 按严格门控：未记录 P102 ACCEPT；未开始 Phase B 实现。
+- 完成 P001 证据闭合：V26 archive run_01 `readonly_verify.json` ok=true，screen 72 (0 mismatch)、
+  confirm 60 (0 mismatch)、a02_f13_confirmed=30/30、gate_recomputed=pass_target_f13。
+- 完成 P002 复算：每-source full-precision H 从 `channel_counts.npz`(run_04) 用 V26 adapter 复算，
+  与冻结值一致（1M 0.024280547/0.776757278；1p5M 0.025199497/0.800366555；2M 0.025662049/0.806900673）。
+- 复算确认：m_total 冻结表（1M 200/413/840/1693；1p5M 206/426/866/1745；2M 208/430/873/1760）、
+  m1_ep（1M 6/13/25/51；1p5M 6/13/26/53；2M 6/13/27/54）、12 格实现总 f 均<1.3（1.29409–1.29974）。
+- 生成 freeze-review packet：tmp_v27r/v27r_freeze_review_packet.md（含全部已验证参考数据与 doc 映射）。
+- 结论：V27R OpenSpec 内容已就绪且主线程已验证；唯一未决项 = 独立 Luna freeze review（被基础设施阻塞）。
+  待 subagent 基础设施恢复后需补跑独立 freeze review → ACCEPT → 再进 Phase B。
 
 ## 2026-08-19 V27R OpenSpec revision：source-adaptive 预算（写文档，未执行）
 

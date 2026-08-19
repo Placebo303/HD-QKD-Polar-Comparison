@@ -23,6 +23,28 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-20: V27R freeze-review gate still blocked by subagent infrastructure (round 2)
+
+**Decision**: Keep V27R OpenSpec in PENDING_FREEZE_REVIEW. P102 ACCEPT is NOT recorded and
+Phase B is NOT started because the required independent Luna freeze review still cannot be
+delivered: the subagent infrastructure failed every attempt this round (foreground subagent
+x1, background subagent x3, muse_spark x1), and earlier-round attempts also failed. The main
+thread has independently re-verified the full arithmetic and evidence (P001/P002 closed) and
+produced a freeze-review packet (tmp_v27r/v27r_freeze_review_packet.md), but that does NOT
+substitute for the independent review.
+
+**Context**: Phase A gate (item 13/14) requires an independent Luna freeze review before
+acceptance. This is a process/infrastructure blocker, not a scientific result.
+
+**Alternatives considered**:
+- Record P102 ACCEPT on the main thread's own verification: rejected — the goal mandates an
+  independent Luna review; fabricating acceptance would violate the strict gate.
+- Start Phase B implementation anyway: rejected — violates "freeze review ACCEPT 前不实现".
+
+**Consequences**: V27R docs and evidence are ready; only the independent review is pending on
+infrastructure. When subagent infra is available again, a fresh Luna freeze review must run;
+on ACCEPT, record P102 and proceed to Phase B. Goal remains active.
+
 ### 2026-08-19: V27R OpenSpec revision — source-adaptive finite-leakage-margin budget
 
 **Decision**: Revise V27 OpenSpec from a single worst-source budget to a **source-adaptive**
