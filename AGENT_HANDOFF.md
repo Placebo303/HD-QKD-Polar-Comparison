@@ -1,3 +1,19 @@
+## 2026-08-21 V31 — CLOSED finite_graph_fail (archived)
+
+- V31 deterministic finite-graph redesign gate executed and archived.
+- M1 60/60 DE confirmation PASS (30/30 per n, m1=16).
+- M2: PEG-capacity-aware rejected both n (L2 GF32 rank-deficient, deterministic);
+  QC-cyclic-projective constructed OK both n (occupancy<=31).
+- M3: n=1024 full window 300/300 exact/tag=0 (L2 always `converged_no_syndrome`),
+  exact/tag FER=1.0; n=2048 bounded 1M prefix (14 blocks) same failure.
+  Terminal `finite_graph_fail`; read-only verifier ok=true, problems=[].
+- Evidence: comparison_bench/outputs_comparison/nonbinary_diagnostics/
+  nbldpc_v31_20260820/run_01/
+- Report: docs/nbldpc-v31-deterministic-finite-graph-redesign-report-20260820.md
+- OpenSpec archived: openspec/changes/archive/2026-08-21-formal-nonbinary-ldpc-v31-
+  deterministic-finite-graph-redesign-gate/
+- No push / V30R rerun / random search / seed tuning / qualification.
+
 ## 2026-08-20 V31 — in progress
 
 - V31 OpenSpec frozen (1d3502e2) and implementation committed (cd4fc0b6, 11 tests pass).

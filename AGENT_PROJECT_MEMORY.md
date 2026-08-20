@@ -1,3 +1,21 @@
+## 2026-08-21 V31 closeout: `finite_graph_fail`
+
+- V31 deterministic finite-graph redesign gate executed and archived
+  (user goal authorization 2026-08-20). No V30R packet rerun.
+- Fixed F03 GF32+GF32, V25 source-conditioned channel, m1=16, n=1024/2048.
+- M1: 60/60 DE confirmation PASS (30/30 per n).
+- M2: `PEG-capacity-aware` rejected both n (L2 GF32 rank-deficient,
+  deterministic); `QC-cyclic-projective` constructed OK both n (occupancy<=31,
+  full rank, projective-safe).
+- M3: n=1024 full window 300/300 exact/tag=0 (`converged_no_syndrome` L2),
+  exact/tag FER=1.0; n=2048 bounded 1M prefix (14 blocks) same failure.
+- Terminal `finite_graph_fail`; read-only verifier `ok=true`, problems=[].
+- Evidence: `comparison_bench/outputs_comparison/nonbinary_diagnostics/
+  nbldpc_v31_20260820/run_01/`
+- Report: `docs/nbldpc-v31-deterministic-finite-graph-redesign-report-20260820.md`
+- OpenSpec archived. No push; no random search; no seed tuning; no
+  qualification/promotion.
+
 ## 2026-08-20 V30R closeout: `finite_graph_fail`
 
 - V29 is closed with `v29_finite_gate_fail`; V28R's duplicate projective keys

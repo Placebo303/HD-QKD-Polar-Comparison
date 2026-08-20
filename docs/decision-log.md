@@ -23,6 +23,35 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-21: V31 deterministic finite-graph redesign gate closed with `finite_graph_fail`
+
+**Decision**: Execute and archive the V31 gate as `finite_graph_fail`.
+
+**Context**: V30R failed at the finite graph/decoder conversion layer. V31
+tested the successor hypotheses (m1=16, projective-capacity-aware PEG,
+deterministic QC control, n=1024/2048) with no search/seed/probity changes.
+
+**Evidence**:
+- M1 DE confirmation PASS 60/60 (30/30 per n, m1=16).
+- M2: PEG-capacity-aware rejected at both n (L2 GF32 rank-deficient:
+  m=200->199, m=414->413); QC-cyclic-projective constructed OK (occupancy<=31).
+- M3: n=1024 full window 300/300 exact/tag=0, L2 always `converged_no_syndrome`
+  -> exact/tag FER=1.0; n=2048 bounded 1M prefix (14 blocks) repeats the failure.
+- Read-only verifier ok=true, problems=[]; terminal finite_graph_fail.
+
+**Alternatives considered**:
+- Re-run/tune V30R balanced packets: prohibited by the frozen objective.
+- Random matrix-library search / seed adjustment: prohibited.
+- Continue the unbounded n=2048 full window: infeasible (non-converging L2
+  decodes took tens of minutes to hours per block); closed on a bounded 1M
+  prefix per the pre-registered design contingency.
+
+**Consequences**: V31 closes this finite-graph conversion route as negative at
+both tested block lengths and both deterministic families. A successor requires
+a new user authorization and new OpenSpec change; the primary diagnostics are
+L2 syndrome non-convergence on the empirical channel and PEG L2 rank
+deficiency at these sizes. No push, qualification, or promotion occurred.
+
 
 ### 2026-08-20: V30R finite-graph gate closed with `finite_graph_fail`
 

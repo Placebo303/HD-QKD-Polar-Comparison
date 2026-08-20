@@ -1,54 +1,15 @@
-Status: **V31 in progress — OpenSpec frozen + implementation complete, tests passing; production gate launching**
-于 2026-08-20 用户目标授权 V31 deterministic finite-graph redesign gate。
-V30R 已归档 `finite_graph_fail`；禁止重跑 V30R balanced/PEG 旧 packets。V31 固定
-F03 GF32+GF32、V25 source-conditioned channel、`m1=16`，n=1024 与 n=2048。
-- OpenSpec：`openspec/changes/formal-nonbinary-ldpc-v31-deterministic-finite-graph-redesign-gate/`
-  （proposal/design/tasks/spec 已 FROZEN_BY_USER_OBJECTIVE 并提交 1d3502e2）。
-- 实现：`comparison_bench/src/comparison_bench/formal_ir/nonbinary_v31.py`
-  + CLI `run_nonbinary_v31_gate.py` + tests `test_nonbinary_v31.py`（11 passed，
-  提交 cd4fc0b6）。
-- 门序：M1 预注册 60-call DE confirmation（每 n 30 calls，5 seeds × 3 sources ×
-  2 layers，m1=16）→ M2 构造两族（PEG-capacity-aware + QC-cyclic-projective，
-  occupancy≤31）→ M3 Bob-only full-window validation（n=1024:100 blocks/source、
-  n=2048:50 blocks/source）→ 只读 verifier → finite pass/fail 收口。
-- 下一步：启动 canonical `run_01` 生产门，完成后跑 `verify_v31` 并写报告/收口。
-
-当前基线：V25 run_04 authority；V26 run_02 canonical；V28R run_02_v28r canonical；
-V30R run_01 canonical（只读）。
-
-Status: **V30R archived — `finite_graph_fail`** — P103 独立 freeze review
-于 2026-08-20 ACCEPT，随后完成一次 canonical `run_01` implementation/
-execution 与 independent read-only verification (`ok=true`, `problems=[]`)。
-V29 已以 `v29_finite_gate_fail` 收口；V28R 的 projective-duplicate/weight-2
-根因已确认。V30R 的有限图构造在固定 1M screen 上失败，已归档；fresh
-qualification、promotion 与 push 不在本轮范围内。
-V30R 冻结：F03
-GF32+GF32、`n=1024`、每 selected allocation 至多 2 packets（balanced 1 +
-PEG-projective-cycle-cancelled 1）、最多 2 allocations / 全局 4 packets；
-M1 失败 allocation 仍完成全部 12 registered calls；M3 screen 固定 blocks
-`0..19`，仅 top-ranked eligible matrix 运行 confirmation `20..69`，其失败
-直接为 global `finite_graph_fail`。bounded cycle rule：4-cycle duplicate
-projective key hard-zero，Tanner-6 greedy `(degenerate_6_new, ratio_index)`，
-Tanner-8 topology-only；ACE 不参与排序。不 push。
-
-V30R input binding (read-only, frozen): V25 authority is
-`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/data_inventory.json`
-plus
-`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/split_manifest.json`;
-V26 canonical is
-`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v26_20260818/run_02/`
-(`RUN_MANIFEST.json`, `m0_report.json`, `readonly_verify.json`); V28R canonical
-is
-`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v28_gf32_finite_code/run_02_v28r/`
-(`v28_config.json`, `v28_evidence.json`, `RUN_MANIFEST.json`,
-`readonly_verify.json`).
-Source IDs/delays are `type2_1M_20260121_184040 -> -50 ps -> 1M`,
-`type2_1p5M_20260121_183806 -> +50 ps -> 1p5M`, and
-`type2_2M_20260121_183657 -> +50 ps -> 2M`; pair paths are the matching
-`v13r3fresh_pairs_20260816/<source_id>/pairs.parquet` entries. Field binding is
-`GF2mField.create(32)`, `poly=0b100101`, V28R field_id
-`c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, and
-zero-based `ratio_index` into `nonzero_cycle`.
+Status: **V31 ARCHIVED — `finite_graph_fail`** — 2026-08-21 收口
+V31 deterministic finite-graph redesign gate 已执行并归档（用户目标授权）。
+- M1 DE confirmation PASS 60/60（每 n 30/30，m1=16）。
+- M2：PEG-capacity-aware 两 n 均因 L2 GF(32) 缺秩 deterministic reject；
+  QC-cyclic-projective 两 n 构造 OK（occupancy<=31）。
+- M3：n=1024 全窗口 300/300 exact/tag=0（L2 恒 converged_no_syndrome），
+  exact/tag FER=1.0；n=2048 有界 1M 前缀 14 块同 fail。终态
+  `finite_graph_fail`；只读 verifier ok=true、problems=[]。
+- 证据根：comparison_bench/outputs_comparison/nonbinary_diagnostics/
+  nbldpc_v31_20260820/run_01/
+- 报告：docs/nbldpc-v31-deterministic-finite-graph-redesign-report-20260820.md
+- 无 push；无 V30R rerun；无随机搜索；无 seed 调参；无 qualification/promotion。
 
 ## 2026-08-21 V31 production gate — running (M1 PASS, M2 in progress)
 

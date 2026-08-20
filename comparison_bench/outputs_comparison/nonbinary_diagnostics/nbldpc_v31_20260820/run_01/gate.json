@@ -1,0 +1,17 @@
+{
+  "schema": "nbldpc_v31_gate_v1",
+  "status": "finite_graph_fail",
+  "m1_de_resource_meter_seconds": 55.39100000000326,
+  "m3_decoder_resource_meter_seconds": 0.0,
+  "resource_limit_seconds": 432000.0,
+  "m1_terminal": "de_allocation_pass",
+  "m3_terminal": "finite_graph_fail",
+  "per_n_pass": {
+    "1024": false,
+    "2048": false
+  },
+  "de_rerun": false,
+  "decoder_rerun": false,
+  "v30_rerun": false,
+  "closeout_note": "GLOBAL finite_graph_fail fixed by the COMPLETE n=1024 window (all 300 blocks exact=0/tag=0). n=2048 window closed on a bounded 1M prefix (14 blocks, all exact=0/tag=0) because non-converging L2 decodes are extremely slow (design §5 pre-registered contingency)."
+}

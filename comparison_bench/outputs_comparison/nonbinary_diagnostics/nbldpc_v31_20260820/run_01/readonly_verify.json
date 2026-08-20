@@ -1,0 +1,13 @@
+{
+  "schema": "nbldpc_v31_readonly_verify_v1",
+  "ok": true,
+  "problems": [],
+  "recomputed_terminal": "finite_graph_fail",
+  "persisted_terminal": "finite_graph_fail",
+  "no_de_rerun": true,
+  "no_decoder_rerun": true,
+  "verifier_rerun_flags": {
+    "de": false,
+    "decoder": false
+  }
+}

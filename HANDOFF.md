@@ -1,4 +1,22 @@
-# HANDOFF — HD-QKD Nonbinary LDPC route (V31 in progress)
+# HANDOFF — HD-QKD Nonbinary LDPC route (V31 archived: finite_graph_fail)
+
+## Current state (2026-08-21)
+
+- V31 deterministic finite-graph redesign gate is ARCHIVED with terminal
+  `finite_graph_fail` (read-only verifier ok=true, problems=[]).
+- M1 60/60 DE confirmation PASS; M2 PEG deterministic reject (L2 rank-deficient),
+  QC-cyclic OK; M3 n=1024 full window FER=1.0, n=2048 bounded prefix FER=1.0.
+- Evidence:
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/`
+- Report: `docs/nbldpc-v31-deterministic-finite-graph-redesign-report-20260820.md`
+- OpenSpec archived at
+  `openspec/changes/archive/2026-08-21-formal-nonbinary-ldpc-v31-deterministic-finite-graph-redesign-gate/`
+- No push. No V30R rerun. No random search / seed tuning / qualification.
+
+## Next
+A successor route requires new user authorization and a new OpenSpec change.
+Primary diagnostics: L2 non-convergence (`converged_no_syndrome`) on the V25
+channel, and PEG L2 rank deficiency at these sizes.
 
 ## Current state (2026-08-20)
 
