@@ -18,11 +18,11 @@ Status: IN PROGRESS (production run launched 2026-08-20).
     m=414->rank413), so full row rank fails.
   - `QC-cyclic-projective` n=1024 and n=2048: construction OK (full rank,
     projective-safe, max support occupancy <=9).
-- M3: RUNNING (n=1024 QC packet). Source 1M window COMPLETE (100/100 blocks):
-  `l1_ok=98`, `l2_ok=0`, `exact=0`, `tag=0`, `false_accept=0` -> 1M exact =
-  tag FER = 1.0 for the QC-cyclic family at n=1024. 1p5M/2M n=1024 and the
-  n=2048 QC window still running to complete the waterfall/failure-position
-  comparison.
+- M3: RUNNING (n=1024 QC packet). Source 1M and 1p5M windows COMPLETE (100/100
+  each): both have `exact=0`, `tag=0`, `false_accept=0` (1M `l1_ok=98`,
+  1p5M `l1_ok=`~99, `l2_ok=0` both) -> exact = tag FER = 1.0 for the QC-cyclic
+  family at n=1024. 2M n=1024 window in progress (occasional very slow
+  non-converging L2 blocks); n=2048 window pending.
 - Read-only verifier: pending
 
 Evidence root:
