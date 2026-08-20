@@ -1,3 +1,34 @@
+# HANDOFF — HD-QKD Nonbinary LDPC route (V31 in progress)
+
+## Current state (2026-08-20)
+
+- V31 deterministic finite-graph redesign gate is AUTHORIZED and FROZEN
+  (user goal 2026-08-20). V30R is archived with `finite_graph_fail` and must
+  not be rerun.
+- OpenSpec documents are committed (1d3502e2); implementation + tests are
+  committed (cd4fc0b6); 11 V31 tests + 36 V30 tests pass.
+- Module: `comparison_bench/src/comparison_bench/formal_ir/nonbinary_v31.py`;
+  CLI: `comparison_bench/src/comparison_bench/cli/run_nonbinary_v31_gate.py`;
+  tests: `comparison_bench/tests/test_nonbinary_v31.py`.
+- Gate plan: M1 60-call DE confirmation (30 per n) -> M2 two deterministic
+  families per n (PEG-capacity-aware, QC-cyclic-projective) -> M3 Bob-only
+  full-window validation at n=1024/2048 -> read-only verifier -> close with
+  finite pass/fail.
+- Evidence root: `comparison_bench/outputs_comparison/nonbinary_diagnostics/
+  nbldpc_v31_20260820/run_01/` (production run pending).
+
+## Next
+
+Run the canonical production gate:
+`python -m comparison_bench.src.comparison_bench.cli.run_nonbinary_v31_gate  comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01`
+Then run `--verify-only` on the root, write the closeout report, update memory
+docs, and commit locally (no push).
+
+## Hard prohibitions
+No push; no V30R packet rerun; no random matrix-library search; no seed tuning;
+no V29 holdout/raw .ttbin; no qualification/promotion.
+
+---
 # HANDOFF — HD-QKD Nonbinary LDPC route (V30R archived)
 
 ## Current state (2026-08-20)

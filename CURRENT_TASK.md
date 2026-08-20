@@ -1,3 +1,21 @@
+Status: **V31 in progress — OpenSpec frozen + implementation complete, tests passing; production gate launching**
+于 2026-08-20 用户目标授权 V31 deterministic finite-graph redesign gate。
+V30R 已归档 `finite_graph_fail`；禁止重跑 V30R balanced/PEG 旧 packets。V31 固定
+F03 GF32+GF32、V25 source-conditioned channel、`m1=16`，n=1024 与 n=2048。
+- OpenSpec：`openspec/changes/formal-nonbinary-ldpc-v31-deterministic-finite-graph-redesign-gate/`
+  （proposal/design/tasks/spec 已 FROZEN_BY_USER_OBJECTIVE 并提交 1d3502e2）。
+- 实现：`comparison_bench/src/comparison_bench/formal_ir/nonbinary_v31.py`
+  + CLI `run_nonbinary_v31_gate.py` + tests `test_nonbinary_v31.py`（11 passed，
+  提交 cd4fc0b6）。
+- 门序：M1 预注册 60-call DE confirmation（每 n 30 calls，5 seeds × 3 sources ×
+  2 layers，m1=16）→ M2 构造两族（PEG-capacity-aware + QC-cyclic-projective，
+  occupancy≤31）→ M3 Bob-only full-window validation（n=1024:100 blocks/source、
+  n=2048:50 blocks/source）→ 只读 verifier → finite pass/fail 收口。
+- 下一步：启动 canonical `run_01` 生产门，完成后跑 `verify_v31` 并写报告/收口。
+
+当前基线：V25 run_04 authority；V26 run_02 canonical；V28R run_02_v28r canonical；
+V30R run_01 canonical（只读）。
+
 Status: **V30R archived — `finite_graph_fail`** — P103 独立 freeze review
 于 2026-08-20 ACCEPT，随后完成一次 canonical `run_01` implementation/
 execution 与 independent read-only verification (`ok=true`, `problems=[]`)。
