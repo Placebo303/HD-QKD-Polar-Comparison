@@ -1,0 +1,11 @@
+{
+  "schema": "nbldpc_v28r_readonly_verify_v2",
+  "ok": true,
+  "problems": [],
+  "recomputed_terminal": "engineering_ready_for_retrospective_gate",
+  "persisted_terminal": "engineering_ready_for_retrospective_gate",
+  "matrix_rebuilt": true,
+  "sequential_empirical_replayed": true,
+  "holdout_read": false,
+  "raw_ttbin_read": false
+}
