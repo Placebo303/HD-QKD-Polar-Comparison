@@ -6,6 +6,12 @@
   `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01`;
   progress file `progress.json` shows stage-by-stage status.
 - Next: monitor M2 construction and M3 full-window validation; then `--verify-only` and closeout.
+- M2 observation (in-run): `PEG-capacity-aware` n=1024 packet was deterministically
+  REJECTED on construction hard gate (one of the L2 m=184/190/192 matrices failed
+  rank/projective/occupancy). `QC-cyclic-projective` n=1024 packet construction OK
+  (max support occupancy 9). n=2048 families and M3 pending.
+- Production process is detached (PowerShell); it survives shell resets. Poll
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/progress.json`.
 
 ## 2026-08-20 V30R — closeout `finite_graph_fail`
 
