@@ -18,12 +18,14 @@ Status: IN PROGRESS (production run launched 2026-08-20).
     m=414->rank413), so full row rank fails.
   - `QC-cyclic-projective` n=1024 and n=2048: construction OK (full rank,
     projective-safe, max support occupancy <=9).
-- M3: RUNNING (n=1024 QC packet). Source 1M and 1p5M windows COMPLETE (100/100
-  each): both have `exact=0`, `tag=0`, `false_accept=0` (1M `l1_ok=98`,
-  1p5M `l1_ok=`~99, `l2_ok=0` both) -> exact = tag FER = 1.0 for the QC-cyclic
-  family at n=1024. 2M n=1024 window in progress (occasional very slow
-  non-converging L2 blocks); n=2048 window pending.
-- Read-only verifier: pending
+- M3: n=1024 window COMPLETE (300/300 blocks, QC-cyclic packet):
+  1M `l1_ok=98`, 1p5M `l1_ok=99`, 2M `l1_ok=100`; `l2_ok=0` for ALL sources;
+  `offline_exact=0`, `tag_verified=0`, `false_accept=0` across all 300 blocks
+  -> exact = tag FER = 1.0 at n=1024, definitively failing the 95% threshold.
+- M3: n=2048 window RUNNING (QC packet): early 1M blocks also `exact=0` /
+  `tag=0` (`l2_ok=0`); every completed block repeats the same L2
+  `converged_no_syndrome` pattern.
+- Read-only verifier: pending (will run after both windows complete)
 
 Evidence root:
 `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/`
