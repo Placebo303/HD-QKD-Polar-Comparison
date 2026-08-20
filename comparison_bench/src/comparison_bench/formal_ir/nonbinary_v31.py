@@ -1068,6 +1068,9 @@ def run_v31_gate(
         "registered_calls": _json_safe([dict(item) for n in N_VALUES for item in _confirmation_items(allocations[n])]),
         "per_n": m1.get("per_n", {}), "confirmed_n": m1.get("confirmed_n", []),
     }
+    _write_json(root / "progress.json", {"stage": "m1_done", "m1_terminal": m1.get("terminal"),
+                                        "confirmed_n": m1.get("confirmed_n", []),
+                                        "m1_meter_seconds": m1.get("resource_meter_seconds", 0.0)})
     if m1.get("terminal") != "de_allocation_pass":
         construction = {n: {"n": n, "packets": [], "rejected": []} for n in N_VALUES}
         m3 = {"schema": "nbldpc_v31_finite_gate_v1", "status": TERMINAL_FAIL,
@@ -1076,6 +1079,9 @@ def run_v31_gate(
         status = m1.get("terminal") or TERMINAL_DE_FAIL
     else:
         construction = run_m2(allocations)
+        _write_json(root / "progress.json", {"stage": "m2_done",
+                                            "packet_count": sum(len(construction[n]["packets"]) for n in N_VALUES),
+                                            "rejected": [r for n in N_VALUES for r in construction.get(n, {}).get("rejected", [])]})
         if blocks_by_n is None:
             blocks_by_n = {n: load_validation_blocks(n) if construction[n]["packets"] else [] for n in N_VALUES}
         else:
@@ -1085,6 +1091,9 @@ def run_v31_gate(
         if any(construction[n]["packets"] for n in N_VALUES):
             m3 = run_m3_gate(construction, blocks_by_n, decoder_runner=decoder_runner,
                              adapters=adapters, resource_limit_seconds=resource_limit_seconds)
+            _write_json(root / "progress.json", {"stage": "m3_done", "status": m3.get("status"),
+                                                 "record_count": m3.get("record_count", 0),
+                                                 "per_n_pass": m3.get("per_n_pass", {})})
         else:
             m3 = {"schema": "nbldpc_v31_finite_gate_v1", "status": TERMINAL_FAIL,
                   "records": [], "record_count": 0, "summaries": {}, "per_n_pass": {},
@@ -1329,8 +1338,14 @@ def verify_v31(run_root: str | Path) -> dict[str, Any]:
             if sorted(indices) != list(range(blocks_per_source)):
                 problems.append(f"block_registration:{n}:{pid}:{source}")
         # Recompute summaries from records and compare to persisted
+        summary_doc = _read_json(root / f"summary_n{n}.json")
+        if not isinstance(summary_doc, dict):
+            problems.append(f"summary_n{n}_type")
+            summaries = []
+        else:
+            summaries = summary_doc.get("summaries", [])
         payload_ids = {str(p["packet_id"]) for p in payload_map.values() if int(p.get("n", -1)) == n}
-        for pid in payload_ids:
+        for pid in sorted(payload_ids):
             rows = [r for r in records if str(r.get("packet_id")) == pid]
             if not rows:
                 problems.append(f"missing_blocks:{n}:{pid}")
@@ -1339,14 +1354,29 @@ def verify_v31(run_root: str | Path) -> dict[str, Any]:
             tag = sum(int(bool(r.get("tag_verified"))) for r in rows)
             false_acc = sum(int(bool(r.get("false_accept"))) for r in rows)
             threshold = math.ceil(THRESHOLD_RATIO * blocks_per_source)
-            minimum = min(blocks_per_source, threshold)
-            passed = exact >= minimum and tag >= minimum and false_acc == 0
-            persisted = _read_json(root / f"summary_n{n}.json").get("summaries", []) if isinstance(
-                _read_json(root / f"summary_n{n}.json"), dict) else []
-            # The persisted summary shape is checked structurally next.
-        summary_doc = _read_json(root / f"summary_n{n}.json")
-        if not isinstance(summary_doc, dict):
-            problems.append(f"summary_n{n}_type")
+            passed = exact >= threshold and tag >= threshold and false_acc == 0
+            matching = [s for s in summaries if str(s.get("packet_id")) == pid]
+            if len(matching) != 1:
+                problems.append(f"summary_missing_packet:{n}:{pid}")
+                continue
+            persisted_summary = matching[0]
+            per = persisted_summary.get("per_source", {}) if isinstance(persisted_summary, dict) else {}
+            for label in SOURCE_ORDER:
+                info = per.get(label) if isinstance(per, dict) else None
+                if not isinstance(info, dict):
+                    problems.append(f"summary_source_missing:{n}:{pid}:{label}")
+                    continue
+                if int(info.get("exact_count", -1)) != sum(int(bool(r.get("offline_exact")))
+                                                            for r in rows if r.get("source") == label):
+                    problems.append(f"summary_exact_mismatch:{n}:{pid}:{label}")
+                if int(info.get("tag_verified_count", -1)) != sum(int(bool(r.get("tag_verified")))
+                                                                   for r in rows if r.get("source") == label):
+                    problems.append(f"summary_tag_mismatch:{n}:{pid}:{label}")
+                if int(info.get("false_accept_count", -1)) != sum(int(bool(r.get("false_accept")))
+                                                                   for r in rows if r.get("source") == label):
+                    problems.append(f"summary_false_accept_mismatch:{n}:{pid}:{label}")
+            if bool(persisted_summary.get("passed")) != bool(passed):
+                problems.append(f"summary_pass_mismatch:{n}:{pid}")
 
     # Terminal recomputation
     recomputed_status = gate.get("status") or TERMINAL_IMPL

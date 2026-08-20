@@ -1,7 +1,8 @@
 # V31 deterministic finite-graph redesign gate — plan (2026-08-20)
 
-Status: DRAFT — new user-authorized change, pending freeze review and
-implementation. This is the successor to V30R (`finite_graph_fail`, archived).
+Status: FROZEN BY USER OBJECTIVE — implementation complete, tests passing (11/11),
+M1 60/60 DE confirmation PASSED (30/30 per n), production gate launched (2026-08-20).
+This is the successor to V30R (`finite_graph_fail`, archived).
 
 ## Objective
 

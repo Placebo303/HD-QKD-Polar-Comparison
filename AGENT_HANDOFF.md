@@ -1,3 +1,12 @@
+## 2026-08-20 V31 — in progress
+
+- V31 OpenSpec frozen (1d3502e2) and implementation committed (cd4fc0b6, 11 tests pass).
+- M1 pre-registered DE confirmation PASSED: 60/60 calls (30/30 per n, m1=16).
+- Production gate launched to
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01`;
+  progress file `progress.json` shows stage-by-stage status.
+- Next: monitor M2 construction and M3 full-window validation; then `--verify-only` and closeout.
+
 ## 2026-08-20 V30R — closeout `finite_graph_fail`
 
 - Archived change: `formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate/`,
