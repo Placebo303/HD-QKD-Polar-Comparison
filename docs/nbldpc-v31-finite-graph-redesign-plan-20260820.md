@@ -56,3 +56,11 @@ Create and execute a V31 deterministic finite-graph redesign gate with:
 M0 (read-only audit) → M1 (60-call DE confirmation) → M2 (two deterministic
 families per n) → M3 (full Bob-only validation windows at both n) → read-only
 verifier → close with `finite_graph_pass` / `finite_graph_fail`.
+
+## Execution status (2026-08-21 00:4x)
+
+- Implementation has resumable wall-clock chunking (M2/M3 persist incrementally);
+  production run launched detached.
+- M1 in-run status: `de_allocation_pass` (60/60; 30/30 per n), 55s.
+- M2 in progress (8 deterministic matrices across n=1024/2048); M3 pending.
+- Closeout: run `--verify-only`, then write report and commit (no push).

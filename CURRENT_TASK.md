@@ -50,6 +50,17 @@ Source IDs/delays are `type2_1M_20260121_184040 -> -50 ps -> 1M`,
 `c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, and
 zero-based `ratio_index` into `nonzero_cycle`.
 
+## 2026-08-21 V31 production gate — running (M1 PASS, M2 in progress)
+
+- 生产门 detached 进程运行中，证据根
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/`。
+- M1 在 run 内 `de_allocation_pass`：60/60 DE confirmation（每 n 30/30，m1=16），55s。
+- M2：两族 × 两 n 共 8 个确定性矩阵构造/审计进行中（PEG-capacity-aware +
+  QC-cyclic-projective，occupancy≤31）。
+- M3：Bob-only full-window validation 待 M2 完成后运行。
+- 收口：只读 verifier 通过后按 `finite_graph_pass`/`finite_graph_fail` 收口；
+  禁止 V30R rerun / 随机搜索 / seed 调参 / qualification/promotion / push。
+
 ## 2026-08-20 V30R closeout — finite_graph_fail
 
 - canonical evidence:
