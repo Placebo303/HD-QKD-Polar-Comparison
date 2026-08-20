@@ -260,9 +260,10 @@ indices/sources).
 
 ### 5.5 Resource gate
 
-M3 has INDEPENDENT cumulative 24-hour decoder meters per block length
-(n=1024 and n=2048), because the two lengths are separate validation gates with
-different block counts. Each block record is persisted before the next block
+M3 has INDEPENDENT cumulative decoder resource meters per block length
+(n=1024 and n=2048, limit 5 days each) because the two lengths are separate
+validation gates with different block counts and n=2048 L2 non-converging
+decodes are extremely slow. Each block record is persisted before the next block
 starts. If a block length's meter hits its limit, that length is
 `resource_blocked`; if any required length is resource-blocked, the overall
 terminal is `resource_blocked`. A complete window that fails thresholds is

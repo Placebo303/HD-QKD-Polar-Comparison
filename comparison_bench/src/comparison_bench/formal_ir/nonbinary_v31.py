@@ -45,7 +45,10 @@ M1_ENTROPY_TOL_BITS = 0.01
 M1_STREAK = 20
 M3_MAX_ITER = 200
 M3_STREAK = 20
-RESOURCE_LIMIT_SECONDS = 24.0 * 60.0 * 60.0
+# Per-n DE/decoder cumulative wall/resource gate.  The 24h V30R gate was
+# raised for V31 because n=2048 L2 non-converging decodes are extremely slow;
+# this is a resource-limit parameter, not a search/tuning knob.
+RESOURCE_LIMIT_SECONDS = 5.0 * 24.0 * 60.0 * 60.0
 THRESHOLD_RATIO = 0.95
 MAX_SUPPORT_OCCUPANCY = Q - 1  # 31 nonzero GF(32) ratios
 FAMILY_PEG = "PEG-capacity-aware"

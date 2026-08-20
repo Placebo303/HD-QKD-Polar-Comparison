@@ -84,8 +84,7 @@ A (n, family) PASS requires, for every source: `exact_count >=
 ceil(0.95*block_count)`, `tag_verified_count >= ceil(0.95*block_count)`, and
 `false_accept_count == 0`. V31 terminal is `finite_graph_pass` iff each n has at
 least one passing family; otherwise `finite_graph_fail`. Terminals also include
-`de_allocation_fail`, `resource_blocked` (24h DE meter, or 24h decoder meter
-per block length), and `implementation_blocked`.
+`de_allocation_fail`, `resource_blocked` (DE meter, or decoder meter per block length, limit 5 days each), and `implementation_blocked`.
 
 ## Requirement: read-only verifier and closeout
 
