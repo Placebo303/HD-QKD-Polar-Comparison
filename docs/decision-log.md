@@ -23,6 +23,53 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+
+### 2026-08-20: V30R finite-graph gate closed with `finite_graph_fail`
+
+**Decision**: Close and archive V30R after the canonical `run_01` execution
+and independent read-only verification. The verifier returned `ok=true`,
+`problems=[]`, and recomputed the persisted terminal `finite_graph_fail`.
+
+**Evidence**: M0 reproduced `15/69/303/922/1107`. M1 persisted all 72 screen
+calls and 60 confirmation calls; screen-eligible `m1=9,12,16` were ranked,
+`m1_9` and `m1_12` were selected, and both completed 30/30 confirmation. M2
+retained valid balanced packets for `m1=9,12`; both PEG packets were
+deterministically rejected because no projectively unique ratio survived for
+support `(0,1)`. M3 screened both valid packets on source 1M blocks `0..5`,
+with `0/6` exact/tag-verified and `0` false accepts for each, making the
+frozen `15/20` screen threshold impossible. The stage stopped before other
+sources and before confirmation. M1/M3 meters were 74.828 s and 719.876 s.
+
+**Scientific boundary**: This is negative only for the tested `n=1024`, F03,
+fixed-allocation, balanced/PEG-family finite conversion under the V28 decoder.
+It does not negate V25's empirical channel, V26's channel-informed DE, or all
+NBLDPC designs. It makes no FER qualification, fresh qualification, promotion,
+integration, or public-residual claim.
+
+**Consequences**: V30R evidence and failure are archived. Same-packet expansion,
+rerun, decoder tuning, random matrix/degree search, V29 holdout reuse, and
+automatic fallback are prohibited. A future finite-graph redesign requires a
+new user-authorized OpenSpec; recorded hypotheses are `m1=16`,
+projective-capacity-aware PEG, L2 girth/expander/QC/SC constraints, and
+`n=2048/4096`. No push was performed.
+
+### 2026-08-20: V30R P103 freeze review ACCEPTED
+
+**Decision**: The independent third P103 freeze review ACCEPTED the V30R
+projective-safe finite-graph gate on 2026-08-20. The four-document packet is
+now `FROZEN_P103_ACCEPTED`; its frozen implementation and pre-registered V30R
+execution are authorized.
+
+**Boundary**: This records authorization, not execution. No V30R code,
+finite-code construction, DE, decoder call, or scientific output has started
+as of this entry. Fresh qualification, promotion, archive, commit, and push
+remain separate actions and are not implied by P103.
+
+**Consequence**: The next operator may implement the exact frozen packet and
+then execute its registered gate, preserving the no-rerun/no-tuning and
+evidence-boundary rules in the V30R four-set. The active state is not pending
+review, and P102 remains historical/superseded.
+
 ### 2026-08-20: V27R freeze review ACCEPT (P102) — in-conversation independent review
 
 **Decision**: The V27R OpenSpec (source-adaptive finite-leakage-margin) received an
@@ -2664,9 +2711,76 @@ Thus this particular finite matrix has `d_min<=2`.
 closure of the channel-informed GF32×GF32 route. The original V28 ACCEPT is
 superseded by V28R engineering evidence and does not claim FER.
 
-**Next**: V30 `formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate`
-is `FROZEN_P102_ACCEPTED` after the 2026-08-20 main-thread freeze review.
-Implementation/execution remains a separate goal; no DE, matrix construction,
-validation block, or decoder call has started. V31 fresh
+**Historical pre-P103 state**: The original V30
+`formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate`
+`FROZEN_P102_ACCEPTED` state was superseded by V30R
+`DRAFT_PENDING_P103_FREEZE_REVIEW`; implementation/execution was blocked at
+that time, and no DE, matrix construction, validation block, or decoder call
+had started. The later P103 ACCEPT entry at the top records the current
+`FROZEN_P103_ACCEPTED` state and authorization boundary. V31 fresh
 time-separated qualification follows only after V30 PASS; V32 integration
 follows V31.
+
+## 2026-08-20 — V30R bounded cycle-cancellation revision (historical pre-P103 state)
+
+**Decision**: Supersede the original V30 `P102 ACCEPTED` packet with a V30R
+revision before implementation or execution. At the time of this entry, the
+state was `DRAFT_PENDING_P103_FREEZE_REVIEW` and P103 was the only release
+gate; the later P103 ACCEPT entry records the current state.
+
+**Frozen packet semantics**:
+- Each selected allocation may produce at most one
+  `balanced-projective` packet and one `PEG-projective-cycle-cancelled` packet;
+  with at most two selected allocations, the global packet cap is four.
+- M1 marks a failed allocation ineligible only after all 12 registered calls
+  are persisted. Only a global terminal may interrupt the registered calls.
+- M3 screens fixed blocks `0..19` for every registered packet. A screen failure
+  removes only that packet. After the complete screen, only the single
+  top-ranked eligible packet runs fixed confirmation blocks `20..69`; its
+  failure is global `finite_graph_fail` and no fallback packet runs.
+
+**Bounded graph/label rule**:
+- A duplicate projective key/proportional column is the 4-cycle FRC failure and
+  must be zero. Ordinary 4-cycles are allowed and only counted for topology or
+  ranking.
+- For each column, reject duplicate-key labels first; among remaining fixed
+  `nonzero_cycle` candidates, compute exact newly closed degenerate Tanner-6
+  cycles and choose minimal `(degenerate_6_new, ratio_index)`. Nonzero counts
+  are allowed and retained as aggregate evidence.
+- Tanner-8 is topology/girth diagnostics only. No all-4/6/8 FRC catalog,
+  random label search, or candidate rejection list is required. Standard
+  variable-side ACE is not used because `d_v=2`.
+
+**Consequences**: V30R retains the V25/V26 channel and V27/V29 leakage/data
+boundaries, but narrows cycle cancellation to an executable,
+literature-aligned bounded rule. No code, DE, finite decoding, scientific
+output, archive, commit, or push is authorized before P103 ACCEPT.
+
+**V30R input binding**: V25 authority is
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/data_inventory.json`
+plus
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/split_manifest.json`;
+V26 canonical is
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v26_20260818/run_02/`
+(manifest/M0/verify); V28R canonical is
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v28_gf32_finite_code/run_02_v28r/`
+(config/evidence/manifest/verify).
+The source IDs/delays are `type2_1M_20260121_184040/-50 ps/1M`,
+`type2_1p5M_20260121_183806/+50 ps/1p5M`, and
+`type2_2M_20260121_183657/+50 ps/2M`, with matching
+`v13r3fresh_pairs_20260816/<source_id>/pairs.parquet` paths. The field is
+`GF2mField.create(32)` with `0b100101`, V28R field_id
+`c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, and
+zero-based `ratio_index`.
+
+**V30R deterministic graph binding**: balanced uses columns in order and
+lexicographic supports minimizing
+`(occupancy_after,max_check_degree_after,sumsq_after,a,b)`. PEG uses the prior
+support check-multigraph edge distance `d_check(a,b)`, defines Tanner path
+length `d(a,b)=2*d_check(a,b)`, and minimizes
+`(component_flag,distance_cost,max_check_degree_after,sumsq_after,a,b)` with
+local Tanner score `d+2`; projective uniqueness is label-stage-only. Tanner-6
+counts contain only the current column and use the canonical tuple
+`min((j,a,k1,c,k2,b),(j,b,k2,c,k1,a))`; L1 and each L2 source use independent
+state. M1 is 72 screen plus at most 60 confirmation calls, with complete 30-call
+confirmation for each selected allocation and allocation-local failure.

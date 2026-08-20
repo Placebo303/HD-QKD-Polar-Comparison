@@ -1,3 +1,51 @@
+## 2026-08-20 V30R — closeout `finite_graph_fail`
+
+- Archived change: `formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate/`,
+  terminal `finite_graph_fail`.
+- Original V30 `P102 ACCEPTED` is superseded by V30R. Independent P103 review was
+  ACCEPTED on 2026-08-20; canonical `run_01` implementation/execution and
+  independent read-only verification are complete (`ok=true`, `problems=[]`).
+  Fresh qualification/promotion remains separate.
+- Frozen packet semantics: one balanced-projective plus one
+  `PEG-projective-cycle-cancelled` packet per selected allocation at most; at
+  most two allocations and four packets globally. M1 failed allocations still
+  complete all 12 registered calls. M3 screen uses blocks `0..19`; only the
+  top-ranked screen-eligible matrix uses blocks `20..69`, and its failed
+  confirmation is global `finite_graph_fail` with no fallback.
+- Bounded cycle rule: duplicate projective key/proportional column = 4-cycle
+  FRC failure and hard-zero; per-column labels minimize exact newly closed
+  Tanner-6 degeneracies by `(degenerate_6_new, ratio_index)`; Tanner-8 is
+  topology/girth aggregate only; standard variable-side ACE is not used for
+  `d_v=2`. Evidence is aggregate plus deterministic replay.
+- Canonical evidence:
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v30_20260820/run_01/`.
+  M0=`15/69/303/922/1107`; M1=72 screen+60 confirmation, selected/confirmed
+  `m1_9,m1_12` both 30/30; M2 valid balanced `m1=9,12`, PEG rejected for no
+  projectively unique ratio on support `(0,1)`; M3 stopped after 1M blocks
+  `0..5` for both valid packets (`0/6` exact, `0` false accepts), yielding
+  `finite_graph_fail`. Meters=74.828s/719.876s.
+- Next handoff: no same-packet expansion/rerun/tuning. A future V31 finite-graph
+  redesign requires new user authorization; record only hypotheses (m1=16,
+  projective-capacity-aware PEG, L2 girth/expander/QC/SC, n=2048/4096).
+
+Frozen input bindings: V25
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/data_inventory.json`
+and `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/split_manifest.json`;
+V26 canonical `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v26_20260818/run_02/`
+(`RUN_MANIFEST.json`, `m0_report.json`, `readonly_verify.json`); V28R canonical
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v28_gf32_finite_code/run_02_v28r/`
+(`v28_config.json`, `v28_evidence.json`, `RUN_MANIFEST.json`,
+`readonly_verify.json`).
+The exact source mapping is `type2_1M_20260121_184040/-50 ps/1M`,
+`type2_1p5M_20260121_183806/+50 ps/1p5M`, and
+`type2_2M_20260121_183657/+50 ps/2M`, with matching
+`v13r3fresh_pairs_20260816/<source_id>/pairs.parquet` paths. The field is
+`GF2mField.create(32)`, polynomial `0b100101`, V28R field_id
+`c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, and
+zero-based `ratio_index` into `nonzero_cycle`.
+
+---
+
 ## 2026-08-19 V26 RUN_COMPLETE (pass_target_f13) + V26R closeout, archived locally (no push)
 
 - V26 channel-informed multilevel DE gate: A02 (F03 GF32+GF32) f=1.3 converges 30/30
@@ -2196,7 +2244,7 @@ discovered by an independent audit of the accepted V8 candidate:
 ## 自动执行终点
 V18-B1 M1 FAIL (NO_THRESHOLD)；无自动下一步，等待用户决策。
 
-## 2026-08-20 V29 closeout and V30 handoff
+## 2026-08-20 V29 closeout and V30 handoff (historical pre-execution snapshot)
 
 V29 canonical `run_02` is a user-authorized early-stop finite-gate failure:
 9 persisted 1M blocks, exact/tag=1, 8 failures, maximum possible 92/100<95;
@@ -2208,9 +2256,11 @@ V28R remains the predecessor, not a FER result. V28R's L1 graph audit found
 this finite matrix has `d_min<=2`. This identifies a finite graph construction
 defect, not a failure of the channel-informed GF32×GF32 route.
 
-Next change: `formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate`,
-status `FROZEN_P102_ACCEPTED`. Its implementation/execution is the next
-separate goal; no DE, matrix construction, validation block, or decoder call
-has started. V31 fresh
+Historical pre-P103 handoff: `formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate`
+had status `DRAFT_PENDING_P103_FREEZE_REVIEW`; at the time of that P103 review,
+the original `FROZEN_P102_ACCEPTED` packet was superseded by V30R and
+implementation/execution was not yet authorized. This snapshot predates the
+later P103 authorization and `run_01` execution and is superseded by the V30R
+closeout at the top of this file. V31 fresh
 time-separated qualification is permitted only after a separate V30 PASS and
 fresh review; V32 integration follows V31.

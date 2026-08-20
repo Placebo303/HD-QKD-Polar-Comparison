@@ -1,0 +1,149 @@
+{
+  "all": {
+    "1M": {
+      "record_count": 12,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": false
+    },
+    "1p5M": {
+      "record_count": 0,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": false
+    },
+    "2M": {
+      "record_count": 0,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": false
+    }
+  },
+  "screen": {
+    "1M": {
+      "record_count": 12,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": true
+    },
+    "1p5M": {
+      "record_count": 0,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": true
+    },
+    "2M": {
+      "record_count": 0,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": true
+    }
+  },
+  "confirmation": {
+    "1M": {
+      "record_count": 0,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": true
+    },
+    "1p5M": {
+      "record_count": 0,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": true
+    },
+    "2M": {
+      "record_count": 0,
+      "offline_exact": 0,
+      "tag_verified": 0,
+      "false_accept": 0,
+      "stage_scoped": true
+    }
+  },
+  "early_stop_proof": null,
+  "selection": {
+    "screen_outcomes": [
+      {
+        "packet_id": "m1_9|balanced-projective",
+        "matrix_id": "m1_9|balanced-projective",
+        "family": "balanced-projective",
+        "source_stats": {
+          "1M": {
+            "completed": 6,
+            "offline_exact": 0,
+            "tag_verified": 0,
+            "false_accept": 0
+          },
+          "1p5M": {
+            "completed": 0,
+            "offline_exact": 0,
+            "tag_verified": 0,
+            "false_accept": 0
+          },
+          "2M": {
+            "completed": 0,
+            "offline_exact": 0,
+            "tag_verified": 0,
+            "false_accept": 0
+          }
+        },
+        "rank_tuple": [
+          0,
+          0,
+          14056,
+          9,
+          0
+        ],
+        "eligible": false,
+        "status": "matrix_local_fail"
+      },
+      {
+        "packet_id": "m1_12|balanced-projective",
+        "matrix_id": "m1_12|balanced-projective",
+        "family": "balanced-projective",
+        "source_stats": {
+          "1M": {
+            "completed": 6,
+            "offline_exact": 0,
+            "tag_verified": 0,
+            "false_accept": 0
+          },
+          "1p5M": {
+            "completed": 0,
+            "offline_exact": 0,
+            "tag_verified": 0,
+            "false_accept": 0
+          },
+          "2M": {
+            "completed": 0,
+            "offline_exact": 0,
+            "tag_verified": 0,
+            "false_accept": 0
+          }
+        },
+        "rank_tuple": [
+          0,
+          0,
+          7440,
+          12,
+          0
+        ],
+        "eligible": false,
+        "status": "matrix_local_fail"
+      }
+    ],
+    "screen_eligible": [],
+    "top_ranked_packet_ids": [],
+    "selected_packet_id": null,
+    "confirmation": null,
+    "no_fallback_confirmation": true
+  }
+}

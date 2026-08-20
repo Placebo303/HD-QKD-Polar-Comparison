@@ -1,4 +1,71 @@
-Status: **V28 实现完成 + 验收 ACCEPT（engineering_ready_for_retrospective_gate）→ Phase D 进行中** — V27 PASS 并提交（9c3f0e70）；V28 OpenSpec 冻结+freeze ACCEPT（95b57f82）；V28 实现完成并验收（nonbinary_v28.py + 11 T0/T1 passed + additive run_01 1.40s + verify ok=true + 主线程验收 ACCEPT）。下一步：V29 retrospective finite-code gate（冻结 V25 holdout）。不 push。
+Status: **V30R archived — `finite_graph_fail`** — P103 独立 freeze review
+于 2026-08-20 ACCEPT，随后完成一次 canonical `run_01` implementation/
+execution 与 independent read-only verification (`ok=true`, `problems=[]`)。
+V29 已以 `v29_finite_gate_fail` 收口；V28R 的 projective-duplicate/weight-2
+根因已确认。V30R 的有限图构造在固定 1M screen 上失败，已归档；fresh
+qualification、promotion 与 push 不在本轮范围内。
+V30R 冻结：F03
+GF32+GF32、`n=1024`、每 selected allocation 至多 2 packets（balanced 1 +
+PEG-projective-cycle-cancelled 1）、最多 2 allocations / 全局 4 packets；
+M1 失败 allocation 仍完成全部 12 registered calls；M3 screen 固定 blocks
+`0..19`，仅 top-ranked eligible matrix 运行 confirmation `20..69`，其失败
+直接为 global `finite_graph_fail`。bounded cycle rule：4-cycle duplicate
+projective key hard-zero，Tanner-6 greedy `(degenerate_6_new, ratio_index)`，
+Tanner-8 topology-only；ACE 不参与排序。不 push。
+
+V30R input binding (read-only, frozen): V25 authority is
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/data_inventory.json`
+plus
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/split_manifest.json`;
+V26 canonical is
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v26_20260818/run_02/`
+(`RUN_MANIFEST.json`, `m0_report.json`, `readonly_verify.json`); V28R canonical
+is
+`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v28_gf32_finite_code/run_02_v28r/`
+(`v28_config.json`, `v28_evidence.json`, `RUN_MANIFEST.json`,
+`readonly_verify.json`).
+Source IDs/delays are `type2_1M_20260121_184040 -> -50 ps -> 1M`,
+`type2_1p5M_20260121_183806 -> +50 ps -> 1p5M`, and
+`type2_2M_20260121_183657 -> +50 ps -> 2M`; pair paths are the matching
+`v13r3fresh_pairs_20260816/<source_id>/pairs.parquet` entries. Field binding is
+`GF2mField.create(32)`, `poly=0b100101`, V28R field_id
+`c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, and
+zero-based `ratio_index` into `nonzero_cycle`.
+
+## 2026-08-20 V30R closeout — finite_graph_fail
+
+- canonical evidence:
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v30_20260820/run_01/`;
+  readonly verifier `ok=true`, `problems=[]`, recomputed terminal equals
+  persisted `finite_graph_fail`，且无 DE/decoder rerun。
+- M0=`15/69/303/922/1107`；M1=72 screen+60 confirmation，eligible
+  `m1=9,12,16`，selected/confirmed `m1_9,m1_12` 均 30/30。
+- M2：balanced `m1=9,12` valid；PEG `m1=9,12` 因 support `(0,1)` 无
+  projectively unique ratio 而 deterministic reject。
+- M3：两个 valid balanced packet 在 1M blocks `0..5` 均为 `0/6` exact、
+  `0/6` tag、`0` false accept，15/20 threshold impossible；按冻结规则
+  在进入其他 source 与 confirmation 前停止。Meters=74.828s/719.876s。
+- 科学边界：只否定 tested `n=1024` F03 fixed allocations/families + V28
+  decoder finite conversion；不否定 V25 empirical channel、V26 DE 或 all
+  NBLDPC。不得扩样、rerun、tune 或自动启动 successor。
+- 报告：`docs/nbldpc-v30r-projective-safe-finite-graph-report-20260820.md`。
+- 下一步只有新授权的 V31 finite-graph redesign 假设（优先 m1=16、
+  projective-capacity-aware PEG、L2 girth/expander/QC/SC、n=2048/4096）；
+  不创建或执行 V31 OpenSpec。
+
+## 2026-08-20 V30R revision — P103 freeze review ACCEPTED (historical pre-execution snapshot)
+
+- V30 P102 保留为 superseded historical review；在该 review 时间点，
+  `formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate/` 为 active
+  change，四件套状态为 `FROZEN_P103_ACCEPTED`；P103 ACCEPT 日期为
+  2026-08-20。随后已由上方 V30R closeout 段落取代。
+- 已修正 packet 计数、ambiguity IDs、顶部状态及 M1/M3 早停语义；P103 当时已授权
+  implementation 与预注册 execution。下方 closeout 已记录该授权后来完成的
+  implementation、execution 和 verification，不应再解读为“尚未实现”。
+- 新 bounded rule 仅要求 4-cycle projective/FRC hard gate=0；Tanner-6 对每列
+  候选精确计算 newly closed degenerate count 并按 `(count, ratio_index)` 选最小；
+  Tanner-8 只记录 topology/girth aggregate。证据只保留 aggregate + deterministic
+  replay，不保留巨量 cycle/candidate 清单。
 
 ## 2026-08-20 V27 Phase B：candidate-delivery review ACCEPT + 一次性 production gate 执行中
 
@@ -1429,7 +1496,7 @@ remain unauthorized.
 - Route C/D 依赖科学路线或用户决策；当前无进一步自动步骤。
 - 下一步需用户决定：是否开新 change 调整 DE 预算/参数，或转向其他路线。
 
-## 2026-08-20 V29 closeout / V30 frozen pending implementation
+## 2026-08-20 V29 closeout / original V30 P102 superseded by V30R (historical pre-execution snapshot)
 
 - V29 canonical `run_02` stopped by explicit user authorization after 9 persisted
   1M blocks: exact=1, tag=1, failures=8, remaining=91, maximum possible=92<95.
@@ -1440,5 +1507,9 @@ remain unauthorized.
   projective classes, 922 columns in duplicate classes, 1107 guaranteed
   proportional/weight-2 pairs; hence this finite construction has `d_min<=2`.
   This is a matrix-construction failure, not closure of the GF32×GF32 route.
-- V30 projective-safe finite-graph gate passed main-thread P102 freeze review
-  as `FROZEN_P102_ACCEPTED`; implementation/execution has not started.
+- Historical note: the original V30 projective-safe finite-graph gate was
+  recorded as `FROZEN_P102_ACCEPTED`, but that packet is superseded by V30R.
+  At the time of the P103 review, V30R was `DRAFT_PENDING_P103_FREEZE_REVIEW`
+  and could not authorize implementation/execution. This historical snapshot
+  predates the later P103 authorization and `run_01` execution, and is
+  superseded by the V30R closeout at the top of this file.

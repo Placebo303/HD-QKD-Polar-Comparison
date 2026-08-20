@@ -1,3 +1,55 @@
+## 2026-08-20 V30R closeout: `finite_graph_fail`
+
+- V29 is closed with `v29_finite_gate_fail`; V28R's duplicate projective keys
+  and guaranteed weight-2 pairs are a finite matrix-construction defect, not a
+  GF32xGF32 route impossibility.
+- Original V30 `P102_ACCEPTED` is superseded by the V30R document revision.
+  Independent P103 freeze review was ACCEPTED on 2026-08-20. Canonical
+  `run_01` implementation/execution and independent read-only verification are
+  complete; verifier `ok=true`, `problems=[]`, terminal
+  `finite_graph_fail`.
+- V30R freezes at most one balanced-projective and one
+  `PEG-projective-cycle-cancelled` packet per selected allocation, at most two
+  allocations/four packets globally; M1 failed allocations still complete all
+  12 registered calls; M3 screen is blocks `0..19`, only top-ranked eligible
+  matrix confirmation is blocks `20..69`, and its failure is global with no
+  fallback.
+- Bounded cycle rule: duplicate projective key/proportional column is the
+  4-cycle FRC hard failure and must be zero; labels minimize exact newly closed
+  Tanner-6 degenerate count by `(degenerate_6_new, ratio_index)`; Tanner-8 is
+  topology/girth aggregate only; standard variable-side ACE is not used for
+  `d_v=2`. Evidence is aggregate plus deterministic replay, without cycle
+  catalogs or candidate rejection lists.
+
+- Canonical result: M0 reproduced `15/69/303/922/1107`; M1 persisted 72 screen
+  and 60 confirmation calls, with `m1_9,m1_12` selected and both 30/30; M2
+  retained valid balanced packets for `m1=9,12` and rejected both PEG packets
+  because support `(0,1)` had no projectively unique ratio. M3 stopped after
+  blocks `0..5` on source 1M for both valid packets (`0/6` exact, `0` false
+  accepts), so terminal `finite_graph_fail` occurred before other sources and
+  confirmation. M1/M3 meters were 74.828s/719.876s.
+- Scientific boundary: this closes only the tested `n=1024` F03 fixed
+  allocation/family finite conversion with the V28 decoder. It does not close
+  the V25 empirical channel, V26 DE, or all NBLDPC. No qualification,
+  promotion, same-packet rerun, tuning, or push is authorized.
+- Report:
+  `docs/nbldpc-v30r-projective-safe-finite-graph-report-20260820.md`.
+
+- V30R frozen input binding: V25
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/data_inventory.json`
+  and
+  `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/split_manifest.json`;
+  V26 canonical `.../nbldpc_v26_20260818/run_02/` (manifest/M0/verify);
+  V28R canonical `.../nbldpc_v28_gf32_finite_code/run_02_v28r/`
+  (config/evidence/manifest/verify). Source IDs and
+  delay mapping are `type2_1M_20260121_184040/-50 ps/1M`,
+  `type2_1p5M_20260121_183806/+50 ps/1p5M`,
+  `type2_2M_20260121_183657/+50 ps/2M`; pair paths are the matching
+  `v13r3fresh_pairs_20260816/<source_id>/pairs.parquet` entries. Field binding:
+  `GF2mField.create(32)`, `0b100101`, field_id
+  `c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, and
+  zero-based `ratio_index`.
+
 ## 2026-08-20 V27 finite-leakage-margin gate: PASS (pass_finite_budget_ready, block_len=1024)
 
 - V27 gate executed once on additive run root `comparison_bench/outputs_comparison/
@@ -2706,7 +2758,7 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_full_20260816/`
 - 边界：legacy_drift_audit only；不构成 fresh/promotion/qualification。
 
-## 2026-08-20 V29 retrospective finite-code gate: FAIL and V30 successor
+## 2026-08-20 V29 retrospective finite-code gate: FAIL and V30 successor (historical pre-execution snapshot)
 
 - Canonical V29 `run_02` stopped after 9 persisted 1M blocks under explicit
   user authorization: exact=1, tag_verified=1, 8 failures, remaining=91,
@@ -2719,6 +2771,10 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   classes, and 1107 guaranteed proportional/weight-2 pairs, proving
   `d_min<=2` for that finite construction. This is not a GF32×GF32 route
   impossibility result; it is a projective-duplicate matrix defect.
-- V30 is a separate `FROZEN_P102_ACCEPTED` projective-safe finite-graph gate.
-  It reuses V26 channel semantics and V29 leakage policy but must not reuse the
-  V29 holdout as fresh qualification. Implementation/execution has not started.
+- The original V30 `FROZEN_P102_ACCEPTED` projective-safe finite-graph gate is
+  superseded by V30R `FROZEN_P103_ACCEPTED`. At the time of the P103 review,
+  V30R only had authorization to proceed and had not yet claimed execution.
+  V30R reuses V26 channel semantics and V29 leakage policy but must not reuse
+  the V29 holdout as fresh qualification. This historical snapshot predates
+  the later V30R execution and is superseded by the V30R closeout at the top
+  of this file.

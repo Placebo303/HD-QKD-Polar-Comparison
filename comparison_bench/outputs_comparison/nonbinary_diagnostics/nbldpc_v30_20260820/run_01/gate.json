@@ -1,0 +1,99 @@
+{
+  "schema": "nbldpc_v30r_gate_v1",
+  "status": "finite_graph_fail",
+  "m1_de_resource_meter_seconds": 74.82799999997951,
+  "m3_decoder_resource_meter_seconds": 719.8760000000475,
+  "resource_limit_seconds": 86400.0,
+  "terminal_precedence": "persist_current; scientific_stage_decision; resource; implementation",
+  "m1_terminal": null,
+  "confirmation_terminal": "de_allocation_pass",
+  "m3_terminal": "finite_graph_fail",
+  "packet_count": 2,
+  "m3_record_count": 12,
+  "m3_screen_outcomes": [
+    {
+      "packet_id": "m1_9|balanced-projective",
+      "matrix_id": "m1_9|balanced-projective",
+      "family": "balanced-projective",
+      "source_stats": {
+        "1M": {
+          "completed": 6,
+          "offline_exact": 0,
+          "tag_verified": 0,
+          "false_accept": 0
+        },
+        "1p5M": {
+          "completed": 0,
+          "offline_exact": 0,
+          "tag_verified": 0,
+          "false_accept": 0
+        },
+        "2M": {
+          "completed": 0,
+          "offline_exact": 0,
+          "tag_verified": 0,
+          "false_accept": 0
+        }
+      },
+      "rank_tuple": [
+        0,
+        0,
+        14056,
+        9,
+        0
+      ],
+      "eligible": false,
+      "status": "matrix_local_fail"
+    },
+    {
+      "packet_id": "m1_12|balanced-projective",
+      "matrix_id": "m1_12|balanced-projective",
+      "family": "balanced-projective",
+      "source_stats": {
+        "1M": {
+          "completed": 6,
+          "offline_exact": 0,
+          "tag_verified": 0,
+          "false_accept": 0
+        },
+        "1p5M": {
+          "completed": 0,
+          "offline_exact": 0,
+          "tag_verified": 0,
+          "false_accept": 0
+        },
+        "2M": {
+          "completed": 0,
+          "offline_exact": 0,
+          "tag_verified": 0,
+          "false_accept": 0
+        }
+      },
+      "rank_tuple": [
+        0,
+        0,
+        7440,
+        12,
+        0
+      ],
+      "eligible": false,
+      "status": "matrix_local_fail"
+    }
+  ],
+  "m3_screen_eligible": [],
+  "m3_top_ranked_packet_ids": [],
+  "m3_selected_packet_id": null,
+  "m3_confirmation": null,
+  "m3_early_stop_proof": null,
+  "m1_selected_allocations": [
+    "m1_9",
+    "m1_12"
+  ],
+  "m1_confirmed_allocations": [
+    "m1_9",
+    "m1_12"
+  ],
+  "no_fallback_confirmation": true,
+  "de_rerun": false,
+  "decoder_rerun": false
+}
