@@ -2195,3 +2195,22 @@ discovered by an independent audit of the accepted V8 candidate:
 
 ## 自动执行终点
 V18-B1 M1 FAIL (NO_THRESHOLD)；无自动下一步，等待用户决策。
+
+## 2026-08-20 V29 closeout and V30 handoff
+
+V29 canonical `run_02` is a user-authorized early-stop finite-gate failure:
+9 persisted 1M blocks, exact/tag=1, 8 failures, maximum possible 92/100<95;
+`readonly_verify.json` is `ok=true`. Its prefix FER is observational only.
+The old V28 original ACCEPT is superseded by the V28R engineering candidate;
+V28R remains the predecessor, not a FER result. V28R's L1 graph audit found
+15 support groups, max multiplicity 69, 303 duplicate projective classes,
+922 affected columns, and 1107 guaranteed proportional/weight-2 pairs, so
+this finite matrix has `d_min<=2`. This identifies a finite graph construction
+defect, not a failure of the channel-informed GF32×GF32 route.
+
+Next change: `formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate`,
+status `FROZEN_P102_ACCEPTED`. Its implementation/execution is the next
+separate goal; no DE, matrix construction, validation block, or decoder call
+has started. V31 fresh
+time-separated qualification is permitted only after a separate V30 PASS and
+fresh review; V32 integration follows V31.

@@ -1,0 +1,44 @@
+{
+  "schema": "nbldpc_v29_frame_selection_v1",
+  "sources": {
+    "1M": {
+      "delay_used_ps": -50,
+      "frame_end": 1999,
+      "frame_ids": [],
+      "frame_start": 1600,
+      "pair_count_per_frame": 256,
+      "pair_idx_range": [
+        0,
+        255
+      ],
+      "pairs_parquet": "<none>",
+      "source_id": "type2_1M_20260121_184040"
+    },
+    "1p5M": {
+      "delay_used_ps": 50,
+      "frame_end": 2612,
+      "frame_ids": [],
+      "frame_start": 2213,
+      "pair_count_per_frame": 256,
+      "pair_idx_range": [
+        0,
+        255
+      ],
+      "pairs_parquet": "<none>",
+      "source_id": "type2_1p5M_20260121_183806"
+    },
+    "2M": {
+      "delay_used_ps": 50,
+      "frame_end": 3315,
+      "frame_ids": [],
+      "frame_start": 2916,
+      "pair_count_per_frame": 256,
+      "pair_idx_range": [
+        0,
+        255
+      ],
+      "pairs_parquet": "<none>",
+      "source_id": "type2_2M_20260121_183657"
+    }
+  }
+}

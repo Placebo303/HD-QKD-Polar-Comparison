@@ -1,0 +1,25 @@
+{
+  "fit_source": "V26_train_split_only",
+  "holdout_fit": false,
+  "model": "V26_train_only_source_delay_conditioned",
+  "schema": "nbldpc_v29_channel_model_binding_v1",
+  "source_order": [
+    "1M",
+    "1p5M",
+    "2M"
+  ],
+  "sources": {
+    "1M": {
+      "delay_used_ps": -50,
+      "source_id": "type2_1M_20260121_184040"
+    },
+    "1p5M": {
+      "delay_used_ps": 50,
+      "source_id": "type2_1p5M_20260121_183806"
+    },
+    "2M": {
+      "delay_used_ps": 50,
+      "source_id": "type2_2M_20260121_183657"
+    }
+  }
+}

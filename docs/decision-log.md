@@ -2645,3 +2645,28 @@ the retrospective finite-code gate on frozen V25 holdout.
 - Terminal state only `engineering_ready_for_retrospective_gate`; no FER/qualification/promotion.
   Evidence: `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v28_gf32_finite_code/
   run_01/` (v28_config, v28_evidence, gate, RUN_MANIFEST, verify). Local commit, no push.
+
+## 2026-08-20 — V29 finite-gate FAIL; V30 projective-safe successor drafted
+
+**Decision**: Close V29 with canonical run_02 as a user-authorized
+irreversible-threshold failure. It contains 9 persisted 1M blocks, exact/tag
+count 1, 8 failures, and maximum possible 92/100<95. The terminal is
+`v29_finite_gate_fail`; `readonly_verify.json` is `ok=true` and the FER is
+observed-prefix-only. Retain run_01 as superseded 0-call
+`implementation_blocked`; do not rerun or tune V29.
+
+**Context**: The V28R finite graph audit found 15 L1 support groups, maximum
+group multiplicity 69, 303 duplicate projective classes, 922 columns in
+duplicate classes, and 1107 guaranteed proportional-column/weight-2 pairs.
+Thus this particular finite matrix has `d_min<=2`.
+
+**Decision boundary**: This is a V28R finite matrix-construction defect, not a
+closure of the channel-informed GF32×GF32 route. The original V28 ACCEPT is
+superseded by V28R engineering evidence and does not claim FER.
+
+**Next**: V30 `formal-nonbinary-ldpc-v30-projective-safe-finite-graph-gate`
+is `FROZEN_P102_ACCEPTED` after the 2026-08-20 main-thread freeze review.
+Implementation/execution remains a separate goal; no DE, matrix construction,
+validation block, or decoder call has started. V31 fresh
+time-separated qualification follows only after V30 PASS; V32 integration
+follows V31.

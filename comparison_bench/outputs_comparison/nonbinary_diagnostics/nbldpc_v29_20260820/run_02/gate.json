@@ -1,0 +1,40 @@
+{
+  "completed_block_count": 9,
+  "decoder_call_count": 16,
+  "decoder_wallclock_seconds": 1167.140000000014,
+  "early_fail_proof": {
+    "completed_source_blocks": 9,
+    "condition": "offline_exact_count + remaining_expected < threshold",
+    "expected_source_blocks": 100,
+    "false_accept_count": 0,
+    "max_possible_offline_exact": 92,
+    "max_possible_tag_verified": 92,
+    "offline_exact_count": 1,
+    "reason": "offline_exact_threshold_irreversible",
+    "remaining_expected": 91,
+    "schema": "nbldpc_v29_early_fail_proof_v1",
+    "source": "1M",
+    "tag_verified_count": 1,
+    "threshold": 95
+  },
+  "error_detail": "User-authorized stop after irreversible 1M threshold failure: completed 9, exact 1, remaining 91, max possible 92 < 95.",
+  "evidence_files_written": [
+    "RUN_MANIFEST.json",
+    "frame_selection.json",
+    "block_manifest.json",
+    "channel_model_binding.json",
+    "matrix_binding.json",
+    "per_block_results.jsonl",
+    "source_summary.json",
+    "gate.json"
+  ],
+  "expected_block_count": 300,
+  "readonly_verify_pending": true,
+  "resource_limit_seconds": 86400.0,
+  "schema": "nbldpc_v29_gate_v1",
+  "scientific_gate_evaluated": false,
+  "status": "v29_finite_gate_fail",
+  "stop_before_next_block": true,
+  "user_authorized_stop": true,
+  "user_stop_reason": "User-authorized stop after irreversible 1M threshold failure: completed 9, exact 1, remaining 91, max possible 92 < 95."
+}

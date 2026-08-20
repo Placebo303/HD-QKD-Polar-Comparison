@@ -1,0 +1,81 @@
+{
+  "coefficient_call": "_coefficient(q, seed, variable_index, endpoint_slot)",
+  "factorization": "F03_natural_MSB_to_LSB_GF32_plus_GF32",
+  "m1": 6,
+  "m2": {
+    "1M": 194,
+    "1p5M": 200,
+    "2M": 202
+  },
+  "matrix_summary": {
+    "L1": {
+      "column_degree_hist": {
+        "2": 1024
+      },
+      "edges": 2048,
+      "row_degree_hist": {
+        "341": 4,
+        "342": 2
+      },
+      "shape": [
+        6,
+        1024
+      ],
+      "unique_pairs": 15
+    },
+    "L2": {
+      "1M": {
+        "column_degree_hist": {
+          "2": 1024
+        },
+        "edges": 2048,
+        "row_degree_hist": {
+          "10": 86,
+          "11": 108
+        },
+        "shape": [
+          194,
+          1024
+        ],
+        "unique_pairs": 1024
+      },
+      "1p5M": {
+        "column_degree_hist": {
+          "2": 1024
+        },
+        "edges": 2048,
+        "row_degree_hist": {
+          "10": 152,
+          "11": 48
+        },
+        "shape": [
+          200,
+          1024
+        ],
+        "unique_pairs": 1024
+      },
+      "2M": {
+        "column_degree_hist": {
+          "2": 1024
+        },
+        "edges": 2048,
+        "row_degree_hist": {
+          "10": 174,
+          "11": 28
+        },
+        "shape": [
+          202,
+          1024
+        ],
+        "unique_pairs": 1024
+      }
+    }
+  },
+  "n": 1024,
+  "q": 32,
+  "schema": "nbldpc_v29_v28r_matrix_binding_v1",
+  "seed_l1": 2026082001,
+  "seed_l2": 2026082002,
+  "topology": "v28r_degree2_ordered_pair_graph",
+  "v28r_schema": "nbldpc_v28r_frozen_config_v2"
+}

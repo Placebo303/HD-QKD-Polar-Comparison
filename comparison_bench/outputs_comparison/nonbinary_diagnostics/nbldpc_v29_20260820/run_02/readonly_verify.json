@@ -1,0 +1,8 @@
+{
+  "decoder_rerun": false,
+  "ok": true,
+  "persisted_terminal": "v29_finite_gate_fail",
+  "problems": [],
+  "recomputed_terminal": "v29_finite_gate_fail",
+  "schema": "nbldpc_v29_readonly_verify_v1"
+}

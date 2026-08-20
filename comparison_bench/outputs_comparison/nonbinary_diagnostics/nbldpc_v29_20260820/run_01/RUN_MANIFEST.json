@@ -1,0 +1,146 @@
+{
+  "channel_model_binding": {
+    "fit_source": "V26_train_split_only",
+    "holdout_fit": false,
+    "model": "V26_train_only_source_delay_conditioned",
+    "schema": "nbldpc_v29_channel_model_binding_v1",
+    "source_order": [
+      "1M",
+      "1p5M",
+      "2M"
+    ],
+    "sources": {
+      "1M": {
+        "delay_used_ps": -50,
+        "source_id": "type2_1M_20260121_184040"
+      },
+      "1p5M": {
+        "delay_used_ps": 50,
+        "source_id": "type2_1p5M_20260121_183806"
+      },
+      "2M": {
+        "delay_used_ps": 50,
+        "source_id": "type2_2M_20260121_183657"
+      }
+    }
+  },
+  "completed_block_count": 0,
+  "decoder_call_count": 0,
+  "decoder_wallclock_seconds": 0.0,
+  "evidence_files": [
+    "RUN_MANIFEST.json",
+    "frame_selection.json",
+    "block_manifest.json",
+    "channel_model_binding.json",
+    "matrix_binding.json",
+    "per_block_results.jsonl",
+    "source_summary.json",
+    "gate.json"
+  ],
+  "frozen_config": {
+    "block_frames": 4,
+    "evidence_files": [
+      "RUN_MANIFEST.json",
+      "frame_selection.json",
+      "block_manifest.json",
+      "channel_model_binding.json",
+      "matrix_binding.json",
+      "per_block_results.jsonl",
+      "source_summary.json",
+      "gate.json",
+      "readonly_verify.json"
+    ],
+    "factorization": "F03_natural_MSB_to_LSB_GF32_plus_GF32",
+    "frame_pairs": 256,
+    "gate": {
+      "all_blocks_required": true,
+      "false_accept_count": 0,
+      "min_offline_exact_per_source": 95,
+      "min_tag_verified_per_source": 95
+    },
+    "h_total_binding": "V28R_frozen_config_no_execution_reestimation",
+    "max_iter": 200,
+    "n": 1024,
+    "q": 32,
+    "resource_limit_seconds": 86400.0,
+    "schema": "nbldpc_v29_frozen_config_v1",
+    "scientific_input_policy": "only_three_registered_V25_pairs_parquet_files",
+    "source_order": [
+      "1M",
+      "1p5M",
+      "2M"
+    ],
+    "sources": {
+      "1M": {
+        "block_count": 100,
+        "delay_used_ps": -50,
+        "f": 1.2971453626425193,
+        "frame_count": 400,
+        "frame_end": 1999,
+        "frame_start": 1600,
+        "h_total": 0.801037825,
+        "leak_bits": 1064,
+        "m1": 6,
+        "m2": 194,
+        "m_total": 200,
+        "n_pairs": 512000,
+        "pair_count_per_frame": 256,
+        "pairs_parquet": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_184040/pairs.parquet",
+        "source_id": "type2_1M_20260121_184040"
+      },
+      "1p5M": {
+        "block_count": 100,
+        "delay_used_ps": 50,
+        "f": 1.2940931527063324,
+        "frame_count": 400,
+        "frame_end": 2612,
+        "frame_start": 2213,
+        "h_total": 0.825566052,
+        "leak_bits": 1094,
+        "m1": 6,
+        "m2": 200,
+        "m_total": 206,
+        "n_pairs": 708352,
+        "pair_count_per_frame": 256,
+        "pairs_parquet": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_183806/pairs.parquet",
+        "source_id": "type2_1p5M_20260121_183806"
+      },
+      "2M": {
+        "block_count": 100,
+        "delay_used_ps": 50,
+        "f": 1.2949474814463287,
+        "frame_count": 400,
+        "frame_end": 3315,
+        "frame_start": 2916,
+        "h_total": 0.832562722,
+        "leak_bits": 1104,
+        "m1": 6,
+        "m2": 202,
+        "m_total": 208,
+        "n_pairs": 933120,
+        "pair_count_per_frame": 256,
+        "pairs_parquet": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_183657/pairs.parquet",
+        "source_id": "type2_2M_20260121_183657"
+      }
+    },
+    "streak": 20,
+    "tag_bits": 64,
+    "tag_method": "sha256(bytes(x1)||bytes(x2))[:8]",
+    "terminal_precedence": "implementation;complete_300_before_resource;resource;scientific_pass_fail"
+  },
+  "input_paths": {
+    "1M": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_1M_20260121_184040\\pairs.parquet",
+    "1p5M": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_1p5M_20260121_183806\\pairs.parquet",
+    "2M": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_2M_20260121_183657\\pairs.parquet"
+  },
+  "matrix_binding_schema": "nbldpc_v29_v28r_matrix_binding_v1",
+  "readonly_verify_pending": true,
+  "run_role": "v29_retrospective_finite_code_gate",
+  "schema": "nbldpc_v29_run_manifest_v1",
+  "source_order": [
+    "1M",
+    "1p5M",
+    "2M"
+  ],
+  "terminal_state": "implementation_blocked"
+}

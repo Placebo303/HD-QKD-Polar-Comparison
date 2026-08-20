@@ -2705,3 +2705,20 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - 8 chunk 各自 verify OK；合并包：
   `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3_legacy_drift_audit_full_20260816/`
 - 边界：legacy_drift_audit only；不构成 fresh/promotion/qualification。
+
+## 2026-08-20 V29 retrospective finite-code gate: FAIL and V30 successor
+
+- Canonical V29 `run_02` stopped after 9 persisted 1M blocks under explicit
+  user authorization: exact=1, tag_verified=1, 8 failures, remaining=91,
+  maximum possible=92<95. Terminal `v29_finite_gate_fail`; readonly verifier
+  `ok=true`; prefix FER is `observed_prefix_only`, never full FER.
+- V29 `run_01` is retained as superseded 0-call `implementation_blocked`.
+- Correct V28 lifecycle: the original ACCEPT was superseded by V28R; V28R is
+  engineering evidence only. Its independent L1 audit is 15 support groups,
+  max group 69, 303 duplicate projective classes, 922 columns in duplicate
+  classes, and 1107 guaranteed proportional/weight-2 pairs, proving
+  `d_min<=2` for that finite construction. This is not a GF32×GF32 route
+  impossibility result; it is a projective-duplicate matrix defect.
+- V30 is a separate `FROZEN_P102_ACCEPTED` projective-safe finite-graph gate.
+  It reuses V26 channel semantics and V29 leakage policy but must not reuse the
+  V29 holdout as fresh qualification. Implementation/execution has not started.

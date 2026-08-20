@@ -1,0 +1,23 @@
+{
+  "completed_block_count": 0,
+  "decoder_call_count": 0,
+  "decoder_wallclock_seconds": 0.0,
+  "error_detail": "input loading failed: ValueError: 1M: frame range/set contains extra or missing frames; blocks: expected exactly 300, got 0",
+  "evidence_files_written": [
+    "RUN_MANIFEST.json",
+    "frame_selection.json",
+    "block_manifest.json",
+    "channel_model_binding.json",
+    "matrix_binding.json",
+    "per_block_results.jsonl",
+    "source_summary.json",
+    "gate.json"
+  ],
+  "expected_block_count": 300,
+  "readonly_verify_pending": true,
+  "resource_limit_seconds": 86400.0,
+  "schema": "nbldpc_v29_gate_v1",
+  "scientific_gate_evaluated": false,
+  "status": "implementation_blocked",
+  "stop_before_next_block": true
+}

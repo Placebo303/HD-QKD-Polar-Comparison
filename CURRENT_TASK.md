@@ -1428,3 +1428,17 @@ remain unauthorized.
 - 按 no-rerun/no-tuning 纪律，Route B M2 不自动启动。
 - Route C/D 依赖科学路线或用户决策；当前无进一步自动步骤。
 - 下一步需用户决定：是否开新 change 调整 DE 预算/参数，或转向其他路线。
+
+## 2026-08-20 V29 closeout / V30 frozen pending implementation
+
+- V29 canonical `run_02` stopped by explicit user authorization after 9 persisted
+  1M blocks: exact=1, tag=1, failures=8, remaining=91, maximum possible=92<95.
+- Terminal `v29_finite_gate_fail`; `readonly_verify ok=true`; FER scope is
+  observed prefix only, not full FER. `run_01` remains superseded 0-call
+  `implementation_blocked` evidence.
+- V28R finite audit: 15 L1 support groups, max group 69, 303 duplicate
+  projective classes, 922 columns in duplicate classes, 1107 guaranteed
+  proportional/weight-2 pairs; hence this finite construction has `d_min<=2`.
+  This is a matrix-construction failure, not closure of the GF32×GF32 route.
+- V30 projective-safe finite-graph gate passed main-thread P102 freeze review
+  as `FROZEN_P102_ACCEPTED`; implementation/execution has not started.
