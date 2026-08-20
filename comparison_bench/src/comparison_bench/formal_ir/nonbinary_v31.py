@@ -606,11 +606,17 @@ def build_matrix_packet(
         raise ValueError("m2_by_source must contain exactly the three frozen sources")
     if isinstance(n, bool) or not isinstance(n, Integral) or int(n) < 1:
         raise ValueError("n must be a positive integer")
-    l1, l1_audit = build_layer(int(m1), n, family=family)
+    try:
+        l1, l1_audit = build_layer(int(m1), n, family=family)
+    except Exception as exc:
+        raise ValueError(f"V31 build_matrix_packet L1(m={m1}, n={n}) failed: {type(exc).__name__}: {exc}") from exc
     l2: dict[str, tuple[tuple[int, ...], ...]] = {}
     l2_audits: dict[str, dict[str, Any]] = {}
     for source in SOURCE_ORDER:
-        matrix, audit = build_layer(int(m2_by_source[source]), n, family=family)
+        try:
+            matrix, audit = build_layer(int(m2_by_source[source]), n, family=family)
+        except Exception as exc:
+            raise ValueError(f"V31 build_matrix_packet L2:{source}(m={m2_by_source[source]}, n={n}) failed: {type(exc).__name__}: {exc}") from exc
         l2[source], l2_audits[source] = matrix, audit
     components = {"L1": l1_audit["four_cycle_count"]}
     components.update({f"L2:{source}": l2_audits[source]["four_cycle_count"] for source in SOURCE_ORDER})
