@@ -8,6 +8,7 @@ n=1024 and n=2048.  It deliberately does not rerun any V30R packet.
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from itertools import combinations
 import json
 import math
 import time
@@ -305,19 +306,17 @@ def build_supports_peg_capacity(m: int, n: int = 1024) -> list[tuple[int, int]]:
     Vectorized numpy scoring over the full lexicographic candidate set with an
     incrementally maintained all-pairs shortest-distance matrix.  The score is
     exactly (occupancy_after, component_flag, distance_cost, max_degree_after,
-    sumsq_after, a, b).
+    sumsq_after, a, b) and it is minimized component-wise (equivalent to the
+    lexicographic minimum) to avoid a full per-column sort.
     """
     m, n = int(m), int(n)
     if m < 2 or n < 1:
         raise ValueError("invalid matrix dimensions")
-    a_list: list[int] = []
-    b_list: list[int] = []
-    for a in range(m):
-        for b in range(a + 1, m):
-            a_list.append(a)
-            b_list.append(b)
-    A = np.asarray(a_list, dtype=np.int64)
-    B = np.asarray(b_list, dtype=np.int64)
+    rows = np.arange(m, dtype=np.int64)
+    # Upper-triangle lexicographic candidate pairs (a,b), a<b.
+    triu = np.triu_indices(m, k=1)
+    A = triu[0].astype(np.int64)
+    B = triu[1].astype(np.int64)
     occ = np.zeros((m, m), dtype=np.int64)
     dist = np.full((m, m), np.inf, dtype=np.float64)
     np.fill_diagonal(dist, 0.0)
@@ -329,24 +328,51 @@ def build_supports_peg_capacity(m: int, n: int = 1024) -> list[tuple[int, int]]:
         valid = occ_ab < MAX_SUPPORT_OCCUPANCY
         if not bool(valid.any()):
             raise ValueError("PEG-capacity-aware: no candidate survives the occupancy<=31 hard gate")
-        Av = A[valid]
-        Bv = B[valid]
-        occ_after = occ_ab[valid] + 1
-        dist_ab = dist[Av, Bv]
-        connected = np.isfinite(dist_ab)
-        component_flag = connected.astype(np.int64)
-        distance_cost = np.where(connected, -(2 * dist_ab + 2.0), 0.0).astype(np.int64)
-        deg_a = degrees[Av]
-        deg_b = degrees[Bv]
+        occ_valid = occ_ab[valid]
+        A1 = A[valid]
+        B1 = B[valid]
+        # 1) minimimal occupancy_after
+        min_occ = int(occ_valid.min())
+        m1 = occ_valid == min_occ
+        A2 = A1[m1]
+        B2 = B1[m1]
+        # 2) minimal component_flag (prefer disconnected = 0)
+        dist2 = dist[A2, B2]
+        comp = np.isfinite(dist2).astype(np.int64)
+        min_comp = int(comp.min())
+        m2 = comp == min_comp
+        A3 = A2[m2]
+        B3 = B2[m2]
+        # 3) minimal distance_cost
+        dist3 = dist[A3, B3]
+        if min_comp == 1:
+            cost = -(2 * dist3 + 2.0).astype(np.int64)
+        else:
+            cost = np.zeros(len(A3), dtype=np.int64)
+        min_cost = int(cost.min())
+        m3 = cost == min_cost
+        A4 = A3[m3]
+        B4 = B3[m3]
+        # 4) minimal max_degree_after
+        deg_a = degrees[A4]
+        deg_b = degrees[B4]
         max_deg_base = int(degrees.max())
         max_after = np.maximum(np.maximum(max_deg_base, deg_a + 1), deg_b + 1)
-        sumsq_after = base_sumsq + 2 * (deg_a + deg_b) + 2
-        # lexsort: last key is primary.
-        order = np.lexsort((Bv, Av, sumsq_after, max_after, distance_cost,
-                            component_flag, occ_after))
+        min_max = int(max_after.min())
+        m4 = max_after == min_max
+        A5 = A4[m4]
+        B5 = B4[m4]
+        # 5) minimal sumsq_after
+        sumsq_after = base_sumsq + 2 * (degrees[A5] + degrees[B5]) + 2
+        min_sumsq = int(sumsq_after.min())
+        m5 = sumsq_after == min_sumsq
+        A6 = A5[m5]
+        B6 = B5[m5]
+        # 6) lexicographically smallest (a,b)
+        order = np.lexsort((B6, A6))
         idx = int(order[0])
-        a = int(Av[idx])
-        b = int(Bv[idx])
+        a = int(A6[idx])
+        b = int(B6[idx])
         selected.append((a, b))
         old_a = int(degrees[a])
         old_b = int(degrees[b])
@@ -510,8 +536,86 @@ def select_projective_ratio_v31(
     }
 
 
-def cycle_topology(supports: Sequence[Sequence[int]]) -> dict[str, int]:
-    return v30.cycle_topology(supports)
+def cycle_topology(supports: Sequence[Sequence[int]], *, m: int | None = None) -> dict[str, Any]:
+    """Bounded 4/6/8-cycle topology diagnostics.
+
+    The 4-cycle count is exact from support multiplicities.  Exact 6/8-cycle
+    enumeration over the check multigraph is C(m,3)/C(m,4) and is infeasible
+    for the large check counts used by V31 L2 (m~200-414); it is therefore
+    computed exactly only for small ``m`` and otherwise reported as ``None``
+    with ``six_eight_exact=False`` (diagnostic only; these counts never enter
+    the finite pass/fail gate).  Girth is always computed exactly on the simple
+    check graph via BFS.
+    """
+    counts: Counter[tuple[int, int]] = Counter(tuple(sorted(map(int, p))) for p in supports)
+    four = sum(value * (value - 1) // 2 for value in counts.values())
+    girth = None
+    nodes = sorted({node for support in counts for node in support})
+    adjacency: dict[int, set[int]] = {node: set() for node in nodes}
+    for (u, v) in counts:
+        adjacency[u].add(v)
+        adjacency[v].add(u)
+    best = None
+    for start in nodes:
+        dist = {start: 0}
+        queue = [start]
+        while queue:
+            cur = queue.pop(0)
+            for nb in sorted(adjacency[cur]):
+                if nb not in dist:
+                    dist[nb] = dist[cur] + 1
+                    queue.append(nb)
+        # a cycle appears when a neighbor already discovered is not the parent at depth>=1
+        for (u, v) in counts:
+            if dist.get(u) is None or dist.get(v) is None:
+                continue
+            cand = dist[u] + 1 + dist[v] + 1
+            if cand < 4:
+                continue
+            # only consider when u,v are at the same BFS depth (even cycle) or differ by 1 handled via parent
+            if cand < (best or float("inf")):
+                # this overcounts; BFS-based girth is refined below
+                pass
+    # exact girth by BFS from each node: shortest cycle through start
+    for s in nodes:
+        parent: dict[int, int] = {}
+        depth: dict[int, int] = {s: 0}
+        queue = [s]
+        while queue:
+            cur = queue.pop(0)
+            for nb in sorted(adjacency[cur]):
+                if nb not in depth:
+                    depth[nb] = depth[cur] + 1
+                    parent[nb] = cur
+                    queue.append(nb)
+                elif parent.get(cur) != nb:
+                    cand = depth[cur] + depth[nb] + 1
+                    if best is None or cand < best:
+                        best = cand
+    if best is not None:
+        girth = best
+    m_val = m if m is not None else max(nodes, default=0) + 1
+    small = int(m_val) <= 60
+    if small:
+        six = 0
+        for a, b, c in combinations(nodes, 3):
+            six += counts[(a, b)] * counts[(a, c)] * counts[(b, c)]
+        eight = 0
+        for a, b, c, d in combinations(nodes, 4):
+            eight += counts[(a, b)] * counts[(b, c)] * counts[(c, d)] * counts[(a, d)]
+            eight += counts[(a, b)] * counts[(b, d)] * counts[(c, d)] * counts[(a, c)]
+            eight += counts[(a, c)] * counts[(b, c)] * counts[(b, d)] * counts[(a, d)]
+        six_val: int | None = int(six)
+        eight_val: int | None = int(eight)
+        exact = True
+    else:
+        six_val = None
+        eight_val = None
+        exact = False
+    return {
+        "four_cycle_count": int(four), "six_cycle_count": six_val,
+        "eight_cycle_count": eight_val, "six_eight_exact": exact, "girth": girth,
+    }
 
 
 def build_layer(
@@ -558,7 +662,7 @@ def build_layer(
         })
     matrix = tuple(tuple(int(x) for x in row) for row in rows.tolist())
     projective = v30.projective_column_audit(matrix, field)
-    topology = cycle_topology(supports)
+    topology = cycle_topology(supports, m=m)
     tanner6_degenerate_total = sum(int(item["selected_score"][0]) for item in label_replay)
     tanner6_degenerate_max = max((int(item["selected_score"][0]) for item in label_replay), default=0)
     audit = {
@@ -583,8 +687,10 @@ def build_layer(
         "capacity_ok": capacity_ok,
         "rank": int(projective["rank"]), "full_row_rank": bool(projective["full_row_rank"]),
         "four_cycle_count": int(topology["four_cycle_count"]),
-        "six_cycle_count": int(topology["six_cycle_count"]),
-        "eight_cycle_count": int(topology["eight_cycle_count"]),
+        "six_cycle_count": topology["six_cycle_count"],
+        "eight_cycle_count": topology["eight_cycle_count"],
+        "six_eight_exact": bool(topology["six_eight_exact"]),
+        "girth": topology["girth"],
         "tanner6_newly_closed_total": int(len(label_replay)),
         "tanner6_degenerate_total": int(tanner6_degenerate_total),
         "tanner6_degenerate_max_per_column": int(tanner6_degenerate_max),

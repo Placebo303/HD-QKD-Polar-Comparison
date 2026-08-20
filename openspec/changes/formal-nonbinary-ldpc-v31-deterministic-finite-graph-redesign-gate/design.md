@@ -105,8 +105,14 @@ For every degree-two column with support `(a,b)`, `a<b`:
 
 The projective hard gate requires zero duplicate projective keys, zero
 proportional-column pairs, no zero row/column, and full GF(32) row rank.
-Tanner-8 is topology-only (aggregate count and girth per matrix). Standard
-variable-side ACE is `not_applicable_dv2` because every variable degree is 2.
+Topology diagnostics are bounded: the ordinary 4-cycle count is always exact
+(from support multiplicities); the girth of the simple check graph is always
+exact (BFS); exact 6/8-cycle enumeration over the check multigraph (C(m,3)/
+C(m,4)) is computed only for small m (<=60) and for large V31 L2 sizes the
+6/8-cycle counts are reported as `None` with `six_eight_exact=False`. These
+diagnostics never enter the finite pass/fail gate (ranking uses only the exact
+4-cycle count). Standard variable-side ACE is `not_applicable_dv2` because every
+variable degree is 2.
 
 The support pair occupancy constraint is a HARD structural constraint for both
 families: for every support pair `(a,b)`, the number of columns using that

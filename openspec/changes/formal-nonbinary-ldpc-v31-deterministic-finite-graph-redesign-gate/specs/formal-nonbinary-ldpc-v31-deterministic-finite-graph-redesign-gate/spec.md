@@ -53,8 +53,9 @@ coefficient chosen in increasing zero-based `nonzero_cycle` order; ratio
 already used by that support rejected; score `(degenerate_6_new, ratio_index)`
 minimized; projective duplicates and proportional pairs MUST be zero; no zero
 row/column; full GF(32) row rank required; support occupancy MUST be <=31 for
-every support pair; Tanner-8 topology-only; standard variable-side ACE omitted
-(`d_v=2`). No RNG, seed library, permutation, or matrix-library search.
+every support pair; 4-cycle count exact, girth exact, exact 6/8-cycle enumeration only for
+small m<=60 (large L2 sizes use `six_eight_exact=False` diagnostics); standard
+variable-side ACE omitted (`d_v=2`). No RNG, seed library, permutation, or matrix-library search.
 
 If any required matrix fails, that packet is rejected and persisted; no
 replacement construction is allowed. Rejections count toward `finite_graph_fail`
