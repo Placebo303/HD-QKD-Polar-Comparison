@@ -18,9 +18,11 @@ Status: IN PROGRESS (production run launched 2026-08-20).
     m=414->rank413), so full row rank fails.
   - `QC-cyclic-projective` n=1024 and n=2048: construction OK (full rank,
     projective-safe, max support occupancy <=9).
-- M3: RUNNING (n=1024 QC packet; 46/300 blocks done at last check, all source 1M)
-  - L1 decodes ok (44/46), L2 `converged_no_syndrome` on 46/46 -> `exact=0`,
-    `tag=0`. RC-cyclic L2 does not converge to the syndrome on the V25 channel.
+- M3: RUNNING (n=1024 QC packet). Source 1M window COMPLETE (100/100 blocks):
+  `l1_ok=98`, `l2_ok=0`, `exact=0`, `tag=0`, `false_accept=0` -> 1M exact =
+  tag FER = 1.0 for the QC-cyclic family at n=1024. 1p5M/2M n=1024 and the
+  n=2048 QC window still running to complete the waterfall/failure-position
+  comparison.
 - Read-only verifier: pending
 
 Evidence root:
