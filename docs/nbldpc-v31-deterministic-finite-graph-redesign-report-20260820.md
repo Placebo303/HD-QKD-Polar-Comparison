@@ -22,9 +22,11 @@ Status: IN PROGRESS (production run launched 2026-08-20).
   1M `l1_ok=98`, 1p5M `l1_ok=99`, 2M `l1_ok=100`; `l2_ok=0` for ALL sources;
   `offline_exact=0`, `tag_verified=0`, `false_accept=0` across all 300 blocks
   -> exact = tag FER = 1.0 at n=1024, definitively failing the 95% threshold.
-- M3: n=2048 window RUNNING (QC packet): early 1M blocks also `exact=0` /
-  `tag=0` (`l2_ok=0`); every completed block repeats the same L2
-  `converged_no_syndrome` pattern.
+- M3: n=2048 window RUNNING (QC packet): 6/150 blocks done at last check,
+  all source 1M; `exact=0`, `tag=0`, `false_accept=0`, `l2_ok=0` on every
+  completed block (same L2 `converged_no_syndrome` pattern as n=1024).
+  Decodes are very slow (pathological non-converging L2 blocks), so the M3
+  per-n resource meter was raised to 5 days to allow completion.
 - Read-only verifier: pending (will run after both windows complete)
 
 Evidence root:
