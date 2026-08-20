@@ -9,11 +9,17 @@ Status: IN PROGRESS (production run launched 2026-08-20).
 - M2 deterministic families implemented: PEG-capacity-aware (occupancy<=31 hard gate) and QC-cyclic-projective control.
 - M3 Bob-only full-window validation running; summary/FER/waterfall/failure-position comparison pending.
 
-## Gate status
+## Gate status (2026-08-21)
 
-- M1: PASS (60/60)
-- M2: in progress
-- M3: pending
+- M1: PASS (60/60 DE confirmation; 30/30 per n, m1=16)
+- M2: COMPLETE
+  - `PEG-capacity-aware` n=1024 and n=2048: DETERMINISTIC REJECT on construction
+    hard gate — L2 matrices are GF(32) rank-deficient (e.g., m=200->rank199,
+    m=414->rank413), so full row rank fails.
+  - `QC-cyclic-projective` n=1024 and n=2048: construction OK (full rank,
+    projective-safe, max support occupancy <=9).
+- M3: RUNNING (Bob-only full-window; early records show L1 success but L2
+  `converged_no_syndrome` -> blocks not exact/tag-verified at n=1024).
 - Read-only verifier: pending
 
 Evidence root:
