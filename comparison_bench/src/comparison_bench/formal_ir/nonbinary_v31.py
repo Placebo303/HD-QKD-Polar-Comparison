@@ -640,15 +640,19 @@ def build_matrix_packet(
     return packet
 
 
-def run_m2(plans: Mapping[int, Mapping[str, Any]]) -> dict[str, Any]:
+def run_m2(plans: Mapping[int, Mapping[str, Any]], *, wallclock_budget_seconds: float | None = None,
+           start_time: float | None = None) -> dict[str, Any]:
     """Build both family packets for each passing n."""
     plans = dict(plans)
+    start_time = time.monotonic() if start_time is None else start_time
     result: dict[str, Any] = {}
     for n in N_VALUES:
         allocation = plans[n]
         packets: list[dict[str, Any]] = []
         rejected: list[dict[str, Any]] = []
         for family in SUPPORTED_FAMILIES:
+            if wallclock_budget_seconds is not None and time.monotonic() - start_time > float(wallclock_budget_seconds):
+                raise _ChunkTimeout(f"m2_n{n}_{family}")
             try:
                 packet = build_matrix_packet(
                     int(allocation["m1"]), allocation["m2_by_source"],
@@ -770,10 +774,12 @@ def _run_packet_full_window(
     max_iter: int, streak: int, decoder_runner: Any,
     adapters: Mapping[str, Any], resource_meter: float,
     resource_limit_seconds: float, records: list[dict[str, Any]],
+    wallclock_budget_seconds: float | None = None,
 ) -> tuple[dict[str, dict[str, int]], float, str | None]:
     """Run one packet over ALL validation blocks, persisting each record first."""
     n = int(packet["n"])
     family = str(packet["family"])
+    start_time = time.monotonic()
     first_source_blocks = sorted(
         (b for b in blocks if b.get("source") == SOURCE_ORDER[0]),
         key=lambda b: int(b.get("block_index", -1)),
@@ -793,6 +799,8 @@ def _run_packet_full_window(
         for block in selected:
             if resource_meter >= float(resource_limit_seconds):
                 return stats, resource_meter, TERMINAL_RESOURCE
+            if wallclock_budget_seconds is not None and time.monotonic() - start_time > float(wallclock_budget_seconds):
+                raise _ChunkTimeout(f"m3_n{n}_{family}_block_{int(block.get('block_index', -1))}")
             try:
                 block_public, public, truth = v30._block_public_and_syndromes(block, packet)
                 started = time.monotonic()
@@ -904,6 +912,7 @@ def run_m3_gate(
     construction: Mapping[int, Mapping[str, Any]], blocks_by_n: Mapping[int, Sequence[Mapping[str, Any]]], *,
     decoder_runner: Any = None, adapters: Mapping[str, Any] | None = None,
     resource_limit_seconds: float = RESOURCE_LIMIT_SECONDS,
+    wallclock_budget_seconds: float | None = None,
 ) -> dict[str, Any]:
     """Run the full Bob-only validation windows for both n."""
     construction = dict(construction)
@@ -926,7 +935,7 @@ def run_m3_gate(
                 packet, blocks, max_iter=M3_MAX_ITER, streak=M3_STREAK,
                 decoder_runner=decoder_runner, adapters=adapters,
                 resource_meter=meter, resource_limit_seconds=resource_limit_seconds,
-                records=records,
+                records=records, wallclock_budget_seconds=wallclock_budget_seconds,
             )
             summary = _packet_summary(packet, records)
             summary["window_status"] = status
@@ -1044,94 +1053,333 @@ def _manifest_for_run(
     }
 
 
+class _ChunkTimeout(Exception):
+    """Raised internally when a wall-clock chunk budget is exhausted."""
+    def __init__(self, stage: str):
+        super().__init__(f"V31 chunk timeout at stage {stage}")
+        self.stage = stage
+
+
+def _packet_key(packet: Mapping[str, Any]) -> tuple[int, str]:
+    return (int(packet.get("n", -1)), str(packet.get("family")))
+
+
+def _load_construction(root: Path) -> dict[int, dict[str, Any]]:
+    construction = {n: {"n": n, "packets": [], "rejected": []} for n in N_VALUES}
+    audits_file = root / "matrix_audits.json"
+    payloads_file = root / "matrix_payloads.json"
+    if not payloads_file.exists():
+        return construction
+    payloads = _read_json(payloads_file).get("packets", [])
+    audits = _read_json(audits_file).get("packets", []) if audits_file.exists() else []
+    for p in payloads:
+        n = int(p["n"])
+        audit = next((a for a in audits if str(a.get("packet_id")) == str(p.get("packet_id"))), {})
+        packet = {**p, "audits": audit.get("audits", {})}
+        if "packet_id" not in packet:
+            packet["packet_id"] = packet.get("matrix_id")
+        construction[n]["packets"].append(packet)
+    return construction
+
+
+def _persist_construction(root: Path, construction: Mapping[int, Mapping[str, Any]]) -> None:
+    _write_json(root / "matrix_audits.json", {"schema": "nbldpc_v31_matrix_audits_v1",
+                                              "packets": _matrix_audit_records(construction),
+                                              "rejected": [r for n in N_VALUES for r in construction.get(n, {}).get("rejected", [])]})
+    _write_json(root / "matrix_payloads.json", {"schema": "nbldpc_v31_matrix_payloads_v1",
+                                                "packets": _matrix_payload_records(construction)})
+
+
+def run_m2_incremental(
+    root: Path, allocations: Mapping[int, Mapping[str, Any]], *,
+    start_time: float | None = None, wallclock_budget_seconds: float | None = None,
+) -> dict[int, dict[str, Any]]:
+    """Build and persist all family packets, resuming from already-built ones."""
+    start_time = time.monotonic() if start_time is None else start_time
+    construction = _load_construction(root)
+    existing = {_packet_key(p): True for n in construction.values() for p in n["packets"]}
+    for n in N_VALUES:
+        allocation = allocations[n]
+        for family in SUPPORTED_FAMILIES:
+            if (int(n), family) in existing:
+                continue
+            if wallclock_budget_seconds is not None and time.monotonic() - start_time > float(wallclock_budget_seconds):
+                raise _ChunkTimeout(f"m2_n{n}_{family}")
+            try:
+                packet = build_matrix_packet(
+                    int(allocation["m1"]), allocation["m2_by_source"],
+                    n=n, family=family, allocation_id=allocation["allocation_id"],
+                )
+                packet["packet_id"] = packet["matrix_id"]
+                if not packet["construction_ok"]:
+                    raise ValueError("V31 construction hard gate failed")
+                construction[n]["packets"].append(packet)
+            except Exception as exc:
+                construction[n]["rejected"].append({
+                    "n": int(n), "family": family,
+                    "allocation_id": allocation["allocation_id"],
+                    "terminal": TERMINAL_FAIL,
+                    "error": f"{type(exc).__name__}: {exc}",
+                })
+            _persist_construction(root, construction)
+    return construction
+
+
+def _load_block_records(root: Path) -> dict[int, list[dict[str, Any]]]:
+    result: dict[int, list[dict[str, Any]]] = {}
+    for n in N_VALUES:
+        path = root / f"per_block_n{n}.jsonl"
+        records: list[dict[str, Any]] = []
+        if path.exists():
+            with path.open("r", encoding="utf-8") as stream:
+                for line in stream:
+                    if line.strip():
+                        records.append(json.loads(line))
+        result[n] = records
+    return result
+
+
+def _append_block_record(root: Path, n: int, record: Mapping[str, Any]) -> None:
+    with (root / f"per_block_n{n}.jsonl").open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps(_json_safe(record), sort_keys=True, allow_nan=False) + "\n")
+
+
+def run_m3_incremental(
+    root: Path, construction: Mapping[int, Mapping[str, Any]],
+    blocks_by_n: Mapping[int, Sequence[Mapping[str, Any]]], *,
+    decoder_runner: Any = None, adapters: Mapping[str, Any] | None = None,
+    resource_limit_seconds: float = RESOURCE_LIMIT_SECONDS,
+    start_time: float | None = None, wallclock_budget_seconds: float | None = None,
+) -> dict[str, Any]:
+    """Run Bob-only validation windows, persisting each block record immediately."""
+    start_time = time.monotonic() if start_time is None else start_time
+    adapters = dict(adapters or {})
+    if decoder_runner is None and not adapters:
+        adapters = v30.load_v26_adapters_once()
+    records_by_n = _load_block_records(root)
+    meter = 0.0
+    terminal: str | None = None
+    for n in N_VALUES:
+        entry = construction.get(n, {"packets": []})
+        blocks = list(blocks_by_n.get(n, []))
+        done_keys = {(str(r.get("packet_id")), str(r.get("source")), int(r.get("block_index", -1)))
+                     for r in records_by_n[n]}
+        for packet in entry.get("packets", []):
+            family = str(packet.get("family"))
+            for label in SOURCE_ORDER:
+                selected = sorted((b for b in blocks if b.get("source") == label),
+                                  key=lambda b: int(b.get("block_index", -1)))
+                for block in selected:
+                    key = (str(packet.get("packet_id")), label, int(block.get("block_index", -1)))
+                    if key in done_keys:
+                        continue
+                    if meter >= float(resource_limit_seconds):
+                        terminal = TERMINAL_RESOURCE
+                        break
+                    if wallclock_budget_seconds is not None and time.monotonic() - start_time > float(wallclock_budget_seconds):
+                        raise _ChunkTimeout(f"m3_n{n}_{family}_block_{int(block.get('block_index', -1))}")
+                    try:
+                        block_public, public, truth = v30._block_public_and_syndromes(block, packet)
+                        started = time.monotonic()
+                        result = v30._invoke_decoder(
+                            decoder_runner, block_public, public, adapters.get(label), packet,
+                            {"max_iter": M3_MAX_ITER, "streak": M3_STREAK},
+                        )
+                        elapsed = time.monotonic() - started
+                        record = v30._finite_block_record(block, public, result, truth, packet, elapsed)
+                        runtime = float(record["runtime_s"])
+                        if not math.isfinite(runtime) or runtime < 0:
+                            raise ValueError("decoder runtime_s must be finite and nonnegative")
+                        meter += runtime
+                    except Exception as exc:
+                        record = {
+                            "schema": "nbldpc_v31_block_result_v1",
+                            "packet_id": packet.get("packet_id"), "source": label,
+                            "block_index": int(block.get("block_index", -1)),
+                            "frame_ids": list(block.get("frame_ids", [])), "l1_ok": False,
+                            "l1_status": TERMINAL_IMPL, "l2_ok": False, "l2_status": "not_run",
+                            "l2_conditioning": "not_run", "l2_not_run_due_l1": True,
+                            "l1_syndrome_ok": False, "l2_syndrome_ok": False,
+                            "offline_exact": False, "tag_verified": False, "false_accept": False,
+                            "l1_symbol_errors": None, "l2_symbol_errors": None,
+                            "l1_iterations": 0, "l2_iterations": 0, "decoder_calls": 0,
+                            "runtime_s": time.monotonic() - started,
+                            "error": f"{type(exc).__name__}: {exc}",
+                        }
+                        meter += float(record["runtime_s"])
+                        terminal = TERMINAL_IMPL
+                    record["n"] = n
+                    record["family"] = family
+                    records_by_n[n].append(record)
+                    _append_block_record(root, n, record)
+                    done_keys.add(key)
+                    if terminal is not None:
+                        break
+                if terminal is not None:
+                    break
+            if terminal is not None:
+                break
+        if terminal is not None:
+            break
+
+    all_records = [r for n in N_VALUES for r in records_by_n[n]]
+    summaries: dict[str, Any] = {}
+    per_n_pass: dict[str, bool] = {}
+    for n in N_VALUES:
+        n_summaries: list[dict[str, Any]] = []
+        passed_any = False
+        for packet in construction.get(n, {}).get("packets", []):
+            summary = _packet_summary(packet, all_records)
+            n_summaries.append(summary)
+            if summary.get("passed"):
+                passed_any = True
+        per_n_pass[str(n)] = bool(passed_any)
+        summaries[str(n)] = {"n": n, "summaries": n_summaries, "passed_any": passed_any}
+        _write_json(root / f"summary_n{n}.json", summaries[str(n)])
+    if terminal is None:
+        if all(per_n_pass.get(str(n), False) for n in N_VALUES):
+            terminal = TERMINAL_PASS
+        else:
+            terminal = TERMINAL_FAIL
+    return {
+        "schema": "nbldpc_v31_finite_gate_v1", "status": terminal,
+        "records": all_records, "record_count": len(all_records),
+        "summaries": summaries, "per_n_pass": per_n_pass,
+        "resource_meter_seconds": meter, "resource_limit_seconds": float(resource_limit_seconds),
+    }
+
+
 def run_v31_gate(
     output_root: str | Path, *, de_runner: Any = None, decoder_runner: Any = None,
     adapters: Mapping[str, Any] | None = None, blocks_by_n: Mapping[int, Sequence[Mapping[str, Any]]] | None = None,
     resource_limit_seconds: float = RESOURCE_LIMIT_SECONDS,
+    wallclock_budget_seconds: float | None = None,
 ) -> dict[str, Any]:
-    """Execute the frozen V31 gate; injected runners/blocks are test-only seams."""
+    """Execute the frozen V31 gate with resumable wall-clock chunking.
+
+    Injected runners/blocks are test-only seams. When a wall-clock budget is
+    provided and exhausted, the run persists progress and returns
+    status "paused"; re-invoking the same command resumes from that point.
+    """
     root = Path(output_root)
-    if root.exists():
-        raise FileExistsError(f"V31 output root must be new: {root}")
-    root.mkdir(parents=True, exist_ok=False)
+    progress_path = root / "progress.json"
+    start_time = time.monotonic()
+    if root.exists() and progress_path.exists():
+        progress = _read_json(progress_path)
+        stage = progress.get("stage")
+        resume = True
+    else:
+        stage = None
+        resume = False
+        if root.exists():
+            raise FileExistsError(f"V31 output root must be new: {root}")
+        root.mkdir(parents=True, exist_ok=False)
+
     configs = {n: frozen_v31_config(n) for n in N_VALUES}
     h_values = v30.load_bound_h_values()
     allocations = {n: build_allocation_plan(n, h_values=h_values) for n in N_VALUES}
+
     if adapters is None and (de_runner is None or decoder_runner is None):
         adapters = v30.load_v26_adapters_once()
-    m0 = v30.run_m0_baseline()
-    m1 = run_m1_confirmation(allocations, de_runner=de_runner, adapters=adapters,
-                             resource_limit_seconds=resource_limit_seconds)
-    registry = {
-        "schema": "nbldpc_v31_m1_registry_v1",
-        "params": configs[1024]["m1_confirmation"],
-        "registered_calls": _json_safe([dict(item) for n in N_VALUES for item in _confirmation_items(allocations[n])]),
-        "per_n": m1.get("per_n", {}), "confirmed_n": m1.get("confirmed_n", []),
-    }
-    _write_json(root / "progress.json", {"stage": "m1_done", "m1_terminal": m1.get("terminal"),
-                                        "confirmed_n": m1.get("confirmed_n", []),
-                                        "m1_meter_seconds": m1.get("resource_meter_seconds", 0.0)})
-    if m1.get("terminal") != "de_allocation_pass":
-        construction = {n: {"n": n, "packets": [], "rejected": []} for n in N_VALUES}
-        m3 = {"schema": "nbldpc_v31_finite_gate_v1", "status": TERMINAL_FAIL,
-              "records": [], "record_count": 0, "summaries": {}, "per_n_pass": {},
-              "resource_meter_seconds": 0.0, "resource_limit_seconds": float(resource_limit_seconds)}
-        status = m1.get("terminal") or TERMINAL_DE_FAIL
-    else:
-        construction = run_m2(allocations)
+
+    try:
+        construction = _load_construction(root) if resume else {n: {"n": n, "packets": [], "rejected": []} for n in N_VALUES}
+
+        if stage is None or stage == "start":
+            _write_json(root / "progress.json", {"stage": "start"})
+            m0 = v30.run_m0_baseline()
+            m1 = run_m1_confirmation(allocations, de_runner=de_runner, adapters=adapters,
+                                     resource_limit_seconds=resource_limit_seconds)
+            registry = {
+                "schema": "nbldpc_v31_m1_registry_v1",
+                "params": configs[N_VALUES[0]]["m1_confirmation"],
+                "registered_calls": _json_safe([dict(item) for n in N_VALUES for item in _confirmation_items(allocations[n])]),
+                "per_n": m1.get("per_n", {}), "confirmed_n": m1.get("confirmed_n", []),
+            }
+            _write_json(root / "de_confirmation.json", m1)
+            _write_json(root / "m1_registry.json", registry)
+            _write_json(root / "progress.json", {"stage": "m1_done", "m1_terminal": m1.get("terminal"),
+                                                "confirmed_n": m1.get("confirmed_n", []),
+                                                "m1_meter_seconds": m1.get("resource_meter_seconds", 0.0)})
+            if m1.get("terminal") != "de_allocation_pass":
+                status = m1.get("terminal") or TERMINAL_DE_FAIL
+                m3 = {"schema": "nbldpc_v31_finite_gate_v1", "status": status, "records": [],
+                      "record_count": 0, "summaries": {}, "per_n_pass": {},
+                      "resource_meter_seconds": 0.0, "resource_limit_seconds": float(resource_limit_seconds)}
+                construction = {n: {"n": n, "packets": [], "rejected": []} for n in N_VALUES}
+                _persist_construction(root, construction)
+                for n in N_VALUES:
+                    _write_json(root / f"validation_frames_n{n}.json", validation_frame_manifest())
+                    _write_json(root / f"validation_blocks_n{n}.json", {"n": n, "blocks": []})
+                    (root / f"per_block_n{n}.jsonl").write_text("", encoding="utf-8")
+                    _write_json(root / f"summary_n{n}.json", {})
+                _finish_v31_run(root, configs, allocations, m1, construction, m3, status)
+                return {"status": status, "evidence_root": str(root)}
+            status = None
+        elif stage == "m1_done":
+            m1 = _read_json(root / "de_confirmation.json")
+            registry = _read_json(root / "m1_registry.json")
+            status = None
+        else:
+            # resume from m2/m3 stages: load persisted artifacts
+            m1 = _read_json(root / "de_confirmation.json")
+            registry = _read_json(root / "m1_registry.json")
+            status = None
+
+        # M2 incremental
+        construction = run_m2_incremental(root, allocations, start_time=start_time,
+                                          wallclock_budget_seconds=wallclock_budget_seconds)
+        _persist_construction(root, construction)
         _write_json(root / "progress.json", {"stage": "m2_done",
                                             "packet_count": sum(len(construction[n]["packets"]) for n in N_VALUES),
-                                            "rejected": [r for n in N_VALUES for r in construction.get(n, {}).get("rejected", [])]})
+                                            "rejected_count": sum(len(construction[n]["rejected"]) for n in N_VALUES)})
         if blocks_by_n is None:
             blocks_by_n = {n: load_validation_blocks(n) if construction[n]["packets"] else [] for n in N_VALUES}
         else:
             for n in N_VALUES:
                 if construction[n]["packets"]:
                     _validate_validation_blocks(blocks_by_n[n], n)
-        if any(construction[n]["packets"] for n in N_VALUES):
-            m3 = run_m3_gate(construction, blocks_by_n, decoder_runner=decoder_runner,
-                             adapters=adapters, resource_limit_seconds=resource_limit_seconds)
+        for n in N_VALUES:
+            _write_json(root / f"validation_frames_n{n}.json", validation_frame_manifest())
+            _write_json(root / f"validation_blocks_n{n}.json", {"schema": f"nbldpc_v31_validation_blocks_v{n}",
+                                                                "n": n, "blocks": _json_safe(blocks_by_n[n])})
+        if not any(construction[n]["packets"] for n in N_VALUES):
+            m3 = {"schema": "nbldpc_v31_finite_gate_v1", "status": TERMINAL_FAIL, "records": [],
+                  "record_count": 0, "summaries": {}, "per_n_pass": {},
+                  "resource_meter_seconds": 0.0, "resource_limit_seconds": float(resource_limit_seconds)}
+            status = TERMINAL_FAIL
+        else:
+            m3 = run_m3_incremental(root, construction, blocks_by_n, decoder_runner=decoder_runner,
+                                    adapters=adapters, resource_limit_seconds=resource_limit_seconds,
+                                    start_time=start_time, wallclock_budget_seconds=wallclock_budget_seconds)
             _write_json(root / "progress.json", {"stage": "m3_done", "status": m3.get("status"),
                                                  "record_count": m3.get("record_count", 0),
                                                  "per_n_pass": m3.get("per_n_pass", {})})
-        else:
-            m3 = {"schema": "nbldpc_v31_finite_gate_v1", "status": TERMINAL_FAIL,
-                  "records": [], "record_count": 0, "summaries": {}, "per_n_pass": {},
-                  "resource_meter_seconds": 0.0, "resource_limit_seconds": float(resource_limit_seconds)}
-        status = m3.get("status", TERMINAL_IMPL)
+            status = m3.get("status", TERMINAL_IMPL)
+        return _finish_v31_run(root, configs, allocations, m1, construction, m3, status)
+    except _ChunkTimeout as exc:
+        _write_json(root / "progress.json", {"stage": exc.stage, "paused": True,
+                                            "wallclock_elapsed_seconds": time.monotonic() - start_time})
+        return {"status": "paused", "evidence_root": str(root), "chunk_stage": exc.stage}
+
+
+def _finish_v31_run(root: Path, configs: Mapping[int, Mapping[str, Any]],
+                    allocations: Mapping[int, Mapping[str, Any]], m1: Mapping[str, Any],
+                    construction: Mapping[int, Mapping[str, Any]], m3: Mapping[str, Any],
+                    status: str) -> dict[str, Any]:
+    for n in N_VALUES:
+        # block records already persisted incrementally; ensure summary files exist
+        _write_json(root / f"summary_n{n}.json", m3.get("summaries", {}).get(str(n), {}))
     manifest = _manifest_for_run(configs, allocations, m1, construction, m3, status)
     _write_json(root / "RUN_MANIFEST.json", manifest)
-    _write_json(root / "de_confirmation.json", m1)
-    _write_json(root / "m1_registry.json", registry)
-    _write_json(root / "matrix_audits.json", {"schema": "nbldpc_v31_matrix_audits_v1",
-                                              "packets": _matrix_audit_records(construction),
-                                              "rejected": [r for n in N_VALUES for r in construction.get(n, {}).get("rejected", [])]})
-    _write_json(root / "matrix_payloads.json", {"schema": "nbldpc_v31_matrix_payloads_v1",
-                                                "packets": _matrix_payload_records(construction)})
-    frame_doc = validation_frame_manifest()
-    for n in N_VALUES:
-        _write_json(root / f"validation_frames_n{n}.json", frame_doc)
-        if blocks_by_n is not None and blocks_by_n.get(n):
-            _write_json(root / f"validation_blocks_n{n}.json", {
-                "schema": f"nbldpc_v31_validation_blocks_v{n}",
-                "n": n, "blocks": _json_safe(blocks_by_n[n]),
-            })
-        else:
-            _write_json(root / f"validation_blocks_n{n}.json", {"schema": f"nbldpc_v31_validation_blocks_v{n}",
-                                                                "n": n, "blocks": []})
-        with (root / f"per_block_n{n}.jsonl").open("w", encoding="utf-8") as stream:
-            for record in m3.get("records", []):
-                if int(record.get("n", -1)) == n:
-                    stream.write(json.dumps(_json_safe(record), sort_keys=True, allow_nan=False) + "\n")
-        summary = m3.get("summaries", {}).get(str(n), {})
-        _write_json(root / f"summary_n{n}.json", summary)
     gate = {
         "schema": "nbldpc_v31_gate_v1", "status": status,
-        "m1_de_resource_meter_seconds": m1.get("resource_meter_seconds", 0.0),
-        "m3_decoder_resource_meter_seconds": m3.get("resource_meter_seconds", 0.0),
-        "resource_limit_seconds": float(resource_limit_seconds),
-        "m1_terminal": m1.get("terminal"), "m3_terminal": m3.get("status"),
-        "per_n_pass": m3.get("per_n_pass", {}),
+        "m1_de_resource_meter_seconds": m1.get("resource_meter_seconds", 0.0) if isinstance(m1, dict) else 0.0,
+        "m3_decoder_resource_meter_seconds": m3.get("resource_meter_seconds", 0.0) if isinstance(m3, dict) else 0.0,
+        "resource_limit_seconds": float(RESOURCE_LIMIT_SECONDS),
+        "m1_terminal": m1.get("terminal") if isinstance(m1, dict) else None,
+        "m3_terminal": m3.get("status") if isinstance(m3, dict) else None,
+        "per_n_pass": m3.get("per_n_pass", {}) if isinstance(m3, dict) else {},
         "de_rerun": False, "decoder_rerun": False, "v30_rerun": False,
     }
     _write_json(root / "gate.json", gate)
@@ -1139,24 +1387,6 @@ def run_v31_gate(
     _write_json(root / "readonly_verify.json", verification)
     return {"status": status, "evidence_root": str(root), "gate": gate, "readonly_verify": verification}
 
-
-# ---------------------------------------------------------------------------
-# Read-only verifier
-# ---------------------------------------------------------------------------
-
-def _expected_allocations() -> dict[int, dict[str, Any]]:
-    h_values = v30.load_bound_h_values()
-    return {n: build_allocation_plan(n, h_values=h_values) for n in N_VALUES}
-
-
-def _recompute_m1_from_registry(registry: Mapping[str, Any], allocations: Mapping[int, Mapping[str, Any]]) -> dict[str, Any]:
-    expected_calls = [dict(item) for n in N_VALUES for item in _confirmation_items(allocations[n])]
-    per_n: dict[str, Any] = {}
-    for n in N_VALUES:
-        own = [item for item in expected_calls if item["n"] == n]
-        per_n[str(n)] = {"n": int(n), "expected_calls": len(own), "n_calls": len(own)}
-    confirmed = [int(n) for n in N_VALUES]
-    return {"expected_calls": expected_calls, "expected_total": 60, "per_n": per_n, "confirmed_n": confirmed}
 
 
 def verify_v31(run_root: str | Path) -> dict[str, Any]:
