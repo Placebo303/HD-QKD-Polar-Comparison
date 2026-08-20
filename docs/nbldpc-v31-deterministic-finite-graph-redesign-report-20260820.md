@@ -18,8 +18,9 @@ Status: IN PROGRESS (production run launched 2026-08-20).
     m=414->rank413), so full row rank fails.
   - `QC-cyclic-projective` n=1024 and n=2048: construction OK (full rank,
     projective-safe, max support occupancy <=9).
-- M3: RUNNING (Bob-only full-window; early records show L1 success but L2
-  `converged_no_syndrome` -> blocks not exact/tag-verified at n=1024).
+- M3: RUNNING (n=1024 QC packet; 46/300 blocks done at last check, all source 1M)
+  - L1 decodes ok (44/46), L2 `converged_no_syndrome` on 46/46 -> `exact=0`,
+    `tag=0`. RC-cyclic L2 does not converge to the syndrome on the V25 channel.
 - Read-only verifier: pending
 
 Evidence root:
