@@ -41,6 +41,9 @@ For each passing n, construct one packet per family:
    `(occupancy_after, component_flag, distance_cost, max_degree_after,
    sumsq_after, a, b)` with `distance_cost=-(2*d_check(a,b)+2)` when connected
    and `(0,0)` when disconnected; candidates with `occupancy>=31` are skipped.
+   `d_check(a,b)` is the shortest-path edge distance in the current check
+   multigraph (all-pairs matrix updated incrementally; the implementation may
+   vectorize with numpy as long as the score is exact).
 2. `QC-cyclic-projective`: supports enumerated by increasing shift s>=1 then
    increasing base row a in 0..m-1, `support=(min(a,(a+s) mod m),
    max(a,(a+s) mod m))`, skipping `s%m==0`, until n columns are selected.
@@ -80,8 +83,8 @@ A (n, family) PASS requires, for every source: `exact_count >=
 ceil(0.95*block_count)`, `tag_verified_count >= ceil(0.95*block_count)`, and
 `false_accept_count == 0`. V31 terminal is `finite_graph_pass` iff each n has at
 least one passing family; otherwise `finite_graph_fail`. Terminals also include
-`de_allocation_fail`, `resource_blocked` (24h DE or decoder meter), and
-`implementation_blocked`.
+`de_allocation_fail`, `resource_blocked` (24h DE meter, or 24h decoder meter
+per block length), and `implementation_blocked`.
 
 ## Requirement: read-only verifier and closeout
 

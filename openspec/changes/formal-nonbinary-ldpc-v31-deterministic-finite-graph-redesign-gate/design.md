@@ -116,31 +116,35 @@ allowed.
 
 ### 4.2 Family 1 — `PEG-capacity-aware`
 
-Process columns `j=0..n-1`. Candidate supports are all `(a,b)`,
-`0 <= a < b < m`, in lexicographic order. Maintain:
+Process columns `j=0..n-1`. The candidate set is all `(a,b)`,
+`0 <= a < b < m`, in lexicographic order. The implementation may use vectorized
+numpy scoring as long as the mathematical score and tie-break are EXACTLY the
+frozen tuple below. State:
 
 - `occupancy[(a,b)]` = number of already-assigned columns with that support;
 - `degrees[r]` = check degree of row r;
-- `adjacency` = simple check graph from prior supports (parallel edges are
-  retained only for distance/path accounting, but adjacency may be a set for
-  shortest-path computation);
+- `dist[a][b]` = shortest-path edge distance `d_check(a,b)` in the current
+  check multigraph (all-pairs matrix, `inf` when disconnected), updated
+  incrementally after each edge insertion via the standard two-side relaxation
+  `dist[x][y] = min(dist[x][y], dist[x][u]+1+dist[v][y],
+  dist[x][v]+1+dist[u][y])` for the new edge `(u,v)`;
 - `edges` = list of prior supports (a multigraph).
 
 For each candidate `(a,b)`:
 
 - skip if `occupancy[(a,b)] >= 31` (capacity-exhausted hard gate);
-- add the edge hypothetically and compute shortest-path edge distance
-  `d_check(a,b)` in the prior multigraph (infinity if disconnected);
-- define `d = 2*d_check(a,b)`, local Tanner score `d+2`;
+- `occupancy_after = occupancy[(a,b)] + 1`;
+- `d_check = dist[a][b]`; `d = 2*d_check`;
 - `component_flag = 0, distance_cost = 0` if disconnected, else
   `component_flag = 1, distance_cost = -(d+2)`;
-- `max_degree_after`, `sumsq_after` from the hypothetical degree update;
+- `max_degree_after` and `sumsq_after` from the hypothetical degree update
+  (only the two endpoints change by one);
 - score tuple (lexicographic min):
   `(occupancy_after, component_flag, distance_cost, max_degree_after,
-  sumsq_after, a, b)`
-  where `occupancy_after = occupancy[(a,b)] + 1`.
+  sumsq_after, a, b)`.
 
-Select the minimum tuple; assign the support; then apply §4.1 label rule.
+Select the minimum tuple among capacity-valid candidates; assign the support;
+then apply §4.1 label rule.
 This makes the construction explicitly projective-capacity-aware: it prefers
 less-used supports first and hard-stops at 31 uses.
 
@@ -250,10 +254,13 @@ indices/sources).
 
 ### 5.5 Resource gate
 
-M3 has one cumulative 24-hour decoder meter across all (n, family) packets.
-Each block record is persisted before the next block starts. If the meter hits
-the limit, the terminal is `resource_blocked` for the incomplete window. A
-complete window that fails thresholds is `finite_graph_fail`, not resource.
+M3 has INDEPENDENT cumulative 24-hour decoder meters per block length
+(n=1024 and n=2048), because the two lengths are separate validation gates with
+different block counts. Each block record is persisted before the next block
+starts. If a block length's meter hits its limit, that length is
+`resource_blocked`; if any required length is resource-blocked, the overall
+terminal is `resource_blocked`. A complete window that fails thresholds is
+`finite_graph_fail`, not resource.
 
 ## 6. Evidence layout
 
