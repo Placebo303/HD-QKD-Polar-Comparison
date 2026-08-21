@@ -157,17 +157,17 @@ T2/T3 only at milestones (A6–A8). No production DE/decoder in any tier (fake r
 
 ### A11 — Local Commit
 
-- [ ] A11.1 `git status` shows only allowed new files + addendum/decision-log/memory diffs; no canonical/archive/old-report/src/experiments/tools diffs.
-- [ ] A11.2 `git add` only the allowed set; `git commit -m "closeout-audit-correction: V31 ARCHIVED_PARTIAL ..."` locally (no push).
-- [ ] A11.3 Verify `git log --oneline -1` shows new commit on `main` atop `c8d2acab`.
+- [x] A11.1 `git status` shows only allowed new files + addendum/decision-log/memory diffs; no canonical/archive/old-report/src/experiments/tools diffs.
+- [x] A11.2 `git add` only the allowed set; `git commit -m "closeout-audit-correction: V31 ARCHIVED_PARTIAL ..."` locally (no push).
+- [x] A11.3 Verify `git log --oneline -1` shows new commit on `main` atop `c8d2acab`.
 - **Evidence**: `git status` before/after, `git log --oneline -2`, `git show --stat HEAD`.
 - **Done when**: local commit exists, no push performed.
 
 ### A12 — Decide Archive Change A
 
-- [ ] A12.1 Main decides if Change A is archivable: requires A9 `closeout_corrected`, all evidence additive, no forbidden overwrite, reviewer PASS, addendum present.
-- [ ] A12.2 If archivable: run `/opsx-archive formal-nonbinary-ldpc-v31-closeout-audit-correction` (or manual move to `openspec/changes/archive/`), merging delta spec into `openspec/specs/`.
-- [ ] A12.3 If not archivable: keep change open, file follow-up tasks, retain failure evidence immutably.
+- [x] A12.1 Main decides if Change A is archivable: requires A9 `closeout_corrected`, all evidence additive, no forbidden overwrite, reviewer PASS, addendum present. — VERDICT ARCHIVABLE 2026-08-21, all A1-A11 [x], C01-C18 ACCEPT via run_02, authoritative run_02 with PEG limitation, addendum/decision-log/memory consistent, no forbidden diff, reviewer PASS, git log c8d2acab->ea319511.
+- [x] A12.2 If archivable: run `/opsx-archive formal-nonbinary-ldpc-v31-closeout-audit-correction` (or manual move to `openspec/changes/archive/`), merging delta spec into `openspec/specs/`. — EXECUTED 2026-08-21: moved to `openspec/changes/archive/2026-08-21-formal-nonbinary-ldpc-v31-closeout-audit-correction/`, archive.md created, delta spec NOT merged (audit-only, no canonical promotion).
+- [x] A12.3 If not archivable: keep change open, file follow-up tasks, retain failure evidence immutably. — N/A (archived).
 - **Evidence**: archive command log or decision not to archive with rationale.
 - **Done when**: archive decision recorded.
 
