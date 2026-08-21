@@ -8,6 +8,40 @@
 > provenance and MUST NOT be treated as this checkout's active backlog.
 > New entries should cover the Polar mainline only.
 
+## 2026-08-22 Repository separation executed (boundary plans 1-3)
+
+- Roles fixed after the crosstalk incident: THIS checkout = binary Polar
+  mainline on new long-lived branch **`polar-mainline`**; sibling
+  `HD-QKD_Polar_Comparison` = formal IR / LDPC research mainline on `main`.
+  Mirror scope declarations added as AGENTS.md §0 in BOTH checkouts (the
+  sibling-side edit is left UNCOMMITTED there for user review). Never merge
+  research `main` into `polar-mainline`. [decision]
+- Commits on `polar-mainline`: `6a58adb` pre-separation checkpoint (on
+  shared main), `f21c94f` boundary declarations (CURRENT_TASK.md rewritten
+  to the Route A-complete Polar task book per 总体判断.txt; memory scope
+  banner), `cd027ec` research-line removal (381 files, -73167 lines:
+  `formal_ir/` package, `data_lock.py`, `final_selection_audit.py`, 48
+  research CLIs, 89 research tests, 19 research OpenSpec change dirs,
+  specs `final-ir-method-selection` + `formal-ir-methods`, nonbinary
+  planning docs, `ldpc_v5_robustness` evidence), `5e1b82a` de-crosstalk
+  test fix. [repo-observed]
+- Post-separation verification: `compileall` exit 0; remaining comparison
+  suite **39/39 passed**; smoke ok. Before the fix, 21 tests failed because
+  `test_evidence_package.py` hardcoded
+  `D:/Code/HD-QKD_Polar_Comparison/workspace/...` — literal crosstalk in
+  code; now uses repo-local `workspace/pytest-evidence-test`. [repo-observed]
+- Kept intentionally in this checkout: comparison_bench core bridge
+  (io/methods/pipeline/sweep, lite methods, v3 parameter sweeps,
+  build_long_frames, group-meeting and real-IR evidence CLIs with their
+  tracked outputs under `outputs_comparison/`), plus OpenSpec changes
+  `research-code-engineering-policy` and
+  `standardize-agent-delivery-workflow-v1` (referenced by AGENTS.md).
+  Remaining active changes: 7. [repo-observed]
+- Pending: push `main` (`6a58adb`) and `polar-mainline`
+  (`f21c94f`..`5e1b82a`) from an unrestricted terminal; elevated-terminal
+  cleanup of ACL-locked pytest temp dirs (script in 2026-08-22 entry
+  below). [decision]
+
 ## 2026-08-22 Release clone audit, V12 code location facts, session environment limits
 
 - `D:\Code\HD-QKD_Polar_Release` (`main` = `origin/main` at `581cd05`, clean
