@@ -1,9 +1,0 @@
-{
-  "schema": "v8_reproduction_trace_precorrection_annotation_v1",
-  "original_file": "v8_reproduction_trace.json",
-  "original_sha256": "dd5678fd2d77b67dd7f3fc7ee221a49b0d33eab37ab5d226d96e6d243b071de3",
-  "status": "pre-correction_approximate_trace",
-  "superseded_by": "v8_reproduction_trace_corrected.json",
-  "reason": "mean-matched concentrated check weights approximated the edge-perspective rate condition; corrected to harmonic-exact weights (V8-60)",
-  "recorded_before_correction": true
-}
