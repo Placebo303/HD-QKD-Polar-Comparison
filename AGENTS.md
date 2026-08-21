@@ -4,11 +4,33 @@ These rules apply to all agents operating in this repository.
 
 ---
 
+## 0. Repository Scope (READ FIRST — boundary rule)
+
+- **This checkout (`HD-QKD_Polar_Release`) is the BINARY POLAR MAINLINE.**
+  Its mission is the mature binary Polar code line: the frozen baseline
+  (`src/`, `experiments/`, `tools/`, `results/`), the security/replay
+  tooling around it, and the non-invasive `comparison_bench/` bridge that
+  READS Polar outputs.
+- **The formal IR / binary-LDPC-v4+ / nonbinary-LDPC research line lives in
+  the sibling working repository `../HD-QKD_Polar_Comparison`.** Do NOT
+  open, advance, execute, or archive research-line OpenSpec changes here
+  (`formal-nonbinary-ldpc-*`, `binary-ldpc-v4*`/`v5*`,
+  `improve-formal-*`, `implement-formal-nonbinary-ldpc`,
+  `speed-up-nbldpc-*`, ...). Historical copies of those documents in this
+  checkout are crosstalk residue kept only for provenance.
+- Both checkouts historically shared one remote and one `main`. This
+  checkout maintains its own long-lived branch **`polar-mainline`**;
+  never merge the research `main` into it.
+- If a task seems to belong to the other repository, stop and say so
+  instead of working around the boundary.
+
+---
+
 ## 1. Project Identity
 
-- **Project name**: `HD-QKD_Polar_Comparison`
-- **Purpose**: Evaluate and compare information reconciliation (IR) methods for high-dimensional QKD data. The original Polar pipeline is a frozen baseline; the `comparison_bench/` layer adds a non-invasive comparison framework.
-- **Main objective**: Build a reproducible benchmark layer that reads/imports existing Polar results, runs executable comparison baselines (cascade, binary LDPC, q-ary LDPC reference) on synthetic and real paired-symbol frame data, and generates comparable CSV/Parquet/summary outputs without changing the original Polar workflow semantics.
+- **Project name**: `HD-QKD_Polar_Release` (binary Polar mainline)
+- **Purpose**: Maintain and use the mature binary Polar code implementation for high-dimensional QKD: frozen end-to-end pipeline, security/finite-key analysis tooling, and reproducible result artifacts. The `comparison_bench/` layer stays as a read-oriented bridge that imports existing Polar results; its day-to-day research evolution is owned by the sibling repository.
+- **Main objective**: Keep the original Polar workflow semantics stable and its results auditable; evolve only Polar-line workstreams (e.g., the bit-plane Route A-complete formalization defined in `总体判断.txt`).
 
 ---
 

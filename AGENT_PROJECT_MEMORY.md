@@ -1,5 +1,13 @@
 # AGENT_PROJECT_MEMORY.md
 
+> **Repository scope (2026-08-22)**: This memory serves the BINARY POLAR
+> MAINLINE checkout (`HD-QKD_Polar_Release`, branch `polar-mainline`).
+> Entries dated before 2026-08-22 largely record the FORMAL IR / NB-LDPC
+> research line that belongs to the sibling repository
+> `../HD-QKD_Polar_Comparison`; they are retained verbatim as crosstalk-era
+> provenance and MUST NOT be treated as this checkout's active backlog.
+> New entries should cover the Polar mainline only.
+
 ## 2026-08-22 Release clone audit, V12 code location facts, session environment limits
 
 - `D:\Code\HD-QKD_Polar_Release` (`main` = `origin/main` at `581cd05`, clean
