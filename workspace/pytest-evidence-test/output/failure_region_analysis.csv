@@ -1,3 +1,0 @@
-method_name,dimension,bin_width_ps,success_classification,failure_count
-layered_ldpc_lite,8,120,decode_failed,1
-layered_ldpc_lite,16,100,decode_failed,1

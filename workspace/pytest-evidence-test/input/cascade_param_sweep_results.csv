@@ -1,6 +1,0 @@
-dataset_id,dimension,bin_width_ps,frame_cap,frames_used_actual,method,method_status,backend_status,block_size_schedule,num_passes,permutation_mode,seed,n_frames_attempted,n_frames_success,n_frames_failed_decode,n_frames_failed_verify,accepted_frame_fraction,raw_ser,post_ir_ser,leak_EC_actual_bits,leak_EC_per_input_bit,beta_eff_empirical,runtime_s,notes,param_hash,real_ir_success,success_classification
-d1,8,120,4,4,cascade_lite,ok,ok,"8,4,16,13",3,seeded_random,0,4,4,0,0,1.0,0.1,0.0,700.0,0.5,0.8,0.1,,h1,True,real_ir_success
-d1,8,120,4,4,cascade_lite,ok,ok,"8,4,16,13",4,seeded_random,0,4,4,0,0,1.0,0.1,0.0,557.0,0.5,0.8,0.2,,h2,True,real_ir_success
-d1,8,120,4,4,cascade_lite,ok,ok,"8,4,16,13",2,seeded_random,0,4,4,0,0,1.0,0.1,0.0,800.0,0.5,0.8,0.15,,h3,True,real_ir_success
-d2,16,100,4,4,cascade_lite,ok,ok,"8,4,16,13",3,seeded_random,0,4,4,0,0,1.0,0.1,0.0,900.0,0.5,0.8,0.3,,h4,True,real_ir_success
-d2,16,100,4,4,cascade_lite,ok,ok,"8,4,16,13",4,seeded_random,0,4,4,0,0,1.0,0.1,0.0,879.0,0.5,0.8,0.25,,h5,True,real_ir_success
