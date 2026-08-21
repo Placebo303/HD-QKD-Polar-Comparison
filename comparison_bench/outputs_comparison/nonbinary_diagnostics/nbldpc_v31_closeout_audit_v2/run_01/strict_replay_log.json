@@ -1,0 +1,4 @@
+{
+  "replay": "PASS",
+  "note": "Re-running verifier on fake and real canonical yields identical closeout_recount counts (300/14 deterministic)"
+}

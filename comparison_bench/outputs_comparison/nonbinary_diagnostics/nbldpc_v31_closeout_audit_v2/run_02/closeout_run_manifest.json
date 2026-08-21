@@ -1,0 +1,28 @@
+{
+  "schema": "nbldpc_v31_closeout_run_manifest_v1",
+  "git_head": "c8d2acabccaae9d55a344e8f0c8ac1bb21ff9d1e",
+  "expected_head": "c8d2acabccaae9d55a344e8f0c8ac1bb21ff9d1e",
+  "verifier_sha": "1cb46655fd1f7cdf",
+  "verifier_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\src\\comparison_bench\\cli\\run_nonbinary_v31_closeout_audit.py",
+  "input_hashes": {
+    "de_confirmation.json": "57ca8ff944cfd85d",
+    "gate.json": "1f4577cb221b98ba",
+    "m1_registry.json": "98f1f7306196d797",
+    "matrix_audits.json": "50ab9db6ea875157",
+    "matrix_payloads.json": "3d0e8773a436eed5",
+    "per_block_n1024.jsonl": "e467a5301807ddea",
+    "per_block_n2048.jsonl": "c3e27c3579cf5dd4",
+    "progress.json": "8fda250120459082",
+    "readonly_verify.json": "c78ab165f64b5a12",
+    "RUN_MANIFEST.json": "180eb106ca531457",
+    "summary_n1024.json": "0ec9d0d68e8f15fe",
+    "summary_n2048.json": "061d960143bbb931",
+    "validation_blocks_n1024.json": "302165d16d0eac18",
+    "validation_blocks_n2048.json": "6f3fcdf178961320",
+    "validation_frames_n1024.json": "4764984ce114d613",
+    "validation_frames_n2048.json": "4764984ce114d613"
+  },
+  "field_id": "c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf",
+  "no_de_rerun": true,
+  "no_decoder_rerun": true
+}

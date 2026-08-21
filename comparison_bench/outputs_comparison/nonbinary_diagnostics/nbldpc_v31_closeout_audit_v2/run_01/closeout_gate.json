@@ -1,0 +1,15 @@
+{
+  "schema": "nbldpc_v31_closeout_gate_v1",
+  "lifecycle": "V31 ARCHIVED_PARTIAL",
+  "terminal": "ARCHIVED_PARTIAL",
+  "n1024": "full-window finite_graph_fail (300/300 blocks, 100/source, QC exact=0 tag=0 false_accept=0, syndrome 0.00)",
+  "n2048": "bounded 1M/14-block diagnostic prefix only (not full 50*3=150 window), 14 blocks on 1M only, 0 on 1p5M/2M",
+  "contingency_post_hoc": true,
+  "contingency_note": "bounded-prefix contingency was post hoc, added at closeout after n1024 failure was known, MUST NOT be described as pre-registered",
+  "global_pass_possible": false,
+  "original_complete_execution": "incomplete",
+  "no_claim_pre_registered": true,
+  "no_restored_PASS": true,
+  "closeout_terminal": "closeout_corrected",
+  "problems": []
+}

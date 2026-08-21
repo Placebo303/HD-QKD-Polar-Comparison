@@ -1,0 +1,35 @@
+{
+  "schema": "nbldpc_v31_closeout_verify_v2",
+  "terminal": "closeout_corrected",
+  "problems": [],
+  "c_checks": {
+    "C01": "PASS",
+    "C14": "PASS",
+    "C04": "PASS",
+    "C05": "PASS",
+    "C06": "PASS",
+    "C07": "PASS",
+    "C08": "PASS",
+    "C09": "PASS",
+    "C10": "PASS",
+    "C11": "PASS",
+    "C12": "PASS",
+    "C13": "PASS",
+    "C15": "PASS",
+    "C02": "PASS",
+    "C03": "PASS",
+    "C16": "PASS",
+    "C17": "PASS",
+    "C18": "PASS"
+  },
+  "contingency_post_hoc": true,
+  "lifecycle": "V31 ARCHIVED_PARTIAL",
+  "narrative": "V31 ARCHIVED_PARTIAL: n1024 full-window finite_graph_fail, n2048 bounded 1M/14-block diagnostic prefix only, bounded-prefix contingency was post hoc, global PASS impossible under original both-n requirement, original complete execution incomplete. No claim of pre-registered contingency or restored PASS.",
+  "no_de_rerun": true,
+  "no_decoder_rerun": true,
+  "evidence_limitations": [
+    "The canonical V31 manifest does not retain independently reconstructable rejected PEG packets. matrix_audits.json records two PEG rejection summaries, but the rejected constructions and rank decisions cannot be fully replayed from the persisted closeout inputs. This limitation does not alter the accepted QC packet recount or the n=1024 finite_graph_fail result."
+  ],
+  "input_root": "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v31_20260820\\run_01",
+  "output_root": "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v31_closeout_audit_v2\\run_02"
+}

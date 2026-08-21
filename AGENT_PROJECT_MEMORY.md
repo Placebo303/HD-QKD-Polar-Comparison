@@ -16,6 +16,16 @@
 - OpenSpec archived. No push; no random search; no seed tuning; no
   qualification/promotion.
 
+## 2026-08-21 V31 closeout correction — authoritative state (Change A, run_02 authoritative)
+
+- Change A state: `closeout_corrected`; C01-C16 ACCEPT after A9R (C09 limitation persisted); C17-C18 pending until commit. [decision]
+- Authoritative evidence: `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_closeout_audit_v2/run_02/` (closeout_verify/recount/gate/run_manifest); superseded `run_01` retained with empty limitation. [repo-observed]
+- V31: `ARCHIVED_PARTIAL`; n=1024 300/300 `finite_graph_fail` valid (0 exact/tag, syndrome 0, L1_ok 296 L2_ok 0, runtime 13015s); n=2048 14 blocks from 1M only; original both-n execution incomplete, global PASS impossible, bounded-prefix contingency post hoc. [repo-observed]
+- PEG replay limitation (persisted in run_02): "The canonical V31 manifest does not retain independently reconstructable rejected PEG packets..." — does not alter QC/neg result. [decision]
+- No V31 rerun, no n=2048 completion. [decision]
+- Successor: only after Change A archive, V32 finite-DE bridge diagnostic is next (not yet started); qualification/promotion still not authorized. [decision]
+- HEAD `c8d2acab`, field_id `c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, m1=16. [repo-observed]
+
 ## 2026-08-20 V30R closeout: `finite_graph_fail`
 
 - V29 is closed with `v29_finite_gate_fail`; V28R's duplicate projective keys

@@ -1,0 +1,14 @@
+{
+  "T1-01": "PASS",
+  "T1-02": "PASS",
+  "T1-03": "PASS",
+  "T1-04": "PASS",
+  "T1-05": "PASS",
+  "T1-06": "PASS",
+  "T1-07": "PASS",
+  "T1-08": "PASS",
+  "T1-09": "PASS",
+  "T1-10": "PASS",
+  "T1-11": "PASS",
+  "description": "All 11 layered tamper tests PASS: raw drift, semantic self-hash, manifest/index links, matrix payload-audit, summary recomputed, gate recomputed, deep source/transcript/public-payload/leakage/accounting/gate reconstruction"
+}

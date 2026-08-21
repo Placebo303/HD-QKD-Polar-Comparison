@@ -2813,3 +2813,36 @@ counts contain only the current column and use the canonical tuple
 `min((j,a,k1,c,k2,b),(j,b,k2,c,k1,a))`; L1 and each L2 source use independent
 state. M1 is 72 screen plus at most 60 confirmation calls, with complete 30-call
 confirmation for each selected allocation and allocation-local failure.
+
+---
+
+### 2026-08-21: V31 deterministic finite-graph redesign — ARCHIVED_PARTIAL closeout audit addendum (Change A, A10)
+
+**Decision**: Close V31 as `ARCHIVED_PARTIAL` via additive closeout audit addendum `docs/nbldpc-v31-closeout-audit-addendum-20260821.md`. The authoritative evidence is additive `run_02` (`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_02/`); `run_01` (`comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/`) is preserved byte-identical but superseded for all lifecycle and interpretation claims. No V31 rerun, reseeding, or graph tuning is performed.
+
+**Context — why ARCHIVED_PARTIAL**: V31 executed n=1024 complete (300/300 blocks: 100 per source 1M/1p5M/2M) and reached `finite_graph_fail` (exact 0/300, tag 0/300, syndrome 0.00, L2 always `converged_no_syndrome`, zero false accepts). n=2048 executed only 14 blocks from 1M (1p5M/2M not executed). Therefore:
+
+```
+V31: ARCHIVED_PARTIAL
+n=1024: 300/300, finite_graph_fail
+n=2048: 14 blocks from 1M only
+original both-n execution: incomplete
+global PASS under original contract: impossible
+bounded-prefix contingency: post hoc
+```
+
+A global PASS under the original both-n (n=1024 + n=2048) contract was impossible once the complete n=1024 failure was observed.
+
+**Post-hoc submission timing**: The original submission closed on a `finite_graph_fail` terminal without distinguishing the bounded-prefix nature. The independent audit on 2026-08-21 identified that the 1M 14-block n=2048 prefix was not a pre-registered design contingency but a closeout-time bounded-prefix contingency added post hoc to document the consistent `converged_no_syndrome` mode. The correction is additive and is recorded in the new addendum and in `run_02` verifier v2 evidence; `run_01` is superseded precisely because it omitted the persisted PEG evidence limitation.
+
+**Why n=1024 negative retained**: The 300-block n=1024 result is a complete, verifier-recomputed (`ok=true`, `problems=[]`, 13015 s wall) bounded negative for the tested deterministic `QC-cyclic-projective` family (full-rank, occupancy 9 at n=1024 / 18 at n=2048, zero duplicate/proportional keys) at fixed `m1=16` on the F03 GF32+GF32 V25 channel (field_id `c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, `HEAD c8d2acab`). L2 progress without convergence is real; the failure is isolated to the finite graph/decoder conversion layer and does not negate V25/V26/V27 or the entire GF32+GF32 route.
+
+**Why no V31 rerun**: V31 is an immutable executed gate (M1 60/60 PASS, M2 PEG rank-deficient hard reject, M3 QC 0/300). Rerunning with the same deterministic constructions would reproduce the same rank deficiency and syndrome non-convergence; any tuning would violate the no-rerun/no-tuning discipline for a completed gate. The addendum therefore corrects only the closeout wording and lifecycle, not the science.
+
+**Why V32 finite-DE bridge instead of graph/seed tuning**: Graph-local tuning (degree/PEG label/seed search) would re-search the same finite conversion layer that V31 isolated as failing, without testing whether the empirical channel itself supports a finite leakage budget at these lengths. V32 (`formal-nonbinary-ldpc-v32-finite-de-bridge`) is pre-registered to test the upstream hypothesis first: whether a channel-informed finite-DE bridge at n=1024 can recover a feasible split before any new finite graph is constructed. If that bridge fails, graph tuning is moot; if it passes, a new graph change can be built on a validated budget. This ordering preserves the V25/V26 channel scope and avoids speculative finite-graph search.
+
+**What is corrected (4 rows)**: `fully executed -> partially executed`; `pre-registered bounded contingency -> post-hoc closeout contingency`; `complete finite-graph gate -> n=1024 complete plus n=2048 prefix`; `verifier proves all evidence -> verifier proves persisted evidence with PEG replay limitation`.
+
+**Verifier v2 evidence (authoritative run_02, run_01 superseded)**: `run_02` block coverage n=1024 300/300 + n=2048 14×1M; exact 0/300, tag 0/300, false_accept 0; syndrome 0.00 (`converged_no_syndrome`); runtime 13015 s; QC matrix full-rank occupancy 9/18; input/code binding field_id `c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`, `H` from V25 `data_inventory.json`/`split_manifest.json`, `m1=16`, `HEAD c8d2acab`; PEG limitation exact text `verifier proves persisted evidence with PEG replay limitation` (PEG rank-deficient, no M3 blocks, verifier attests only persisted rejection audit); strict replay/tamper `ok=true`, `recomputed_terminal=finite_graph_fail`, zero mismatches. run_01 is preserved but superseded because it omitted the persisted PEG evidence limitation.
+
+**Consequences**: V31 remains `finite_graph_fail` but as `ARCHIVED_PARTIAL` (n=1024 complete plus n=2048 prefix, post-hoc contingency). The prior report `docs/nbldpc-v31-deterministic-finite-graph-redesign-report-20260820.md` is preserved, not rewritten. No qualification, promotion, V32 result, or complete n=2048 completion is implied. A successor V32 finite-DE bridge requires a new user-authorized OpenSpec change with fresh roots; any finite-code successor after that also requires a new change. Evidence roots `run_02` (authoritative) and `run_01` (superseded) remain immutable; no push was performed.

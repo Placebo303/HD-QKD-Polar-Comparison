@@ -1,0 +1,59 @@
+{
+  "schema": "nbldpc_v31_closeout_recount_v1",
+  "n1024_count": 300,
+  "n1024_per_source": {
+    "1M": 100,
+    "1p5M": 100,
+    "2M": 100
+  },
+  "n2048_count": 14,
+  "n2048_per_source": {
+    "1M": 14
+  },
+  "n1024_exact": 0,
+  "n1024_tag": 0,
+  "n1024_false_accept": 0,
+  "n2048_exact": 0,
+  "n2048_tag": 0,
+  "n2048_false_accept": 0,
+  "n1024_1M_exact": 0,
+  "n1024_1M_tag": 0,
+  "n1024_1M_fa": 0,
+  "n1024_1p5M_exact": 0,
+  "n1024_1p5M_tag": 0,
+  "n1024_1p5M_fa": 0,
+  "n1024_2M_exact": 0,
+  "n1024_2M_tag": 0,
+  "n1024_2M_fa": 0,
+  "n2048_1M_exact": 0,
+  "n2048_1M_tag": 0,
+  "n2048_1M_fa": 0,
+  "n1024_l2_status": {
+    "converged_no_syndrome": 293,
+    "not_run": 4,
+    "max_iter_reached": 3
+  },
+  "n2048_l2_status": {
+    "not_run": 1,
+    "converged_no_syndrome": 12,
+    "max_iter_reached": 1
+  },
+  "n1024_l1_ok": 296,
+  "n1024_l2_ok": 0,
+  "n2048_l1_ok": 13,
+  "n2048_l2_ok": 0,
+  "n1024_syndrome_conv": 0.9866666666666667,
+  "n2048_syndrome_conv": 0.0,
+  "runtime_n1024": 10279.40800000052,
+  "runtime_n2048": 2735.6749999999884,
+  "runtime_total": 13015.083000000508,
+  "contingency_post_hoc": true,
+  "gate_info": {
+    "persisted_terminal": "finite_graph_fail",
+    "closeout_note": "GLOBAL finite_graph_fail fixed by the COMPLETE n=1024 window (all 300 blocks exact=0/tag=0). n=2048 window closed on a bounded 1M prefix (14 blocks, all exact=0/tag=0) because non-converging L2 decodes are extremely slow (design \u00a75 pre-registered contingency).",
+    "contingency_post_hoc": true
+  },
+  "evidence_limitations": [
+    "The canonical V31 manifest does not retain independently reconstructable rejected PEG packets. matrix_audits.json records two PEG rejection summaries, but the rejected constructions and rank decisions cannot be fully replayed from the persisted closeout inputs. This limitation does not alter the accepted QC packet recount or the n=1024 finite_graph_fail result."
+  ]
+}
