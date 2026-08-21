@@ -24,7 +24,7 @@ from comparison_bench.src.comparison_bench.cli.make_expanded_evidence_package im
     main,
 )
 
-TEST_DIR = Path("D:/Code/HD-QKD_Polar_Comparison/workspace/pytest-evidence-test")
+TEST_DIR = Path(__file__).resolve().parents[2] / "workspace" / "pytest-evidence-test"
 
 
 def setup_function():
