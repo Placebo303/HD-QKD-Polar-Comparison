@@ -29,7 +29,7 @@ Out of scope:
 - **SHALL-A2** — The system SHALL use frozen seeds for B1/B2: 1M `320101–320120`; 1.5M `320201–320220`; 2M `320301–320320`. Seeds and block IDs SHALL NOT change during the change.
 - **SHALL-A3** — B2 SHALL differ from B1 in exactly one respect: oracle L1 replaced by Bob-only sequential L1; block/seed/truth/channel sample/graph/posterior SHALL be identical to B1.
 - **SHALL-A4** — B3 SHALL preserve each source block's error count/marginals under a deterministic permutation of EXACTLY the B4 block set (blocks 0–19 per source); the permutation rule and seed SHALL be fixed and recorded in `RUN_MANIFEST.json` BEFORE execution; permutation SHALL never be selected by results; truth MAY construct the fixture but SHALL NEVER be a decoder input.
-- **SHALL-A5** — Every B1/B2/B4 block SHALL be marked `truth_used=true, truth_role=oracle_l1, operational=false, qualification=false`; B0 requires 6/6 exact, 6/6 tag, 6/6 syndrome, 0 false accept, and any B0 failure SHALL stop the run before scientific attribution.
+- **SHALL-A5** — Every B1/B4 block SHALL be marked `truth_used=true, truth_role=oracle_l1, operational=false, qualification=false`; B2 (Bob-only sequential, cf. SHALL-A3) SHALL be marked `truth_used=true, truth_role=sequential_no_truth, operational=false, qualification=false` — no oracle/truth data enters the B2 decoder input path (G-truth); B0 requires 6/6 exact, 6/6 tag, 6/6 syndrome, 0 false accept, and any B0 failure SHALL stop the run before scientific attribution.
 - **SHALL-A6** — B5 SHALL import the V31 baseline strictly read-only: it SHALL NOT invoke the V31 decoder and SHALL NOT regenerate any result; import integrity (300 records, identity match vs canonical) SHALL be verified.
 
 ### Discriminator & Terminals

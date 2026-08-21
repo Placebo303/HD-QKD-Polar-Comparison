@@ -88,9 +88,9 @@ STOP-and-report triggers (never autonomous): modifying B0–B5; changing seeds/b
 
 ### P3 — Candidate Review Round 1 (reviewer-go, independent)
 
-- [ ] P3.1 reviewer-go (not the implementer) re-runs T0/T1/T2 read-only in a fresh workspace root; verifies static checks and that no canonical/frozen path was touched.
-- [ ] P3.2 reviewer-go publishes findings (PASS/FAIL per tier, per frozen constant) without editing files.
-- [ ] P3.3 Main decides run authorization: confirm run root absent, budget/scope unchanged, no STOP-trigger fired.
+- [x] P3.1 reviewer-go (not the implementer) re-runs T0/T1/T2 read-only in a fresh workspace root; verifies static checks and that no canonical/frozen path was touched. — Evidence: R1 report C1 (fresh basetemp 10/14/20 all passed), C2/C7 zero forbidden diff, canonical 16-file byte-identical.
+- [x] P3.2 reviewer-go publishes findings (PASS/FAIL per tier, per frozen constant) without editing files. — Evidence: R1 report, 9/9 checks PASS, verdict ACCEPT_CANDIDATE; N1 wording defect routed to main.
+- [x] P3.3 Main decides run authorization: confirm run root absent, budget/scope unchanged, no STOP-trigger fired. — AUTHORIZED 2026-08-22 by main after N1 spec wording fix (SHALL-A5 B2 truth_role=sequential_no_truth; design §2 row synced). Run root absence confirmed by reviewer C5; frozen numbers untouched; P4 may start.
 - **Evidence**: reviewer report; `git diff` empty on all Forbidden paths; main authorization note.
 - **Done when**: R1 PASS + main authorizes P4.
 

@@ -16,7 +16,7 @@ Identical to `proposal.md §Frozen Input Bindings` (9 rows: V31 QC packet / vali
 |---|---|---|---|---|
 | B0 noiseless control | 2/source × 3 = 6 | noiseless | n/a (no errors) | plumbing control |
 | B1 iid synthetic + oracle L1 | 20/source × 3 = 60 | matched iid synthetic (V25/V26 posterior) | oracle L1 | `truth_used=true, truth_role=oracle_l1, operational=false, qualification=false` |
-| B2 Bob-only sequential | same 60 blocks as B1 | identical channel samples to B1 | Bob-only sequential | same markers as B1 |
+| B2 Bob-only sequential | same 60 blocks as B1 | identical channel samples to B1 | Bob-only sequential | `truth_used=true, truth_role=sequential_no_truth, operational=false, qualification=false` |
 | B3 shuffled real-error surrogate | 20/source × 3 = 60 | deterministic permutation of EXACTLY the B4 block set (blocks 0–19/source; counts/marginals preserved) | oracle L1 (same as B1/B4, so B1↔B3 differ only in error structure) | truth used to build fixture ONLY, never decoder input |
 | B4 real retrospective oracle-L1 | blocks 0–19/source × 3 = 60 | real V31 validation errors | oracle L1 | `truth_used=true, truth_role=oracle_l1, operational=false, qualification=false` |
 | B5 V31 baseline import | 300 records | — (read-only import) | — | no decoder invocation, no regeneration |
