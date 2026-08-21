@@ -1,5 +1,45 @@
 # AGENT_PROJECT_MEMORY.md
 
+## 2026-08-22 Release clone audit, V12 code location facts, session environment limits
+
+- `D:\Code\HD-QKD_Polar_Release` (`main` = `origin/main` at `581cd05`, clean
+  tree) is the release snapshot clone. Active development continues in the
+  companion working repository `D:\Code\HD-QKD_Polar_Comparison`, which is on
+  `main` with newer history (v31/v32-era OpenSpec changes). [repo-observed]
+- V12 implementation exists ONLY in the companion repo (6 tracked files:
+  `cli/run_formal_nonbinary_v12_real_micro.py`,
+  `cli/verify_formal_nonbinary_v12_real_micro.py`,
+  `formal_ir/nonbinary_v12_real_micro.py`,
+  `formal_ir/nonbinary_v12_real_partition.py`,
+  `tests/test_nonbinary_v12_real_micro.py`,
+  `tests/test_nonbinary_v12_real_partition.py`). The Release clone tracks
+  only the five V12 OpenSpec documents; grep for v12 code there returns zero
+  hits. Authoritative output roots `outputs_comparison/formal_ir_methods/`
+  and `final_ir_method_selection/` also exist only in the companion repo.
+  Do not execute V12 steps (V12-T3 onward) in the Release clone.
+  [repo-observed]
+- Release-clone health checks 2026-08-22: `compileall` exit 0; safe smoke ok;
+  scoped regression (test_nonbinary_v7_r1a_{codebook,long},
+  test_nonbinary_v11_{smp_de,mcde,parallel}, test_data_lock,
+  test_success_classifier, test_metrics, test_polar_existing_bridge,
+  test_cascade_lite): 74 passed / 2 failed. Both failures are multiworker
+  `test_nonbinary_v11_parallel.py` cases whose pool workers die on
+  `PermissionError` creating TEMP dirs under the agent-session sandbox —
+  environment artifact, consistent with prior full-suite passes; not code
+  regressions. [repo-observed]
+- Session-environment fact (reusable): in non-elevated agent sessions on this
+  host, pytest temp directories become ACL-denied even for DACL reads
+  (`icacls`/`takeown` fail without elevation). Verified untracked but
+  undeletable from the session: 23 root `pytest-cache-files-*` dirs,
+  root `tmpw7zl0atk/`, and `workspace/regression_scope_*.tmp`. They were
+  left intact; removal needs an elevated terminal targeting ONLY these
+  exact patterns. Also: session `git ls-remote/push/fetch` fail — schannel
+  `SEC_E_NO_CREDENTIALS`, and the openssl fallback dies because Git-for-
+  Windows helper processes cannot create signal pipes (Win32 error 5).
+  Network git actions need an unrestricted terminal; pending there:
+  delete fully merged `origin/formal-ir-accumulation` (`git rev-list
+  --count main..origin/formal-ir-accumulation` = 0). [repo-observed]
+
 ## 2026-08-12 Formal IR accumulation commit, branch, and push
 
 - Current working branch is `formal-ir-accumulation`, HEAD =

@@ -1,6 +1,33 @@
 # CURRENT_TASK.md
 
-## Current Task — Nonbinary V11 spatially coupled DE gate: PLAN FROZEN (2026-08-06)
+## Status Snapshot — Release clone audit (2026-08-22)
+
+This checkout is the **release snapshot clone**
+(`main` = `origin/main` at `581cd05`, clean tree). Verified facts for THIS
+clone:
+
+- Frozen baseline `src/`, `experiments/`, `tools/`, `results/` untouched;
+  safe smoke passes; all `comparison_bench` modules byte-compile.
+- Scoped regression (V7-R1A + V11 + core subset, 10 files): 74 passed /
+  2 failed. Both failures are `test_nonbinary_v11_parallel.py` multiworker
+  cases hitting session-sandbox `PermissionError` on TEMP creation — an
+  environment artifact, not a code regression.
+- This clone contains **no V12 implementation or tests** (only the five V12
+  OpenSpec documents below). Implementation, tests, and both authoritative
+  output roots (`formal_ir_methods/`, `final_ir_method_selection/`) live in
+  the companion working repository, which carries newer history
+  (v31/v32-era changes). Do not execute V12 steps in this snapshot.
+- Housekeeping 2026-08-22: 23 root `pytest-cache-files-*` dirs plus
+  `tmpw7zl0atk/` are verified untracked but ACL-denied to non-elevated
+  sessions; deletion needs an elevated terminal (dirs left intact).
+- `origin/formal-ir-accumulation` is fully merged into `main`; its deletion
+  awaits an unrestricted terminal (session git cannot reach the network).
+
+The historical task records below are preserved unchanged.
+
+---
+
+## Previous Task — Nonbinary V11 spatially coupled DE gate: PLAN FROZEN (2026-08-06)
 
 The new planning change is
 `openspec/changes/formal-nonbinary-ldpc-v11-sc-de-gate/`. Literature review,
