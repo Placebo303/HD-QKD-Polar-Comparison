@@ -154,33 +154,50 @@ Git/worktree 纪律:
 
 ### A4 — Correction Verifier 实现（coder-fast）
 
-- [ ] A4.1 实现 CLI（design §2–§8）：stage-0 七绑定校验（存在性 + 字面值 + SHA256）；
+- [x] A4.1 实现 CLI（design §2–§8）：stage-0 七绑定校验（存在性 + 字面值 + SHA256）；
   子命令 d0/d1/d2/d3/all + `--runner` 注入；collision STOP（run root 已存在即 exit 非 0）；
   manifest 先冻后算（MC 参数/bin 边界/lifecycle_note 四标签/no_de_run/no_decoder_run/
   old_roots_read_only/git HEAD/implementation identity）；谓词引擎 P-i..P-iii（mismatch 如实记录）；
   B2 sentinel 排除；D1 六指标 + 旧值对照列 + naming_rules；D2 双 law 分开输出；
   D3 问题/层率表/not_fixed_packet_de；机械终态选择（优先级 + 13 条件 checklist）；
   区分 exit code（ok/collision/blocked/evidence-inconsistent/write-guard）。
-  测试套件骨架同批创建。— Evidence: `py_compile` exit 0 + 两文件清单 +
-  静态 grep 无 DE/decoder/ttbin/graph-builder 标记。
+  测试套件骨架同批创建。
+  **偏差记录**：「测试套件骨架同批创建」条款经主控指令调整为 A5 任务执行（偏差已记录，
+  本任务仅交付恰一个实现文件）。
+  — Evidence: `python -m py_compile comparison_bench/src/comparison_bench/cli/
+  run_nonbinary_v32_operating_point_audit_correction.py` exit 0；文件清单 = 恰一文件
+  （CLI 本体，1301 行）；静态 grep：DE 采样调用 0 / decoder 入口 0（"decode" 字符串命中
+  均为冻结 schema 字段名 terminal_decoder_status、l1_decoder_status_verbatim、禁令七串
+  常量与 docstring 措辞）/ ttbin 0 / graph-builder 标记 0；import 清单 = argparse/hashlib/
+  importlib/json/math/subprocess(git HEAD)/sys/datetime/pathlib + numpy（stdlib+numpy 白名单）；
+  另附合成 fixture + fake runner 端到端 smoke（temp scratch，非真实输入、非 canonical root）：
+  `all` exit 0 六件产出、D0 谓词全过且 B2 sentinel=60 单列、D1 analytic q_mass>0 →
+  full_expected_nll="infinity"、D2 Law-A 交叉核对 diff<1e-9 且 Law-B gap =
+  -2268.7/-2413.3/-2418.4 bits（与冻结值 -2269/-2413/-2418 一致）、D3 question 逐字、
+  collision replay exit 2、C13 pending ⇒ 终态 audit_verifier_blocked（决策时点诚实值）。
 - **Done when**: CLI 编译通过、静态检查干净；尚未对真实输入执行。
 
 ### A5 — Tests T0/T1（coder-fast）
 
-- [ ] A5.1 按 design §11 完成 T0（结构/tiny math/infinity 语义/rates 断言/import 白名单/
+- [x] A5.1 按 design §11 完成 T0（结构/tiny math/infinity 语义/rates 断言/import 白名单/
   same-root 拒绝）与 ≥12 项 T1（分类/sentinel/命名/双 law/question wording/overwrite guard/
   禁令七串扫描等）；fresh `workspace/<fresh-id>/` root + `pytest -p no:cacheprovider`。
-  — Evidence: pytest 计数行（T0 N passed；T1 N passed）。
-- **Done when**: T0+T1 全过；canonical 路径零改动（scoped `git status` 核对）。
+  — Evidence: pytest 计数行（T0 8 passed；T1 16 passed）—
+  `python -m pytest comparison_bench/tests/test_nonbinary_v32_operating_point_audit_correction.py
+  -k t0/-k t1 -q -p no:cacheprovider --basetemp workspace/opaudit_corr_t0_a1b2c3/t{0,1}`；
+  scoped git status 核对零 canonical 路径改动（2026-08-23）。
+- **Done when**: T0+T1 全过；canonical 路径零改动（scoped `git status` 核对）。 ✓
 
 ### A6 — Fake T2 + Strict Replay（coder-fast）
 
-- [ ] A6.1 fake fixture 完整 correction 流程（合成 per_block + tiny channel_counts，
+- [x] A6.1 fake fixture 完整 correction 流程（合成 per_block + tiny channel_counts，
   显式 fake runner，绝不触生产 runner）；独立 recount 复现 headline 数字；tamper 系列
   （terminal/summary/count drift/source/rate/law substitution/deep semantic）；strict replay
-  （同输入重跑输出一致，时间戳字段白名单除外）；collision 端到端。— Evidence: pytest 计数行（T2 N passed）。
+  （同输入重跑输出一致，时间戳字段白名单除外）；collision 端到端。— Evidence: pytest 计数行
+  （T2 13 passed；全套件单文件 37 passed in 14.01s）— `-k t2 --basetemp
+  workspace/opaudit_corr_t0_a1b2c3/t2`（2026-08-23）。
 - **Done when**: T2 PASS；delta-only 报告交付 main，请求 A7 授权。
-  **强制停止点：main 未授权前不得对真实输入执行。**
+  **强制停止点：main 未授权前不得对真实输入执行。** ✓
 
 ### A7 — 真实输入只读 Correction 执行一次（coder-fast，执行身份）
 
