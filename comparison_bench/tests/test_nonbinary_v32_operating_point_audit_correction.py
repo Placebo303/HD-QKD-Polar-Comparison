@@ -430,28 +430,38 @@ def test_t0_q_joint_closed_form_toy():
     assert np.array_equal(q0, np.eye(corr.Q_SYMBOLS) / corr.Q_SYMBOLS)  # ser=0 hand case
 
 
-def test_t0_uniform_p_toy_exact_analytic_and_infinity_flag(tmp_path):
-    """Toy law with NO positive mass on P-zero cells: analytic values are exact.
+def test_t0_uniform_p_toy_zero_support_miss_finite_full_nll(tmp_path):
+    """Fix task B, both directions of the iff semantics.
 
-    Uniform P => P(u1|b)=P(u2|b,u1)=1/32 everywhere => every layer NLL is
-    exactly 5 bits, truncated common-support CE = -sum(Q*log2(1/q^2)) =
-    20 bits exactly (joint entropy of a uniform 1024x1024 table), zero hits.
-    The static ``"infinity"`` labeling is then WRONG for this input, and the
-    verifier must flag it honestly via signature_mismatch (never silently OK).
+    Direction 1 — uniform P has NO P-zero cells, so q_mass_on_p_zero_cells
+    == 0 and the full expected NLL MUST be the JSON-safe finite analytic
+    value (uniform 1024x1024 table => E_Q[-log2 P] = log2(1048576) = 20 bits
+    exactly); it must NEVER be the string "infinity".
+
+    Direction 2 — a sparse diagonal+/-1 toy leaves most cells at P=0 while
+    Q covers everything, so q_mass_on_p_zero_cells > 0 and the full expected
+    NLL MUST be exactly the string "infinity".
+
+    After fix B the implementation derives both from the same condition, so
+    ``signature_mismatch`` (the old honest-mislabel alarm) stays False in
+    both directions.
     """
     q = corr.Q_SYMBOLS
+    out = tmp_path / "out"
+    out.mkdir()
+
+    # ---- direction 1: zero support miss -> finite full expected NLL ----
     npz = tmp_path / "uniform.npz"
     np.savez(npz, **{f"{SIDS[l]}_N_ab_train_N_ab_train": np.full((q, q), 1024.0)
                      for l in LABELS})
-    out = tmp_path / "out"
-    out.mkdir()
     res = corr.run_d1(out, {"v25_channel_counts": npz}, _frozen())
     assert set(res["per_source"]) == set(LABELS)
     for lbl, v in res["per_source"].items():
         sm = v["support_miss"]
         assert sm["q_mass_on_p_zero_cells_analytic"] == 0.0
-        assert v["full_expected_nll"] == "infinity"
-        assert bool(v["full_expected_nll_derivation"])
+        assert v["full_expected_nll"] != "infinity"
+        assert v["full_expected_nll"] == pytest.approx(20.0, abs=1e-9)
+        assert "no mass on P-zero cells" in v["full_expected_nll_derivation"]
         ce = v["truncated_common_support_cross_entropy"]
         assert ce["value_bits"] == pytest.approx(20.0, abs=1e-9)
         assert ce["common_support_cell_count"] == q * q
@@ -461,8 +471,21 @@ def test_t0_uniform_p_toy_exact_analytic_and_infinity_flag(tmp_path):
             assert val == pytest.approx(10.0, abs=1e-12)
         assert sm["zero_hit_count_mc"] == 0 and sm["zero_hit_frequency_mc"] == 0.0
         assert cm["mc_seed"] == 20260822
-    # no-positive-mass case must NOT be accepted as infinity silently:
-    assert res["signature_mismatch"] is True
+    assert res["signature_mismatch"] is False
+
+    # ---- direction 2: positive support miss -> "infinity" ----
+    npz_pos = tmp_path / "sparse.npz"
+    np.savez(npz_pos, **{f"{SIDS[l]}_N_ab_train_N_ab_train": make_counts(l)
+                         for l in LABELS})
+    out2 = tmp_path / "out2"
+    out2.mkdir()
+    res2 = corr.run_d1(out2, {"v25_channel_counts": npz_pos}, _frozen())
+    for lbl, v in res2["per_source"].items():
+        sm = v["support_miss"]
+        assert sm["q_mass_on_p_zero_cells_analytic"] > 0
+        assert v["full_expected_nll"] == "infinity"
+        assert bool(v["full_expected_nll_derivation"])
+    assert res2["signature_mismatch"] is False
 
 
 def test_t0_same_input_output_root_rejected(tmp_path):
@@ -479,7 +502,7 @@ def test_t0_same_input_output_root_rejected(tmp_path):
 
 def test_t0_static_import_whitelist_no_forbidden_calls():
     cli_src = Path(corr.__file__).read_text(encoding="utf-8")
-    allowed = {"argparse", "hashlib", "importlib", "json", "math", "subprocess",
+    allowed = {"argparse", "hashlib", "importlib", "json", "math", "os", "subprocess",
                "sys", "datetime", "pathlib", "numpy", "__future__"}
     tree = ast.parse(cli_src)
     imports, calls = set(), []
@@ -752,7 +775,27 @@ def test_t1_manifest_missing_rejected(tmp_path):
     (lambda m: m["frozen"].__setitem__("margin_method", "normal approximation"),
      corr.EXIT_MANIFEST),
     (lambda m: m["bindings"][0].__setitem__("sha256", "0" * 64), corr.EXIT_BLOCKED),
-], ids=["thresholds", "mc_seed", "bin_edge", "margin_method", "binding_sha"])
+    # ---- fix task D: field-level manifest guards ----
+    (lambda m: m.__setitem__("lifecycle_note", ["drifted"]), corr.EXIT_MANIFEST),
+    (lambda m: m.__setitem__("no_de_run", False), corr.EXIT_MANIFEST),
+    (lambda m: m.__setitem__("no_decoder_run", False), corr.EXIT_MANIFEST),
+    (lambda m: m.__setitem__("old_roots_read_only", False), corr.EXIT_MANIFEST),
+    (lambda m: m.__setitem__("schema", "nbldpc_v32_operating_point_audit_correction_manifest_v0"),
+     corr.EXIT_MANIFEST),
+    (lambda m: m["implementation_identity"].__setitem__("sha256", "zz"), corr.EXIT_MANIFEST),
+    (lambda m: m.__setitem__("output_files_expected_eight", ["a.json"]), corr.EXIT_MANIFEST),
+    # frozen-field tamper WITH a correctly recomputed digest must still be
+    # rejected by the frozen-block content equality check:
+    (lambda m: (m["frozen"]["thresholds"].__setitem__("expected_nll_ratio_K", 9.9),
+                m.__setitem__("freeze_digest",
+                              __import__("hashlib").sha256(json.dumps(
+                                  m["frozen"], sort_keys=True, separators=(",", ":"),
+                                  ensure_ascii=False).encode("utf-8")).hexdigest())),
+     corr.EXIT_MANIFEST),
+], ids=["thresholds", "mc_seed", "bin_edge", "margin_method", "binding_sha",
+        "lifecycle_note", "no_de_run", "no_decoder_run", "old_roots_read_only",
+        "schema", "implementation_identity", "expected_outputs",
+        "frozen_field_with_fixed_digest"])
 def test_t1_manifest_freeze_drift_rejected(tmp_path, mutate, want):
     root, rc = _flow(tmp_path)
     assert rc == corr.EXIT_OK
@@ -779,6 +822,76 @@ def test_t1_out_of_root_write_rejection(tmp_path):
             corr._safe_path(root, bad)
         assert ei.value.code == corr.EXIT_WRITE
     assert corr._safe_path(root, "fine.json").name == "fine.json"
+
+
+def test_t1_run_root_guardrail_rejects_and_allows():
+    """Fix task C: minimal explicit path guardrail (pure path logic; the
+    validation runs before any filesystem IO, so pointing it at real protected
+    roots touches nothing)."""
+    def w(rel: str) -> Path:
+        return corr.REPO_ROOT / rel
+
+    diag = "comparison_bench/outputs_comparison/nonbinary_diagnostics"
+    protected_self = [
+        f"{diag}/nbldpc_v32_finite_de_bridge/run_01",
+        f"{diag}/nbldpc_v32_operating_point_audit/run_01",
+        f"{diag}/nbldpc_v31_20260820/run_01",
+        f"{diag}/nbldpc_v31_closeout_audit_v2/run_01",
+    ]
+    for rel in protected_self:
+        with pytest.raises(corr.AuditStop) as ei:
+            corr.validate_run_root(w(rel), fake_runner=True)
+        assert ei.value.code == corr.EXIT_WRITE
+
+    # subpath INSIDE a protected root is equally rejected
+    with pytest.raises(corr.AuditStop) as ei:
+        corr.validate_run_root(w(f"{diag}/nbldpc_v32_finite_de_bridge/run_01/sub/dir"),
+                               fake_runner=True)
+    assert ei.value.code == corr.EXIT_WRITE
+
+    # repo root / results root / outputs_comparison root / diagnostics root:
+    # all too broad
+    for bad in (corr.REPO_ROOT,
+                w("results"),
+                w("comparison_bench/outputs_comparison"),
+                w(diag)):
+        with pytest.raises(corr.AuditStop) as ei:
+            corr.validate_run_root(bad, fake_runner=True)
+        assert ei.value.code == corr.EXIT_WRITE
+
+    # workspace root itself is too broad even for a fake runner
+    with pytest.raises(corr.AuditStop) as ei:
+        corr.validate_run_root(w("workspace"), fake_runner=True)
+    assert ei.value.code == corr.EXIT_WRITE
+
+    # without a fake runner, even a fresh workspace test root is rejected
+    fresh = w("workspace/guardrail_probe_root")
+    with pytest.raises(corr.AuditStop) as ei:
+        corr.validate_run_root(fresh, fake_runner=False)
+    assert ei.value.code == corr.EXIT_WRITE
+
+    # allowed: the frozen additive v2 default root (validation only; collision
+    # handling stays downstream)
+    corr.validate_run_root(corr.DEFAULT_RUN_ROOT, fake_runner=False)
+
+    # allowed: explicit fake runner + fresh workspace test root
+    corr.validate_run_root(fresh, fake_runner=True)
+
+
+def test_t1_manifest_time_binding_head_drift_accepted(tmp_path):
+    """Fix task D: git_head/implementation identity bind the EXECUTION-time
+    commit/file.  Drifting the recorded HEAD to another well-formed hash must
+    NOT be refused at manifest verification (no current-HEAD equality check).
+    Observable: verification passes and the flow proceeds to the stage-output
+    collision (d1 already exists after the initial all-flow)."""
+    root, rc = _flow(tmp_path)
+    assert rc == corr.EXIT_OK
+    mp = root / "audit_manifest.json"
+    manifest = _load(mp)
+    assert manifest["git_head"] != "a" * 40
+    manifest["git_head"] = "a" * 40          # well-formed but different
+    mp.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+    assert _sub("d1", root) == corr.EXIT_COLLISION  # got past verify_manifest
 
 
 # --------------------------------------------------------------------------- #

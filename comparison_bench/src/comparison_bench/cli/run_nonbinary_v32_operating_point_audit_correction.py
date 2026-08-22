@@ -35,6 +35,7 @@ import hashlib
 import importlib
 import json
 import math
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -172,8 +173,9 @@ OLD_AUDIT_REFERENCE = {
 NAMING_RULES = {
     "rule": "three distinct quantities with non-interchangeable names (C4)",
     "full_expected_nll": (
-        'complete E_Q[-log2 P]; its only legal value here is the string '
-        '"infinity" because Q places positive mass on P-zero cells'
+        'complete E_Q[-log2 P]; the string "infinity" iff q_mass_on_p_zero_cells '
+        '> 0 (positive Q mass sits on cells with log2(P) = -infinity); '
+        'otherwise the JSON-safe finite analytic value'
     ),
     "conditional_finite_support_mean": (
         "seeded MC mean over non-hit samples only (posterior cell nonzero); "
@@ -189,6 +191,13 @@ FULL_EXPECTED_NLL_DERIVATION = (
     "E_Q[-log2 P] = infinity because positive Q mass (q_mass_on_p_zero_cells "
     "> 0) sits on cells where log2(P) = log2(0) = -infinity, so the sum "
     "contains mass * (-infinity) summed negatively to -infinity."
+)
+ZERO_MASS_FULL_NLL_DERIVATION = (
+    "q_mass_on_p_zero_cells == 0: Q places no mass on P-zero cells, so "
+    "E_Q[-log2 P] is finite and equals its analytic value over the common "
+    "support (reported as a JSON-safe number; minimal representation chosen "
+    "in the verifier-fix handoff because the frozen schema specifies no "
+    "zero-mass literal)"
 )
 Q_B1_INFEASIBLE_CONCLUSION = (
     "information-theoretically infeasible at current allocation"
@@ -448,11 +457,15 @@ def stage0_bindings(paths: dict[str, Path]) -> tuple[list[dict], dict]:
 # --------------------------------------------------------------------------- #
 
 MANIFEST_NAME = "audit_manifest.json"
+MANIFEST_SCHEMA = "nbldpc_v32_operating_point_audit_correction_manifest_v1"
 CLI_PATH = Path(__file__).resolve()
 
 
-def freeze_manifest(run_root: Path, binding_rows: list[dict], extras: dict) -> dict:
-    frozen = {
+def _expected_frozen() -> dict:
+    """The frozen block, rebuilt from module constants (fix task D): lets
+    verify_manifest catch a frozen-field tamper even when the tamperer also
+    recomputes freeze_digest."""
+    return {
         "thresholds": THRESHOLDS,
         "mc_plan": MC_PLAN,
         "histogram_bins": {
@@ -462,8 +475,12 @@ def freeze_manifest(run_root: Path, binding_rows: list[dict], extras: dict) -> d
         "margin_method": MARGIN_METHOD,
         "h_cross_check_tol_bits": H_CROSS_CHECK_TOL_BITS,
     }
+
+
+def freeze_manifest(run_root: Path, binding_rows: list[dict], extras: dict) -> dict:
+    frozen = _expected_frozen()
     manifest = {
-        "schema": "nbldpc_v32_operating_point_audit_correction_manifest_v1",
+        "schema": MANIFEST_SCHEMA,
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "execution_order": ["manifest_freeze", "d0", "d1", "d2", "d3",
                             "corrected_branch_decision"],
@@ -489,8 +506,38 @@ def verify_manifest(run_root: Path, runner) -> dict:
     if not mpath.is_file():
         raise AuditStop(EXIT_MANIFEST, f"frozen manifest missing: {mpath} (run `all` first)")
     manifest = load_json(mpath)
+
+    # Fix task D: field-level guards on the frozen acceptance semantics.
+    if manifest.get("schema") != MANIFEST_SCHEMA:
+        raise AuditStop(EXIT_MANIFEST,
+                        f"manifest schema drift: {manifest.get('schema')!r}")
+    if manifest.get("lifecycle_note") != list(LIFECYCLE_NOTE):
+        raise AuditStop(EXIT_MANIFEST, "manifest lifecycle_note tampered")
+    for flag in ("no_de_run", "no_decoder_run", "old_roots_read_only"):
+        if manifest.get(flag) is not True:
+            raise AuditStop(EXIT_MANIFEST, f"manifest flag tampered: {flag} is not true")
+    ident = manifest.get("implementation_identity")
+    if not (isinstance(ident, dict)
+            and isinstance(ident.get("path"), str) and ident["path"]
+            and isinstance(ident.get("sha256"), str)
+            and len(ident["sha256"]) == 64):
+        raise AuditStop(EXIT_MANIFEST,
+                        "manifest implementation_identity missing/malformed")
+    # Time binding: implementation_identity/git_head bind the EXECUTION-time
+    # commit and CLI file.  They are recorded verbatim above but are NEVER
+    # compared against the CURRENT HEAD or the current CLI file, both of which
+    # legitimately move on afterwards (fix task D).
+    gh = manifest.get("git_head")
+    if not (isinstance(gh, str) and len(gh) == 40):
+        raise AuditStop(EXIT_MANIFEST, "manifest git_head missing/malformed")
+    if manifest.get("output_files_expected_eight") != OUTPUT_FILES_EIGHT:
+        raise AuditStop(EXIT_MANIFEST, "manifest expected-output file list tampered")
+
     frozen = manifest.get("frozen")
-    if not isinstance(frozen, dict) or manifest.get("freeze_digest") != sha256_canonical(frozen):
+    if frozen != _expected_frozen():
+        raise AuditStop(EXIT_MANIFEST,
+                        "manifest frozen-block content drift vs module constants")
+    if manifest.get("freeze_digest") != sha256_canonical(frozen):
         raise AuditStop(EXIT_MANIFEST,
                         "manifest freeze digest mismatch: thresholds/MC plan/bins/"
                         "margin method drifted")
@@ -844,6 +891,17 @@ def run_d1(run_root: Path, paths: dict[str, Path], frozen: dict) -> dict:
         # Truncated common-support cross entropy (C4-named quantity).
         h_qp_truncated = float(-(Q_joint[mask_p] * np.log2(P[mask_p])).sum())
 
+        # Fix B (blocking): "infinity" is legal ONLY when positive Q mass sits
+        # on P-zero cells; otherwise E_Q[-log2 P] is finite and equals the
+        # analytic expectation over the common support exactly (no Q mass
+        # outside mask_p), reported as the JSON-safe number.
+        if q_on_p_zero > 0:
+            full_nll_value = "infinity"
+            nll_derivation = FULL_EXPECTED_NLL_DERIVATION
+        else:
+            full_nll_value = h_qp_truncated
+            nll_derivation = ZERO_MASS_FULL_NLL_DERIVATION
+
         # Layer NLL under the empirical-P posteriors (bits/symbol per symbol pair).
         colP = P.sum(axis=0)
         pab_P = np.divide(P, colP, out=np.zeros_like(P), where=colP > 0)
@@ -877,8 +935,8 @@ def run_d1(run_root: Path, paths: dict[str, Path], frozen: dict) -> dict:
                 "zero_hit_count_mc": zero_hit_count,
                 "zero_hit_frequency_mc": zero_hit_count / mc["n_samples"],
             },
-            "full_expected_nll": "infinity",
-            "full_expected_nll_derivation": FULL_EXPECTED_NLL_DERIVATION,
+            "full_expected_nll": full_nll_value,
+            "full_expected_nll_derivation": nll_derivation,
             "conditional_finite_support_mean": {
                 "mean_bits_per_symbol": float(finite.mean()) if finite.size else None,
                 "quantiles_bits_per_symbol": quantiles,
@@ -1143,9 +1201,9 @@ def write_corrected_branch_decision(run_root: Path, runner, d0r: dict, d1r: dict
                     and v["support_miss"]["q_mass_on_p_zero_cells_analytic"] >= 0
                     for v in d1r["per_source"].values())),
         "C05_full_nll_marked_infinity_with_derivation": all(
-            v["full_expected_nll"] == "infinity"
-            and (v["support_miss"]["q_mass_on_p_zero_cells_analytic"] > 0)
-            and bool(v["full_expected_nll_derivation"])
+            bool(v["full_expected_nll_derivation"])
+            and ((v["support_miss"]["q_mass_on_p_zero_cells_analytic"] > 0)
+                 == (v["full_expected_nll"] == "infinity"))
             for v in d1r["per_source"].values()),
         "C06_conditional_truncated_naming": (
             d1r["naming_rules"] == NAMING_RULES
@@ -1244,6 +1302,60 @@ STAGE_OUTPUT_NAMES = {
 }
 
 
+# --------------------------------------------------------------------------- #
+# Run-root guardrail (fix task C): minimal explicit allow/deny path checks.
+# No general security framework — a fixed deny list plus one allow rule.
+# --------------------------------------------------------------------------- #
+
+_PROTECTED_ROOTS_REL = [
+    V32_DIR,   # nbldpc_v32_finite_de_bridge/run_01
+    OLD_AUDIT_DIR,
+    V25_DIR,
+    V26_DIR,
+    V31_DIR,
+    f"{DIAG}/nbldpc_v31_closeout_audit_v2/run_01",
+    f"{DIAG}/nbldpc_v31_closeout_audit_v2/run_02",
+    "openspec/changes/archive",
+]
+_BROAD_ROOTS_REL = ["results", "comparison_bench/outputs_comparison", DIAG]
+
+
+def _norm(p: Path) -> str:
+    return os.path.normcase(str(Path(p).resolve()))
+
+
+def validate_run_root(run_root: Path, fake_runner: bool) -> None:
+    """Allow exactly: the frozen additive v2 run_01 root, or -- only with an
+    explicit fake runner -- a directory under workspace/.  Reject the repo
+    root, results root, diagnostics root and other too-broad paths, and every
+    protected old root itself or any subpath inside it."""
+    rr = _norm(run_root)
+    if rr == _norm(DEFAULT_RUN_ROOT):
+        return
+    ws = _norm(REPO_ROOT / "workspace")
+    if fake_runner and rr.startswith(ws + os.sep):
+        return
+
+    repo = _norm(REPO_ROOT)
+    if rr == repo:
+        raise AuditStop(EXIT_WRITE, "run root rejected: repository root itself")
+    for broad in _BROAD_ROOTS_REL:
+        br = _norm(REPO_ROOT / broad)
+        if rr == br:
+            raise AuditStop(EXIT_WRITE, f"run root rejected: too-broad root {broad}")
+    for prot in _PROTECTED_ROOTS_REL:
+        pr = _norm(REPO_ROOT / prot)
+        if rr == pr:
+            raise AuditStop(EXIT_WRITE, f"run root rejected: protected old root {prot}")
+        if rr.startswith(pr + os.sep):
+            raise AuditStop(EXIT_WRITE,
+                            f"run root rejected: subpath inside protected root {prot}")
+    raise AuditStop(
+        EXIT_WRITE,
+        "run root rejected: only the frozen additive v2 run_01 root, or a "
+        "workspace test root with an explicit fake runner, may be used")
+
+
 def cli_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="run_nonbinary_v32_operating_point_audit_correction.py",
@@ -1258,6 +1370,7 @@ def cli_main(argv: list[str] | None = None) -> int:
 
     run_root = Path(args.run_root)
     try:
+        validate_run_root(run_root, fake_runner=args.runner is not None)
         if args.subcommand == "all":
             if run_root.exists():  # STOP: collision — no overwrite, no automatic run_02
                 raise AuditStop(EXIT_COLLISION,

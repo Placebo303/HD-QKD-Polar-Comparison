@@ -268,6 +268,42 @@ Git/worktree 纪律:
 
 ---
 
+## Candidate Fix 2026-08-23 — verifier semantic guards（candidate fix，不得视为 ACCEPT）
+
+主控裁决（2026-08-23）：科学候选证据可接受，变更整体暂 REJECT；唯一阻塞 =
+design §11 / spec AC-D1 的 infinity 语义未按 iff 条件实现。本轮修复（任务 B/C/D）
+仅改动 CLI/tests/tasks.md 三文件；旧 v2 run_01 八件证据字节不变（pre/post SHA256 全同）。
+
+- [x] F-B1 infinity 语义修正：`run_d1` 改为条件式——q_mass_on_p_zero_cells > 0 ⇒
+  `full_expected_nll="infinity"`（保留推导行）；== 0 ⇒ 输出 JSON-safe 有限解析值
+  （数值上等于共同支撑期望，零质量时与 truncated CE 恒等），附
+  `ZERO_MASS_FULL_NLL_DERIVATION`。`NAMING_RULES.full_expected_nll` 同步改为 iff
+  条件语义；C05 checklist 改为 iff 一致性判定形式。— Evidence: T0 uniform-P 玩具
+  两方向断言（零质量 ⇒ 有限 20.0 且 ≠ "infinity"；正质量 ⇒ "infinity"）；全量 47 passed。
+- [x] F-C1 run-root 护栏：`validate_run_root()` 最小显式路径检查——拒绝 repo root、
+  results 根、diagnostics 根、outputs_comparison 根等过宽路径，五个 protected old root
+  本身及其任意子路径、archive；仅允许冻结 v2 默认根，或显式 fake runner 时 workspace
+  下的测试根（workspace 根本身仍拒）。cli_main 两分支入口接线。— Evidence: T1
+  guardrail 测试（protected self/subpath/broad/workspace-root/non-fake 全拒 +
+  default/fake-fresh 允许）。
+- [x] F-D1 verify_manifest 字段级强化：schema、lifecycle_note 四标签、no_de_run /
+  no_decoder_run / old_roots_read_only 必须为 true、implementation_identity 结构完整、
+  output_files_expected_eight 清单核对、frozen 块内容与模块常量相等（防"改值+重算
+  digest"绕过）、freeze_digest 原有检查保留。Git HEAD 与 implementation identity 遵守
+  时间绑定：仅做格式/存在性校验，绝不与当前 HEAD 或当前 CLI 文件比对。— Evidence:
+  tamper 参数化新增 8 例全过 + time-binding 测试（HEAD 漂移为另一合法哈希后流程
+  继续至 stage collision，证明无 current-HEAD 等值检查）。
+- [x] F-T 全量验证：T0=8 / T1=26 / T2=13 / 全量 **47 passed**（fresh basetemp
+  workspace/v32_correction_fix_20260822a/{t0,t1,t2,all}）；py_compile exit 0；
+  旧八件证据 pre/post SHA256 逐字节一致；nbldpc_v32_operating_point_audit_v2/ 下
+  无新增目录。
+- [ ] F-G1 Codex 主控复核本 candidate fix（保持未勾选直到审查）。
+
+状态：candidate fix 完成 —— 等待 Codex 主控 ACCEPT/REJECT；未运行 DE，未运行 decoder，
+未启动 successor，未触碰任何旧证据。
+
+---
+
 ## Git 提交分离（三条；禁止 amend/rebase 隐藏顺序）
 
 1. **Commit 1** `spec(nbldpc-v32-audit-correction): freeze correction OpenSpec` —
