@@ -1,3 +1,32 @@
+## 2026-08-23 V32 finite-DE bridge + operating-point audit correction: ACCEPTED closeout
+
+- Observed [repo-observed, R2-verified]: V32 bridge raw record valid (B0 6/6;
+  B1–B4 0/60 each; B5 import ok; exact-once, no resume, 10047 s). Correction
+  v2 evidence (`.../nbldpc_v32_operating_point_audit_v2/run_01/`, eight files):
+  q_mass_on_p_zero_cells = 0.2394680/0.2541265/0.2553477 (1M/1p5M/2M);
+  full_expected_nll = "infinity" ×3; conditional_finite_support_mean =
+  0.397–0.431 bits/symbol; truncated_common_support_cross_entropy =
+  7.77–7.91 bits. D0: B1 divergence observation; B2 l2_errors_final=1024 is a
+  not_run sentinel; B3/B4 improve-but-no-syndrome (~250→~179). Dual law:
+  empirical P nominal budget feasible only (pure gaps +180–187 bits); original
+  Q_B1 information-theoretically infeasible (required ≈3269–3458 bits vs pure
+  syndrome 1000–1040 bits).
+- Rejected interpretation [decision]: B1 divergence does NOT prove fixed QC
+  graph / message-passing / V28R decoder failure — B1's generator law Q_B1 was
+  not matched to the V25 empirical posterior (positive mass on P-zero cells ⇒
+  full expected NLL infinite). The persisted bridge terminal
+  `finite_graph_decoder_mismatch` and the first operating-point audit
+  (`post_hoc_exploratory_only` lifecycle) are superseded for all attribution
+  claims; neither may be cited as an accepted root cause.
+- Next authorized boundary [decision]: the only next question is exact-V31-rate
+  empirical-P ensemble DE convergence (L1 0.984375 ×3; L2
+  0.8203125/0.814453125/0.8125) under F03/A02 — candidate change
+  `formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic`
+  exists as DRAFT_PENDING_FREEZE_REVIEW only; DE execution requires a frozen
+  OpenSpec plus explicit authorization. Fixed-graph/decoder/NB-Polar successor
+  selection undecided. No qualification/promotion; correction commit chain
+  59ba0236 → 0765d893 → 29a5dafe → 3110cb0e (verifier semantic guards ACCEPT).
+
 ## 2026-08-21 V31 closeout: `finite_graph_fail`
 
 - V31 deterministic finite-graph redesign gate executed and archived
