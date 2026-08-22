@@ -1,0 +1,305 @@
+{
+  "schema": "nbldpc_v32_operating_point_audit_correction_manifest_v1",
+  "created_utc": "2026-08-22T18:00:48.224401+00:00",
+  "execution_order": [
+    "manifest_freeze",
+    "d0",
+    "d1",
+    "d2",
+    "d3",
+    "corrected_branch_decision"
+  ],
+  "bindings": [
+    {
+      "binding": "oldaudit_audit_manifest_json",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\audit_manifest.json",
+      "size_bytes": 12744,
+      "sha256": "9d219598205d2a284846aca359595f0fe27f85eaa40461730107ba034bb3ddf6"
+    },
+    {
+      "binding": "oldaudit_d0_signature_json",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\d0_signature.json",
+      "size_bytes": 90998,
+      "sha256": "074107ed846b4027d563037fb38e8818125f9055a571217f19451a59a61e19b4"
+    },
+    {
+      "binding": "oldaudit_d0_signature_md",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\d0_signature.md",
+      "size_bytes": 1203,
+      "sha256": "48291046eaff55d0ba8794046e2e7cab40f780e739cd760335acfe71df7446c9"
+    },
+    {
+      "binding": "oldaudit_d1_consistency_json",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\d1_consistency.json",
+      "size_bytes": 10460,
+      "sha256": "a53ceeb79d972fdd1021d05d14c9424d3a454eb99be562166c848d6a901ba905"
+    },
+    {
+      "binding": "oldaudit_d1_consistency_md",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\d1_consistency.md",
+      "size_bytes": 573,
+      "sha256": "601dc2a73537f568c03e67f865e03210d14f4c805c5f09199da1aa40a222d13a"
+    },
+    {
+      "binding": "oldaudit_d2_feasibility_json",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\d2_feasibility.json",
+      "size_bytes": 8159,
+      "sha256": "82350d11b8ea0149e7bab55e3a8deb0f4cca2d8c04a14e1b2e856ae9b06e026e"
+    },
+    {
+      "binding": "oldaudit_d2_feasibility_md",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\d2_feasibility.md",
+      "size_bytes": 668,
+      "sha256": "fab2240c3c9de4d787557f81a3b87c765b017c97214878a03f17516837537e23"
+    },
+    {
+      "binding": "oldaudit_d3_v26_evidence_json",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\d3_v26_evidence.json",
+      "size_bytes": 13159,
+      "sha256": "87c899ec8854cd08aa5afcf64a659d38ed9bd2d6d0ed5d96e79256fbbf0a3b71"
+    },
+    {
+      "binding": "oldaudit_d3_v26_evidence_md",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\d3_v26_evidence.md",
+      "size_bytes": 771,
+      "sha256": "c235ec0e1accccc8b459885d3f74e76e86e2dead5c47c5fd21d6f3f96474f2ca"
+    },
+    {
+      "binding": "oldaudit_final_branch_decision",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_operating_point_audit\\run_01\\final_branch_decision.json",
+      "size_bytes": 1190,
+      "sha256": "4b049ce795e9f4cb9e33465b015d78beb4a9df6f64ca939bbcfc2cf944fcc920"
+    },
+    {
+      "binding": "v25_channel_counts",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+      "size_bytes": 25166822,
+      "sha256": "e0360203b8003c821d3ee543bdaf712bd853b0ea712055b936ca37f478ddd5b2"
+    },
+    {
+      "binding": "v25_channel_summary",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_summary.json",
+      "size_bytes": 12094,
+      "sha256": "e38ae524e9f07a702853d1c293a571d0696ef362d7a9a18a08731ce97f6a4b1d"
+    },
+    {
+      "binding": "v25_split_manifest",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\split_manifest.json",
+      "size_bytes": 849,
+      "sha256": "4c08927c1a8df1be7b989465fa9f1f8a66680d560c913437c34026e9cc0cc468"
+    },
+    {
+      "binding": "v26_RUN_MANIFEST",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\RUN_MANIFEST.json",
+      "size_bytes": 1342,
+      "sha256": "604084e68cec0937ae835e27a850f892e0f27e72c258c1f5fe66b5d95589472f"
+    },
+    {
+      "binding": "v26_confirmation_results",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\confirmation_results.json",
+      "size_bytes": 89569,
+      "sha256": "0c60277ccfc8e64bee353edcb95dbf120baea0ed8b6a6dd93000f58592edc57e"
+    },
+    {
+      "binding": "v26_gate",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\gate.json",
+      "size_bytes": 185,
+      "sha256": "a20cebded19c7f95b858c89e4af2397c1461f0565a7dee9224c7d5a6bd1b0c1d"
+    },
+    {
+      "binding": "v26_screen_results",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\screen_results.json",
+      "size_bytes": 110463,
+      "sha256": "d38fb4b4ffef631c3d2e4d8076041d360b6c7be359e59474650267ed76bc53d3"
+    },
+    {
+      "binding": "v31_RUN_MANIFEST",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v31_20260820\\run_01\\RUN_MANIFEST.json",
+      "size_bytes": 121602,
+      "sha256": "180eb106ca53145744934aac3d3d3bd946ad384a235c69261fc754e085106ca4"
+    },
+    {
+      "binding": "v31_m1_registry",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v31_20260820\\run_01\\m1_registry.json",
+      "size_bytes": 25138,
+      "sha256": "98f1f7306196d797405414a53898d2e90d5a8056635a273f05e720c22522111e"
+    },
+    {
+      "binding": "v31_matrix_audits",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v31_20260820\\run_01\\matrix_audits.json",
+      "size_bytes": 12558442,
+      "sha256": "50ab9db6ea875157e3488e671a399162fe02bb059a6da20b62e63a80377c3b37"
+    },
+    {
+      "binding": "v32_candidate_terminal",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\candidate_terminal.json",
+      "size_bytes": 479,
+      "sha256": "83f10d012c2151467a9e05a4b76e9c69d70ab878aa05b0f099b354f3ecbcdb28"
+    },
+    {
+      "binding": "v32_per_block",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\per_block.jsonl",
+      "size_bytes": 245306,
+      "sha256": "2cc00a5f4c3573343ef8be37739922d8fbeb9922ced95f1179ed6dba4625789c"
+    },
+    {
+      "binding": "v32_run_manifest",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\RUN_MANIFEST.json",
+      "size_bytes": 5979,
+      "sha256": "ad5302db960c74556002f7df7f8110685f489b66ce76848e6c3389f04019be38"
+    },
+    {
+      "binding": "v32_summary_B0",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B0.json",
+      "size_bytes": 487,
+      "sha256": "93a8a2f4c003fc3e70ae4600d121b3a350921ea7e9d67a1de9fd2edfeb216674"
+    },
+    {
+      "binding": "v32_summary_B1",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B1.json",
+      "size_bytes": 494,
+      "sha256": "d3a14f2b85d272683b87ca9d4bd16d523f16fc61cd02a72b339225269d96413f"
+    },
+    {
+      "binding": "v32_summary_B2",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B2.json",
+      "size_bytes": 504,
+      "sha256": "145c5964114f529bde646b5778c8d31601b7b0e0171e6162436e579be1037a7b"
+    },
+    {
+      "binding": "v32_summary_B3",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B3.json",
+      "size_bytes": 504,
+      "sha256": "13bc4077347ea50c2bc5f64c6ec27cb425df1f26690da85a02ce24303f56ff44"
+    },
+    {
+      "binding": "v32_summary_B4",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B4.json",
+      "size_bytes": 499,
+      "sha256": "1312182a5bc0d465c8d26de295b85acb4e23261406754b922f4e37eeebeeca1a"
+    },
+    {
+      "binding": "v32_summary_B5",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B5.json",
+      "size_bytes": 220,
+      "sha256": "1cf893f75b5be9493946aeb0f937a05ae3d7de84d5103f03b79b6ec7cad67208"
+    }
+  ],
+  "lifecycle_note": [
+    "post_hoc_exploratory_only",
+    "not_formal_pre_registered_gate",
+    "numerical_outputs_retained",
+    "scientific_terminal_superseded_pending_correction"
+  ],
+  "no_de_run": true,
+  "no_decoder_run": true,
+  "old_roots_read_only": true,
+  "git_head": "0765d8939b05275eb2f7a8fd8babc296ce910781",
+  "implementation_identity": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\src\\comparison_bench\\cli\\run_nonbinary_v32_operating_point_audit_correction.py",
+    "sha256": "2200646db310f8d34dc6db2fa28e7b0e2751c24a25e33546211a0cbd98ee0984"
+  },
+  "output_files_expected_eight": [
+    "audit_manifest.json",
+    "d0_failure_signature.json",
+    "d1_support_mismatch.json",
+    "d2_dual_law_feasibility.json",
+    "d3_next_question.json",
+    "corrected_branch_decision.json",
+    "readonly_review.json",
+    "operator_handoff.md"
+  ],
+  "persisted_terminal_distrust": {
+    "file": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\candidate_terminal.json",
+    "recorded_value": "finite_graph_decoder_mismatch",
+    "status": "read_as_distrusted_not_accepted",
+    "note": "persisted terminal of the superseded v1 chain; never used as a v2 conclusion and never emitted as one"
+  },
+  "frozen": {
+    "thresholds": {
+      "expected_nll_ratio_K": 3.0,
+      "expected_nll_ratio_derivation": "Anchored to log2(1024)=10 bits/symbol uniform-symmetry bound. The self-NLL baseline is the V31 reference conditional entropy sum H.L1+H.L2 <= 0.833 bits/symbol; K=3 places the catastrophic-mismatch line at ~2.50 bits/symbol, far above plug-in estimation noise (< 0.05 bits) and far below the 10 bits/symbol uniform bound.",
+      "support_miss_fraction_max": 0.01,
+      "support_miss_fraction_derivation": "With n=1024 symbols per frame, a per-symbol support-miss probability of 1% gives P(at least one miss per frame) = 1-(1-0.01)^1024 ~= 1.0: every long frame would hit a P-zero posterior cell. Anchored to the frozen n=1024 frame length."
+    },
+    "mc_plan": {
+      "seed": 20260822,
+      "n_samples": 100000,
+      "quantiles": [
+        0.05,
+        0.5,
+        0.95
+      ],
+      "zero_hit_policy": "samples whose true-symbol posterior cell has probability zero are counted separately; finite statistics are computed over non-hit samples only"
+    },
+    "histogram_bins": {
+      "error_delta_bin_edges": [
+        -1024,
+        -960,
+        -896,
+        -832,
+        -768,
+        -704,
+        -640,
+        -576,
+        -512,
+        -448,
+        -384,
+        -320,
+        -256,
+        -192,
+        -128,
+        -64,
+        0,
+        64,
+        128,
+        192,
+        256,
+        320,
+        384,
+        448,
+        512,
+        576,
+        640,
+        704,
+        768,
+        832,
+        896,
+        960,
+        1024
+      ],
+      "log2_edges_bits_per_symbol": [
+        9.5367431640625e-07,
+        1.9073486328125e-06,
+        3.814697265625e-06,
+        7.62939453125e-06,
+        1.52587890625e-05,
+        3.0517578125e-05,
+        6.103515625e-05,
+        0.0001220703125,
+        0.000244140625,
+        0.00048828125,
+        0.0009765625,
+        0.001953125,
+        0.00390625,
+        0.0078125,
+        0.015625,
+        0.03125,
+        0.0625,
+        0.125,
+        0.25,
+        0.5,
+        1.0,
+        2.0,
+        4.0,
+        8.0,
+        16.0,
+        32.0,
+        64.0
+      ]
+    },
+    "margin_method": "simple gap reporting at n=1024 only: gap_bits = leakage_bits - required_bits per layer and total, plus leakage/required ratio; no normal approximation and no other statistics",
+    "h_cross_check_tol_bits": 1e-06
+  },
+  "freeze_digest": "f62cfa71f2147b3f82d184ecdd087890a118f5248c0d1f2cd11873b261f41fc5"
+}

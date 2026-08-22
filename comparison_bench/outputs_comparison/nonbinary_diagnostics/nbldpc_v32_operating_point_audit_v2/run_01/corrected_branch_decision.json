@@ -1,0 +1,53 @@
+{
+  "schema": "nbldpc_v32_operating_point_audit_correction_branch_decision_v1",
+  "selected_branch": "audit_verifier_blocked",
+  "selection_priority_frozen": [
+    "audit_evidence_inconsistent",
+    "audit_verifier_blocked",
+    "audit_corrected_rate_aligned_de_required"
+  ],
+  "conditions_checklist_c01_c13": {
+    "C01_d0_full_recompute_and_predicates_recorded": true,
+    "C02_b2_sentinel_semantics": true,
+    "C03_b3b4_improve_but_no_syndrome_wording": true,
+    "C04_d1_analytic_q_mass_three_sources": true,
+    "C05_full_nll_marked_infinity_with_derivation": true,
+    "C06_conditional_truncated_naming": true,
+    "C07_d2_dual_laws_both_present_unmerged": true,
+    "C08_empirical_P_nominal_conclusion_scope": true,
+    "C09_q_b1_infeasible_conclusion": true,
+    "C10_d3_exact_rate_empirical_P_de_question": true,
+    "C11_no_de_or_decoder_invoked": true,
+    "C12_old_roots_byte_identical_runtime_window": true,
+    "C13_reviewer_artifact_blocking_false": false
+  },
+  "failed_conditions": [
+    "C13_reviewer_artifact_blocking_false"
+  ],
+  "selection_reasons": [
+    "pending/unmet condition(s): ['C13_reviewer_artifact_blocking_false']"
+  ],
+  "branch_inputs": {
+    "d0_signature_mismatch": false,
+    "d1_signature_mismatch": false,
+    "d1_full_expected_nll_all_sources": {
+      "1M": "infinity",
+      "1p5M": "infinity",
+      "2M": "infinity"
+    },
+    "d2_law_a_conclusion_scope": "nominal information budget feasible only — no finite-length/DE/fixed-graph/decoder feasibility claim",
+    "d2_law_b_conclusion": "information-theoretically infeasible at current allocation",
+    "d3_question_defined_not_executed": true
+  },
+  "candidate_only": true,
+  "main_acceptance_pending": true,
+  "review_note": "C13 is evaluated against readonly_review.json at decision time; the independent reviewer appends that file after this sequence, and the main adjudication (A9) owns the final candidate determination",
+  "generated_by_execution_order": [
+    "manifest_freeze",
+    "d0",
+    "d1",
+    "d2",
+    "d3",
+    "corrected_branch_decision"
+  ]
+}

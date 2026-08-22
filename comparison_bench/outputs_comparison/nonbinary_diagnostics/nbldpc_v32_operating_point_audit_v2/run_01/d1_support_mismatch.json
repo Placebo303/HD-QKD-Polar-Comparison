@@ -1,0 +1,155 @@
+{
+  "schema": "nbldpc_v32_operating_point_audit_correction_d1_v1",
+  "p_definition": "P = N_ab / total from channel_counts.npz key {sid}_N_ab_train_N_ab_train (verbatim on-disk key with duplicated suffix)",
+  "naming_rules": {
+    "rule": "three distinct quantities with non-interchangeable names (C4)",
+    "full_expected_nll": "complete E_Q[-log2 P]; its only legal value here is the string \"infinity\" because Q places positive mass on P-zero cells",
+    "conditional_finite_support_mean": "seeded MC mean over non-hit samples only (posterior cell nonzero); never call it full NLL",
+    "truncated_common_support_cross_entropy": "cross entropy summed over common-support cells only (P>0); never call it full cross entropy"
+  },
+  "mc_plan_frozen_in_manifest": {
+    "seed": 20260822,
+    "n_samples": 100000,
+    "quantiles": [
+      0.05,
+      0.5,
+      0.95
+    ],
+    "zero_hit_policy": "samples whose true-symbol posterior cell has probability zero are counted separately; finite statistics are computed over non-hit samples only"
+  },
+  "per_source": {
+    "1M": {
+      "source_id": "type2_1M_20260121_184040",
+      "raw_ser_quoted_from": "channel_summary.json per_source[type2_1M_20260121_184040].ser",
+      "raw_ser": 0.239779296875,
+      "q_definition": "Q_B1(b|a) = (1-raw_ser)*delta_{b=a} + raw_ser*Uniform{b != a mod 1024}; Q(a)=Uniform",
+      "q_total_mass": 1.0000000000000004,
+      "support_miss": {
+        "q_mass_on_p_zero_cells_analytic": 0.2394679998284094,
+        "p_mass_on_q_zero_cells": 0.0,
+        "zero_hit_count_mc": 24046,
+        "zero_hit_frequency_mc": 0.24046
+      },
+      "full_expected_nll": "infinity",
+      "full_expected_nll_derivation": "E_Q[-log2 P] = infinity because positive Q mass (q_mass_on_p_zero_cells > 0) sits on cells where log2(P) = log2(0) = -infinity, so the sum contains mass * (-infinity) summed negatively to -infinity.",
+      "conditional_finite_support_mean": {
+        "mean_bits_per_symbol": 0.39689697672163377,
+        "quantiles_bits_per_symbol": {
+          "0.05": 0.3195803400309395,
+          "0.5": 0.3966047811818586,
+          "0.95": 0.47740935956635283
+        },
+        "n_samples_non_hit": 75954,
+        "mc_seed": 20260822,
+        "definition_note": "seeded MC mean over non-hit samples only (posterior cell nonzero); never call it full NLL"
+      },
+      "truncated_common_support_cross_entropy": {
+        "value_bits": 7.909127715481916,
+        "common_support_cell_count": 2384,
+        "definition_note": "cross entropy summed over common-support cells only (P>0); never call it full cross entropy"
+      },
+      "old_audit_reference_readonly": {
+        "note": "v1 audit numbers retained as cross-reference only; never a trusted source; deltas reported honestly, no silent alignment, old files never rewritten",
+        "q_mass_on_p_zero_cells_v1_reference": 0.239468,
+        "delta_q_mass_v2_minus_v1": -1.715905750820923e-10,
+        "mc_conditional_mean_v1_approx_range_bits_per_symbol": [
+          0.397,
+          0.431
+        ],
+        "truncated_cross_entropy_v1_approx_range_bits": [
+          7.77,
+          7.91
+        ]
+      }
+    },
+    "1p5M": {
+      "source_id": "type2_1p5M_20260121_183806",
+      "raw_ser_quoted_from": "channel_summary.json per_source[type2_1p5M_20260121_183806].ser",
+      "raw_ser": 0.2544695292735815,
+      "q_definition": "Q_B1(b|a) = (1-raw_ser)*delta_{b=a} + raw_ser*Uniform{b != a mod 1024}; Q(a)=Uniform",
+      "q_total_mass": 1.0000000000000004,
+      "support_miss": {
+        "q_mass_on_p_zero_cells_analytic": 0.2541265286632689,
+        "p_mass_on_q_zero_cells": 0.0,
+        "zero_hit_count_mc": 25469,
+        "zero_hit_frequency_mc": 0.25469
+      },
+      "full_expected_nll": "infinity",
+      "full_expected_nll_derivation": "E_Q[-log2 P] = infinity because positive Q mass (q_mass_on_p_zero_cells > 0) sits on cells where log2(P) = log2(0) = -infinity, so the sum contains mass * (-infinity) summed negatively to -infinity.",
+      "conditional_finite_support_mean": {
+        "mean_bits_per_symbol": 0.42617411644642966,
+        "quantiles_bits_per_symbol": {
+          "0.05": 0.3602945346844118,
+          "0.5": 0.42223300068304787,
+          "0.95": 0.4947646917495781
+        },
+        "n_samples_non_hit": 74531,
+        "mc_seed": 20260822,
+        "definition_note": "seeded MC mean over non-hit samples only (posterior cell nonzero); never call it full NLL"
+      },
+      "truncated_common_support_cross_entropy": {
+        "value_bits": 7.777767092029151,
+        "common_support_cell_count": 2436,
+        "definition_note": "cross entropy summed over common-support cells only (P>0); never call it full cross entropy"
+      },
+      "old_audit_reference_readonly": {
+        "note": "v1 audit numbers retained as cross-reference only; never a trusted source; deltas reported honestly, no silent alignment, old files never rewritten",
+        "q_mass_on_p_zero_cells_v1_reference": 0.254127,
+        "delta_q_mass_v2_minus_v1": -4.713367310893446e-07,
+        "mc_conditional_mean_v1_approx_range_bits_per_symbol": [
+          0.397,
+          0.431
+        ],
+        "truncated_cross_entropy_v1_approx_range_bits": [
+          7.77,
+          7.91
+        ]
+      }
+    },
+    "2M": {
+      "source_id": "type2_2M_20260121_183657",
+      "raw_ser_quoted_from": "channel_summary.json per_source[type2_2M_20260121_183657].ser",
+      "raw_ser": 0.2557409550754458,
+      "q_definition": "Q_B1(b|a) = (1-raw_ser)*delta_{b=a} + raw_ser*Uniform{b != a mod 1024}; Q(a)=Uniform",
+      "q_total_mass": 0.9999999999999998,
+      "support_miss": {
+        "q_mass_on_p_zero_cells_analytic": 0.25534765843849927,
+        "p_mass_on_q_zero_cells": 0.0,
+        "zero_hit_count_mc": 25518,
+        "zero_hit_frequency_mc": 0.25518
+      },
+      "full_expected_nll": "infinity",
+      "full_expected_nll_derivation": "E_Q[-log2 P] = infinity because positive Q mass (q_mass_on_p_zero_cells > 0) sits on cells where log2(P) = log2(0) = -infinity, so the sum contains mass * (-infinity) summed negatively to -infinity.",
+      "conditional_finite_support_mean": {
+        "mean_bits_per_symbol": 0.43116176123155947,
+        "quantiles_bits_per_symbol": {
+          "0.05": 0.36801099176496005,
+          "0.5": 0.429167828113732,
+          "0.95": 0.4896375416978459
+        },
+        "n_samples_non_hit": 74482,
+        "mc_seed": 20260822,
+        "definition_note": "seeded MC mean over non-hit samples only (posterior cell nonzero); never call it full NLL"
+      },
+      "truncated_common_support_cross_entropy": {
+        "value_bits": 7.768754037724351,
+        "common_support_cell_count": 2635,
+        "definition_note": "cross entropy summed over common-support cells only (P>0); never call it full cross entropy"
+      },
+      "old_audit_reference_readonly": {
+        "note": "v1 audit numbers retained as cross-reference only; never a trusted source; deltas reported honestly, no silent alignment, old files never rewritten",
+        "q_mass_on_p_zero_cells_v1_reference": 0.255348,
+        "delta_q_mass_v2_minus_v1": -3.415615007495987e-07,
+        "mc_conditional_mean_v1_approx_range_bits_per_symbol": [
+          0.397,
+          0.431
+        ],
+        "truncated_cross_entropy_v1_approx_range_bits": [
+          7.77,
+          7.91
+        ]
+      }
+    }
+  },
+  "signature_mismatch": false
+}

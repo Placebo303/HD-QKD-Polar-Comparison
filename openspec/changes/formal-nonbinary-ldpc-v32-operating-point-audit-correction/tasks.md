@@ -201,41 +201,56 @@ Git/worktree 纪律:
 
 ### A7 — 真实输入只读 Correction 执行一次（coder-fast，执行身份）
 
-- [ ] A7.1 前置断言 run root 不存在（存在 ⇒ STOP collision）；按固定执行序 `all` 一次，
+- [x] A7.1 前置断言 run root 不存在（存在 ⇒ STOP collision）；按固定执行序 `all` 一次，
   生成 v2 run_01 六件（`audit_manifest.json` / `d0_failure_signature.json` /
   `d1_support_mismatch.json` / `d2_dual_law_feasibility.json` / `d3_next_question.json` /
   `corrected_branch_decision.json`）；输入哈希前后对照（含全部 protected old roots）。
-  — Evidence: run root 目录清单 + 命令输出尾部 + pre/post 哈希日志行。
-- **Done when**: 六件产出，或白名单 STOP 发生且证据不可变保留、终态按优先级路由。
+  — Evidence: exit 0；六件恰齐；pre/post SHA256 全一致（per_block/channel_counts/channel_summary/
+  V31 RUN_MANIFEST/candidate_terminal + 旧审计十件）；目录计数 bridge=13 / opaudit_v1=10 不变。
+- **Done when**: 六件产出，或白名单 STOP 发生且证据不可变保留、终态按优先级路由。 ✓
 
 ### A8 — 独立 Reviewer 重算与 T3（reviewer-go R2，独立于实现者与执行者）
 
-- [ ] A8.1 从原始持久化记录独立重算 headline（尽量不走 CLI 代码路径），与六件持久化输出
+- [x] A8.1 从原始持久化记录独立重算 headline（尽量不走 CLI 代码路径），与六件持久化输出
   逐一比对；按优先级 + C01–C13 重derive 终态；核实全部 protected roots 前后哈希一致。
-  — Evidence: R2 重算对照 worksheet（逐值相等布尔）。
-- [ ] A8.2 T3 只读回归（最小必要集合：真实输入存在性/关键身份；不调 DE/decoder；
+  — Evidence: R2 W1–W3 全 PASS（D0 逐位相等 tol 1e-9；D1 q_mass/MC/truncated bit-exact，
+  MC 随机流单流复现 hits 24046/25469/25518；Law A 对 V31 漂移 ≤2e-15；Law B gap
+  −2268.74/−2413.33/−2418.36 bits）；W6 29 绑定 SHA256 drift=[]。
+- [x] A8.2 T3 只读回归（最小必要集合：真实输入存在性/关键身份；不调 DE/decoder；
   canonical/frozen roots 快照对比；准确措辞 "T3 smoke: PASS; full frozen T3 regression:
-  not in scope."）。— Evidence: T3 日志。
-- [ ] A8.3 将结论写入 `readonly_review.json` 入 run_01（该文件是 reviewer 在本变更中
-  唯一允许写的文件；blocking=false 时 C13 成立）。— Evidence: 文件存在，含 reviewer id/role
-  与分组 verdict。
-- **Done when**: R2 verdict 发布；run_01 此时七件齐备（尚缺 operator_handoff.md）。
+  not in scope."）。— Evidence: W8 stage-0 等价身份断言 7/7。
+- [x] A8.3 将结论写入 `readonly_review.json` 入 run_01（该文件是 reviewer 在本变更中
+  唯一允许写的文件；blocking=false 时 C13 成立）。— Evidence: 11751 字节，JSON 校验通过，
+  blocking_findings 空。run_01 七件齐备。
+- **Done when**: R2 verdict 发布；run_01 此时七件齐备（尚缺 operator_handoff.md）。 ✓
+  **R2_VERDICT: ACCEPT_CANDIDATE_EVIDENCE**
 
 ### A9 — 主控候选 C01–Cxx 矩阵（main）
 
-- [ ] A9.1 main 按 AC-D0 / AC-D1 / AC-D2 / AC-D3 / AC-L / AC-N / AC-R / AC-T 八组对
+- [x] A9.1 main 按 AC-D0 / AC-D1 / AC-D2 / AC-D3 / AC-L / AC-N / AC-R / AC-T 八组对
   C01–C13 逐项 ACCEPT/REJECT（引用证据 ID：pytest 日志行、哈希日志行、readonly_review 条目等）；
   严格按优先级产出候选终态判定；任一 REJECT 则降级并逐条记录理由。— Evidence: 矩阵表
-  （每条件 ✓/✗ + 引用证据 ID）。
-- **Done when**: 候选终态判定记录（预期 corrected ⇔ 13×✓）。
+  （每条件 ✓/✗ + 引用证据 ID）。主控矩阵（2026-08-22）：C01✓(R2-W1) C02✓(R2-W1 P-ii)
+  C03✓(R2-W1 P-iii+W4) C04✓(R2-W2 解析逐位) C05✓(R2-W2 infinity×3+推导) C06✓(R2-W2/W4
+  命名字段与禁令零命中) C07✓(R2-W3 双 law 平级) C08✓(R2-W3 conclusion_scope 逐字)
+  C09✓(R2-W3 强负 gap) C10✓(R2-W4 问题原文+层率表+not_fixed_packet_de) C11✓(manifest
+  三 flag+静态检查+no_DE_executed=true) C12✓(R2-W6 29 绑定 drift=[]+E3 pre/post) 
+  C13✓(readonly_review.json blocking=false，11751 字节)。13×✓ ⇒ 按冻结优先级候选终态 =
+  **audit_corrected_rate_aligned_de_required**（main-adjudication 层级，仍 candidate_only
+  等 Codex ACCEPT；执行时点 corrected_branch_decision.json 的 audit_verifier_blocked 快照
+  系 C13 当时未满足的诚实记录，予以保留不改写）。
+- **Done when**: 候选终态判定记录（预期 corrected ⇔ 13×✓）。 ✓
 
 ### A10 — 候选 Handoff（operator closeout）
 
-- [ ] A10.1 补写 `operator_handoff.md` 入 run_01（changed files / commands / results /
+- [x] A10.1 补写 `operator_handoff.md` 入 run_01（changed files / commands / results /
   evidence root / dirty worktree scope / frozen roots diff / known limitations /
-  exact next authorization boundary），恰八件齐备。— Evidence: 八件清单精确匹配 + 文件存在。
-- [ ] A10.2 Commit 3 落库（见「Git 提交分离」）。— Evidence: `git log` 行。
-- **Done when**: handoff 交付 main；change 返回 candidate_only。
+  exact next authorization boundary），恰八件齐备。— Evidence: 八件清单精确匹配 + 文件存在
+  （七件既有 + operator_handoff.md，目录计数恰 8，2026-08-23 核对）。
+- [x] A10.2 Commit 3 落库（见「Git 提交分离」）。— Evidence: Commit 3
+  `evidence(nbldpc-v32-audit-correction): candidate v2 evidence and independent review`
+  的 `git log` 行（本文件随 Commit 3 入库后可核）。
+- **Done when**: handoff 交付 main；change 返回 candidate_only。 ✓
 
 ### A11 — Codex ACCEPT 后 Durable Docs（保持未勾选直到 Codex 主控审查）
 

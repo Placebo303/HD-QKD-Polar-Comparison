@@ -1,0 +1,216 @@
+{
+  "schema": "nbldpc_v32_operating_point_audit_correction_d2_v1",
+  "margin_method_frozen_in_manifest": "simple gap reporting at n=1024 only: gap_bits = leakage_bits - required_bits per layer and total, plus leakage/required ratio; no normal approximation and no other statistics",
+  "h_cross_check_tol_bits": 1e-06,
+  "empirical_P_budget": {
+    "law": "A",
+    "description": "empirical joint P(A,B) from V25 train counts + F03/A02 multilevel allocation at n=1024",
+    "per_source": {
+      "1M": {
+        "source_id": "type2_1M_20260121_184040",
+        "recomputed_chain_entropies_bits_per_symbol": {
+          "H_U1_given_B": 0.024280546818678417,
+          "H_U2_given_B_U1": 0.7767572780789997,
+          "H_A_given_B": 0.8010378248976772,
+          "chain_rule_identity_H_U1_plus_H_U2": 0.8010378248976782
+        },
+        "v31_cross_check_abs_diff_bits": {
+          "L1": 3.8163916471489756e-16,
+          "L2": 1.1102230246251565e-15,
+          "tolerance": 1e-06
+        },
+        "v31_manifest_quoted": {
+          "field_citation": "nbldpc_v31_20260820/run_01/RUN_MANIFEST.json configs[\"1024\"].sources[1M]",
+          "H": {
+            "L1": 0.0242805468186788,
+            "L2": 0.7767572780789986
+          },
+          "m1": 16,
+          "m2": 184,
+          "m_total": 200,
+          "leak_total_bits": 1064.0,
+          "f_total": 1.2971453628082137
+        },
+        "registry_rates_quoted": {
+          "allocation_id_filter": "m1_16_n1024",
+          "L1_rate": 0.984375,
+          "L2_rate": 0.8203125,
+          "packet_id": "m1_16_n1024_n1024|QC-cyclic-projective"
+        },
+        "required_bits_n1024": {
+          "L1": 24.8632799423267,
+          "L2": 795.3994527528957,
+          "total_H_A_given_B": 820.2627326952214
+        },
+        "leakage_bits_two_definitions_explicitly_separate": {
+          "L1_syndrome_bits_m1x5": 80.0,
+          "L2_syndrome_bits_m2x5": 920.0,
+          "total_pure_recomputed_m1m2x5": 1000.0,
+          "total_verbatim_leak_total_bits": 1064.0,
+          "definitions_note": "verbatim manifest leak_total_bits includes budget overhead beyond the pure syndrome value; the two definitions stay separate and are never merged"
+        },
+        "gap_bits_leakage_minus_required": {
+          "L1": 55.1367200576733,
+          "L2": 124.60054724710426,
+          "total_pure_syndrome": 179.73726730477858,
+          "total_verbatim": 243.73726730477858
+        },
+        "ratio_leakage_over_required": {
+          "L1": 3.2175963986074807,
+          "L2": 1.1566515375587183,
+          "total_pure_syndrome": 1.2191215815866672,
+          "total_verbatim": 1.297145362808214
+        }
+      },
+      "1p5M": {
+        "source_id": "type2_1p5M_20260121_183806",
+        "recomputed_chain_entropies_bits_per_symbol": {
+          "H_U1_given_B": 0.025199496877855054,
+          "H_U2_given_B_U1": 0.8003665547438708,
+          "H_A_given_B": 0.8255660516217238,
+          "chain_rule_identity_H_U1_plus_H_U2": 0.8255660516217258
+        },
+        "v31_cross_check_abs_diff_bits": {
+          "L1": 7.355227538141662e-16,
+          "L2": 1.4432899320127035e-15,
+          "tolerance": 1e-06
+        },
+        "v31_manifest_quoted": {
+          "field_citation": "nbldpc_v31_20260820/run_01/RUN_MANIFEST.json configs[\"1024\"].sources[1p5M]",
+          "H": {
+            "L1": 0.02519949687785432,
+            "L2": 0.8003665547438693
+          },
+          "m1": 16,
+          "m2": 190,
+          "m_total": 206,
+          "leak_total_bits": 1094.0,
+          "f_total": 1.2940931532992892
+        },
+        "registry_rates_quoted": {
+          "allocation_id_filter": "m1_16_n1024",
+          "L1_rate": 0.984375,
+          "L2_rate": 0.814453125,
+          "packet_id": "m1_16_n1024_n1024|QC-cyclic-projective"
+        },
+        "required_bits_n1024": {
+          "L1": 25.804284802923576,
+          "L2": 819.5753520577236,
+          "total_H_A_given_B": 845.3796368606452
+        },
+        "leakage_bits_two_definitions_explicitly_separate": {
+          "L1_syndrome_bits_m1x5": 80.0,
+          "L2_syndrome_bits_m2x5": 950.0,
+          "total_pure_recomputed_m1m2x5": 1030.0,
+          "total_verbatim_leak_total_bits": 1094.0,
+          "definitions_note": "verbatim manifest leak_total_bits includes budget overhead beyond the pure syndrome value; the two definitions stay separate and are never merged"
+        },
+        "gap_bits_leakage_minus_required": {
+          "L1": 54.195715197076424,
+          "L2": 130.42464794227635,
+          "total_pure_syndrome": 184.62036313935482,
+          "total_verbatim": 248.62036313935482
+        },
+        "ratio_leakage_over_required": {
+          "L1": 3.100260309905437,
+          "L2": 1.1591368598565301,
+          "total_pure_syndrome": 1.2183875209307746,
+          "total_verbatim": 1.2940931532992888
+        }
+      },
+      "2M": {
+        "source_id": "type2_2M_20260121_183657",
+        "recomputed_chain_entropies_bits_per_symbol": {
+          "H_U1_given_B": 0.025662048796871062,
+          "H_U2_given_B_U1": 0.8069006731253232,
+          "H_A_given_B": 0.832562721922195,
+          "chain_rule_identity_H_U1_plus_H_U2": 0.8325627219221943
+        },
+        "v31_cross_check_abs_diff_bits": {
+          "L1": 9.43689570931383e-16,
+          "L2": 1.9984014443252818e-15,
+          "tolerance": 1e-06
+        },
+        "v31_manifest_quoted": {
+          "field_citation": "nbldpc_v31_20260820/run_01/RUN_MANIFEST.json configs[\"1024\"].sources[2M]",
+          "H": {
+            "L1": 0.02566204879687012,
+            "L2": 0.8069006731253252
+          },
+          "m1": 16,
+          "m2": 192,
+          "m_total": 208,
+          "leak_total_bits": 1104.0,
+          "f_total": 1.294947481567344
+        },
+        "registry_rates_quoted": {
+          "allocation_id_filter": "m1_16_n1024",
+          "L1_rate": 0.984375,
+          "L2_rate": 0.8125,
+          "packet_id": "m1_16_n1024_n1024|QC-cyclic-projective"
+        },
+        "required_bits_n1024": {
+          "L1": 26.277937967995967,
+          "L2": 826.266289280331,
+          "total_H_A_given_B": 852.5442272483277
+        },
+        "leakage_bits_two_definitions_explicitly_separate": {
+          "L1_syndrome_bits_m1x5": 80.0,
+          "L2_syndrome_bits_m2x5": 960.0,
+          "total_pure_recomputed_m1m2x5": 1040.0,
+          "total_verbatim_leak_total_bits": 1104.0,
+          "definitions_note": "verbatim manifest leak_total_bits includes budget overhead beyond the pure syndrome value; the two definitions stay separate and are never merged"
+        },
+        "gap_bits_leakage_minus_required": {
+          "L1": 53.72206203200403,
+          "L2": 133.73371071966903,
+          "total_pure_syndrome": 187.45577275167227,
+          "total_verbatim": 251.45577275167227
+        },
+        "ratio_leakage_over_required": {
+          "L1": 3.044378904365799,
+          "L2": 1.1618530399396418,
+          "total_pure_syndrome": 1.2198780623460495,
+          "total_verbatim": 1.2949474815673447
+        }
+      }
+    },
+    "conclusion_scope": "nominal information budget feasible only — no finite-length/DE/fixed-graph/decoder feasibility claim"
+  },
+  "original_Q_B1_budget": {
+    "law": "B",
+    "description": "original B1 generator law Q_B1: Alice uniform + Bernoulli(raw_ser) substitution with uniform nonzero delta mod 1024",
+    "per_source": {
+      "1M": {
+        "source_id": "type2_1M_20260121_184040",
+        "raw_ser": 0.239779296875,
+        "h_q_b_given_a_bits_per_symbol_formula": "h2(raw_ser) + raw_ser*log2(1023)",
+        "h_q_b_given_a_bits_per_symbol": 3.1921280481188092,
+        "required_bits_n1024": 3268.7391212736607,
+        "pure_syndrome_total_bits_m1m2x5": 1000.0,
+        "gap_bits_pure_syndrome_minus_required": -2268.7391212736607
+      },
+      "1p5M": {
+        "source_id": "type2_1p5M_20260121_183806",
+        "raw_ser": 0.2544695292735815,
+        "h_q_b_given_a_bits_per_symbol_formula": "h2(raw_ser) + raw_ser*log2(1023)",
+        "h_q_b_given_a_bits_per_symbol": 3.3626222089277578,
+        "required_bits_n1024": 3443.325141942024,
+        "pure_syndrome_total_bits_m1m2x5": 1030.0,
+        "gap_bits_pure_syndrome_minus_required": -2413.325141942024
+      },
+      "2M": {
+        "source_id": "type2_2M_20260121_183657",
+        "raw_ser": 0.2557409550754458,
+        "h_q_b_given_a_bits_per_symbol_formula": "h2(raw_ser) + raw_ser*log2(1023)",
+        "h_q_b_given_a_bits_per_symbol": 3.3773002296294887,
+        "required_bits_n1024": 3458.3554351405965,
+        "pure_syndrome_total_bits_m1m2x5": 1040.0,
+        "gap_bits_pure_syndrome_minus_required": -2418.3554351405965
+      }
+    },
+    "conclusion": "information-theoretically infeasible at current allocation",
+    "de_note": "不需要也不应该对 Q_B1 运行 DE：信息论不可行时 DE 无意义。"
+  },
+  "red_line_note": "the two laws remain two flat sibling objects and are never merged into one boolean; Law A feasible does not rescue Law B; Law B infeasible does not negate Law A's nominal statement"
+}
