@@ -252,19 +252,26 @@ Git/worktree 纪律:
   的 `git log` 行（本文件随 Commit 3 入库后可核）。
 - **Done when**: handoff 交付 main；change 返回 candidate_only。 ✓
 
-### A11 — Codex ACCEPT 后 Durable Docs（保持未勾选直到 Codex 主控审查）
+### A11 — Codex ACCEPT 后 Durable Docs（Codex 已 ACCEPT 3110cb0e，2026-08-23 执行）
 
-- [ ] A11.1 `docs/decision-log.md` 新增条目（Decision / Reason / Consequence 按主控给定文本）。
-  — Evidence: (pending Codex)。
-- [ ] A11.2 V32 final report addendum（措辞按主控指令）。— Evidence: (pending Codex)。
-- [ ] A11.3 memory triage 三层结论（经 memory agent）。— Evidence: (pending Codex)。
-- **Done when**: (pending Codex) — Codex 给出 ACCEPT/REJECT 前必须保持未勾选。
+- [x] A11.1 `docs/decision-log.md` 新增条目（Decision / Reason / Consequence）。— Evidence:
+  2026-08-23 条目「V32 finite-DE bridge + operating-point audit correction — durable
+  closeout (ACCEPTED)」已追加至文件末尾（含 B1 否决理由、双 law 结论、verifier guards、
+  下一授权边界）。
+- [x] A11.2 V32 correction addendum。— Evidence: 新建
+  `docs/nbldpc-v32-operating-point-audit-correction-addendum-20260823.md`（七节：修正内容/
+  生命周期四标签/已接受语义表/双 law 可行性/verifier guards/下一授权边界/不可变证据清单）。
+- [x] A11.3 memory triage 三层结论写入 `AGENT_PROJECT_MEMORY.md` 顶层（Observed /
+  Rejected interpretation / Next authorized boundary；未写 "branch C accepted" 或任何
+  NB-Polar 主线声明）。— Evidence: 顶层新增 2026-08-23 节。
+- **Done when**: 三处 durable docs 落盘且相互一致。 ✓
 
-### A12 — Archive / Commit Decision（保持未勾选直到 Codex 主控审查）
+### A12 — Archive / Commit Decision
 
-- [ ] A12.1 仅在 Codex 主控 ACCEPT/REJECT 后：裁决本变更可归档性，若批准执行 `/opsx-archive`。
-  — Evidence: (pending Codex)。
-- **Done when**: (pending Codex) — 同上，保持未勾选。
+- [x] A12.1 归档审查通过：四件套一致性（冻结数值跨文件逐字）、旧审计生命周期四标签在案、
+  A11 三项完成。按 OpenSpec 惯例整目录 rename 至
+  `openspec/changes/archive/2026-08-23-formal-nonbinary-ldpc-v32-operating-point-audit-correction/`
+  （含 archive.md；delta spec 不并入 openspec/specs——audit-only 变更，沿用 Change A 先例）。
 
 ---
 
@@ -297,7 +304,9 @@ design §11 / spec AC-D1 的 infinity 语义未按 iff 条件实现。本轮修�
   workspace/v32_correction_fix_20260822a/{t0,t1,t2,all}）；py_compile exit 0；
   旧八件证据 pre/post SHA256 逐字节一致；nbldpc_v32_operating_point_audit_v2/ 下
   无新增目录。
-- [ ] F-G1 Codex 主控复核本 candidate fix（保持未勾选直到审查）。
+- [x] F-G1 Codex 主控复核本 candidate fix — **ACCEPT（2026-08-23）**。Evidence: commit
+  `3110cb0e` 静态复核；独立全量测试 47 passed（T0=8/T1=26/T2=13，fresh basetemp）；旧八件
+  证据 git diff = 0（pre/post SHA256 全同）。主控随后授权 durable closeout（A11/A12 解锁）。
 
 状态：candidate fix 完成 —— 等待 Codex 主控 ACCEPT/REJECT；未运行 DE，未运行 decoder，
 未启动 successor，未触碰任何旧证据。
