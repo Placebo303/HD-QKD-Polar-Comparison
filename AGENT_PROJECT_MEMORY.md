@@ -1,3 +1,58 @@
+## 2026-08-23 B1 NLL unit correction + long-term roadmap review (R1–R4) + audit-correction archived
+
+- Unit correction [repo-observed]: Ground 2 of
+  `docs/nbldpc-v32-main-review-verdict-20260822.md` misstated units — B1 raw
+  posterior NLL mean is ≈229–245 bits per n=1024 block (≈0.224–0.239
+  bits/symbol), NOT bits/symbol; reference conditional entropies are ≈0.80–0.83
+  bits/symbol. Additive correction recorded at
+  `docs/nbldpc-v32-main-verdict-unit-correction-20260823.md`; the original
+  verdict file is preserved byte-identical on purpose. Future citations must
+  use the corrected unit phrasing.
+- Long-term roadmap review finalized [decision]:
+  `docs/hd-qkd-ir-roadmap-review-20260823.md` (supersedes the same-day
+  conversation-only version). Fixes route naming R1 matched empirical-P /
+  R2 allocation-factorization / R3 binary-MLC & NB-Polar / R4 HD-Cascade
+  reference, avoiding collision with historical Route A–D names.
+- Roadmap priority convention [decision]: V33 exact-V31-rate empirical-P
+  ensemble DE is the mandatory highest-value prerequisite gate; corrected
+  matched finite-control becomes the next high-value experiment only after
+  V33 passes.
+- Law A wording [decision]: nominal feasibility only means NB-Polar's immediate
+  information-theoretic veto is untriggered; it does not show NB-Polar
+  feasible; the two-layer D2 results must not be cited as R3 support.
+- Audit-correction change archived [result]: after verifier fix `3110cb0e`,
+  F-G1 = ACCEPT; Change A12 terminal `audit_corrected_rate_aligned_de_required`;
+  archived under `openspec/changes/archive/
+  2026-08-23-formal-nonbinary-ldpc-v32-operating-point-audit-correction/`
+  (closeout commits d76a55c3 + b1171cc9; HEAD b1171cc9). Supersedes the interim
+  stop-point status quoted inside the two 2026-08-23 docs. V32 scientific
+  attribution remains inconclusive (`bridge_inconclusive`, main-review layer);
+  no qualification/promotion; V33 draft still DRAFT_PENDING_FREEZE_REVIEW.
+
+## 2026-08-23 S4 research-doc closeout: B1 NLL unit convention + route registry R1–R4
+
+- Unit convention [decision, authoritative citation]: B1 posterior NLL must be
+  stated as "raw posterior NLL mean ≈229–245 bits per n=1024 block
+  (≈0.224–0.239 bits/symbol)"; the form "229–245 bits/symbol" is banned.
+  Reference entropies are per-symbol: ≈0.80–0.83 bits/symbol. Authoritative
+  note: `docs/nbldpc-v32-main-verdict-unit-correction-20260823.md` (original
+  verdict file preserved byte-identical).
+- Route registry [decision]: future roadmap citations use R1 = matched
+  empirical-P NB-LDPC; R2 = allocation/factorization redesign; R3 =
+  binary-MLC / NB-Polar P0; R4 = HD-Cascade reference. Historical repo
+  "Route A/B/C/D" names stay reserved for their older meanings.
+- Sequencing [decision]: V33 exact-V31-rate empirical-P ensemble DE is the
+  mandatory prerequisite; corrected matched finite-control is authorized only
+  after V33 full PASS. V33 four-piece OpenSpec candidate exists as
+  DRAFT_PENDING_FREEZE_REVIEW (untracked); DE execution still requires freeze +
+  explicit authorization.
+- Scope guard [decision]: Law A (empirical-P nominal budget feasible) supports
+  no feasibility claim for NB-Polar or any finite scheme; it only records that
+  the immediate information-theoretic veto has not triggered.
+- Accepted docs [repo-observed]: `docs/nbldpc-v32-main-verdict-unit-correction-
+  20260823.md` and `docs/hd-qkd-ir-roadmap-review-20260823.md` (v2, R1–R4
+  renaming + F-G1 ACCEPT state), committed in the S4 closeout commit.
+
 ## 2026-08-23 V32 finite-DE bridge + operating-point audit correction: ACCEPTED closeout
 
 - Observed [repo-observed, R2-verified]: V32 bridge raw record valid (B0 6/6;
