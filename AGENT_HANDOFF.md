@@ -12,11 +12,15 @@
 - Independent Luna IR1 re-review ACCEPTED that exact commit on 2026-08-24.
   Formal DE still needs a separate explicit `EXECUTE_AUTH`; IR1 did not authorize
   execution.
+- Authorization preflight was reviewed in memory only: `decision=REVIEW_ONLY`
+  and `granted=false` were both rejected; a missing auth file returned exit 7,
+  and the official root remained absent. No review-only auth file was persisted.
 - Performance-first roadmap:
   `docs/hd-qkd-ir-performance-roadmap-20260824.md`.
 - Scientific priority: V33 exact-rate empirical-P ensemble gate; if it passes,
   one matched finite-control; if finite conversion still fails, move to
-  protograph/MET/lifting rather than more QC/PEG seed tuning.
+  informed NB-MLC/JRDO, protograph/MET, one Block-MDS/QC candidate, or a
+  rate-adaptive mother code rather than more QC/PEG seed tuning.
 - Do not delete/overwrite historical outputs, run V33, start finite-control,
   implement NB-Polar, push, or claim qualification/promotion.
 

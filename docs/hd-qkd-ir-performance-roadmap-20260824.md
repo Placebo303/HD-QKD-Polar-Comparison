@@ -135,12 +135,15 @@ fresh frozen seeds、三源分别报告、无 tuning/rerun。
 
 1. **allocation/factorization 联合搜索**：在 empirical-P 上比较 F02/F03/F04/F05、
    层序、L1/L2 泄漏分配；先做链式熵与 ensemble gate，不构图。
-2. **protograph/MET**：限制长 degree-2 链，显式设计不同 node/edge type；以
+2. **informed NB-MLC/JRDO/IDC**：联合优化 mapping、layer rate 与 degree
+   distribution；优先于直接 GF(1024) NB-Polar，但仍先做 empirical-P ensemble P0。
+3. **protograph/MET**：限制长 degree-2 链，显式设计不同 node/edge type；以
    block-error 结构为目标，不只优化 bit entropy threshold。
-3. **lifting/QC realization**：只有 protograph/MET ensemble 通过后，才做一个
-   确定性 lifting 候选和一个有限窗 gate。
-4. **rate-adaptive mother code**：研究 check-node splitting、puncture/shorten 或
-   乘性重复的适用区间；三个 source 共享母结构但使用不同公开 rate。
+4. **单一结构化 finite realization**：只有 ensemble 通过后，才比较一个
+   protograph lifting 与一个 Block-MDS/QC 候选；不做 seed 搜索。
+5. **rate-adaptive mother code**：研究 check-node splitting、puncture/shorten、
+   Raptor-like incremental redundancy 或乘性重复的适用区间；三个 source 共享
+   母结构但使用不同公开 rate。
 
 筛选目标从单独阈值改为预估净 key-rate：
 
@@ -204,11 +207,19 @@ NB-LDPC 后继必须说明预期收益来自更低 leakage、更少交互或更�
 - [Tarable et al., rateless protograph LDPC for QKD](https://tqe.ieee.org/2024/02/02/rateless-protograph-ldpc-codes-for-quantum-key-distribution/)：支持 rate-adaptive protograph 备选。
 - [Bravo-Santos, q-ary polar source/channel coding](https://arxiv.org/abs/1511.03881)：支持 NB-Polar P0，不证明 GF(1024) finite 实现。
 - [Martinez-Mateo & Elkouss, multiplicatively repeated NB-LDPC](https://doi.org/10.1140/epjqt/s40507-025-00376-9)：支持短块/变化信道的母码思路，但主要证据来自 CV-QKD 低率区。
+- [Tauz et al., Block-MDS QC-LDPC for HD-QKD](https://doi.org/10.1109/ITW61385.2024.10806945)：提供结构化 QC 候选和 IR/PA 联合判据；其模拟信道、码长与判定口径不能直接外推到本项目。
+- [Hyla & Sułek, short-blocklength nonbinary Raptor-like LDPC](https://doi.org/10.1109/ACCESS.2024.3517171)：支持短块 incremental-redundancy 母码候选，但其 GF(4/8/16) 与反馈语义不同。
+- [Jia et al., MGC-LDPC for CV-QKD](https://doi.org/10.1007/s11128-024-04623-3) 与 [Fu et al., rate-adaptive CV-QKD reconciliation](https://doi.org/10.3390/e28010010)：支持把 FER、可靠度和净 key-rate 纳入后继设计，不支持跳过当前离散 empirical-P gate。
+- [Müller et al., industrial Cascade/LDPC comparison](https://doi.org/10.1049/qtc2.70003)：支持保留 R4 系统级基线及 verification/leakage 成本，但其 binary/BSC 长帧结果不是 GF32 证据。
+
+2026-08-24 增量检索未发现同时覆盖三源 empirical-P、GF32+GF32、n=1024、
+V31 精确层率与 true-predecessor 条件语义的研究，因此不改变 V33-first 顺序。
 
 ## 11. 当前授权边界
 
-当前允许：只读 prepare、自检、fake-runner tests、状态文档更新，以及准备一份供主控
-单独审查的 execute-auth 候选；这不构成执行授权。
+当前允许：只读 prepare、自检、fake-runner tests、状态文档更新，以及在内存中
+审查无效 execute-auth 候选；这不构成执行授权。本轮已验证 `decision=REVIEW_ONLY`
+和 `granted=false` 均被拒绝，缺失 auth 文件返回 exit 7，official root 前后不存在。
 
 当前不允许：正式 V33 DE、decoder、finite-control、NB-Polar 实现、真实数据流水线、
 longrun/minrerun、qualification、promotion、push、删除或覆盖旧 outputs。

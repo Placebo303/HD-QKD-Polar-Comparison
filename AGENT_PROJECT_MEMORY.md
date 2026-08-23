@@ -10,6 +10,14 @@
   PASS may lead to one proposed matched finite-control. A DE failure redirects
   to allocation/factorization or protograph/MET research; a matched-control
   failure closes further QC/PEG seed micro-tuning.
+- Authorization preflight [repo-observed]: review-only auth was constructed
+  in memory, not persisted. `decision=REVIEW_ONLY` and `granted=false` were
+  both rejected; a missing auth file returned exit 7; official `run_01`
+  remained absent and no DE/decoder ran.
+- Literature increment [decision]: a 2024--2026 search did not change
+  V33-first. Post-V33 structural candidates now explicitly include informed
+  NB-MLC/JRDO, Block-MDS/QC, and a short-block rate-adaptive mother code; see
+  `docs/hd-qkd-ir-performance-roadmap-20260824.md` §10.
 - Research-code boundary [decision]: engineering checks are justified only
   when they prevent a wrong operating point, invalid scientific attribution,
   or irreproducible execution. Mature-package infrastructure is not a goal.
