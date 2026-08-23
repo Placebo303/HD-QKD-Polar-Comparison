@@ -1,8 +1,9 @@
 # Proposal: formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic
 
-> **Status: DRAFT_PENDING_FREEZE_REVIEW** — 本四件套为 freeze-review 候选。
-> 主控 ACCEPT_FREEZE 前：§Candidate Call Matrix 仍为候选值；不得实现任何代码；
-> 不得执行任何 DE（含 smoke）；OpenCode 无权自行宣告 ACCEPT_FREEZE。
+> **Status: FROZEN_ACCEPTED** — FR1 ACCEPT_FREEZE by Codex master（2026-08-23，
+> 冻结基线 commit `0a050066`）。全部 frozen constants、bindings、sampler、H_t、
+> terminal、path/write guards、exact-once 与 claim boundary 自此不可修改。
+> Candidate Call Matrix 候选值已随 freeze 转正为冻结值。
 
 ## Positioning
 

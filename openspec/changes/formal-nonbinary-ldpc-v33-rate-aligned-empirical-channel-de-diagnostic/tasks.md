@@ -1,7 +1,7 @@
 # Tasks: formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic
 
-> **Status: DRAFT_PENDING_FREEZE_REVIEW** — freeze review（FR1）通过前不得勾选任何
-> 条目、不得实现、不得执行。
+> **Status: FROZEN_ACCEPTED**（FR1 ACCEPT_FREEZE，2026-08-23，baseline `0a050066`）—
+> freeze review 通过前不得勾选的限制已解除；P4 真实 DE 仍需主控 EXECUTE_AUTH。
 
 ## Allowed New Files（草案）
 
@@ -57,12 +57,23 @@
 
 ## 阶段（草案）
 
-- [ ] P1 规格冻结：四件套定稿（判敛公式 H_t 逐字化）；reviewer-go **FR1** 审查；
-  **主控 ACCEPT_FREEZE**（候选调用矩阵就此转正为冻结值）。
-- [ ] P2 实现 CLI + T0/T1（fake DE runner 显式注入；仅写 workspace fresh root，
+- [x] P1 规格冻结：四件套定稿（判敛公式 H_t 逐字化）；reviewer-go **FR1** 审查；
+  **主控 ACCEPT_FREEZE（2026-08-23，冻结基线 commit `0a050066`）**——全部 frozen
+  constants、bindings、sampler、H_t、terminal、path/write guards、exact-once 与
+  claim boundary 转为不可变；Candidate Call Matrix 候选值就此转正。
+- [x] P2 实现 CLI + T0/T1（fake DE runner 显式注入；仅写 workspace fresh root，
   绝不创建 official run_01）。
-- [ ] P2R fake T2 全流程 + strict replay + exact-once 顺序断言 +
+  - 证据：T0 `10 passed, 39 deselected in 0.56s`（basetemp
+    workspace/v33_run_0823d/t0）。
+  - 证据：T1 `29 passed, 20 deselected in 8.92s`（basetemp
+    workspace/v33_run_0823d/t1）。
+- [x] P2R fake T2 全流程 + strict replay + exact-once 顺序断言 +
   official-root 创建守卫断言。
+  - 证据：T2 `8 passed, 41 deselected in 2.56s`（basetemp
+    workspace/v33_run_0823d/t2；strict replay norm() 白名单含
+    freeze_digest_ref，主控 2026-08-23 裁决补入）。
+  - 证据：T3 `2 passed, 47 deselected in 0.73s`（basetemp
+    workspace/v33_run_0823d/t3）。
 - [ ] P3 **IR1 implementation candidate review**（reviewer-go，非实现者）+
   **T3**：真实输入只读 binding/identity 核验（R1–R7 存在性/SHA256/字面值）+
   protected roots pre/post unchanged——**不调用真实 DE**。

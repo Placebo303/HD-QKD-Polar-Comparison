@@ -1,7 +1,7 @@
 # Spec Delta: formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic
 
-> **Status: DRAFT_PENDING_FREEZE_REVIEW** — SHALL 条款候选；判敛公式细节于
-> freeze review 逐字定稿。
+> **Status: FROZEN_ACCEPTED** — SHALL 条款自 FR1 ACCEPT_FREEZE（2026-08-23，
+> baseline `0a050066`）起不可修改。
 
 ## Scope
 

@@ -1,6 +1,6 @@
 # Design: formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic
 
-> **Status: DRAFT_PENDING_FREEZE_REVIEW**
+> **Status: FROZEN_ACCEPTED**（FR1 ACCEPT_FREEZE，2026-08-23，baseline `0a050066`）
 
 ## §1 Bindings
 
