@@ -1,3 +1,22 @@
+## 2026-08-24 V33 IR1 ACCEPT + performance-first execution boundary
+
+- Current state [repo-observed, independently reviewed]: V33 implementation
+  commit `5b8cfef3fa0c45534c3aaede30750e6ad49bd2f6` received independent IR1
+  ACCEPT. The state is `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`;
+  official `nbldpc_v33_rate_aligned_empirical_de/run_01` does not exist, and
+  no real DE, decoder, or finite graph was run.
+- Performance-first sequence [decision]: run exact-V31-rate empirical-P
+  ensemble DE only after a separate explicit `EXECUTE_AUTH`; only a six-cell
+  PASS may lead to one proposed matched finite-control. A DE failure redirects
+  to allocation/factorization or protograph/MET research; a matched-control
+  failure closes further QC/PEG seed micro-tuning.
+- Research-code boundary [decision]: engineering checks are justified only
+  when they prevent a wrong operating point, invalid scientific attribution,
+  or irreproducible execution. Mature-package infrastructure is not a goal.
+  Current roadmap: `docs/hd-qkd-ir-performance-roadmap-20260824.md`.
+- This entry supersedes older statements below that V33 is
+  `DRAFT_PENDING_FREEZE_REVIEW`; those remain historical snapshots.
+
 ## 2026-08-23 B1 NLL unit correction + long-term roadmap review (R1–R4) + audit-correction archived
 
 - Unit correction [repo-observed]: Ground 2 of

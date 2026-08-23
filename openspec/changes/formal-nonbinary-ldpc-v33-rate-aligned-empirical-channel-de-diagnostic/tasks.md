@@ -74,18 +74,19 @@
     freeze_digest_ref，主控 2026-08-23 裁决补入）。
   - 证据：T3 `2 passed, 47 deselected in 0.73s`（basetemp
     workspace/v33_run_0823d/t3）。
-- [ ] P3 **IR1 implementation candidate review**（reviewer-go，非实现者）+
+- [x] P3 **IR1 implementation candidate review**（独立 Luna，非实现者）+
   **T3**：真实输入只读 binding/identity 核验（R1–R7 存在性/SHA256/字面值）+
   protected roots pre/post unchanged——**不调用真实 DE**。
   - 2026-08-24 fix candidate：R4 从 V25 train counts 独立重算 F03 H 并核对
     m_total/f_total；R6 核对每源两组 rate+H identity；授权绑定 HEAD 与冻结调用
     矩阵；数值异常 reason 与 claim/provenance replay 加强。
   - 当前证据：compile/real-input prepare/selfcheck PASS；focused fake/read-only
-    suite `55 passed`（`workspace/v33_ir1_acceptance_r7`）。独立 IR1 re-review 待完成，
-    本项仍不得勾选。
-- [ ] P3 END **implementation candidate handoff**。强制停止点：
+    suite `55 passed`（`workspace/v33_ir1_acceptance_r7`）。独立 IR1 于 2026-08-24
+    对精确提交 `5b8cfef3fa0c45534c3aaede30750e6ad49bd2f6` 给出 ACCEPT；官方
+    `run_01` 不存在，未调用真实 DE/decoder/finite graph。
+- [x] P3 END **implementation candidate handoff**。强制停止点：
   **IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED** —— 主控 implementation
-  ACCEPT/REJECT 裁决后 P4 方可解锁。
+  ACCEPT 已记录；P4 仍需另行、显式 `EXECUTE_AUTH` 方可解锁。
 - [ ] P4 执行授权门通过后：对真实输入按固定顺序运行 30 calls 恰一次
   （official run lifecycle 见 design §4）。
 - [ ] P4R **ER1** post-execution read-only evidence review：独立重算 headline、

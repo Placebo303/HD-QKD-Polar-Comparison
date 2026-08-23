@@ -1,17 +1,17 @@
-## 2026-08-24 V33 IR1 fix candidate — performance-first roadmap
+## 2026-08-24 V33 IR1 ACCEPT — performance-first roadmap
 
 - Current change: `formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic`.
-- State: `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`; official
+- State: `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`; official
   `nbldpc_v33_rate_aligned_empirical_de/run_01` does not exist.
-- Current candidate adds exact R4 empirical F03 H/m_total/f_total checks, R6
+- Accepted commit `5b8cfef3fa0c45534c3aaede30750e6ad49bd2f6` adds exact R4 empirical F03 H/m_total/f_total checks, R6
   rate+H identity checks, strict HEAD/call-matrix authorization values,
   scientific numeric reason codes, and provenance/claim-boundary replay.
 - Evidence: compile passed; real-input `prepare` passed; selfcheck passed;
   focused suite `55 passed` at workspace basetemp
   `workspace/v33_ir1_acceptance_r7` (no real DE/decoder).
-- Independent Luna IR1 re-review of this fix candidate is still required before
-  main-thread implementation ACCEPT. Formal DE still needs a separate
-  `EXECUTE_AUTH` after a clean scoped implementation commit.
+- Independent Luna IR1 re-review ACCEPTED that exact commit on 2026-08-24.
+  Formal DE still needs a separate explicit `EXECUTE_AUTH`; IR1 did not authorize
+  execution.
 - Performance-first roadmap:
   `docs/hd-qkd-ir-performance-roadmap-20260824.md`.
 - Scientific priority: V33 exact-rate empirical-P ensemble gate; if it passes,

@@ -21,8 +21,9 @@
 
 ## 2. 当前证据状态
 
-审计基线：`main`，HEAD `c7b63cea`；V33 CLI/测试存在未提交修订，正式 V33
-`run_01` 不存在。本轮没有运行真实 DE、decoder、原始数据流水线或 successor。
+审计基线：`main`，V33 实现验收提交
+`5b8cfef3fa0c45534c3aaede30750e6ad49bd2f6`；正式 V33 `run_01` 不存在。
+本轮没有运行真实 DE、decoder、原始数据流水线或 successor。
 
 | 证据 | 已证明 | 未证明 |
 |---|---|---|
@@ -32,7 +33,7 @@
 | V30R | 测试的 n=1024 有限图/decoder 转换失败 | NB-LDPC 总体失败 |
 | V31 | n=1024 QC packet 在真实有限窗上 0/300；n=2048 只有 14-block 前缀 | 完整 n=2048 结论；失败根因 |
 | V32 correction | B1 generator/posterior 不匹配；原 `finite_graph_decoder_mismatch` 归因无效 | fixed graph 或 decoder 已被独立定罪 |
-| V33 | 规格已冻结，实现候选正在 IR1 | 正式 DE 结果、finite-code 或 qualification |
+| V33 | 规格已冻结，精确提交 `5b8cfef3` 已获独立 IR1 ACCEPT | 正式 DE 结果、finite-code 或 qualification |
 
 V31 的权威生命周期是 `ARCHIVED_PARTIAL`：n=1024 负结果完整，n=2048 不完整。
 V32 科学结论是 `bridge_inconclusive`。这些边界不能因后续路线需要而改写。
@@ -90,7 +91,8 @@ official root 未创建。CLI 美观、通用配置、成熟包 API 不是 block
 
 ### 正式执行门
 
-IR1 通过后状态仍为 `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`。只有主控
+IR1 已于 2026-08-24 通过，当前状态为
+`IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`。只有主控
 另行给出 `EXECUTE_AUTH`，才允许执行一次：
 
 ```powershell
@@ -175,7 +177,7 @@ NB-LDPC 后继必须说明预期收益来自更低 leakage、更少交互或更�
 
 | 时间 | 主任务 | 交付/停止点 |
 |---|---|---|
-| M0 | V33 IR1、冻结实现 | ACCEPT 或带具体 blocker 的 REJECT；不执行 DE |
+| M0 | V33 IR1、冻结实现 | 已完成：`5b8cfef3` ACCEPT；未执行 DE |
 | M0--M1 | 一次 V33 execute + ER1 | PASS/FAIL/INCONCLUSIVE；无自动 successor |
 | M1--M2 | 条件式 matched finite-control 或 R2 P0 | 一次归因结论或候选系综短名单 |
 | M2--M4 | protograph/MET 或 allocation/factorization ensemble gate | 最多 1--2 个 finite 候选 |
@@ -205,7 +207,8 @@ NB-LDPC 后继必须说明预期收益来自更低 leakage、更少交互或更�
 
 ## 11. 当前授权边界
 
-当前允许：V33 IR1 修复、只读 prepare、自检、fake-runner tests、状态文档更新。
+当前允许：只读 prepare、自检、fake-runner tests、状态文档更新，以及准备一份供主控
+单独审查的 execute-auth 候选；这不构成执行授权。
 
 当前不允许：正式 V33 DE、decoder、finite-control、NB-Polar 实现、真实数据流水线、
 longrun/minrerun、qualification、promotion、push、删除或覆盖旧 outputs。
