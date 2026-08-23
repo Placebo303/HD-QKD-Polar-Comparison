@@ -1,14 +1,14 @@
 # Tasks: formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic
 
-> **Status: DRAFT_PENDING_FREEZE_REVIEW** — freeze review 通过前不得勾选任何条目、
-> 不得实现、不得执行。
+> **Status: DRAFT_PENDING_FREEZE_REVIEW** — freeze review（FR1）通过前不得勾选任何
+> 条目、不得实现、不得执行。
 
 ## Allowed New Files（草案）
 
 - `comparison_bench/src/comparison_bench/cli/run_nonbinary_v33_rate_aligned_empirical_de.py`
 - `comparison_bench/tests/test_nonbinary_v33_rate_aligned_empirical_de.py`
 - `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v33_rate_aligned_empirical_de/run_01/*`
-- workspace 测试根 `workspace/v33_<fresh-id>/*`
+- workspace 测试根 `workspace/v33_<fresh-id>/*`（**绝不创建 official run_01 于测试中**）
 
 ## Forbidden
 
@@ -18,33 +18,59 @@
   n=2048 产物；memory/decision-log 编辑（本变更内）；qualification/promotion 措辞；
   push；git add -A；run_02/rerun/tuning/补 seed/screen-rank-select。
 
-## 阶段（草案）
-
-- [ ] P1 规格冻结：四件套定稿（判敛公式/聚合规则逐字化）；reviewer R1 审查；
-  **主控 ACCEPT_FREEZE**（候选调用矩阵就此转正为冻结值）。
-- [ ] P2 实现 + T0/T1（fake DE runner 显式注入）。
-- [ ] P2R fake T2 全流程（可解→PASS / max_iter→FAIL / NaN→INCONCLUSIVE /
-  zero-denominator→inconclusive_input_binding）+ strict replay + exact-once 顺序断言。
-- [ ] P3 独立候选验收 R1（非实现者）。
-- [ ] **P4 执行授权门：主控显式授权后，方得对真实输入运行 30 calls 一次。**
-- [ ] P5 closeout：R2 独立重算写 readonly_review.json + candidate handoff +
-  终态持久化。
-
 ## Frozen Constants（候选——ACCEPT_FREEZE 前可被主控修订）
 
-- 层率表：L1 三源 0.984375；L2 0.8203125/0.814453125/0.8125（allocation
-  `m1_16_n1024` 过滤核对）；m1=16；m2={184,190,192}；n=1024。
-- ρ 构造：make_rho(R_i, lambda={2:1})；禁止 f=1.3 反推。
-- 调用矩阵：seeds 33101–33105；n_samples=2000；max_iter=200；
+- **Binding Registry R1–R7**：R1 V25 run_04 `channel_counts.npz`（键
+  `{sid}_N_ab_train_N_ab_train`）；R2 V25 `channel_summary.json`；R3 V25
+  `split_manifest.json`；R4 V31 `RUN_MANIFEST.json`；R5 V31 `matrix_audits.json`；
+  R6 V31 `m1_registry.json`（allocation `m1_16_n1024` 过滤）；R7 V26 DE kernel/
+  code identity + historical gate（只读、不可外推）。
+- **Source ID ↔ NPZ key ↔ m2 逐项绑定**：
+  `type2_1M_20260121_184040` ↔ `{sid}_N_ab_train_N_ab_train` ↔ m2=184；
+  `type2_1p5M_20260121_183806` ↔ 同构键 ↔ m2=190；
+  `type2_2M_20260121_183657` ↔ 同构键 ↔ m2=192。n=1024；m1=16。
+- **ρ 构造**：make_rho(R_i, lambda={2:1})；禁止 f=1.3 反推。
+- **调用矩阵（候选）**：seeds 33101–33105；n_samples=2000；max_iter=200；
   entropy_tol=0.01 bits/symbol；streak=20；RNG=PCG64；30 calls。
+- **机械判敛**：H_t = population mean categorical entropy (bits/symbol)；
+  PASS ⟺ 概率全程有效且连续 streak=20 iterations H_t < 0.01 bits/symbol；
+  max_iter=200 未满足（含有限振荡）⇒ FAIL。
 - 终态三值 + INCONCLUSIVE reason codes（含 inconclusive_input_binding）；
   聚合优先级 INCONCLUSIVE > FAIL > PASS。
-- 输出根 `nbldpc_v33_rate_aligned_empirical_de/run_01/`；exact-once 固定顺序。
+- 输出根 `nbldpc_v33_rate_aligned_empirical_de/run_01/`；execute 入口 collision
+  检查一次，同 execute 内后续阶段不重复触发。
+
+## Review IDs（唯一命名）
+
+- **FR1** = freeze review（规格冻结审查）。
+- **IR1** = implementation candidate review（实现候选验收，非实现者）。
+- **ER1** = post-execution read-only evidence review（执行后只读证据复核，
+  写 readonly_review.json 的唯一角色）。
+
+## 阶段（草案）
+
+- [ ] P1 规格冻结：四件套定稿（判敛公式 H_t 逐字化）；reviewer-go **FR1** 审查；
+  **主控 ACCEPT_FREEZE**（候选调用矩阵就此转正为冻结值）。
+- [ ] P2 实现 CLI + T0/T1（fake DE runner 显式注入；仅写 workspace fresh root，
+  绝不创建 official run_01）。
+- [ ] P2R fake T2 全流程 + strict replay + exact-once 顺序断言 +
+  official-root 创建守卫断言。
+- [ ] P3 **IR1 implementation candidate review**（reviewer-go，非实现者）+
+  **T3**：真实输入只读 binding/identity 核验（R1–R7 存在性/SHA256/字面值）+
+  protected roots pre/post unchanged——**不调用真实 DE**。
+- [ ] P3 END **implementation candidate handoff**。强制停止点：
+  **IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED** —— 主控 implementation
+  ACCEPT/REJECT 裁决后 P4 方可解锁。
+- [ ] P4 执行授权门通过后：对真实输入按固定顺序运行 30 calls 恰一次
+  （official run lifecycle 见 design §4）。
+- [ ] P4R **ER1** post-execution read-only evidence review：独立重算 headline、
+  写 readonly_review.json、protected roots unchanged 复核。
+- [ ] P5 closeout：candidate handoff + 终态持久化 + Final Return Statement。
 
 ## 强制停止点
 
 1. 主控 ACCEPT_FREEZE 前不得实现；
-2. 实现 acceptance 前不得执行真实 DE；
+2. IR1 + implementation ACCEPT 前不得执行真实 DE；
 3. closeout 后立即停止等待主控裁决。
 
 ## Final Return Statement（逐字）

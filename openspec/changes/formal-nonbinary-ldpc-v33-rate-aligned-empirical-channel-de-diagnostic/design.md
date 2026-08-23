@@ -2,34 +2,55 @@
 
 > **Status: DRAFT_PENDING_FREEZE_REVIEW**
 
-## §1 Input Bindings（7 行，全部只读；distrust 旧 terminal 惯例沿用）
+## §1 Binding Registry R1–R7（唯一编号，与 proposal/tasks/spec 逐字一致）
 
-| # | 绑定 | 路径/键 | 用途 |
-|---|---|---|---|
-| R1 | V25 train counts | `nbldpc_v25_20260818/run_04/channel_counts.npz` 键 `{sid}_N_ab_train_N_ab_train`（逐字，含重复后缀） | DE channel construction 唯一数据源 |
-| R2 | V25 summary/split | `channel_summary.json`（raw_ser 三源逐字）、`split_manifest.json` | raw_ser 恒等校验；train/holdout 边界声明 |
-| R3 | V31 manifest | `RUN_MANIFEST.json configs["1024"].sources[].{H.L1,H.L2,m1,m2,m_total,leak_total_bits,f_total}` | 层率与分配恒等校验 |
-| R4 | V31 matrix audits | `matrix_audits.json` packet_id `m1_16_n1024_n1024\|QC-cyclic-projective`、L1 shape [16,1024] | packet 恒等 |
-| R5 | V31 registry | `m1_registry.json registered_calls`（allocation `m1_16_n1024` 过滤） | 层率表逐字核对 |
-| R6 | V26 历史 | `gate.json`/`best_passing_f`/design_constants | 只读对照（不可外推） |
-| — | 代码事实 | harness L555–564（Q_B1 定义，仅作历史引用）；V26 sampler L10–13 | D3/claim 引用 |
+| # | 绑定 | 完整路径 / 键 / 身份 |
+|---|---|---|
+| R1 | V25 train counts | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz`，键 `{sid}_N_ab_train_N_ab_train`（逐字，含重复后缀） |
+| R2 | V25 summary | 同 run_04 `channel_summary.json`：raw_ser 三源 `0.239779296875` / `0.2544695292735815` / `0.2557409550754458`、pm1_mass |
+| R3 | V25 split manifest | 同 run_04 `split_manifest.json` |
+| R4 | V31 manifest | `nbldpc_v31_20260820/run_01/RUN_MANIFEST.json` 的 `configs["1024"].sources[].{H.L1,H.L2,m1=16,m2,m_total,leak_total_bits∈{1064,1094,1104},f_total}` |
+| R5 | V31 matrix audits | 同 run_01 `matrix_audits.json`：packet_id `m1_16_n1024_n1024\|QC-cyclic-projective`、L1 shape [16,1024] |
+| R6 | V31 registry | 同 run_01 `m1_registry.json registered_calls`，**按 allocation_id=`m1_16_n1024` 过滤**（同文件含其他 allocation，禁全表扫描） |
+| R7 | V26 DE kernel/code identity + historical gate | sampler/kernel 代码身份（L10–13 语义引用）；`gate.json` status `pass_target_f13`、best_passing_f A01=1.6/A02=1.3——只读方法身份对照，不可外推至 V31 层率 |
+
+Source ID ↔ m2 逐项绑定（R4/R6 校验基准）：
+`type2_1M_20260121_184040 → 184`；`type2_1p5M_20260121_183806 → 190`；
+`type2_2M_20260121_183657 → 192`。
 
 stage-0 校验失败 → STOP。**validation/holdout 数据永不进入 channel construction。**
 
 ## §2 DE 计算管线（per call）
 
 call = (source s, layer i, seed k)。固定顺序枚举：
-`1M/L1/33101 … 2M/L2/33105`（source 外层、layer 中层、seed 内层，均升序），共 30 calls。
+source 外层（1M→1p5M→2M）× layer 中层（L1→L2）× seed 内层（33101→33105 升序），
+共 **30 calls**。
 
-1. 由 N_ab 构造 P(A,B)=N_ab/total 与层条件总体（F03：U1=A>>5、U2=A&31；
+1. 由 R1 计数矩阵构造 P(A,B)=N_ab/total 与层条件总体（F03：U1=A>>5、U2=A&31；
    L1: P(U1|B)；L2 true-predecessor-conditioned: P(U2|B,U1)）。
-2. R_i(s)=1−m_i(s)/1024；ρ_i=make_rho(R_i(s), lambda={2:1})。
-3. 以 PCG64(seed=k) 初始化 MC-DE：n_samples=2000/迭代、max_iter=200、
-   entropy_tol=0.01 bits/symbol、streak=20。
-4. 判敛：连续 streak 次迭代层互信息增量 ≥ −entropy_tol 且轨迹稳定 ⇒ PASS(达到
-   streak)；运行至 max_iter 未达 streak ⇒ FAIL（含有限振荡）；过程中出现
-   NaN/Inf/负概率/归一化失败/异常 ⇒ INCONCLUSIVE(对应 reason)。
-5. 每 call 结束立即持久化 per-call 记录（参数、seed、迭代轨迹摘要、终态、
+2. m_i 取 §1 绑定值（L1: m1=16；L2: m2 per source）；R_i(s)=1−m_i/1024；
+   ρ_i=make_rho(R_i(s), lambda={2:1})。
+3. 以 PCG64(seed=k) 初始化 MC-DE：n_samples=2000/迭代、max_iter=200。
+
+### 步骤 4 —— 机械判敛判据（fix B2，唯一判据）
+
+层轨迹的总体平均分类熵：
+
+```
+H_t = (1/N) · Σ_{j=1..N} Σ_{x=0..31} − p_{t,j}(x) · log2( p_{t,j}(x) )    [bits/symbol]
+```
+
+其中 N 为该层符号数、p_{t,j}(x) 为第 t 次迭代时符号位 j 取 x 的概率
+（L1: N=1024 层内位置对 B；L2: 条件于真 U1 的对应条件分布族）。
+
+- call **PASS** 当且仅当：全程概率有效（无 NaN/Inf/负概率/归一化失败）
+  且存在连续 **streak=20** 次迭代满足 **H_t < 0.01 bits/symbol**；
+- 有效运行至 **max_iter=200** 仍未满足（**包括有限振荡**）⇒ **FAIL**；
+- 计算过程中出现 NaN/Inf/负概率/归一化失败/异常 ⇒ INCONCLUSIVE(对应 reason)。
+
+不使用"互信息增量"、不使用任何未定义的"轨迹稳定"措辞。
+
+5. 每 call 结束立即持久化 per-call 记录（参数、seed、逐迭代 H_t 轨迹、终态、
    reason codes），随后才进入下一 call。
 
 ## §3 零分母处理（Zero-Denominator）
@@ -39,37 +60,54 @@ P(U2|B,U1) 条件不可定义），该 call 立即终止：
 `INCONCLUSIVE(reason="inconclusive_input_binding")`。禁止 one-hot fallback、
 禁止样本级跳过、禁止以平滑/占位分布替代。
 
-## §4 聚合与优先级（candidate）
+## §4 Official Run Lifecycle 与聚合（fix B4）
 
-- **call** → 如上三态 + reason codes。
-- **cell=(s,i)**（5 seeds）：任一 INCONCLUSIVE ⇒ cell INCONCLUSIVE(reasons 合并)；
-  全 PASS ⇒ cell PASS；否则 cell FAIL。
-- **overall**：任一 cell INCONCLUSIVE ⇒ overall INCONCLUSIVE；全 cells PASS ⇒
-  overall `pass_rate_aligned_empirical_de`；否则 overall
-  `rate_allocation_or_ensemble_fail`。
-- 优先级 INCONCLUSIVE > FAIL > PASS；未覆盖组合 → inconclusive with reasons。
+一次正式 execute 的入口顺序：
+
+```
+execute 入口：run_01 已存在 ⇒ collision STOP（exit 码区分）
+否则 mkdir run_01
+→ 写 pre-execution manifest（绑定 SHA256 + 候选矩阵转正为冻结值 + 判敛参数
+   + lifecycle 标注 + git HEAD + implementation identity）
+→ 按固定顺序执行 30 calls（每 call 持久化后进入下一 call）
+→ cell/overall 聚合 → final_state.json
+```
+
+同一次 execute 内刚创建的 root 不被自身后续阶段判为 collision（collision 仅在
+execute 入口检查一次）。所有 fake tests 只写 fresh workspace root
+（`workspace/<fresh-id>/`），绝不创建 official run_01。
+
+聚合（candidate）：cell=(s,i) 任一 INCONCLUSIVE ⇒ INCONCLUSIVE(reasons 合并)；
+全 PASS ⇒ PASS；否则 FAIL。overall：任一 cell INCONCLUSIVE ⇒ INCONCLUSIVE；
+全 cells PASS ⇒ `pass_rate_aligned_empirical_de`；否则
+`rate_allocation_or_ensemble_fail`。优先级 INCONCLUSIVE > FAIL > PASS；
+未覆盖组合 → inconclusive with reasons。
 
 ## §5 输出（run_01 内）
 
-`audit_manifest.json`（绑定 SHA256+候选矩阵+判敛参数+lifecycle 标注+Git HEAD+
-implementation identity；freeze 先于计算）、`de_call_matrix.json`（30 call 记录）、
+`audit_manifest.json`（pre-execution）、`de_call_matrix.json`（30 call 记录）、
 `de_cell_matrix.json/md`（6 cell 判定）、`final_state.json`（overall 终态+reasons）、
-`v26_reference_readonly.json`、`operator_handoff.md`、`readonly_review.json`（R2 写入）。
-collision → STOP（exit 码区分 ok/collision/blocked/inconclusive/write-guard）。
+`v26_reference_readonly.json`（R7 对照）、`readonly_review.json`（ER1 写入）、
+`operator_handoff.md`（closeout）。exit 码区分 ok/collision/blocked/
+inconclusive/write-guard。
 
 ## §6 测试分层
 
-- T0：compile/import；toy 可解通道判敛小数学；层率表/rho 构造断言；
-  not_fixed_packet_de 断言；zero-denominator 触发断言；collision 拒绝；
+- T0：compile/import；toy 可解通道判敛小数学（H_t 解析对照）；层率表/rho 构造
+  断言；not_fixed_packet_de 断言；zero-denominator 触发断言；collision 拒绝；
   import 白名单（无 decoder/graph-builder/生产 DE 入口）。
-- T1：绑定漂移拒绝；层率/分配篡改拒绝；判敛参数篡改拒绝（manifest 冻结）；
-  zero-denominator one-hot fallback 检测；trace 不完整拒绝；out-of-root 写拒绝。
-- T2：fake DE runner 全流程三通道（可解→PASS / max_iter→FAIL / NaN→INCONCLUSIVE）
-  × 聚合路由；独立重算复现终态；strict replay；exact-once 顺序断言；
-  collision 端到端。
-- T3：真实输入只读身份核验 + protected roots 快照不变（最小集）。
+- T1：绑定漂移拒绝；层率/allocation 篡改拒绝；判敛参数篡改拒绝（manifest 冻结）；
+  zero-denominator one-hot fallback 检测；trace 不完整拒绝；out-of-root 写拒绝；
+  official-root 创建守卫（fake 测试路径绝不指向 official run_01）。
+- T2：fake DE runner 全流程三通道（可解→PASS / max_iter 含有限振荡→FAIL /
+  NaN→INCONCLUSIVE(inconclusive_input_binding 或 numeric)）× 聚合路由；
+  独立重算复现终态；strict replay；exact-once 顺序断言；同 execute 内后续阶段
+  不重复触发 collision 断言。
+- T3：真实输入只读 binding/identity 核验（R1–R7 存在性/SHA256/字面值）+
+  protected roots pre/post unchanged；**不调用真实 DE**。
 
-全部 fresh `workspace/<id>/` basetemp + `-p no:cacheprovider`；fake DE runner 显式注入。
+全部测试仅写 fresh `workspace/<id>/` basetemp + `-p no:cacheprovider`；fake DE
+runner 显式注入。
 
 ## §7 自主权边界
 

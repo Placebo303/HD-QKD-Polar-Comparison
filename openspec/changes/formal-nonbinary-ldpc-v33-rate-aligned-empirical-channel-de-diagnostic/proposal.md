@@ -1,8 +1,8 @@
 # Proposal: formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic
 
 > **Status: DRAFT_PENDING_FREEZE_REVIEW** — 本四件套为 freeze-review 候选。
-> 主控 ACCEPT_FREEZE 前：§5 调用矩阵仍为候选值；不得实现任何代码；不得执行任何 DE
-> （含 smoke）；OpenCode 无权自行宣告 ACCEPT_FREEZE。
+> 主控 ACCEPT_FREEZE 前：§Candidate Call Matrix 仍为候选值；不得实现任何代码；
+> 不得执行任何 DE（含 smoke）；OpenCode 无权自行宣告 ACCEPT_FREEZE。
 
 ## Positioning
 
@@ -18,15 +18,31 @@ V32 operating-point audit correction（ACCEPTED，归档于
 任何计算。不做码构造、decoder、FER、性能预测、sweep 调参；不启动 corrected
 matched-B1、NB-Polar 或任何 successor。
 
-## Frozen Input Bindings（只读）
+## Binding Registry R1–R7（唯一编号，四文件逐字复用）
 
-1. **R3**：V25 `run_04/channel_counts.npz`，**仅使用三源 `{sid}_N_ab_train_N_ab_train`
-   键**（train split）；validation/holdout 一律不得进入 DE channel construction。
-2. 语义：行=Alice label A，列=Bob symbol B；P(A,B)=N_ab/total。
-3. **R6/R7**：V31 `RUN_MANIFEST.json` / `m1_registry.json`（allocation
-   `m1_16_n1024` 过滤）/ `matrix_audits.json` packet_id——仅用于层率与分配恒等校验。
-4. **R5**：V26 run_02 gate/best_passing_f——仅只读历史对照，不得外推至 V31 层率，
-   不得替代本轮 exact-rate 结果。
+| # | 绑定 | 完整路径 / 键 |
+|---|---|---|
+| R1 | V25 train counts | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz`，键 `{sid}_N_ab_train_N_ab_train` |
+| R2 | V25 summary | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_summary.json` |
+| R3 | V25 split manifest | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/split_manifest.json` |
+| R4 | V31 manifest | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/RUN_MANIFEST.json` |
+| R5 | V31 matrix audits | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/matrix_audits.json` |
+| R6 | V31 registry | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/m1_registry.json` |
+| R7 | V26 DE kernel/code identity + historical gate | V26 run_02 工件（gate.json/best_passing_f/design_constants）与 V26 sampler/kernel 代码身份——只读方法身份对照，不可外推 |
+
+全部只读；persisted terminal distrust 惯例沿用。
+
+## Source IDs × NPZ Keys × m2（逐项绑定）
+
+| label | source ID | NPZ key（R1 内） | m2 |
+|---|---|---|---|
+| 1M | `type2_1M_20260121_184040` | `type2_1M_20260121_184040_N_ab_train_N_ab_train` | 184 |
+| 1p5M | `type2_1p5M_20260121_183806` | `type2_1p5M_20260121_183806_N_ab_train_N_ab_train` | 190 |
+| 2M | `type2_2M_20260121_183657` | `type2_2M_20260121_183657_N_ab_train_N_ab_train` | 192 |
+
+语义：行=Alice label A，列=Bob symbol B；P(A,B)=N_ab/total。
+**仅使用三源 `_N_ab_train` 键**；validation/holdout 一律不得进入 DE channel
+construction。简称 1M/1p5M/2M 仅为表内标签，实现必须按完整 source ID 映射。
 
 ## Factorization Identity
 
@@ -36,10 +52,10 @@ width=5；L2=true-predecessor-conditioned（P(U2|B,U1)）。
 ## Actual-Rate Construction（禁止 f=1.3 反推）
 
 - n=1024；m1=16；
-- m2 按 source 精确绑定：1M→184、1p5M→190、2M→192；
+- m2 按 source ID 精确绑定（见上表）：184/190/192；
 - R_i = 1 − m_i/1024（per source、per layer）；
 - ρ_i 仅由 `make_rho(R_i, lambda={2:1})` 构造；
-- **禁止**以历史 f=1.3 反推或校验 rate；V26 f=1.3 仅作只读历史对照。
+- **禁止**以历史 f=1.3 反推或校验 rate；V26 f=1.3 仅作只读历史对照（R7）。
 
 ## DE Identity
 
@@ -63,7 +79,8 @@ V26 posterior-population full-vector MC-DE（与 V26 同族方法、经验总体
 
 ## Terminal States 与聚合（恰三类 + reason codes）
 
-- **PASS**（call 级）：数值全程有效且达到 streak；
+- **PASS**（call 级）：数值全程有效且达到 streak（判敛判据见 design §2 步骤 4：
+  population mean categorical entropy H_t 连续 20 iterations < 0.01 bits/symbol）；
 - **FAIL**（call 级）：有效运行至 max_iter 仍未达 streak，含有限振荡；
 - **INCONCLUSIVE**：binding 漂移 / NaN / Inf / 负概率 / 归一化失败 / 异常 /
   资源中断；零分母情形 reason=`inconclusive_input_binding`（见 §Zero-Denominator）。
@@ -76,11 +93,15 @@ V26 posterior-population full-vector MC-DE（与 V26 同族方法、经验总体
   FAIL(`rate_allocation_or_ensemble_fail`)。
 - 优先级：INCONCLUSIVE > FAIL > PASS；未覆盖组合 → inconclusive with reasons。
 
-## Exact-Once Execution
+## Exact-Once Execution 与 Official Run Lifecycle
 
 固定顺序枚举 30 calls（source 序 1M→1p5M→2M × 层序 L1→L2 × seed 升序）；每 call
-持久化完成后才进入下一 call；输出根已存在 ⇒ STOP collision；禁止 run_02、rerun、
-tuning、补 seed、screen/rank/select。
+持久化完成后才进入下一 call；禁止 run_02、rerun、tuning、补 seed、screen/rank/select。
+
+Official run lifecycle（fix B4）：一次正式 execute 的入口检查 run_01——已存在 ⇒
+collision STOP；否则创建 run_01 → 写 pre-execution manifest → 按固定顺序执行
+30 calls。同一次 execute 内的后续阶段不再重新触发 root collision。所有 fake tests
+只写 workspace fresh root，绝不创建 official run_01。
 
 ## Zero-Denominator Rule
 
@@ -97,10 +118,13 @@ INCONCLUSIVE(reason=`inconclusive_input_binding`)；**禁止静默 one-hot fallb
 ## Output Root（唯一）
 
 `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v33_rate_aligned_empirical_de/run_01/`
-已存在 ⇒ STOP collision；禁覆盖禁自动 run_02；所有写操作仅限该根。
+即上节 official run lifecycle 所指的唯一 additive 根；所有写操作仅限该根。
 
-## Lifecycle Gates
+## Lifecycle Gates 与 Review IDs
 
-1. 主控 ACCEPT_FREEZE 前不得实现；
-2. 实现 acceptance（测试全过 + 独立候选验收）前不得 execute；
-3. OpenCode 无权自行 ACCEPT_FREEZE 或授权执行。
+1. **FR1 freeze review**：reviewer-go 只读审查本四件套 → 主控 ACCEPT_FREEZE 前不得
+   实现；
+2. 实现 acceptance（测试全过 + **IR1 implementation candidate review**）前不得
+   execute；candidate 完成后停在 `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`；
+3. 执行后由独立 reviewer 做 **ER1 post-execution read-only evidence review**；
+4. OpenCode 无权自行 ACCEPT_FREEZE、implementation ACCEPT 或授权执行。
