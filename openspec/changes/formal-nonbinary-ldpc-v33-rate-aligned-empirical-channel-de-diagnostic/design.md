@@ -6,7 +6,7 @@
 
 | # | 绑定 | 完整路径 / 键 / 身份 |
 |---|---|---|
-| R1 | V25 train counts | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz`，键 `{sid}_N_ab_train_N_ab_train`（逐字，含重复后缀） |
+| R1 | V25 train counts | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz`，仅用三源 train 键（逐字字面量见下方 Source ID ↔ m2 绑定行） |
 | R2 | V25 summary | 同 run_04 `channel_summary.json`：raw_ser 三源 `0.239779296875` / `0.2544695292735815` / `0.2557409550754458`、pm1_mass |
 | R3 | V25 split manifest | 同 run_04 `split_manifest.json` |
 | R4 | V31 manifest | `nbldpc_v31_20260820/run_01/RUN_MANIFEST.json` 的 `configs["1024"].sources[].{H.L1,H.L2,m1=16,m2,m_total,leak_total_bits∈{1064,1094,1104},f_total}` |
@@ -18,6 +18,12 @@ Source ID ↔ m2 逐项绑定（R4/R6 校验基准）：
 `type2_1M_20260121_184040 → 184`；`type2_1p5M_20260121_183806 → 190`；
 `type2_2M_20260121_183657 → 192`。
 
+GF(32) 身份（fix 4）：`GF2mField.create(32)`，primitive polynomial = **37**
+（0b100101），polynomial basis；symbol encoding / field_id =
+`c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`（与 V31
+manifest 一致）。stage-0 校验 field_id 不匹配即 STOP——V26 的边系数 permutation
+依赖具体域表示，q=32 不足以唯一确定。
+
 stage-0 校验失败 → STOP。**validation/holdout 数据永不进入 channel construction。**
 
 ## §2 DE 计算管线（per call）
@@ -26,11 +32,14 @@ call = (source s, layer i, seed k)。固定顺序枚举：
 source 外层（1M→1p5M→2M）× layer 中层（L1→L2）× seed 内层（33101→33105 升序），
 共 **30 calls**。
 
-1. 由 R1 计数矩阵构造 P(A,B)=N_ab/total 与层条件总体（F03：U1=A>>5、U2=A&31；
-   L1: P(U1|B)；L2 true-predecessor-conditioned: P(U2|B,U1)）。
-2. m_i 取 §1 绑定值（L1: m1=16；L2: m2 per source）；R_i(s)=1−m_i/1024；
-   ρ_i=make_rho(R_i(s), lambda={2:1})。
-3. 以 PCG64(seed=k) 初始化 MC-DE：n_samples=2000/迭代、max_iter=200。
+1. **Sampler semantics（fix 5）**：每次抽取自 flatten 后的 P_s(A,B)=N_ab/total
+   （**三源独立、永不合并**）；层条件总体按 F03 构造：U1=A>>5、U2=A&31；
+   L1 使用 P(U1|B)；L2 使用**同一真实 A 的真实 U1** 构造
+   P(U2|B,U1)（true-predecessor-conditioned）。
+2. 后验按真实 layer symbol 做 GF-XOR centering：真值移至 index 0（V26 误差域
+   约定）；PCG64(seed=k) 固定 draw order。
+3. m_i 取 §1 绑定值（L1: m1=16；L2: m2 per source）；R_i(s)=1−m_i/1024；
+   ρ_i=make_rho(R_i(s), lambda={2:1})；n_samples=2000/迭代；max_iter=200。
 
 ### 步骤 4 —— 机械判敛判据（fix B2，唯一判据）
 
@@ -48,7 +57,9 @@ H_t = (1/N) · Σ_{j=1..N} Σ_{x=0..31} − p_{t,j}(x) · log2( p_{t,j}(x) )    
 - 有效运行至 **max_iter=200** 仍未满足（**包括有限振荡**）⇒ **FAIL**；
 - 计算过程中出现 NaN/Inf/负概率/归一化失败/异常 ⇒ INCONCLUSIVE(对应 reason)。
 
-不使用"互信息增量"、不使用任何未定义的"轨迹稳定"措辞。
+不使用"互信息增量"、不使用任何未定义的"轨迹稳定"措辞。正概率抽样点命中非法
+条件分母 ⇒ INCONCLUSIVE(reason=inconclusive_input_binding)，禁止 one-hot
+fallback（§3）。
 
 5. 每 call 结束立即持久化 per-call 记录（参数、seed、逐迭代 H_t 轨迹、终态、
    reason codes），随后才进入下一 call。

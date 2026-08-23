@@ -22,7 +22,7 @@ matched-B1、NB-Polar 或任何 successor。
 
 | # | 绑定 | 完整路径 / 键 |
 |---|---|---|
-| R1 | V25 train counts | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz`，键 `{sid}_N_ab_train_N_ab_train` |
+| R1 | V25 train counts | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz`，仅用三源 train 键（逐字字面量见下表） |
 | R2 | V25 summary | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_summary.json` |
 | R3 | V25 split manifest | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/split_manifest.json` |
 | R4 | V31 manifest | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/RUN_MANIFEST.json` |
@@ -48,6 +48,10 @@ construction。简称 1M/1p5M/2M 仅为表内标签，实现必须按完整 sour
 
 `F03_natural_MSB_to_LSB_GF32_plus_GF32`；A02=F03；解码序 L1 then L2；q=32、
 width=5；L2=true-predecessor-conditioned（P(U2|B,U1)）。
+GF(32) 身份冻结：`GF2mField.create(32)`、primitive polynomial = **37**
+（0b100101）、polynomial basis；symbol encoding / field_id =
+`c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`
+（与 V31 manifest 一致）。
 
 ## Actual-Rate Construction（禁止 f=1.3 反推）
 
@@ -59,8 +63,11 @@ width=5；L2=true-predecessor-conditioned（P(U2|B,U1)）。
 
 ## DE Identity
 
-V26 posterior-population full-vector MC-DE（与 V26 同族方法、经验总体注入）。
-非 fixed-packet DE、非 QC matrix DE、非 finite graph 仿真。
+V26 posterior-population full-vector MC-DE（与 V26 同族方法、经验总体注入）：
+每次抽取自 flatten 后的 P_s(A,B)；三源独立永不合并；L1 用 P(U1|B)；L2 用同一
+真实 A 的真实 U1 构造 P(U2|B,U1)；后验按真实 layer symbol GF-XOR centering
+（真值 index 0）；PCG64 固定 draw order。非 fixed-packet DE、非 QC matrix DE、
+非 finite graph 仿真。
 
 ## Candidate Call Matrix（ACCEPT_FREEZE 前为候选值）
 

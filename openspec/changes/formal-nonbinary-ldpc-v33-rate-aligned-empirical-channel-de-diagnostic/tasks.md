@@ -20,15 +20,29 @@
 
 ## Frozen Constants（候选——ACCEPT_FREEZE 前可被主控修订）
 
-- **Binding Registry R1–R7**：R1 V25 run_04 `channel_counts.npz`（键
-  `{sid}_N_ab_train_N_ab_train`）；R2 V25 `channel_summary.json`；R3 V25
+- **Binding Registry R1–R7**：R1 V25 run_04 `channel_counts.npz`（仅三源 train 键，
+  逐字字面量见下方绑定行）；R2 V25 `channel_summary.json`；R3 V25
   `split_manifest.json`；R4 V31 `RUN_MANIFEST.json`；R5 V31 `matrix_audits.json`；
   R6 V31 `m1_registry.json`（allocation `m1_16_n1024` 过滤）；R7 V26 DE kernel/
   code identity + historical gate（只读、不可外推）。
-- **Source ID ↔ NPZ key ↔ m2 逐项绑定**：
-  `type2_1M_20260121_184040` ↔ `{sid}_N_ab_train_N_ab_train` ↔ m2=184；
-  `type2_1p5M_20260121_183806` ↔ 同构键 ↔ m2=190；
-  `type2_2M_20260121_183657` ↔ 同构键 ↔ m2=192。n=1024；m1=16。
+- **Source ID ↔ NPZ key ↔ m2 逐项绑定**（key 为盘上逐字字面量）：
+  `type2_1M_20260121_184040` ↔ `type2_1M_20260121_184040_N_ab_train_N_ab_train`
+  ↔ m2=184；
+  `type2_1p5M_20260121_183806` ↔
+  `type2_1p5M_20260121_183806_N_ab_train_N_ab_train` ↔ m2=190；
+  `type2_2M_20260121_183657` ↔
+  `type2_2M_20260121_183657_N_ab_train_N_ab_train` ↔ m2=192。n=1024；m1=16。
+- **GF(32) identity**：GF2mField.create(32)；primitive polynomial = 37
+  （0b100101）；polynomial basis；field_id =
+  `c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`
+  （与 V31 manifest 一致）。
+- **Sampler semantics**：flatten P_s(A,B) 抽样；三源独立不合并；L1 用 P(U1|B)；
+  L2 用同一真实 A 的真实 U1 条件；GF-XOR centering 真值 index-0；PCG64 固定
+  draw order；非法条件分母 ⇒ INCONCLUSIVE(inconclusive_input_binding)，禁
+  one-hot fallback。
+- **状态机**：IMPLEMENTATION_CANDIDATE/EXECUTE_NOT_AUTHORIZED →（IR1 + 主控
+  implementation ACCEPT）→ IMPLEMENTATION_ACCEPTED/EXECUTE_NOT_AUTHORIZED →
+  （主控另行 EXECUTE_AUTH）→ 真实 DE 恰一次。
 - **ρ 构造**：make_rho(R_i, lambda={2:1})；禁止 f=1.3 反推。
 - **调用矩阵（候选）**：seeds 33101–33105；n_samples=2000；max_iter=200；
   entropy_tol=0.01 bits/symbol；streak=20；RNG=PCG64；30 calls。

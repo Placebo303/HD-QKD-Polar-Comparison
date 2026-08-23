@@ -19,25 +19,31 @@ ensemble/channel 层 DE diagnostic（V26 posterior-population full-vector MC-DE�
   （allocation `m1_16_n1024` 过滤）；R7 = V26 DE kernel/code identity +
   historical gate（只读、不可外推）。
 - 输入语义：A=Alice label，B=Bob symbol；P(A,B)=N_ab/total。
-- Source ID ↔ NPZ key ↔ m2（逐项绑定）：
+- Source ID ↔ NPZ key ↔ m2（逐项绑定；key 为盘上逐字字面量，无大括号占位符）：
   `type2_1M_20260121_184040` ↔
-  `{type2_1M_20260121_184040}_N_ab_train_N_ab_train` ↔ m2=184；
+  `type2_1M_20260121_184040_N_ab_train_N_ab_train` ↔ m2=184；
   `type2_1p5M_20260121_183806` ↔
-  `{type2_1p5M_20260121_183806}_N_ab_train_N_ab_train` ↔ m2=190；
+  `type2_1p5M_20260121_183806_N_ab_train_N_ab_train` ↔ m2=190；
   `type2_2M_20260121_183657` ↔
-  `{type2_2M_20260121_183657}_N_ab_train_N_ab_train` ↔ m2=192。
+  `type2_2M_20260121_183657_N_ab_train_N_ab_train` ↔ m2=192。
   简称 1M/1p5M/2M 仅为表内标签。validation/holdout 禁入。
 - Factorization：F03_natural_MSB_to_LSB_GF32_plus_GF32；A02=F03；L1 then L2；
   q=32/width=5；L2=true-predecessor-conditioned。
+- GF(32) identity：GF2mField.create(32)；primitive polynomial = 37（0b100101）；
+  polynomial basis；symbol encoding / field_id =
+  `c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`（与 V31
+  manifest 一致）。
+- Sampler semantics：每次抽取自 flatten 后的 P_s(A,B)；三源独立、永不合并；
+  L1 使用 P(U1|B)；L2 使用同一真实 A 的真实 U1 构造 P(U2|B,U1)；后验按真实
+  layer symbol 做 GF-XOR centering（真值位于 index 0）；PCG64 固定 draw order；
+  非法条件分母直接 INCONCLUSIVE(reason=inconclusive_input_binding)，不进入任何
+  one-hot fallback。
 - Actual rate：n=1024；m1=16；m2 按上表逐项绑定；R_i=1−m_i/1024；
   ρ_i=make_rho(R_i, lambda={2:1})；禁止 f=1.3 反推。
 - 调用矩阵（候选）：3 sources × 2 layers × seeds 33101–33105 = 30 calls；
   n_samples=2000；max_iter=200；entropy_tol=0.01 bits/symbol；streak=20；
   RNG=PCG64。
-- 机械判敛：H_t = population mean categorical entropy in bits/symbol，
-  H_t = (1/N)Σ_j Σ_x −p_{t,j}(x)·log2 p_{t,j}(x)；不使用"互信息增量"或
-  "轨迹稳定"措辞。
-- Run root = `.../nbldpc_v33_rate_aligned_empirical_de/run_01/`。
+- Run root = `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v33_rate_aligned_empirical_de/run_01/`。
 - Terminal 恰三类：PASS / FAIL(`rate_allocation_or_ensemble_fail`) /
   INCONCLUSIVE(`de_diagnostic_inconclusive`，reason codes 含
   `inconclusive_input_binding`)；聚合优先级 INCONCLUSIVE > FAIL > PASS。
@@ -50,9 +56,9 @@ ensemble/channel 层 DE diagnostic（V26 posterior-population full-vector MC-DE�
 - **SHALL-BIND1**：全部输入 SHALL 经唯一 Binding Registry R1–R7 引用；R1–R7
   编号/路径/键 SHALL 在 proposal/design/tasks/spec 四文件逐字一致，禁止任何
   文件使用冲突编号或简称推断完整路径/source ID。
-- **SHALL-IN1**：DE channel construction SHALL 仅使用 R1 中三源
-  `{sid}_N_ab_train_N_ab_train` 计数矩阵（source ID 逐项见 Definitions）；
-  validation/holdout SHALL NOT 进入任何构造路径。
+- **SHALL-IN1**：DE channel construction SHALL 仅使用 R1 中三源 train 计数矩阵
+  （逐字字面 key 见 Definitions 绑定表）；validation/holdout SHALL NOT 进入任何
+  构造路径。
 - **SHALL-ID1**：DE SHALL 标识为 posterior-population full-vector MC-DE；
   `not_fixed_packet_de=true` SHALL 出现于输出；fixed-packet/QC-matrix/
   finite-graph 结论 SHALL NOT 出现。
@@ -96,11 +102,25 @@ ensemble/channel 层 DE diagnostic（V26 posterior-population full-vector MC-DE�
   empirical-P ensemble DE 通过"；不得声称 finite code/decoder/FER/QKD
   qualification/promotion 可行。
 
-### Execution Authorization
-- **SHALL-AU1**：主控 ACCEPT_FREEZE（FR1 通过 + 主控签署）前不得实现；实现候选
-  经 **IR1** review + 主控 implementation ACCEPT 前，状态保持
-  `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED` 之前半句不成立——即真实 DE
-  （含 smoke）不得执行；测试 SHALL 仅使用显式 fake DE runner。
+### Execution Authorization（状态机，fix 3）
+- **SHALL-AU1**：在 IR1 review 与主控 implementation ACCEPT 之前，变更状态 SHALL
+  为 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；真实 DE（含 smoke）
+  SHALL NOT 执行；测试 SHALL 仅使用显式 fake DE runner。
+- **SHALL-AU2**：IR1 通过且主控 implementation ACCEPT 之后，状态 SHALL 变为
+  `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`；真实 DE 仍 SHALL NOT 执行。
+- **SHALL-AU3**：仅当主控另行授予 `EXECUTE_AUTH` 后，真实 DE 方可按冻结调用矩阵
+  运行恰一次。
+
+### Field & Sampler Identity（fix 4/5）
+- **SHALL-FIELD1**：实现 SHALL 使用 GF2mField.create(32)、primitive polynomial
+  = 37（0b100101）、polynomial basis，且 symbol encoding/field_id 与 V31 manifest
+  （`c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`）一致；
+  任何其他域表示 SHALL 触发 binding STOP。
+- **SHALL-SAMP1**：MC 抽样 SHALL 按 Sampler semantics 执行——每次从 flatten 后的
+  P_s(A,B) 抽样；三源独立、永不合并；L1 用 P(U1|B)；L2 用同一真实 A 的真实 U1
+  构造 P(U2|B,U1)；后验按真实 layer symbol GF-XOR centering（真值 index 0）；
+  PCG64 固定 draw order；非法条件分母走 SHALL-ZD1 的 INCONCLUSIVE 路径，
+  SHALL NOT 进入任何 one-hot fallback。
 - **SHALL-H1**：closeout 交付 candidate_only=true / main_acceptance_pending=true /
   qualification=false / promotion=false；最终声明逐字：
   「candidate_only，等待 Codex 主控 ACCEPT/REJECT；未运行 DE，未运行 decoder，未启动 successor。」
@@ -110,10 +130,11 @@ ensemble/channel 层 DE diagnostic（V26 posterior-population full-vector MC-DE�
 | AC 组 | SHALL | 验证 |
 |---|---|---|
 | 绑定 registry | BIND1 | 四文件逐字一致性检查 |
-| 输入/恒等 | IN1, ID1, FAC1, RATE1 | stage-0 + T0 断言 |
+| 输入/恒等/域身份 | IN1, ID1, FAC1, RATE1, FIELD1 | stage-0 + T0 断言 |
 | 机械判敛 | CONV1 | T0 toy 解析对照 + T1 措辞禁令 |
+| sampler 语义 | SAMP1 | T2 三通道 fixture + centering 断言 |
 | 调用矩阵/exact-once/lifecycle | MC1, X1, X2 | T2 fake 全流程 + 顺序/collision 断言 |
-| 零分母 | ZD1 | T2 NaN/denominator fixture |
+| 零分母 | ZD1, SAMP1 | T2 NaN/denominator fixture |
 | 终态聚合 | T1, AGG1 | T2 三通道路由 + 重算 |
-| 授权门/review IDs | AU1 | 守卫测试 + FR1/IR1/ER1 报告链 |
+| 授权状态机 | AU1–AU3 | 守卫测试 + FR1/IR1/ER1 报告链 |
 | 输出/handoff | X2, H1 | 目录清单 + 标志断言 |
