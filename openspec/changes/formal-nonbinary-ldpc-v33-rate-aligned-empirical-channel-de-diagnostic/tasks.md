@@ -20,18 +20,12 @@
 
 ## Frozen Constants（候选——ACCEPT_FREEZE 前可被主控修订）
 
-- **Binding Registry R1–R7**：R1 V25 run_04 `channel_counts.npz`（仅三源 train 键，
-  逐字字面量见下方绑定行）；R2 V25 `channel_summary.json`；R3 V25
-  `split_manifest.json`；R4 V31 `RUN_MANIFEST.json`；R5 V31 `matrix_audits.json`；
-  R6 V31 `m1_registry.json`（allocation `m1_16_n1024` 过滤）；R7 V26 DE kernel/
-  code identity + historical gate（只读、不可外推）。
-- **Source ID ↔ NPZ key ↔ m2 逐项绑定**（key 为盘上逐字字面量）：
-  `type2_1M_20260121_184040` ↔ `type2_1M_20260121_184040_N_ab_train_N_ab_train`
-  ↔ m2=184；
-  `type2_1p5M_20260121_183806` ↔
-  `type2_1p5M_20260121_183806_N_ab_train_N_ab_train` ↔ m2=190；
-  `type2_2M_20260121_183657` ↔
-  `type2_2M_20260121_183657_N_ab_train_N_ab_train` ↔ m2=192。n=1024；m1=16。
+- **Binding Registry R1–R7**：唯一规范定义见 spec SHALL-BIND1（canonical 表，
+  含完整路径/精确 key/Source ID ↔ m2 绑定/用途边界）；本文件不维护副本。
+  stage-0 失败冻结语义（zero DE calls / 不进聚合 / overall=INCONCLUSIVE /
+  五类 reason 枚举 missing_input / binding_drift / field_mismatch /
+  allocation_mismatch / malformed_input / 无伪造 call 记录）见 design §1 与
+  spec SHALL-SF1。n=1024；m1=16。
 - **GF(32) identity**：GF2mField.create(32)；primitive polynomial = 37
   （0b100101）；polynomial basis；field_id =
   `c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf`

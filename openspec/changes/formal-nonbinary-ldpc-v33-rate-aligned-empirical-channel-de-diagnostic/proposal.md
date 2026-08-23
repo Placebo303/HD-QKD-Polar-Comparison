@@ -18,31 +18,20 @@ V32 operating-point audit correction（ACCEPTED，归档于
 任何计算。不做码构造、decoder、FER、性能预测、sweep 调参；不启动 corrected
 matched-B1、NB-Polar 或任何 successor。
 
-## Binding Registry R1–R7（唯一编号，四文件逐字复用）
+## Input Bindings
 
-| # | 绑定 | 完整路径 / 键 |
-|---|---|---|
-| R1 | V25 train counts | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz`，仅用三源 train 键（逐字字面量见下表） |
-| R2 | V25 summary | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_summary.json` |
-| R3 | V25 split manifest | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/split_manifest.json` |
-| R4 | V31 manifest | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/RUN_MANIFEST.json` |
-| R5 | V31 matrix audits | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/matrix_audits.json` |
-| R6 | V31 registry | `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/m1_registry.json` |
-| R7 | V26 DE kernel/code identity + historical gate | V26 run_02 工件（gate.json/best_passing_f/design_constants）与 V26 sampler/kernel 代码身份——只读方法身份对照，不可外推 |
+输入绑定以 **spec.md 的 canonical Binding Registry R1–R7 为唯一规范定义**
+（SHALL-BIND1：完整路径、精确 key、用途与边界均在表中）。本文件不维护缩略
+registry 副本。关键语义重述（规范文本见 spec）：
 
-全部只读；persisted terminal distrust 惯例沿用。
-
-## Source IDs × NPZ Keys × m2（逐项绑定）
-
-| label | source ID | NPZ key（R1 内） | m2 |
-|---|---|---|---|
-| 1M | `type2_1M_20260121_184040` | `type2_1M_20260121_184040_N_ab_train_N_ab_train` | 184 |
-| 1p5M | `type2_1p5M_20260121_183806` | `type2_1p5M_20260121_183806_N_ab_train_N_ab_train` | 190 |
-| 2M | `type2_2M_20260121_183657` | `type2_2M_20260121_183657_N_ab_train_N_ab_train` | 192 |
-
-语义：行=Alice label A，列=Bob symbol B；P(A,B)=N_ab/total。
-**仅使用三源 `_N_ab_train` 键**；validation/holdout 一律不得进入 DE channel
-construction。简称 1M/1p5M/2M 仅为表内标签，实现必须按完整 source ID 映射。
+- 全部只读；persisted terminal distrust 惯例沿用。
+- **仅使用三源 train 键**（逐字字面量见 spec Source ID 绑定表）；
+  validation/holdout 一律不得进入 DE channel construction。
+- 语义：行=Alice label A，列=Bob symbol B；P(A,B)=N_ab/total；简称 1M/1p5M/2M
+  仅为标签，实现必须按完整 source ID 映射。
+- R5 仅 allocation/packet identity 核对，非任何 DE 输入；
+- R6 仅读 source/allocation ID、m1、m2、rate、H identity，禁止继承 V31 DE 参数；
+- R7 仅只读方法身份对照，不可外推至 V31 层率。
 
 ## Factorization Identity
 
@@ -56,7 +45,7 @@ GF(32) 身份冻结：`GF2mField.create(32)`、primitive polynomial = **37**
 ## Actual-Rate Construction（禁止 f=1.3 反推）
 
 - n=1024；m1=16；
-- m2 按 source ID 精确绑定（见上表）：184/190/192；
+- m2 按 source ID 精确绑定（canonical registry 表）：184/190/192；
 - R_i = 1 − m_i/1024（per source、per layer）；
 - ρ_i 仅由 `make_rho(R_i, lambda={2:1})` 构造；
 - **禁止**以历史 f=1.3 反推或校验 rate；V26 f=1.3 仅作只读历史对照（R7）。
