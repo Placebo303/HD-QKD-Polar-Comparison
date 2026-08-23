@@ -77,6 +77,12 @@
 - [ ] P3 **IR1 implementation candidate review**（reviewer-go，非实现者）+
   **T3**：真实输入只读 binding/identity 核验（R1–R7 存在性/SHA256/字面值）+
   protected roots pre/post unchanged——**不调用真实 DE**。
+  - 2026-08-24 fix candidate：R4 从 V25 train counts 独立重算 F03 H 并核对
+    m_total/f_total；R6 核对每源两组 rate+H identity；授权绑定 HEAD 与冻结调用
+    矩阵；数值异常 reason 与 claim/provenance replay 加强。
+  - 当前证据：compile/real-input prepare/selfcheck PASS；focused fake/read-only
+    suite `55 passed`（`workspace/v33_ir1_acceptance_r7`）。独立 IR1 re-review 待完成，
+    本项仍不得勾选。
 - [ ] P3 END **implementation candidate handoff**。强制停止点：
   **IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED** —— 主控 implementation
   ACCEPT/REJECT 裁决后 P4 方可解锁。

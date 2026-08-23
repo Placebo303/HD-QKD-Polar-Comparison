@@ -26,7 +26,7 @@ from the frozen OpenSpec constants below.
 
 Subcommands (design section 4 lifecycle):
 - ``prepare``        stage-0 seven-binding validation (R1-R7) -> binding report
-                     JSON on stdout / --report-out.  Never touches DE.
+                     JSON on stdout only (no file output).  Never touches DE.
 - ``verify``         read-only: independently recompute call/cell/overall
                      terminals from persisted evidence in a run root; validate
                      call completeness/uniqueness/order, bindings, rates, rho,
@@ -35,9 +35,13 @@ Subcommands (design section 4 lifecycle):
 - ``test-selfcheck`` tiny synthetic self-check (fake data only, no real inputs,
                      no filesystem writes).
 - ``execute``        production path.  Mechanical authorization gate: requires
-                     ``--execute-auth-file <path>`` containing JSON with
-                     ``{"granted": true, ...}``; missing/refused => exit 7 with
-                     zero side effects.  After the gate: path guard -> collision
+                     ``--execute-auth-file <path>`` containing a JSON object
+                     with EXACTLY the ten-field EXECUTE_AUTH schema v1
+                     (schema/change/freeze_commit/implementation_commit/
+                     official_run_root/call_matrix_digest/decision/granted_by/
+                     decision_id plus boolean ``granted: true``); any missing,
+                     wrong-typed, wrong-valued or extra key => exit 7 with zero
+                     side effects.  After the gate: path guard -> collision
                      check (entry, once) -> mkdir run_01 -> pre-execution
                      manifest -> fixed-order 30 calls (each persisted before
                      the next) -> cell/overall aggregation -> final_state.json.
@@ -194,6 +198,43 @@ MANIFEST_SCHEMA = "nbldpc_v33_rate_aligned_empirical_de_manifest_v1"
 CALL_MATRIX_SCHEMA = "nbldpc_v33_rate_aligned_empirical_de_calls_v1"
 CELL_MATRIX_SCHEMA = "nbldpc_v33_rate_aligned_empirical_de_cells_v1"
 FINAL_STATE_SCHEMA = "nbldpc_v33_rate_aligned_empirical_de_final_state_v1"
+
+# EXECUTE_AUTH strict schema (IR1-FIX1 briefing F2): the auth file must be a
+# JSON object with EXACTLY these keys -- missing, wrong-typed, wrong-valued or
+# extra keys are all unauthorized.
+EXECUTE_AUTH_SCHEMA = "nbldpc_v33_execute_auth_v1"
+AUTH_FREEZE_COMMIT = "0a05006627c41619b47ec872dd173a0830f0343f"
+EXECUTE_AUTH_EXACT_VALUES = {
+    "schema": EXECUTE_AUTH_SCHEMA,
+    "change": CHANGE_NAME,
+    "freeze_commit": AUTH_FREEZE_COMMIT,
+    "official_run_root": OFFICIAL_RUN_REL,
+    "decision": "EXECUTE_AUTH",
+}
+EXECUTE_AUTH_KEYS = set(EXECUTE_AUTH_EXACT_VALUES) | {
+    "implementation_commit", "call_matrix_digest", "granted_by",
+    "decision_id", "granted",
+}
+_HEX_DIGITS = frozenset("0123456789abcdef")
+
+
+def _is_lower_hex(value, n: int) -> bool:
+    """Lowercase-hex string check without ``re`` (frozen import whitelist)."""
+    return isinstance(value, str) and len(value) == n and \
+        all(c in _HEX_DIGITS for c in value)
+
+
+# IR1-FIX1 (F4b): INCONCLUSIVE reason whitelist -- any other reason code on an
+# INCONCLUSIVE call record is evidence-inconsistent at verify time.
+INCONCLUSIVE_REASON_WHITELIST = (
+    "inconclusive_input_binding",
+    "numeric_nan",
+    "numeric_inf",
+    "negative_probability",
+    "normalization_failed",
+    "internal_exception",
+    "resource_interrupted",
+)
 
 # Five protected old roots (SHALL-PATH1).
 PROTECTED_OLD_ROOTS = [
@@ -471,6 +512,25 @@ def build_q_joint(counts: np.ndarray) -> dict:
     return {"P_ab": p_ab, "p_u1_gb": p_u1_gb, "p_joint": p_joint, "u1": u1, "u2": u2}
 
 
+def empirical_f03_entropies(n_ab: np.ndarray) -> dict[str, float]:
+    """Recompute H(U1|B) and H(U2|B,U1) from the bound V25 counts."""
+    arr = np.asarray(n_ab, dtype=np.float64)
+    if arr.shape != (N_BLOCKS, N_BLOCKS) or not np.all(np.isfinite(arr)) or \
+            np.any(arr < 0.0) or float(arr.sum()) <= 0.0:
+        raise NumericError("N_ab is invalid for F03 entropy recomputation")
+
+    def entropy(counts_: np.ndarray) -> float:
+        probs = np.asarray(counts_, dtype=np.float64).ravel()
+        probs = probs[probs > 0.0] / float(probs.sum())
+        return float(-np.sum(probs * np.log2(probs)))
+
+    u1_b = arr.reshape(Q, Q, N_BLOCKS).sum(axis=1)
+    h_b = entropy(arr.sum(axis=0))
+    h_u1_b = entropy(u1_b)
+    h_a_b = entropy(arr)
+    return {"L1": h_u1_b - h_b, "L2": h_a_b - h_u1_b}
+
+
 def _center_rows(rows: np.ndarray, true_sym: np.ndarray) -> np.ndarray:
     """GF-XOR centering: out[i, j] = rows[i, j XOR tv_i] (truth at index 0)."""
     q_cols = rows.shape[1]
@@ -523,7 +583,8 @@ def sample_centered_rows(qdata: dict, layer: str, n: int, rng: np.random.Generat
 
 def _channel_from_centered(centered: np.ndarray) -> np.ndarray:
     """Validate + row-normalize centered posterior rows (V26
-    _channel_rows_from_centered; violations raise => INCONCLUSIVE(numeric))."""
+    _channel_rows_from_centered; violations raise => INCONCLUSIVE(
+    numeric_nan|numeric_inf))."""
     centered = np.asarray(centered, dtype=np.float64)
     if centered.ndim != 2:
         raise NumericError("posterior population must be 2-D (n, q)")
@@ -646,6 +707,32 @@ def mean_bits_entropy(pop: np.ndarray) -> float:
     return float(np.mean(terms.sum(axis=1)))
 
 
+def _numeric_pathology(qdata: dict, c2v: np.ndarray, trace: list[float],
+                       exc: Exception) -> tuple[str, str]:
+    """F4b option B: classify a numeric anomaly by actual pathology.
+
+    First hit wins -- any NaN anywhere in the retained state => numeric_nan;
+    else any Inf/overflow => numeric_inf.  Returns (reason_code, detail); the
+    bare ``numeric`` code is retired (outside the F4b whitelist).
+    """
+    pools: list[tuple[str, object]] = list(qdata.items())
+    pools.append(("c2v population", c2v))
+    pools.append(("entropy trace", np.asarray(trace, dtype=np.float64)))
+    for name, arr in pools:
+        if bool(np.isnan(np.asarray(arr, dtype=np.float64)).any()):
+            return "numeric_nan", f"NaN detected in {name} ({type(exc).__name__}: {exc})"
+    for name, arr in pools:
+        if bool(np.isinf(np.asarray(arr, dtype=np.float64)).any()):
+            return "numeric_inf", f"Inf/overflow detected in {name} ({type(exc).__name__}: {exc})"
+    detail = f"{type(exc).__name__}: {exc}"
+    message = str(exc).lower()
+    if "negative" in message:
+        return "negative_probability", detail
+    if "normaliz" in message or "total mass" in message:
+        return "normalization_failed", detail
+    return "internal_exception", detail
+
+
 def mcde_iterate(qdata: dict, layer: str, seed: int, *, rate: float,
                  n_samples: int = N_SAMPLES, max_iter: int = MAX_ITER,
                  entropy_tol_bits: float = ENTROPY_TOL_BITS,
@@ -655,7 +742,8 @@ def mcde_iterate(qdata: dict, layer: str, seed: int, *, rate: float,
     Convergence is mechanical (SHALL-CONV1): PASS iff probabilities stay valid
     throughout and H_t < entropy_tol_bits for ``streak_target`` consecutive
     iterations; exhausting max_iter without the streak (finite oscillation
-    included) => FAIL; any numeric anomaly => INCONCLUSIVE('numeric'); an
+    included) => FAIL; any numeric anomaly => INCONCLUSIVE(numeric_nan or
+    numeric_inf, classified by _numeric_pathology); an
     illegal L2 conditional denominator => INCONCLUSIVE('inconclusive_input_binding').
     One-hot fallback is never applied.
     """
@@ -692,13 +780,12 @@ def mcde_iterate(qdata: dict, layer: str, seed: int, *, rate: float,
         return _call_core(terminal, reason_codes, trace, iterations, detail=str(exc))
     except NumericError as exc:
         terminal = "INCONCLUSIVE"
-        reason_codes = ["numeric"]
-        return _call_core(terminal, reason_codes, trace, iterations, detail=str(exc))
+        reason, det = _numeric_pathology(qdata, c2v, trace, exc)
+        return _call_core(terminal, [reason], trace, iterations, detail=det)
     except Exception as exc:  # noqa: BLE001 - anomaly => INCONCLUSIVE, never crash
         terminal = "INCONCLUSIVE"
-        reason_codes = ["numeric"]
-        return _call_core(terminal, reason_codes, trace, iterations,
-                          detail=f"{type(exc).__name__}: {exc}")
+        reason, det = _numeric_pathology(qdata, c2v, trace, exc)
+        return _call_core(terminal, [reason], trace, iterations, detail=det)
     if converged:
         terminal = "PASS"
     else:
@@ -931,6 +1018,12 @@ def stage0_validate(repo_root: Path, provider=None) -> tuple[dict, dict]:
                                              str(entry.get("m2"))))
                         if entry.get("m2") != tab["m2"]:
                             fr = fr or "binding_drift"
+                        m_total = entry.get("m_total")
+                        ok_m_total = m_total == M1 + tab["m2"]
+                        checks.append(_check(f"m_total[{label}]", ok_m_total,
+                                             str(m_total)))
+                        if not ok_m_total:
+                            fr = fr or "binding_drift"
                         leak = entry.get("leak_total_bits")
                         ok_leak = isinstance(leak, (int, float)) and \
                             float(leak) == tab["leak_total_bits"]
@@ -938,21 +1031,28 @@ def stage0_validate(repo_root: Path, provider=None) -> tuple[dict, dict]:
                                              str(leak)))
                         if not ok_leak:
                             fr = fr or "binding_drift"
-                        f_tot = entry.get("f_total")
-                        if not isinstance(f_tot, (int, float)) or \
-                                not math.isfinite(float(f_tot)) or float(f_tot) <= 0:
-                            checks.append(_check(f"f_total[{label}]", False, str(f_tot)))
-                            fr = fr or "malformed_input"
-                        else:
-                            checks.append(_check(f"f_total[{label}]", True))
-                            # f=1.3 is historical reference only; never used for rates
                         hid = entry.get("H")
-                        ok_h = isinstance(hid, dict) and \
-                            isinstance(hid.get("L1"), (int, float)) and \
-                            isinstance(hid.get("L2"), (int, float))
-                        checks.append(_check(f"H_identity[{label}]", ok_h))
+                        expected_h = empirical_f03_entropies(counts[tab["source_id"]])
+                        ok_h = isinstance(hid, dict) and all(
+                            isinstance(hid.get(layer), (int, float)) and
+                            math.isfinite(float(hid[layer])) and
+                            abs(float(hid[layer]) - expected_h[layer]) < 1e-12
+                            for layer in LAYER_ORDER)
+                        checks.append(_check(f"H_identity[{label}]", ok_h,
+                                             canonical_json(hid) if isinstance(hid, dict)
+                                             else str(hid)))
                         if not ok_h:
-                            fr = fr or "missing_input"
+                            fr = fr or "binding_drift"
+                        f_tot = entry.get("f_total")
+                        expected_f = tab["leak_total_bits"] / (
+                            N_BLOCKS * sum(expected_h.values()))
+                        ok_f = isinstance(f_tot, (int, float)) and \
+                            math.isfinite(float(f_tot)) and \
+                            abs(float(f_tot) - expected_f) < 1e-12
+                        checks.append(_check(f"f_total[{label}]", ok_f, str(f_tot)))
+                        if not ok_f:
+                            fr = fr or "binding_drift"
+                        # f_total is identity-only; it never derives V33 rates.
                 fld = cfg.get("field")
                 if not isinstance(fld, dict):
                     fr = fr or "malformed_input"
@@ -1038,26 +1138,44 @@ def stage0_validate(repo_root: Path, provider=None) -> tuple[dict, dict]:
                 if not filt:
                     fr = "allocation_mismatch"
                 else:
-                    rates_allowed = {"L1": 1.0 - M1 / N_BLOCKS}
                     for label in SOURCE_ORDER:
                         tab = SOURCE_TABLE[label]
-                        rates_allowed["L2"] = 1.0 - tab["m2"] / N_BLOCKS
                         mine = [c for c in filt if c.get("source_id") == tab["source_id"]]
-                        checks.append(_check(f"registry_entries[{label}]", len(mine) >= 1,
+                        checks.append(_check(f"registry_entries[{label}]", len(mine) == 10,
                                              f"{len(mine)} calls"))
-                        if not mine:
+                        if len(mine) != 10:
                             fr = fr or "allocation_mismatch"
+                        if not mine:
                             continue
                         m1_ok = all(c.get("m1") == M1 for c in mine)
                         m2_ok = all(c.get("m2") == tab["m2"] for c in mine)
-                        rate_ok = all(
-                            isinstance(c.get("rate"), (int, float)) and
-                            min(abs(float(c["rate"]) - r) for r in rates_allowed.values()) < 1e-9
-                            for c in mine)
+                        expected_pairs = {
+                            (1.0 - M1 / N_BLOCKS,
+                             float(manifest_sources[label]["H"]["L1"])): 5,
+                            (1.0 - tab["m2"] / N_BLOCKS,
+                             float(manifest_sources[label]["H"]["L2"])): 5,
+                        }
+                        observed_pairs = {pair: 0 for pair in expected_pairs}
+                        pair_ok = True
+                        for call in mine:
+                            rate = call.get("rate")
+                            h_val = call.get("H_bits_per_symbol")
+                            matched = [pair for pair in expected_pairs
+                                       if isinstance(rate, (int, float)) and
+                                       isinstance(h_val, (int, float)) and
+                                       abs(float(rate) - pair[0]) < 1e-12 and
+                                       abs(float(h_val) - pair[1]) < 1e-12]
+                            if len(matched) != 1:
+                                pair_ok = False
+                            else:
+                                observed_pairs[matched[0]] += 1
+                        pair_ok = pair_ok and observed_pairs == expected_pairs
                         checks.append(_check(f"m1[{label}]", m1_ok))
                         checks.append(_check(f"m2[{label}]", m2_ok))
-                        checks.append(_check(f"rate[{label}]", rate_ok))
-                        if not m1_ok or not m2_ok or not rate_ok:
+                        checks.append(_check(f"rate_H_identity[{label}]", pair_ok,
+                                             canonical_json({str(k): v for k, v in
+                                                             observed_pairs.items()})))
+                        if not m1_ok or not m2_ok or not pair_ok:
                             fr = fr or "binding_drift"
         except Exception as exc:  # noqa: BLE001
             fr = "malformed_input"
@@ -1162,6 +1280,27 @@ def enumerate_calls() -> list[dict]:
                     "seed": seed,
                 })
     return calls
+
+
+def expected_call_matrix_digest() -> str:
+    """Digest of the frozen scientific call matrix named by EXECUTE_AUTH."""
+    payload = {
+        "calls": enumerate_calls(),
+        "n_samples": N_SAMPLES,
+        "max_iter": MAX_ITER,
+        "entropy_tol_bits": ENTROPY_TOL_BITS,
+        "streak": STREAK,
+        "rng": RNG_NAME,
+        "n_blocks": N_BLOCKS,
+        "m1": M1,
+        "m2_by_source": {
+            label: SOURCE_TABLE[label]["m2"] for label in SOURCE_ORDER
+        },
+        "lambda_edge": {str(k): v for k, v in LAMBDA_EDGE.items()},
+        "factorization": FACT_ID,
+        "field_id": FROZEN_FIELD_ID,
+    }
+    return sha256_bytes(canonical_json(payload).encode("utf-8"))
 
 
 def aggregate(records: list[dict], rates: dict) -> tuple[dict, dict]:
@@ -1279,14 +1418,24 @@ def deny_protected_write(target: Path) -> None:
 def freeze_manifest(report: dict, run_root: Path, auth_info: dict,
                     output_inventory: list) -> dict:
     """Pre-execution manifest: written BEFORE any DE computation."""
+    production = auth_info["mechanism"] == "auth_file"
+    # IR1-FIX1 (F3/F5): mode / auth_mechanism / run_root / code_identity are
+    # part of the digest-protected semantic group; verify re-derives them
+    # independently so recomputing freeze_digest cannot launder tampering.
     manifest = {
         "schema": MANIFEST_SCHEMA,
         "change": CHANGE_NAME,
         "generated_utc": utc_now(),
         "git_head": git_head(),
+        "mode": "production" if production else "fake",
+        "auth_mechanism": (
+            {"mechanism": "auth_file",
+             "auth_file_sha256": auth_info.get("sha256"),
+             "decision_id": auth_info.get("decision_id")}
+            if production else "runner_injection"),
         "lifecycle": {
             "state_machine": "EXECUTE_AUTH granted via mechanical auth gate"
-            if auth_info["mechanism"] == "auth_file" else
+            if production else
             "fake runner injection (authorization gate skipped; workspace-only)",
             "execute_auth": auth_info,
             "collision_checked_at_entry": True,
@@ -1315,6 +1464,11 @@ def freeze_manifest(report: dict, run_root: Path, auth_info: dict,
             "cli": Path(__file__).name,
             "cli_sha256": this_file_sha256(),
         },
+        "code_identity": {
+            "v26_channel_sha256": sha256_file(V26_CHANNEL_SRC),
+            "v26_mcde_sha256": sha256_file(V26_MCDE_SRC),
+            "cli_self_sha256": this_file_sha256(),
+        },
         "run_root": str(run_root),
         "output_inventory": output_inventory,
     }
@@ -1339,16 +1493,8 @@ def verify_freeze_digest(manifest: dict) -> bool:
 def cmd_prepare(args) -> int:
     provider = load_runner(args.runner) if args.runner else None
     report, _ = stage0_validate(REPO_ROOT, provider)
-    text = json.dumps(report, indent=2, sort_keys=True)
-    print(text)
-    if args.report_out:
-        out = Path(args.report_out)
-        try:
-            deny_protected_write(out)
-        except WriteGuardError as exc:
-            print(json.dumps({"blocked": "write_guard", "detail": str(exc)}))
-            return EXIT_WRITE_GUARD
-        out.write_text(text + "\n", encoding="utf-8")
+    # IR1-FIX1 (F1): stdout only -- prepare never writes to disk.
+    print(json.dumps(report, indent=2, sort_keys=True))
     return EXIT_OK if report["ok"] else EXIT_BLOCKED_BINDING
 
 
@@ -1379,6 +1525,47 @@ def _finalize_record(core: dict, request: dict) -> dict:
     return rec
 
 
+def validate_execute_auth(auth, *, expected_commit: str | None = None) -> str | None:
+    """Strict EXECUTE_AUTH schema check (IR1-FIX1 briefing F2).
+
+    Returns ``None`` iff authorized; otherwise a rejection detail string.
+    The payload must be a JSON object whose key set is EXACTLY
+    EXECUTE_AUTH_KEYS with exact values / types per field.
+    """
+    if not isinstance(auth, dict):
+        return "auth payload must be a JSON object"
+    keys = set(auth)
+    missing = sorted(EXECUTE_AUTH_KEYS - keys)
+    if missing:
+        return f"missing required keys: {missing}"
+    extra = sorted(keys - EXECUTE_AUTH_KEYS)
+    if extra:
+        return f"unsupported extra keys: {extra}"
+    for key, want in sorted(EXECUTE_AUTH_EXACT_VALUES.items()):
+        got = auth[key]
+        if got != want or not isinstance(got, str):
+            return f"{key} must equal {want!r} (got {got!r})"
+    impl_commit = auth["implementation_commit"]
+    if not _is_lower_hex(impl_commit, 40):
+        return "implementation_commit must be a 40-char lowercase hex string"
+    current_head = expected_commit or git_head()
+    if impl_commit != current_head:
+        return f"implementation_commit must equal current HEAD {current_head!r}"
+    digest = auth["call_matrix_digest"]
+    if not _is_lower_hex(digest, 64):
+        return "call_matrix_digest must be a 64-char lowercase hex string"
+    expected_digest = expected_call_matrix_digest()
+    if digest != expected_digest:
+        return "call_matrix_digest does not match the frozen call matrix"
+    for key in ("granted_by", "decision_id"):
+        val = auth[key]
+        if not isinstance(val, str) or not val.strip():
+            return f"{key} must be a non-empty string"
+    if auth["granted"] is not True:
+        return "granted must be boolean true"
+    return None
+
+
 def cmd_execute(args) -> int:
     fake = bool(args.runner)
     provider = load_runner(args.runner) if fake else None
@@ -1405,12 +1592,14 @@ def cmd_execute(args) -> int:
             print(json.dumps({"blocked": "unauthorized",
                               "detail": f"auth file unparsable: {exc}"}))
             return EXIT_UNAUTHORIZED
-        if auth.get("granted") is not True:
+        rejection = validate_execute_auth(auth)
+        if rejection:
             print(json.dumps({"blocked": "unauthorized",
-                              "detail": "auth file does not grant execution"}))
+                              "detail": f"auth schema rejected: {rejection}"}))
             return EXIT_UNAUTHORIZED
         auth_info = {"mechanism": "auth_file", "file": str(ap),
-                     "sha256": sha256_file(ap), "granted": True}
+                     "sha256": sha256_file(ap), "granted": True,
+                     "decision_id": auth["decision_id"], "payload": auth}
 
     # 2. path guard (SHALL-PATH1) -- before anything else touches disk
     try:
@@ -1514,27 +1703,42 @@ def cmd_execute(args) -> int:
     return EXIT_OK
 
 
-def _replay_terminal(record: dict) -> tuple[str, list, int | None]:
-    """Independently recompute a call terminal from its persisted H_t trace.
+def _trace_valid(trace) -> bool:
+    """True iff trace is a list of finite, non-negative numbers."""
+    return isinstance(trace, list) and all(
+        isinstance(h, (int, float)) and not isinstance(h, bool)
+        and math.isfinite(h) and h >= 0.0
+        for h in trace)
 
-    Returns ``(terminal, reason_codes, replayed_iterations)``; the iteration
-    count is the streak-completion index for PASS runs (None otherwise)."""
-    trace = record.get("entropy_trace_bits") or []
-    reasons = list(record.get("reason_codes") or [])
-    if "INCONCLUSIVE" in (record.get("terminal"),):
-        return "INCONCLUSIVE", reasons, None
-    if not trace:
-        return "INCONCLUSIVE", sorted(set(reasons) | {"empty_trace"}), None
-    if any((not math.isfinite(h)) or h < 0.0 for h in trace):
-        return "INCONCLUSIVE", sorted(set(reasons) | {"invalid_entropy_values"}), None
+
+def _streak_completion_index(trace) -> int | None:
+    """First iteration index completing STREAK consecutive H_t < tol entries."""
     streak = 0
     for iteration, h in enumerate(trace, start=1):
         streak = streak + 1 if h < ENTROPY_TOL_BITS else 0
         if streak >= STREAK:
-            return "PASS", [], iteration
+            return iteration
+    return None
+
+
+def _replay_terminal(record: dict) -> tuple[str, int | None]:
+    """Independently re-judge a call terminal from its persisted H_t trace
+    ALONE (IR1-FIX1 F4b-1: persisted terminals are never trusted).
+
+    Returns ``(terminal, streak_done_at)``; ``streak_done_at`` is the
+    streak-completion iteration for PASS runs, else None."""
+    trace = record.get("entropy_trace_bits")
+    if not _trace_valid(trace):
+        # unusable entropy evidence can never demonstrate PASS or FAIL
+        return "INCONCLUSIVE", None
+    done_at = _streak_completion_index(trace)
+    if done_at is not None:
+        return "PASS", done_at
     if len(trace) >= MAX_ITER:
-        return "FAIL", ["max_iter_exhausted_without_streak"], None
-    return "INCONCLUSIVE", sorted(set(reasons) | {"truncated_trace"}), None
+        return "FAIL", None
+    # short valid trace without the streak: neither convergence nor
+    # exhaustion is demonstrated => stays INCONCLUSIVE
+    return "INCONCLUSIVE", None
 
 
 def cmd_verify(args) -> int:
@@ -1558,6 +1762,69 @@ def cmd_verify(args) -> int:
                           "problems": ["freeze_digest does not match manifest body"],
                           "exit": EXIT_MANIFEST}))
         return EXIT_MANIFEST
+
+    if manifest.get("schema") != MANIFEST_SCHEMA:
+        problems.append(f"manifest_schema_invalid:{manifest.get('schema')!r}")
+    if manifest.get("change") != CHANGE_NAME:
+        problems.append(f"manifest_change_invalid:{manifest.get('change')!r}")
+
+    # IR1-FIX1 (F3/F5): independent semantic comparison of the protected
+    # lifecycle/identity group -- recomputing freeze_digest after tampering
+    # with these fields must still be rejected here.
+    if os.path.normcase(os.path.abspath(str(manifest.get("run_root") or ""))) != \
+            os.path.normcase(os.path.abspath(str(run_root))):
+        problems.append("run_root_mismatch:"
+                        f"{manifest.get('run_root')!r}!={str(run_root)!r}")
+    mode = manifest.get("mode")
+    auth_mech = manifest.get("auth_mechanism")
+    if mode == "production":
+        ok_am = isinstance(auth_mech, dict) and \
+            auth_mech.get("mechanism") == "auth_file" and \
+            isinstance(auth_mech.get("auth_file_sha256"), str) and \
+            bool(auth_mech.get("auth_file_sha256")) and \
+            isinstance(auth_mech.get("decision_id"), str) and \
+            bool(auth_mech.get("decision_id"))
+        if not ok_am:
+            problems.append("auth_mechanism_invalid_for_production")
+        execute_auth = (manifest.get("lifecycle") or {}).get("execute_auth") or {}
+        payload = execute_auth.get("payload")
+        rejection = validate_execute_auth(
+            payload, expected_commit=manifest.get("git_head"))
+        if rejection:
+            problems.append(f"execute_auth_payload_invalid:{rejection}")
+        if execute_auth.get("sha256") != auth_mech.get("auth_file_sha256"):
+            problems.append("execute_auth_hash_link_mismatch")
+    elif mode == "fake":
+        if auth_mech != "runner_injection":
+            problems.append("auth_mechanism_invalid_for_fake")
+    else:
+        problems.append(f"mode_invalid:{mode!r}")
+    legal_states = {
+        "production": "EXECUTE_AUTH granted via mechanical auth gate",
+        "fake": "fake runner injection (authorization gate skipped; workspace-only)",
+    }
+    if (manifest.get("lifecycle") or {}).get("state_machine") != \
+            legal_states.get(mode):
+        problems.append("lifecycle_state_invalid:"
+                        f"{(manifest.get('lifecycle') or {}).get('state_machine')!r}")
+    ci = manifest.get("code_identity") or {}
+    want_ci = {
+        "v26_channel_sha256": sha256_file(V26_CHANNEL_SRC),
+        "v26_mcde_sha256": sha256_file(V26_MCDE_SRC),
+        "cli_self_sha256": this_file_sha256(),
+    }
+    for key, want in sorted(want_ci.items()):
+        got = ci.get(key)
+        if got != want or not isinstance(got, str):
+            problems.append(f"code_identity_drift:{key}:{got!r}!={want!r}")
+    impl = manifest.get("implementation_identity") or {}
+    if impl.get("cli") != Path(__file__).name or \
+            impl.get("cli_sha256") != want_ci["cli_self_sha256"]:
+        problems.append("implementation_identity_drift")
+
+    for name in manifest.get("output_inventory") or []:
+        if not (run_root / name).exists():
+            problems.append(f"declared_output_missing:{name}")
 
     # bindings: re-validate now and compare against manifest-recorded hashes
     report, _ = stage0_validate(REPO_ROOT, provider)
@@ -1635,21 +1902,61 @@ def cmd_verify(args) -> int:
                 problems.append(f"rho_drift:{i}")
         if rec.get("not_fixed_packet_de") is not True:
             problems.append(f"not_fixed_packet_de_flag_missing:{i}")
-        term, replay_reasons, replay_iters = _replay_terminal(rec)
-        if term != rec.get("terminal"):
-            problems.append(f"terminal_replay_mismatch:{i}:"
-                            f"{rec.get('terminal')}!={term}")
-        if term != "PASS" and not replay_reasons and not rec.get("reason_codes"):
-            problems.append(f"missing_reason_codes:{i}")
-        if term == "PASS" and rec.get("reason_codes"):
-            problems.append(f"pass_with_reasons:{i}")
-        if term == "PASS":
-            need = rec.get("iterations")
-            if need is None or need < STREAK or need > MAX_ITER:
-                problems.append(f"pass_iterations_out_of_range:{i}:{need}")
-            elif need != replay_iters:
-                problems.append(f"pass_iterations_replay_mismatch:{i}:"
-                                f"{need}!={replay_iters}")
+        if rec.get("source_id") != exp["source_id"]:
+            problems.append(f"source_id_drift:{i}")
+        if rec.get("claim_boundary") != CLAIM_BOUNDARY:
+            problems.append(f"call_claim_boundary_drift:{i}")
+        # ---- IR1-FIX1 F4b: independent per-call re-judgment ----------------
+        term, done_at = _replay_terminal(rec)
+        rec_term = rec.get("terminal")
+        rec_trace = rec.get("entropy_trace_bits")
+        rec_iters = rec.get("iterations")
+        rec_reasons = rec.get("reason_codes") or []
+        if term != rec_term:
+            problems.append(f"terminal_replay_mismatch:{i}:{rec_term}!={term}")
+        # structural sanity: iterations bounded, trace length consistent
+        if not isinstance(rec_iters, int) or isinstance(rec_iters, bool) or \
+                not (0 <= rec_iters <= MAX_ITER):
+            problems.append(f"iterations_out_of_range:{i}:{rec_iters!r}")
+        elif not isinstance(rec_trace, list) or len(rec_trace) != rec_iters:
+            problems.append(f"trace_iterations_mismatch:{i}")
+        # termination-event consistency (F4b-3): the recorded terminal must
+        # carry the event class its state implies
+        if rec_term == "PASS":
+            # streak-achievement event: clean reasons, iterations = replay index
+            if rec_reasons:
+                problems.append(f"pass_with_reasons:{i}")
+            if rec_iters != done_at:
+                problems.append(
+                    f"pass_iterations_replay_mismatch:{i}:{rec_iters!r}!={done_at!r}")
+        elif rec_term == "FAIL":
+            # max_iter event: exact exhaustion reason and nothing else
+            if sorted({str(r) for r in rec_reasons}) != \
+                    ["max_iter_exhausted_without_streak"]:
+                problems.append(f"fail_reason_invalid:{i}:{rec_reasons!r}")
+        elif rec_term == "INCONCLUSIVE":
+            # anomaly events (F4b-2): whitelisted reason(s) present, nothing
+            # outside the seven-value whitelist, detail field present
+            bad = sorted({str(r) for r in rec_reasons
+                          if r not in INCONCLUSIVE_REASON_WHITELIST})
+            if bad:
+                problems.append(
+                    f"inconclusive_reason_out_of_whitelist:{i}:{bad}")
+            if not rec_reasons:
+                problems.append(f"inconclusive_reason_missing:{i}")
+            detail = rec.get("detail")
+            if not (isinstance(detail, str) and detail):
+                problems.append(f"inconclusive_detail_missing:{i}")
+            # trace anti-contradiction (F4b-4): a usable trace containing the
+            # PASS streak or running to full max_iter can never be
+            # INCONCLUSIVE, whatever the record claims
+            if _trace_valid(rec_trace):
+                if _streak_completion_index(rec_trace) is not None:
+                    problems.append(f"inconclusive_with_pass_streak:{i}")
+                elif len(rec_trace) >= MAX_ITER:
+                    problems.append(f"inconclusive_with_full_valid_trace:{i}")
+        else:
+            problems.append(f"terminal_unknown:{i}:{rec_term!r}")
 
     # duplicate/missing coverage independent of ordering
     wanted = {(c["source_label"], c["layer"], c["seed"]) for c in expected}
@@ -1657,32 +1964,61 @@ def cmd_verify(args) -> int:
     if missing:
         problems.append(f"missing_calls:{sorted(missing)}")
 
-    # cell + overall recomputation
-    if records:
-        cells, overall = aggregate(records, report["rates"])
-        cell_path = run_root / "de_cell_matrix.json"
-        if not cell_path.exists():
-            problems.append("de_cell_matrix.json missing")
-        else:
-            stored_cells = json.loads(cell_path.read_text(encoding="utf-8")).get("cells") or {}
-            if {k: v.get("terminal") for k, v in stored_cells.items()} != \
-                    {k: v["terminal"] for k, v in cells.items()}:
-                problems.append("cell_terminals_recompute_mismatch")
-        final_path = run_root / "final_state.json"
-        if not final_path.exists():
-            problems.append("final_state.json missing")
-        else:
+    # cell + overall recomputation from the independently re-judged calls
+    # (F4b-1/-5): tampering ANY single layer -- call record, stored cell or
+    # final state -- breaks at least one cross-layer equality below.
+    cells, overall = aggregate(records, report["rates"])
+    cell_path = run_root / "de_cell_matrix.json"
+    if not cell_path.exists():
+        problems.append("de_cell_matrix.json missing")
+    else:
+        try:
+            stored_cells = json.loads(
+                cell_path.read_text(encoding="utf-8")).get("cells") or {}
+        except Exception as exc:  # noqa: BLE001
+            problems.append(f"de_cell_matrix unparsable: {exc}")
+            stored_cells = {}
+
+        def cell_view(c: dict) -> dict:
+            return {k: c.get(k) for k in ("source_label", "layer", "seeds",
+                                          "terminals", "terminal",
+                                          "reason_codes", "rate")}
+
+        if {k: cell_view(v) for k, v in stored_cells.items()} != \
+                {k: cell_view(v) for k, v in cells.items()}:
+            problems.append("cell_matrix_recompute_mismatch")
+    final_path = run_root / "final_state.json"
+    if not final_path.exists():
+        problems.append("final_state.json missing")
+    else:
+        try:
             final_state = json.loads(final_path.read_text(encoding="utf-8"))
-            if final_state.get("overall_terminal") != overall["terminal"]:
-                problems.append("overall_terminal_recompute_mismatch:"
-                                f"{final_state.get('overall_terminal')}!={overall['terminal']}")
-            if final_state.get("overall_label") != overall["label"]:
-                problems.append("overall_label_recompute_mismatch")
-            if final_state.get("not_fixed_packet_de") is not True:
-                problems.append("final_state_not_fixed_packet_de_flag")
-            if final_state.get("qualification") is not False or \
-                    final_state.get("promotion") is not False:
-                problems.append("claim_flags_invalid")
+        except Exception as exc:  # noqa: BLE001
+            problems.append(f"final_state unparsable: {exc}")
+            final_state = {}
+        if final_state.get("overall_terminal") != overall["terminal"]:
+            problems.append("overall_terminal_recompute_mismatch:"
+                            f"{final_state.get('overall_terminal')}!={overall['terminal']}")
+        if final_state.get("overall_label") != overall["label"]:
+            problems.append("overall_label_recompute_mismatch")
+        if final_state.get("reason_codes") != overall["reason_codes"]:
+            problems.append("overall_reason_codes_recompute_mismatch:"
+                            f"{final_state.get('reason_codes')!r}"
+                            f"!={overall['reason_codes']!r}")
+        if final_state.get("calls_total") != len(records):
+            problems.append("calls_total_recompute_mismatch:"
+                            f"{final_state.get('calls_total')}!={len(records)}")
+        if final_state.get("freeze_digest_ref") != manifest.get("freeze_digest"):
+            problems.append("freeze_digest_ref_mismatch")
+        if final_state.get("not_fixed_packet_de") is not True:
+            problems.append("final_state_not_fixed_packet_de_flag")
+        if final_state.get("qualification") is not False or \
+                final_state.get("promotion") is not False:
+            problems.append("claim_flags_invalid")
+        if final_state.get("candidate_only") is not True or \
+                final_state.get("main_acceptance_pending") is not True or \
+                final_state.get("claim_boundary") != CLAIM_BOUNDARY:
+            problems.append("candidate_claim_boundary_invalid")
 
     verdict = {
         "verdict": "consistent" if not problems else "evidence_inconsistent",
@@ -1783,9 +2119,7 @@ def main(argv: list | None = None) -> int:
                     "(ensemble/channel layer only; not_fixed_packet_de=true).")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p_prep = sub.add_parser("prepare", help="stage-0 R1-R7 binding validation report")
-    p_prep.add_argument("--report-out", default=None,
-                        help="optional path to also write the binding report JSON")
+    p_prep = sub.add_parser("prepare", help="stage-0 R1-R7 binding validation report (stdout only)")
     p_prep.add_argument("--runner", default=None, help="MODULE:ATTR fake provider (tests)")
     p_prep.set_defaults(func=cmd_prepare)
 
@@ -1800,7 +2134,9 @@ def main(argv: list | None = None) -> int:
     p_exe = sub.add_parser("execute", help="production DE execution (authorized, exact-once)")
     p_exe.add_argument("--run-root", default=str(OFFICIAL_RUN_ROOT))
     p_exe.add_argument("--execute-auth-file", default=None,
-                       help='JSON file with {"granted": true, ...}')
+                       help="JSON file with the exact nine-field "
+                            "nbldpc_v33_execute_auth_v1 schema (granted=true); "
+                            "any missing/wrong/extra key => exit 7")
     p_exe.add_argument("--runner", default=None, help="MODULE:ATTR fake provider (tests)")
     p_exe.set_defaults(func=cmd_execute)
 

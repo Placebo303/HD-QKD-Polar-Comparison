@@ -154,11 +154,12 @@ def build_fixtures(fx_repo: Path) -> None:
 
     sources = {}
     for lbl in LABELS:
+        h = v33.empirical_f03_entropies(make_counts(lbl))
         sources[lbl] = {
             "source_id": SIDS[lbl], "delay_used_ps": 50,
             "m_total": 16 + M2_MAP[lbl], "m1": 16, "m2": M2_MAP[lbl],
-            "H": {"L1": 0.11 + 0.01 * LABELS.index(lbl), "L2": 0.22},
-            "leak_total_bits": LEAK_MAP[lbl], "f_total": 1.2949,
+            "H": h, "leak_total_bits": LEAK_MAP[lbl],
+            "f_total": LEAK_MAP[lbl] / (v33.N_BLOCKS * sum(h.values())),
         }
     put("R4", {"schema": "nbldpc_v31_run_manifest_v1", "configs": {"1024": {
         "schema": "nbldpc_v31_frozen_config_v1", "q": 32, "n": 1024, "m1": 16,
@@ -174,10 +175,12 @@ def build_fixtures(fx_repo: Path) -> None:
     registry = []
     for lbl in LABELS:
         for lyr in LAYERS:
-            registry.append({
-                "allocation_id": ALLOCATION_ID_LITERAL, "layer": lyr,
-                "source_id": SIDS[lbl], "m1": 16, "m2": M2_MAP[lbl],
-                "rate": RATES_LITERAL[lyr][lbl]})
+            for _ in range(5):
+                registry.append({
+                    "allocation_id": ALLOCATION_ID_LITERAL, "layer": lyr,
+                    "source_id": SIDS[lbl], "m1": 16, "m2": M2_MAP[lbl],
+                    "rate": RATES_LITERAL[lyr][lbl],
+                    "H_bits_per_symbol": sources[lbl]["H"][lyr]})
     # Decoy allocation with wrong rates: must be filtered out by allocation id.
     for lbl in LABELS[:2]:
         registry.append({"allocation_id": "m1_16_n2048_decoy", "layer": "L2",
@@ -206,10 +209,11 @@ def _tiered_behavior(req: dict) -> dict:
                 "iterations": MAX_ITER_LITERAL,
                 "entropy_trace_bits": [0.02, 0.05] * 100,
                 "final_entropy_bits": 0.05}
-    return {"terminal": "INCONCLUSIVE", "reason_codes": ["numeric"],
+    return {"terminal": "INCONCLUSIVE", "reason_codes": ["numeric_nan"],
             "iterations": 3,
             "entropy_trace_bits": [0.5, 0.2, float("nan")],
-            "final_entropy_bits": None}
+            "final_entropy_bits": None,
+            "detail": "fixture pathology: NaN entropy trace bit at terminal iteration"}
 
 
 def _all_pass(_req: dict) -> dict:
@@ -471,13 +475,27 @@ def test_t0_real_engine_toys_pass_fail_nan():
                            n_samples=64, max_iter=8)
     assert bad["terminal"] == "FAIL"
     assert bad["iterations"] == 8 and len(bad["entropy_trace_bits"]) == 8
-    # non-finite channel mass -> NumericError path => INCONCLUSIVE(numeric)
+    # non-finite channel mass -> NumericError path => INCONCLUSIVE(numeric_nan)
     nan_qd = v33.build_q_joint(toy)
     nan_qd["p_u1_gb"][0, 3] = np.nan
     nanrec = v33.mcde_iterate(nan_qd, "L1", 7, rate=0.984375,
                               n_samples=64, max_iter=8)
     assert nanrec["terminal"] == "INCONCLUSIVE"
-    assert nanrec["reason_codes"] == ["numeric"]
+    assert nanrec["reason_codes"] == ["numeric_nan"]
+    assert isinstance(nanrec.get("detail"), str) and nanrec["detail"]
+
+
+def test_t0_numeric_reason_classification_is_scientifically_specific():
+    state = {"p": np.array([1.0])}
+    pop = np.full((2, v33.Q), 1.0 / v33.Q)
+    assert v33._numeric_pathology(
+        state, pop, [], v33.NumericError("negative mass"))[0] == \
+        "negative_probability"
+    assert v33._numeric_pathology(
+        state, pop, [], v33.NumericError("not normalized"))[0] == \
+        "normalization_failed"
+    assert v33._numeric_pathology(
+        state, pop, [], RuntimeError("unexpected"))[0] == "internal_exception"
 
 
 def test_t0_static_whitelist_no_forbidden_calls_and_test_isolation():
@@ -580,6 +598,29 @@ def test_t1_stage0_five_failure_reasons(tmp_path, victim, reason):
     assert report["reasons"] == [reason]
 
 
+def test_t1_stage0_rejects_r4_entropy_and_r6_layer_identity_drift(tmp_path):
+    fx = tmp_path / "fixture_repo"
+    build_fixtures(fx)
+
+    r4 = fx / v33.BINDING_PATHS["R4"]
+    doc = _load(r4)
+    doc["configs"]["1024"]["sources"]["1M"]["H"]["L2"] += 0.01
+    _dump(r4, doc)
+    report, _ = v33.stage0_validate(fx, None)
+    assert "binding_drift" in report["reasons"]
+
+    build_fixtures(fx)
+    r6 = fx / v33.BINDING_PATHS["R6"]
+    doc = _load(r6)
+    target = next(c for c in doc["registered_calls"]
+                  if c["source_id"] == SIDS["1M"] and
+                  c["rate"] == RATES_LITERAL["L2"]["1M"])
+    target["H_bits_per_symbol"] = doc["registered_calls"][0]["H_bits_per_symbol"]
+    _dump(r6, doc)
+    report, _ = v33.stage0_validate(fx, None)
+    assert "binding_drift" in report["reasons"]
+
+
 @pytest.mark.parametrize("reason", STAGE0_REASONS)
 def test_t1_execute_stage0_failure_zero_de_calls(tmp_path, reason, capsys):
     """SHALL-SF1: blocked stage-0 => zero DE calls, no run root, no fabricated
@@ -622,6 +663,23 @@ def test_t1_unauthorized_execute_paths(tmp_path, capsys):
     assert not v33.OFFICIAL_RUN_ROOT.exists()          # zero side effects
 
 
+def test_t1_execute_auth_binds_head_and_call_matrix():
+    auth = dict(v33.EXECUTE_AUTH_EXACT_VALUES)
+    auth.update({
+        "implementation_commit": v33.git_head(),
+        "call_matrix_digest": v33.expected_call_matrix_digest(),
+        "granted_by": "Codex main",
+        "decision_id": "test-only",
+        "granted": True,
+    })
+    assert v33.validate_execute_auth(auth) is None
+
+    bad_commit = dict(auth, implementation_commit="0" * 40)
+    assert "current HEAD" in v33.validate_execute_auth(bad_commit)
+    bad_matrix = dict(auth, call_matrix_digest="0" * 64)
+    assert "frozen call matrix" in v33.validate_execute_auth(bad_matrix)
+
+
 def test_t1_path_guard_full_scenarios():
     def w(rel: str) -> Path:
         return v33.REPO_ROOT / rel
@@ -652,23 +710,13 @@ def test_t1_path_guard_full_scenarios():
     assert v33.guard_run_root(fresh, fake=True) == fresh.resolve()
 
 
-def test_t1_deny_protected_write_report_out(tmp_path, capsys):
-    root, rc = _flow(tmp_path)
-    assert rc == v33.EXIT_OK
-    # prepare --report-out into a protected/diagnostics location => exit 6
-    for bad in (v33.REPO_ROOT / v33.DIAGNOSTICS_REL, v33.RESULTS_ROOT,
-                v33.ARCHIVE_ROOT,
-                v33.REPO_ROOT / v33.PROTECTED_OLD_ROOTS[0][1]):
-        rcp = v33.main(["prepare", "--runner", RUNNER_SPEC,
-                        "--report-out", str(bad)])
-        assert rcp == v33.EXIT_WRITE_GUARD
-        assert _payload(capsys)["blocked"] == "write_guard"
-    # benign target under the fresh basetemp => allowed and written
-    out = tmp_path / "reports" / "binding_report.json"
-    out.parent.mkdir(parents=True)
-    assert v33.main(["prepare", "--runner", RUNNER_SPEC,
-                     "--report-out", str(out)]) == v33.EXIT_OK
-    assert _load(out)["ok"] is True
+def test_t1_prepare_rejects_removed_report_out(tmp_path):
+    out = tmp_path / "binding_report.json"
+    with pytest.raises(SystemExit) as exc:
+        v33.main(["prepare", "--runner", RUNNER_SPEC,
+                  "--report-out", str(out)])
+    assert exc.value.code == 2
+    assert not out.exists()
 
 
 def test_t1_collision_existing_root_byte_frozen(tmp_path):
@@ -736,11 +784,16 @@ def test_t1_verify_binding_and_field_tamper_post_run(tmp_path, capsys):
     (lambda recs: recs[0]["params"].__setitem__("streak", 5), "param_drift"),
     (lambda recs: recs[0].__setitem__("not_fixed_packet_de", False),
      "not_fixed_packet_de_flag_missing"),
+    (lambda recs: recs[0].__setitem__("source_id", "wrong-source"),
+     "source_id_drift"),
+    (lambda recs: recs[0].__setitem__("claim_boundary", "finite-ready"),
+     "call_claim_boundary_drift"),
     (lambda recs: recs[0].__setitem__("terminal", "FAIL"), "terminal_replay"),
     (lambda recs: recs[0].__setitem__(
         "entropy_trace_bits", recs[0]["entropy_trace_bits"][:10]),
      "terminal_replay"),
-], ids=["rate", "rho", "params", "flag", "terminal", "truncated_trace"])
+], ids=["rate", "rho", "params", "flag", "source_id", "claim_boundary",
+        "terminal", "truncated_trace"])
 def test_t1_verify_record_drift_family(tmp_path, mutate, token, capsys):
     root, rc = _flow(tmp_path, behavior=_all_pass)     # uniform PASS records
     assert rc == v33.EXIT_OK
@@ -750,6 +803,19 @@ def test_t1_verify_record_drift_family(tmp_path, mutate, token, capsys):
     _dump(cp, doc)
     assert _sub("verify", root) == v33.EXIT_EVIDENCE_INCONSISTENT
     assert any(token in p for p in _problems(capsys))
+
+
+def test_t1_verify_rejects_final_claim_promotion(tmp_path, capsys):
+    root, rc = _flow(tmp_path, behavior=_all_pass)
+    assert rc == v33.EXIT_OK
+    fp = root / "final_state.json"
+    final = _load(fp)
+    final["candidate_only"] = False
+    final["claim_boundary"] = "qualified"
+    _dump(fp, final)
+    assert _sub("verify", root) == v33.EXIT_EVIDENCE_INCONSISTENT
+    assert any("candidate_claim_boundary_invalid" in p
+               for p in _problems(capsys))
 
 
 @pytest.mark.parametrize("attack,token", [
@@ -820,7 +886,7 @@ def test_t2_full_flow_three_way_routing_and_files(tmp_path):
     final = _load(root / "final_state.json")
     assert final["overall_terminal"] == "INCONCLUSIVE"
     assert final["overall_label"] == v33.OVERALL_INCONCLUSIVE_LABEL
-    assert final["reason_codes"] == ["numeric"]
+    assert final["reason_codes"] == ["numeric_nan"]
     assert final["calls_total"] == 30
     assert final["not_fixed_packet_de"] is True
     assert final["candidate_only"] is True
@@ -832,6 +898,8 @@ def test_t2_full_flow_three_way_routing_and_files(tmp_path):
     assert len(records) == 30
     assert all(r["not_fixed_packet_de"] is True for r in records)
     assert all(r["claim_boundary"] == v33.CLAIM_BOUNDARY for r in records)
+    assert all(isinstance(r.get("detail"), str) and r["detail"]
+               for r in records if r["terminal"] == "INCONCLUSIVE")
     ref = _load(root / "v26_reference_readonly.json")
     assert ref["gate"]["status"] == "pass_target_f13"
 

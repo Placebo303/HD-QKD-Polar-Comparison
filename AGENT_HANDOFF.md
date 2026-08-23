@@ -1,3 +1,25 @@
+## 2026-08-24 V33 IR1 fix candidate — performance-first roadmap
+
+- Current change: `formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic`.
+- State: `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`; official
+  `nbldpc_v33_rate_aligned_empirical_de/run_01` does not exist.
+- Current candidate adds exact R4 empirical F03 H/m_total/f_total checks, R6
+  rate+H identity checks, strict HEAD/call-matrix authorization values,
+  scientific numeric reason codes, and provenance/claim-boundary replay.
+- Evidence: compile passed; real-input `prepare` passed; selfcheck passed;
+  focused suite `55 passed` at workspace basetemp
+  `workspace/v33_ir1_acceptance_r7` (no real DE/decoder).
+- Independent Luna IR1 re-review of this fix candidate is still required before
+  main-thread implementation ACCEPT. Formal DE still needs a separate
+  `EXECUTE_AUTH` after a clean scoped implementation commit.
+- Performance-first roadmap:
+  `docs/hd-qkd-ir-performance-roadmap-20260824.md`.
+- Scientific priority: V33 exact-rate empirical-P ensemble gate; if it passes,
+  one matched finite-control; if finite conversion still fails, move to
+  protograph/MET/lifting rather than more QC/PEG seed tuning.
+- Do not delete/overwrite historical outputs, run V33, start finite-control,
+  implement NB-Polar, push, or claim qualification/promotion.
+
 ## 2026-08-21 V31 — CLOSED finite_graph_fail (archived)
 
 - V31 deterministic finite-graph redesign gate executed and archived.
