@@ -1,0 +1,17 @@
+{
+  "schema": "v36_empirical_graph_manifest_v1",
+  "method": "formal_ir_v36_empirical_graph",
+  "field_id": "c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf",
+  "terminal_status": "NO_FINITE_GRAPH_ADVANCE",
+  "files": [
+    "de_candidate_grid.csv",
+    "de_coarse_results.csv",
+    "de_confirmation_results.csv",
+    "de_shortlist.json",
+    "finite_graph_metrics.csv",
+    "finite_block_results.csv",
+    "incremental_block_results.csv",
+    "summary.json"
+  ],
+  "timestamp": "2026-08-24T09:46:28Z"
+}

@@ -1,0 +1,2 @@
+candidate_id,dbar_v,max_check_degree,mean_entropy,std_entropy,worst_entropy,all_converged
+lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00,2.1622,13,0.000000,0.000000,0.000000,True

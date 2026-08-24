@@ -23,6 +23,50 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-24: Use GitHub as the ChatGPT/OpenCode research exchange surface
+
+**Decision**: Use repository-native, copy-pasteable handoffs rather than MCP.
+ChatGPT owns planning and read-only scientific review; OpenCode implements a
+frozen packet; the user/main reviewer owns acceptance and formal-execution
+authorization. `docs/research-cycle-sop.md` is the workflow authority.
+
+**Context**: Chat histories are not durable or shared, and high-capability
+execution models can confidently invent missing requirements or overstate
+results. Each side therefore receives an exact repository/branch/SHA and a
+fixed entrypoint, then returns a stable schema that is copied back into Git.
+
+**Data decision**: Each research milestone includes compact machine-readable
+data when practical. Large, binary, raw, private, or replaceable artifacts may
+remain outside Git only when the commit includes a result summary with data
+identity, seeds, commands, metrics, omissions, claim limits, and reproduction
+or retrieval instructions.
+
+**Publishing boundary**: Normal non-force pushes only. An incompatible remote
+Polar/crosstalk line is not merged into the formal-IR research history; use a
+separate formal-IR branch.
+
+**Consequences**: Agent completion is not acceptance, a test pass is not
+scientific success, and development evidence is not qualification. The SOP
+must remain lighter than the algorithm work it supports.
+
+### 2026-08-24: Preserve V36 as an exploratory residual signal, not an accepted candidate
+
+**Decision**: Retain V36 code and compact run data, but label A1 DE selection
+unaccepted, A2 structural gate failed, and A3 development-only exploratory.
+The overall terminal remains `NO_FINITE_GRAPH_ADVANCE`.
+
+**Evidence**: The paired finite data show mean residual 174.80 -> 157.07 and
+10/15 improved blocks, but 0/15 exact recovery. All source median gates miss
+15%; two blocks worsen by more than 10 errors. The realized graphs contain
+thousands of 4-cycles and degree-2 cycle ranks 779--801 despite a frozen zero
+cycle requirement. DE confirmation did not compare each source to a baseline
+under identical confirmation settings or enforce the required 10% threshold.
+
+**Consequences**: V36 supports a bounded hypothesis that low-average-degree
+irregular graphs deserve a corrected finite-aware test. It does not prove
+empirical-P DE superiority, trapping-set causality, general FER improvement,
+or the necessity of MET.
+
 ### 2026-08-24: Close V34 as an ER1-accepted bounded finite-control failure
 
 **Decision**: Accept the single authorized V34 official run as

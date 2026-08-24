@@ -317,6 +317,28 @@ Qualification still requires separate prepare, main-thread review, execute,
 and read-only verify stages, with immutable failure retention and all
 pre-registered no-rerun/no-tuning rules intact.
 
+### 10.2 GitHub-Centered ChatGPT/OpenCode Exchange
+
+- Use `docs/research-cycle-sop.md` for every new research cycle. GitHub is the
+  durable exchange surface; chat history is not project state.
+- ChatGPT performs planning and read-only scientific review. OpenCode performs
+  frozen implementation, focused tests, and only explicitly authorized
+  development runs. Neither may grant its own acceptance, formal-execution
+  authorization, qualification, or promotion.
+- Every handoff names the repository, branch/PR, full target SHA, cycle ID,
+  entrypoint document, lifecycle state, and allowed action. If the reviewer
+  cannot verify the target SHA, its result is advisory and cannot be ACCEPT.
+- Every research milestone commit/PR includes the applicable OpenSpec, code,
+  tests, and compact machine-readable data. If raw/large/binary/private data
+  cannot be committed, include a result summary with provenance, seeds,
+  commands, primary metrics, omitted artifacts/reasons, and reproduction or
+  retrieval instructions.
+- Use the copy-paste prompts under `docs/prompts/` and preserve agent returns in
+  the cycle documents. Report deltas; do not paste growing chat histories.
+- Publish with ordinary non-force pushes. If a remote branch carries an
+  incompatible Polar or sibling-checkout line, push a clearly named formal-IR
+  branch instead of merging crosstalk or force-updating that branch.
+
 ---
 
 *This file is authoritative. If behavior diverges from what is written here, update this file via an OpenSpec change.*

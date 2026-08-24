@@ -1,0 +1,16 @@
+{
+  "calls_total": 60,
+  "candidate_only": true,
+  "change": "formal-nonbinary-ldpc-v34-corrected-matched-empirical-p-finite-control",
+  "claim_boundary": "corrected matched empirical-P finite control only; one V31 QC packet; oracle L1; V32 ProductionRunner max_iter=30; no FER, key rate, qualification, operational, promotion, or general NB-LDPC claim",
+  "fatal": false,
+  "freeze_digest_ref": "477e048f9d816cead7fa0dcc8700512044faabe2d179d15b787d8cc9978d5136",
+  "main_acceptance_pending": true,
+  "no_resume_no_retry": true,
+  "overall_terminal": "matched_empirical_finite_control_fail",
+  "promotion": false,
+  "qualification": false,
+  "records": 60,
+  "schema": "nbldpc_v34_corrected_matched_empirical_p_final_v1",
+  "terminal": "matched_empirical_finite_control_fail"
+}

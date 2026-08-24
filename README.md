@@ -21,6 +21,21 @@ This repository contains the current HD-QKD Polar comparison workspace, includin
 
 ## Current Status
 
+As of 2026-08-24, the active research mainline is performance-first formal IR:
+
+- V34 is closed as an ER1-accepted bounded failure for the tested matched
+  empirical-P V31 QC packet/decoder (`0/60` exact, useful residual reduction).
+- V35R1 is a bounded negative for one hand-designed mixed-degree NB-LDPC
+  configuration; it does not close empirical-P irregular or MET designs.
+- V36 produced an exploratory paired residual signal, but its DE selection and
+  finite-graph structural gates do not satisfy the frozen OpenSpec. It is not
+  an accepted candidate and remains `NO_FINITE_GRAPH_ADVANCE`.
+- The next algorithm decision is a small corrected DE/finite-graph experiment,
+  not automatic MET promotion or more verifier infrastructure.
+
+The older Polar reporting line below remains frozen baseline context, not the
+active algorithm-development objective.
+
 As of 2026-03-27, the current reporting line is:
 - `PRIMARY_REPORTING_MODE = actual_ir_finite_key`
 - `BETA_BASELINE_ROLE = comparison_only`
@@ -36,6 +51,14 @@ Route A correctness-side verification is formalized with per-block universal has
 Route B-lite is a completed archived study. Its LLR-only gains were local and unstable, so it is not part of the mainline.
 
 ## Main Documents
+
+- GitHub/ChatGPT/OpenCode research-cycle SOP:
+  - [docs/research-cycle-sop.md](docs/research-cycle-sop.md)
+  - [ChatGPT review prompt](docs/prompts/chatgpt-research-review.md)
+  - [OpenCode execution prompt](docs/prompts/opencode-research-execution.md)
+- active formal-IR state:
+  - [AGENT_HANDOFF.md](AGENT_HANDOFF.md)
+  - [docs/nbldpc-v36-empirical-graph-development.md](docs/nbldpc-v36-empirical-graph-development.md)
 
 - latest workflow and run method:
   - [docs/POLAR_CODE_MAINFLOW_20260327.md](docs/POLAR_CODE_MAINFLOW_20260327.md)
@@ -103,6 +126,12 @@ Comparison benchmark entrypoints:
 - `python -m comparison_bench.src.comparison_bench.cli.compare_methods`
 
 ## Recommended Usage
+
+For a new research cycle, begin with
+[docs/research-cycle-sop.md](docs/research-cycle-sop.md). Freeze an OpenSpec
+plan, push a Git candidate, obtain a copy-pasteable ChatGPT review, then give
+OpenCode the accepted SHA and frozen execution packet. Commit compact result
+data or the standard result summary before the next review.
 
 If you only need the current best result package, read the existing outputs and do not rerun the physics front half.
 

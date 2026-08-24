@@ -1,0 +1,11 @@
+{
+  "schema": "v35_algorithm_development_manifest_v1",
+  "method": "formal_ir_v35_algorithm_development",
+  "field_id": "c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf",
+  "terminal_status": "NO_CANDIDATE_SUCCESS",
+  "files": {
+    "blocks_csv": "v35_algorithm_development_blocks.csv",
+    "summary_json": "v35_algorithm_development_summary.json"
+  },
+  "timestamp": "2026-08-24T08:02:59Z"
+}

@@ -1,0 +1,52 @@
+{
+  "schema": "v35_algorithm_development_summary_v1",
+  "terminal_status": "NO_CANDIDATE_SUCCESS",
+  "stages_mode": "auto",
+  "evaluation_matrix": {
+    "sources": [
+      "1M",
+      "1p5M",
+      "2M"
+    ],
+    "seeds_per_source": 5,
+    "total_development_blocks": 15
+  },
+  "stage_summaries": {
+    "A1_decoder_schedules": {
+      "records_evaluated": 45,
+      "exact_successes": 0,
+      "conclusion": "schedule_alone_insufficient"
+    },
+    "A2_protograph_design": {
+      "records_evaluated": 15,
+      "exact_successes": 0,
+      "avg_variable_degree": 2.8125,
+      "girth": 6
+    },
+    "A3_incremental_syndrome": {
+      "records_evaluated": 15,
+      "per_source_successes": {
+        "1M": 0,
+        "1p5M": 0,
+        "2M": 0
+      },
+      "source_threshold_met": false,
+      "total_false_accepts": 0
+    },
+    "A4_binary_mlc_fallback": {
+      "executed": true,
+      "records_evaluated": 15,
+      "per_source_successes": {
+        "1M": 0,
+        "1p5M": 0,
+        "2M": 0
+      },
+      "total_false_accepts": 0
+    }
+  },
+  "overall_metrics": {
+    "total_records": 90,
+    "terminal_status": "NO_CANDIDATE_SUCCESS",
+    "total_wallclock_s": 423.0344
+  }
+}

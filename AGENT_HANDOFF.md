@@ -8,6 +8,52 @@ scientific result wrong, irreproducible, unauthorized, or destructive to
 existing data. See AGENTS.md §1.1 and
 `openspec/changes/research-code-engineering-policy/`.
 
+## 2026-08-24 COLLABORATION SOP — GITHUB / CHATGPT / OPENCODE
+
+- Durable protocol: `docs/research-cycle-sop.md`.
+- ChatGPT copy prompt: `docs/prompts/chatgpt-research-review.md`.
+- OpenCode copy prompt: `docs/prompts/opencode-research-execution.md`.
+- Git/PR contract: `.github/pull_request_template.md`; compact result template:
+  `docs/templates/research-result-summary-template.md`.
+- ChatGPT is the planner/read-only scientific reviewer. OpenCode is a frozen
+  implementation operator. Agent text becomes project state only after it is
+  copied into a cycle document and committed.
+- Every handoff binds an exact SHA. Every milestone includes compact data or a
+  data-summary/provenance document. Formal execution remains a separate user
+  authorization.
+- GitHub `origin/main` currently contains an incompatible Polar/crosstalk line
+  not present in this formal-IR checkout. Do not merge or force-push it into
+  this mainline; publish this state on a distinct formal-IR branch.
+
+## 2026-08-24 V35R1 / V36 DEVELOPMENT STATE
+
+- V35R1 `run_02` supersedes invalid `run_01`. It tested the V31 baseline
+  schedules, one hand-designed mixed-degree graph, and cold-start incremental
+  checks. All tested NB configurations had 0/15 exact recovery; the
+  hand-designed graph worsened residuals. A4 MLC was not executed. This is a
+  bounded negative for the tested configuration only. Because the original
+  V35 OpenSpec required conditional A4 execution, V35R1 is also
+  `PROTOCOL_PARTIAL_A4_NOT_EXECUTED`; it is not the original full four-stage
+  `NO_CANDIDATE_SUCCESS` terminal.
+- V36 code and `run_01` are retained as exploratory research evidence. Its
+  paired finite screen is real: baseline mean residual 174.80, candidate
+  157.07; 10/15 blocks improved, but exact recovery remained 0/15 and the
+  per-source advance gates failed.
+- V36 A1 is not accepted: the implementation did not enforce the required
+  per-source >=10% confirmation against a same-setting baseline and the final
+  entropy metric saturated near zero.
+- V36 A2 failed the frozen graph gate: actual graphs contain 2288--3002
+  4-cycles and degree-2 cycle ranks 779--801, while the OpenSpec required zero.
+  The pipeline nevertheless entered A3, so A3 is development-only exploratory
+  evidence rather than a protocol-compliant advance.
+- Current status:
+  `V36_A3_POSITIVE_EXPLORATORY_SIGNAL / A1_DE_SELECTION_NOT_ACCEPTED /
+  A2_STRUCTURAL_GATE_FAILED / NO_FINITE_GRAPH_ADVANCE`.
+- Do not claim that V36 proves empirical-P DE superiority, trapping-set
+  causality, general FER improvement, or MET necessity. The next plan must
+  repair the numerical objective and reconcile degree-2 distribution with
+  realizable finite-graph constraints before another bounded A/B.
+
 ## 2026-08-24 V34 COMPLETE — BOUNDED FAIL / ER1 ACCEPT
 
 - Accepted implementation HEAD: `c8cc1fbe6ef37bc2735de3f6795c29d7042670ff`.

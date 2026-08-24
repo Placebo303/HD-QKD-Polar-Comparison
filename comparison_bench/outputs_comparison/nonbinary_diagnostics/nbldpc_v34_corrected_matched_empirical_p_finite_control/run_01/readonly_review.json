@@ -1,0 +1,72 @@
+{
+  "schema": "nbldpc_v34_er1_readonly_review_v1",
+  "review": "ACCEPT_ER1",
+  "reviewed_utc": "2026-08-24T05:25:00Z",
+  "reviewer": "independent_luna_worker",
+  "decoder_or_execute_invoked": false,
+  "implementation_commit": "c8cc1fbe6ef37bc2735de3f6795c29d7042670ff",
+  "freeze_commit": "f5f61eb672afe8e399727fa5d7507ca9f2f9151a",
+  "call_matrix_digest": "d30335b4d0d74df3e7729e01b02ae1ae73e43035652c59e81f871a5545fe73bb",
+  "authorization_decision_id": "user-v34-execute-auth-20260824-01",
+  "records_checked": 60,
+  "ordinals_complete": true,
+  "missing_records": 0,
+  "duplicate_records": 0,
+  "x2_hat_records": 60,
+  "l2_initial_errors_recomputed": true,
+  "l2_final_errors_recomputed": true,
+  "runtime_finite_nonnegative": true,
+  "run_02_exists": false,
+  "absolute_path_verify": {
+    "verdict": "consistent",
+    "problems": [],
+    "records_checked": 60
+  },
+  "relative_path_verify_note": "An earlier read-only invocation used a relative path and reported only run_root_mismatch because the manifest stores the absolute root; no decoder or write occurred.",
+  "sources": {
+    "1M": {
+      "blocks": 20,
+      "successes": 0,
+      "l2_errors_initial_mean": 249.25,
+      "l2_errors_initial_min": 212,
+      "l2_errors_initial_max": 269,
+      "l2_errors_final_mean": 168.45,
+      "l2_errors_final_min": 139,
+      "l2_errors_final_max": 196,
+      "runtime_s_mean": 10.1936,
+      "runtime_s_min": 9.25,
+      "runtime_s_max": 10.625,
+      "terminal": "FAIL"
+    },
+    "1p5M": {
+      "blocks": 20,
+      "successes": 0,
+      "l2_errors_initial_mean": 261.35,
+      "l2_errors_initial_min": 239,
+      "l2_errors_initial_max": 288,
+      "l2_errors_final_mean": 181.1,
+      "l2_errors_final_min": 158,
+      "l2_errors_final_max": 216,
+      "runtime_s_mean": 10.0084,
+      "runtime_s_min": 9.015,
+      "runtime_s_max": 10.531,
+      "terminal": "FAIL"
+    },
+    "2M": {
+      "blocks": 20,
+      "successes": 0,
+      "l2_errors_initial_mean": 256.9,
+      "l2_errors_initial_min": 238,
+      "l2_errors_initial_max": 290,
+      "l2_errors_final_mean": 174.05,
+      "l2_errors_final_min": 137,
+      "l2_errors_final_max": 196,
+      "runtime_s_mean": 9.9852,
+      "runtime_s_min": 9.281,
+      "runtime_s_max": 10.375,
+      "terminal": "FAIL"
+    }
+  },
+  "overall_terminal": "matched_empirical_finite_control_fail",
+  "claim_boundary": "bounded negative result for the frozen matched empirical-P finite control only; not an NB-LDPC, FER, key-rate, qualification, or promotion result"
+}

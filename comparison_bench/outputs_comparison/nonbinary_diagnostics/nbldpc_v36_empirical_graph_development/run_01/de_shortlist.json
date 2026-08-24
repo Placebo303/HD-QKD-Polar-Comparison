@@ -1,0 +1,15 @@
+[
+  {
+    "candidate_id": "lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00",
+    "lambda_edge": {
+      "2": 0.85,
+      "4": 0.15
+    },
+    "dbar_v": 2.1621621621621623,
+    "max_check_degree": 13,
+    "mean_entropy": 3.089393128245247e-296,
+    "std_entropy": 0.0,
+    "worst_entropy": 3.089393128245247e-296,
+    "all_converged": true
+  }
+]

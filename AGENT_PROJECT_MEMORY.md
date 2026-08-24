@@ -1,3 +1,43 @@
+## 2026-08-24 GitHub-centered ChatGPT/OpenCode research-cycle SOP
+
+- Workflow [decision]: GitHub is the durable exchange surface. ChatGPT handles
+  planning/read-only scientific review; OpenCode implements a frozen packet;
+  the user/main reviewer owns acceptance and formal execution authorization.
+- Handoffs [decision]: every prompt/return binds repository, branch/PR, full
+  target SHA, cycle ID, entrypoint, lifecycle state, and allowed action. Agent
+  text becomes durable only after it is copied into a cycle file and committed.
+- Data/Git [decision]: each milestone includes compact machine-readable data or
+  a result summary with provenance, seeds, commands, metrics, omissions, claim
+  limits, and reproduction/retrieval instructions. Normal non-force pushes
+  only; incompatible Polar/crosstalk history goes to a separate formal-IR
+  branch rather than being merged or overwritten.
+- Authority: `docs/research-cycle-sop.md`; prompts under `docs/prompts/`.
+
+## 2026-08-24 V36 post-run scientific review correction
+
+- Retained observation [repo-observed]: 15 paired development blocks gave
+  baseline/candidate mean residual 174.80/157.07; 10/15 improved; exact 0/15.
+- Gate [decision]: `NO_FINITE_GRAPH_ADVANCE` remains correct, but the route to
+  A3 was not protocol compliant. A1 did not implement the frozen per-source
+  >=10% same-setting DE confirmation; A2 realized 2288--3002 4-cycles and
+  degree-2 cycle ranks 779--801 despite a zero-cycle requirement.
+- Claim boundary [decision]: status is
+  `POSITIVE_EXPLORATORY_RESIDUAL_SIGNAL / A1_DE_SELECTION_NOT_ACCEPTED /
+  A2_STRUCTURAL_GATE_FAILED / NO_FINITE_GRAPH_ADVANCE`. No empirical-P DE
+  superiority, trapping-set causality, general FER, or MET-necessity claim.
+
+## 2026-08-24 V35R1 corrected bounded status
+
+- `run_01` is invalid and superseded; `run_02` provides corrected A1--A3
+  development evidence with 25 focused tests passing.
+- All tested NB configurations had 0/15 exact recovery and the hand-designed
+  mixed-degree graph worsened residuals. This supports only
+  `NO_NB_CANDIDATE_FOR_TESTED_HAND_DESIGNED_CONFIGURATION`.
+- The original OpenSpec required conditional A4 after A3 failure, but A4 was
+  not executed in `run_02`. Durable status therefore also includes
+  `PROTOCOL_PARTIAL_A4_NOT_EXECUTED`; do not claim the original full
+  four-stage `NO_CANDIDATE_SUCCESS` terminal or a binary-MLC result.
+
 ## 2026-08-24 Strict first principle: high-performance correction algorithms
 
 - User directive [decision]: the project's strict first principle is to find,

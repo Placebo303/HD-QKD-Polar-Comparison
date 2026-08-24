@@ -1,0 +1,322 @@
+{
+  "schema": "v36_empirical_graph_development_summary_v1",
+  "method": "formal_ir_v36_empirical_graph",
+  "terminal_status": "NO_FINITE_GRAPH_ADVANCE",
+  "stages_mode": "auto",
+  "stage_summaries": {
+    "A0_decoder_iteration_diagnostic": {
+      "status": "completed",
+      "selected_max_iter": 30,
+      "max_iters_tested": [
+        30,
+        60
+      ],
+      "median_relative_drops": {
+        "1M": 0.0,
+        "1p5M": 0.0,
+        "2M": 0.0
+      },
+      "improvements_ge_5pct": {
+        "1M": false,
+        "1p5M": false,
+        "2M": false
+      },
+      "all_sources_improved_ge_5pct": false,
+      "records": [
+        {
+          "source": "1M",
+          "seed": 360101,
+          "max_iter": 30,
+          "raw_errors": 251,
+          "final_errors": 166,
+          "iterations": 30,
+          "runtime_s": 1.9418846999760717
+        },
+        {
+          "source": "1M",
+          "seed": 360101,
+          "max_iter": 60,
+          "raw_errors": 251,
+          "final_errors": 166,
+          "iterations": 60,
+          "runtime_s": 3.7722237000707537
+        },
+        {
+          "source": "1M",
+          "seed": 360102,
+          "max_iter": 30,
+          "raw_errors": 258,
+          "final_errors": 177,
+          "iterations": 30,
+          "runtime_s": 1.850656499969773
+        },
+        {
+          "source": "1M",
+          "seed": 360102,
+          "max_iter": 60,
+          "raw_errors": 258,
+          "final_errors": 177,
+          "iterations": 60,
+          "runtime_s": 3.787199900019914
+        },
+        {
+          "source": "1M",
+          "seed": 360103,
+          "max_iter": 30,
+          "raw_errors": 241,
+          "final_errors": 171,
+          "iterations": 30,
+          "runtime_s": 1.8894808000186458
+        },
+        {
+          "source": "1M",
+          "seed": 360103,
+          "max_iter": 60,
+          "raw_errors": 241,
+          "final_errors": 171,
+          "iterations": 60,
+          "runtime_s": 3.8416422000154853
+        },
+        {
+          "source": "1p5M",
+          "seed": 360201,
+          "max_iter": 30,
+          "raw_errors": 268,
+          "final_errors": 167,
+          "iterations": 30,
+          "runtime_s": 1.896659600082785
+        },
+        {
+          "source": "1p5M",
+          "seed": 360201,
+          "max_iter": 60,
+          "raw_errors": 268,
+          "final_errors": 167,
+          "iterations": 60,
+          "runtime_s": 3.797609700006433
+        },
+        {
+          "source": "1p5M",
+          "seed": 360202,
+          "max_iter": 30,
+          "raw_errors": 269,
+          "final_errors": 199,
+          "iterations": 30,
+          "runtime_s": 1.904209699947387
+        },
+        {
+          "source": "1p5M",
+          "seed": 360202,
+          "max_iter": 60,
+          "raw_errors": 269,
+          "final_errors": 199,
+          "iterations": 60,
+          "runtime_s": 3.76962159993127
+        },
+        {
+          "source": "1p5M",
+          "seed": 360203,
+          "max_iter": 30,
+          "raw_errors": 275,
+          "final_errors": 187,
+          "iterations": 30,
+          "runtime_s": 1.8721408999990672
+        },
+        {
+          "source": "1p5M",
+          "seed": 360203,
+          "max_iter": 60,
+          "raw_errors": 275,
+          "final_errors": 187,
+          "iterations": 60,
+          "runtime_s": 3.793210400035605
+        },
+        {
+          "source": "2M",
+          "seed": 360301,
+          "max_iter": 30,
+          "raw_errors": 257,
+          "final_errors": 164,
+          "iterations": 30,
+          "runtime_s": 1.858107200008817
+        },
+        {
+          "source": "2M",
+          "seed": 360301,
+          "max_iter": 60,
+          "raw_errors": 257,
+          "final_errors": 164,
+          "iterations": 60,
+          "runtime_s": 3.7472310999874026
+        },
+        {
+          "source": "2M",
+          "seed": 360302,
+          "max_iter": 30,
+          "raw_errors": 263,
+          "final_errors": 189,
+          "iterations": 30,
+          "runtime_s": 1.8960008999565616
+        },
+        {
+          "source": "2M",
+          "seed": 360302,
+          "max_iter": 60,
+          "raw_errors": 263,
+          "final_errors": 189,
+          "iterations": 60,
+          "runtime_s": 3.7803784999996424
+        },
+        {
+          "source": "2M",
+          "seed": 360303,
+          "max_iter": 30,
+          "raw_errors": 249,
+          "final_errors": 183,
+          "iterations": 30,
+          "runtime_s": 1.8671133000170812
+        },
+        {
+          "source": "2M",
+          "seed": 360303,
+          "max_iter": 60,
+          "raw_errors": 249,
+          "final_errors": 183,
+          "iterations": 60,
+          "runtime_s": 3.771968699991703
+        }
+      ]
+    },
+    "A1_de_candidate_screening": {
+      "status": "DE_SHORTLIST_READY",
+      "coarse_evaluated": 195,
+      "coarse_passed": 1,
+      "confirmation_evaluated": 1,
+      "top_candidates": [
+        {
+          "candidate_id": "lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00",
+          "lambda_edge": {
+            "2": 0.85,
+            "4": 0.15
+          },
+          "dbar_v": 2.1621621621621623,
+          "max_check_degree": 13,
+          "mean_entropy": 3.089393128245247e-296,
+          "std_entropy": 0.0,
+          "worst_entropy": 3.089393128245247e-296,
+          "all_converged": true
+        }
+      ],
+      "baseline_de": {
+        "1M": {
+          "final_entropy_bits": 3.089393128245247e-296,
+          "lambda": {
+            "2": 1.0
+          },
+          "rho": {
+            "11": 0.8593749999999998,
+            "12": 0.14062500000000022
+          }
+        },
+        "1p5M": {
+          "final_entropy_bits": 7.535776465840564e-08,
+          "lambda": {
+            "2": 1.0
+          },
+          "rho": {
+            "10": 0.20507812499999967,
+            "11": 0.7949218750000003
+          }
+        },
+        "2M": {
+          "final_entropy_bits": 3.089393128245247e-296,
+          "lambda": {
+            "2": 1.0
+          },
+          "rho": {
+            "10": 0.3124999999999996,
+            "11": 0.6875000000000004
+          }
+        }
+      }
+    },
+    "A2_source_native_graphs": {
+      "candidates_constructed": 1,
+      "metrics": [
+        {
+          "candidate_id": "lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00",
+          "source": "1M",
+          "target_m": 184,
+          "target_n": 1024,
+          "rank": 184,
+          "rank_full": true,
+          "mean_check_degree": "12.0326",
+          "max_check_degree": 13,
+          "four_cycles": 3002,
+          "degree2_cycles": 801,
+          "eliminated": false
+        },
+        {
+          "candidate_id": "lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00",
+          "source": "1p5M",
+          "target_m": 190,
+          "target_n": 1024,
+          "rank": 190,
+          "rank_full": true,
+          "mean_check_degree": "11.6526",
+          "max_check_degree": 12,
+          "four_cycles": 2721,
+          "degree2_cycles": 785,
+          "eliminated": false
+        },
+        {
+          "candidate_id": "lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00",
+          "source": "2M",
+          "target_m": 192,
+          "target_n": 1024,
+          "rank": 192,
+          "rank_full": true,
+          "mean_check_degree": "11.5312",
+          "max_check_degree": 12,
+          "four_cycles": 2288,
+          "degree2_cycles": 779,
+          "eliminated": false
+        }
+      ]
+    },
+    "A3_finite_paired_screen": {
+      "status": "NO_FINITE_GRAPH_ADVANCE",
+      "best_candidate_id": null,
+      "candidate_summaries": {
+        "lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00": {
+          "exact_gate_met": false,
+          "residual_gate_met": false,
+          "advance_granted": false,
+          "exact_counts_by_source": {
+            "1M": 0,
+            "1p5M": 0,
+            "2M": 0
+          },
+          "median_drops_by_source": {
+            "1M": 0.029239766081871343,
+            "1p5M": 0.06741573033707865,
+            "2M": 0.13114754098360656
+          },
+          "improved_blocks": 10,
+          "no_block_worse_than_10": false
+        }
+      },
+      "total_records": 30
+    },
+    "A4_incremental_syndrome": {
+      "executed": false,
+      "status": "SKIPPED"
+    }
+  },
+  "overall_metrics": {
+    "total_finite_records": 30,
+    "total_incremental_records": 0,
+    "terminal_status": "NO_FINITE_GRAPH_ADVANCE",
+    "total_wallclock_s": 300.0183
+  }
+}

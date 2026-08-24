@@ -1,0 +1,4 @@
+candidate_id,source,target_m,target_n,rank,rank_full,mean_check_degree,max_check_degree,four_cycles,degree2_cycles,eliminated
+lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00,1M,184,1024,184,True,12.0326,13,3002,801,False
+lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00,1p5M,190,1024,190,True,11.6526,12,2721,785,False
+lam_d2_0.85_d3_0.00_d4_0.15_d5_0.00,2M,192,1024,192,True,11.5312,12,2288,779,False

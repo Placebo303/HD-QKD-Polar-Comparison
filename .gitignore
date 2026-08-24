@@ -7,6 +7,11 @@ __pycache__/
 .pytest_cache/
 pytest-cache-files-*/
 .opencode/
+.agents/
+# Multi-agent scratch briefs generated at the repository root. Durable cycle
+# inputs/outputs belong under docs/research_cycles/ instead.
+/ORIGINAL_REQUEST.md
+/PROJECT.md
 comparison_bench/outputs_comparison/pytest-cache-files-*/
 comparison_bench/outputs_comparison/pytest_tmp/
 comparison_bench/outputs_comparison/pytest_tmp2/

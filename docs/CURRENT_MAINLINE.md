@@ -1,5 +1,24 @@
 # Current Mainline
 
+## Formal-IR research mainline (2026-08-24)
+
+The strict first principle is high-performance error correction for actual
+HD-QKD data. The frozen Polar line below is a comparison baseline; active
+algorithm work lives under `comparison_bench/`, OpenSpec, and the NB-LDPC
+research documents.
+
+Current bounded state:
+
+- V34: matched empirical-P fixed-packet bounded failure, ER1 accepted.
+- V35R1: no candidate for the tested hand-designed NB configuration.
+- V36: real exploratory residual decrease on 15 paired development blocks,
+  but no exact recovery and no finite-graph advance. Its DE-selection gate is
+  not accepted and its realized graphs violate the frozen zero-cycle gate.
+
+Use `docs/research-cycle-sop.md` for the next plan -> ChatGPT review -> OpenCode
+implementation -> result-review loop. No successor or formal run is currently
+authorized by this status document.
+
 ## Reporting Rule
 
 The default reporting line is Route A actual-IR finite-key:
