@@ -1,8 +1,9 @@
 # Design: V34 corrected matched empirical-P finite control
 
-> FR1 accepted the revised packet. Independent science review then required the
-> narrow statistical/environment amendments now incorporated here. Values remain
-> non-executable until amendment re-review and main-thread `ACCEPT_FREEZE`.
+> **FROZEN_ACCEPTED** against baseline commit
+> `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`. FR1 and science-amendment review
+> accepted this complete design; all scientific constants, bindings, evidence
+> fields, terminals, and lifecycle rules below are immutable for P3.
 
 ## 1. Causal contrast
 
@@ -83,7 +84,7 @@ mass.
   `m2=184/190/192` matrices. Reusing the V28R decoder function SHALL NOT load
   V28R's own `m2=194/200/202` matrices.
 
-## 4. Frozen-matrix target
+## 4. Frozen matrix
 
 Order is source `1M`, `1p5M`, `2M`, then increasing seed. Each source has 20
 blocks:
@@ -174,9 +175,9 @@ add a framework, cache, retry layer, lock, backup, checksum manifest, general
 sampler abstraction, or compatibility layer. Recorded source hashes are
 scientific input identities, not a new integrity subsystem.
 
-## 8. FR1 revision checklist
+## 8. Frozen FR1 checklist
 
-Independent FR1 re-review must accept all of the following before freeze:
+Independent FR1 and science-amendment review accepted all of the following:
 
 1. direct 1024-iid draw semantics and exact PCG64 draw order;
 2. fresh seed ranges and source/block enumeration order;

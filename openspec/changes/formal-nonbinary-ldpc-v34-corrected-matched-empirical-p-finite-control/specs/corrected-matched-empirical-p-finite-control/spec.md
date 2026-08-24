@@ -1,5 +1,8 @@
 # Corrected matched empirical-P finite control specification
 
+> **Status: FROZEN_ACCEPTED** — Codex main `ACCEPT_FREEZE` on 2026-08-24
+> against baseline commit `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`.
+
 ## ADDED Requirements
 
 ### Requirement: Single-variable matched empirical control

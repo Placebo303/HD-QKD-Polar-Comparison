@@ -1,11 +1,13 @@
 # Proposal: formal-nonbinary-ldpc-v34-corrected-matched-empirical-p-finite-control
 
-> **Status: FR1_ACCEPTED_SCIENCE_AMENDMENTS_PENDING / IMPLEMENTATION_NOT_AUTHORIZED**.
-> Initial FR1 returned `REJECT_FREEZE`; specification re-review then returned
-> `ACCEPT_FREEZE`. Independent science amendments are incorporated below and
-> require final re-review. This change
-> may be reviewed and revised, but nothing in it authorizes implementation,
-> decoder execution, an official run, or a successor.
+> **Status: FROZEN_ACCEPTED / IMPLEMENTATION_AUTHORIZED /
+> EXECUTE_NOT_AUTHORIZED**. Initial FR1 returned `REJECT_FREEZE`; specification
+> re-review returned `ACCEPT_FREEZE`, science amendments returned
+> `ACCEPT_AMENDMENTS_FINAL`, and Codex main recorded `ACCEPT_FREEZE` on
+> 2026-08-24 against baseline commit
+> `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`. P3 fake/test-only implementation
+> is authorized. Nothing here authorizes a real decoder call, official run, or
+> successor.
 
 ## Why
 

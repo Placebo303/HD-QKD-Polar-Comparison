@@ -1,6 +1,8 @@
 # Tasks: V34 corrected matched empirical-P finite control
 
-> **Status: FR1_ACCEPTED_SCIENCE_AMENDMENTS_PENDING / IMPLEMENTATION_NOT_AUTHORIZED**
+> **Status: FROZEN_ACCEPTED / IMPLEMENTATION_AUTHORIZED /
+> EXECUTE_NOT_AUTHORIZED** — Codex main `ACCEPT_FREEZE` on 2026-08-24 against
+> baseline commit `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`.
 
 ## Allowed before freeze
 
@@ -35,9 +37,9 @@
   evidence fields and protected roots required revision.
 - [x] P2R Independent FR1 re-review returned `ACCEPT_FREEZE`; every original
   `design.md` section 8 item was accepted.
-- [ ] P2S Independent science-amendment re-review: mechanical-not-statistical
+- [x] P2S Independent science-amendment re-review accepted: mechanical-not-statistical
   19/20 language, bounded-sample claim, max_iter comparability, channel-law-only
-  intervention, and NumPy 2.4.0 sampler identity.
+  intervention, and literal NumPy 2.4.0 sampler identity.
 - [ ] P3 After freeze only: implement the smallest CLI and focused T0/T1 tests
   using explicit fake-runner injection and fresh workspace roots.
 - [ ] P4 Milestone fake T2 strict replay/exact-once/tamper checks, then IR1 on
@@ -52,6 +54,6 @@
 
 ## Current stop condition
 
-After science-amendment re-review, stop unless the main thread explicitly records
-`ACCEPT_FREEZE`.
+P3 fake/test-only implementation is now authorized. Stop again after the full
+candidate and IR1 at `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`.
 Nothing in the V33 execution authorization carries forward to V34.
