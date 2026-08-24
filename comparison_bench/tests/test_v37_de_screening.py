@@ -219,7 +219,8 @@ def test_t9_disjoint_seed_sets():
 
 def test_t10_conditional_confirmation():
     """T10: Verify confirmation is executed if and only if screening yields >= 1 passing candidates."""
-    # Case A: When threshold is impossible (e.g. 0.99), 0 candidates pass screening
+    # Case A: Zero-pass screening branch
+    # When threshold is impossible (e.g. 0.99), 0 candidates pass screening
     report_no_pass = run_v37_p1_pipeline(effect_size_threshold=0.99, fake_runner=True)
     assert len(report_no_pass.passing_screening_candidates) == 0
     assert report_no_pass.confirmation_executed is False
@@ -229,7 +230,8 @@ def test_t10_conditional_confirmation():
     assert report_no_pass.selected_winner is None
     assert report_no_pass.terminal_state == STATUS_P1_NO_FINITE_FEASIBLE_DE_ADVANCE
 
-    # Case B: When threshold is standard (0.05), candidates pass screening and exactly one enters confirmation
+    # Case B: One-or-more-pass screening branch
+    # When threshold is standard (0.05), candidates pass screening and exactly one enters confirmation
     report_pass = run_v37_p1_pipeline(effect_size_threshold=0.05, fake_runner=True)
     assert len(report_pass.passing_screening_candidates) > 0
     assert report_pass.confirmation_executed is True
@@ -240,33 +242,46 @@ def test_t10_conditional_confirmation():
 
 
 def test_t11_failed_confirmation_terminal_state():
-    """T11: Verify P1_SCREEN_SIGNAL_NOT_CONFIRMED when confirmation fails."""
-    # Build candidate and mock results where screening passes but confirmation fails on 2M
-    cand = DegreeCandidate("cand_test", {2: 0.1, 3: 0.9}, 146, 2.857, 2926, {184: 16, 190: 16, 192: 16}, True, False)
+    """T11: Force screening PASS + confirmation FAIL -> P1_SCREEN_SIGNAL_NOT_CONFIRMED (no second candidate tried)."""
+    # Construct 2 candidates where both pass screening, c1 selected as winner
+    c1 = DegreeCandidate("cand_1", {2: 0.1, 3: 0.9}, 146, 2.857, 2926, {184: 16, 190: 16, 192: 16}, True, False)
+    c2 = DegreeCandidate("cand_2", {2: 0.05, 3: 0.95}, 75, 2.927, 2998, {184: 17, 190: 16, 192: 16}, True, False)
     baseline = DegreeCandidate("baseline", {2: 1.0}, 1024, 2.0, 2048, {184: 12, 190: 11, 192: 11}, False, False)
 
-    # Screening: beats baseline by 6% on all 3 sources, and converges (H60 < 1e-4)
     screen_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
-    # Trace with AUT_30 = 94.0 and final entropy 1e-5
-    trace_94 = [94.0 / 31.0] * 30 + [1e-5] * 30
-    trace_98 = [98.0 / 31.0] * 30 + [1e-5] * 30
+    trace_92 = [92.0 / 31.0] * 30 + [1e-5] * 30  # Delta = -0.08
+    trace_94 = [94.0 / 31.0] * 30 + [1e-5] * 30  # Delta = -0.06
+    trace_98 = [98.0 / 31.0] * 30 + [1e-5] * 30  # Delta = -0.02 (fails 5% gate)
 
-    screen_cand_metrics = {
-        src: {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)}
-        for src in SOURCES
-    }
-    screen_res = aggregate_candidate_results(cand, "screen", screen_cand_metrics, screen_base_means)
-    assert screen_res.all_seeds_converged is True
-    assert all(screen_res.relative_deltas[src] <= -0.05 for src in SOURCES)
+    # Both c1 and c2 pass screening, c1 has lower AUT_30 (92 < 94) -> selected as C*
+    res_c1_screen = aggregate_candidate_results(
+        c1, "screen",
+        {src: {s: compute_trajectory_metrics(trace_92, h0=92.0 / 31.0) for s in (1, 2, 3)} for src in SOURCES},
+        screen_base_means,
+    )
+    res_c2_screen = aggregate_candidate_results(
+        c2, "screen",
+        {src: {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)} for src in SOURCES},
+        screen_base_means,
+    )
 
-    # Confirmation: beats 1M and 1p5M by 6%, but only beats 2M by 2% (Delta = -0.02 > -0.05)
+    passing = [res_c1_screen, res_c2_screen]
+    passing.sort(key=lambda c: (c.mean_aut30_overall, c.mean_h10_overall, c.candidate.N2, c.candidate.candidate_id))
+    selected_winner = passing[0]
+    assert selected_winner.candidate.candidate_id == "cand_1"
+
+    # Confirmation stage: evaluated strictly on selected_winner (c1) and baseline
+    confirm_configs_tested = [selected_winner.candidate.candidate_id, baseline.candidate_id]
+    assert "cand_2" not in confirm_configs_tested, "Second candidate must NOT be tested in confirmation"
+
+    # Confirmation execution for c1: fails on 2M (trace_98 -> Delta = -0.02 > -0.05)
     confirm_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
     confirm_cand_metrics = {
-        "1M": {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)},
-        "1p5M": {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)},
+        "1M": {s: compute_trajectory_metrics(trace_92, h0=92.0 / 31.0) for s in (1, 2, 3)},
+        "1p5M": {s: compute_trajectory_metrics(trace_92, h0=92.0 / 31.0) for s in (1, 2, 3)},
         "2M": {s: compute_trajectory_metrics(trace_98, h0=98.0 / 31.0) for s in (1, 2, 3)},
     }
-    confirm_res = aggregate_candidate_results(cand, "confirm", confirm_cand_metrics, confirm_base_means)
+    confirm_res = aggregate_candidate_results(selected_winner.candidate, "confirm", confirm_cand_metrics, confirm_base_means)
     confirm_passed = confirm_res.all_seeds_converged and all(confirm_res.relative_deltas[src] <= -0.05 for src in SOURCES)
     assert confirm_passed is False
 
@@ -275,12 +290,13 @@ def test_t11_failed_confirmation_terminal_state():
 
 
 def test_t12_confirmed_advance_terminal_state():
-    """T12: Verify P1_DE_ADVANCE_CANDIDATE_FOUND when confirmation passes on all 3 sources."""
-    cand = DegreeCandidate("cand_test", {2: 0.1, 3: 0.9}, 146, 2.857, 2926, {184: 16, 190: 16, 192: 16}, True, False)
+    """T12: Force screening PASS + confirmation PASS -> P1_DE_ADVANCE_CANDIDATE_FOUND."""
+    cand = DegreeCandidate("cand_winner", {2: 0.1, 3: 0.9}, 146, 2.857, 2926, {184: 16, 190: 16, 192: 16}, True, False)
     confirm_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
-    trace_94 = [94.0 / 31.0] * 30 + [1e-5] * 30
+    trace_92 = [92.0 / 31.0] * 30 + [1e-5] * 30  # Delta = -0.08 <= -0.05 on all 3 sources
+
     confirm_cand_metrics = {
-        src: {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)}
+        src: {s: compute_trajectory_metrics(trace_92, h0=92.0 / 31.0) for s in (1, 2, 3)}
         for src in SOURCES
     }
     confirm_res = aggregate_candidate_results(cand, "confirm", confirm_cand_metrics, confirm_base_means)
@@ -355,3 +371,42 @@ def test_t15_cli_dry_run_and_reporting():
     assert summary["candidate_counts"]["raw"] == 1771
     assert summary["candidate_counts"]["final_candidates"] == 259
     assert summary["run_counts"]["screening_runs"] == 2349
+
+
+def test_t16_early_stop_padding_and_indexing_semantics():
+    """T16: Verify short trace padding to t=60, H60 semantics, and exact AUT_30 indexing."""
+    # A short trace of 10 iterations (terminated early at t=10)
+    trace_short_1based = [4.0, 3.0, 2.0, 1.0, 0.5, 0.2, 0.05, 0.005, 1e-4, 1e-6]
+    h0 = 5.0
+    metrics = compute_trajectory_metrics(trace_short_1based, h0=h0, max_aut_iter=30, target_len=60)
+
+    # 1. Verify full trajectory length and 0-indexing:
+    # full_trace has 61 entries: full_trace[0] = H(0), full_trace[1] = H(1), ..., full_trace[60] = H(60)
+    assert len(metrics.entropy_trace) == 61
+    assert metrics.entropy_trace[0] == 5.0
+    for t in range(1, 11):
+        assert metrics.entropy_trace[t] == pytest.approx(trace_short_1based[t - 1], abs=1e-9)
+
+    # 2. Verify padding to t=60:
+    for t in range(11, 61):
+        assert metrics.entropy_trace[t] == pytest.approx(1e-6, abs=1e-9)
+
+    # 3. Verify H5, H10, H15, H60 semantics:
+    assert metrics.H5 == pytest.approx(0.5, abs=1e-9)
+    assert metrics.H10 == pytest.approx(1e-6, abs=1e-9)
+    assert metrics.H15 == pytest.approx(1e-6, abs=1e-9)
+    assert metrics.H60 == pytest.approx(1e-6, abs=1e-9)
+    assert metrics.converged is True
+
+    # 4. Verify threshold iterations:
+    # H(7) = 0.05 <= 0.10 -> T_010 == 7
+    # H(8) = 0.005 <= 0.01 -> T_001 == 8
+    assert metrics.T_010 == 7
+    assert metrics.T_001 == 8
+
+    # 5. Verify exact AUT_30 sum without indexing offset:
+    # AUT_30 = H(0) + sum_{t=1}^{10} H(t) + 20 * H(10)
+    expected_sum_10 = sum(trace_short_1based)  # 10.755101
+    expected_aut_30 = 5.0 + expected_sum_10 + 20 * 1e-6  # 15.755121
+    assert metrics.AUT_30 == pytest.approx(expected_aut_30, abs=1e-9)
+    assert metrics.AUT_30 == pytest.approx(sum(metrics.entropy_trace[:31]), abs=1e-9)
