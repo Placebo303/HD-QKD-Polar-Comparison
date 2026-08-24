@@ -58,6 +58,17 @@ non-operational and non-qualifying.
 - **AND** max_iter=30 SHALL be identified as a comparability binding, not a
   decoder-adequacy claim; a 200-iteration arm requires a new successor.
 
+#### Scenario: Runtime and L2 errors are accounted
+
+- **WHEN** one runner call completes
+- **THEN** runtime SHALL be measured with a monotonic clock immediately around
+  that runner call and SHALL override any runner-supplied runtime value
+- **AND** final L2 errors SHALL be recomputed as the GF(32)-symbol mismatch
+  count between legal `x2_hat` and true `x2`, never copied from the runner
+- **AND** the complete `x2_hat` SHALL be persisted for ER1 reconstruction
+- **AND** `x2_hat=null` SHALL use `1024` only as an explicitly unavailable
+  candidate sentinel, not as an observed decoder error count.
+
 ### Requirement: Frozen bounded matrix and exact-once execution
 
 Before implementation, FR1 and the main thread SHALL freeze the RNG/draw order,
@@ -94,6 +105,11 @@ frozen matrix.
 ER1 SHALL independently reconstruct the frozen input identities, all attempted
 ordinals, per-source success totals, terminal mapping, and protected-root
 status without invoking the decoder.
+
+ER1 SHALL also regenerate true `x2` from each frozen seed and empirical table,
+then independently recompute `l2_errors_final` from the persisted `x2_hat`.
+It SHALL check runtime values are finite and nonnegative but SHALL NOT rerun the
+decoder to reproduce wall-clock measurements.
 
 The 20 blocks per source SHALL be described as iid only conditional on the
 frozen empirical table, fixed packet, and fixed decoder configuration. They

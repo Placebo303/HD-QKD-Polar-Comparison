@@ -5,6 +5,10 @@
 > accepted this complete design; all scientific constants, bindings, evidence
 > fields, terminals, and lifecycle rules below are immutable for P3.
 
+> **Accounting correction authorized 2026-08-24.** The user authorized a
+> minimal runtime/L2-error accounting correction before IR1 and the exact-once
+> official run. This does not change any scientific constant or matrix entry.
+
 ## 1. Causal contrast
 
 V34 changes exactly one channel-law variable relative to V32 B1: the block
@@ -145,6 +149,20 @@ true-symbol-rank summaries. Each source summary SHALL reconstruct attempted,
 completed, missing and duplicate counts, success components, false accepts,
 decoder terminal counts, denominator 20, iteration/runtime distributions,
 `m1/m2`, syndrome leakage and 64-bit verification leakage.
+
+Runtime is the elapsed monotonic wall time around exactly one runner call. It
+excludes empirical sampling, posterior construction, syndrome construction,
+record serialization, and verification. A runner-supplied runtime is not the
+authoritative value.
+
+`l2_errors_initial` is the GF(32)-symbol mismatch count between true `x2` and
+observed `y2`. When a legal candidate exists, `l2_errors_final` is recomputed
+by the V34 harness as the GF(32)-symbol mismatch count between `x2_hat` and
+true `x2`; a decoder-supplied count is never trusted. The complete `x2_hat`
+SHALL be persisted so ER1 can independently reconstruct this count from the
+frozen empirical draw. If the decoder legally returns no candidate,
+`x2_hat=null` and `l2_errors_final=1024` is an unavailable-candidate sentinel,
+not a claim that the decoder produced 1024 erroneous symbols.
 
 Protected read-only roots are V25 run_04, V26 run_02, V28R run_02_v28r, V31
 run_01, V31 closeout-audit-v2 run_01 and run_02, V32 finite-DE run_01, V32

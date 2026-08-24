@@ -9,6 +9,12 @@
 > is authorized. Nothing here authorizes a real decoder call, official run, or
 > successor.
 
+> **Accounting correction authorized 2026-08-24:** before IR1 and official
+> execution, repair runtime and L2 final-error accounting while leaving the
+> frozen scientific matrix unchanged. The same user instruction authorizes one
+> official execution only after the corrected implementation is independently
+> accepted and bound to its exact HEAD.
+
 ## Why
 
 V33 established only that exact-rate ensemble DE converges for all three

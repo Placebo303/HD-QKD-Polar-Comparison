@@ -620,34 +620,46 @@ def _normalise_result(result: Mapping[str, Any], private: Mapping[str, Any]) -> 
                 if str(exc) == "decoder_result_nonfinite":
                     raise
                 raise ValueError("decoder_result_malformed") from exc
-    # A fake runner can return the four mechanical predicates directly.
+    # A fake runner can return the four mechanical predicates directly.  When
+    # it also supplies x2_hat, keep and validate that candidate for independent
+    # L2-error accounting; the mechanical predicates remain the fake seam's
+    # explicit success inputs.
+    x2_hat = None
     if all(k in result for k in ("exact_l2", "syndrome_ok", "tag_ok", "false_accept")):
         values = {k: result[k] for k in ("exact_l2", "syndrome_ok", "tag_ok", "false_accept")}
         if any(not isinstance(v, (bool, np.bool_)) for v in values.values()):
             raise ValueError("decoder_result_malformed")
         exact, syndrome, tag, false_accept = (bool(values[k]) for k in values)
+        raw_xhat = result.get("x2_hat")
+        if raw_xhat is not None:
+            try:
+                x2_hat = np.asarray(raw_xhat, dtype=np.int64)
+            except Exception as exc:
+                raise ValueError(f"decoder_result_malformed:{exc}") from exc
+            if x2_hat.shape != (N,) or np.any(x2_hat < 0) or np.any(x2_hat >= 32):
+                raise ValueError("decoder_result_malformed")
     else:
-        xhat = result.get("x2_hat")
+        raw_xhat = result.get("x2_hat")
         # V32 returns a complete legal status object even when the decoder
         # cannot produce a candidate (x2_hat=None).  That is an ordinary
         # decode failure and the frozen matrix must continue to the next block.
-        if xhat is None and ("l2_status" in result or "l2_syndrome_ok" in result):
+        if raw_xhat is None and ("l2_status" in result or "l2_syndrome_ok" in result):
             exact = False
             syndrome = bool(result.get("l2_syndrome_ok", False))
             tag = False
             false_accept = False
-        elif xhat is None:
+        elif raw_xhat is None:
             raise ValueError("decoder_result_malformed")
         else:
             try:
-                xhat = np.asarray(xhat, dtype=np.int64)
+                x2_hat = np.asarray(raw_xhat, dtype=np.int64)
             except Exception as exc:
                 raise ValueError(f"decoder_result_malformed:{exc}") from exc
-            if xhat.shape != (N,) or np.any(xhat < 0) or np.any(xhat >= 32):
+            if x2_hat.shape != (N,) or np.any(x2_hat < 0) or np.any(x2_hat >= 32):
                 raise ValueError("decoder_result_malformed")
-            exact = bool(np.array_equal(xhat, private["x2"]))
+            exact = bool(np.array_equal(x2_hat, private["x2"]))
             syndrome = bool(result.get("l2_syndrome_ok"))
-            tag = bool(_tag64(private["x1"], xhat) == _tag64(private["x1"], private["x2"]))
+            tag = bool(_tag64(private["x1"], x2_hat) == _tag64(private["x1"], private["x2"]))
             false_accept = bool(tag and not exact)
     iters = _safe_int(result.get("l2_iterations", result.get("iterations", 0)))
     runtime_s = result.get("runtime_s", 0.0)
@@ -660,13 +672,24 @@ def _normalise_result(result: Mapping[str, Any], private: Mapping[str, Any]) -> 
     if iters > MAX_ITER:
         raise ValueError("decoder_result_malformed")
     success = bool(exact and syndrome and tag and not false_accept)
+    if x2_hat is None:
+        l2_errors_final = N
+        l2_error_accounting = "candidate_unavailable"
+    else:
+        # The decoder's optional l2_errors_final field is deliberately ignored:
+        # this is the authoritative GF(32)-symbol comparison against the
+        # sampled Alice layer, and remains independently replayable from the
+        # persisted x2_hat plus the frozen sampler.
+        l2_errors_final = int(np.count_nonzero(x2_hat != private["x2"]))
+        l2_error_accounting = "measured"
     return {
         "exact_l2": exact, "syndrome_ok": syndrome, "tag_ok": tag,
         "false_accept": false_accept, "success": success,
         "l2_status": str(result.get("l2_status", "fake")),
         "l2_iterations": iters, "runtime_s": runtime_s,
-        "l2_errors_final": _safe_int(result.get("l2_errors_final", 0 if exact else N),
-                                      0 if exact else N),
+        "x2_hat": None if x2_hat is None else x2_hat.tolist(),
+        "l2_errors_final": l2_errors_final,
+        "l2_error_accounting": l2_error_accounting,
         "decoder_terminal_status": str(result.get("terminal", result.get("l2_status", "complete"))),
     }
 
@@ -705,6 +728,8 @@ def _build_record(call: Mapping[str, Any], private: Mapping[str, Any],
         "true_prior_probability_mean": float(metrics.get("true_prior_probability_mean", math.nan)),
         "l2_errors_initial": int(np.sum(private["x2"] != private["y2"])),
         "l2_errors_final": int(result.get("l2_errors_final", N)),
+        "x2_hat": result.get("x2_hat"),
+        "l2_error_accounting": str(result.get("l2_error_accounting", "candidate_unavailable")),
         "l2_status": str(result.get("l2_status", "not_run")),
         "l2_iterations": int(result.get("l2_iterations", 0)),
         "runtime_s": float(result.get("runtime_s", 0.0)),
@@ -949,11 +974,19 @@ def execute_run(repo_root: Path, run_root: Path, *, provider: Any = None,
             private["support_mask"] = positive
             if not bool(np.all(positive)):
                 raise ValueError("probability_support_violation")
+            # The harness measurement is authoritative for runtime_s.  Keep
+            # the boundary identical for fake and production calls: sampling,
+            # posterior construction, and evidence writes are outside it.
+            started = time.monotonic()
             if fake:
                 result = provider.run_call(request)
             else:
                 result = prod.run_block(request)
+            runtime_s = time.monotonic() - started
+            if not math.isfinite(runtime_s) or runtime_s < 0:
+                raise ValueError("decoder_result_nonfinite")
             norm = _normalise_result(result, private)
+            norm["runtime_s"] = float(runtime_s)
             rec = _build_record(call, private, norm, report)
         except KeyboardInterrupt as exc:
             rec = _build_record(call, private or {"alice": np.zeros(N, dtype=np.int64),
@@ -1065,8 +1098,44 @@ def _verify_records(records: list[dict[str, Any]], counts: Mapping[str, np.ndarr
                 problems.append(f"delta_histogram_drift:{i}")
             if int(rec.get("empirical_support_violations", -1)) != 0:
                 problems.append(f"support_violation:{i}")
+            _, replay_x2 = _factor(alice)
+            _, replay_y2 = _factor(bob)
+            recomputed_initial = int(np.count_nonzero(replay_x2 != replay_y2))
+            if type(rec.get("l2_errors_initial")) is not int or \
+                    rec["l2_errors_initial"] != recomputed_initial:
+                problems.append(f"l2_initial_error_recompute_mismatch:{i}")
+            stored_x2_hat = rec.get("x2_hat")
+            accounting = rec.get("l2_error_accounting")
+            stored_final = rec.get("l2_errors_final")
+            if stored_x2_hat is None:
+                if accounting != "candidate_unavailable":
+                    problems.append(f"l2_accounting_mode:{i}")
+                if type(stored_final) is not int or stored_final != N:
+                    problems.append(f"l2_sentinel_mismatch:{i}")
+            else:
+                if (not isinstance(stored_x2_hat, list) or
+                        len(stored_x2_hat) != N or
+                        any(type(v) is not int for v in stored_x2_hat)):
+                    problems.append(f"l2_x2_hat_invalid:{i}")
+                else:
+                    replay_x2_hat = np.asarray(stored_x2_hat, dtype=np.int64)
+                    if np.any(replay_x2_hat < 0) or np.any(replay_x2_hat >= Q):
+                        problems.append(f"l2_x2_hat_range:{i}")
+                    recomputed_final = int(np.count_nonzero(replay_x2_hat != replay_x2))
+                    if accounting != "measured":
+                        problems.append(f"l2_accounting_mode:{i}")
+                    if type(stored_final) is not int or stored_final != recomputed_final:
+                        problems.append(f"l2_error_recompute_mismatch:{i}")
+                    if rec.get("exact_l2") is not (recomputed_final == 0):
+                        problems.append(f"l2_exact_recompute_mismatch:{i}")
         except Exception as exc:
             problems.append(f"sampler_replay_error:{i}:{exc}")
+        try:
+            runtime_s = float(rec.get("runtime_s"))
+            if not math.isfinite(runtime_s) or runtime_s < 0:
+                problems.append(f"runtime_invalid:{i}")
+        except (TypeError, ValueError):
+            problems.append(f"runtime_invalid:{i}")
         terminal = rec.get("terminal")
         if terminal not in ("PASS", "FAIL", "INCONCLUSIVE"):
             problems.append(f"terminal_invalid:{i}")

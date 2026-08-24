@@ -4,6 +4,10 @@
 > `ACCEPT_FREEZE` on 2026-08-24 against
 > baseline commit `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`.
 
+> **2026-08-24 user authorization:** correct and independently accept the
+> runtime/L2-error accounting, then execute the unchanged frozen 60-block
+> matrix exactly once on the resulting accepted HEAD and perform ER1.
+
 ## Allowed before freeze
 
 - Read-only inspection of bound code, documents, and evidence.
@@ -50,6 +54,9 @@
 - [ ] P4 Milestone fake T2 strict replay/exact-once/tamper checks, then IR1 on
   the exact candidate. Stop at
   `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`.
+- [x] P4A Correct runtime/L2-error accounting without changing the frozen
+  matrix: monotonic runner-call runtime, harness-recomputed GF(32) final error
+  count, persisted `x2_hat`, and focused independent-reconstruction tests.
 - [ ] P5 Only after a new user `EXECUTE_AUTH`: preflight frozen HEAD and matrix,
   execute exactly 60 blocks once, then stop decoder activity.
 - [ ] P6 ER1 independently reconstructs bindings, ordinals, success counts,
@@ -59,7 +66,7 @@
 
 ## Current stop condition
 
-Per user instruction, stop after P3 at
-`IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`. P4/IR1 are the next packet
-for Ox Alpha plus independent Codex review; they are not complete or accepted.
-Nothing in the V33 execution authorization carries forward to V34.
+Proceed only through the user-authorized sequence P4A -> independent IR1 -> P5
+exactly once -> P6 ER1, then stop and document. Nothing in the V33 execution
+authorization carries forward to V34; the new V34 authorization must bind the
+post-correction accepted HEAD and unchanged frozen matrix digest.
