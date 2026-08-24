@@ -12,16 +12,23 @@ Key Theoretical Quantities:
 2. Exact Node Degree Apportionment (Hamilton / Largest Remainder):
    sum_i N_i = n, where N_i approx n * L_i
 
-3. Variable Sockets & Implied Check Degree:
+3. Variable Sockets & Check-Side Degree Allocation:
    Total sockets: E = sum_i i * N_i
    Average check degree: dbar_c(m) = E / m
+   Realizable integer check degree allocation:
+       dc_floor = floor(E / m), dc_ceil = ceil(E / m)
+       n_checks_ceil = E % m, n_checks_floor = m - n_checks_ceil
+       realized_max_check_degree = dc_ceil if n_checks_ceil > 0 else dc_floor
 
-4. Degree-2 Subgraph Feasibility (Forest Bound & Cycle Rank):
+4. Degree-2 Subgraph Feasibility (Forest Bound & Cycle Rank Lower Bound):
    A degree-2 variable node corresponds to an edge in the check-node multigraph.
    For m check nodes, any cycle-free subgraph (forest) has at most m - 1 edges.
    Therefore, the unavoidable degree-2 cycle rank lower bound is:
        gamma_2 >= max(0, N_2 - (m - 1))
    When N_2 > m - 1, a cycle-free degree-2 subgraph is mathematically impossible.
+   Note: Excess cycles beyond this lower bound may arise from graph connectivity
+   and multigraph topology, and cycle rank is a topological metric, not a causal
+   decoder failure claim.
 """
 from __future__ import annotations
 
@@ -195,6 +202,65 @@ def calculate_mean_variable_degree(
     return 1.0 / harmonic_sum
 
 
+def calculate_check_degree_allocation(total_sockets: int, m: int) -> dict[str, Any]:
+    """Calculate the exact floor/ceil check-degree allocation to realize total_sockets.
+
+    Given total sockets E and m check nodes:
+        dc_floor = floor(E / m), dc_ceil = ceil(E / m)
+        n_checks_ceil = E % m
+        n_checks_floor = m - n_checks_ceil
+        realized_max_check_degree = dc_ceil if n_checks_ceil > 0 else dc_floor
+
+    Args:
+        total_sockets: Total variable-node edge sockets E.
+        m: Number of check nodes.
+
+    Returns:
+        Dictionary with floor/ceil degrees, check counts, and socket allocation feasibility.
+    """
+    if isinstance(m, bool) or not isinstance(m, Integral) or int(m) < 1:
+        raise ValueError(f"m must be a positive integer, got {m!r}")
+    if isinstance(total_sockets, bool) or not isinstance(total_sockets, Integral) or int(total_sockets) < 1:
+        raise ValueError(f"total_sockets must be a positive integer, got {total_sockets!r}")
+
+    m_int = int(m)
+    e_int = int(total_sockets)
+
+    mean_dc = e_int / m_int
+    dc_floor = math.floor(mean_dc)
+    rem = e_int % m_int
+
+    if rem == 0:
+        dc_ceil = dc_floor
+        n_checks_floor = m_int
+        n_checks_ceil = 0
+        realized_max_check_degree = dc_floor
+        allocation = {str(dc_floor): n_checks_floor}
+    else:
+        dc_ceil = dc_floor + 1
+        n_checks_ceil = rem
+        n_checks_floor = m_int - rem
+        realized_max_check_degree = dc_ceil
+        allocation = {str(dc_floor): n_checks_floor, str(dc_ceil): n_checks_ceil}
+
+    # Sockets allocation is feasible if dc_floor >= 2 (all check nodes have degree >= 2)
+    is_socket_allocation_feasible = dc_floor >= 2
+
+    return {
+        "m": m_int,
+        "total_sockets": e_int,
+        "mean_check_degree": round(mean_dc, 6),
+        "mean_check_degree_exact": mean_dc,
+        "dc_floor": dc_floor,
+        "dc_ceil": dc_ceil,
+        "n_checks_floor": n_checks_floor,
+        "n_checks_ceil": n_checks_ceil,
+        "realized_max_check_degree": realized_max_check_degree,
+        "check_degree_allocation": allocation,
+        "is_socket_allocation_feasible": is_socket_allocation_feasible,
+    }
+
+
 def analyze_degree2_subgraph(N2: int, m: int) -> dict[str, Any]:
     """Analyze cycle feasibility of the degree-2 check-node subgraph.
 
@@ -266,19 +332,12 @@ def analyze_degree_feasibility(
     N2 = degree_counts.get(2, 0)
     L2 = node_dist.get(2, 0.0)
 
-    # Check node degree analysis
+    # Check node degree allocation analysis
     check_analysis: dict[str, Any] = {}
     for m in m_list:
-        mean_dc = total_sockets / m
-        check_analysis[str(m)] = {
-            "m": m,
-            "mean_check_degree": round(mean_dc, 6),
-            "mean_check_degree_exact": mean_dc,
-            "dc_floor": math.floor(mean_dc),
-            "dc_ceil": math.ceil(mean_dc),
-            "rate": 1.0 - (m / n_int),
-            "is_check_degree_feasible": mean_dc >= 2.0,
-        }
+        alloc = calculate_check_degree_allocation(total_sockets, m)
+        alloc["rate"] = 1.0 - (m / n_int)
+        check_analysis[str(m)] = alloc
 
     # Degree-2 feasibility per m
     degree2_by_m: dict[str, Any] = {}
@@ -312,8 +371,9 @@ def analyze_degree_feasibility(
         },
         "feasibility_verdict": {
             "all_forest_feasible": all(N2 <= (m - 1) for m in m_list),
-            "all_check_degrees_feasible": all((total_sockets / m) >= 2.0 for m in m_list),
-            "structurally_cycle_free_degree2_possible": any(N2 <= (m - 1) for m in m_list),
+            "all_socket_allocations_feasible": all(chk["is_socket_allocation_feasible"] for chk in check_analysis.values()),
+            "structurally_cycle_free_degree2_possible": all(N2 <= (m - 1) for m in m_list),
+            "any_source_forest_feasible": any(N2 <= (m - 1) for m in m_list),
         },
     }
     return report

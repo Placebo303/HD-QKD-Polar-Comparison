@@ -1,15 +1,17 @@
 """Unit Test Suite for V37-P0 Finite-Length Degree Feasibility Analyzer.
 
 Covers:
-- T1: V36 Candidate Distribution Evaluation (N2 ≈ 941, cycle rank lower bound hundreds)
+- T1: V36 Candidate Distribution Evaluation (N2 ≈ 941, cycle rank lower bounds, exact floor/ceil check allocations)
 - T2: Low-Degree-2 Feasible Distribution (N2 <= m - 1, cycle rank lower bound = 0)
 - T3: Zero-Degree-2 Distribution (Regular degree-3, N2 = 0)
-- T4: Invalid Lambda Inputs (Sum != 1, negative, non-finite, degree < 1, empty)
-- T5: Invalid Graph Dimensions (n <= 0, m <= 0)
-- T6: String-Key and Integer-Key Equivalence
-- T7: Largest-Remainder Apportionment Sum Invariant (sum == n)
-- T8: Full JSON Report Generation and Schema Validation
-- T9: CLI Execution via module entrypoint
+- T4: Mixed-m Forest Feasibility (one m fails, another passes -> global verdict False, any_source True)
+- T5: Invalid Lambda Inputs (Sum != 1, negative, non-finite, degree < 1, empty)
+- T6: Invalid Graph Dimensions (n <= 0, m <= 0)
+- T7: String-Key and Integer-Key Equivalence
+- T8: Largest-Remainder Apportionment Sum Invariant (sum == n)
+- T9: Exact Check Degree Floor/Ceil Socket Allocation Function
+- T10: Full JSON Report Generation and Schema Validation
+- T11: CLI Execution via module entrypoint
 """
 from __future__ import annotations
 
@@ -22,6 +24,7 @@ import pytest
 from comparison_bench.src.comparison_bench.formal_ir.v37_degree_feasibility import (
     analyze_degree2_subgraph,
     analyze_degree_feasibility,
+    calculate_check_degree_allocation,
     calculate_mean_variable_degree,
     calculate_node_degree_counts,
     calculate_total_sockets,
@@ -64,11 +67,41 @@ def test_v36_distribution_analysis():
     # E = 2 * 941 + 4 * 83 = 1882 + 332 = 2214
     assert report["total_variable_sockets"] == 2214
 
-    # 5. Check-node degree analysis
+    # 5. Check-node degree allocation analysis (R3 exact requirements)
     chk = report["check_node_analysis"]
-    assert math.isclose(chk["184"]["mean_check_degree_exact"], 2214.0 / 184.0, rel_tol=1e-9)
-    assert math.isclose(chk["190"]["mean_check_degree_exact"], 2214.0 / 190.0, rel_tol=1e-9)
-    assert math.isclose(chk["192"]["mean_check_degree_exact"], 2214.0 / 192.0, rel_tol=1e-9)
+
+    # m=184: 178 degree-12 + 6 degree-13 checks, max=13
+    chk_184 = chk["184"]
+    assert chk_184["dc_floor"] == 12
+    assert chk_184["dc_ceil"] == 13
+    assert chk_184["n_checks_floor"] == 178
+    assert chk_184["n_checks_ceil"] == 6
+    assert chk_184["realized_max_check_degree"] == 13
+    assert chk_184["check_degree_allocation"] == {"12": 178, "13": 6}
+    assert chk_184["n_checks_floor"] * 12 + chk_184["n_checks_ceil"] * 13 == 2214
+    assert chk_184["is_socket_allocation_feasible"] is True
+
+    # m=190: 66 degree-11 + 124 degree-12 checks, max=12
+    chk_190 = chk["190"]
+    assert chk_190["dc_floor"] == 11
+    assert chk_190["dc_ceil"] == 12
+    assert chk_190["n_checks_floor"] == 66
+    assert chk_190["n_checks_ceil"] == 124
+    assert chk_190["realized_max_check_degree"] == 12
+    assert chk_190["check_degree_allocation"] == {"11": 66, "12": 124}
+    assert chk_190["n_checks_floor"] * 11 + chk_190["n_checks_ceil"] * 12 == 2214
+    assert chk_190["is_socket_allocation_feasible"] is True
+
+    # m=192: 90 degree-11 + 102 degree-12 checks, max=12
+    chk_192 = chk["192"]
+    assert chk_192["dc_floor"] == 11
+    assert chk_192["dc_ceil"] == 12
+    assert chk_192["n_checks_floor"] == 90
+    assert chk_192["n_checks_ceil"] == 102
+    assert chk_192["realized_max_check_degree"] == 12
+    assert chk_192["check_degree_allocation"] == {"11": 90, "12": 102}
+    assert chk_192["n_checks_floor"] * 11 + chk_192["n_checks_ceil"] * 12 == 2214
+    assert chk_192["is_socket_allocation_feasible"] is True
 
     # 6. Degree-2 feasibility and cycle rank lower bounds
     d2 = report["degree2_analysis"]
@@ -93,7 +126,8 @@ def test_v36_distribution_analysis():
     verdict = report["feasibility_verdict"]
     assert verdict["all_forest_feasible"] is False
     assert verdict["structurally_cycle_free_degree2_possible"] is False
-    assert verdict["all_check_degrees_feasible"] is True
+    assert verdict["any_source_forest_feasible"] is False
+    assert verdict["all_socket_allocations_feasible"] is True
 
 
 def test_low_degree2_feasible_distribution():
@@ -128,6 +162,7 @@ def test_low_degree2_feasible_distribution():
 
     assert report["feasibility_verdict"]["all_forest_feasible"] is True
     assert report["feasibility_verdict"]["structurally_cycle_free_degree2_possible"] is True
+    assert report["feasibility_verdict"]["any_source_forest_feasible"] is True
 
 
 def test_zero_degree2_regular_distribution():
@@ -140,10 +175,53 @@ def test_zero_degree2_regular_distribution():
     assert report["degree2_analysis"]["N2"] == 0
     assert report["degree2_analysis"]["by_m"]["192"]["cycle_rank_lower_bound"] == 0
     assert report["degree2_analysis"]["by_m"]["192"]["is_forest_feasible"] is True
+    assert report["feasibility_verdict"]["structurally_cycle_free_degree2_possible"] is True
+
+
+def test_mixed_m_forest_feasibility_semantics():
+    """T4: Test mixed-feasibility where N2 passes for larger m but fails for smaller m."""
+    # Construct a distribution where N2 is between m1-1 and m2-1.
+    # For m=[184, 190, 192], forest bounds are [183, 189, 191].
+    # Let N2 = 186 (e.g. lambda_2 = 0.115, lambda_3 = 0.885 with n=1024):
+    # L_2 = (0.115 / 2) / (0.115 / 2 + 0.885 / 3) = 0.0575 / (0.0575 + 0.295) = 0.0575 / 0.3525 = 23 / 141
+    # n * (23/141) = 1024 * 0.163120567 = 167.03...
+    # Let's directly craft a lambda to get N2 = 186:
+    # We want L_2 ≈ 186 / 1024 ≈ 0.181640625
+    # L_2 = (w2/2) / (w2/2 + (1-w2)/3) = 3*w2 / (w2 + 2) = 0.181640625
+    # 3*w2 = 0.181640625 * w2 + 0.36328125 => 2.818359375 * w2 = 0.36328125 => w2 ≈ 0.1288981289
+    w2 = 0.1288981288981289
+    lambda_mixed = {2: w2, 3: 1.0 - w2}
+    report = analyze_degree_feasibility(lambda_mixed, n=1024, m_values=[184, 190, 192])
+
+    N2 = report["degree2_analysis"]["N2"]
+    assert N2 == 186
+
+    by_m = report["degree2_analysis"]["by_m"]
+    # m=184: forest bound 183 < 186 -> False, cycle rank lower bound = 3
+    assert by_m["184"]["forest_bound"] == 183
+    assert by_m["184"]["is_forest_feasible"] is False
+    assert by_m["184"]["cycle_rank_lower_bound"] == 3
+
+    # m=190: forest bound 189 >= 186 -> True, cycle rank lower bound = 0
+    assert by_m["190"]["forest_bound"] == 189
+    assert by_m["190"]["is_forest_feasible"] is True
+    assert by_m["190"]["cycle_rank_lower_bound"] == 0
+
+    # m=192: forest bound 191 >= 186 -> True, cycle rank lower bound = 0
+    assert by_m["192"]["forest_bound"] == 191
+    assert by_m["192"]["is_forest_feasible"] is True
+    assert by_m["192"]["cycle_rank_lower_bound"] == 0
+
+    # Global verdict MUST be False because m=184 is not feasible (R1 requirement)
+    verdict = report["feasibility_verdict"]
+    assert verdict["all_forest_feasible"] is False
+    assert verdict["structurally_cycle_free_degree2_possible"] is False
+    # At-least-one diagnostic is True
+    assert verdict["any_source_forest_feasible"] is True
 
 
 def test_invalid_lambda_inputs():
-    """T4: Ensure invalid lambda distributions fail closed with ValueError."""
+    """T5: Ensure invalid lambda distributions fail closed with ValueError."""
     # Sum != 1
     with pytest.raises(ValueError, match="must sum to 1.0"):
         parse_and_validate_lambda({2: 0.5, 4: 0.3})
@@ -182,7 +260,7 @@ def test_invalid_lambda_inputs():
 
 
 def test_invalid_dimensions():
-    """T5: Ensure invalid n or m values raise ValueError."""
+    """T6: Ensure invalid n or m values raise ValueError."""
     with pytest.raises(ValueError, match="n must be a positive integer"):
         analyze_degree_feasibility({2: 0.85, 4: 0.15}, n=0)
 
@@ -195,9 +273,12 @@ def test_invalid_dimensions():
     with pytest.raises(ValueError, match="m must be a positive integer"):
         analyze_degree2_subgraph(N2=10, m=0)
 
+    with pytest.raises(ValueError, match="total_sockets must be a positive integer"):
+        calculate_check_degree_allocation(total_sockets=0, m=100)
+
 
 def test_string_key_equivalence():
-    """T6: Verify string-keyed dict and integer-keyed dict produce identical analyses."""
+    """T7: Verify string-keyed dict and integer-keyed dict produce identical analyses."""
     dict_int = {2: 0.85, 4: 0.15}
     dict_str = {"2": 0.85, "4": 0.15}
 
@@ -208,7 +289,7 @@ def test_string_key_equivalence():
 
 
 def test_largest_remainder_invariants():
-    """T7: Test exact sum and apportionment invariants for largest-remainder."""
+    """T8: Test exact sum and apportionment invariants for largest-remainder."""
     props = [0.1, 0.2, 0.3, 0.4]
     for total in [1, 7, 10, 100, 1024, 2048]:
         counts = largest_remainder_counts(props, total)
@@ -216,8 +297,27 @@ def test_largest_remainder_invariants():
         assert len(counts) == len(props)
 
 
+def test_check_degree_allocation_function():
+    """T9: Directly test calculate_check_degree_allocation edge cases and exact algebra."""
+    # Exact divisible case: E = 2000, m = 100 -> exactly 100 checks of degree 20
+    res_exact = calculate_check_degree_allocation(total_sockets=2000, m=100)
+    assert res_exact["dc_floor"] == 20
+    assert res_exact["dc_ceil"] == 20
+    assert res_exact["n_checks_floor"] == 100
+    assert res_exact["n_checks_ceil"] == 0
+    assert res_exact["realized_max_check_degree"] == 20
+    assert res_exact["check_degree_allocation"] == {"20": 100}
+    assert res_exact["is_socket_allocation_feasible"] is True
+
+    # Infeasible check degree: E = 150, m = 100 -> dc_floor = 1 < 2 -> is_socket_allocation_feasible False
+    res_infeasible = calculate_check_degree_allocation(total_sockets=150, m=100)
+    assert res_infeasible["dc_floor"] == 1
+    assert res_infeasible["dc_ceil"] == 2
+    assert res_infeasible["is_socket_allocation_feasible"] is False
+
+
 def test_full_json_report_generation():
-    """T8: Verify generate_degree_feasibility_report produces valid parseable JSON."""
+    """T10: Verify generate_degree_feasibility_report produces valid parseable JSON."""
     json_str = generate_degree_feasibility_report({2: 0.85, 4: 0.15}, n=1024, m_values=[184, 190, 192])
     parsed = json.loads(json_str)
 
@@ -233,7 +333,7 @@ def test_full_json_report_generation():
 
 
 def test_cli_execution():
-    """T9: Verify CLI execution via python -m runner."""
+    """T11: Verify CLI execution via python -m runner."""
     cmd = [
         sys.executable,
         "-m",
@@ -251,3 +351,5 @@ def test_cli_execution():
     assert data["degree_counts"]["2"] == 941
     assert data["degree2_analysis"]["N2"] == 941
     assert data["degree2_analysis"]["by_m"]["184"]["cycle_rank_lower_bound"] == 758
+    assert data["check_node_analysis"]["184"]["n_checks_floor"] == 178
+    assert data["check_node_analysis"]["184"]["n_checks_ceil"] == 6
