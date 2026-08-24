@@ -82,3 +82,15 @@ Key frozen items:
 - Primary trajectory metric: $\text{AUT}_{30} = \sum_{t=0}^{30} H(t)$ measuring cumulative early-iteration entropy.
 - Two-stage evaluation: P1-A screening (3 seeds/source) + conditional P1-B confirmation on fresh disjoint seeds (3 seeds/source) if screening passes.
 - Advance threshold: $\ge 5\%$ reduction in $\text{AUT}_{30}$ across all three sources independently.
+
+---
+
+## Milestone 3: Development Execution Authorization
+
+**Authorization Source**: Explicit user authorization (“我授权 V37R1 按已经接受的 implementation 运行 P1-A development DE，并且仅在冻结 screening gate 通过时运行 P1-B。”)
+**Lifecycle State**: `DEVELOPMENT_EXECUTION_AUTHORIZED`
+**Accepted Implementation SHA**: `3a64d1e9ad11625f3eee1fa6cafb5d75c7eaca39`
+**Authorized Scope**: V37R1 frozen P1-A development DE (2,349 runs) and conditional P1-B confirmation (18 runs) only.
+**P1-B Condition**: Executed if and only if $\ge 1$ finite candidate passes the frozen P1-A screening gate ($\Delta_s \le -0.05$ on all 3 sources independently, all seeds converge).
+**Formal Execution Authorization**: `NOT_GRANTED`
+**Scientific Promotion**: `NOT_GRANTED`
