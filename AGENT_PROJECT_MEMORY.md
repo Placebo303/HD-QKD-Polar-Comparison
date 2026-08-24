@@ -1,3 +1,20 @@
+## 2026-08-24 Strict first principle: high-performance correction algorithms
+
+- User directive [decision]: the project's strict first principle is to find,
+  implement, and experimentally validate scientifically reasonable
+  high-performance IR/error-correction algorithms for the actual HD-QKD data.
+- Priority measures [decision]: correction success/FER, leakage/reconciliation
+  efficiency, throughput/runtime, memory/resource cost, and accepted-frame net
+  secret-key yield.
+- Engineering boundary [decision]: package maturity, general frameworks,
+  defensive hardening, exhaustive audit, and verifier sophistication are
+  secondary. They block algorithm work only for a concrete risk of wrong
+  science/numerics, irreproducibility, unauthorized expensive execution, or
+  destructive overwrite; otherwise mark non-blocking/deferred.
+- Workflow consequence [decision]: use the shortest scientifically valid path
+  from method hypothesis to implementation to performance measurement. Do not
+  expand ordinary algorithm work into adversarial-verifier engineering.
+
 ## 2026-08-24 V34 matched empirical-P finite control: P3 implementation candidate
 
 - Current state [repo-observed]: V34 OpenSpec passed initial FR1 rejection,

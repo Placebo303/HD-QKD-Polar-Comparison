@@ -23,6 +23,27 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-24: High-performance correction algorithms are the strict first principle
+
+**Decision**: Make discovery, implementation, and experimental validation of
+high-performance IR/error-correction algorithms the project's strict first
+principle. Benchmark, evidence, lifecycle, and review work are supporting
+means, not the research output.
+
+**Priority metrics**: correction success/FER, leakage and reconciliation
+efficiency, throughput/runtime, memory/resource cost, and accepted-frame net
+secret-key yield.
+
+**Blocking rule**: Engineering, audit, or verifier findings block algorithm
+work only when they can concretely cause wrong numerics/scientific attribution,
+irreproducibility, unauthorized expensive execution, or destructive overwrite.
+All other engineering improvements are non-blocking or deferred.
+
+**Consequences**: Do not turn algorithm development into package-hardening or
+adversarial-verifier work. Use the smallest scientifically valid implementation
+and validation, measure the method, then allocate effort to the next
+highest-information correction algorithm.
+
 ### 2026-08-24: Freeze V34 and stop after the P3 implementation candidate
 
 **Decision**: Accept the revised V34 specification freeze, implement only the

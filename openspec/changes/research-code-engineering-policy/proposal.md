@@ -8,7 +8,21 @@ prompt rules must go through an OpenSpec change first. This proposal satisfies
 that requirement and documents the policy for all agents operating in this
 repository.
 
+The user further requires **high-performance error-correction algorithm
+research to be the project's strict first principle**. The existing policy
+limits production-style engineering, but does not yet define what wins when
+algorithm work competes with packaging, audit, verifier, or framework work.
+
 ## What Changes
+
+Add a binding priority rule: discover, implement, and experimentally validate
+scientifically reasonable high-performance IR algorithms for the actual
+HD-QKD data first. Correction success, leakage efficiency, throughput,
+resource cost, and net secret-key yield take priority over package maturity,
+generality, defensive hardening, exhaustive audit machinery, and verifier
+sophistication. Engineering may block algorithm work only for a concrete risk
+of wrong science, irreproducible numerics, unauthorized expensive execution,
+or destructive overwrite.
 
 Add a new subsection `### 5.7 Research Code Engineering Policy` to
 `AGENTS.md` §5 (Project-Specific Rules), containing the following policy
@@ -62,7 +76,8 @@ text:
 
 ## Scope
 
-- **Files modified**: `AGENTS.md` only (add one subsection)
-- **Files NOT touched**: `AGENT_PROJECT_MEMORY.md`, `docs/`, any source code
+- **Files modified**: `AGENTS.md`, `openspec/project.md`, `README.md`, project
+  decision/memory/roadmap documents, and this OpenSpec packet
+- **Files NOT touched**: algorithm source code or scientific outputs
 - **No new files** outside this change directory
-- **No test requirements** (pure documentation change)
+- **No test requirements** (pure policy/documentation change)

@@ -5,6 +5,21 @@
 ### Summary
 Evaluate and compare Information Reconciliation (IR) methods for high-dimensional Quantum Key Distribution (QKD). The original Polar pipeline is a frozen baseline; `comparison_bench/` adds a non-invasive comparison layer.
 
+### Strict First Principle
+
+The project's first principle is to discover, implement, and experimentally
+validate scientifically reasonable high-performance error-correction/IR
+algorithms for the actual HD-QKD data. Benchmarking, reproducibility, lifecycle
+gates, and evidence exist to make those algorithm measurements trustworthy;
+they must not become the primary product.
+
+Algorithmic progress in correction success/FER, leakage efficiency,
+throughput/runtime, resource cost, and net secret-key yield outranks package
+maturity, generalized infrastructure, defensive hardening, exhaustive audit,
+and verifier sophistication. Non-scientific engineering findings are
+non-blocking unless they can concretely change the numerical result,
+scientific attribution, execution authorization, or existing data.
+
 ### Tech Stack
 - **Language**: Python 3
 - **Core deps**: `numpy`, `pandas`, `numba`, `tqdm`

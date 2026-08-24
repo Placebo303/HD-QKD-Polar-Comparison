@@ -1,5 +1,23 @@
 # Design: Research Code Engineering Policy
 
+## Decision: Performance algorithm research is the strict first principle
+
+All project planning and review SHALL use this priority order:
+
+1. formulate a scientifically plausible correction-method hypothesis;
+2. implement the smallest algorithm capable of testing it;
+3. measure correction success, leakage, runtime/resource cost, and net-key
+   implications at the appropriate synthetic/real boundary;
+4. retain only the minimum reproducibility and lifecycle evidence needed to
+   trust that measurement;
+5. improve packaging, generalized infrastructure, verifier depth, or defensive
+   robustness only when explicitly requested or required by a concrete
+   scientific failure mode.
+
+Reviews SHALL distinguish algorithm/scientific blockers from engineering
+improvements. Engineering is non-blocking unless it can change the numerical
+result, scientific attribution, execution authorization, or existing data.
+
 ## Decision: Placement as §5.7
 
 The policy is placed as a new subsection `### 5.7 Research Code Engineering
@@ -20,8 +38,11 @@ structural disruption.
 | File | Action | Description |
 |------|--------|-------------|
 | `AGENTS.md` | Edit | Insert `### 5.7` subsection between existing `### 5.6` and the `---` separator before `## 6` |
+| `openspec/project.md` | Edit | Add the strict first-principle objective and priority rule |
+| `README.md` | Edit | Surface the algorithm-performance-first identity |
+| project decision/memory/roadmap docs | Edit | Record the durable decision and supersession rule |
 
-No other files modified or created.
+No algorithm or output files are modified by this policy change.
 
 ## Structural Checkpoints
 

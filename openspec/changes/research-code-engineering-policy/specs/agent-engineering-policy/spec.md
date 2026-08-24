@@ -30,3 +30,36 @@ for all agents operating in this repository:
   exists.
 - Agents SHALL NOT generalize one-off research scripts into production
   frameworks unless explicitly requested.
+
+### Requirement: High-performance correction algorithms are the strict first principle
+
+The project SHALL prioritize discovering, implementing, and experimentally
+validating scientifically reasonable high-performance information-
+reconciliation algorithms for actual HD-QKD data above package maturity,
+generality, defensive hardening, exhaustive audit machinery, and verifier
+sophistication.
+
+Algorithm performance SHALL be evaluated using the applicable combination of
+correction success/FER, leakage and reconciliation efficiency, throughput and
+runtime, memory/resource cost, and accepted-frame net secret-key yield.
+
+Engineering, audit, or verifier work SHALL block algorithm work only when the
+unresolved issue can concretely cause a wrong numerical/scientific conclusion,
+an irreproducible result, unauthorized expensive execution, or destructive
+overwrite of existing data. Other engineering improvements SHALL be recorded
+as non-blocking or deferred.
+
+#### Scenario: Review finds a defensive or verifier improvement
+
+- **WHEN** the finding cannot change the algorithm's numerical result,
+  scientific attribution, authorization boundary, or existing data
+- **THEN** it SHALL NOT block algorithm implementation or measurement
+- **AND** the project SHALL continue with the highest-information algorithmic
+  task.
+
+#### Scenario: Algorithm and package work compete for effort
+
+- **WHEN** both are available and package work is not required for a concrete
+  scientific or data-safety failure mode
+- **THEN** the algorithm hypothesis, implementation, or performance experiment
+  SHALL be performed first.

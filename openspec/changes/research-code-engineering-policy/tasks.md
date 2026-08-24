@@ -19,14 +19,25 @@
    - Bullet list prefix (`*` / `-`) is consistent with existing blocks
    - File encoding is valid UTF-8
 
-4. **Report** — confirm the single-file diff: only `AGENTS.md` modified.
-   No other files touched.
+4. **Report** — confirm that only policy/documentation files are modified and
+   no algorithm source or scientific output is touched.
+
+5. **Amend for the user-directed first principle** — update this OpenSpec
+   packet first, then synchronize `AGENTS.md`, `openspec/project.md`,
+   `README.md`, the performance roadmap, decision log, and project memory.
+   Do not edit algorithm code or scientific outputs.
+
+6. **Consistency check** — verify every authoritative project document states
+   that algorithm performance outranks package maturity and verifier/audit
+   sophistication, while preserving only the minimum safeguards for numerical
+   correctness, reproducibility, explicit execution authorization, and
+   no-overwrite data safety.
 
 ## Verification (no test suite)
 
 This is a documentation-only change. Verification is structural:
 
-- `git diff --stat` shows only `AGENTS.md` (plus change directory if tracked)
+- `git diff --stat` shows only the policy/documentation files named above
 - `AGENTS.md` parses as valid Markdown
 - Section numbering 1–10 remains contiguous
 - All existing content is preserved unchanged apart from the insertion

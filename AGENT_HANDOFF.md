@@ -1,3 +1,13 @@
+## STRICT PROJECT FIRST PRINCIPLE — PERFORMANCE ALGORITHMS
+
+High-performance error-correction/IR algorithm discovery, implementation, and
+measurement are the first priority. Do not let packaging, generalized
+infrastructure, defensive hardening, audit depth, or verifier sophistication
+displace algorithm work unless a concrete issue would make the numerical or
+scientific result wrong, irreproducible, unauthorized, or destructive to
+existing data. See AGENTS.md §1.1 and
+`openspec/changes/research-code-engineering-policy/`.
+
 ## 2026-08-24 V34 P3 COMPLETE — IMPLEMENTATION CANDIDATE ONLY
 
 - Change: `formal-nonbinary-ldpc-v34-corrected-matched-empirical-p-finite-control`.

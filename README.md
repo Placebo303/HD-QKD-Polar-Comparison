@@ -1,5 +1,19 @@
 # HD-QKD Polar Comparison
 
+## Project First Principle
+
+This is a performance-first research-code repository. Its strict first
+principle is to find, implement, and validate scientifically reasonable
+high-performance information-reconciliation algorithms for the actual HD-QKD
+data. Primary measures are correction success/FER, leakage efficiency,
+throughput and resource cost, and accepted-frame net secret-key yield.
+
+Benchmarking and reproducibility support algorithm discovery. Package maturity,
+general frameworks, defensive hardening, exhaustive audit machinery, and
+verifier sophistication are secondary and must not displace algorithm work
+unless a concrete issue would make the scientific result wrong, irreproducible,
+unauthorized, or destructive to existing data.
+
 This repository contains the current HD-QKD Polar comparison workspace, including:
 - the frozen Polar baseline
 - the non-invasive `comparison_bench/` comparison layer (formal IR methods, CLIs, parameter sweeps, and tests)

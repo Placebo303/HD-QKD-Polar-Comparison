@@ -4,11 +4,49 @@ These rules apply to all agents operating in this repository.
 
 ---
 
+## 0. Repository Scope (READ FIRST — boundary rule)
+
+- **This checkout (`HD-QKD_Polar_Comparison`) is the FORMAL IR / LDPC
+  RESEARCH MAINLINE** (`main` branch): formal Cascade/LDPC methods,
+  binary-LDPC v3+ long-frame work, and the nonbinary-LDPC ladder live and
+  evolve here.
+- **The sibling checkout `../HD-QKD_Polar_Release` is the BINARY POLAR
+  MAINLINE** (branch `polar-mainline`): mature binary Polar usage, frozen
+  baseline, security tooling. Do not advance Polar-mainline workstreams
+  there from this repository, and do not merge `polar-mainline` into this
+  `main`.
+- Both checkouts historically shared one remote and one `main`, which
+  caused a crosstalk incident (research content swept into the shared
+  mainline, 2026-08-12..22). Keep research commits on this `main`; never
+  sweep them into the sibling's branch again.
+
+---
+
 ## 1. Project Identity
 
 - **Project name**: `HD-QKD_Polar_Comparison`
 - **Purpose**: Evaluate and compare information reconciliation (IR) methods for high-dimensional QKD data. The original Polar pipeline is a frozen baseline; the `comparison_bench/` layer adds a non-invasive comparison framework.
-- **Main objective**: Build a reproducible benchmark layer that reads/imports existing Polar results, runs executable comparison baselines (cascade, binary LDPC, q-ary LDPC reference) on synthetic and real paired-symbol frame data, and generates comparable CSV/Parquet/summary outputs without changing the original Polar workflow semantics.
+- **Main objective**: Discover, implement, and experimentally validate
+  scientifically reasonable **high-performance information-reconciliation
+  algorithms** for the actual HD-QKD data. The benchmark layer and frozen Polar
+  baseline support this objective; they are not the objective themselves.
+
+### 1.1 Strict First Principle: High-Performance Error Correction
+
+- High-performance correction algorithms are the project's strict first
+  principle. Prioritize algorithm hypotheses, implementations, and informative
+  performance experiments over package maturity, generalized infrastructure,
+  defensive hardening, exhaustive audit machinery, and verifier sophistication.
+- Evaluate progress using the applicable combination of correction success/FER,
+  leakage and reconciliation efficiency, throughput/runtime, memory/resource
+  cost, and accepted-frame net secret-key yield.
+- Engineering, audit, or verifier work may block algorithm work only when the
+  unresolved issue can concretely cause a wrong numerical/scientific conclusion,
+  irreproducible result, unauthorized expensive execution, or destructive
+  overwrite of existing data. Otherwise record it as non-blocking or deferred.
+- Use the shortest scientifically valid path: formulate the method, implement
+  the smallest testable algorithm, measure it, and then decide the next method.
+  Do not let research turns become packaging or adversarial-verifier projects.
 
 ---
 
@@ -99,13 +137,14 @@ These rules apply to all agents operating in this repository.
   - failed computations can normally be rerun;
   - Git is used for source-code version control.
 - Prioritize:
-  1. scientific and numerical correctness;
-  2. explicit units, assumptions, and parameter definitions;
-  3. readable calculations;
-  4. reproducible random seeds where relevant;
-  5. validation against known limits or small test cases;
-  6. clear error messages for realistic input mistakes;
-  7. minimal dependencies and minimal abstraction.
+  1. high-performance correction-method progress and informative measurement;
+  2. scientific and numerical correctness;
+  3. explicit units, assumptions, and parameter definitions;
+  4. readable calculations;
+  5. reproducible random seeds where relevant;
+  6. validation against known limits or small test cases;
+  7. clear error messages for realistic input mistakes;
+  8. minimal dependencies and minimal abstraction.
 - Before adding any defensive mechanism, identify the concrete failure mode it prevents. If no realistic failure mode exists in this repository, omit it.
 - Do not generalize a one-off research script into a production framework unless explicitly requested.
 
@@ -238,9 +277,10 @@ This workflow is the default for all substantial delegated implementation:
    frozen items are complete, or on a concrete blocker with the failing
    command, exact error/traceback, attempted remedies, and the single decision
    needed from the main thread. “Still incomplete” is not a completion report.
-4. **Review three times by default.** Main-thread review occurs at
-   specification freeze, complete candidate delivery, and independent
-   acceptance. Avoid repeated full-file review after each small increment.
+4. **Review in proportion to scientific risk.** Use freeze, candidate, and
+   independent-acceptance reviews for irreversible or claim-bearing scientific
+   execution. For low-risk algorithm iteration, use focused numerical review;
+   do not let review ceremony displace algorithm work.
 5. **Reuse before rebuilding.** A successor starts from the nearest accepted
    predecessor contract and an explicit delta list. Preserve unchanged
    artifact, transcript, provenance, invalid-run, replay, and no-overwrite
@@ -250,10 +290,10 @@ This workflow is the default for all substantial delegated implementation:
    qualification plus strict replay; T3 is cross-version or broad regression.
    Run T2/T3 only at milestones. Main acceptance also checks frozen
    directories/source hashes and absence of unauthorized production output.
-7. **Freeze layered tamper evidence up front.** When verifiers are in scope,
-   cover raw byte drift, semantic changes with local self-hashes recomputed,
-   manifest/index links recomputed, and deep source/transcript/public-payload/
-   leakage/accounting/gate reconstruction.
+7. **Use tamper evidence only when scientifically necessary.** When a verifier
+   is explicitly in scope and a concrete evidence-integrity failure could alter
+   a scientific conclusion, cover the necessary drift layers. Do not expand an
+   algorithm task into adversarial tamper engineering by default.
 8. **Never invoke production work implicitly from tests.** Test-only
    execute/verify calls must explicitly pass a fake runner. A default
    production decoder, raw-data pipeline, long run, or evidence-output path
