@@ -219,42 +219,76 @@ def test_t9_disjoint_seed_sets():
 
 def test_t10_conditional_confirmation():
     """T10: Verify confirmation is executed if and only if screening yields >= 1 passing candidates."""
-    # Test fake runner execution
-    report = run_v37_p1_pipeline(fake_runner=True)
-    # With fake runner synthetic traces, passing candidates exist -> confirmation is executed
-    assert report.screening_de_runs == 2349
-    if report.passing_screening_candidates:
-        assert report.confirmation_executed is True
-        assert report.confirmation_de_runs == 18
-        assert report.total_de_runs == 2367
-        assert report.selected_winner is not None
-    else:
-        assert report.confirmation_executed is False
-        assert report.confirmation_de_runs == 0
-        assert report.total_de_runs == 2349
-        assert report.terminal_state == STATUS_P1_NO_FINITE_FEASIBLE_DE_ADVANCE
+    # Case A: When threshold is impossible (e.g. 0.99), 0 candidates pass screening
+    report_no_pass = run_v37_p1_pipeline(effect_size_threshold=0.99, fake_runner=True)
+    assert len(report_no_pass.passing_screening_candidates) == 0
+    assert report_no_pass.confirmation_executed is False
+    assert report_no_pass.confirmation_de_runs == 0
+    assert report_no_pass.screening_de_runs == 2349
+    assert report_no_pass.total_de_runs == 2349
+    assert report_no_pass.selected_winner is None
+    assert report_no_pass.terminal_state == STATUS_P1_NO_FINITE_FEASIBLE_DE_ADVANCE
+
+    # Case B: When threshold is standard (0.05), candidates pass screening and exactly one enters confirmation
+    report_pass = run_v37_p1_pipeline(effect_size_threshold=0.05, fake_runner=True)
+    assert len(report_pass.passing_screening_candidates) > 0
+    assert report_pass.confirmation_executed is True
+    assert report_pass.confirmation_de_runs == 18
+    assert report_pass.screening_de_runs == 2349
+    assert report_pass.total_de_runs == 2367
+    assert report_pass.selected_winner is not None
 
 
 def test_t11_failed_confirmation_terminal_state():
     """T11: Verify P1_SCREEN_SIGNAL_NOT_CONFIRMED when confirmation fails."""
-    # Synthetic test where confirmation delta fails
-    report = run_v37_p1_pipeline(fake_runner=True)
-    if report.confirmation_executed:
-        # Simulate confirmation failure
-        assert report.terminal_state in (
-            STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND,
-            STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED,
-        )
+    # Build candidate and mock results where screening passes but confirmation fails on 2M
+    cand = DegreeCandidate("cand_test", {2: 0.1, 3: 0.9}, 146, 2.857, 2926, {184: 16, 190: 16, 192: 16}, True, False)
+    baseline = DegreeCandidate("baseline", {2: 1.0}, 1024, 2.0, 2048, {184: 12, 190: 11, 192: 11}, False, False)
+
+    # Screening: beats baseline by 6% on all 3 sources, and converges (H60 < 1e-4)
+    screen_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
+    # Trace with AUT_30 = 94.0 and final entropy 1e-5
+    trace_94 = [94.0 / 31.0] * 30 + [1e-5] * 30
+    trace_98 = [98.0 / 31.0] * 30 + [1e-5] * 30
+
+    screen_cand_metrics = {
+        src: {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)}
+        for src in SOURCES
+    }
+    screen_res = aggregate_candidate_results(cand, "screen", screen_cand_metrics, screen_base_means)
+    assert screen_res.all_seeds_converged is True
+    assert all(screen_res.relative_deltas[src] <= -0.05 for src in SOURCES)
+
+    # Confirmation: beats 1M and 1p5M by 6%, but only beats 2M by 2% (Delta = -0.02 > -0.05)
+    confirm_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
+    confirm_cand_metrics = {
+        "1M": {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)},
+        "1p5M": {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)},
+        "2M": {s: compute_trajectory_metrics(trace_98, h0=98.0 / 31.0) for s in (1, 2, 3)},
+    }
+    confirm_res = aggregate_candidate_results(cand, "confirm", confirm_cand_metrics, confirm_base_means)
+    confirm_passed = confirm_res.all_seeds_converged and all(confirm_res.relative_deltas[src] <= -0.05 for src in SOURCES)
+    assert confirm_passed is False
+
+    terminal_state = STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND if confirm_passed else STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED
+    assert terminal_state == STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED
 
 
 def test_t12_confirmed_advance_terminal_state():
-    """T12: Verify terminal state constants exist and are distinct."""
-    states = {
-        STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND,
-        STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED,
-        STATUS_P1_NO_FINITE_FEASIBLE_DE_ADVANCE,
+    """T12: Verify P1_DE_ADVANCE_CANDIDATE_FOUND when confirmation passes on all 3 sources."""
+    cand = DegreeCandidate("cand_test", {2: 0.1, 3: 0.9}, 146, 2.857, 2926, {184: 16, 190: 16, 192: 16}, True, False)
+    confirm_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
+    trace_94 = [94.0 / 31.0] * 30 + [1e-5] * 30
+    confirm_cand_metrics = {
+        src: {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)}
+        for src in SOURCES
     }
-    assert len(states) == 3
+    confirm_res = aggregate_candidate_results(cand, "confirm", confirm_cand_metrics, confirm_base_means)
+    confirm_passed = confirm_res.all_seeds_converged and all(confirm_res.relative_deltas[src] <= -0.05 for src in SOURCES)
+    assert confirm_passed is True
+
+    terminal_state = STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND if confirm_passed else STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED
+    assert terminal_state == STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND
 
 
 def test_t13_convergence_requirement():
