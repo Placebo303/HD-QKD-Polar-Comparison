@@ -48,6 +48,8 @@ successor ran.
 scientific gate is one corrected matched empirical-P finite-control that keeps
 the V31 QC packet/decoder fixed and changes only generator/posterior matching.
 V33 must not be rerun, tuned, or promoted to qualification evidence.
+The diagnostic change is archived without merging its delta spec into the
+canonical method specs; no successor is authorized.
 
 ### 2026-08-21: V31 deterministic finite-graph redesign gate closed with `finite_graph_fail`
 

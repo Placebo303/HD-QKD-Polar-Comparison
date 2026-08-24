@@ -1,7 +1,7 @@
 ## 2026-08-24 V33 COMPLETE — PASS / ER1 ACCEPT
 
-- Current change: `formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic`.
-- State: `RUN_COMPLETE_ER1_ACCEPTED / SUCCESSOR_NOT_AUTHORIZED`.
+- Archived change: `openspec/changes/archive/2026-08-24-formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic/`.
+- State: `ARCHIVED / SUCCESSOR_NOT_AUTHORIZED`.
 - Official evidence: `comparison_bench/outputs_comparison/nonbinary_diagnostics/
   nbldpc_v33_rate_aligned_empirical_de/run_01/`.
 - Accepted commit `5b8cfef3fa0c45534c3aaede30750e6ad49bd2f6` adds exact R4 empirical F03 H/m_total/f_total checks, R6

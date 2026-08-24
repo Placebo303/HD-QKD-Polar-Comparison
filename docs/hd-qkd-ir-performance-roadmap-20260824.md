@@ -81,6 +81,7 @@ raw-SER + uniform nonzero delta 代替。
 - L1 iteration range 23–25；L2 range 37–44。L2 明显更慢，但仍在冻结判据内收敛。
 - 总执行约 60.8 s；没有 per-call runtime/CPU/memory 字段，因此不作更细吞吐声明。
 - strict verify：`consistent / problems=[] / records_checked=30`；独立 ER1 ACCEPT。
+- V33 OpenSpec 已归档；状态为 `ARCHIVED / SUCCESSOR_NOT_AUTHORIZED`。
 
 该结果解除“V31 实际层率在 empirical-P ensemble 层已经不可行”的否决，但不证明
 QC packet、decoder、FER 或净 key-rate。最终 entropy floor 约 `3.09e-296` 是数值

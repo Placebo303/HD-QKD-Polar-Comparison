@@ -4,7 +4,8 @@
   official `run_01` executed exactly once on HEAD `41d31151`; 30/30 calls and
   all six source×layer cells PASS 5/5. Strict verify returned consistent with
   no problems; independent Luna ER1 ACCEPTED. State is
-  `RUN_COMPLETE_ER1_ACCEPTED / SUCCESSOR_NOT_AUTHORIZED`.
+  `ARCHIVED / SUCCESSOR_NOT_AUTHORIZED`; archived under
+  `openspec/changes/archive/2026-08-24-formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic/`.
 - Scientific boundary [decision]: this proves convergence only for the frozen
   V25 train-only empirical-P, F03/A02, V31 exact-rate ensemble MC-DE. It does
   not prove a fixed QC graph, decoder, FER, finite code, net key rate,
