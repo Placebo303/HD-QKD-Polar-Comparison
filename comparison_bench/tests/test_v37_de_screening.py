@@ -241,70 +241,135 @@ def test_t10_conditional_confirmation():
     assert report_pass.selected_winner is not None
 
 
-def test_t11_failed_confirmation_terminal_state():
-    """T11: Force screening PASS + confirmation FAIL -> P1_SCREEN_SIGNAL_NOT_CONFIRMED (no second candidate tried)."""
-    # Construct 2 candidates where both pass screening, c1 selected as winner
-    c1 = DegreeCandidate("cand_1", {2: 0.1, 3: 0.9}, 146, 2.857, 2926, {184: 16, 190: 16, 192: 16}, True, False)
-    c2 = DegreeCandidate("cand_2", {2: 0.05, 3: 0.95}, 75, 2.927, 2998, {184: 17, 190: 16, 192: 16}, True, False)
-    baseline = DegreeCandidate("baseline", {2: 1.0}, 1024, 2.0, 2048, {184: 12, 190: 11, 192: 11}, False, False)
-
-    screen_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
-    trace_92 = [92.0 / 31.0] * 30 + [1e-5] * 30  # Delta = -0.08
-    trace_94 = [94.0 / 31.0] * 30 + [1e-5] * 30  # Delta = -0.06
-    trace_98 = [98.0 / 31.0] * 30 + [1e-5] * 30  # Delta = -0.02 (fails 5% gate)
-
-    # Both c1 and c2 pass screening, c1 has lower AUT_30 (92 < 94) -> selected as C*
-    res_c1_screen = aggregate_candidate_results(
-        c1, "screen",
-        {src: {s: compute_trajectory_metrics(trace_92, h0=92.0 / 31.0) for s in (1, 2, 3)} for src in SOURCES},
-        screen_base_means,
-    )
-    res_c2_screen = aggregate_candidate_results(
-        c2, "screen",
-        {src: {s: compute_trajectory_metrics(trace_94, h0=94.0 / 31.0) for s in (1, 2, 3)} for src in SOURCES},
-        screen_base_means,
-    )
-
-    passing = [res_c1_screen, res_c2_screen]
-    passing.sort(key=lambda c: (c.mean_aut30_overall, c.mean_h10_overall, c.candidate.N2, c.candidate.candidate_id))
-    selected_winner = passing[0]
-    assert selected_winner.candidate.candidate_id == "cand_1"
-
-    # Confirmation stage: evaluated strictly on selected_winner (c1) and baseline
-    confirm_configs_tested = [selected_winner.candidate.candidate_id, baseline.candidate_id]
-    assert "cand_2" not in confirm_configs_tested, "Second candidate must NOT be tested in confirmation"
-
-    # Confirmation execution for c1: fails on 2M (trace_98 -> Delta = -0.02 > -0.05)
-    confirm_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
-    confirm_cand_metrics = {
-        "1M": {s: compute_trajectory_metrics(trace_92, h0=92.0 / 31.0) for s in (1, 2, 3)},
-        "1p5M": {s: compute_trajectory_metrics(trace_92, h0=92.0 / 31.0) for s in (1, 2, 3)},
-        "2M": {s: compute_trajectory_metrics(trace_98, h0=98.0 / 31.0) for s in (1, 2, 3)},
-    }
-    confirm_res = aggregate_candidate_results(selected_winner.candidate, "confirm", confirm_cand_metrics, confirm_base_means)
-    confirm_passed = confirm_res.all_seeds_converged and all(confirm_res.relative_deltas[src] <= -0.05 for src in SOURCES)
-    assert confirm_passed is False
-
-    terminal_state = STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND if confirm_passed else STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED
-    assert terminal_state == STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED
+def _make_synthetic_metrics(aut30_val: float, h60_val: float = 1e-5, h0: float = 5.0) -> TrajectoryMetrics:
+    """Helper to construct a TrajectoryMetrics with exact requested AUT_30 and H60."""
+    step_val = max(0.0, (aut30_val - h0) / 30.0)
+    trace = [step_val] * 30 + [h60_val] * 30
+    return compute_trajectory_metrics(trace, h0=h0, max_aut_iter=30, target_len=60)
 
 
-def test_t12_confirmed_advance_terminal_state():
-    """T12: Force screening PASS + confirmation PASS -> P1_DE_ADVANCE_CANDIDATE_FOUND."""
-    cand = DegreeCandidate("cand_winner", {2: 0.1, 3: 0.9}, 146, 2.857, 2926, {184: 16, 190: 16, 192: 16}, True, False)
-    confirm_base_means = {"1M": 100.0, "1p5M": 100.0, "2M": 100.0}
-    trace_92 = [92.0 / 31.0] * 30 + [1e-5] * 30  # Delta = -0.08 <= -0.05 on all 3 sources
+def test_t11_failed_confirmation_terminal_state(monkeypatch):
+    """T11: End-to-end pipeline test forcing screening PASS + confirmation FAIL -> P1_SCREEN_SIGNAL_NOT_CONFIRMED.
 
-    confirm_cand_metrics = {
-        src: {s: compute_trajectory_metrics(trace_92, h0=92.0 / 31.0) for s in (1, 2, 3)}
-        for src in SOURCES
-    }
-    confirm_res = aggregate_candidate_results(cand, "confirm", confirm_cand_metrics, confirm_base_means)
-    confirm_passed = confirm_res.all_seeds_converged and all(confirm_res.relative_deltas[src] <= -0.05 for src in SOURCES)
-    assert confirm_passed is True
+    Verifies that run_v37_p1_pipeline:
+    1. Selects exactly one winner C* from multiple passing candidates.
+    2. Enters confirmation for C* and baseline only (confirmation_executed == True, runs == 18, total == 2367).
+    3. Concludes terminal state P1_SCREEN_SIGNAL_NOT_CONFIRMED when C* confirmation fails.
+    4. Does NOT retry or evaluate the second-best candidate during confirmation.
+    """
+    import comparison_bench.src.comparison_bench.formal_ir.v37_de_screening as de_mod
 
-    terminal_state = STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND if confirm_passed else STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED
-    assert terminal_state == STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND
+    _, _, final_cands = generate_v37_candidate_grid()
+    c1_id = final_cands[0].candidate_id
+    c2_id = final_cands[1].candidate_id
+
+    confirm_eval_cids: List[str] = []
+
+    def mock_evaluator(candidate, stage, seeds_by_source, samplers, n_samples, max_iter, fake_runner):
+        cid = candidate.candidate_id
+        if stage == "confirm":
+            confirm_eval_cids.append(cid)
+
+        results = {}
+        for src in SOURCES:
+            results[src] = {}
+            for seed in seeds_by_source[src]:
+                if stage == "screen":
+                    if cid == "baseline_dv2_regular":
+                        results[src][seed] = _make_synthetic_metrics(100.0)
+                    elif cid == c1_id:
+                        results[src][seed] = _make_synthetic_metrics(90.0)  # delta = -0.10 <= -0.05
+                    elif cid == c2_id:
+                        results[src][seed] = _make_synthetic_metrics(94.0)  # delta = -0.06 <= -0.05
+                    else:
+                        results[src][seed] = _make_synthetic_metrics(105.0)  # delta = +0.05
+                elif stage == "confirm":
+                    if cid == "baseline_dv2_regular":
+                        results[src][seed] = _make_synthetic_metrics(100.0)
+                    elif cid == c1_id:
+                        # 1M: 90.0 (-10%), 1p5M: 90.0 (-10%), 2M: 98.0 (-2% -> FAILS gate)
+                        val = 98.0 if src == "2M" else 90.0
+                        results[src][seed] = _make_synthetic_metrics(val)
+                    else:
+                        results[src][seed] = _make_synthetic_metrics(105.0)
+        return results
+
+    monkeypatch.setattr(de_mod, "evaluate_single_config", mock_evaluator)
+
+    report = run_v37_p1_pipeline(fake_runner=True)
+
+    # Assertions on the actual ScreeningExecutionReport
+    assert report.terminal_state == STATUS_P1_SCREEN_SIGNAL_NOT_CONFIRMED
+    assert report.confirmation_executed is True
+    assert report.confirmation_passed is False
+    assert report.screening_de_runs == 2349
+    assert report.confirmation_de_runs == 18
+    assert report.total_de_runs == 2367
+    assert report.selected_winner is not None
+    assert report.selected_winner.candidate.candidate_id == c1_id
+    assert len(report.passing_screening_candidates) == 2
+
+    # Verify confirmation evaluated ONLY c1 and baseline (no second candidate fallback)
+    assert confirm_eval_cids == [c1_id, "baseline_dv2_regular"]
+    assert c2_id not in confirm_eval_cids
+
+
+def test_t12_confirmed_advance_terminal_state(monkeypatch):
+    """T12: End-to-end pipeline test forcing screening PASS + confirmation PASS -> P1_DE_ADVANCE_CANDIDATE_FOUND.
+
+    Verifies that run_v37_p1_pipeline:
+    1. Selects winner C* from screening.
+    2. Successfully confirms C* on fresh confirmation seeds on all 3 sources (Delta_s <= -0.05).
+    3. Concludes terminal state P1_DE_ADVANCE_CANDIDATE_FOUND.
+    4. Evaluates only C* and baseline in confirmation.
+    """
+    import comparison_bench.src.comparison_bench.formal_ir.v37_de_screening as de_mod
+
+    _, _, final_cands = generate_v37_candidate_grid()
+    c1_id = final_cands[0].candidate_id
+
+    confirm_eval_cids: List[str] = []
+
+    def mock_evaluator(candidate, stage, seeds_by_source, samplers, n_samples, max_iter, fake_runner):
+        cid = candidate.candidate_id
+        if stage == "confirm":
+            confirm_eval_cids.append(cid)
+
+        results = {}
+        for src in SOURCES:
+            results[src] = {}
+            for seed in seeds_by_source[src]:
+                if stage == "screen":
+                    if cid == "baseline_dv2_regular":
+                        results[src][seed] = _make_synthetic_metrics(100.0)
+                    elif cid == c1_id:
+                        results[src][seed] = _make_synthetic_metrics(90.0)
+                    else:
+                        results[src][seed] = _make_synthetic_metrics(105.0)
+                elif stage == "confirm":
+                    if cid == "baseline_dv2_regular":
+                        results[src][seed] = _make_synthetic_metrics(100.0)
+                    elif cid == c1_id:
+                        # c1 passes on all 3 sources in confirmation (90.0 -> -10% <= -5%)
+                        results[src][seed] = _make_synthetic_metrics(90.0)
+                    else:
+                        results[src][seed] = _make_synthetic_metrics(105.0)
+        return results
+
+    monkeypatch.setattr(de_mod, "evaluate_single_config", mock_evaluator)
+
+    report = run_v37_p1_pipeline(fake_runner=True)
+
+    # Assertions on the actual ScreeningExecutionReport
+    assert report.terminal_state == STATUS_P1_DE_ADVANCE_CANDIDATE_FOUND
+    assert report.confirmation_executed is True
+    assert report.confirmation_passed is True
+    assert report.screening_de_runs == 2349
+    assert report.confirmation_de_runs == 18
+    assert report.total_de_runs == 2367
+    assert report.selected_winner is not None
+    assert report.selected_winner.candidate.candidate_id == c1_id
+    assert confirm_eval_cids == [c1_id, "baseline_dv2_regular"]
 
 
 def test_t13_convergence_requirement():
