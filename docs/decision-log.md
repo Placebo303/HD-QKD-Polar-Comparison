@@ -23,6 +23,30 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-24: Close V34 as an ER1-accepted bounded finite-control failure
+
+**Decision**: Accept the single authorized V34 official run as
+`matched_empirical_finite_control_fail` and prohibit V34 rerun or tuning.
+
+**Evidence**: Accounting-corrected HEAD `c8cc1fbe` passed independent IR1 and
+the complete 45-test fake suite. The authorized 60-block matrix completed with
+no fatal record. All three sources had 0/20 exact/syndrome/tag successes, while
+mean L2 errors fell by about 31--32%. Strict absolute-path verification was
+consistent and independent ER1 accepted all recomputed initial/final counts,
+runtime fields, ordinals, authorization, and terminal. No run_02 exists.
+
+**Interpretation**: Matching the empirical generator and posterior removes the
+V32 B1 attribution defect, but does not make this one V31 QC finite realization
+and V28R decoder succeed at oracle L1 and max_iter=30. Partial error reduction
+shows useful posterior/decoder motion; 37 converged-no-syndrome and 23 max-iter
+blocks point to finite-graph/iterative dynamics without uniquely identifying
+the cause.
+
+**Consequences**: Close current-packet tuning. Use existing residuals to guide
+one empirical-P-informed protograph/MET candidate and one rate-adaptive or
+incremental-syndrome mother-code design. Any higher-iteration check or new
+finite run is a separate successor, not a V34 retry.
+
 ### 2026-08-24: High-performance correction algorithms are the strict first principle
 
 **Decision**: Make discovery, implementation, and experimental validation of

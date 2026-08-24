@@ -130,7 +130,7 @@ python -m comparison_bench.src.comparison_bench.cli.run_nonbinary_v33_rate_align
 - 六个 cell 全 PASS：本分支已触发。当前只授权提出一次 corrected matched
   finite-control；不自动执行。
 
-## 5. PASS 后的一次归因实验：V34 当前到达 P3 候选
+## 5. PASS 后的一次归因实验：V34 已完成并得到 bounded FAIL
 
 corrected matched finite-control 的职责不是选码，而是回答：当合成数据与 posterior
 都来自同一个经验 `P(A,B)` 时，现有 QC packet+decoder 是否仍失败？
@@ -138,22 +138,22 @@ corrected matched finite-control 的职责不是选码，而是回答：当合�
 最小冻结设计：同一 V31 QC packet、同一 decoder、oracle L1、20 blocks/source、
 fresh frozen seeds、三源分别报告、无 tuning/rerun。
 
-截至 2026-08-24，V34 已完成 FR1、独立科学复核和主控 ACCEPT_FREEZE，并形成
-P3 最小实现候选。冻结细节为：直接从各源 train empirical P(A,B) 抽样；NumPy
+截至 2026-08-24，V34 已完成 FR1、实现、runtime/L2-error 会计修正、独立 IR1、
+恰一次正式 60-block 执行和独立 ER1。冻结细节为：直接从各源 train empirical P(A,B) 抽样；NumPy
 2.4.0 + `V34-PCG64-REF1`；source-major 60 calls；V31 m2=184/190/192；V32
 oracle-L1/V28R decoder；max_iter=30；每源 >=19/20 仅作机械判据。compile、
-selfcheck、真实输入只读 prepare 与 13 个 fake focused tests 均通过，官方输出根
-不存在。
+selfcheck、真实输入只读 prepare 与完整 45-test fake suite 均通过。accepted HEAD
+为 `c8cc1fbe`，矩阵 digest 未改变。
 
-当前状态不是 IR1 ACCEPT，也不是可执行状态。下一步固定为 Ox Alpha 完成 P4
-fake T2/T3 证据，再由独立 Codex 做 IR1；任务包见
-`docs/v34-p3-implementation-candidate-and-ox-alpha-handoff-20260824.md`。
-任何真实 decoder call 仍需 IR1、主控 implementation ACCEPT 和新的用户
-EXECUTE_AUTH。
+正式结果为三源各 0/20 success、无 fatal、无 false accept，终态
+`matched_empirical_finite_control_fail`。平均 L2 errors 分别从
+249.25/261.35/256.90 降至 168.45/181.10/174.05；平均 runtime 约
+10.19/10.01/9.99 s/block。37 块 `converged_no_syndrome`，23 块
+`max_iter_reached`。strict verify 一致，独立 ER1 ACCEPT，run_02 不存在。
 
-- 若明显通过：瓶颈转向真实误差传播、非 oracle L1 与有限余量。
-- 若仍失败：关闭对当前 `lambda={2:1}` + 当前 finite conversion 的继续微调；
-  不再搜索 PEG/QC seed、局部边标签或小范围 girth。
+- 本次触发 FAIL 分支：关闭对当前 `lambda={2:1}` + 当前 finite conversion 的
+  继续微调；不再搜索 PEG/QC seed、局部边标签或小范围 girth，也不把提高
+  max_iter 伪装成 V34 continuation。
 
 文献显示 degree-2 标准系综存在有限长度 block-error 风险。因此 matched control
 只做一次归因，不能成为无限循环的图构造调参入口。
@@ -213,7 +213,7 @@ NB-LDPC 后继必须说明预期收益来自更低 leakage、更少交互或更�
 |---|---|---|
 | M0 | V33 IR1、冻结实现 | 已完成：`5b8cfef3` ACCEPT |
 | M0--M1 | 一次 V33 execute + ER1 | 已完成：30/30 PASS，ER1 ACCEPT；无自动 successor |
-| M1--M2 | 条件式 matched finite-control 或 R2 P0 | 一次归因结论或候选系综短名单 |
+| M1--M2 | matched finite-control 与 ER1 | 已完成：0/20×3 bounded FAIL，转入 R2 |
 | M2--M4 | protograph/MET 或 allocation/factorization ensemble gate | 最多 1--2 个 finite 候选 |
 | M4--M6 | 单一 finite lifting gate；R3 P0；R4 基线 | 关闭失败族，保留一个主候选 |
 | M6--M9 | frozen validation 与 source transfer | 真实泛化证据，不调 confirmation |

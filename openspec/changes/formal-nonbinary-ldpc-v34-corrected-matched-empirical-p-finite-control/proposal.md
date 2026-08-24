@@ -1,13 +1,15 @@
 # Proposal: formal-nonbinary-ldpc-v34-corrected-matched-empirical-p-finite-control
 
-> **Status: FROZEN_ACCEPTED / IMPLEMENTATION_AUTHORIZED /
-> EXECUTE_NOT_AUTHORIZED**. Initial FR1 returned `REJECT_FREEZE`; specification
+> **Status: RUN_COMPLETE / BOUNDED_FAIL / ER1_ACCEPTED /
+> SUCCESSOR_NOT_AUTHORIZED**. Initial FR1 returned `REJECT_FREEZE`; specification
 > re-review returned `ACCEPT_FREEZE`, science amendments returned
 > `ACCEPT_AMENDMENTS_FINAL`, and Codex main recorded `ACCEPT_FREEZE` on
 > 2026-08-24 against baseline commit
 > `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`. P3 fake/test-only implementation
-> is authorized. Nothing here authorizes a real decoder call, official run, or
-> successor.
+> was authorized. After the accounting correction was independently accepted
+> at `c8cc1fbe`, the user authorized and the project completed exactly one
+> official 60-block execution. ER1 accepted the bounded FAIL. Nothing here
+> authorizes a rerun or successor.
 
 > **Accounting correction authorized 2026-08-24:** before IR1 and official
 > execution, repair runtime and L2 final-error accounting while leaving the

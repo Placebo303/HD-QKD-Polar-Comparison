@@ -15,6 +15,25 @@
   from method hypothesis to implementation to performance measurement. Do not
   expand ordinary algorithm work into adversarial-verifier engineering.
 
+## 2026-08-24 V34 matched empirical-P finite control: bounded FAIL / ER1 ACCEPT
+
+- Lifecycle [repo-observed]: accepted accounting-corrected HEAD `c8cc1fbe`;
+  user auth `user-v34-execute-auth-20260824-01`; one official 60-block execute;
+  strict absolute-path verify consistent; independent ER1 ACCEPT; no run_02.
+- Result [repo-observed]: 0/20 successes for each of 1M/1p5M/2M, no fatal or
+  false accept. Mean GF(32) L2 errors changed 249.25->168.45,
+  261.35->181.10, and 256.90->174.05; runtime means 10.1936/10.0084/9.9852 s.
+  Status split is 37 converged-no-syndrome and 23 max-iter.
+- Scientific boundary [decision]: direct empirical-P matching removed V32 B1's
+  confounder but did not rescue this fixed V31 QC packet/V28R decoder at oracle
+  L1 and max_iter=30. This is not NB-LDPC, FER, key-rate, qualification, or
+  promotion evidence.
+- Performance-first consequence [decision]: do not rerun/tune V34. Reuse its
+  residuals for graph-structure diagnosis, then prioritize one empirical-P
+  protograph/MET candidate and one rate-adaptive/incremental-syndrome mother
+  code. Administrative archival must not delay algorithm work.
+- Durable closeout: `docs/v34-formal-execution-er1-closeout-20260824.md`.
+
 ## 2026-08-24 V34 matched empirical-P finite control: P3 implementation candidate
 
 - Current state [repo-observed]: V34 OpenSpec passed initial FR1 rejection,

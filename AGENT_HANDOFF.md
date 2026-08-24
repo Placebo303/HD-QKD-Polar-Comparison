@@ -8,6 +8,29 @@ scientific result wrong, irreproducible, unauthorized, or destructive to
 existing data. See AGENTS.md §1.1 and
 `openspec/changes/research-code-engineering-policy/`.
 
+## 2026-08-24 V34 COMPLETE — BOUNDED FAIL / ER1 ACCEPT
+
+- Accepted implementation HEAD: `c8cc1fbe6ef37bc2735de3f6795c29d7042670ff`.
+- Frozen matrix digest: `d30335b4d0d74df3e7729e01b02ae1ae73e43035652c59e81f871a5545fe73bb`.
+- Accounting correction: runner-call monotonic runtime; final GF(32) symbol
+  errors recomputed from persisted `x2_hat`; independent IR1 accepted after
+  `45 passed`.
+- User authorization `user-v34-execute-auth-20260824-01` bound the accepted
+  HEAD. Official 60-block execute occurred exactly once; no fatal record.
+- Result: every source 0/20 exact/syndrome/tag successes. Mean initial -> final
+  L2 errors: 1M 249.25 -> 168.45; 1p5M 261.35 -> 181.10; 2M 256.90 -> 174.05.
+  Mean runtime was about 10.0--10.2 s/block. Statuses were 37
+  `converged_no_syndrome` and 23 `max_iter_reached`.
+- Absolute-path verifier returned `consistent`, `problems=[]`, 60 records;
+  independent Luna returned `ACCEPT_ER1`; `run_02` is absent.
+- This closes the fixed V31 QC packet + V28R decoder + oracle-L1 matched
+  empirical-P control only. It is not general NB-LDPC failure or FER/key-rate
+  evidence.
+- Next algorithm priority: residual-topology analysis from existing V34
+  records, then one empirical-P-informed protograph/MET finite candidate and
+  one rate-adaptive/incremental-syndrome mother-code design. Do not rerun V34.
+- Closeout: `docs/v34-formal-execution-er1-closeout-20260824.md`.
+
 ## 2026-08-24 V34 P3 COMPLETE — IMPLEMENTATION CANDIDATE ONLY
 
 - Change: `formal-nonbinary-ldpc-v34-corrected-matched-empirical-p-finite-control`.

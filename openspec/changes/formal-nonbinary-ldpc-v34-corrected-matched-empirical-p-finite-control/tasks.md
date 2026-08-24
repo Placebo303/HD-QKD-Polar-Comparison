@@ -1,6 +1,7 @@
 # Tasks: V34 corrected matched empirical-P finite control
 
-> **Status: IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED** — Codex main
+> **Status: RUN_COMPLETE / BOUNDED_FAIL / ER1_ACCEPTED /
+> SUCCESSOR_NOT_AUTHORIZED** — Codex main
 > `ACCEPT_FREEZE` on 2026-08-24 against
 > baseline commit `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`.
 
@@ -51,22 +52,23 @@
   `13 passed in 10.16s` at `workspace/v34_p3_main_20260824_01`; frozen matrix
   digest `d30335b4d0d74df3e7729e01b02ae1ae73e43035652c59e81f871a5545fe73bb`;
   official `run_01` absent. No real decoder or DE call occurred.
-- [ ] P4 Milestone fake T2 strict replay/exact-once/tamper checks, then IR1 on
+- [x] P4 Milestone fake T2 strict replay/exact-once/tamper checks, then IR1 on
   the exact candidate. Stop at
   `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`.
 - [x] P4A Correct runtime/L2-error accounting without changing the frozen
   matrix: monotonic runner-call runtime, harness-recomputed GF(32) final error
   count, persisted `x2_hat`, and focused independent-reconstruction tests.
-- [ ] P5 Only after a new user `EXECUTE_AUTH`: preflight frozen HEAD and matrix,
+- [x] P5 Only after a new user `EXECUTE_AUTH`: preflight frozen HEAD and matrix,
   execute exactly 60 blocks once, then stop decoder activity.
-- [ ] P6 ER1 independently reconstructs bindings, ordinals, success counts,
+- [x] P6 ER1 independently reconstructs bindings, ordinals, success counts,
   tags/syndromes, terminal, protected-root status, and claim boundary.
 - [ ] P7 Main-thread scientific acceptance or rejection, durable documentation,
   and archive. No successor is implied.
 
 ## Current stop condition
 
-Proceed only through the user-authorized sequence P4A -> independent IR1 -> P5
-exactly once -> P6 ER1, then stop and document. Nothing in the V33 execution
-authorization carries forward to V34; the new V34 authorization must bind the
-post-correction accepted HEAD and unchanged frozen matrix digest.
+Stop. The user-authorized sequence P4A -> independent IR1 -> P5 exact-once ->
+P6 ER1 is complete. The result is 0/20 successes for every source,
+`matched_empirical_finite_control_fail`, with no fatal record and ER1 ACCEPT.
+No V34 rerun, resume, `run_02`, tuning, or automatic successor is authorized.
+P7 archival remains administrative and must not delay algorithm planning.
