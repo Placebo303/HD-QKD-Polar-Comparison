@@ -125,13 +125,26 @@ python -m comparison_bench.src.comparison_bench.cli.run_nonbinary_v33_rate_align
 - 六个 cell 全 PASS：本分支已触发。当前只授权提出一次 corrected matched
   finite-control；不自动执行。
 
-## 5. PASS 后的一次归因实验
+## 5. PASS 后的一次归因实验：V34 当前到达 P3 候选
 
 corrected matched finite-control 的职责不是选码，而是回答：当合成数据与 posterior
 都来自同一个经验 `P(A,B)` 时，现有 QC packet+decoder 是否仍失败？
 
 最小冻结设计：同一 V31 QC packet、同一 decoder、oracle L1、20 blocks/source、
 fresh frozen seeds、三源分别报告、无 tuning/rerun。
+
+截至 2026-08-24，V34 已完成 FR1、独立科学复核和主控 ACCEPT_FREEZE，并形成
+P3 最小实现候选。冻结细节为：直接从各源 train empirical P(A,B) 抽样；NumPy
+2.4.0 + `V34-PCG64-REF1`；source-major 60 calls；V31 m2=184/190/192；V32
+oracle-L1/V28R decoder；max_iter=30；每源 >=19/20 仅作机械判据。compile、
+selfcheck、真实输入只读 prepare 与 13 个 fake focused tests 均通过，官方输出根
+不存在。
+
+当前状态不是 IR1 ACCEPT，也不是可执行状态。下一步固定为 Ox Alpha 完成 P4
+fake T2/T3 证据，再由独立 Codex 做 IR1；任务包见
+`docs/v34-p3-implementation-candidate-and-ox-alpha-handoff-20260824.md`。
+任何真实 decoder call 仍需 IR1、主控 implementation ACCEPT 和新的用户
+EXECUTE_AUTH。
 
 - 若明显通过：瓶颈转向真实误差传播、非 oracle L1 与有限余量。
 - 若仍失败：关闭对当前 `lambda={2:1}` + 当前 finite conversion 的继续微调；

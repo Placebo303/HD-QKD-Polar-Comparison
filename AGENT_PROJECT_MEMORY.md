@@ -1,3 +1,29 @@
+## 2026-08-24 V34 matched empirical-P finite control: P3 implementation candidate
+
+- Current state [repo-observed]: V34 OpenSpec passed initial FR1 rejection,
+  revised FR1 ACCEPT, independent science-amendment ACCEPT, and Codex main
+  `ACCEPT_FREEZE`. Freeze baseline is `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`;
+  lifecycle freeze commit is `0c817a322d1d1674f65708563afe3b77c47ae961`.
+- Scientific identity [decision]: change only the channel-law generator from
+  V32's raw-SER uniform substitution to direct source-specific V25 train
+  empirical P(A,B). Fresh seeds are nuisance randomization, not a paired trial.
+  Keep V31 packet, V32 oracle-L1/V28R decoder, max_iter=30, 20 blocks/source,
+  and source >=19/20 mechanical discriminator fixed.
+- Reproducibility [decision]: NumPy exactly 2.4.0 and literal
+  `V34-PCG64-REF1`; frozen 60-call digest
+  `d30335b4d0d74df3e7729e01b02ae1ae73e43035652c59e81f871a5545fe73bb`.
+- P3 evidence [repo-observed]: one CLI plus one focused test; compile,
+  selfcheck and read-only real-input prepare PASS; focused fake suite
+  `13 passed in 10.16s` under `workspace/v34_p3_main_20260824_01`; official
+  V34 `run_01` absent. No real decoder or DE ran.
+- Lifecycle boundary [decision]: current state is
+  `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, not IR1 ACCEPT. Next is
+  the Ox Alpha P4 evidence packet followed by independent Codex IR1. V34
+  production execution still requires a new explicit user EXECUTE_AUTH bound
+  to the accepted implementation HEAD and frozen matrix.
+- Durable handoff:
+  `docs/v34-p3-implementation-candidate-and-ox-alpha-handoff-20260824.md`.
+
 ## 2026-08-24 V33 exact-rate empirical-P ensemble DE: PASS / ER1 ACCEPT
 
 - Current state [repo-observed, independently reviewed]: user-authorized V33

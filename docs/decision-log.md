@@ -23,6 +23,35 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-24: Freeze V34 and stop after the P3 implementation candidate
+
+**Decision**: Accept the revised V34 specification freeze, implement only the
+minimal fake/test-isolated candidate, and stop at
+`IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED` for Ox Alpha evidence work
+and independent Codex IR1.
+
+**Evidence**: Initial FR1 rejected ambiguous RNG, threshold, decoder-matrix,
+failure and protected-root semantics. Revised FR1 returned ACCEPT; independent
+science review accepted the carried-forward >=19/20 mechanical discriminator,
+bounded-sample claim, max_iter=30 comparability binding and literal NumPy 2.4.0
+reference vector. The P3 candidate passes compile, selfcheck, real-input
+read-only prepare and 13 focused fake tests; official V34 `run_01` is absent.
+
+**Alternatives considered**:
+- Change the gate to 20/20: rejected because it would change the decision rule
+  together with the generator and spoil the V32/V34 single-channel-law contrast.
+- Raise max_iter to 200 now: rejected because it changes a second variable;
+  decoder-iteration adequacy is a separate possible successor.
+- Treat 19/20 as FER evidence: rejected; 20 blocks/source are only a bounded
+  diagnostic conditional on this packet and decoder configuration.
+- Let Ox Alpha execute the real decoder or self-accept: rejected; it is an
+  implementation/evidence operator, while Codex retains IR1 and execution gates.
+
+**Consequences**: Ox Alpha may complete the frozen P4 fake T2/T3 evidence
+packet. No production decoder, official root, EXECUTE_AUTH, ER1, qualification,
+promotion or successor is authorized. See
+`docs/v34-p3-implementation-candidate-and-ox-alpha-handoff-20260824.md`.
+
 ### 2026-08-24: V33 exact-rate empirical-P ensemble gate passed
 
 **Decision**: Accept the single authorized V33 `run_01` as

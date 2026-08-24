@@ -1,7 +1,7 @@
 # Tasks: V34 corrected matched empirical-P finite control
 
-> **Status: FROZEN_ACCEPTED / IMPLEMENTATION_AUTHORIZED /
-> EXECUTE_NOT_AUTHORIZED** — Codex main `ACCEPT_FREEZE` on 2026-08-24 against
+> **Status: IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED** — Codex main
+> `ACCEPT_FREEZE` on 2026-08-24 against
 > baseline commit `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`.
 
 ## Allowed before freeze
@@ -40,8 +40,13 @@
 - [x] P2S Independent science-amendment re-review accepted: mechanical-not-statistical
   19/20 language, bounded-sample claim, max_iter comparability, channel-law-only
   intervention, and literal NumPy 2.4.0 sampler identity.
-- [ ] P3 After freeze only: implement the smallest CLI and focused T0/T1 tests
-  using explicit fake-runner injection and fresh workspace roots.
+- [x] P3 Implement the smallest CLI and focused T0/T1 tests using explicit
+  fake-runner injection and fresh workspace roots. Candidate files are the V34
+  CLI and one focused test module only. Main-thread evidence: compile PASS;
+  `test-selfcheck` PASS; real-input read-only `prepare` PASS; focused suite
+  `13 passed in 10.16s` at `workspace/v34_p3_main_20260824_01`; frozen matrix
+  digest `d30335b4d0d74df3e7729e01b02ae1ae73e43035652c59e81f871a5545fe73bb`;
+  official `run_01` absent. No real decoder or DE call occurred.
 - [ ] P4 Milestone fake T2 strict replay/exact-once/tamper checks, then IR1 on
   the exact candidate. Stop at
   `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`.
@@ -54,6 +59,7 @@
 
 ## Current stop condition
 
-P3 fake/test-only implementation is now authorized. Stop again after the full
-candidate and IR1 at `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`.
+Per user instruction, stop after P3 at
+`IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`. P4/IR1 are the next packet
+for Ox Alpha plus independent Codex review; they are not complete or accepted.
 Nothing in the V33 execution authorization carries forward to V34.

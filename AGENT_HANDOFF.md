@@ -1,3 +1,27 @@
+## 2026-08-24 V34 P3 COMPLETE — IMPLEMENTATION CANDIDATE ONLY
+
+- Change: `formal-nonbinary-ldpc-v34-corrected-matched-empirical-p-finite-control`.
+- Frozen baseline: `f5f61eb672afe8e399727fa5d7507ca9f2f9151a`; lifecycle freeze commit:
+  `0c817a322d1d1674f65708563afe3b77c47ae961`.
+- State: `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`. This supersedes
+  the V33 handoff statement that matched finite-control had not started.
+- Candidate adds only one CLI and one focused test. Compile, exact NumPy 2.4.0
+  `V34-PCG64-REF1`, selfcheck, real-input read-only prepare, and focused fake
+  suite pass (`13 passed in 10.16s`; basetemp
+  `workspace/v34_p3_main_20260824_01`). Call-matrix digest is
+  `d30335b4d0d74df3e7729e01b02ae1ae73e43035652c59e81f871a5545fe73bb`.
+- Frozen experiment: direct source-specific train empirical-P sampling; V31
+  packet m2=184/190/192; V32 oracle runner/V28R decoder identity;
+  max_iter=30; 20 blocks/source; source PASS >=19/20 as a mechanical
+  discriminator only.
+- No real decoder/DE, official V34 root, T2/T3, IR1, EXECUTE_AUTH, ER1,
+  qualification, promotion, rerun, or successor occurred.
+- Next packet for Ox Alpha:
+  `docs/v34-p3-implementation-candidate-and-ox-alpha-handoff-20260824.md`.
+  Ox Alpha may improve tests/evidence only within that packet; it may not run
+  the production decoder or mark its own work accepted. Independent Codex IR1
+  remains mandatory.
+
 ## 2026-08-24 V33 COMPLETE — PASS / ER1 ACCEPT
 
 - Archived change: `openspec/changes/archive/2026-08-24-formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic/`.
