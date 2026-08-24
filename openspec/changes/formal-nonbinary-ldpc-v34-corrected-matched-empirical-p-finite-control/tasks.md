@@ -1,6 +1,6 @@
 # Tasks: V34 corrected matched empirical-P finite control
 
-> **Status: DRAFT_PENDING_FR1 / IMPLEMENTATION_NOT_AUTHORIZED**
+> **Status: FR1_ACCEPTED_SCIENCE_AMENDMENTS_PENDING / IMPLEMENTATION_NOT_AUTHORIZED**
 
 ## Allowed before freeze
 
@@ -30,8 +30,14 @@
   and unresolved choices.
 - [x] P1 Draft proposal/design/spec/tasks with candidate constants and explicit
   claim/lifecycle boundaries.
-- [ ] P2 FR1 independently resolves all `design.md` section 7 decisions and
-  returns findings. Main thread either revises or records `ACCEPT_FREEZE`.
+- [x] P2 Initial FR1 returned `REJECT_FREEZE`: exact RNG call, fixed 19/20
+  threshold, failure taxonomy, V31-vs-V28R matrix binding, probability precheck,
+  evidence fields and protected roots required revision.
+- [x] P2R Independent FR1 re-review returned `ACCEPT_FREEZE`; every original
+  `design.md` section 8 item was accepted.
+- [ ] P2S Independent science-amendment re-review: mechanical-not-statistical
+  19/20 language, bounded-sample claim, max_iter comparability, channel-law-only
+  intervention, and NumPy 2.4.0 sampler identity.
 - [ ] P3 After freeze only: implement the smallest CLI and focused T0/T1 tests
   using explicit fake-runner injection and fresh workspace roots.
 - [ ] P4 Milestone fake T2 strict replay/exact-once/tamper checks, then IR1 on
@@ -46,6 +52,6 @@
 
 ## Current stop condition
 
-After FR1, stop unless the main thread explicitly records `ACCEPT_FREEZE`.
+After science-amendment re-review, stop unless the main thread explicitly records
+`ACCEPT_FREEZE`.
 Nothing in the V33 execution authorization carries forward to V34.
-
