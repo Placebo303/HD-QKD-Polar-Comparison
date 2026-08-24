@@ -1,7 +1,8 @@
 # Tasks: formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic
 
-> **Status: FROZEN_ACCEPTED**（FR1 ACCEPT_FREEZE，2026-08-23，baseline `0a050066`）—
-> freeze review 通过前不得勾选的限制已解除；P4 真实 DE 仍需主控 EXECUTE_AUTH。
+> **Status: RUN_COMPLETE_ER1_ACCEPTED**（2026-08-24）— V33 official `run_01`
+> 已按用户 `EXECUTE_AUTH` 恰一次完成；30/30 PASS，ER1 ACCEPT，主控接受该
+> ensemble-only 终态。任何 finite-control/successor 仍需新 OpenSpec 与授权。
 
 ## Allowed New Files（草案）
 
@@ -87,11 +88,14 @@
 - [x] P3 END **implementation candidate handoff**。强制停止点：
   **IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED** —— 主控 implementation
   ACCEPT 已记录；P4 仍需另行、显式 `EXECUTE_AUTH` 方可解锁。
-- [ ] P4 执行授权门通过后：对真实输入按固定顺序运行 30 calls 恰一次
-  （official run lifecycle 见 design §4）。
-- [ ] P4R **ER1** post-execution read-only evidence review：独立重算 headline、
-  写 readonly_review.json、protected roots unchanged 复核。
-- [ ] P5 closeout：candidate handoff + 终态持久化 + Final Return Statement。
+- [x] P4 用户于 2026-08-24 明确授予 `EXECUTE_AUTH`；在 HEAD `41d31151` 上按
+  固定顺序恰一次完成 30 calls。30/30 PASS，六个 cell 均 5/5 PASS；未运行
+  decoder、finite-control 或 successor。
+- [x] P4R **ER1** post-execution read-only evidence review：CLI strict verify
+  `consistent / problems=[] / records_checked=30`；独立 Luna ER1 `ACCEPT`，仅新增
+  `readonly_review.json`，protected roots observed unchanged。
+- [x] P5 closeout：`operator_handoff.md`、终态与主控 ACCEPT 已记录；不自动启动
+  matched finite-control。
 
 ## 强制停止点
 
@@ -101,4 +105,5 @@
 
 ## Final Return Statement（逐字）
 
-> candidate_only，等待 Codex 主控 ACCEPT/REJECT；未运行 DE，未运行 decoder，未启动 successor。
+> V33 PASS，ER1 ACCEPT，Codex 主控 ACCEPT；已恰一次运行 30-call ensemble DE，
+> 未运行 decoder、finite-control 或 successor；等待新 OpenSpec 与明确授权。

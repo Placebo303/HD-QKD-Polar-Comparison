@@ -1,0 +1,132 @@
+{
+  "aggregation_priority": "INCONCLUSIVE > FAIL > PASS",
+  "cells": {
+    "1M|L1": {
+      "layer": "L1",
+      "rate": 0.984375,
+      "reason_codes": [],
+      "seeds": [
+        33101,
+        33102,
+        33103,
+        33104,
+        33105
+      ],
+      "source_label": "1M",
+      "terminal": "PASS",
+      "terminals": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    "1M|L2": {
+      "layer": "L2",
+      "rate": 0.8203125,
+      "reason_codes": [],
+      "seeds": [
+        33101,
+        33102,
+        33103,
+        33104,
+        33105
+      ],
+      "source_label": "1M",
+      "terminal": "PASS",
+      "terminals": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    "1p5M|L1": {
+      "layer": "L1",
+      "rate": 0.984375,
+      "reason_codes": [],
+      "seeds": [
+        33101,
+        33102,
+        33103,
+        33104,
+        33105
+      ],
+      "source_label": "1p5M",
+      "terminal": "PASS",
+      "terminals": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    "1p5M|L2": {
+      "layer": "L2",
+      "rate": 0.814453125,
+      "reason_codes": [],
+      "seeds": [
+        33101,
+        33102,
+        33103,
+        33104,
+        33105
+      ],
+      "source_label": "1p5M",
+      "terminal": "PASS",
+      "terminals": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    "2M|L1": {
+      "layer": "L1",
+      "rate": 0.984375,
+      "reason_codes": [],
+      "seeds": [
+        33101,
+        33102,
+        33103,
+        33104,
+        33105
+      ],
+      "source_label": "2M",
+      "terminal": "PASS",
+      "terminals": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    },
+    "2M|L2": {
+      "layer": "L2",
+      "rate": 0.8125,
+      "reason_codes": [],
+      "seeds": [
+        33101,
+        33102,
+        33103,
+        33104,
+        33105
+      ],
+      "source_label": "2M",
+      "terminal": "PASS",
+      "terminals": [
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS",
+        "PASS"
+      ]
+    }
+  },
+  "schema": "nbldpc_v33_rate_aligned_empirical_de_cells_v1"
+}

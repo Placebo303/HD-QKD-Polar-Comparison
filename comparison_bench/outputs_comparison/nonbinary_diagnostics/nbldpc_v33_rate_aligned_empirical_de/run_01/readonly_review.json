@@ -1,0 +1,90 @@
+{
+  "schema": "nbldpc_v33_er1_readonly_review_v1",
+  "review_id": "er1-v33-run01-20260824-01",
+  "generated_utc": "2026-08-24T00:41:08.5183971Z",
+  "verdict": "ACCEPT",
+  "problems": [],
+  "records_checked": 30,
+  "recomputed_call_matrix": {
+    "sources_order": ["1M", "1p5M", "2M"],
+    "layers_order": ["L1", "L2"],
+    "seeds": [33101, 33102, 33103, 33104, 33105],
+    "total_calls": 30,
+    "n_samples": 2000,
+    "max_iter": 200,
+    "rng": "PCG64",
+    "call_matrix_digest": "f90e57af27661c3368f30edf351570937d691007002ab7c932c3bafc71f11905",
+    "order_source_layer_seed_rate_terminal_consistent": true,
+    "terminal_counts": {"PASS": 30, "FAIL": 0, "INCONCLUSIVE": 0},
+    "iteration_range": [23, 44]
+  },
+  "recomputed_cells": {
+    "1M|L1": {"calls": 5, "seeds": [33101, 33102, 33103, 33104, 33105], "rate": 0.984375, "terminal": "PASS", "terminal_counts": {"PASS": 5}},
+    "1M|L2": {"calls": 5, "seeds": [33101, 33102, 33103, 33104, 33105], "rate": 0.8203125, "terminal": "PASS", "terminal_counts": {"PASS": 5}},
+    "1p5M|L1": {"calls": 5, "seeds": [33101, 33102, 33103, 33104, 33105], "rate": 0.984375, "terminal": "PASS", "terminal_counts": {"PASS": 5}},
+    "1p5M|L2": {"calls": 5, "seeds": [33101, 33102, 33103, 33104, 33105], "rate": 0.814453125, "terminal": "PASS", "terminal_counts": {"PASS": 5}},
+    "2M|L1": {"calls": 5, "seeds": [33101, 33102, 33103, 33104, 33105], "rate": 0.984375, "terminal": "PASS", "terminal_counts": {"PASS": 5}},
+    "2M|L2": {"calls": 5, "seeds": [33101, 33102, 33103, 33104, 33105], "rate": 0.8125, "terminal": "PASS", "terminal_counts": {"PASS": 5}}
+  },
+  "recomputed_overall": {
+    "terminal": "PASS",
+    "label": "pass_rate_aligned_empirical_de",
+    "reason_codes": [],
+    "calls_total": 30,
+    "not_fixed_packet_de": true,
+    "qualification": false,
+    "promotion": false,
+    "candidate_only": true,
+    "main_acceptance_pending": true
+  },
+  "auth_provenance": {
+    "manifest_freeze_digest": "a88864769250229a299ff23fbad5993864e51ae5c972047443b36111de87faa0",
+    "implementation_commit": "41d311519e993431ee130f7bd8b74bb3d850a0eb",
+    "auth_file": "workspace\\v33_execute_auth_20260824_01\\execute_auth.json",
+    "auth_file_sha256": "f997bdaa80d7df51aa43dccb411f061b51df4d73c3de9f009009e46e069e118a",
+    "decision": "EXECUTE_AUTH",
+    "decision_id": "user-v33-execute-auth-20260824-01",
+    "granted": true,
+    "granted_by": "user explicit authorization in Codex thread 01a02fa4-5f73-7353-9003-e5a8bb269383",
+    "call_matrix_digest": "f90e57af27661c3368f30edf351570937d691007002ab7c932c3bafc71f11905",
+    "cli_sha256": "9b36874948ae6397eb644aeb5a94dfe0ca7a8ee9c7aa7e3c7320677e97d07019",
+    "v26_channel_sha256": "432313167562f370ef3c9c45ca7ee6427c5fb1d0f1252e2f4b4d65c4593295b6",
+    "v26_mcde_sha256": "54971162ed991cb86d1a1e24e596151dfa182c4d24971b0cb2749c6b2bdf41ec",
+    "input_binding_sha256": {
+      "R1": "e0360203b8003c821d3ee543bdaf712bd853b0ea712055b936ca37f478ddd5b2",
+      "R2": "e38ae524e9f07a702853d1c293a571d0696ef362d7a9a18a08731ce97f6a4b1d",
+      "R3": "4c08927c1a8df1be7b989465fa9f1f8a66680d560c913437c34026e9cc0cc468",
+      "R4": "180eb106ca53145744934aac3d3d3bd946ad384a235c69261fc754e085106ca4",
+      "R5": "50ab9db6ea875157e3488e671a399162fe02bb059a6da20b62e63a80377c3b37",
+      "R6": "98f1f7306196d797405414a53898d2e90d5a8056635a273f05e720c22522111e",
+      "R7": "a20cebded19c7f95b858c89e4af2397c1461f0565a7dee9224c7d5a6bd1b0c1d"
+    },
+    "all_manifest_hashes_recomputed_equal": true
+  },
+  "claim_boundary": "exact-rate empirical-P ensemble DE diagnostic only; not_fixed_packet_de; no finite code, decoder, FER, QC matrix, qualification or promotion claim",
+  "protected_root_result": {
+    "status": "unchanged_observed",
+    "files_newer_than_preexecution_manifest": 0,
+    "git_status_entries": 2,
+    "git_status_untracked_historical_roots": [
+      "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v32_finite_de_bridge/run_01/",
+      "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v32_operating_point_audit/run_01/"
+    ],
+    "git_status_note": "These historical output roots are untracked; all files under the five protected roots remained older than the pre-execution manifest.",
+    "production_write_guard_scope": "official run_01 only",
+    "roots": [
+      "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01",
+      "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_closeout_audit_v2/run_01",
+      "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_closeout_audit_v2/run_02",
+      "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v32_finite_de_bridge/run_01",
+      "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v32_operating_point_audit/run_01"
+    ]
+  },
+  "execution_scope_check": {
+    "de_rerun": false,
+    "decoder_run": false,
+    "successor_or_tuning": false,
+    "existing_execution_files_modified": false
+  },
+  "reviewer": "luna_worker independent ER1 reviewer"
+}

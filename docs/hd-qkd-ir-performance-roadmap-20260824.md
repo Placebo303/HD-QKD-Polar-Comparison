@@ -21,9 +21,9 @@
 
 ## 2. 当前证据状态
 
-审计基线：`main`，V33 实现验收提交
-`5b8cfef3fa0c45534c3aaede30750e6ad49bd2f6`；正式 V33 `run_01` 不存在。
-本轮没有运行真实 DE、decoder、原始数据流水线或 successor。
+审计基线：`main`，V33 在 HEAD `41d31151` 上获得用户 `EXECUTE_AUTH` 后恰一次
+完成正式 `run_01`。本轮运行了冻结的 30-call ensemble DE；没有运行 decoder、
+finite-control、原始数据流水线或 successor。
 
 | 证据 | 已证明 | 未证明 |
 |---|---|---|
@@ -33,7 +33,7 @@
 | V30R | 测试的 n=1024 有限图/decoder 转换失败 | NB-LDPC 总体失败 |
 | V31 | n=1024 QC packet 在真实有限窗上 0/300；n=2048 只有 14-block 前缀 | 完整 n=2048 结论；失败根因 |
 | V32 correction | B1 generator/posterior 不匹配；原 `finite_graph_decoder_mismatch` 归因无效 | fixed graph 或 decoder 已被独立定罪 |
-| V33 | 规格已冻结，精确提交 `5b8cfef3` 已获独立 IR1 ACCEPT | 正式 DE 结果、finite-code 或 qualification |
+| V33 | 30/30 calls、六格 5/5 PASS；strict verify 一致；ER1 ACCEPT | fixed packet、decoder、FER、finite-code 或 qualification |
 
 V31 的权威生命周期是 `ARCHIVED_PARTIAL`：n=1024 负结果完整，n=2048 不完整。
 V32 科学结论是 `bridge_inconclusive`。这些边界不能因后续路线需要而改写。
@@ -61,7 +61,7 @@ V32 科学结论是 `bridge_inconclusive`。这些边界不能因后续路线需
 参与选择；任何 synthetic control 必须直接抽样经验联合 `P(A,B)`，不能再用
 raw-SER + uniform nonzero delta 代替。
 
-## 4. 当前最高价值实验：V33
+## 4. 已完成的最高价值实验：V33
 
 科学问题只有一个：在 V25 empirical `P(A,B)`、F03/A02、V31 实际层率下，
 六个 source×layer cell 的 ensemble MC-DE 是否全部收敛？
@@ -73,6 +73,18 @@ raw-SER + uniform nonzero delta 代替。
 - 三源独立，L2 true-predecessor-conditioned；
 - 5 seeds/cell，30 calls；`n_samples=2000`，`max_iter=200`；
 - `H_t < 0.01 bits/symbol` 连续 20 iterations 才 PASS。
+
+### 正式结果
+
+- Overall：`PASS / pass_rate_aligned_empirical_de`。
+- 30/30 calls PASS；六个 source×layer cell 均 5/5 PASS；无 reason code。
+- L1 iteration range 23–25；L2 range 37–44。L2 明显更慢，但仍在冻结判据内收敛。
+- 总执行约 60.8 s；没有 per-call runtime/CPU/memory 字段，因此不作更细吞吐声明。
+- strict verify：`consistent / problems=[] / records_checked=30`；独立 ER1 ACCEPT。
+
+该结果解除“V31 实际层率在 empirical-P ensemble 层已经不可行”的否决，但不证明
+QC packet、decoder、FER 或净 key-rate。最终 entropy floor 约 `3.09e-296` 是数值
+概率下限，不是有限码零误码。
 
 ### IR1 最小验收
 
@@ -91,9 +103,8 @@ official root 未创建。CLI 美观、通用配置、成熟包 API 不是 block
 
 ### 正式执行门
 
-IR1 已于 2026-08-24 通过，当前状态为
-`IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`。只有主控
-另行给出 `EXECUTE_AUTH`，才允许执行一次：
+IR1 已于 2026-08-24 通过；用户随后对 HEAD `41d31151` 明确授予一次
+`EXECUTE_AUTH`，下列命令已经恰一次完成：
 
 ```powershell
 python -m comparison_bench.src.comparison_bench.cli.run_nonbinary_v33_rate_aligned_empirical_de execute --execute-auth-file <accepted-auth.json>
@@ -110,7 +121,8 @@ python -m comparison_bench.src.comparison_bench.cli.run_nonbinary_v33_rate_align
 - 任一 cell `INCONCLUSIVE`：修输入/数值定义，只能在新授权下决定是否有 successor；
   不把它当 FAIL。
 - 任一 cell `FAIL`：停止 finite-control；进入 R2 分配/映射/系综研究。
-- 六个 cell 全 PASS：只授权提出一次 corrected matched finite-control；不自动执行。
+- 六个 cell 全 PASS：本分支已触发。当前只授权提出一次 corrected matched
+  finite-control；不自动执行。
 
 ## 5. PASS 后的一次归因实验
 
@@ -180,8 +192,8 @@ NB-LDPC 后继必须说明预期收益来自更低 leakage、更少交互或更�
 
 | 时间 | 主任务 | 交付/停止点 |
 |---|---|---|
-| M0 | V33 IR1、冻结实现 | 已完成：`5b8cfef3` ACCEPT；未执行 DE |
-| M0--M1 | 一次 V33 execute + ER1 | PASS/FAIL/INCONCLUSIVE；无自动 successor |
+| M0 | V33 IR1、冻结实现 | 已完成：`5b8cfef3` ACCEPT |
+| M0--M1 | 一次 V33 execute + ER1 | 已完成：30/30 PASS，ER1 ACCEPT；无自动 successor |
 | M1--M2 | 条件式 matched finite-control 或 R2 P0 | 一次归因结论或候选系综短名单 |
 | M2--M4 | protograph/MET 或 allocation/factorization ensemble gate | 最多 1--2 个 finite 候选 |
 | M4--M6 | 单一 finite lifting gate；R3 P0；R4 基线 | 关闭失败族，保留一个主候选 |
@@ -217,11 +229,11 @@ V31 精确层率与 true-predecessor 条件语义的研究，因此不改变 V33
 
 ## 11. 当前授权边界
 
-当前允许：只读 prepare、自检、fake-runner tests、状态文档更新，以及在内存中
-审查无效 execute-auth 候选；这不构成执行授权。本轮已验证 `decision=REVIEW_ONLY`
-和 `granted=false` 均被拒绝，缺失 auth 文件返回 exit 7，official root 前后不存在。
+当前允许：V33 closeout、只读复核、状态文档更新，以及为一次 corrected matched
+empirical-P finite-control 创建新的 OpenSpec proposal。V33 PASS 不构成该控制的
+实现或执行授权。
 
-当前不允许：正式 V33 DE、decoder、finite-control、NB-Polar 实现、真实数据流水线、
+当前不允许：V33 rerun、decoder、finite-control、NB-Polar 实现、真实数据流水线、
 longrun/minrerun、qualification、promotion、push、删除或覆盖旧 outputs。
 
 本路线图取代 2026-08-23 文档中“V33 尚待 freeze”的陈旧当前状态，但不改写其

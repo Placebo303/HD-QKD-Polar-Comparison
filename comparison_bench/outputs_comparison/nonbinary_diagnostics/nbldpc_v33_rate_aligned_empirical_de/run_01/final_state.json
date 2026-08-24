@@ -1,0 +1,17 @@
+{
+  "aggregation_priority": "INCONCLUSIVE > FAIL > PASS",
+  "calls_total": 30,
+  "candidate_only": true,
+  "change": "formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic",
+  "claim_boundary": "exact-rate empirical-P ensemble DE diagnostic only; not_fixed_packet_de; no finite code, decoder, FER, QC matrix, qualification or promotion claim",
+  "freeze_digest_ref": "a88864769250229a299ff23fbad5993864e51ae5c972047443b36111de87faa0",
+  "generated_utc": "2026-08-24T00:29:19.093034+00:00",
+  "main_acceptance_pending": true,
+  "not_fixed_packet_de": true,
+  "overall_label": "pass_rate_aligned_empirical_de",
+  "overall_terminal": "PASS",
+  "promotion": false,
+  "qualification": false,
+  "reason_codes": [],
+  "schema": "nbldpc_v33_rate_aligned_empirical_de_final_state_v1"
+}

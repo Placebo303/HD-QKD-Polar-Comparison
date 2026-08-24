@@ -1,27 +1,28 @@
-## 2026-08-24 V33 IR1 ACCEPT — performance-first roadmap
+## 2026-08-24 V33 COMPLETE — PASS / ER1 ACCEPT
 
 - Current change: `formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic`.
-- State: `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`; official
-  `nbldpc_v33_rate_aligned_empirical_de/run_01` does not exist.
+- State: `RUN_COMPLETE_ER1_ACCEPTED / SUCCESSOR_NOT_AUTHORIZED`.
+- Official evidence: `comparison_bench/outputs_comparison/nonbinary_diagnostics/
+  nbldpc_v33_rate_aligned_empirical_de/run_01/`.
 - Accepted commit `5b8cfef3fa0c45534c3aaede30750e6ad49bd2f6` adds exact R4 empirical F03 H/m_total/f_total checks, R6
   rate+H identity checks, strict HEAD/call-matrix authorization values,
   scientific numeric reason codes, and provenance/claim-boundary replay.
 - Evidence: compile passed; real-input `prepare` passed; selfcheck passed;
   focused suite `55 passed` at workspace basetemp
   `workspace/v33_ir1_acceptance_r7` (no real DE/decoder).
-- Independent Luna IR1 re-review ACCEPTED that exact commit on 2026-08-24.
-  Formal DE still needs a separate explicit `EXECUTE_AUTH`; IR1 did not authorize
-  execution.
-- Authorization preflight was reviewed in memory only: `decision=REVIEW_ONLY`
-  and `granted=false` were both rejected; a missing auth file returned exit 7,
-  and the official root remained absent. No review-only auth file was persisted.
+- User `EXECUTE_AUTH` bound HEAD `41d31151` and frozen call-matrix digest
+  `f90e57af...11905`; production execute occurred exactly once.
+- Result: 30/30 calls PASS; all six source×layer cells PASS 5/5. L1 needed
+  23–25 iterations and L2 37–44. Strict verify was consistent with no problems;
+  independent Luna ER1 ACCEPTED and wrote only `readonly_review.json`.
 - Performance-first roadmap:
   `docs/hd-qkd-ir-performance-roadmap-20260824.md`.
-- Scientific priority: V33 exact-rate empirical-P ensemble gate; if it passes,
-  one matched finite-control; if finite conversion still fails, move to
+- Scientific priority: V33 removed the exact-rate empirical-P ensemble veto.
+  The next proposed gate is one matched empirical-P finite-control; if finite
+  conversion still fails, move to
   informed NB-MLC/JRDO, protograph/MET, one Block-MDS/QC candidate, or a
   rate-adaptive mother code rather than more QC/PEG seed tuning.
-- Do not delete/overwrite historical outputs, run V33, start finite-control,
+- Do not delete/overwrite historical outputs, rerun V33, start finite-control,
   implement NB-Polar, push, or claim qualification/promotion.
 
 ## 2026-08-21 V31 — CLOSED finite_graph_fail (archived)

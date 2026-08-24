@@ -23,6 +23,32 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 ---
 
 ## Decisions
+### 2026-08-24: V33 exact-rate empirical-P ensemble gate passed
+
+**Decision**: Accept the single authorized V33 `run_01` as
+`PASS / pass_rate_aligned_empirical_de` after independent ER1, while retaining
+an ensemble-only claim boundary.
+
+**Evidence**: 30/30 registered calls PASS; all six source×layer cells PASS
+5/5 at the V31 exact rates. Strict replay returned `consistent`,
+`problems=[]`, `records_checked=30`; independent ER1 returned ACCEPT. L1 used
+23–25 iterations and L2 37–44. No decoder, finite-control, rerun, tuning, or
+successor ran.
+
+**Alternatives considered**:
+- Treat V31/V32 as proof the whole NB-LDPC route failed: rejected because V32
+  used mismatched generator/posterior laws and V33 now passes at the actual
+  empirical-P ensemble operating point.
+- Infer finite-code success from V33: rejected because DE does not test the
+  fixed QC graph, decoder, FER, or finite-length conversion.
+- Start a matched control automatically: rejected; it requires a new frozen
+  OpenSpec and explicit authorization.
+
+**Consequences**: The exact-rate ensemble veto is removed. The next proposed
+scientific gate is one corrected matched empirical-P finite-control that keeps
+the V31 QC packet/decoder fixed and changes only generator/posterior matching.
+V33 must not be rerun, tuned, or promoted to qualification evidence.
+
 ### 2026-08-21: V31 deterministic finite-graph redesign gate closed with `finite_graph_fail`
 
 **Decision**: Execute and archive the V31 gate as `finite_graph_fail`.
