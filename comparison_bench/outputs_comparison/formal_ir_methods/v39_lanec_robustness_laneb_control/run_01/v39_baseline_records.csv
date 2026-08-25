@@ -1,0 +1,16 @@
+lane,source,construction_seed,construction_seed_ordinal,block_seed,matrix_id,errors_initial,errors_final,exact_l2,syndrome_ok,wrong_codeword,iterations,status,runtime_s
+v31_baseline,1M,,,390101,v31_baseline_1M,252,162,false,false,false,30,converged_no_syndrome,1.892635399941355
+v31_baseline,1M,,,390102,v31_baseline_1M,258,170,false,false,false,30,converged_no_syndrome,1.8183264000108466
+v31_baseline,1M,,,390103,v31_baseline_1M,274,178,false,false,false,30,converged_no_syndrome,1.8792219000170007
+v31_baseline,1M,,,390104,v31_baseline_1M,248,150,false,false,false,30,converged_no_syndrome,2.0578258000314236
+v31_baseline,1M,,,390105,v31_baseline_1M,258,188,false,false,false,30,converged_no_syndrome,1.8448492999887094
+v31_baseline,1p5M,,,390201,v31_baseline_1p5M,271,159,false,false,false,30,converged_no_syndrome,1.9036978000076488
+v31_baseline,1p5M,,,390202,v31_baseline_1p5M,262,197,false,false,false,30,converged_no_syndrome,2.063285799929872
+v31_baseline,1p5M,,,390203,v31_baseline_1p5M,230,155,false,false,false,30,converged_no_syndrome,2.054321900010109
+v31_baseline,1p5M,,,390204,v31_baseline_1p5M,262,183,false,false,false,30,converged_no_syndrome,1.8883335000136867
+v31_baseline,1p5M,,,390205,v31_baseline_1p5M,240,158,false,false,false,30,converged_no_syndrome,1.912556300056167
+v31_baseline,2M,,,390301,v31_baseline_2M,259,174,false,false,false,30,converged_no_syndrome,1.951485599973239
+v31_baseline,2M,,,390302,v31_baseline_2M,265,167,false,false,false,30,converged_no_syndrome,1.8911407999694347
+v31_baseline,2M,,,390303,v31_baseline_2M,261,180,false,false,false,30,converged_no_syndrome,1.8021602999651805
+v31_baseline,2M,,,390304,v31_baseline_2M,252,173,false,false,false,30,converged_no_syndrome,1.798138799960725
+v31_baseline,2M,,,390305,v31_baseline_2M,253,169,false,false,false,30,converged_no_syndrome,1.793993900064379
