@@ -1,0 +1,7 @@
+cycle_id: V38P0
+state: PLAN_CANDIDATE
+predecessor_cycle: V37R1
+predecessor_result_sha: 67da7c649646b9c9910d52489ae476ceae7fdb57
+development_execution_authorized: false
+formal_execution_authorized: false
+scientific_promotion: false
