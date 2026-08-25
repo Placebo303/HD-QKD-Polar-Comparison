@@ -1,0 +1,16 @@
+cycle_id: V38R1
+state: IMPLEMENTATION_CANDIDATE
+lifecycle_state: IMPLEMENTATION_CANDIDATE
+change_id: formal-ir-v38r1-posterior-binding-correction
+predecessor_cycle: V38P0
+accepted_plan_sha: 1b3fb4b8d0fa14c127ab895b1bbb21eb77f3414d
+accepted_predecessor_implementation_sha: 41cad74cc6f50dad6bfed37e63bb188cbd294f77
+invalid_predecessor_result_sha: 6a36914e2b9bfbc5fc7e78fc8eac5e8a42759bce
+terminal_state: V38_DIRECTION_EVIDENCE_INVALID
+execution_status: EXECUTE_NOT_AUTHORIZED
+development_execution_authorized: false
+formal_execution_authorized: false
+scientific_promotion: false
+run_01_status: immutable_invalid_evidence
+run_02_status: absent_not_authorized
+independent_implementation_acceptance: pending

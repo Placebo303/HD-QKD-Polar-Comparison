@@ -31,8 +31,6 @@ Accepted scope includes:
 - **Formal Execution Authorization**: `NOT_GRANTED`
 - **Scientific Promotion**: `NOT_GRANTED`
 
----
-
 ## Milestone 2: Implementation Review (Delta-Review)
 
 **Repository**: `Placebo303/HD-QKD-Polar-pipeline`
@@ -63,3 +61,34 @@ Verified items:
 - **Development Execution Authorization**: `NOT_GRANTED`
 - **Formal Execution Authorization**: `NOT_GRANTED`
 - **Scientific Promotion**: `NOT_GRANTED`
+
+---
+
+## Milestone 3: Post-run Evidence Invalidation
+
+**Repository**: `Placebo303/HD-QKD-Polar-pipeline`
+**Branch**: `formal-ir-mainline`
+**Target Result SHA**: `6a36914e2b9bfbc5fc7e78fc8eac5e8a42759bce`
+**Review Kind**: POST-RUN INVALIDATION
+**Cycle ID**: V38P0
+**Advisory Verdict**: `V38_DIRECTION_EVIDENCE_INVALID`
+
+The 45 decoder records in V38-P0 `run_01` are retained as immutable historical
+execution evidence, but they cannot support `V38_NO_ROUTE_SIGNAL` or any lane
+performance conclusion. `evaluate_single_block()` passed `u2_bob` (the low
+GF(32) component in `0..31`) to `get_conditional_posterior_l2()`, whose frozen
+contract requires the complete Bob symbol in `0..1023`. The shared malformed
+prior explains the identical Lane A/B/C decoder outputs and invalidates the
+directional comparison.
+
+The 27/27 structural construction records remain usable only as structural
+evidence. They do not establish lane performance, a `d_v >= 3` lower bound, or
+that cycle-label optimization is ineffective. The cycle state is therefore
+`DEVELOPMENT_RESULT_INVALID` with terminal state
+`V38_DIRECTION_EVIDENCE_INVALID`; `development_execution_authorized: true` is
+preserved as the historical fact that the run was authorized and completed.
+
+The minimal successor is V38R1 decoder-only correction: fix the posterior
+binding, reuse the frozen 15 blocks and the nine run_01 winner IDs/seeds, and
+write any future authorized evaluation only to additive `run_02`. No execution
+authorization is granted by this invalidation record.

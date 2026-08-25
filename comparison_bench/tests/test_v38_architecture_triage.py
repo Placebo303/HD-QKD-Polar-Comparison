@@ -15,8 +15,10 @@ import pytest
 from comparison_bench.formal_ir.v35_algorithm_development import (
     GF2mField,
     compute_gf32_rank,
+    get_conditional_posterior_l2,
     load_v31_qc_baseline_matrices,
 )
+from comparison_bench.formal_ir import v38_architecture_triage as v38_module
 from comparison_bench.formal_ir.v38_architecture_triage import (
     BLOCK_LENGTH,
     FROZEN_BASELINE_ERROR_MAP,
@@ -931,3 +933,89 @@ def test_safety_fake_runner_evaluation():
     assert rec["matrix_id"] == "lane_test_1M_s938001"
     assert rec["status"] == "max_iter"
     assert rec["iterations"] == 30
+
+
+def test_r1_05_evaluate_single_block_passes_complete_bob_to_posterior(monkeypatch):
+    """R1-05: posterior binding receives full Bob symbols, including values >31."""
+    alice = np.tile(np.array([1, 34, 547, 996], dtype=np.int64), BLOCK_LENGTH // 4)
+    bob = np.tile(np.array([32, 321, 1023, 64], dtype=np.int64), BLOCK_LENGTH // 4)
+    captured: dict[str, np.ndarray] = {}
+
+    def fake_sample(counts, seed, size):
+        assert size == BLOCK_LENGTH
+        return np.arange(BLOCK_LENGTH, dtype=np.int64), alice, bob
+
+    def fake_posterior(counts_arg, bob_arg, u1_arg):
+        captured["bob"] = np.asarray(bob_arg).copy()
+        captured["u1"] = np.asarray(u1_arg).copy()
+        return np.full((len(bob_arg), 32), 1.0 / 32.0, dtype=np.float64)
+
+    monkeypatch.setattr(v38_module, "sample_empirical_block", fake_sample)
+    monkeypatch.setattr(v38_module, "get_conditional_posterior_l2", fake_posterior)
+
+    rec = evaluate_single_block(
+        np.zeros((SOURCE_CHECKS["1M"], BLOCK_LENGTH), dtype=np.uint8),
+        source="1M",
+        block_seed=360101,
+        lane="lane_test",
+        construction_seed=938001,
+        counts=np.ones((BLOCK_LENGTH, BLOCK_LENGTH), dtype=np.float64),
+        fake_runner=True,
+    )
+
+    np.testing.assert_array_equal(captured["bob"], bob)
+    assert np.any(captured["bob"] > 31)
+    np.testing.assert_array_equal(captured["u1"], (alice >> 5) & 31)
+    assert rec["status"] == "max_iter"
+
+
+def test_r1_06_corrected_prior_matches_v36_numeric_sentinel(monkeypatch):
+    """R1-06: wrong low-layer binding changes hard decisions; corrected V38 equals V36."""
+    counts = np.ones((BLOCK_LENGTH, BLOCK_LENGTH), dtype=np.float64)
+    bob_base = np.array([32, 321, 1023, 64], dtype=np.int64)
+    u1_base = np.array([0, 1, 17, 31], dtype=np.int64)
+    correct_symbols = np.array([2, 3, 4, 5], dtype=np.int64)
+    wrong_symbols = np.array([25, 26, 27, 28], dtype=np.int64)
+    low_bob = bob_base & 31
+
+    for i in range(4):
+        counts[u1_base[i] * 32 + correct_symbols[i], bob_base[i]] = 1_000_000.0
+        counts[u1_base[i] * 32 + wrong_symbols[i], low_bob[i]] = 1_000_000.0
+
+    v36_prior = get_conditional_posterior_l2(counts, bob_base, u1_base)
+    wrong_prior = get_conditional_posterior_l2(counts, low_bob, u1_base)
+    np.testing.assert_array_equal(np.argmax(v36_prior, axis=1), correct_symbols)
+    np.testing.assert_array_equal(np.argmax(wrong_prior, axis=1), wrong_symbols)
+    assert np.max(np.abs(v36_prior - wrong_prior)) > 0.9
+
+    alice = np.tile((u1_base << 5) | np.array([1, 2, 3, 4], dtype=np.int64), BLOCK_LENGTH // 4)
+    bob = np.tile(bob_base, BLOCK_LENGTH // 4)
+    captured: dict[str, np.ndarray] = {}
+
+    def fake_sample(counts_arg, seed, size):
+        return np.arange(BLOCK_LENGTH, dtype=np.int64), alice, bob
+
+    def spy_posterior(counts_arg, bob_arg, u1_arg):
+        prior = get_conditional_posterior_l2(counts_arg, bob_arg, u1_arg)
+        captured["bob"] = np.asarray(bob_arg).copy()
+        captured["prior"] = prior.copy()
+        return prior
+
+    monkeypatch.setattr(v38_module, "sample_empirical_block", fake_sample)
+    monkeypatch.setattr(v38_module, "get_conditional_posterior_l2", spy_posterior)
+
+    evaluate_single_block(
+        np.zeros((SOURCE_CHECKS["1M"], BLOCK_LENGTH), dtype=np.uint8),
+        source="1M",
+        block_seed=360101,
+        lane="lane_test",
+        construction_seed=938001,
+        counts=counts,
+        fake_runner=True,
+    )
+
+    expected_correct = get_conditional_posterior_l2(
+        counts, bob, np.tile(u1_base, BLOCK_LENGTH // 4)
+    )
+    np.testing.assert_array_equal(captured["bob"], bob)
+    np.testing.assert_allclose(captured["prior"], expected_correct, rtol=0.0, atol=0.0)

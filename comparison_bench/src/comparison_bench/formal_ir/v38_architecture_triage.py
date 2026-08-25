@@ -857,7 +857,7 @@ def evaluate_single_block(
     matrix_id = f"{lane}_{source}_s{construction_seed}"
     idx, alice, bob = sample_empirical_block(counts, seed=block_seed, size=BLOCK_LENGTH)
     u1_alice, u2_alice, u1_bob, u2_bob = factorize_f03(alice, bob)
-    prior = get_conditional_posterior_l2(counts, u2_bob, u1_alice)
+    prior = get_conditional_posterior_l2(counts, bob, u1_alice)
     raw_errors = int(np.sum(u2_alice != u2_bob))
     syn_true = syndrome_of_gf32(H, u2_alice, field)
 
