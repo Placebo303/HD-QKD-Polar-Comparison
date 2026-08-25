@@ -1,0 +1,49 @@
+cycle_id: V39P0
+state: PLAN_CANDIDATE
+lifecycle_state: PLAN_CANDIDATE
+change_id: formal-ir-v39-lanec-robustness-laneb-control
+predecessor_cycle: V38R1
+predecessor_terminal_state: V38_MULTIPLE_ROUTE_SIGNALS
+accepted_predecessor_result_sha: 2416486f724f4fb7cbf1058d9dc1bb1fc5ded5ed
+accepted_predecessor_acceptance_commit: c8c5cd2e
+accepted_predecessor_implementation_sha: 8f7bc7d8d7366772ff425528cd1080fa67ef7509
+plan_candidate_sha: null  # per SOP, never record a commit's own SHA inside that commit; filled by the next verdict/return commit
+plan_review_verdict: pending
+development_execution_authorized: false
+formal_execution_authorized: false
+scientific_promotion: false
+implementation_started: false
+production_outputs_created: false
+main_route: lane_c_l8_w2_spatially_banded
+control_route: lane_b_eira_like_lower_bidiagonal
+excluded_routes: [lane_a]
+construction_seed_registry:
+  lane_c:
+    "1M": [383101, 383102, 383103]
+    "1p5M": [383201, 383202, 383203]
+    "2M": [383301, 383302, 383303]
+  lane_b:
+    "1M": [382101, 382102, 382103]
+    "1p5M": [382201, 382202, 382203]
+    "2M": [382301, 382302, 382303]
+new_block_seeds:
+  "1M": [390101, 390102, 390103, 390104, 390105]
+  "1p5M": [390201, 390202, 390203, 390204, 390205]
+  "2M": [390301, 390302, 390303, 390304, 390305]
+decoder_contract:
+  field: GF32
+  primitive_polynomial: 37
+  decoder: row_layered_fftqspa
+  max_iter: 30
+  damping_alpha: 1.0
+  success_metric: exact_l2
+workload:
+  lane_c_calls: 45
+  lane_b_calls: 45
+  v31_baseline_calls: 15
+  total_decoder_calls: 105
+target_output_root: comparison_bench/outputs_comparison/formal_ir_methods/v39_lanec_robustness_laneb_control/run_01
+structural_authority: comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_01/v38_structural_prototypes.json
+entrypoint_docs:
+  review_entrypoint: docs/research_cycles/V39P0/REVIEW_ENTRYPOINT.md
+  execution_packet: docs/research_cycles/V39P0/EXECUTION_PACKET.md
