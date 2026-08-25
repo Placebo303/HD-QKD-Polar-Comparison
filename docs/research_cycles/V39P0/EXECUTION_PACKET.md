@@ -17,11 +17,16 @@
 ## Planned authorized command (future)
 
 ```powershell
-python scripts/execute_v39_development.py --development-execution-authorized
+python scripts/execute_v39_development.py `
+  --development-execution-authorized `
+  --authorized-target-sha <AUTHORIZED_IMPLEMENTATION_SHA>
 ```
 
-The flag is mandatory; the CLI has no fake-runner option and binds
-`fake_runner=False`.
+`<AUTHORIZED_IMPLEMENTATION_SHA>` is the placeholder for the full
+implementation SHA bound by the final user EXECUTE_AUTH (the runner enforces
+exact equality of both `git rev-parse HEAD` and `git rev-parse
+origin/formal-ir-mainline` with that SHA). The flag set is mandatory; the CLI
+has no fake-runner option and binds `fake_runner=False`.
 
 ## Frozen scope of the single future run
 

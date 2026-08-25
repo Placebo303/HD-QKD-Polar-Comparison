@@ -109,6 +109,15 @@ OUTPUT_ROOT = (
 )
 FORBIDDEN_WINNER_NPZ_NAME = "v38_winning_matrices.npz"
 
+# Scoped tracked-dirty check: only these directly reused/scientific files must
+# match HEAD before an authorized run. The rest of the worktree is not judged.
+SCOPED_TRACKED_PATHS: tuple[str, ...] = (
+    "comparison_bench/src/comparison_bench/formal_ir/v39_lanec_robustness_laneb_control.py",
+    "scripts/execute_v39_development.py",
+    "comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py",
+    "comparison_bench/src/comparison_bench/formal_ir/v35_algorithm_development.py",
+)
+
 V25_COUNTS_RELATIVE_PATH = (
     "comparison_bench/outputs_comparison/nonbinary_diagnostics/"
     "nbldpc_v25_20260818/run_04/channel_counts.npz"
@@ -872,6 +881,29 @@ def git_rev_parse(repo_root: Path, ref: str) -> str:
     return completed.stdout.strip()
 
 
+def verify_scoped_clean(
+    repo_root: Path,
+    relative_paths: tuple[str, ...] = SCOPED_TRACKED_PATHS,
+) -> None:
+    """Refuse execution when any scoped tracked file differs from HEAD.
+
+    Only the listed scientific/implementation files are judged (index +
+    worktree vs HEAD). Untracked files and unrelated modifications elsewhere
+    in the worktree are deliberately ignored.
+    """
+    completed = subprocess.run(
+        ["git", "-C", str(repo_root), "diff", "HEAD", "--quiet", "--", *relative_paths],
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise IntegrityFailure(
+            "TRACKED_DIRTY",
+            f"scoped tracked files differ from HEAD; commit or revert before "
+            f"execution: {list(relative_paths)}",
+        )
+
+
 def verify_execution_sha_binding(repo_root: Path, authorized_target_sha: str) -> dict[str, str]:
     """Exact-equality binding of HEAD AND origin branch to the authorized SHA."""
     head = git_rev_parse(repo_root, "HEAD")
@@ -960,8 +992,13 @@ def build_v39_summary(
     integrity_failures: Optional[list[tuple[str, str]]],
     terminal_state: str,
     terminal_reason: Optional[str],
+    completed_lane_records: Optional[list[dict[str, Any]]] = None,
+    completed_baseline_records: Optional[list[dict[str, Any]]] = None,
+    decoder_calls_started: Optional[int] = None,
 ) -> dict[str, Any]:
     invalid = terminal_state == TERMINAL_EVIDENCE_INVALID
+    lane_done = list(completed_lane_records or [])
+    baseline_done = list(completed_baseline_records or [])
     return {
         "cycle_id": CYCLE_ID,
         "change_id": CHANGE_ID,
@@ -978,10 +1015,19 @@ def build_v39_summary(
         "v25_counts_provenance": counts_provenance,
         "v31_packet_identity": v31_identity,
         "accounting": {
-            "decoder_calls_total": TOTAL_CALLS,
-            "lane_c": EXPECTED_CALLS["lane_c"],
-            "lane_b": EXPECTED_CALLS["lane_b"],
-            "v31_baseline": EXPECTED_CALLS[BASELINE_LANE],
+            "decoder_calls_planned": {
+                "total": TOTAL_CALLS,
+                "lane_c": EXPECTED_CALLS["lane_c"],
+                "lane_b": EXPECTED_CALLS["lane_b"],
+                "v31_baseline": EXPECTED_CALLS[BASELINE_LANE],
+            },
+            "decoder_calls_completed": {
+                "total": len(lane_done) + len(baseline_done),
+                "lane_c": sum(1 for r in lane_done if r.get("lane") == "lane_c"),
+                "lane_b": sum(1 for r in lane_done if r.get("lane") == "lane_b"),
+                "v31_baseline": len(baseline_done),
+            },
+            "decoder_calls_started": decoder_calls_started,
             "structural_reconstruction_decoder_calls": 0,
             "preflight_decoder_calls": 0,
         },
@@ -1051,11 +1097,17 @@ def write_v39_outputs(
     paired_rows: list[dict[str, Any]],
     summary: dict[str, Any],
 ) -> Path:
-    """Write the fixed additive evidence set; fail closed on existing root."""
+    """Write the fixed additive evidence set; fail closed on a non-empty root.
+
+    The guarded runner pre-creates the (empty) root just before the decoder
+    phase, so writing into an existing-but-empty root owned by this run is
+    expected; any pre-existing NON-empty root is refused.
+    """
     root = Path(output_root)
-    if root.exists():
-        raise FileExistsError(f"I9: refusing to overwrite existing output root: {root}")
-    root.mkdir(parents=True)
+    if root.exists() and any(root.iterdir()):
+        raise FileExistsError(f"I9: refusing to overwrite non-empty output root: {root}")
+    if not root.exists():
+        root.mkdir(parents=True)
 
     def dump(name: str, payload: Any) -> None:
         with (root / name).open("w", encoding="utf-8") as handle:
@@ -1113,6 +1165,7 @@ def run_v39_development(
     v31_matrices: Optional[dict[str, np.ndarray]] = None,
     field: Optional[GF2mField] = None,
     check_git: bool = True,
+    check_scoped_dirty: bool = True,
     constructors: Optional[dict[str, Callable[..., tuple[np.ndarray, dict[str, Any]]]]] = None,
     reconstruct_only: Optional[frozenset[tuple[str, str, int]]] = None,
 ) -> dict[str, Any]:
@@ -1141,6 +1194,11 @@ def run_v39_development(
                 "authorized_target_sha is required for the authorized run",
             )
         sha_binding = verify_execution_sha_binding(REPO_ROOT, authorized_target_sha)
+
+    if check_scoped_dirty:
+        # Execution-refusal class failure: raised before any evidence root
+        # exists, so nothing is created.
+        verify_scoped_clean(REPO_ROOT)
 
     registry_ok, registry_msg = validate_block_registry()
     if not registry_ok:
@@ -1172,16 +1230,19 @@ def run_v39_development(
         if v31[source].shape != expected_shape:
             raise IntegrityFailure("P3", f"V31 matrix shape mismatch for {source}: {v31[source].shape}")
 
-    # Evaluation begins; the additive root is created by the writers only
-    # (fail-closed), while a mid-run crash persists raw partial evidence
-    # into a lazily-created root without ever deleting anything.
+    # All preflight (reconstruction, posterior sentinels, V31 identity) is
+    # complete. The run is about to enter the real decoder phase: occupy the
+    # additive root NOW. From this point any crash — including KeyboardInterrupt
+    # or process kill — leaves the root (plus retained raw partials) in place
+    # so a relaunch fails closed on I9 instead of silently re-running.
+    root.mkdir(parents=True)
     lane_records: list[dict[str, Any]] = []
     baseline_records: list[dict[str, Any]] = []
     try:
         _evaluate_all_calls(
             matrices, counts, v31, field, fake_runner, lane_records, baseline_records
         )
-    except Exception:
+    except BaseException:
         _persist_invalid_evidence(
             root,
             structural_rows=structural_rows,
@@ -1252,6 +1313,9 @@ def run_v39_development(
         integrity_failures=None,
         terminal_state=terminal_state,
         terminal_reason=terminal_reason,
+        completed_lane_records=lane_records,
+        completed_baseline_records=baseline_records,
+        decoder_calls_started=TOTAL_CALLS,
     )
     write_v39_outputs(root, structural_rows, lane_records, baseline_records, paired_rows, summary)
     return {
@@ -1315,6 +1379,8 @@ def _persist_invalid_evidence(
             integrity_failures=failures,
             terminal_state=TERMINAL_EVIDENCE_INVALID,
             terminal_reason=None,
+            completed_lane_records=lane_records,
+            completed_baseline_records=baseline_records,
         )
         with (root / "v39_summary.json").open("w", encoding="utf-8") as handle:
             json.dump(summary, handle, indent=2)

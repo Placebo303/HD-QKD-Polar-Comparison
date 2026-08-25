@@ -12,9 +12,11 @@ from __future__ import annotations
 import itertools
 import json
 import math
+import re
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -336,6 +338,7 @@ def test_t7_fake_runner_end_to_end_105_calls_and_outputs(
         counts_by_source=real_counts,
         v31_matrices=fake_v31,
         check_git=False,
+        check_scoped_dirty=False,
         constructors=world.constructors,
     )
 
@@ -354,7 +357,12 @@ def test_t7_fake_runner_end_to_end_105_calls_and_outputs(
 
     summary = json.loads((root / "v39_summary.json").read_text(encoding="utf-8"))
     assert summary["lifecycle_state"] == "DEVELOPMENT_RESULT_CANDIDATE"
-    assert summary["accounting"]["decoder_calls_total"] == 105
+    accounting = summary["accounting"]
+    assert accounting["decoder_calls_planned"]["total"] == 105
+    assert accounting["decoder_calls_completed"]["total"] == 105
+    assert accounting["decoder_calls_completed"]["lane_c"] == 45
+    assert accounting["decoder_calls_completed"]["lane_b"] == 45
+    assert accounting["decoder_calls_completed"]["v31_baseline"] == 15
     assert summary["aggregates"]["lane_c"]["overall"]["records_count"] == 45
     assert summary["aggregates"]["lane_b"]["overall"]["records_count"] == 45
     assert summary["aggregates"][v39.BASELINE_LANE]["overall"]["records_count"] == 15
@@ -409,6 +417,54 @@ def test_sha_binding_exact_equality():
     with pytest.raises(v39.IntegrityFailure) as excinfo:
         v39.verify_execution_sha_binding(Path.cwd(), "0" * 40)
     assert excinfo.value.check_id == "SHA_BINDING_MISMATCH"
+
+
+def test_verify_scoped_clean_dirty_raises_and_clean_passes(tmp_path, monkeypatch):
+    """A-2b unit level: stub v39.subprocess.run for dirty (rc=1) and clean (rc=0)."""
+
+    def git_stub(returncode):
+        def _run(cmd, *args, **kwargs):
+            assert cmd[0] == "git" and "diff" in cmd and "HEAD" in cmd
+            for rel in v39.SCOPED_TRACKED_PATHS:
+                assert rel in cmd
+            return SimpleNamespace(returncode=returncode, stdout="", stderr="")
+
+        return _run
+
+    monkeypatch.setattr(v39.subprocess, "run", git_stub(1))
+    with pytest.raises(v39.IntegrityFailure) as excinfo:
+        v39.verify_scoped_clean(tmp_path)
+    assert excinfo.value.check_id == "TRACKED_DIRTY"
+
+    monkeypatch.setattr(v39.subprocess, "run", git_stub(0))
+    v39.verify_scoped_clean(tmp_path)  # must not raise
+
+
+def test_runner_refuses_scoped_tracked_dirty_before_root_creation(
+    tmp_path, monkeypatch, real_counts, fake_v31
+):
+    world = _FakeWorld()
+
+    def dirty_run(cmd, *args, **kwargs):
+        return SimpleNamespace(returncode=1, stdout="", stderr="")
+
+    monkeypatch.setattr(v39.subprocess, "run", dirty_run)
+    root = tmp_path / "dirty_run_root"
+    with pytest.raises(v39.IntegrityFailure) as excinfo:
+        v39.run_v39_development(
+            development_execution_authorized=True,
+            authorized_target_sha="d" * 40,
+            fake_runner=True,
+            output_root=root,
+            structural_authority_path=world.authority_file(tmp_path),
+            counts_by_source=real_counts,
+            v31_matrices=fake_v31,
+            check_git=False,
+            check_scoped_dirty=True,
+            constructors=world.constructors,
+        )
+    assert excinfo.value.check_id == "TRACKED_DIRTY"
+    assert not root.exists()
 
 
 def test_npz_policy_rejects_winner_archive_as_authority(tmp_path):
@@ -640,6 +696,26 @@ def test_t14_writer_contract_and_overwrite_guard(tmp_path):
     assert payload["performance_interpretation"] == "none"
 
 
+def test_writer_accepts_precreated_empty_root(tmp_path):
+    """A-2d: writer succeeds into an existing-but-empty root (runner pre-creates it)."""
+    structural = [{"matrix_id": "x", "strict_match_committed_metrics": True}]
+    lane_records, baseline = _valid_full_record_sets()
+    paired = v39.build_paired_rows(lane_records, baseline)
+    summary = v39.build_v39_summary(
+        lifecycle_state="DEVELOPMENT_RESULT_CANDIDATE", fake_runner=True,
+        authorized_target_sha=None, sha_binding=None,
+        counts_provenance={}, v31_identity={}, structural_rows=structural,
+        aggregates=None, gates=None, discordance=None, integrity_failures=None,
+        terminal_state=v39.TERMINAL_BOTH_ROUTES_ROBUST, terminal_reason=None,
+    )
+    root = tmp_path / "precreated_empty"
+    root.mkdir()
+    written = v39.write_v39_outputs(root, structural, lane_records, baseline, paired, summary)
+    assert written == root
+    assert (root / "v39_summary.json").is_file()
+    assert len(list(root.iterdir())) == 9
+
+
 def test_partial_failure_retains_raw_records_without_aggregates(tmp_path):
     structural = [{"matrix_id": "x", "strict_match_committed_metrics": True}]
     partial_lane = [make_record("lane_c", "1M", 1, 383101, 390101, exact=True)]
@@ -683,11 +759,77 @@ def test_runner_mid_run_exception_retains_partials(
             counts_by_source=real_counts,
             v31_matrices=fake_v31,
             check_git=False,
+            check_scoped_dirty=False,
             constructors=world.constructors,
         )
     notice = json.loads((root / "v39_invalid_notice.json").read_text(encoding="utf-8"))
     assert notice["terminal_state"] == v39.TERMINAL_EVIDENCE_INVALID
     assert "v39_paired_comparison.json" not in {p.name for p in root.iterdir()}
+
+
+def test_runner_keyboard_interrupt_retains_partials_and_blocks_relaunch(
+    tmp_path, monkeypatch, real_counts, fake_v31
+):
+    """A-2a: KeyboardInterrupt mid-run persists partial evidence, propagates,
+    and the occupied root refuses any relaunch (I9)."""
+    world = _FakeWorld()
+    calls = {"n": 0}
+    real_eval = v39.evaluate_single_block
+
+    def first_ok_then_interrupt(*args, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return real_eval(*args, **kwargs)
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(v39, "evaluate_single_block", first_ok_then_interrupt)
+    root = tmp_path / "ki_run"
+    with pytest.raises(KeyboardInterrupt):
+        v39.run_v39_development(
+            development_execution_authorized=True,
+            authorized_target_sha="e" * 40,
+            fake_runner=True,
+            output_root=root,
+            structural_authority_path=world.authority_file(tmp_path),
+            counts_by_source=real_counts,
+            v31_matrices=fake_v31,
+            check_git=False,
+            check_scoped_dirty=False,
+            constructors=world.constructors,
+        )
+
+    names = {p.name for p in root.iterdir()}
+    assert "v39_invalid_notice.json" in names
+    assert "v39_summary.json" in names
+    assert "v39_block_records.json" in names
+    assert "v39_paired_comparison.json" not in names
+    block_rows = json.loads((root / "v39_block_records.json").read_text(encoding="utf-8"))
+    assert len(block_rows) >= 1
+
+    retained = len(block_rows)
+    base_json = root / "v39_baseline_records.json"
+    if base_json.exists():
+        retained += len(json.loads(base_json.read_text(encoding="utf-8")))
+
+    summary = json.loads((root / "v39_summary.json").read_text(encoding="utf-8"))
+    accounting = summary["accounting"]
+    assert accounting["decoder_calls_planned"]["total"] == 105
+    assert accounting["decoder_calls_completed"]["total"] == retained == 1
+    assert accounting["decoder_calls_completed"]["total"] != 105
+
+    with pytest.raises(FileExistsError):
+        v39.run_v39_development(
+            development_execution_authorized=True,
+            authorized_target_sha="e" * 40,
+            fake_runner=True,
+            output_root=root,
+            structural_authority_path=world.authority_file(tmp_path),
+            counts_by_source=real_counts,
+            v31_matrices=fake_v31,
+            check_git=False,
+            check_scoped_dirty=False,
+            constructors=world.constructors,
+        )
 
 
 def test_runner_integrity_failure_path_writes_invalid_artifacts(
@@ -717,6 +859,7 @@ def test_runner_integrity_failure_path_writes_invalid_artifacts(
         counts_by_source=real_counts,
         v31_matrices=fake_v31,
         check_git=False,
+        check_scoped_dirty=False,
         constructors=world.constructors,
     )
     assert result["terminal_state"] == v39.TERMINAL_EVIDENCE_INVALID
@@ -746,6 +889,23 @@ def test_t15_cli_requires_flag_and_has_no_fake_runner_option():
     )
     assert proc2.returncode != 0
     assert "--authorized-target-sha" in (proc2.stdout + proc2.stderr)
+
+
+def test_execution_packet_command_block_uses_placeholder_sha():
+    """A-2c: the frozen command block carries both flags and the SHA placeholder,
+    with no hardcoded 40-hex SHA."""
+    packet_path = (
+        Path(__file__).resolve().parents[2] / "docs" / "research_cycles" / "V39P0"
+        / "EXECUTION_PACKET.md"
+    )
+    text = packet_path.read_text(encoding="utf-8")
+    start = text.index("```powershell")
+    end = text.index("```", start + len("```powershell"))
+    block = text[start:end]
+    assert "--development-execution-authorized" in block
+    assert "--authorized-target-sha" in block
+    assert "<AUTHORIZED_IMPLEMENTATION_SHA>" in block
+    assert re.search(r"\b[0-9a-fA-F]{40}\b", block) is None
 
 
 # ---------------------------------------------------------------------------
