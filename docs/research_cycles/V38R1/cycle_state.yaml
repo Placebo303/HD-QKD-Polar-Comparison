@@ -1,5 +1,5 @@
 cycle_id: V38R1
-state: IMPLEMENTATION_ACCEPTED
+state: DEVELOPMENT_EXECUTION_AUTHORIZED
 lifecycle_state: IMPLEMENTATION_ACCEPTED
 change_id: formal-ir-v38r1-posterior-binding-correction
 predecessor_cycle: V38P0
@@ -9,13 +9,15 @@ invalid_predecessor_result_sha: 6a36914e2b9bfbc5fc7e78fc8eac5e8a42759bce
 predecessor_terminal_state: V38_DIRECTION_EVIDENCE_INVALID
 terminal_state: null
 accepted_implementation_sha: 8f7bc7d8d7366772ff425528cd1080fa67ef7509
-execution_status: EXECUTE_NOT_AUTHORIZED
-development_execution_authorized: false
+execution_status: EXECUTE_AUTHORIZED
+development_execution_authorized: true
 formal_execution_authorized: false
 scientific_promotion: false
 run_01_status: immutable_invalid_evidence
-run_02_status: absent_not_authorized
+run_02_status: absent_authorized_exactly_once
 independent_implementation_acceptance: accepted
+execution_authorization_target_sha: 8f7bc7d8d7366772ff425528cd1080fa67ef7509
+execution_authorization_scope: decoder_only_9_winners_15_blocks_45_calls_exactly_once
 runner_entrypoint: scripts/execute_v38r1_development.py
 runner_status: implemented_guarded_decoder_only
 winner_metrics_source: comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_01/v38_structural_prototypes.json

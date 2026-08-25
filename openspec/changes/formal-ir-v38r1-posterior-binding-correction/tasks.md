@@ -1,7 +1,8 @@
 # OpenSpec Tasks: formal-ir-v38r1-posterior-binding-correction
 
-**Lifecycle**: `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`
-**Execution**: no real decoder, DE, run_02, tuning, or seed search
+**Lifecycle**: `IMPLEMENTATION_ACCEPTED / EXECUTE_AUTHORIZED`
+**Execution**: one decoder-only `run_02` is explicitly authorized; no DE,
+tuning, seed search, structural reselection, overwrite, or rerun
 
 ## Frozen implementation matrix
 

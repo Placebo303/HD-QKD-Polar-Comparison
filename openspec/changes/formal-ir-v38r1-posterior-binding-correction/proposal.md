@@ -1,6 +1,6 @@
 # OpenSpec Proposal: formal-ir-v38r1-posterior-binding-correction
 
-**Status**: `IMPLEMENTATION_ACCEPTED / EXECUTE_NOT_AUTHORIZED`
+**Status**: `IMPLEMENTATION_ACCEPTED / EXECUTE_AUTHORIZED`
 **Domain**: Formal Information Reconciliation / Nonbinary LDPC research
 **Change ID**: `formal-ir-v38r1-posterior-binding-correction`
 **Predecessor cycle**: `V38P0`
