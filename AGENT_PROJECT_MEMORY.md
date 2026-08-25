@@ -1,3 +1,29 @@
+## 2026-08-25 V37R1 P1 empirical-P DE screening: bounded negative result (`P1_NO_FINITE_FEASIBLE_DE_ADVANCE`)
+
+- Direct evidence [repo-observed]: 2,349 real empirical-P GF(32) DE screening
+  runs across 261 configurations (259 finite-feasible candidates with $N_2 \le 183,
+  d_{c,\max} \le 20$ + matched regular $d_v=2$ baseline + V36 positive control)
+  $\times$ 3 sources (1M, 1.5M, 2M) $\times$ 3 seeds completed in 3262.8s.
+  - Baseline $d_v=2$: 1M $\text{AUT}_{30}=73.61$, 1.5M=59.38, 2M=59.45 (mean 64.15).
+  - Best finite candidate (`lam_d2_0.10_d3_0.90`): 1M=153.997 (+109.2%), 1.5M=154.117
+    (+159.6%), 2M=154.091 (+159.2%), mean 154.07, `all_seeds_converged=False`.
+  - V36 positive control ($\lambda=\{2: 0.85, 4: 0.15\}$): mean 81.59 (+8.7% to +42.4%).
+  - Passing screening candidates: 0 / 259 (P1-B confirmation skipped conditionally).
+  - Terminal state: `P1_NO_FINITE_FEASIBLE_DE_ADVANCE`.
+- Scientific diagnosis [decision]: the gap (+109% to +160% higher $\text{AUT}_{30}$
+  vs -5% target) is structural, not a grid step resolution issue. High code rate
+  ($R \approx 0.8125 - 0.8203$) and finite-length cycle-free forest gate ($N_2 \le 183$)
+  force $\bar{d}_v \ge 2.857$ and $d_c \in [16, 20]$. In GF(32), check degrees $\ge 16$
+  exponentially inflate message convolution uncertainty, stalling early iteration
+  mutual information propagation. The optimizer saturates at the lowest-degree
+  boundary ($\lambda_2=0.10, \lambda_3=0.90$).
+- Architectural roadmap [decision]:
+  - Abandon unstructured single-edge irregular $\lambda$-distribution simplex tuning.
+  - Pivot to structured low-degree NB-LDPC for V38+:
+    1. Protograph / Multi-Edge-Type (MET) NB-LDPC (controlled degree-2 chains without random cycle explosion).
+    2. Near-$d_v=2$ low-degree graph topology + GF(32) edge label / coefficient optimization.
+    3. Non-binary Spatially-Coupled LDPC (SC-NB-LDPC) fallback.
+
 ## 2026-08-24 GitHub-centered ChatGPT/OpenCode research-cycle SOP
 
 - Workflow [decision]: GitHub is the durable exchange surface. ChatGPT handles

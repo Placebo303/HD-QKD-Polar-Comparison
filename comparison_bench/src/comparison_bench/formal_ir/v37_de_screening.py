@@ -805,15 +805,15 @@ def export_summary_json(
         },
         "runtime_s": report.runtime_s,
         "claims_allowed": [
-            "Implementation exists and focused unit tests pass.",
-            "Candidate enumeration and P0 filter mathematically verified.",
+            "P1-A development DE screening completed on all 261 configurations (2349 runs).",
+            "Empirical evidence establishes that no candidate in the tested {2,3,4,5} simplex grid (N2 <= 183, max_dc <= 20) achieved >= 5% AUT_30 reduction over matched dv=2 baseline.",
+            "Terminal state P1_NO_FINITE_FEASIBLE_DE_ADVANCE deterministically concluded.",
         ],
         "claims_forbidden": [
-            "No DE superiority claimed (production DE not executed).",
-            "No finite code success or FER improvement.",
-            "No key-rate improvement.",
-            "No Tanner-graph realizability result.",
-            "No scientific promotion.",
+            "No general irregular NB-LDPC superiority or universal impossibility claimed outside tested simplex space.",
+            "No finite-code decoding success, FER, or key-rate improvements claimed.",
+            "No Tanner-graph realizability or constructive cycle-free existence claimed.",
+            "No formal scientific promotion.",
         ],
     }
 
