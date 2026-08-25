@@ -59,14 +59,16 @@ A prototype matrix must strictly satisfy all of the following:
 6. Maximum check degree dc_max <= 16 across all rows (frozen gate; not relaxed).
 If any hard requirement is violated, the prototype is designated STRUCTURALLY_INVALID and is never passed to decoding.
 
-### 2.4 Frozen PRNG & Substream Derivation Rules
+### 2.4 Frozen PRNG and Substream Derivation Rules
 - **RNG Engine**: numpy.random.Generator with numpy.random.PCG64 exclusively.
 - **Substream Derivation**: For a base construction seed S, derive deterministic substreams using SeedSequence:
-  - Support RNG: SeedSequence([S, 1])
-  - Coefficient RNG: SeedSequence([S, 2])
-  - Initial-label RNG: SeedSequence([S, 3])
+  - Support RNG: Generator(PCG64(SeedSequence([S, 1])))
+  - Coefficient RNG: Generator(PCG64(SeedSequence([S, 2])))
+  - Initial-label RNG: Generator(PCG64(SeedSequence([S, 3])))
 - **No Hidden Seeds**: No Python hash(), no time/OS entropy, no random module.
-- **Frozen Orderings**: At prototype initialization, generate exactly one seeded permutation of check indices within each eligible check set to resolve ties throughout placement (no new permutation draws per column).
+- **GF(32) Coefficient Sampling**: All stochastic GF(32) nonzero coefficients are sampled uniformly from integers 1..31 via rng.integers(low=1, high=32, size=..., endpoint=False). Zero is never sampled; no rejection sampling or alternate parameterizations.
+- **Canonical Coefficient Edge Order**: Whenever coefficients are assigned to support edges, edges are ordered canonically by sorted((check_index, variable_index) for each nonzero edge) (check_index ascending first, variable_index ascending second).
+- **Frozen Orderings**: At prototype initialization, generate seeded permutations of check indices once (Lane B: single permutation of 0..m-1; Lane C: 8 independent permutations for positions 0..7 generated sequentially in order 0,1,2,3,4,5,6,7 from the support RNG stream). These remain immutable for the entire prototype.
 
 ---
 
@@ -76,26 +78,27 @@ If any hard requirement is violated, the prototype is designated STRUCTURALLY_IN
 - **Purpose**: Controlled label-only isolation experiment to determine whether changing GF(32) coefficients alone on the existing low-degree V31 binary support provides finite-block benefit.
 - **Binary Support Binding**: Lane A SHALL use the exact accepted V31 QC baseline binary support A_support(src) = (H_V31(src) != 0). The support matrix is bit-identical across all 3 Lane-A seeds (all column weights = 2, exactly 2,048 edges, row weights in [10, 12]).
 - **Pre-Enumerated Support Cycles**: Enumerate canonical simple Tanner cycles of lengths 4, 6, 8 ONCE per frozen V31 support/source. Construct edge-to-incident-cycles lookup tables.
-- **Coefficient Initialization**: Assign every existing edge a nonzero GF(32) entry from the PCG64 initial-label RNG (SeedSequence([S, 3])).
+- **Coefficient Initialization**: Assign every existing edge a nonzero GF(32) entry from the initial-label RNG (SeedSequence([S, 3])) in canonical support edge order.
 - **Deterministic Local Search Algorithm**:
   - **Lexicographic Objective**: (degenerate_4_cycles, degenerate_6_cycles, degenerate_8_cycles).
   - **Incremental Update**: When evaluating candidate coefficients for an edge, recompute degeneracy only for incident cycles; unaffected cycles retain cached states.
   - **Canonical Edge Order**: Fixed once by sorting edge index pairs (check_index, variable_index).
+  - **Candidate Coefficient Order**: 1, 2, ..., 31.
   - **Sweeps**: Exactly MAX_SWEEPS = 2. In each sweep, visit every edge once; test all 31 nonzero GF(32) integer values (1..31); select the coefficient minimizing the objective; ties choose the lowest GF(32) integer value.
-  - Stop early if an entire sweep produces 0 coefficient updates.
-  - Global GF(32) row rank is verified once after each full sweep and after the final sweep as a hard validity gate (not inside per-trial local objective).
-- **Lane-Specific Validity**: Bit-identical support to V31, full GF(32) row rank, dc_max <= 16.
+  - **Early Stop**: Stop immediately if an entire sweep produces 0 coefficient updates.
+  - **Rank Semantics**: After sweep 1, compute rank_GF32(H) and record as rank_after_sweep_1 (diagnostic only; does not prematurely invalidate prototype). After sweep 2 (or after early stop), compute final_rank_GF32. Prototype is STRUCTURALLY_INVALID iff final_rank_GF32 != m.
+- **Lane-Specific Validity**: Bit-identical support to V31, full GF(32) final row rank, dc_max <= 16.
 
 ### 3.2 Lane B: eIRA-like Dual-Diagonal Structured NB-LDPC Prototype
 - **Purpose**: Test whether structural partitioning of variable classes (information vs. parity accumulator chain) provides low effective check degrees and convergence without random degree-2 cycle explosion.
 - **Matrix Partition**: H_B = [H_info | H_parity] where H_info is m x (1024 - m) and H_parity is m x m.
-- **Parity Structure**: H_parity is fixed as a deterministic lower-bidiagonal matrix (diagonal entries = 1, first subdiagonal entries = 1, all others = 0). This guarantees rank_GF32(H_parity) == m and total parity edges = 2m - 1. (All existing parity entries = GF(32) element 1).
-- **Total Support Edges & Degree Sanity**: Total edges = 2(1024 - m) + 2m - 1 = 2,047 edges. Mean check degrees: 1M = 11.125, 1.5M = 10.774, 2M = 10.661 (analytically compatible with dc_max <= 16).
-- **Information Support Placement (Sequential for column j in 0..1024-m-1)**:
+- **Parity Structure**: H_parity is fixed as a deterministic lower-bidiagonal matrix (diagonal entries = 1, first subdiagonal entries = 1, all others = 0). This guarantees rank_GF32(H_parity) == m and total parity edges = 2m - 1. (All existing parity entries = GF(32) element 1, consuming zero coefficient-RNG draws).
+- **Total Support Edges and Degree Sanity**: Total edges = 2(1024 - m) + 2m - 1 = 2,047 edges. Mean check degrees: 1M = 11.125, 1.5M = 10.774, 2M = 10.661 (analytically compatible with dc_max <= 16).
+- **Support Generation (Sequential for column j in 0..1024-m-1)**:
   - Initialize each check degree from H_parity.
   - **First Edge**: Eligible set = all m checks. Select check with minimum current total degree (ties: frozen check permutation).
   - **Second Edge**: Eligible set = all m checks except first selected check. Find minimum current total degree in eligible set. Among checks at that minimum degree, prefer candidates that create zero new support 4-cycles; ties choose earliest in frozen check permutation. (Never move to a higher-degree check solely to avoid a 4-cycle).
-- **Information Coefficients**: Assign deterministic nonzero GF(32) entries from the coefficient RNG (SeedSequence([S, 2])). (No label search in Lane B).
+- **Coefficient Assignment**: Complete entire H_info binary support first. Then enumerate H_info support edges in canonical (check_index, variable_index) order and assign one uniform coefficient in 1..31 per edge using coefficient RNG (SeedSequence([S, 2])).
 - **Lane-Specific Validity**: All information columns degree 2, dual-diagonal parity pattern (parity endpoint degree 1 is an explicit structural feature of eIRA), full GF(32) row rank, dc_max <= 16.
 
 ### 3.3 Lane C: SC-Inspired Finite Spatially Banded Prototype
@@ -108,10 +111,10 @@ If any hard requirement is violated, the prototype is designated STRUCTURALLY_IN
   - **Source 1.5M (m=190)**: [12, 24, 24, 24, 24, 24, 23, 35] (12 + 5*24 + 23 + 35 = 190)
   - **Source 2M (m=192)**: [12, 24, 24, 24, 24, 24, 24, 36] (12 + 6*24 + 36 = 192)
 - **Capacity Sanity Gate (LANE_C_CAPACITY_FEASIBLE)**: For every position p in 0..7, require expected_support_edges(p) <= 16 * checks(p). (Max load/check at pos 7: 1M = 384/34 = 11.29; 1.5M = 384/35 = 10.97; 2M = 384/36 = 10.67; all <= 16).
-- **Support Placement (Sequential for column j in 0..1023 at position p)**:
+- **Support Generation (Sequential for column j in 0..1023 at position p)**:
   - For p < 7: Edge 1 connects to check position p (minimum current total degree; zero-4-cycle preference within minimum-degree set; frozen check permutation). Edge 2 connects to check position p+1 (minimum current total degree; zero-4-cycle preference within minimum-degree set; frozen check permutation).
   - For p = 7: Both edges connect to distinct checks within check position 7. (Never select a higher-degree check solely to avoid a 4-cycle).
-- **Coefficients**: Assign deterministic nonzero GF(32) entries from the coefficient RNG (SeedSequence([S, 2])). (No label search in Lane C).
+- **Coefficient Assignment**: Complete entire binary support first. Then enumerate all Lane-C support edges in canonical (check_index, variable_index) order and assign one uniform coefficient in 1..31 per edge using coefficient RNG (SeedSequence([S, 2])).
 - **Lane-Specific Validity**: Every variable column degree 2, exact spatial allocation within coupling window, full GF(32) row rank, dc_max <= 16.
 - **Fallback Status**: If all 3 seeds fail structural requirements, the lane status is LANE_STRUCTURAL_NOT_READY (does NOT invalidate other lanes).
 
@@ -208,7 +211,7 @@ A READY lane achieves LANE_PROMISING_DIRECTION_SIGNAL iff:
 
 ## 8. Implementation Test Matrix (Mandatory for Next Phase)
 
-The future implementation phase must implement and pass the following 32 focused tests (T1-T32):
+The future implementation phase must implement and pass the following 41 focused tests (T1-T41):
 - **T1**: Construction seed determinism across all 3 lanes.
 - **T2**: All generated matrices have exact dimensions (184x1024, 190x1024, 192x1024).
 - **T3**: GF(32) row rank routine correctly validates known full-rank and rank-deficient test fixtures.
@@ -241,6 +244,15 @@ The future implementation phase must implement and pass the following 32 focused
 - **T30**: Lane A final support remains bit-identical to V31.
 - **T31**: Lane A global GF(32) rank checked after sweep/final result, not for every coefficient trial.
 - **T32**: Criterion-B integer operational threshold (<=150) is correctly interpreted.
+- **T33**: Uniform GF(32) coefficient sampler generates values only in 1..31 and is deterministic for a frozen seed.
+- **T34**: Canonical coefficient edge order is independent of sparse/dense input enumeration.
+- **T35**: Lane B parity coefficients consume zero coefficient-RNG draws.
+- **T36**: Lane B support is fully generated before H_info coefficient assignment.
+- **T37**: Lane C support is fully generated before coefficient assignment.
+- **T38**: Lane C position permutations are generated exactly in position order 0..7 and reused unchanged.
+- **T39**: Lane A sweep-1 rank deficiency does not prematurely invalidate a prototype.
+- **T40**: Lane A final rank deficiency does invalidate the prototype.
+- **T41**: Lane A zero-change early stop performs final-rank validation.
 
 ---
 
