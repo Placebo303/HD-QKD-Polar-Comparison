@@ -1,0 +1,126 @@
+{
+  "cycle_id": "V38P0",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "terminal_state": "V38_NO_ROUTE_SIGNAL",
+  "prototypes_generated_count": 27,
+  "decoder_runs_count": 45,
+  "lane_statuses": {
+    "lane_a": "LANE_EVALUATED_NO_SIGNAL",
+    "lane_b": "LANE_EVALUATED_NO_SIGNAL",
+    "lane_c": "LANE_EVALUATED_NO_SIGNAL"
+  },
+  "lane_aggregates": {
+    "lane_a": {
+      "lane": "lane_a",
+      "records_count": 15,
+      "integrity_ok": true,
+      "status": "OK",
+      "exact_recovery_count": 0,
+      "overall_mean_errors": 968.0666666666667,
+      "overall_median_errors": 971.0,
+      "overall_median_improvement": -4.4858757062146895,
+      "improve_count": 0,
+      "equal_count": 0,
+      "worsen_count": 15,
+      "worst_single_block_degradation": 814,
+      "source_stats": {
+        "1M": {
+          "exact_count": 0,
+          "mean_errors": 972.0,
+          "median_errors": 974.0,
+          "median_delta_s": 4.695906432748538,
+          "ref_median": 171.0
+        },
+        "1p5M": {
+          "exact_count": 0,
+          "mean_errors": 967.6,
+          "median_errors": 962.0,
+          "median_delta_s": 4.404494382022472,
+          "ref_median": 178.0
+        },
+        "2M": {
+          "exact_count": 0,
+          "mean_errors": 964.6,
+          "median_errors": 967.0,
+          "median_delta_s": 4.284153005464481,
+          "ref_median": 183.0
+        }
+      }
+    },
+    "lane_b": {
+      "lane": "lane_b",
+      "records_count": 15,
+      "integrity_ok": true,
+      "status": "OK",
+      "exact_recovery_count": 0,
+      "overall_mean_errors": 968.0666666666667,
+      "overall_median_errors": 971.0,
+      "overall_median_improvement": -4.4858757062146895,
+      "improve_count": 0,
+      "equal_count": 0,
+      "worsen_count": 15,
+      "worst_single_block_degradation": 814,
+      "source_stats": {
+        "1M": {
+          "exact_count": 0,
+          "mean_errors": 972.0,
+          "median_errors": 974.0,
+          "median_delta_s": 4.695906432748538,
+          "ref_median": 171.0
+        },
+        "1p5M": {
+          "exact_count": 0,
+          "mean_errors": 967.6,
+          "median_errors": 962.0,
+          "median_delta_s": 4.404494382022472,
+          "ref_median": 178.0
+        },
+        "2M": {
+          "exact_count": 0,
+          "mean_errors": 964.6,
+          "median_errors": 967.0,
+          "median_delta_s": 4.284153005464481,
+          "ref_median": 183.0
+        }
+      }
+    },
+    "lane_c": {
+      "lane": "lane_c",
+      "records_count": 15,
+      "integrity_ok": true,
+      "status": "OK",
+      "exact_recovery_count": 0,
+      "overall_mean_errors": 968.0666666666667,
+      "overall_median_errors": 971.0,
+      "overall_median_improvement": -4.4858757062146895,
+      "improve_count": 0,
+      "equal_count": 0,
+      "worsen_count": 15,
+      "worst_single_block_degradation": 814,
+      "source_stats": {
+        "1M": {
+          "exact_count": 0,
+          "mean_errors": 972.0,
+          "median_errors": 974.0,
+          "median_delta_s": 4.695906432748538,
+          "ref_median": 171.0
+        },
+        "1p5M": {
+          "exact_count": 0,
+          "mean_errors": 967.6,
+          "median_errors": 962.0,
+          "median_delta_s": 4.404494382022472,
+          "ref_median": 178.0
+        },
+        "2M": {
+          "exact_count": 0,
+          "mean_errors": 964.6,
+          "median_errors": 967.0,
+          "median_delta_s": 4.284153005464481,
+          "ref_median": 183.0
+        }
+      }
+    }
+  },
+  "execution_runtime_s": 756.2318561077118
+}
