@@ -1,8 +1,9 @@
 cycle_id: V37R1
-state: DEVELOPMENT_RESULT_REVIEW_PENDING
+state: DEVELOPMENT_RESULT_ACCEPTED
 accepted_plan_sha: 661e2878f96f9fb84291bd601ebd3eb6abfcfdd4
 accepted_implementation_sha: 3a64d1e9ad11625f3eee1fa6cafb5d75c7eaca39
 development_authorization_sha: bff235f240c4a88396fda4e20275cf2bb1856432
+accepted_development_result_sha: 67da7c64fa4150a66d020243d6292420903297fe
 development_execution_authorized: true
 formal_execution_authorized: false
 scientific_promotion: false

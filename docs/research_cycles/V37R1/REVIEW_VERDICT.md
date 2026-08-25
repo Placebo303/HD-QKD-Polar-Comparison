@@ -94,3 +94,38 @@ Key frozen items:
 **P1-B Condition**: Executed if and only if $\ge 1$ finite candidate passes the frozen P1-A screening gate ($\Delta_s \le -0.05$ on all 3 sources independently, all seeds converge).
 **Formal Execution Authorization**: `NOT_GRANTED`
 **Scientific Promotion**: `NOT_GRANTED`
+---
+
+## Milestone 4: Development Result Review
+
+**Repository**: `Placebo303/HD-QKD-Polar-pipeline`
+**Branch**: `formal-ir-mainline`
+**Target SHA**: `67da7c64fa4150a66d020243d6292420903297fe`
+**SHA Verification**: VERIFIED
+**Review Kind**: DEVELOPMENT_RESULT
+**Cycle ID**: V37R1
+**Advisory Verdict**: ADVISORY_ACCEPT
+**Terminal State**: `P1_NO_FINITE_FEASIBLE_DE_ADVANCE`
+
+### Accepted Bounded Result
+
+Within the frozen V37R1 search space and empirical-P GF(32) DE protocol, no tested finite-feasible candidate satisfied the complete screening gate.
+
+Accepted evidence includes:
+- 259 finite-feasible V37 candidates (N2 <= 183, dc_max <= 20);
+- 2,331 finite-candidate DE runs (259 configs x 3 sources x 3 seeds);
+- 0 / 2,331 finite-candidate runs converged (H(60) >= 1e-4);
+- Baseline 9 / 9 converged (H(60) = 0.0);
+- V36 positive control 9 / 9 converged (H(60) = 0.0);
+- 0 / 259 candidates passed the frozen screening gate;
+- 259 / 259 candidates had positive AUT_30 delta on all three sources relative to baseline (+109% to +160%);
+- No P1-B confirmation was executed (conditionally skipped);
+- No finite decoding / FER / key-rate / security result was established;
+- Terminal state concluded as `P1_NO_FINITE_FEASIBLE_DE_ADVANCE`.
+
+This is acceptance of the bounded DEVELOPMENT RESULT only.
+
+It is NOT:
+- formal scientific promotion;
+- a general impossibility result for irregular NB-LDPC;
+- an authorization for V38 execution.
