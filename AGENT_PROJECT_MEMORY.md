@@ -1,3 +1,23 @@
+## 2026-08-25 V38R1 accepted development result: bounded machine candidate
+
+- Current result [repo-observed]: exactly-once authorized `run_02` completed in
+  result-candidate commit `2416486f724f4fb7cbf1058d9dc1bb1fc5ded5ed`; main
+  acceptance commit is `c8c5cd2ed5b60665af58e6a1639e58f99726bc05`. The machine
+  terminal is `V38_MULTIPLE_ROUTE_SIGNALS`; this is not a scientific,
+  formal-execution, promotion, or automatic-V39 decision.
+- Frozen execution [repo-observed]: 45 calls over the fixed 15-block-per-lane
+  set, with no rerun, tuning, seed change, or automatic V39 follow-up.
+  Lane A was 0/15 exact with median residual 115 and 15/15 improved; Lane B
+  was 9/15 exact with median residual 0; Lane C was 14/15 exact with median
+  residual 0, with its only non-exact block at 1p5M/360202 (residual 63).
+  One Lane B block had `syndrome_ok` without exact recovery; success remains
+  defined by `exact_l2`, not syndrome status alone.
+- Claim boundary [decision]: blocks are V25 TRAIN empirical-count samples
+  with oracle-L1 inputs, not real-frame FER evidence. Do not infer threshold,
+  SKR, formal-execution, qualification, or promotion results. The current
+  result supersedes the pre-execution boundary in the implementation-only
+  entry below; further reruns/tuning and automatic V39 are prohibited.
+
 ## 2026-08-25 V38P0 invalidation and V38R1 implementation acceptance
 
 - Root-cause invalidation [repo-observed, decision]: V38P0 `run_01` passed
