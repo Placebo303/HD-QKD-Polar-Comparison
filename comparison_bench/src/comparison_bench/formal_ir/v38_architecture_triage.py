@@ -84,6 +84,30 @@ LANE_C_CHECK_ALLOCATIONS: dict[str, list[int]] = {
 }
 
 # Authoritative frozen V31 baseline performance (from committed V36 A3 records)
+FROZEN_BASELINE_ERROR_MAP: dict[str, dict[int, int]] = {
+    "1M": {
+        360101: 166,
+        360102: 177,
+        360103: 171,
+        360104: 178,
+        360105: 162,
+    },
+    "1p5M": {
+        360201: 167,
+        360202: 199,
+        360203: 187,
+        360204: 148,
+        360205: 178,
+    },
+    "2M": {
+        360301: 164,
+        360302: 189,
+        360303: 183,
+        360304: 184,
+        360305: 169,
+    },
+}
+
 V31_BASELINE_REFERENCE: dict[str, Any] = {
     "exact_count": 0,
     "overall_mean": 174.80,
@@ -93,16 +117,19 @@ V31_BASELINE_REFERENCE: dict[str, Any] = {
             "mean": 170.8,
             "median": 171.0,
             "errors": [166, 177, 171, 178, 162],
+            "seed_map": FROZEN_BASELINE_ERROR_MAP["1M"],
         },
         "1p5M": {
             "mean": 175.8,
             "median": 178.0,
             "errors": [167, 199, 187, 148, 178],
+            "seed_map": FROZEN_BASELINE_ERROR_MAP["1p5M"],
         },
         "2M": {
             "mean": 177.8,
             "median": 183.0,
             "errors": [164, 189, 183, 184, 169],
+            "seed_map": FROZEN_BASELINE_ERROR_MAP["2M"],
         },
     },
 }
@@ -187,7 +214,6 @@ def enumerate_canonical_simple_cycles(
                     v1 = common[j]
                     c_tuple = (c0, c1)
                     v_tuple = (v0, v1)
-                    # cycle: c0-v0, c1-v0, c1-v1, c0-v1
                     edges = ((c0, v0), (c1, v0), (c1, v1), (c0, v1))
                     cycles_4.append(CycleInfo(length=4, checks=c_tuple, vars=v_tuple, edges=edges))
 
@@ -387,6 +413,7 @@ def compute_structural_metrics(
         "lane": lane,
         "source": source,
         "construction_seed": seed,
+        "matrix_id": f"{lane}_{source}_s{seed}",
         "shape": list(H.shape),
         "rank_GF32": rank,
         "support_edge_count": support_edge_count,
@@ -414,48 +441,40 @@ def compute_structural_metrics(
 
 
 # ---------------------------------------------------------------------------
-# Lane Constructors
+# Lane A Optimization Helper
 # ---------------------------------------------------------------------------
 
-def construct_lane_a_prototype(
-    source: str,
-    seed: int,
+def optimize_lane_a_coefficients(
+    H_init: np.ndarray,
+    binary_support: np.ndarray,
     max_sweeps: int = 2,
     field: Optional[GF2mField] = None,
-) -> tuple[np.ndarray, dict[str, Any]]:
-    """Construct Lane A prototype on frozen V31 support via cycle-aware label optimization.
+) -> tuple[np.ndarray, int, int, int, int]:
+    """Perform deterministic Lane-A cycle-degeneracy minimization search over GF(32) edge labels.
 
-    - Support is strictly bit-identical to V31 baseline.
-    - Initial labels drawn from Generator(PCG64(SeedSequence([seed, 3]))).
-    - Local search over (deg_4, deg_6, deg_8) with cached incremental updates.
-    - MAX_SWEEPS = 2. Stop early on 0 updates.
-    - Sweep 1 rank is diagnostic; final rank is hard validity gate.
+    Candidate key for every edge and candidate value:
+        candidate_key = (cand_d4, cand_d6, cand_d8, cand)
+    The minimum candidate_key across all cand in 1..31 is chosen (strict tie-break to lowest integer).
+    Edges with 0 incident cycles choose cand = 1.
+
+    Returns:
+        H_opt: optimized matrix
+        sweeps_completed: number of sweeps executed
+        total_updates: total coefficient updates made
+        rank_sweep_1: GF(32) rank after sweep 1 (diagnostic only)
+        final_rank: GF(32) rank after final sweep
     """
     if field is None:
         field = GF2mField.create(32)
 
-    v31_mats = load_v31_qc_baseline_matrices()
-    if source not in v31_mats:
-        raise ValueError(f"Unknown source rate {source}")
-
-    H_v31 = v31_mats[source]
-    binary_support = (H_v31 != 0).astype(np.uint8)
+    H = H_init.copy()
     canonical_edges = get_canonical_support_edges(binary_support)
 
-    # Initial labels
-    label_rng = get_substream_generator(seed, stream_id=3)
-    init_coeffs = sample_uniform_gf32_nonzero(label_rng, len(canonical_edges))
-
-    H = np.zeros_like(H_v31, dtype=np.uint8)
-    for (r, c), val in zip(canonical_edges, init_coeffs):
-        H[r, c] = val
-
-    # Pre-enumerate cycles and build lookup tables
     c4, c6, c8, edge_to_cycle_ids = enumerate_canonical_simple_cycles(binary_support)
     all_cycles = c4 + c6 + c8
     num_cycles = len(all_cycles)
 
-    # Cache initial cycle degeneracy states
+    # Initial cycle degeneracy states
     is_degenerate = [classify_cycle_algebraic_degeneracy(cyc, H, field) for cyc in all_cycles]
 
     def _count_degeneracies() -> tuple[int, int, int]:
@@ -475,49 +494,55 @@ def construct_lane_a_prototype(
 
         for edge in canonical_edges:
             r, c = edge
-            old_val = H[r, c]
+            old_val = int(H[r, c])
             incident_ids = edge_to_cycle_ids.get(edge, [])
 
             if not incident_ids:
+                # 0 incident cycles: all cand in 1..31 yield same objective (curr_d4, curr_d6, curr_d8).
+                # Minimum key (curr_d4, curr_d6, curr_d8, cand) is at cand = 1.
+                best_val = 1
+                if best_val != old_val:
+                    H[r, c] = best_val
+                    updates_in_sweep += 1
                 continue
 
-            # Count old incident degeneracies by length
             old_inc_4 = sum(is_degenerate[idx] for idx in incident_ids if all_cycles[idx].length == 4)
             old_inc_6 = sum(is_degenerate[idx] for idx in incident_ids if all_cycles[idx].length == 6)
             old_inc_8 = sum(is_degenerate[idx] for idx in incident_ids if all_cycles[idx].length == 8)
 
+            best_key = (float("inf"), float("inf"), float("inf"), float("inf"))
             best_val = old_val
-            best_tuple = (curr_d4, curr_d6, curr_d8)
-            best_new_incident_states = [is_degenerate[idx] for idx in incident_ids]
+            best_states: list[bool] = []
 
-            # Try candidate values 1..31
             for cand in range(1, 32):
                 if cand == old_val:
-                    continue
+                    cand_states = [is_degenerate[idx] for idx in incident_ids]
+                    cand_d4, cand_d6, cand_d8 = curr_d4, curr_d6, curr_d8
+                else:
+                    H[r, c] = cand
+                    cand_states = [
+                        classify_cycle_algebraic_degeneracy(all_cycles[idx], H, field)
+                        for idx in incident_ids
+                    ]
+                    cand_inc_4 = sum(cand_states[k] for k, idx in enumerate(incident_ids) if all_cycles[idx].length == 4)
+                    cand_inc_6 = sum(cand_states[k] for k, idx in enumerate(incident_ids) if all_cycles[idx].length == 6)
+                    cand_inc_8 = sum(cand_states[k] for k, idx in enumerate(incident_ids) if all_cycles[idx].length == 8)
 
-                H[r, c] = cand
-                cand_states = [classify_cycle_algebraic_degeneracy(all_cycles[idx], H, field) for idx in incident_ids]
+                    cand_d4 = curr_d4 - old_inc_4 + cand_inc_4
+                    cand_d6 = curr_d6 - old_inc_6 + cand_inc_6
+                    cand_d8 = curr_d8 - old_inc_8 + cand_inc_8
 
-                cand_inc_4 = sum(cand_states[k] for k, idx in enumerate(incident_ids) if all_cycles[idx].length == 4)
-                cand_inc_6 = sum(cand_states[k] for k, idx in enumerate(incident_ids) if all_cycles[idx].length == 6)
-                cand_inc_8 = sum(cand_states[k] for k, idx in enumerate(incident_ids) if all_cycles[idx].length == 8)
-
-                cand_d4 = curr_d4 - old_inc_4 + cand_inc_4
-                cand_d6 = curr_d6 - old_inc_6 + cand_inc_6
-                cand_d8 = curr_d8 - old_inc_8 + cand_inc_8
-                cand_tuple = (cand_d4, cand_d6, cand_d8)
-
-                if cand_tuple < best_tuple:
-                    best_tuple = cand_tuple
+                cand_key = (cand_d4, cand_d6, cand_d8, cand)
+                if cand_key < best_key:
+                    best_key = cand_key
                     best_val = cand
-                    best_new_incident_states = cand_states
+                    best_states = cand_states
 
-            # Apply best update
             if best_val != old_val:
                 H[r, c] = best_val
-                curr_d4, curr_d6, curr_d8 = best_tuple
+                curr_d4, curr_d6, curr_d8, _ = best_key
                 for k, idx in enumerate(incident_ids):
-                    is_degenerate[idx] = best_new_incident_states[k]
+                    is_degenerate[idx] = best_states[k]
                 updates_in_sweep += 1
             else:
                 H[r, c] = old_val
@@ -531,13 +556,60 @@ def construct_lane_a_prototype(
             break
 
     final_rank = compute_gf32_rank(H, field)
-    metrics = compute_structural_metrics(H, lane="lane_a", source=source, seed=seed, field=field)
+    return H, sweeps_completed, total_updates, rank_sweep_1, final_rank
+
+
+# ---------------------------------------------------------------------------
+# Lane Constructors
+# ---------------------------------------------------------------------------
+
+def construct_lane_a_prototype(
+    source: str,
+    seed: int,
+    max_sweeps: int = 2,
+    field: Optional[GF2mField] = None,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Construct Lane A prototype on frozen V31 support via cycle-aware label optimization.
+
+    - Support is strictly bit-identical to V31 baseline.
+    - Initial labels drawn from Generator(PCG64(SeedSequence([seed, 3]))).
+    - Local search over (deg_4, deg_6, deg_8, cand) with cached incremental updates.
+    - MAX_SWEEPS = 2. Stop early on 0 updates.
+    - Sweep 1 rank is diagnostic; final rank is hard validity gate.
+    """
+    if field is None:
+        field = GF2mField.create(32)
+
+    v31_mats = load_v31_qc_baseline_matrices()
+    if source not in v31_mats:
+        raise ValueError(f"Unknown source rate {source}")
+
+    H_v31 = v31_mats[source]
+    binary_support = (H_v31 != 0).astype(np.uint8)
+    canonical_edges = get_canonical_support_edges(binary_support)
+
+    # Initial labels
+    label_rng = get_substream_generator(seed, stream_id=3)
+    init_coeffs = sample_uniform_gf32_nonzero(label_rng, len(canonical_edges))
+
+    H_init = np.zeros_like(H_v31, dtype=np.uint8)
+    for (r, c), val in zip(canonical_edges, init_coeffs):
+        H_init[r, c] = val
+
+    H_opt, sweeps_completed, total_updates, rank_sweep_1, final_rank = optimize_lane_a_coefficients(
+        H_init=H_init,
+        binary_support=binary_support,
+        max_sweeps=max_sweeps,
+        field=field,
+    )
+
+    metrics = compute_structural_metrics(H_opt, lane="lane_a", source=source, seed=seed, field=field)
     metrics["sweeps_completed"] = sweeps_completed
     metrics["total_updates"] = total_updates
     metrics["rank_after_sweep_1"] = rank_sweep_1
     metrics["final_rank_GF32"] = final_rank
 
-    return H, metrics
+    return H_opt, metrics
 
 
 def construct_lane_b_prototype(
@@ -567,7 +639,7 @@ def construct_lane_b_prototype(
     support_rng = get_substream_generator(seed, stream_id=1)
     coeff_rng = get_substream_generator(seed, stream_id=2)
 
-    # 1. H_parity: m x m lower-bidiagonal
+    # 1. H_parity: m x m lower-bidiagonal (consuming 0 coefficient-RNG draws)
     H_parity = np.zeros((m, m), dtype=np.uint8)
     for i in range(m):
         H_parity[i, i] = 1
@@ -583,7 +655,6 @@ def construct_lane_b_prototype(
 
     # 2. H_info Support Construction
     H_info_support = np.zeros((m, n_info), dtype=np.uint8)
-    # Track pairs of checks already connected by info columns to detect 4-cycles
     check_pairs_connected: set[tuple[int, int]] = set()
 
     for j in range(n_info):
@@ -592,7 +663,6 @@ def construct_lane_b_prototype(
         eligible_1 = [c for c in range(m) if check_degrees[c] == min_deg_1]
         c1 = min(eligible_1, key=lambda c: check_rank_in_perm[c])
 
-        # Temporarily increment c1
         check_degrees[c1] += 1
 
         # Second edge: eligible = all checks except c1
@@ -600,7 +670,6 @@ def construct_lane_b_prototype(
         min_deg_2 = min(check_degrees[c] for c in eligible_2_checks)
         min_deg_set = [c for c in eligible_2_checks if check_degrees[c] == min_deg_2]
 
-        # Prefer candidates that create zero new 4-cycles with previous info columns
         no_4cycle_cands = [
             c for c in min_deg_set if (min(c1, c), max(c1, c)) not in check_pairs_connected
         ]
@@ -659,7 +728,6 @@ def construct_lane_c_prototype(
     support_rng = get_substream_generator(seed, stream_id=1)
     coeff_rng = get_substream_generator(seed, stream_id=2)
 
-    # Compute check index ranges per spatial position
     check_offsets = [0] * 8
     for p in range(1, 8):
         check_offsets[p] = check_offsets[p - 1] + allocations[p - 1]
@@ -783,6 +851,7 @@ def evaluate_single_block(
     if field is None:
         field = GF2mField.create(32)
 
+    matrix_id = f"{lane}_{source}_s{construction_seed}"
     idx, alice, bob = sample_empirical_block(counts, seed=block_seed, size=BLOCK_LENGTH)
     u1_alice, u2_alice, u1_bob, u2_bob = factorize_f03(alice, bob)
     prior = get_conditional_posterior_l2(counts, u2_bob, u1_alice)
@@ -812,6 +881,7 @@ def evaluate_single_block(
         "block_seed": block_seed,
         "lane": lane,
         "construction_seed": construction_seed,
+        "matrix_id": matrix_id,
         "errors_initial": raw_errors,
         "errors_final": final_errors,
         "exact_l2": exact,
@@ -826,16 +896,49 @@ def evaluate_single_block(
 # Aggregation & Triage Decision Gates
 # ---------------------------------------------------------------------------
 
+def validate_block_records_integrity(block_records: list[dict[str, Any]]) -> tuple[bool, str]:
+    """Validate that the block record set satisfies exact frozen 15-block requirements."""
+    if len(block_records) != 15:
+        return False, f"Expected exactly 15 records, got {len(block_records)}"
+
+    seen_pairs: set[tuple[str, int]] = set()
+    for rec in block_records:
+        src = rec.get("source")
+        seed = rec.get("block_seed")
+        if src not in SOURCE_CHECKS:
+            return False, f"Unexpected source rate: {src}"
+        if seed not in V36_A3_BLOCK_SEEDS.get(src, []):
+            return False, f"Unexpected seed {seed} for source {src}"
+        pair = (src, seed)
+        if pair in seen_pairs:
+            return False, f"Duplicate record for source {src} seed {seed}"
+        seen_pairs.add(pair)
+
+    # Check exact coverage for all 3 sources (5 seeds each)
+    for src, expected_seeds in V36_A3_BLOCK_SEEDS.items():
+        src_seeds = {pair[1] for pair in seen_pairs if pair[0] == src}
+        if src_seeds != set(expected_seeds):
+            return False, f"Incomplete seed set for source {src}: expected {expected_seeds}, got {src_seeds}"
+
+    return True, "INTEGRITY_OK"
+
+
 def aggregate_lane_results(
     block_records: list[dict[str, Any]],
     reference_baseline: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
-    """Aggregate block evaluation records for a lane and compute paired comparisons."""
+    """Aggregate block evaluation records for a lane and compute paired comparisons keyed by (source, block_seed)."""
     if reference_baseline is None:
         reference_baseline = V31_BASELINE_REFERENCE
 
-    if not block_records:
-        return {"records_count": 0, "status": "NO_RECORDS"}
+    integrity_ok, integrity_reason = validate_block_records_integrity(block_records)
+    if not integrity_ok:
+        return {
+            "records_count": len(block_records),
+            "status": "INVALID_BLOCK_SET",
+            "integrity_ok": False,
+            "failure_reason": integrity_reason,
+        }
 
     lane_name = block_records[0]["lane"]
     errors_final_list = [r["errors_final"] for r in block_records]
@@ -849,7 +952,11 @@ def aggregate_lane_results(
     else:
         overall_median_improvement = 0.0
 
-    # Per-source aggregation and paired comparisons
+    # Index candidate records by (source, block_seed)
+    records_by_key: dict[tuple[str, int], dict[str, Any]] = {
+        (r["source"], r["block_seed"]): r for r in block_records
+    }
+
     source_stats: dict[str, Any] = {}
     improve_count = 0
     equal_count = 0
@@ -857,9 +964,8 @@ def aggregate_lane_results(
     worst_single_degradation = 0
 
     for src in SOURCE_CHECKS:
-        src_recs = [r for r in block_records if r["source"] == src]
-        if not src_recs:
-            continue
+        expected_seeds = V36_A3_BLOCK_SEEDS[src]
+        src_recs = [records_by_key[(src, s)] for s in expected_seeds]
 
         src_errs = [r["errors_final"] for r in src_recs]
         src_exact = sum(1 for r in src_recs if r.get("exact_l2", False))
@@ -868,27 +974,27 @@ def aggregate_lane_results(
 
         ref_src = reference_baseline["sources"].get(src, {})
         ref_src_median = float(ref_src.get("median", 0.0))
-        ref_src_errs = ref_src.get("errors", [])
+        ref_src_seed_map = ref_src.get("seed_map", FROZEN_BASELINE_ERROR_MAP[src])
 
         if ref_src_median > 0:
             median_delta_s = (src_median - ref_src_median) / ref_src_median
         else:
             median_delta_s = 0.0 if src_median == 0 else 1.0
 
-        # Paired block comparison
-        for k, rec in enumerate(src_recs):
-            if k < len(ref_src_errs):
-                ref_e = ref_src_errs[k]
-                lane_e = rec["errors_final"]
-                diff = lane_e - ref_e
-                if diff < 0:
-                    improve_count += 1
-                elif diff == 0:
-                    equal_count += 1
-                else:
-                    worsen_count += 1
-                    if diff > worst_single_degradation:
-                        worst_single_degradation = diff
+        # Exact key-based paired block comparison
+        for rec in src_recs:
+            b_seed = rec["block_seed"]
+            ref_e = ref_src_seed_map[b_seed]
+            lane_e = rec["errors_final"]
+            diff = lane_e - ref_e
+            if diff < 0:
+                improve_count += 1
+            elif diff == 0:
+                equal_count += 1
+            else:
+                worsen_count += 1
+                if diff > worst_single_degradation:
+                    worst_single_degradation = diff
 
         source_stats[src] = {
             "exact_count": src_exact,
@@ -901,6 +1007,8 @@ def aggregate_lane_results(
     return {
         "lane": lane_name,
         "records_count": len(block_records),
+        "integrity_ok": True,
+        "status": "OK",
         "exact_recovery_count": exact_count,
         "overall_mean_errors": overall_mean,
         "overall_median_errors": overall_median,
@@ -915,12 +1023,12 @@ def aggregate_lane_results(
 
 def evaluate_triage_gate(aggregated_results: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
     """Evaluate whether a lane achieves PROMISING_DIRECTION_SIGNAL."""
-    if aggregated_results.get("records_count", 0) == 0:
-        return False, {"reason": "NO_RECORDS"}
+    if not aggregated_results.get("integrity_ok", False) or aggregated_results.get("records_count", 0) != 15:
+        return False, {"gate_passed": False, "reason": "INVALID_BLOCK_SET"}
 
     source_stats = aggregated_results.get("source_stats", {})
-    if len(source_stats) < 3:
-        return False, {"reason": "INCOMPLETE_SOURCES"}
+    if len(source_stats) != 3:
+        return False, {"gate_passed": False, "reason": "INCOMPLETE_SOURCES"}
 
     # Non-degradation gate: all sources median_delta_s <= +0.05
     for src, stats in source_stats.items():
@@ -963,7 +1071,10 @@ def determine_v38_terminal_state(
         return V38_DIRECTION_EVIDENCE_INVALID
 
     signal_lanes = [lane for lane, st in lane_statuses.items() if st == LANE_PROMISING_DIRECTION_SIGNAL]
-    ready_lanes = [lane for lane, st in lane_statuses.items() if st in (LANE_READY, LANE_EVALUATED_NO_SIGNAL, LANE_PROMISING_DIRECTION_SIGNAL)]
+    ready_lanes = [
+        lane for lane, st in lane_statuses.items()
+        if st in (LANE_READY, LANE_EVALUATED_NO_SIGNAL, LANE_PROMISING_DIRECTION_SIGNAL)
+    ]
 
     if len(signal_lanes) == 1:
         return V38_SINGLE_ROUTE_SIGNAL
@@ -973,3 +1084,122 @@ def determine_v38_terminal_state(
         return V38_NO_ROUTE_SIGNAL
     else:
         return V38_NO_STRUCTURAL_PROTOTYPE_READY
+
+
+# ---------------------------------------------------------------------------
+# Future Development Orchestration (Guarded; Not Executed During Implementation)
+# ---------------------------------------------------------------------------
+
+def run_v38_development(
+    development_execution_authorized: bool = False,
+    fake_runner: bool = False,
+) -> dict[str, Any]:
+    """Execute the full frozen V38 development triage workflow.
+
+    Software Guard:
+        Requires development_execution_authorized=True, otherwise raises PermissionError.
+        This guard prevents accidental or unauthorized execution during planning/implementation.
+
+    Maximum Workload Enforced:
+        - Structural prototypes: <= 27
+        - New decoder runs: <= 45
+    """
+    if not development_execution_authorized:
+        raise PermissionError(
+            "V38 development execution not authorized. "
+            "Formal development execution requires explicit authorization."
+        )
+
+    # Load empirical counts for all 3 sources
+    counts_by_source: dict[str, np.ndarray] = {}
+    for src in SOURCE_CHECKS:
+        counts_by_source[src] = load_v25_channel_counts(src, "TRAIN")
+
+    field = GF2mField.create(32)
+    lane_constructors = {
+        "lane_a": construct_lane_a_prototype,
+        "lane_b": construct_lane_b_prototype,
+        "lane_c": construct_lane_c_prototype,
+    }
+
+    prototypes_generated_count = 0
+    decoder_runs_count = 0
+
+    lane_winners: dict[str, dict[str, tuple[np.ndarray, dict[str, Any]]]] = {}
+    lane_statuses: dict[str, str] = {}
+    lane_aggregates: dict[str, dict[str, Any]] = {}
+    all_block_records: list[dict[str, Any]] = []
+
+    for lane_name, constructor in lane_constructors.items():
+        lane_winners[lane_name] = {}
+        lane_ready = True
+
+        for src in ("1M", "1p5M", "2M"):
+            production_seeds = LANE_PRODUCTION_SEEDS[lane_name][src]
+            assert len(production_seeds) == 3, "Must have exactly 3 pre-registered seeds"
+
+            src_prototypes: list[dict[str, Any]] = []
+            src_mats: dict[int, np.ndarray] = {}
+
+            for seed in production_seeds:
+                assert prototypes_generated_count < 27, "Maximum prototype generation cap (27) exceeded"
+                H_proto, metrics = constructor(source=src, seed=seed, field=field)
+                prototypes_generated_count += 1
+                src_prototypes.append(metrics)
+                src_mats[seed] = H_proto
+
+            winner_metric, sel_status = select_structural_winner(src_prototypes)
+            if winner_metric is None:
+                lane_ready = False
+                break
+            else:
+                win_seed = winner_metric["construction_seed"]
+                lane_winners[lane_name][src] = (src_mats[win_seed], winner_metric)
+
+        if not lane_ready:
+            lane_statuses[lane_name] = LANE_STRUCTURAL_NOT_READY
+            continue
+
+        # Evaluate the 3 winners on 15 frozen development blocks
+        lane_block_records: list[dict[str, Any]] = []
+        for src in ("1M", "1p5M", "2M"):
+            H_win, win_metric = lane_winners[lane_name][src]
+            win_seed = win_metric["construction_seed"]
+            counts = counts_by_source[src]
+
+            for b_seed in V36_A3_BLOCK_SEEDS[src]:
+                assert decoder_runs_count < 45, "Maximum new decoder runs cap (45) exceeded"
+                rec = evaluate_single_block(
+                    H=H_win,
+                    source=src,
+                    block_seed=b_seed,
+                    lane=lane_name,
+                    construction_seed=win_seed,
+                    counts=counts,
+                    max_iter=30,
+                    damping_alpha=1.0,
+                    fake_runner=fake_runner,
+                    field=field,
+                )
+                decoder_runs_count += 1
+                lane_block_records.append(rec)
+                all_block_records.append(rec)
+
+        agg = aggregate_lane_results(lane_block_records)
+        lane_aggregates[lane_name] = agg
+        passed, gate_details = evaluate_triage_gate(agg)
+        if passed:
+            lane_statuses[lane_name] = LANE_PROMISING_DIRECTION_SIGNAL
+        else:
+            lane_statuses[lane_name] = LANE_EVALUATED_NO_SIGNAL
+
+    terminal_state = determine_v38_terminal_state(lane_statuses, integrity_ok=True)
+
+    return {
+        "prototypes_generated_count": prototypes_generated_count,
+        "decoder_runs_count": decoder_runs_count,
+        "lane_statuses": lane_statuses,
+        "lane_aggregates": lane_aggregates,
+        "terminal_state": terminal_state,
+        "all_block_records": all_block_records,
+    }

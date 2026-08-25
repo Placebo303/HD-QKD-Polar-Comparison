@@ -1,110 +1,80 @@
-# V38-P0 Implementation Report: Structured Low-Degree Architecture Triage
+# V38-P0 Implementation Report: Structured Low-Degree Architecture Triage (Revision R1)
 
-**Cycle ID**: V38P0  
-**Lifecycle State**: `IMPLEMENTATION_CANDIDATE`  
-**Repository**: `Placebo303/HD-QKD-Polar-pipeline`  
-**Branch**: `formal-ir-mainline`  
-**Accepted Plan SHA**: `1b3fb4b8d0fa14c127ab895b1bbb21eb77f3414d`  
-**Plan Acceptance SHA**: `dbb6ea8cf102bd4ed9c5beb68c1d7432ee2005d6`  
-**Predecessor Result SHA**: `67da7c64fa4150a66d020243d6292420903297fe`  
-**Predecessor Review SHA**: `cc1483cd568ca41fb686c40492f40b5eed81f06c`  
-**Development Execution Authorization**: `NOT_AUTHORIZED` (`development_execution_authorized: false`)  
-**Formal Execution Authorization**: `NOT_AUTHORIZED` (`formal_execution_authorized: false`)  
-**Scientific Promotion**: `NOT_GRANTED` (`scientific_promotion: false`)  
-
----
-
-## 1. Implementation Summary
-
-The accepted V38-P0 Structured Low-Degree Architecture Triage plan has been implemented in a dedicated additive module:
-[`comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py`](file:///D:/Code/HD-QKD_Polar_Comparison/comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py).
-
-### Core Components Implemented
-
-1. **Deterministic PRNG & Sampling Contract**:
-   - `get_substream_generator(base_seed, stream_id)`: Derived via `numpy.random.SeedSequence([S, 1])` (support), `SeedSequence([S, 2])` (coefficients), and `SeedSequence([S, 3])` (initial labels).
-   - `sample_uniform_gf32_nonzero(rng, size)`: Uniform integer sampling from $\{1, 2, \dots, 31\}$ via `rng.integers(low=1, high=32, endpoint=False)`. Zero is never sampled.
-   - `get_canonical_support_edges(binary_support)`: Sorted lexicographically `(check_index, variable_index)` for canonical coefficient assignments.
-
-2. **Canonical Cycle Enumeration & Algebraic Degeneracy Classifier**:
-   - `enumerate_canonical_simple_cycles(binary_support)`: Canonical simple cycles of lengths 4, 6, and 8 without duplicate rotations/reversals. Builds edge-to-incident-cycle lookup tables.
-   - `compute_cycle_submatrix_rank(cycle, H)`: Constructs the $r \times r$ cycle-only submatrix over $\text{GF}(32)$ and computes its rank via direct Gaussian elimination.
-   - `classify_cycle_algebraic_degeneracy(cycle, H)`: Classifies as `ALGEBRAICALLY_NONDEGENERATE` iff $\text{rank}_{\text{GF}(32)}(H_{\text{cycle}}) == r$, and `ALGEBRAICALLY_DEGENERATE` iff rank $< r$.
-
-3. **Lane A (Controlled Label-Only Isolation Experiment)**:
-   - `construct_lane_a_prototype(source, seed, max_sweeps=2)`: Uses exact frozen V31 binary support ($A_{\text{support}} = (H_{V31} \ne 0)$); pre-enumerates cycles; initializes labels in canonical edge order; performs incremental local search over `(degenerate_4, degenerate_6, degenerate_8)` with `MAX_SWEEPS = 2`; records `rank_after_sweep_1` as diagnostic; applies final GF(32) rank gate at completion.
-
-4. **Lane B (High-Rate eIRA-like Dual-Diagonal Prototype)**:
-   - `construct_lane_b_prototype(source, seed)`: $H = [H_{\text{info}} \mid H_{\text{parity}}]$; $H_{\text{parity}}$ is $m \times m$ lower-bidiagonal with unit entries (rank $m$, total parity edges $2m-1$); $H_{\text{info}}$ has degree 2 per column; sequential placement with degree-balancing prioritized over 4-cycle avoidance; total support edges = 2,047; coefficients assigned after support completion.
-
-5. **Lane C (SC-Inspired Spatially Banded Prototype)**:
-   - `construct_lane_c_prototype(source, seed)`: $L=8, w=2$, 128 variables per position; check allocation via edge-load vector `[128, 256, 256, 256, 256, 256, 256, 384]` (`[12, 23..23, 34]` for 1M; `[12, 24..24, 23, 35]` for 1.5M; `[12, 24..24, 36]` for 2M); analytical capacity gate (`LANE_C_CAPACITY_FEASIBLE`); position permutations generated sequentially in order $0..7$; total support edges = 2,048; coefficients assigned after support completion.
-
-6. **Structural Prototype Selection**:
-   - `select_structural_winner(prototypes)`: Filters valid candidates first; applies ordered tie-break: (1) lower degenerate 4-cycles, (2) lower degenerate 6-cycles, (3) lower degenerate 8-cycles, (4) lower support 4-cycles, (5) lower $d_{c,\max}$, (6) lower construction seed. Decoder metrics strictly excluded.
-
-7. **Finite Development Evaluation & Triage Gates**:
-   - `evaluate_single_block(...)`: Row-layered FFT-QSPA decoder ($I_{\max}=30, \alpha=1.0$, GF(32), oracle-L1 prior).
-   - `aggregate_lane_results(...)`: Reuses frozen V36 A3 baseline ($0/15$ exact, median residual = 177).
-   - `evaluate_triage_gate(...)`: Evaluates `LANE_PROMISING_DIRECTION_SIGNAL` (non-degradation $\le +0.05$ on all sources; exact count $> 0$, overall median $\le 150$, or improve $\ge 10$ and worsen $\le 3$).
-   - `determine_v38_terminal_state(...)`: Evaluates `V38_SINGLE_ROUTE_SIGNAL`, `V38_MULTIPLE_ROUTE_SIGNALS`, `V38_NO_ROUTE_SIGNAL`, `V38_NO_STRUCTURAL_PROTOTYPE_READY`, `V38_DIRECTION_EVIDENCE_INVALID`.
+**Cycle ID**: V38P0
+**Lifecycle State**: `IMPLEMENTATION_CANDIDATE`
+**Repository**: `Placebo303/HD-QKD-Polar-pipeline`
+**Branch**: `formal-ir-mainline`
+**Accepted Plan SHA**: `1b3fb4b8d0fa14c127ab895b1bbb21eb77f3414d`
+**Plan Acceptance SHA**: `dbb6ea8cf102bd4ed9c5beb68c1d7432ee2005d6`
+**Base Implementation SHA**: `1bb92a655fb5e0b7b9008916fa217412a7aca62a`
+**Predecessor Result SHA**: `67da7c64fa4150a66d020243d6292420903297fe`
+**Predecessor Review SHA**: `cc1483cd568ca41fb686c40492f40b5eed81f06c`
+**Development Execution Authorization**: `NOT_AUTHORIZED` (`development_execution_authorized: false`)
+**Formal Execution Authorization**: `NOT_AUTHORIZED` (`formal_execution_authorized: false`)
+**Scientific Promotion**: `NOT_GRANTED` (`scientific_promotion: false`)
 
 ---
 
-## 2. Test Matrix Execution & Verification (T1 - T41)
+## 1. Implementation Summary & R1 Targeted Corrections
 
-All 41 implementation contract items and safety assertions are verified in [`comparison_bench/tests/test_v38_architecture_triage.py`](file:///D:/Code/HD-QKD_Polar_Comparison/comparison_bench/tests/test_v38_architecture_triage.py):
+The accepted V38-P0 Structured Low-Degree Architecture Triage plan is implemented in [`comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py`](file:///D:/Code/HD-QKD_Polar_Comparison/comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py).
 
-| Test ID | Description | Result |
+Following independent review feedback, the following targeted corrections were applied:
+
+1. **Sanitization of Plan-Acceptance Record**:
+   - Cleaned `\x0c` escape corruption in `docs/research_cycles/V38P0/REVIEW_VERDICT.md` so `formal-ir-mainline` is recorded without escape characters.
+
+2. **Lane A Strict Lowest-Integer Tie-Break**:
+   - For every edge and candidate value in $1..31$, the selection evaluates candidate key `(cand_d4, cand_d6, cand_d8, cand)`.
+   - The minimal key is selected strictly without privileging `old_val`.
+   - Edges with zero incident 4/6/8 cycles select $cand = 1$, incrementing the sweep update count if $old\_val \ne 1$.
+
+3. **Block Pairing by (Source, Block_Seed) & Integrity Validation**:
+   - `aggregate_lane_results()` pairs records using explicit `(source, block_seed)` mapping to `FROZEN_BASELINE_ERROR_MAP` rather than list position, ensuring total order invariance.
+   - Requires exact 15 records covering the 3 sources (5 blocks each with exact seed sets).
+   - Partial, duplicate, missing, or unexpected block sets return status `INVALID_BLOCK_SET` and fail closed.
+
+4. **Production Orchestration & Execution Guard**:
+   - Implemented `run_v38_development()` with explicit guard: raises `PermissionError` when `development_execution_authorized=False`.
+   - Maximum workload enforced: $\le 27$ structural prototypes and $\le 45$ new decoder runs.
+
+---
+
+## 2. Test Verification & Results
+
+All 41 implementation contract items, safety assertions, and newly added behavioral tests are verified in [`comparison_bench/tests/test_v38_architecture_triage.py`](file:///D:/Code/HD-QKD_Polar_Comparison/comparison_bench/tests/test_v38_architecture_triage.py):
+
+| Test Category | Description | Result |
 | :--- | :--- | :---: |
-| **T1** | Construction seed determinism across all 3 lanes | **PASS** |
-| **T2** | All generated matrices have exact dimensions (184x1024, 190x1024, 192x1024) | **PASS** |
-| **T3** | GF(32) row rank routine validates full-rank and rank-deficient fixtures | **PASS** |
-| **T4** | Canonical simple cycle enumeration correctly deduplicates rotations/reversals | **PASS** |
-| **T5** | Cycle submatrix rank classifies nondegenerate vs degenerate fixtures | **PASS** |
-| **T6** | Lane A binary support is bit-identical to frozen V31 baseline | **PASS** |
-| **T7** | Lane A modifies nonzero GF(32) labels only | **PASS** |
-| **T8** | Lane A local search strictly obeys MAX_SWEEPS = 2 cap | **PASS** |
-| **T9** | Lane B parity block is exact unit lower-bidiagonal matrix | **PASS** |
-| **T10** | Lane B information columns all have degree exactly 2 | **PASS** |
-| **T11** | Lane C all variable columns have degree exactly 2 | **PASS** |
-| **T12** | Lane C all edges strictly respect L=8, w=2 coupling window | **PASS** |
-| **T13** | No hidden construction retry beyond the 3 pre-registered seeds | **PASS** |
-| **T14** | Structural prototype selection strictly ignores decoder performance | **PASS** |
-| **T15** | Structurally invalid prototype is never selected | **PASS** |
-| **T16** | One lane being STRUCTURAL_NOT_READY does not invalidate other READY lanes | **PASS** |
-| **T17** | Exact V36 A3 block seeds are preserved (360101-360105, etc.) | **PASS** |
-| **T18** | PROMISING_DIRECTION_SIGNAL branch tests (Crit A, B, C, >5% degradation failure) | **PASS** |
-| **T19** | Zero baseline median relative-delta division-by-zero protection | **PASS** |
-| **T20** | Pipeline correctly follows all overall terminal-state branches | **PASS** |
-| **T21** | SHA provenance safety: verified predecessor SHAs exist | **PASS** |
-| **T22** | Lane C positional capacity calculation matches frozen vectors | **PASS** |
-| **T23** | Lane C old equal-allocation fixture correctly fails capacity sanity gate | **PASS** |
-| **T24** | Lane C dc_max limit enforcement | **PASS** |
-| **T25** | Lane B total support edge count == 2047 | **PASS** |
-| **T26** | Lane B lower-bidiagonal parity block guarantees rank m | **PASS** |
-| **T27** | PRNG uses PCG64 only and no hidden entropy | **PASS** |
-| **T28** | Substream derivation is deterministic via SeedSequence | **PASS** |
-| **T29** | Lane A cached incremental cycle objective matches brute-force recomputation | **PASS** |
-| **T30** | Lane A final support remains bit-identical to V31 | **PASS** |
-| **T31** | Lane A sweep-1 rank diagnostic behavior | **PASS** |
-| **T32** | Criterion-B integer operational threshold (<=150) correctly interpreted | **PASS** |
-| **T33** | Uniform GF(32) coefficient sampler values in 1..31 | **PASS** |
-| **T34** | Canonical coefficient edge ordering independence | **PASS** |
-| **T35** | Lane B parity coefficients consume zero coefficient-RNG draws | **PASS** |
-| **T36** | Lane B support fully generated before H_info coefficient assignment | **PASS** |
-| **T37** | Lane C support fully generated before coefficient assignment | **PASS** |
-| **T38** | Lane C position permutations generated in order 0..7 and reused unchanged | **PASS** |
-| **T39** | Lane A sweep-1 rank deficiency does not prematurely invalidate prototype | **PASS** |
-| **T40** | Lane A final rank deficiency invalidates prototype | **PASS** |
-| **T41** | Lane A zero-change early stop performs final-rank validation | **PASS** |
-| **Safety** | Production seeds protected; fake_runner evaluation supported | **PASS** |
+| **T1 - T3** | Determinism, dimensions (184/190/192x1024), GF(32) row rank | **PASS** |
+| **T4 & Oracle** | Canonical 4/6/8 cycle enumeration against independent reference DFS | **PASS** |
+| **T5** | Cycle submatrix rank algebraic degeneracy classification | **PASS** |
+| **T6 - T8** | Lane A support identity, label-only search, MAX_SWEEPS=2 cap | **PASS** |
+| **Lane A Ties** | Lowest-integer tie-break, zero-incident edges, brute-force equivalence | **PASS** |
+| **T9 - T10, T25-T26, T35** | Lane B unit lower-bidiagonal structure, edges=2047, RNG position test | **PASS** |
+| **T11 - T12, T22-T24, T38** | Lane C L=8 w=2 coupling, capacity gate, 0..7 permutation sequence | **PASS** |
+| **T13 - T17** | Pre-registered seed namespaces, structural tie-break, V36 block seeds | **PASS** |
+| **T21** | Real Git verification (`git cat-file -t commit`) for predecessor SHAs | **PASS** |
+| **Block Pairing** | Order-invariant pairing by block_seed, 15-block integrity gate | **PASS** |
+| **T18 - T20, T32** | Triage gate branches (Crit A, B, C, >5% degradation) & terminal states | **PASS** |
+| **T27 - T28** | PCG64 PRNG contract & SeedSequence substream derivation | **PASS** |
+| **T29 - T31, T33-T34, T36-T37** | Cached cycle search, canonical edge order, support before labels | **PASS** |
+| **T39 - T41** | Behavioral tests: sweep-1 rank continuation, final rank gate, early stop | **PASS** |
+| **Safety & Guards** | Orchestrator PermissionError guard, protected seed constants | **PASS** |
 
-**Pytest Summary**: `26 passed in 247.43s` (with zero errors, zero warnings).
+### Test Suite Execution Output
+
+- **V38 Test Suite**:
+  `python -m pytest comparison_bench/tests/test_v38_architecture_triage.py -o pythonpath=comparison_bench/src -p no:cacheprovider --basetemp=workspace/pytest_temp -v`
+  **Result**: `30 passed in 237.67s` (0 failures, 0 errors).
+
+- **V35 Regression Test Suite**:
+  `python -m pytest comparison_bench/tests/test_v35_algorithm_development.py -o pythonpath=. -p no:cacheprovider --basetemp=workspace/pytest_temp -v`
+  **Result**: `25 passed in 15.71s` (0 failures, 0 errors).
 
 ---
 
-## 3. Execution Boundary & Non-Execution Assertion
+## 3. Strict Execution Boundary Assertion
 
 - **Production Seeds Executed**: `0 / 27` (No production candidate from `381xxx`, `382xxx`, `383xxx` was constructed or evaluated).
 - **Production Structural Prototypes Generated**: `0`

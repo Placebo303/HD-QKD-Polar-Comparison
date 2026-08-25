@@ -5,7 +5,7 @@
 ## Milestone 1: Plan Review
 
 **Repository**: Placebo303/HD-QKD-Polar-pipeline
-**Branch**: ormal-ir-mainline
+**Branch**: formal-ir-mainline
 **Target SHA**: 1b3fb4b8d0fa14c127ab895b1bbb21eb77f3414d
 **SHA Verification**: VERIFIED
 **Review Kind**: PLAN
@@ -14,7 +14,7 @@
 
 ### Summary of Plan Acceptance
 
-The V38-P0 Structured Low-Degree Architecture Triage plan (docs/nbldpc-v38-direction-screen-plan.md) has been accepted by independent ChatGPT review.
+The V38-P0 Structured Low-Degree Architecture Triage plan (`docs/nbldpc-v38-direction-screen-plan.md`) has been accepted by independent ChatGPT review.
 
 Accepted scope includes:
 - **Lane A**: Fixed V31 binary support + GF(32) cycle-aware label optimization (lengths 4/6/8 algebraic cycle degeneracy, MAX_SWEEPS=2).
@@ -27,6 +27,6 @@ Accepted scope includes:
 
 ### Authorization Status
 
-- **Development Execution Authorization**: NOT_GRANTED
-- **Formal Execution Authorization**: NOT_GRANTED
-- **Scientific Promotion**: NOT_GRANTED
+- **Development Execution Authorization**: `NOT_GRANTED`
+- **Formal Execution Authorization**: `NOT_GRANTED`
+- **Scientific Promotion**: `NOT_GRANTED`
