@@ -231,9 +231,10 @@ route is never held to a lower bar.
 ### Gate CB — Lane C advantage over Lane B (`C_ADVANTAGE_OVER_B`)
 
 ALL of:
-- CB-a: `exact_count_C >= exact_count_B + 5` (retained per frozen protocol
-  and reported separately even where CB-b can imply it under complete
-  pairing);
+- CB-a: `exact_count_C >= exact_count_B + 5` (retained per frozen protocol;
+  under complete pairing `exact_count_C - exact_count_B = d_CB - d_BC`, so
+  CB-a implies CB-b and CB-b does NOT imply CB-a — CB-a is the stronger
+  condition; both are computed and reported separately);
 - CB-b: over the COMPLETE 45 pairs matched by
   `(source, construction_seed_ordinal, block_seed)`:
   `d_CB - d_BC >= 3`, where

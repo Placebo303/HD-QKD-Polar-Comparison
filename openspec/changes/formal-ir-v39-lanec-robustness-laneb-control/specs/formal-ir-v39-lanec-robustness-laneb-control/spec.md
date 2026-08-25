@@ -132,8 +132,9 @@ exact_count_C >= exact_count_B + 5;
 d_CB = count(C exact and B not exact) and d_BC = count(B exact and C not
 exact); no source where C trails B by more than one exact;
 mean(errors_final over all 45 C records) <= mean(errors_final over all 45
-B records). CB-a is retained and reported separately even where CB-b can
-imply it under complete pairing.
+B records). Under complete pairing `exact_count_C - exact_count_B =
+d_CB - d_BC`, so CB-a implies CB-b, and CB-b does NOT imply CB-a; CB-a and
+CB-b are retained, computed, and reported separately, and both must hold.
 
 Gate BASE(lane) SHALL be evaluated per construction-seed ordinal against
 the single 15-record V31 baseline (a direct 45-vs-15 comparison is
