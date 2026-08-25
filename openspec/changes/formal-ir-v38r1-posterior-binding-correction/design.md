@@ -82,3 +82,9 @@ The flag is mandatory. The script writes only to the fixed additive root
 `comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_02/`
 and fails closed if that path already exists. It writes nine winner metrics,
 45 block records in CSV/JSON, and one summary JSON; it never writes an NPZ.
+The CLI has no `--fake-runner` option and always binds `fake_runner=False`;
+the fake evaluator remains available only to direct unit-test calls. The
+summary lifecycle and execution status are both
+`DEVELOPMENT_RESULT_CANDIDATE`. Before any authorized decoder run, the
+accepted constructors are exercised once in a decoder-free preflight to
+rebuild and strictly compare all nine winners against run_01.

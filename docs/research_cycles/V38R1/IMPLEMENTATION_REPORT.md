@@ -26,8 +26,10 @@ The decoder-only successor is now implemented as
 frozen winner matrices from the committed run_01 structural metrics JSON,
 strictly checks all reference metric fields (including Lane C permutations),
 and performs exactly 45 evaluations over the frozen 15 blocks. It has a
-default-deny authorization guard and a `fake_runner` test path; it does not
-search 27 candidates and does not read the ignored NPZ.
+default-deny authorization guard and a `fake_runner` path available only to
+direct tests; the formal CLI has no fake-runner option and always binds
+`fake_runner=False`. It does not search 27 candidates and does not read the
+ignored NPZ.
 
 The command entrypoint is:
 
@@ -41,6 +43,24 @@ fails closed if the fixed additive output path already exists, and writes:
 - `v38r1_winning_metrics.json` and `.csv` (9 reconstructed winners);
 - `v38r1_development_block_records.json` and `.csv` (45 records);
 - `v38r1_triage_summary.json`.
+
+The summary uses `DEVELOPMENT_RESULT_CANDIDATE` for both lifecycle and
+execution status. A decoder-free reconstruction preflight was run directly
+against the committed run_01 JSON before any decoder authorization:
+
+```text
+winner_count=9
+matrix_ids=lane_a_1M_s381101,lane_a_1p5M_s381201,lane_a_2M_s381301,
+lane_b_1M_s382103,lane_b_1p5M_s382201,lane_b_2M_s382301,
+lane_c_1M_s383103,lane_c_1p5M_s383203,lane_c_2M_s383301
+elapsed_s=214.792563
+decoder_calls=0
+outputs_written=False
+```
+
+The preflight called `reconstruct_v38r1_winners()` once, performed strict
+run_01 metric comparison for all nine matrices, and did not invoke the
+evaluator or write any output.
 
 It never writes `v38_winning_matrices.npz` and never overwrites V38-P0
 `run_01`.
@@ -63,7 +83,8 @@ The following checks were run without production execution:
 
 ```text
 python -B -m py_compile comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py comparison_bench/tests/test_v38_architecture_triage.py scripts/execute_v38r1_development.py
-3 V38R1 runner/writer pytest tests passed (R1-14 through R1-17)
+4 V38R1 runner/writer/CLI pytest tests passed (R1-14 through R1-17, R1-20,
+R1-21)
 8 prior focused V38 pytest tests passed (R1-05, R1-06, fake-runner safety,
 authorization guard, and frozen-contract checks)
 the default-deny script guard rejected execution without the authorization flag

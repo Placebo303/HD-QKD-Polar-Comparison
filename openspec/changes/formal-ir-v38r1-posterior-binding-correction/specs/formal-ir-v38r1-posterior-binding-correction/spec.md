@@ -63,3 +63,13 @@ writer, and write only fixed additive `run_02` evidence. If the output path
 already exists it SHALL fail closed without overwriting. The writer SHALL emit
 nine winner metrics, 45 block records in CSV/JSON, and a summary JSON, and SHALL
 not emit or read `v38_winning_matrices.npz`.
+
+The formal CLI SHALL NOT expose a `--fake-runner` option and SHALL always call
+the runner with `fake_runner=False`. The test-only fake path MAY be used only
+by direct unit-test calls. The written summary SHALL use
+`DEVELOPMENT_RESULT_CANDIDATE` for both lifecycle and execution status.
+
+Before any authorized decoder execution, a decoder-free preflight SHALL call
+`reconstruct_v38r1_winners()` against the committed run_01 metrics and verify
+all nine winner reconstructions without invoking `evaluate_single_block()` or
+writing output artifacts.

@@ -65,7 +65,7 @@ def write_v38r1_run02(
     summary = {
         "cycle_id": results.get("cycle_id", "V38R1"),
         "predecessor_cycle": results.get("predecessor_cycle", "V38P0"),
-        "lifecycle_state": "IMPLEMENTATION_CANDIDATE",
+        "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
         "execution_status": "DEVELOPMENT_RESULT_CANDIDATE",
         "winners_reconstructed_count": results["winners_reconstructed_count"],
         "decoder_runs_count": results["decoder_runs_count"],
@@ -89,11 +89,6 @@ def _parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Required explicit authorization for the 45-call development run.",
     )
-    parser.add_argument(
-        "--fake-runner",
-        action="store_true",
-        help="Use the test-only fake evaluator; never use for scientific results.",
-    )
     return parser.parse_args(argv)
 
 
@@ -108,7 +103,7 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     results = run_v38r1_development(
         development_execution_authorized=True,
-        fake_runner=args.fake_runner,
+        fake_runner=False,
         reference_metrics_path=V38R1_RUN01_METRICS_PATH,
     )
     output_root = write_v38r1_run02(results, V38R1_RUN02_ROOT)

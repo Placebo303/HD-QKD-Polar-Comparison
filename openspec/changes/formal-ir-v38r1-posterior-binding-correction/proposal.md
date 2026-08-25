@@ -28,6 +28,9 @@ This change produces an implementation candidate only:
 4. Record V38-P0 invalidation and freeze a decoder-only V38R1 successor.
 5. Provide a guarded decoder-only runner that reconstructs the nine frozen
    winners from the committed run_01 metrics and an additive run_02 writer.
+6. Keep the test-only fake evaluator callable only through Python test
+   functions, require the formal CLI to bind the real evaluator, and perform
+   a decoder-free nine-matrix reconstruction preflight.
 
 No execution is performed by this candidate. The runner is implemented for a
 future separately authorized run, but production decoder execution, DE,

@@ -68,6 +68,7 @@ from comparison_bench.formal_ir.v38_architecture_triage import (
     select_structural_winner,
     validate_block_records_integrity,
 )
+from scripts import execute_v38r1_development as v38r1_script
 from scripts.execute_v38r1_development import write_v38r1_run02
 
 TEST_SEED_1 = 938001
@@ -1205,6 +1206,8 @@ def test_r1_16_r1_17_writer_outputs_additive_files_and_rejects_existing():
     assert len(json.loads((root / "v38r1_winning_metrics.json").read_text(encoding="utf-8"))) == 9
     assert len(json.loads((root / "v38r1_development_block_records.json").read_text(encoding="utf-8"))) == 45
     summary = json.loads((root / "v38r1_triage_summary.json").read_text(encoding="utf-8"))
+    assert summary["lifecycle_state"] == "DEVELOPMENT_RESULT_CANDIDATE"
+    assert summary["execution_status"] == "DEVELOPMENT_RESULT_CANDIDATE"
     assert summary["npz_input_used"] is False
 
     sentinel = root / "sentinel.txt"
@@ -1212,3 +1215,14 @@ def test_r1_16_r1_17_writer_outputs_additive_files_and_rejects_existing():
     with pytest.raises(FileExistsError, match="Refusing to overwrite"):
         write_v38r1_run02(results, root)
     assert sentinel.read_text(encoding="utf-8") == "preserve"
+
+
+def test_r1_20_formal_cli_has_no_fake_runner_and_binds_false():
+    """R1-20: the production CLI cannot select the test-only fake evaluator."""
+    source = inspect.getsource(v38r1_script)
+    assert "--fake-runner" not in source
+    assert "fake_runner=False" in inspect.getsource(v38r1_script.main)
+    args = v38r1_script._parse_args(["--development-execution-authorized"])
+    assert not hasattr(args, "fake_runner")
+    with pytest.raises(SystemExit):
+        v38r1_script._parse_args(["--fake-runner"])

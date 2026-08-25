@@ -42,3 +42,10 @@
   `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED` lifecycle.
 - [x] **R1-19** Final targeted checks, diff/output audit, and successor
   candidate commit completed; no push and no production output.
+- [x] **R1-20** Remove `--fake-runner` from the formal CLI, bind
+  `fake_runner=False`, and test that the CLI cannot select the fake evaluator.
+- [x] **R1-21** Set both run_02 summary lifecycle and execution status to
+  `DEVELOPMENT_RESULT_CANDIDATE`, with a focused assertion.
+- [x] **R1-22** Run one real decoder-free nine-winner reconstruction preflight
+  against immutable run_01 metrics; record timing/result and verify no
+  evaluator call, output write, run_01 diff, or run_02 creation.
