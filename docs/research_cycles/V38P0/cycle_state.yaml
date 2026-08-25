@@ -1,7 +1,8 @@
 cycle_id: V38P0
-state: IMPLEMENTATION_CANDIDATE
+state: IMPLEMENTATION_ACCEPTED
 accepted_plan_sha: 1b3fb4b8d0fa14c127ab895b1bbb21eb77f3414d
 plan_acceptance_sha: dbb6ea8cf102bd4ed9c5beb68c1d7432ee2005d6
+accepted_implementation_sha: 41cad74cc6f50dad6bfed37e63bb188cbd294f77
 predecessor_cycle: V37R1
 predecessor_result_sha: 67da7c64fa4150a66d020243d6292420903297fe
 predecessor_result_review_sha: cc1483cd568ca41fb686c40492f40b5eed81f06c
