@@ -50,3 +50,7 @@ tuning, seed search, structural reselection, overwrite, or rerun
 - [x] **R1-22** Run one real decoder-free nine-winner reconstruction preflight
   against immutable run_01 metrics; record timing/result and verify no
   evaluator call, output write, run_01 diff, or run_02 creation.
+- [x] **R1-23** Execute the separately authorized decoder-only development run
+  exactly once, retain the five additive run_02 files, and complete the
+  read-only 9/45/lane/seed/block/run_01 postcheck. Keep the result at
+  `DEVELOPMENT_RESULT_CANDIDATE` pending independent result acceptance.
