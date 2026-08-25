@@ -100,17 +100,32 @@
   },
   "runtime_s": 3262.7795332999667,
   "claims_allowed": [
-    "P1-A development DE screening completed on all 261 configurations (2349 runs).",
-    "Empirical evidence establishes that no candidate in the tested {2,3,4,5} simplex grid (N2 <= 183, max_dc <= 20) achieved >= 5% AUT_30 reduction over matched dv=2 baseline.",
-    "Terminal state P1_NO_FINITE_FEASIBLE_DE_ADVANCE deterministically concluded."
+    "P1-A development DE executed under the frozen V37R1 protocol.",
+    "2349 screening DE runs were executed.",
+    "No finite-feasible candidate satisfied the complete frozen screening gate.",
+    "P1-B was not executed because the screening pass set was empty.",
+    "The bounded terminal state is P1_NO_FINITE_FEASIBLE_DE_ADVANCE."
   ],
   "claims_forbidden": [
-    "No general irregular NB-LDPC superiority or universal impossibility claimed outside tested simplex space.",
-    "No finite-code decoding success, FER, or key-rate improvements claimed.",
-    "No Tanner-graph realizability or constructive cycle-free existence claimed.",
+    "No general irregular NB-LDPC impossibility claim.",
+    "No Tanner-graph realizability result.",
+    "No finite-block FER or exact-recovery result.",
+    "No key-rate or security improvement claim.",
     "No formal scientific promotion."
   ],
   "accepted_implementation_sha": "3a64d1e9ad11625f3eee1fa6cafb5d75c7eaca39",
   "development_authorization_sha": "bff235f240c4a88396fda4e20275cf2bb1856432",
-  "output_directory": "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v37_p1_de_20260825/run_01"
+  "output_directory": "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v37_p1_de_20260825/run_01",
+  "convergence_audit": {
+    "total_seed_runs": 2349,
+    "converged_seed_runs": 18,
+    "non_converged_seed_runs": 2331,
+    "baseline_converged_runs": "9/9",
+    "positive_control_converged_runs": "9/9",
+    "finite_candidate_total_runs": 2331,
+    "finite_candidate_converged_runs": 0,
+    "finite_candidate_non_converged_runs": 2331,
+    "finite_candidates_all_9_converged": 0,
+    "finite_candidates_with_non_convergence": 259
+  }
 }
