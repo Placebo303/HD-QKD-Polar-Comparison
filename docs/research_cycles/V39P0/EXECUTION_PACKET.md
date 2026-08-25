@@ -10,9 +10,9 @@
 
 > This packet becomes operative only after (1) an independent plan review
 > ACCEPT for cycle V39P0 and (2) a new explicit user `EXECUTE_AUTH` bound to
-> the repository, branch, full accepted implementation target SHA, and scope
-> `v39_decoder_only_105_calls_exactly_once`. Until both exist, no command
-> below may be run.
+> the repository, branch, full accepted implementation target SHA, cycle
+> V39P0, and scope `v39_decoder_only_105_calls_exactly_once`. Until both
+> exist, no command below may be run.
 
 ## Planned authorized command (future)
 
@@ -40,28 +40,41 @@ The flag is mandatory; the CLI has no fake-runner option and binds
 4. Decoder: GF(32) polynomial 37, row-layered FFT-QSPA, max_iter=30,
    damping_alpha=1.0; success = `exact_l2 = np.array_equal(x_hat, u2_alice)`.
 5. Write ONLY the additive files listed in design Section 15 under
-   `comparison_bench/outputs_comparison/formal_ir_methods/v39_lanec_robustness_laneb_control/run_01/`.
-6. Evaluate gates C1/B1/CB/BASE and emit exactly one terminal state with
-   integrity-first precedence.
+   `comparison_bench/outputs_comparison/formal_ir_methods/v39_lanec_robustness_laneb_control/run_01/`;
+   the summary includes per-ordinal BASE-C/BASE-B verdicts, block-cluster
+   aggregates, V25 counts provenance, and `terminal_reason` when applicable.
+6. Evaluate gates C1/B1/CB/BASE and emit exactly one terminal state using
+   the exhaustive integrity-first order of design Section 12 (state 2 is
+   named `V39_C_ROBUST_NO_COMPLETE_ADVANTAGE` and records `terminal_reason`
+   as one of `CB_FAIL` / `BASE_C_FAIL` / `CB_AND_BASE_C_FAIL`).
 
 ## Preflight stop rules
 
-Before any decode: verify HEAD contains the accepted implementation SHA named
-in the authorization; verify the output root does not exist; verify the V38P0
-structural JSON has exactly 27 records; verify zero decoder calls so far.
-Stop without execution if any check fails.
+Before any decode: verify EXACT EQUALITY of BOTH `git rev-parse HEAD` and
+`git rev-parse origin/formal-ir-mainline` with the authorized target SHA
+named in the authorization (equality required; ancestry or "contains"
+checks are insufficient); verify the output root does not exist; verify the
+V38P0 structural JSON has exactly 27 records; run the posterior-binding
+sentinels on probe blocks 390101/390201/390301; record V31 packet/source
+identity (`m1_16_n1024_n1024|QC-cyclic-projective`, per-source presence);
+verify zero decoder calls so far. Stop without execution if any check fails.
 
 ## Failure and no-rerun rules
 
 If execution raises or writes a partial run root: retain everything unchanged,
-return a concrete blocker (failing command, error, attempted remedies), and
-wait for a main-thread decision. Do not delete, repair, resume, rerun, tune,
-change seeds, add seeds, or relax thresholds. No warm start, no iteration-cap
-increase, no damping search.
+including raw partial records byte-for-byte as evidence, but generate no
+performance aggregate, gate evaluation, or terminal performance
+interpretation from a partial set; return a concrete blocker (failing
+command, error, attempted remedies) and wait for a main-thread decision. Do
+not delete, repair, resume, rerun, tune, change seeds, add seeds, or relax
+thresholds. No warm start, no iteration-cap increase, no damping search.
 
 ## Forbidden during execution
 
 Touching V38/V38R1 code/tests/docs/outputs; touching results/run_01/run_02;
-writing or reading any NPZ; modifying AGENT_PROJECT_MEMORY.md; drawing FER,
-threshold, SKR, security, qualification, or promotion conclusions; marking
-the result accepted.
+reading the winner NPZ `v38_winning_matrices.npz` or writing any NPZ
+(read-only access to the fixed V25 `channel_counts.npz` through the accepted
+`load_v25_channel_counts()` is allowed); modifying AGENT_PROJECT_MEMORY.md;
+drawing FER, threshold, SKR, security, qualification, or promotion
+conclusions; describing the 45 lane records as independent block draws;
+marking the result accepted.

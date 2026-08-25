@@ -43,8 +43,10 @@ All 18 matrices SHALL be reconstructed from the accepted constructors and
 frozen seeds and strictly compared against the committed V38P0 run_01 file
 `v38_architecture_triage/run_01/v38_structural_prototypes.json` (27 records;
 lanes b/c subset = 18), including Lane C `position_permutations`. Any
-mismatch SHALL be integrity failure I1. Local NPZ files SHALL NOT be inputs
-or outputs.
+mismatch SHALL be integrity failure I1. Reading the local winner archive
+`v38_winning_matrices.npz` SHALL NOT occur and no NPZ SHALL be written;
+read-only access to the fixed V25 `channel_counts.npz` through the accepted
+`load_v25_channel_counts()` is permitted.
 
 ## R5. New development blocks
 
@@ -58,12 +60,17 @@ frames, holdout data, or qualification evidence.
 
 ## R6. Posterior-binding preflight
 
-Before any authorized execution, a decoder-free, write-free preflight SHALL:
-capture the second argument of `get_conditional_posterior_l2` on probe blocks
-390101/390201/390301 and assert it equals complete `bob`; assert the
-complete-bob prior differs materially from the `u2_bob` prior and equals the
-V36-style complete-Bob call element-for-element; and perform zero production
-decoder calls. Failure SHALL block execution.
+Before any authorized execution, a decoder-free, write-free preflight SHALL,
+for each probe block 390101/390201/390301, verify ALL of:
+`np.any(bob > 31) == True`; the captured second argument of
+`get_conditional_posterior_l2` element-equal to complete `bob`;
+`prior_corrected` element-equal to the direct complete-bob call;
+`prior_corrected` NOT element-equal to the `u2_bob` prior;
+`max(abs(prior_corrected - prior_u2_bob)) > 1e-6`; and at least one position
+where the posteriors' `argmax` differs. The preflight SHALL perform zero
+production decoder calls. Failure SHALL block execution. A frozen probe
+failing a difference sentinel SHALL be replaced only at plan-review stage
+(as a pre-registered change), never after production execution.
 
 ## R7. Decoder success semantics
 
@@ -101,39 +108,70 @@ construction fields.
 
 Aggregates SHALL be produced at: lane overall; lane/source;
 lane/construction-seed ordinal; lane/source/seed; baseline overall and per
-source; the 45-pair C/B discordance table; and per-construction-seed vs
-single-baseline same-block joins (9 groups per lane). No aggregation may
-treat duplicated baseline values as independent observations.
+source; the complete 45-pair C/B discordance table; per-ordinal
+(o = 1..3) lane-vs-single-baseline joins of 15-vs-15 records used by Gate
+BASE plus per-(source, ordinal) 5-vs-5 medians; and block-cluster
+aggregates per (lane, source, block_seed) across the 3 construction
+matrices (seed_exact_count in 0..3, seed_exact_fraction, residual
+mean/median). No aggregation may treat replicated baseline values as new or
+independent observations.
 
 ## R12. Gates
 
 Gate C1 (`C_ROBUST_SIGNAL`) and Gate B1 (`B_ROBUST_SIGNAL`) each require ALL
 of: overall exact_l2 >= 36/45; every source >= 12/15; every seed ordinal
->= 12/15; overall median errors_final == 0; every source median
-errors_final == 0 (B1 identical thresholds); wrong-codeword count reported
-separately.
+>= 12/15; every (source, construction_seed) cell >= 4/5 (nine 5-record
+cells per lane); overall median errors_final == 0; every source median
+errors_final == 0 (B1 uses identical thresholds); wrong-codeword count
+reported separately.
 
-Gate CB (`C_ADVANTAGE_OVER_B`) requires ALL of: exact_count_C >=
-exact_count_B + 5; d_CB > d_BC over the 45 matched pairs; no source where C
-trails B by more than one exact; overall median errors_final(C) <= median(B).
+Gate CB (`C_ADVANTAGE_OVER_B`) requires ALL of:
+exact_count_C >= exact_count_B + 5;
+`d_CB - d_BC >= 3` over the COMPLETE 45 pairs matched by
+(source, construction_seed_ordinal, block_seed), where
+d_CB = count(C exact and B not exact) and d_BC = count(B exact and C not
+exact); no source where C trails B by more than one exact;
+mean(errors_final over all 45 C records) <= mean(errors_final over all 45
+B records). CB-a is retained and reported separately even where CB-b can
+imply it under complete pairing.
 
-Gate BASE(lane): exact_count_lane > exact_count_V31; overall median
-errors_final(lane) < median(V31); every source median errors_final(lane) <=
-median(V31 of that source). BASE-C PASS gates terminal state 1; BASE-B is
-report-only.
+Gate BASE(lane) SHALL be evaluated per construction-seed ordinal against
+the single 15-record V31 baseline (a direct 45-vs-15 comparison is
+forbidden): for each ordinal o, exact_count_lane_ordinal(o) >
+exact_count_V31 over the same 15 blocks;
+median(errors_final, ordinal o) < median(errors_final, V31 overall); and
+for every (source, o), median(errors_final, source-ordinal, 5 records) <=
+median(errors_final, V31 source, 5 records). BASE(lane) PASS iff ALL THREE
+ordinals pass. BASE-C PASS gates terminal state 1; BASE-B is report-only.
 
-McNemar exact p-values and Wilson intervals are descriptive only and SHALL
-NOT replace gates.
+The 45 lane records per lane are 15 unique sampled blocks x 3 construction
+matrices and SHALL NOT be described as 45 independent block draws.
+Record-level Wilson intervals are naive descriptive summaries ignoring
+clustering; the McNemar exact test on the 45 pairs is descriptive and
+uncorrected for construction/block clustering; neither indicates
+independent-sample significance nor replaces the frozen gates. Block-cluster
+descriptive summaries over the 15 unique blocks SHALL accompany them.
 
 ## R13. Terminal states
 
-With integrity-first precedence, exactly one terminal SHALL be emitted:
-`V39_EVIDENCE_INVALID`, `V39_C_ROBUST_AND_ADVANTAGE` (C1+CB+BASE-C PASS),
-`V39_C_ROBUST_NO_B_ADVANTAGE` (C1 PASS, CB FAIL, B1 FAIL),
-`V39_BOTH_ROUTES_ROBUST` (C1 PASS, CB FAIL, B1 PASS),
-`V39_B_ONLY_ROBUST` (C1 FAIL, B1 PASS),
-`V39_NO_ROBUST_ROUTE_SIGNAL` (both FAIL, both validly evaluated).
-Lane B SHALL be retained even when it fails its gate.
+With integrity-first precedence, the FIRST matching rule SHALL win:
+
+0. any integrity failure -> `V39_EVIDENCE_INVALID` (overrides everything);
+1. C1 PASS and CB PASS and BASE-C PASS -> `V39_C_ROBUST_AND_ADVANTAGE`;
+2. C1 PASS, rule 1 not satisfied, B1 FAIL ->
+   `V39_C_ROBUST_NO_COMPLETE_ADVANTAGE`, recording `terminal_reason` as
+   exactly one of `CB_FAIL`, `BASE_C_FAIL`, or `CB_AND_BASE_C_FAIL`;
+3. C1 PASS, rule 1 not satisfied, B1 PASS -> `V39_BOTH_ROUTES_ROBUST`;
+4. C1 FAIL and B1 PASS -> `V39_B_ONLY_ROBUST`;
+5. C1 FAIL and B1 FAIL -> `V39_NO_ROBUST_ROUTE_SIGNAL`.
+
+The mapping SHALL be total and disjoint over all (C1, CB, BASE-C, B1)
+combinations, proven by a truth-table test. Lane B SHALL be retained even
+when it fails its gate. `V39_B_ONLY_ROBUST` asserts B1 robustness only; it
+does NOT assert Lane B superiority over V31 and does not by itself
+authorize any successor step. BASE-B ordinal verdicts SHALL be written to
+the summary and referenced in result interpretation; successor planning for
+Lane B MUST consider BASE-B, not the terminal name alone.
 
 ## R14. Evidence outputs
 
@@ -142,22 +180,37 @@ The authorized run SHALL write ONLY, under additive root
 `v39_structural_reconstruction.json/.csv`,
 `v39_block_records.json/.csv`, `v39_baseline_records.json/.csv`,
 `v39_paired_comparison.json/.csv`, `v39_summary.json`, and, only on
-integrity failure, `v39_invalid_notice.json`. No NPZ SHALL be written or
-read. Existing V38/V38R1 outputs SHALL remain byte-identical.
+integrity failure, `v39_invalid_notice.json`. Writing any NPZ SHALL NOT
+occur and the winner archive `v38_winning_matrices.npz` SHALL NOT be read;
+read-only `load_v25_channel_counts()` access to the fixed V25
+`channel_counts.npz` is permitted with provenance recorded in the summary.
+The summary SHALL additionally contain per-ordinal BASE-C and BASE-B
+verdicts (ordinals 1/2/3 plus overall), `terminal_reason` when state 2
+occurs, and the block-cluster aggregates. Existing V38/V38R1 outputs SHALL
+remain byte-identical.
 
 ## R15. Integrity-first invalidation
 
 Integrity failures I1-I11 (design Section 14) SHALL force terminal
 `V39_EVIDENCE_INVALID` with `v39_invalid_notice.json`; performance SHALL NOT
-be interpreted on invalid evidence.
+be interpreted on invalid evidence. I3 SHALL cover overlap with block seeds
+used by V36 AND by V38/V38R1; I8 SHALL include cross-lane/baseline
+`errors_initial` equality for each `(source, block_seed)`; I10 SHALL flag
+only a forbidden winner-NPZ dependency or any NPZ output. After a mid-run
+execution failure, raw partial records MAY be retained byte-for-byte as
+evidence but SHALL NOT be aggregated into performance results.
 
 ## R16. Lifecycle and authorization
 
 Implementation candidates stop at `IMPLEMENTATION_CANDIDATE /
 EXECUTE_NOT_AUTHORIZED`. The single development execution requires an
-independent plan ACCEPT plus explicit user `EXECUTE_AUTH` bound to the full
-target SHA and scope `v39_decoder_only_105_calls_exactly_once`. No rerun,
-tuning, post-result threshold edit, post-result seed addition, self-acceptance,
+independent plan ACCEPT plus explicit user `EXECUTE_AUTH` bound to the
+repository, branch, full implementation SHA, cycle V39P0, and scope
+`v39_decoder_only_105_calls_exactly_once`. Before execution the runner
+SHALL verify exact equality of BOTH `git rev-parse HEAD` and
+`git rev-parse origin/formal-ir-mainline` with the authorized target SHA;
+ancestor or "contains" checks alone are insufficient. No rerun, tuning,
+post-result threshold edit, post-result seed addition, self-acceptance,
 or automatic successor authorization is permitted.
 
 ## R17. Claim boundary
@@ -166,3 +219,6 @@ Results support only bounded reproducibility statements about prototype
 behavior on empirical-count development samples with oracle-L1 conditioning.
 FER, asymptotic threshold, SKR, security, formal qualification, promotion,
 and real-frame claims remain forbidden regardless of outcome.
+`V39_B_ONLY_ROBUST` SHALL NOT be presented as Lane B superiority over V31;
+any successor consideration for Lane B SHALL reference the reported BASE-B
+ordinal verdicts.

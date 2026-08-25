@@ -40,18 +40,23 @@ Primary documents, in reading order:
 
 ## Specific reviewer questions
 
-1. Do the gates C1/B1/CB/BASE and their thresholds match the intended
-   protocol? Gate CB sub-items b/d were transcribed from a partially
-   corrupted task packet; see design Section 19 OQ-1/OQ-2 and confirm or
-   correct the strict-inequality discordance form and the median choice.
-2. Is the terminal-state precedence in design Section 12 (resolution of the
-   literal overlap between states 2 and 3 via B1 status, and the C1+CB PASS
-   with BASE-C FAIL fall-through) acceptable? OQ-3/OQ-4.
-3. Confirm BASE-B is report-only and drives no terminal state (OQ-5).
-4. Confirm the posterior-binding preflight contract (design Section 5)
-   fully guards against a recurrence of the V38P0 `u2_bob` defect.
-5. Confirm the baseline dedup rule (one record per block; join-based
-   comparisons; never 45 replicated baseline observations).
+1. Are revisions R39-01..R39-12 correctly and completely incorporated:
+   CB-b `d_CB - d_BC >= 3` over the complete 45 pairs; CB-d as the MEAN
+   comparison; per-(source, construction_seed) >= 4/5 cell condition in
+   C1/B1; per-ordinal BASE evaluation against the single 15-record
+   baseline; renamed state 2 `V39_C_ROBUST_NO_COMPLETE_ADVANTAGE` with
+   `terminal_reason`; NPZ carve-out preserving the legal read-only V25
+   counts input; explicit posterior-preflight sentinels; exact-equality
+   execution SHA binding?
+2. Is the exhaustive terminal truth table (design Section 12) total and
+   disjoint over all (C1, CB, BASE-C, B1) combinations, with correct
+   `terminal_reason` selection for state 2?
+3. Confirm BASE-B remains report-only and that the
+   `V39_B_ONLY_ROBUST` no-auto-superiority caveats are correctly stated.
+4. Confirm the posterior preflight sentinel set (six conditions) and the
+   plan-review-only probe-replacement policy.
+5. Confirm the baseline dedup rule (one record per block; ordinal-level
+   joins of 15-vs-15; never replicated into new observations).
 
 ## Claim boundary for reviewers
 
@@ -59,6 +64,10 @@ No execution is authorized by this plan. Even after an authorized run,
 results are bounded development evidence on empirical-count samples with
 oracle-L1 conditioning — never FER, threshold, SKR, security,
 qualification, promotion, or real-frame claims. Lane A is excluded from V39.
+The 45 lane records per lane are 15 unique sampled blocks x 3 construction
+matrices and must not be described as independent block draws; record-level
+Wilson intervals and the 45-pair McNemar test are naive descriptive
+summaries uncorrected for clustering.
 
 ## Verification hints
 

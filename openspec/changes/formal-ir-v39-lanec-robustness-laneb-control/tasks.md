@@ -20,17 +20,28 @@ explicit user `EXECUTE_AUTH` bound to the accepted implementation SHA exist.
       not be read.
 - [ ] **A4** Implement block registry validator (exact seeds, no duplicates,
       no overlap with V36 seeds) and record-schema validator.
-- [ ] **A5** Implement posterior-binding preflight checks P-BIND-1/2/3
-      (decoder-free, write-free).
-- [ ] **A6** Implement the guarded runner: default-deny authorization,
-      exactly 45 + 45 + 15 = 105 real calls, one baseline call per block,
-      join-based comparisons, no warm start, fail-closed behavior on any
-      integrity failure with `v39_invalid_notice.json`.
-- [ ] **A7** Implement aggregation levels 1-7, gates C1/B1/CB/BASE, terminal
-      machine with integrity-first precedence, Wilson/McNemar descriptive
-      helpers.
+- [ ] **A5** Implement posterior-binding preflight checks P-BIND-1/2/3 with
+      the fixed sentinels of design Section 5 (decoder-free, write-free;
+      probe replacement only at plan-review stage).
+- [ ] **A6** Implement the guarded runner: default-deny authorization with
+      exact-equality SHA preflight (`git rev-parse HEAD` AND
+      `git rev-parse origin/formal-ir-mainline` both == authorized target
+      SHA), exactly 45 + 45 + 15 = 105 real calls, one baseline call per
+      block, join-based comparisons, cross-lane/baseline `errors_initial`
+      equality check, no warm start, fail-closed behavior on any integrity
+      failure with `v39_invalid_notice.json`, and raw-partial-record
+      retention without performance aggregation on mid-run failure.
+- [ ] **A7** Implement aggregation levels 1-8 (incl. block-cluster
+      aggregates), gates C1/B1 with the per-(source, seed) >= 4/5 cell
+      condition, CB with `d_CB - d_BC >= 3` and the mean comparison,
+      per-ordinal BASE evaluation, the exhaustive terminal machine with
+      `terminal_reason`, and Wilson/McNemar descriptive helpers labeled as
+      naive/clustering-uncorrected.
 - [ ] **A8** Implement additive writer: exact file set of design Section 15,
-      CSV/JSON parity, no NPZ output, fail-closed overwrite guard.
+      CSV/JSON parity, NPZ policy enforcement (no NPZ output; no
+      winner-NPZ read), fail-closed overwrite guard; summary carries
+      per-ordinal BASE-C/BASE-B verdicts, `terminal_reason` when state 2
+      occurs, block-cluster aggregates, and V25 counts provenance.
 - [ ] **A9** Add `scripts/execute_v39_development.py` with mandatory
       `--development-execution-authorized`, no fake-runner option, binding
       `fake_runner=False`.
@@ -45,8 +56,9 @@ explicit user `EXECUTE_AUTH` bound to the accepted implementation SHA exist.
       (I3 path).
 - [ ] **T4** Posterior capture test: forwarded second argument equals complete
       `bob`; probe blocks include Bob values > 31.
-- [ ] **T5** Posterior sentinel: complete-bob prior differs from `u2_bob`
-      prior; corrected path equals V36-style call element-for-element.
+- [ ] **T5** Posterior sentinel: the six fixed conditions per probe
+      (design Section 5), including the 1e-6 max-abs difference and argmax
+      divergence; a failing probe is replaced only at plan-review stage.
 - [ ] **T6** Baseline dedup: exactly 15 baseline calls in fake mode; joins map
       every lane record to the unique same-block baseline record; tripling
       baseline observations fails.
@@ -54,22 +66,33 @@ explicit user `EXECUTE_AUTH` bound to the accepted implementation SHA exist.
       cell counts 45/45/15.
 - [ ] **T8** Record schema completeness incl. derived `wrong_codeword`.
 - [ ] **T9-T11** Gate unit tests C1/B1/CB/BASE on synthetic aggregates,
-      including boundary values (36/45, 12/15, +5, discordance, medians) and
-      failure branches.
-- [ ] **T12** Terminal-machine table-driven tests for all six states plus the
-      BASE-C-fail edge case and EVIDENCE_INVALID precedence.
+      including boundary values (36/45, 12/15, per-cell 4/5, +5,
+      `d_CB - d_BC` = 3 boundary, mean-comparison tie, ordinal BASE exact/
+      median ties) and failure branches.
+- [ ] **T12** Exhaustive truth-table tests proving every (C1, CB, BASE-C, B1)
+      combination lands in exactly one terminal (states 0-5), correct
+      `terminal_reason` selection for state 2, and EVIDENCE_INVALID
+      precedence.
 - [ ] **T13** Wilson interval and McNemar exact helpers against hand-computed
-      fixtures.
+      fixtures, with naive/clustering-descriptive labeling asserted in
+      outputs.
 - [ ] **T14** Writer contract: file-set exactness, CSV/JSON row parity,
-      overwrite guard, absence of NPZ.
+      overwrite guard, no NPZ output and no winner-NPZ read.
 - [ ] **T15** CLI guards: missing flag -> non-zero exit and zero calls; CLI
-      exposes no fake-runner option.
+      exposes no fake-runner option; SHA-equality preflight rejects an
+      authorized_target_sha that differs from HEAD or the origin branch.
 - [ ] **T16** Integrity injection: each of I1-I11 triggers
-      `V39_EVIDENCE_INVALID` + invalid notice without performance output.
+      `V39_EVIDENCE_INVALID` + invalid notice without performance output,
+      incl. cross-lane `errors_initial` mismatch (I8), winner-NPZ read
+      attempt (I10), and confirmation that V25 counts loading stays allowed.
 - [ ] **T17** Pairing completeness: exactly 45 C/B pairs and full baseline
-      joins at both ordinal and source level.
+      joins at both ordinal and source level; identical `errors_initial`
+      across lane_b / lane_c / v31_baseline per (source, block_seed).
 - [ ] **T18** Frozen-parameter assertions: max_iter=30, damping_alpha=1.0,
       polynomial 37; no warm-start parameter exists in the call path.
+- [ ] **T19** Block-cluster aggregate correctness on synthetic fixtures:
+      seed_exact_count in 0..3, seed_exact_fraction, residual mean/median
+      across the 3 matrices.
 
 ## Phase C — preflight (decoder-free, before any authorization request)
 
@@ -77,21 +100,30 @@ explicit user `EXECUTE_AUTH` bound to the accepted implementation SHA exist.
       record timing; verify zero evaluator calls and zero writes.
 - [ ] **P2** Run posterior-binding preflight P-BIND-1/2/3 on probe blocks
       390101 / 390201 / 390301.
-- [ ] **P3** Verify V31 loader returns three expected-shape matrices; verify
+- [ ] **P3** Verify V31 loader returns three expected-shape matrices and
+      record packet/source identity (packet_id
+      `m1_16_n1024_n1024|QC-cyclic-projective`, per-source presence); verify
       output root absent; report PASS/BLOCKED only.
 
 ## Phase D — authorized development execution (requires EXECUTE_AUTH)
 
 - [ ] **D1** Main thread obtains independent plan review verdict and explicit
-      user `EXECUTE_AUTH` bound to repo, branch, full target SHA, cycle
-      V39P0, scope `v39_decoder_only_105_calls_exactly_once`.
+      user `EXECUTE_AUTH` bound to repository, branch, full implementation
+      SHA, cycle V39P0, and scope
+      `v39_decoder_only_105_calls_exactly_once`. Preflight verifies exact
+      equality of `git rev-parse HEAD` and
+      `git rev-parse origin/formal-ir-mainline` with the authorized target
+      SHA (not ancestry/contains).
 - [ ] **D2** Run exactly once:
       `python scripts/execute_v39_development.py --development-execution-authorized`;
-      retain additive run_01 files; on error/partial state stop, retain
-      unchanged, return blocker; no rerun, repair, tuning, or seed change.
+      retain additive run_01 files; on error/partial state stop, retain raw
+      partial records byte-for-byte without generating performance
+      aggregates, return blocker; no rerun, repair, tuning, or seed change.
 - [ ] **D3** Read-only postcheck: 105-call accounting, 90 lane records, 15
-      baseline records, pairing completeness, run-root immutability of V38
-      outputs, absence of NPZ.
+      baseline records, pairing completeness incl. `errors_initial`
+      cross-lane/baseline equality, winner-NPZ unread, no NPZ written,
+      block-cluster aggregates present in the summary, run-root immutability
+      of V38 outputs.
 
 ## Phase E — result review
 
@@ -106,6 +138,8 @@ explicit user `EXECUTE_AUTH` bound to the accepted implementation SHA exist.
 
 Implementing before plan acceptance; running any production decoder; touching
 V38/V38R1 code/tests/docs/outputs, AGENT_PROJECT_MEMORY.md, existing OpenSpec
-changes, decoder, constructors, results/run_01/run_02; writing any NPZ; adding
-seeds after results; revising thresholds after results; self-acceptance;
+changes, decoder, constructors, results/run_01/run_02; reading the winner NPZ
+`v38_winning_matrices.npz` or writing any NPZ (read-only V25
+`channel_counts.npz` via the accepted loader stays allowed); adding seeds
+after results; revising thresholds after results; self-acceptance;
 automatic successor start.
