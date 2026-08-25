@@ -1,8 +1,9 @@
 # OpenSpec Tasks: formal-ir-v38r1-posterior-binding-correction
 
-**Lifecycle**: `IMPLEMENTATION_ACCEPTED / EXECUTE_AUTHORIZED`
-**Execution**: one decoder-only `run_02` is explicitly authorized; no DE,
-tuning, seed search, structural reselection, overwrite, or rerun
+**Lifecycle**: `DEVELOPMENT_RESULT_ACCEPTED / FORMAL_NOT_AUTHORIZED`
+**Execution**: the single authorized decoder-only `run_02` is complete; no
+further execution, DE, tuning, seed search, structural reselection, overwrite,
+or rerun is authorized
 
 ## Frozen implementation matrix
 
@@ -54,3 +55,7 @@ tuning, seed search, structural reselection, overwrite, or rerun
   exactly once, retain the five additive run_02 files, and complete the
   read-only 9/45/lane/seed/block/run_01 postcheck. Keep the result at
   `DEVELOPMENT_RESULT_CANDIDATE` pending independent result acceptance.
+- [x] **R1-24** Independently recompute the 45-record aggregates and triage
+  state, accept `V38_MULTIPLE_ROUTE_SIGNALS` as bounded development evidence,
+  and preserve all formal-execution, qualification, promotion, and no-rerun
+  boundaries.
