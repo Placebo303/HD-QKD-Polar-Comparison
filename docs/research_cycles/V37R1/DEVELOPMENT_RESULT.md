@@ -25,7 +25,7 @@
 - **Candidate Search Space**:
   - Raw 0.05-simplex over degrees {2, 3, 4, 5}: 1,771 distributions.
   - P0 necessary forest-count gate (N2 <= 183): 547 distributions.
-  - Check realizability cap (realized max_dc <= 20 across all 3 sources): 259 distributions.
+  - Check realizability cap (realized dc_max <= 20 across all 3 sources): 259 distributions.
   - Total evaluated configurations: 261 (259 finite candidates + 1 regular dv=2 baseline + 1 V36 positive control).
 - **Seed Architecture**:
   - Screening seeds: 1M: (370101, 370102, 370103); 1.5M: (370201, 370202, 370203); 2M: (370301, 370302, 370303).
@@ -51,7 +51,7 @@
 - **1.5M Mean AUT_30**: **59.377442** (seed AUT_30 values: 59.377442, 59.377442, 59.377442).
 - **2M Mean AUT_30**: **59.450244** (seed AUT_30 values: 59.450244, 59.450244, 59.450244).
 - **Overall Mean AUT_30**: **64.145350**.
-- **Convergence**: **9 / 9** runs converged ((60) = 0.0 < 10^{-4}$).
+- **Convergence**: **9 / 9** runs converged (H(60) = 0.0 < 1e-4).
 
 ### 3.3 Exploratory Positive Control (V36 lambda={2: 0.85, 4: 0.15})
 - **Candidate ID**: positive_control_v36 (N2=941, finite_inadmissible=True, non-promotable reference).
@@ -59,12 +59,12 @@
 - **1.5M Mean AUT_30**: **84.545534** (Delta_1.5M = **+42.39%** relative to baseline).
 - **2M Mean AUT_30**: **80.240504** (Delta_2M = **+34.97%** relative to baseline).
 - **Overall Mean AUT_30**: **81.588409**.
-- **Convergence**: **9 / 9** runs converged ((60) = 0.0 < 10^{-4}$).
+- **Convergence**: **9 / 9** runs converged (H(60) = 0.0 < 1e-4).
 
 ### 3.4 Finite Candidate Convergence Audit
 - **Total Finite Candidate Runs**: 259 configs x 3 sources x 3 seeds = **2,331 runs**.
-- **Converged Finite Runs ((60) < 10^{-4}$)**: **0 / 2,331** (0.0%).
-- **Non-Converged Finite Runs ((60) \ge 10^{-4}$)**: **2,331 / 2,331** (100.0%).
+- **Converged Finite Runs (H(60) < 1e-4)**: **0 / 2,331** (0.0%).
+- **Non-Converged Finite Runs (H(60) >= 1e-4)**: **2,331 / 2,331** (100.0%).
 - **Candidate-Level Convergence Breakdown**:
   - Candidates with ALL 9 runs converged: **0 / 259**.
   - Candidates with at least 1 non-converged run: **259 / 259**.
@@ -73,14 +73,14 @@
   - 1M: 0 / 777 converged (777 non-converged).
   - 1.5M: 0 / 777 converged (777 non-converged).
   - 2M: 0 / 777 converged (777 non-converged).
-- *Observation*: For all 259 finite-feasible candidates, entropy at iteration 60 remained near .96 \sim 5.0$ bits/symbol (asymptotic decoding threshold was not reached under empirical noise levels).
+- *Observation*: For all 259 finite-feasible candidates, entropy at iteration 60 remained near 4.96 ~ 5.0 bits/symbol (asymptotic decoding threshold was not reached under empirical noise levels).
 
 ### 3.5 Lowest-AUT_30 Finite Candidates
 - **Lowest-AUT_30 Finite Candidate Among All 259**: lam_d2_0.10_d3_0.90_d4_0.00_d5_0.00 (did not satisfy convergence gate; all_seeds_converged = False).
 - **Lowest-AUT_30 Fully Converged Finite Candidate**: **NONE** (0 finite candidates converged).
 
 #### Top 10 Finite Candidates Ranked by Overall Mean AUT_30
-| Rank | Candidate ID | $\lambda_2$ | $\lambda_3$ | $\lambda_4$ | $\lambda_5$ | $ | $\bar{d}_v$ | {c,184}$ | {c,190}$ | {c,192}$ | 1M AUT_30 ($\Delta$) | 1.5M AUT_30 ($\Delta$) | 2M AUT_30 ($\Delta$) | Overall AUT_30 | Converged? | Screening Pass? |
+| Rank | Candidate ID | lambda_2 | lambda_3 | lambda_4 | lambda_5 | N2 | dbar_v | dc_184 | dc_190 | dc_192 | 1M AUT_30 (Delta) | 1.5M AUT_30 (Delta) | 2M AUT_30 (Delta) | Overall AUT_30 | Converged? | Screening Pass? |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | 1 | lam_d2_0.10_d3_0.90_d4_0.00_d5_0.00 | 0.10 | 0.90 | 0.00 | 0.00 | 146 | 2.857 | 16 | 16 | 16 | 153.997 (+109.2%) | 154.117 (+159.6%) | 154.091 (+159.2%) | **154.068452** | False | False |
 | 2 | lam_d2_0.10_d3_0.85_d4_0.05_d5_0.00 | 0.10 | 0.85 | 0.05 | 0.00 | 148 | 2.892 | 17 | 16 | 16 | 154.101 (+109.4%) | 154.186 (+159.7%) | 154.176 (+159.3%) | **154.154431** | False | False |
@@ -94,10 +94,10 @@
 | 10 | lam_d2_0.10_d3_0.75_d4_0.10_d5_0.05 | 0.10 | 0.75 | 0.10 | 0.05 | 153 | 2.985 | 17 | 17 | 16 | 154.296 (+109.6%) | 154.395 (+160.0%) | 154.373 (+159.7%) | **154.354512** | False | False |
 
 ### 3.6 Delta Audit Across Complete Finite Set
-- **1M Deltas**: min = **+1.092119** (+109.2%), median = **+1.102275** (+110.2%), max = **+1.103946** (+110.4%). Count($\Delta_{1\text{M}} < 0$) = **0**, Count($\Delta_{1\text{M}} \le -0.05$) = **0**.
-- **1.5M Deltas**: min = **+1.595550** (+159.6%), median = **+1.606756** (+160.7%), max = **+1.608497** (+160.8%). Count($\Delta_{1.5\text{M}} < 0$) = **0**, Count($\Delta_{1.5\text{M}} \le -0.05$) = **0**.
-- **2M Deltas**: min = **+1.591928** (+159.2%), median = **+1.603493** (+160.3%), max = **+1.605282** (+160.5%). Count($\Delta_{2\text{M}} < 0$) = **0**, Count($\Delta_{2\text{M}} \le -0.05$) = **0**.
-- **Verified Invariant**: Candidates with $\Delta > 0$ on ALL THREE sources = **259 / 259** (100.0%).
+- **1M Deltas**: min = **+1.092119** (+109.2%), median = **+1.102275** (+110.2%), max = **+1.103946** (+110.4%). Count(Delta_1M < 0) = **0**, Count(Delta_1M <= -0.05) = **0**.
+- **1.5M Deltas**: min = **+1.595550** (+159.6%), median = **+1.606756** (+160.7%), max = **+1.608497** (+160.8%). Count(Delta_1.5M < 0) = **0**, Count(Delta_1.5M <= -0.05) = **0**.
+- **2M Deltas**: min = **+1.591928** (+159.2%), median = **+1.603493** (+160.3%), max = **+1.605282** (+160.5%). Count(Delta_2M < 0) = **0**, Count(Delta_2M <= -0.05) = **0**.
+- **Verified Invariant**: Candidates with Delta > 0 on ALL THREE sources = **259 / 259** (100.0%).
 
 ### 3.7 Screening Gate Result & P1-B Decision
 - **Screening PASS Set Size**: **0**.
@@ -110,10 +110,10 @@
 
 1. **Screening Gate Failure**:
    - Total finite candidates evaluated = 259.
-   - Number meeting $\Delta_s \le -0.05$ on all 3 sources with all 9 runs converged = **0**.
+   - Number meeting Delta_s <= -0.05 on all 3 sources with all 9 runs converged = **0**.
 2. **Terminal State Determination**:
    - Under the pre-registered V37-P1 decision logic, an empty screening pass set yields strictly:
-     \text{Terminal State} = \mathbf{P1\_NO\_FINITE\_FEASIBLE\_DE\_ADVANCE}
+     Terminal State = P1_NO_FINITE_FEASIBLE_DE_ADVANCE
 
 ---
 
@@ -123,16 +123,16 @@
 > The following analysis represents scientific interpretation and hypotheses consistent with the observed data, not controlled causal proofs.
 
 ### 5.1 Structural Tension in High-Rate Finite Irregular NB-LDPC
-- **Large Optimization Distance**: The performance gap between candidate distributions ($\Delta \approx +109\% \sim +160\%$) and baseline is over an order of magnitude larger than the $-5\%$ improvement gate. This indicates a structural regime gap rather than a grid resolution artifact.
-- **Boundary Saturation at Lowest Variable Degree**: The lowest-AUT_30 distribution sits precisely at the lowest allowed variable-degree boundary ($\lambda_2=0.10, \lambda_3=0.90, \lambda_4=0, \lambda_5=0$). Increasing higher-degree fractions ($\lambda_4, \lambda_5$) strictly increases $\bar{d}_v$ and check degrees $, monotonically degrading DE trajectory behavior.
-- **Structural Hypothesis**: Under high code rates ( \approx 0.8125 - 0.8203$), the relationship $\bar{d}_c = \bar{d}_v / (1 - R) \approx 5.3 \bar{d}_v$ couples variable degree to check degree. When the finite-length forest gate ( \le 183$) bounds $\lambda_2 \le 0.10$, average variable degree is constrained to $\bar{d}_v \ge 2.857$, resulting in check degrees  \in [16, 20]$. In GF(32) message passing, higher check degrees are hypothesized to severely inflate check-node message convolution uncertainty, impeding early-iteration mutual information flow.
-- **Positive Control Context**: Even the V36 positive control ($\lambda_2=0.85, \lambda_4=0.15, N_2=941$), which has abundant degree-2 variables, exhibited $+8.65\%$ to $+42.39\%$ higher $\text{AUT}_{30}$ than regular =2$, indicating that adjusting single-edge polynomial weights alone is insufficient.
+- **Large Optimization Distance**: The performance gap between candidate distributions (Delta ~ +109% to +160%) and baseline is over an order of magnitude larger than the -5% improvement gate. This indicates a structural regime gap rather than a grid resolution artifact.
+- **Boundary Saturation at Lowest Variable Degree**: The lowest-AUT_30 distribution sits precisely at the lowest allowed variable-degree boundary (lambda_2=0.10, lambda_3=0.90, lambda_4=0, lambda_5=0). Increasing higher-degree fractions (lambda_4, lambda_5) strictly increases dbar_v and check degrees dc, monotonically degrading DE trajectory behavior.
+- **Structural Hypothesis**: Under high code rates (R ~ 0.8125 - 0.8203), the relationship dbar_c = dbar_v / (1 - R) ~ 5.3 * dbar_v couples variable degree to check degree. When the finite-length forest gate (N2 <= 183) bounds lambda_2 <= 0.10, average variable degree is constrained to dbar_v >= 2.857, resulting in check degrees dc in [16, 20]. In GF(32) message passing, higher check degrees are hypothesized to severely inflate check-node message convolution uncertainty, impeding early-iteration mutual information flow.
+- **Positive Control Context**: Even the V36 positive control (lambda_2=0.85, lambda_4=0.15, N2=941), which has abundant degree-2 variables, exhibited +8.65% to +42.39% higher AUT_30 than regular dv=2, indicating that adjusting single-edge polynomial weights alone is insufficient.
 
 ### 5.2 Architectural Roadmap for V38+
-- **Direction Abandoned**: Unstructured single-edge irregular $\lambda$-distribution simplex tuning. Finer grid resolution searches (e.g., step=0.025) are closed.
+- **Direction Abandoned**: Unstructured single-edge irregular lambda-distribution simplex tuning. Finer grid resolution searches (e.g., step=0.025) are closed.
 - **Candidate Structured Directions**:
   1. **Protograph / Multi-Edge-Type (MET) NB-LDPC** (Primary Candidate): Utilizing MET structures to enforce controlled degree-2 chains, accumulators, and topological constraints, achieving low effective variable degrees without random cycle explosion.
-  2. **Near-=2$ Structured Topology + GF(32) Edge Coefficient Optimization**: Preserving the strong DE convergence of low-degree regular graphs while resolving finite-length girth, rank deficiency, and trapping sets through algebraic edge labeling.
+  2. **Near-dv=2 Structured Topology + GF(32) Edge Coefficient Optimization**: Preserving the strong DE convergence of low-degree regular graphs while resolving finite-length girth, rank deficiency, and trapping sets through algebraic edge labeling.
   3. **Non-Binary Spatially-Coupled LDPC (SC-NB-LDPC)** (Fallback Architecture): Leveraging spatial coupling threshold saturation on protographs.
 
 ---
@@ -140,7 +140,7 @@
 ## 6. Claim Boundary
 
 ### Allowed Statements
-- Within the pre-registered V37R1 candidate space (degrees $\{2, 3, 4, 5\}$ on 0.05-simplex, necessary forest-count gate  \le 183$, realized check degree cap {c,\max} \le 20$) under the source-specific V25 TRAIN empirical-P GF(32) DE protocol, **no candidate satisfied the pre-registered screening gate (0 / 259 passed)**.
+- Within the pre-registered V37R1 candidate space (degrees {2, 3, 4, 5} on 0.05-simplex, necessary forest-count gate N2 <= 183, realized check degree cap dc_max <= 20) under the source-specific V25 TRAIN empirical-P GF(32) DE protocol, **no candidate satisfied the pre-registered screening gate (0 / 259 passed)**.
 - The experiment concludes stage P1 with terminal state P1_NO_FINITE_FEASIBLE_DE_ADVANCE.
 
 ### Forbidden Statements
