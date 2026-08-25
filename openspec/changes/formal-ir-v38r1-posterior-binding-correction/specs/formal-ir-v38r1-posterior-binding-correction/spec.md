@@ -47,3 +47,19 @@ This change SHALL stop at
 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`. Independent acceptance and
 a new explicit user `EXECUTE_AUTH` bound to the accepted target SHA are required
 before any run_02 decoder execution.
+
+## R1.6 Guarded runner and writer
+
+The change SHALL provide `run_v38r1_development()` with a default-deny
+authorization guard. With explicit authorization it SHALL reconstruct exactly
+nine frozen winners from the committed run_01 structural metrics, issue exactly
+45 calls using the frozen 15 blocks and decoder parameters, and reuse the V38
+aggregation and terminal-gate functions. The test-only `fake_runner` path SHALL
+be supported.
+
+`scripts/execute_v38r1_development.py` SHALL require the explicit
+`--development-execution-authorized` flag, call only the V38R1 runner and its
+writer, and write only fixed additive `run_02` evidence. If the output path
+already exists it SHALL fail closed without overwriting. The writer SHALL emit
+nine winner metrics, 45 block records in CSV/JSON, and a summary JSON, and SHALL
+not emit or read `v38_winning_matrices.npz`.

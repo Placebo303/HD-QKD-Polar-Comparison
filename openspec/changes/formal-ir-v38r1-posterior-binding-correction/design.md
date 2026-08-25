@@ -60,3 +60,25 @@ on it.
 This candidate does not authorize development or formal execution. The main
 thread owns independent acceptance. A future `run_02` requires a new explicit
 user authorization bound to the accepted V38R1 target SHA.
+
+## 5. Runner and evidence writer
+
+The implementation exposes `run_v38r1_development()` from
+`comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py`.
+It requires `development_execution_authorized=True`, reconstructs exactly nine
+winner matrices from `v38_structural_prototypes.json`, and then evaluates the
+same 15 blocks in each lane for exactly 45 calls. The runner accepts
+`fake_runner=True` for tests and reuses `aggregate_lane_results()`,
+`evaluate_triage_gate()`, and `determine_v38_terminal_state()`.
+
+The only command entrypoint is
+`scripts/execute_v38r1_development.py`:
+
+```text
+python scripts/execute_v38r1_development.py --development-execution-authorized
+```
+
+The flag is mandatory. The script writes only to the fixed additive root
+`comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_02/`
+and fails closed if that path already exists. It writes nine winner metrics,
+45 block records in CSV/JSON, and one summary JSON; it never writes an NPZ.

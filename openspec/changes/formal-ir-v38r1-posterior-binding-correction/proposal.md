@@ -26,9 +26,13 @@ This change produces an implementation candidate only:
 3. Add a fixed numerical sentinel proving wrong and correct posterior hard
    decisions differ and that the corrected call equals the V36 call.
 4. Record V38-P0 invalidation and freeze a decoder-only V38R1 successor.
+5. Provide a guarded decoder-only runner that reconstructs the nine frozen
+   winners from the committed run_01 metrics and an additive run_02 writer.
 
-No production decoder, V38 development execution, DE, parameter tuning, seed
-search, run_02 creation, or promotion is in scope for this candidate.
+No execution is performed by this candidate. The runner is implemented for a
+future separately authorized run, but production decoder execution, DE,
+parameter tuning, seed search, run_02 creation, and promotion remain out of
+scope for this implementation turn.
 
 ## Lifecycle
 

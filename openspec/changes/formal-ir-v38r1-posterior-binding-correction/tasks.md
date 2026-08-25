@@ -27,3 +27,18 @@
 - [x] **R1-11** Final scoped diff/output checks completed; OpenSpec validation
   was attempted and is unavailable because the command is not installed.
 - [x] **R1-12** Local coherent candidate commit is created; no push.
+- [x] **R1-13** Freeze and implement the nine winner seed mapping.
+- [x] **R1-14** Reconstruct exactly nine matrices from the committed run_01
+  metrics JSON and strictly compare winner metrics, including Lane C
+  permutations; do not use NPZ or 27-candidate search.
+- [x] **R1-15** Implement default-deny `run_v38r1_development()` with exactly
+  45 calls, frozen blocks/parameters, fake-runner support, and existing gates.
+- [x] **R1-16** Add `scripts/execute_v38r1_development.py` with mandatory
+  authorization flag, fixed additive run_02 writer, no-overwrite guard, and no
+  NPZ output.
+- [x] **R1-17** Add fake/monkeypatch tests for guard, nine reconstruction,
+  fixed seeds, metric mismatch, NPZ independence, 45 calls, and writer guard.
+- [x] **R1-18** Document the runner command, output files, and unchanged
+  `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED` lifecycle.
+- [x] **R1-19** Final targeted checks, diff/output audit, and successor
+  candidate commit completed; no push and no production output.

@@ -6,7 +6,10 @@ All tests use TEST-ONLY non-scientific seeds (938001+) and fixtures.
 
 from __future__ import annotations
 
+import json
+import inspect
 import subprocess
+import uuid
 from pathlib import Path
 
 import numpy as np
@@ -32,6 +35,10 @@ from comparison_bench.formal_ir.v38_architecture_triage import (
     SOURCE_CHECKS,
     V31_BASELINE_REFERENCE,
     V36_A3_BLOCK_SEEDS,
+    V38R1_REQUIRED_METRIC_KEYS,
+    V38R1_RUN01_METRICS_PATH,
+    V38R1_SOURCE_ORDER,
+    V38R1_WINNER_SEEDS,
     V38_DIRECTION_EVIDENCE_INVALID,
     V38_MULTIPLE_ROUTE_SIGNALS,
     V38_NO_ROUTE_SIGNAL,
@@ -55,13 +62,22 @@ from comparison_bench.formal_ir.v38_architecture_triage import (
     get_substream_generator,
     optimize_lane_a_coefficients,
     run_v38_development,
+    run_v38r1_development,
+    reconstruct_v38r1_winners,
     sample_uniform_gf32_nonzero,
     select_structural_winner,
     validate_block_records_integrity,
 )
+from scripts.execute_v38r1_development import write_v38r1_run02
 
 TEST_SEED_1 = 938001
 TEST_SEED_2 = 938002
+
+
+def _fresh_workspace_test_root(label: str) -> Path:
+    root = Path("workspace/v38r1_tests") / f"{label}_{uuid.uuid4().hex}"
+    root.mkdir(parents=True, exist_ok=False)
+    return root
 
 
 # ---------------------------------------------------------------------------
@@ -1019,3 +1035,180 @@ def test_r1_06_corrected_prior_matches_v36_numeric_sentinel(monkeypatch):
     )
     np.testing.assert_array_equal(captured["bob"], bob)
     np.testing.assert_allclose(captured["prior"], expected_correct, rtol=0.0, atol=0.0)
+
+
+def _run01_metrics_by_id() -> dict[str, dict]:
+    records = json.loads(V38R1_RUN01_METRICS_PATH.read_text(encoding="utf-8"))
+    return {record["matrix_id"]: record for record in records}
+
+
+def test_r1_14_reconstructs_exact_nine_winners_and_rejects_metric_drift(monkeypatch):
+    """R1-14/R1-17: fixed seeds rebuild nine winners and strict metrics fail closed."""
+    assert "v38_winning_matrices.npz" not in inspect.getsource(reconstruct_v38r1_winners)
+    reference = _run01_metrics_by_id()
+    constructor_calls: list[tuple[str, str, int]] = []
+
+    def fake_constructor(lane: str, source: str, seed: int, **kwargs):
+        matrix_id = f"{lane}_{source}_s{seed}"
+        metric = dict(reference[matrix_id])
+        constructor_calls.append((lane, source, seed))
+        return np.zeros(tuple(metric["shape"]), dtype=np.uint8), metric
+
+    monkeypatch.setattr(
+        v38_module,
+        "construct_lane_a_prototype",
+        lambda source, seed, **kwargs: fake_constructor("lane_a", source, seed, **kwargs),
+    )
+    monkeypatch.setattr(
+        v38_module,
+        "construct_lane_b_prototype",
+        lambda source, seed, **kwargs: fake_constructor("lane_b", source, seed, **kwargs),
+    )
+    monkeypatch.setattr(
+        v38_module,
+        "construct_lane_c_prototype",
+        lambda source, seed, **kwargs: fake_constructor("lane_c", source, seed, **kwargs),
+    )
+    monkeypatch.setattr(
+        v38_module,
+        "select_structural_winner",
+        lambda *_args, **_kwargs: pytest.fail("V38R1 must not search/select 27 candidates"),
+    )
+
+    winners = reconstruct_v38r1_winners()
+    assert sum(len(by_source) for by_source in winners.values()) == 9
+    assert constructor_calls == [
+        (lane, source, V38R1_WINNER_SEEDS[lane][source])
+        for lane in ("lane_a", "lane_b", "lane_c")
+        for source in V38R1_SOURCE_ORDER
+    ]
+    for lane in ("lane_a", "lane_b", "lane_c"):
+        for source in V38R1_SOURCE_ORDER:
+            _, metric = winners[lane][source]
+            assert set(V38R1_REQUIRED_METRIC_KEYS).issubset(metric)
+            assert metric["matrix_id"] == f"{lane}_{source}_s{V38R1_WINNER_SEEDS[lane][source]}"
+            assert metric["construction_seed"] == V38R1_WINNER_SEEDS[lane][source]
+    for source in V38R1_SOURCE_ORDER:
+        assert "position_permutations" in winners["lane_c"][source][1]
+
+    bad_records = list(reference.values())
+    bad_id = "lane_b_1M_s382103"
+    bad_record = dict(next(record for record in bad_records if record["matrix_id"] == bad_id))
+    bad_record["support_edge_count"] += 1
+    bad_records = [bad_record if record["matrix_id"] == bad_id else record for record in bad_records]
+    bad_path = _fresh_workspace_test_root("r1_14") / "v38_structural_prototypes_bad.json"
+    bad_path.write_text(json.dumps(bad_records), encoding="utf-8")
+    with pytest.raises(ValueError, match="winner metric mismatch"):
+        reconstruct_v38r1_winners(bad_path)
+
+
+def test_r1_15_runner_guard_and_exactly_45_fake_calls(monkeypatch):
+    """R1-15/R1-17: default deny and authorized fake runner uses fixed 45 calls."""
+    with pytest.raises(PermissionError, match="V38R1 development execution not authorized"):
+        run_v38r1_development()
+
+    fake_winners = {lane: {} for lane in ("lane_a", "lane_b", "lane_c")}
+    for lane in fake_winners:
+        for source in V38R1_SOURCE_ORDER:
+            seed = V38R1_WINNER_SEEDS[lane][source]
+            fake_winners[lane][source] = (
+                np.zeros((SOURCE_CHECKS[source], BLOCK_LENGTH), dtype=np.uint8),
+                {
+                    "lane": lane,
+                    "source": source,
+                    "construction_seed": seed,
+                    "matrix_id": f"{lane}_{source}_s{seed}",
+                },
+            )
+
+    monkeypatch.setattr(v38_module, "reconstruct_v38r1_winners", lambda _path: fake_winners)
+    monkeypatch.setattr(
+        v38_module,
+        "load_v25_channel_counts",
+        lambda: {source: np.ones((BLOCK_LENGTH, BLOCK_LENGTH), dtype=np.float64) for source in SOURCE_CHECKS},
+    )
+    calls: list[dict] = []
+
+    def fake_evaluate(**kwargs):
+        calls.append(kwargs)
+        source = kwargs["source"]
+        block_seed = kwargs["block_seed"]
+        return {
+            "source": source,
+            "block_seed": block_seed,
+            "lane": kwargs["lane"],
+            "construction_seed": kwargs["construction_seed"],
+            "matrix_id": f"{kwargs['lane']}_{source}_s{kwargs['construction_seed']}",
+            "errors_initial": FROZEN_BASELINE_ERROR_MAP[source][block_seed],
+            "errors_final": FROZEN_BASELINE_ERROR_MAP[source][block_seed],
+            "exact_l2": False,
+            "syndrome_ok": False,
+            "iterations": kwargs["max_iter"],
+            "status": "fake_runner",
+            "runtime_s": 0.0,
+        }
+
+    monkeypatch.setattr(v38_module, "evaluate_single_block", fake_evaluate)
+    result = run_v38r1_development(development_execution_authorized=True, fake_runner=True)
+
+    assert result["winners_reconstructed_count"] == 9
+    assert result["decoder_runs_count"] == 45
+    assert len(calls) == 45
+    assert all(call["max_iter"] == 30 for call in calls)
+    assert all(call["damping_alpha"] == 1.0 for call in calls)
+    assert all(call["fake_runner"] is True for call in calls)
+    assert [call["construction_seed"] for call in calls[:15]] == [381101] * 5 + [381201] * 5 + [381301] * 5
+    assert all(aggregate["records_count"] == 15 for aggregate in result["lane_aggregates"].values())
+
+
+def test_r1_16_r1_17_writer_outputs_additive_files_and_rejects_existing():
+    """R1-16/R1-17: writer emits fixed evidence and never overwrites run_02."""
+    winner_metrics = [
+        _run01_metrics_by_id()[f"{lane}_{source}_s{V38R1_WINNER_SEEDS[lane][source]}"]
+        for lane in ("lane_a", "lane_b", "lane_c")
+        for source in V38R1_SOURCE_ORDER
+    ]
+    block_records = [
+        {
+            "source": source,
+            "block_seed": block_seed,
+            "lane": "lane_a",
+            "errors_final": 1,
+        }
+        for source, seeds in V36_A3_BLOCK_SEEDS.items()
+        for block_seed in seeds
+    ] * 3
+    results = {
+        "cycle_id": "V38R1",
+        "predecessor_cycle": "V38P0",
+        "winners_reconstructed_count": 9,
+        "winner_metrics": winner_metrics,
+        "all_block_records": block_records,
+        "decoder_runs_count": 45,
+        "lane_statuses": {lane: LANE_EVALUATED_NO_SIGNAL for lane in ("lane_a", "lane_b", "lane_c")},
+        "lane_aggregates": {},
+        "triage_gate_details": {},
+        "terminal_state": V38_NO_ROUTE_SIGNAL,
+        "fake_runner": True,
+    }
+    root = _fresh_workspace_test_root("r1_16") / "run_02"
+    assert write_v38r1_run02(results, root) == root
+    assert {
+        path.name for path in root.iterdir()
+    } == {
+        "v38r1_winning_metrics.json",
+        "v38r1_winning_metrics.csv",
+        "v38r1_development_block_records.json",
+        "v38r1_development_block_records.csv",
+        "v38r1_triage_summary.json",
+    }
+    assert len(json.loads((root / "v38r1_winning_metrics.json").read_text(encoding="utf-8"))) == 9
+    assert len(json.loads((root / "v38r1_development_block_records.json").read_text(encoding="utf-8"))) == 45
+    summary = json.loads((root / "v38r1_triage_summary.json").read_text(encoding="utf-8"))
+    assert summary["npz_input_used"] is False
+
+    sentinel = root / "sentinel.txt"
+    sentinel.write_text("preserve", encoding="utf-8")
+    with pytest.raises(FileExistsError, match="Refusing to overwrite"):
+        write_v38r1_run02(results, root)
+    assert sentinel.read_text(encoding="utf-8") == "preserve"

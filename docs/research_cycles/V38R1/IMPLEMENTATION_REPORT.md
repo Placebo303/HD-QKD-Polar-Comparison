@@ -21,6 +21,30 @@ Two targeted tests were added:
   count sentinel where the wrong and correct bindings produce different hard
   decisions, then checks the corrected V38 call path against the V36 function.
 
+The decoder-only successor is now implemented as
+`run_v38r1_development()` in the V38 module. It reconstructs exactly the nine
+frozen winner matrices from the committed run_01 structural metrics JSON,
+strictly checks all reference metric fields (including Lane C permutations),
+and performs exactly 45 evaluations over the frozen 15 blocks. It has a
+default-deny authorization guard and a `fake_runner` test path; it does not
+search 27 candidates and does not read the ignored NPZ.
+
+The command entrypoint is:
+
+```text
+python scripts/execute_v38r1_development.py --development-execution-authorized
+```
+
+The flag is mandatory. The script calls only the guarded runner and its writer,
+fails closed if the fixed additive output path already exists, and writes:
+
+- `v38r1_winning_metrics.json` and `.csv` (9 reconstructed winners);
+- `v38r1_development_block_records.json` and `.csv` (45 records);
+- `v38r1_triage_summary.json`.
+
+It never writes `v38_winning_matrices.npz` and never overwrites V38-P0
+`run_01`.
+
 ## Frozen future execution contract
 
 V38R1 is decoder-only and may not search or retune. If independently accepted
@@ -38,13 +62,16 @@ reconstructed from the constructor and frozen seeds.
 The following checks were run without production execution:
 
 ```text
-python -B -m py_compile comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py comparison_bench/tests/test_v38_architecture_triage.py
-8 targeted V38 pytest tests passed (R1-05, R1-06, fake-runner safety,
+python -B -m py_compile comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py comparison_bench/tests/test_v38_architecture_triage.py scripts/execute_v38r1_development.py
+3 V38R1 runner/writer pytest tests passed (R1-14 through R1-17)
+8 prior focused V38 pytest tests passed (R1-05, R1-06, fake-runner safety,
 authorization guard, and frozen-contract checks)
-3 targeted V35 regression tests passed (seed/frozen-directory/CLI parser checks)
+the default-deny script guard rejected execution without the authorization flag
 openspec validate: unavailable (`openspec` command is not installed)
 ```
 
-The complete V38 Lane-A-heavy suite was not rerun in this candidate turn. No
-real decoder, DE, run_02, tuning, or seed search was performed. Independent
-implementation acceptance remains pending.
+The complete V38 Lane-A-heavy suite was not rerun in this candidate turn. The
+three V35-related frozen-contract checks are included in the eight focused V38
+tests above; no separate V35 suite was run. No real decoder, DE, run_02,
+tuning, or seed search was performed. Independent implementation acceptance
+remains pending.

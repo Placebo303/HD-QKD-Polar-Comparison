@@ -16,9 +16,10 @@ Lifecycle: IMPLEMENTATION_CANDIDATE
 from __future__ import annotations
 
 import math
+import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import numpy as np
 
@@ -146,6 +147,47 @@ LANE_READY = "LANE_READY"
 LANE_STRUCTURAL_NOT_READY = "LANE_STRUCTURAL_NOT_READY"
 LANE_EVALUATED_NO_SIGNAL = "LANE_EVALUATED_NO_SIGNAL"
 LANE_PROMISING_DIRECTION_SIGNAL = "LANE_PROMISING_DIRECTION_SIGNAL"
+
+# V38R1 decoder-only successor: the nine winners are frozen from V38-P0
+# run_01.  This mapping intentionally bypasses the 27-candidate construction
+# and structural winner search used by V38-P0.
+V38R1_WINNER_SEEDS: dict[str, dict[str, int]] = {
+    "lane_a": {"1M": 381101, "1p5M": 381201, "2M": 381301},
+    "lane_b": {"1M": 382103, "1p5M": 382201, "2M": 382301},
+    "lane_c": {"1M": 383103, "1p5M": 383203, "2M": 383301},
+}
+V38R1_LANE_ORDER: tuple[str, ...] = ("lane_a", "lane_b", "lane_c")
+V38R1_SOURCE_ORDER: tuple[str, ...] = ("1M", "1p5M", "2M")
+V38R1_REPO_ROOT = Path(__file__).resolve().parents[4]
+V38R1_RUN01_METRICS_PATH = (
+    V38R1_REPO_ROOT
+    / "comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_01/v38_structural_prototypes.json"
+)
+V38R1_RUN02_ROOT = (
+    V38R1_REPO_ROOT
+    / "comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_02"
+)
+
+V38R1_REQUIRED_METRIC_KEYS: tuple[str, ...] = (
+    "lane",
+    "source",
+    "construction_seed",
+    "matrix_id",
+    "shape",
+    "rank_GF32",
+    "support_edge_count",
+    "col_degree_min",
+    "col_degree_mean",
+    "col_degree_max",
+    "row_degree_min",
+    "row_degree_mean",
+    "row_degree_max",
+    "degenerate_cycles_4",
+    "degenerate_cycles_6",
+    "degenerate_cycles_8",
+    "support_cycles_4",
+    "structurally_valid",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -834,6 +876,99 @@ def select_structural_winner(prototypes: list[dict[str, Any]]) -> tuple[dict[str
     return valid_candidates[0], "WINNER_SELECTED"
 
 
+def _load_v38r1_reference_metrics(
+    reference_metrics_path: Path | str = V38R1_RUN01_METRICS_PATH,
+) -> dict[str, dict[str, Any]]:
+    """Load the committed V38-P0 structural metrics indexed by matrix ID."""
+    path = Path(reference_metrics_path)
+    with path.open("r", encoding="utf-8") as handle:
+        records = json.load(handle)
+    if not isinstance(records, list) or len(records) != 27:
+        raise ValueError(f"V38R1 requires exactly 27 run_01 metrics, got {len(records) if isinstance(records, list) else 'non-list'}")
+
+    indexed: dict[str, dict[str, Any]] = {}
+    for record in records:
+        if not isinstance(record, dict) or not isinstance(record.get("matrix_id"), str):
+            raise ValueError("V38R1 run_01 metrics contain a record without matrix_id")
+        matrix_id = record["matrix_id"]
+        if matrix_id in indexed:
+            raise ValueError(f"Duplicate V38R1 run_01 matrix_id: {matrix_id}")
+        indexed[matrix_id] = record
+    return indexed
+
+
+def _check_v38r1_metric_match(
+    expected: dict[str, Any],
+    actual: dict[str, Any],
+    matrix_id: str,
+) -> None:
+    """Fail closed when reconstructed metrics drift from committed run_01."""
+    for key in V38R1_REQUIRED_METRIC_KEYS:
+        if key not in expected or key not in actual:
+            raise ValueError(f"V38R1 winner metric missing required field {matrix_id}: {key}")
+    for key, expected_value in expected.items():
+        if key not in actual or actual[key] != expected_value:
+            actual_value = actual.get(key, "<missing>")
+            raise ValueError(
+                f"V38R1 winner metric mismatch for {matrix_id}: "
+                f"{key} expected={expected_value!r} actual={actual_value!r}"
+            )
+
+
+def reconstruct_v38r1_winners(
+    reference_metrics_path: Path | str = V38R1_RUN01_METRICS_PATH,
+) -> dict[str, dict[str, tuple[np.ndarray, dict[str, Any]]]]:
+    """Rebuild exactly the nine frozen V38R1 winners without candidate search.
+
+    The committed V38-P0 structural JSON is the metric authority.  Matrix
+    bytes are rebuilt from the accepted constructors and frozen seeds; the
+    ignored local NPZ is deliberately not an input.
+    """
+    reference_by_id = _load_v38r1_reference_metrics(reference_metrics_path)
+    field = GF2mField.create(DIMENSION)
+    if field.primitive_polynomial != POLYNOMIAL:
+        raise RuntimeError(
+            f"V38R1 field polynomial mismatch: expected {POLYNOMIAL}, got {field.primitive_polynomial}"
+        )
+
+    constructors: dict[str, Callable[..., tuple[np.ndarray, dict[str, Any]]]] = {
+        "lane_a": construct_lane_a_prototype,
+        "lane_b": construct_lane_b_prototype,
+        "lane_c": construct_lane_c_prototype,
+    }
+    winners: dict[str, dict[str, tuple[np.ndarray, dict[str, Any]]]] = {
+        lane: {} for lane in V38R1_LANE_ORDER
+    }
+    reconstructed_count = 0
+
+    for lane in V38R1_LANE_ORDER:
+        for source in V38R1_SOURCE_ORDER:
+            seed = V38R1_WINNER_SEEDS[lane][source]
+            matrix_id = f"{lane}_{source}_s{seed}"
+            expected = reference_by_id.get(matrix_id)
+            if expected is None:
+                raise ValueError(f"Missing frozen V38R1 winner in run_01 metrics: {matrix_id}")
+            if expected.get("lane") != lane or expected.get("source") != source:
+                raise ValueError(f"V38R1 winner identity mismatch in run_01 metrics: {matrix_id}")
+
+            constructor = constructors[lane]
+            if lane == "lane_a":
+                matrix, metrics = constructor(
+                    source=source, seed=seed, max_sweeps=2, field=field
+                )
+            else:
+                matrix, metrics = constructor(source=source, seed=seed, field=field)
+            _check_v38r1_metric_match(expected, metrics, matrix_id)
+            if lane == "lane_c" and "position_permutations" not in expected:
+                raise ValueError(f"Missing frozen Lane C permutations in run_01 metrics: {matrix_id}")
+            winners[lane][source] = (matrix, metrics)
+            reconstructed_count += 1
+
+    if reconstructed_count != 9:
+        raise AssertionError(f"V38R1 must reconstruct exactly 9 winners, got {reconstructed_count}")
+    return winners
+
+
 # ---------------------------------------------------------------------------
 # Finite Block Evaluation & Diagnostic Plumbing
 # ---------------------------------------------------------------------------
@@ -1221,4 +1356,85 @@ def run_v38_development(
         "lane_aggregates": lane_aggregates,
         "terminal_state": terminal_state,
         "all_block_records": all_block_records,
+    }
+
+
+def run_v38r1_development(
+    development_execution_authorized: bool = False,
+    fake_runner: bool = False,
+    reference_metrics_path: Path | str = V38R1_RUN01_METRICS_PATH,
+) -> dict[str, Any]:
+    """Run the frozen V38R1 decoder-only successor with exactly 45 calls."""
+    if not development_execution_authorized:
+        raise PermissionError(
+            "V38R1 development execution not authorized. "
+            "Explicit --development-execution-authorized is required."
+        )
+
+    winners = reconstruct_v38r1_winners(reference_metrics_path)
+    counts_by_source = load_v25_channel_counts()
+    field = GF2mField.create(DIMENSION)
+    if field.primitive_polynomial != POLYNOMIAL:
+        raise RuntimeError(
+            f"V38R1 field polynomial mismatch: expected {POLYNOMIAL}, got {field.primitive_polynomial}"
+        )
+
+    decoder_runs_count = 0
+    lane_statuses: dict[str, str] = {}
+    lane_aggregates: dict[str, dict[str, Any]] = {}
+    triage_gate_details: dict[str, dict[str, Any]] = {}
+    all_block_records: list[dict[str, Any]] = []
+
+    for lane in V38R1_LANE_ORDER:
+        lane_records: list[dict[str, Any]] = []
+        for source in V38R1_SOURCE_ORDER:
+            matrix, metrics = winners[lane][source]
+            for block_seed in V36_A3_BLOCK_SEEDS[source]:
+                if decoder_runs_count >= 45:
+                    raise AssertionError("V38R1 decoder call cap exceeded")
+                record = evaluate_single_block(
+                    H=matrix,
+                    source=source,
+                    block_seed=block_seed,
+                    lane=lane,
+                    construction_seed=int(metrics["construction_seed"]),
+                    counts=counts_by_source[source],
+                    max_iter=30,
+                    damping_alpha=1.0,
+                    fake_runner=fake_runner,
+                    field=field,
+                )
+                decoder_runs_count += 1
+                lane_records.append(record)
+                all_block_records.append(record)
+
+        aggregate = aggregate_lane_results(lane_records)
+        lane_aggregates[lane] = aggregate
+        passed, details = evaluate_triage_gate(aggregate)
+        triage_gate_details[lane] = details
+        lane_statuses[lane] = (
+            LANE_PROMISING_DIRECTION_SIGNAL if passed else LANE_EVALUATED_NO_SIGNAL
+        )
+
+    if decoder_runs_count != 45:
+        raise AssertionError(f"V38R1 requires exactly 45 decoder calls, got {decoder_runs_count}")
+
+    winner_metrics = [
+        winners[lane][source][1]
+        for lane in V38R1_LANE_ORDER
+        for source in V38R1_SOURCE_ORDER
+    ]
+    return {
+        "cycle_id": "V38R1",
+        "predecessor_cycle": "V38P0",
+        "winners_reconstructed_count": 9,
+        "winner_metrics": winner_metrics,
+        "lane_winners": winners,
+        "decoder_runs_count": decoder_runs_count,
+        "lane_statuses": lane_statuses,
+        "lane_aggregates": lane_aggregates,
+        "triage_gate_details": triage_gate_details,
+        "terminal_state": determine_v38_terminal_state(lane_statuses, integrity_ok=True),
+        "all_block_records": all_block_records,
+        "fake_runner": fake_runner,
     }

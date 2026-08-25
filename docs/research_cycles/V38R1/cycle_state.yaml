@@ -14,3 +14,7 @@ scientific_promotion: false
 run_01_status: immutable_invalid_evidence
 run_02_status: absent_not_authorized
 independent_implementation_acceptance: pending
+runner_entrypoint: scripts/execute_v38r1_development.py
+runner_status: implemented_guarded_decoder_only
+winner_metrics_source: comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_01/v38_structural_prototypes.json
+target_output_root: comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_02
