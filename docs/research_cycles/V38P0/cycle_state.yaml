@@ -1,7 +1,8 @@
 cycle_id: V38P0
 state: PLAN_CANDIDATE
 predecessor_cycle: V37R1
-predecessor_result_sha: 67da7c649646b9c9910d52489ae476ceae7fdb57
+predecessor_result_sha: 67da7c64fa4150a66d020243d6292420903297fe
+predecessor_result_review_sha: cc1483cd4d7d3d2dc90bc02c4cf2db44d5ba73bf
 development_execution_authorized: false
 formal_execution_authorized: false
 scientific_promotion: false
