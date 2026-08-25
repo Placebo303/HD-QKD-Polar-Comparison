@@ -736,8 +736,10 @@ def construct_lane_c_prototype(
 
     # Generate frozen check permutations for each spatial position sequentially (order 0..7)
     check_rank_in_perm: dict[int, dict[int, int]] = {}
+    position_permutations: list[list[int]] = []
     for p in range(8):
         perm_p = support_rng.permutation(check_ranges[p]).tolist()
+        position_permutations.append(perm_p)
         check_rank_in_perm[p] = {c: idx for idx, c in enumerate(perm_p)}
 
     # Support construction
@@ -795,6 +797,7 @@ def construct_lane_c_prototype(
         H[r, c] = val
 
     metrics = compute_structural_metrics(H, lane="lane_c", source=source, seed=seed, field=field)
+    metrics["position_permutations"] = position_permutations
     return H, metrics
 
 
@@ -1093,6 +1096,7 @@ def determine_v38_terminal_state(
 def run_v38_development(
     development_execution_authorized: bool = False,
     fake_runner: bool = False,
+    custom_seed_dict: Optional[dict[str, dict[str, list[int]]]] = None,
 ) -> dict[str, Any]:
     """Execute the full frozen V38 development triage workflow.
 
@@ -1101,8 +1105,8 @@ def run_v38_development(
         This guard prevents accidental or unauthorized execution during planning/implementation.
 
     Maximum Workload Enforced:
-        - Structural prototypes: <= 27
-        - New decoder runs: <= 45
+        - Structural prototype generation attempts: exactly 27 across all 3 lanes x 3 sources x 3 seeds.
+        - New decoder runs: <= 45 (15 per READY lane; 0 for NOT_READY lanes).
     """
     if not development_execution_authorized:
         raise PermissionError(
@@ -1110,10 +1114,10 @@ def run_v38_development(
             "Formal development execution requires explicit authorization."
         )
 
+    seed_dict = custom_seed_dict if custom_seed_dict is not None else LANE_PRODUCTION_SEEDS
+
     # Load empirical counts for all 3 sources
-    counts_by_source: dict[str, np.ndarray] = {}
-    for src in SOURCE_CHECKS:
-        counts_by_source[src] = load_v25_channel_counts(src, "TRAIN")
+    counts_by_source = load_v25_channel_counts()
 
     field = GF2mField.create(32)
     lane_constructors = {
@@ -1125,39 +1129,52 @@ def run_v38_development(
     prototypes_generated_count = 0
     decoder_runs_count = 0
 
+    all_prototype_metrics: dict[str, dict[str, list[dict[str, Any]]]] = {}
     lane_winners: dict[str, dict[str, tuple[np.ndarray, dict[str, Any]]]] = {}
     lane_statuses: dict[str, str] = {}
     lane_aggregates: dict[str, dict[str, Any]] = {}
     all_block_records: list[dict[str, Any]] = []
 
+    # 1. Structural prototype generation: ALL 27 attempts must be completed unconditionally
     for lane_name, constructor in lane_constructors.items():
+        all_prototype_metrics[lane_name] = {}
         lane_winners[lane_name] = {}
-        lane_ready = True
 
         for src in ("1M", "1p5M", "2M"):
-            production_seeds = LANE_PRODUCTION_SEEDS[lane_name][src]
-            assert len(production_seeds) == 3, "Must have exactly 3 pre-registered seeds"
+            seeds = seed_dict[lane_name][src]
+            assert len(seeds) == 3, f"Must have exactly 3 pre-registered seeds for {lane_name}/{src}, got {len(seeds)}"
 
             src_prototypes: list[dict[str, Any]] = []
             src_mats: dict[int, np.ndarray] = {}
 
-            for seed in production_seeds:
+            for seed in seeds:
                 assert prototypes_generated_count < 27, "Maximum prototype generation cap (27) exceeded"
                 H_proto, metrics = constructor(source=src, seed=seed, field=field)
                 prototypes_generated_count += 1
                 src_prototypes.append(metrics)
                 src_mats[seed] = H_proto
 
+            all_prototype_metrics[lane_name][src] = src_prototypes
+
             winner_metric, sel_status = select_structural_winner(src_prototypes)
-            if winner_metric is None:
-                lane_ready = False
-                break
-            else:
+            if winner_metric is not None:
                 win_seed = winner_metric["construction_seed"]
                 lane_winners[lane_name][src] = (src_mats[win_seed], winner_metric)
 
-        if not lane_ready:
+    assert prototypes_generated_count == 27, f"Expected exactly 27 structural prototype attempts, got {prototypes_generated_count}"
+
+    # 2. Evaluation Phase: only lanes with valid winners for all 3 sources receive decoder runs
+    for lane_name in ("lane_a", "lane_b", "lane_c"):
+        has_all_sources = all(src in lane_winners[lane_name] for src in ("1M", "1p5M", "2M"))
+
+        if not has_all_sources:
             lane_statuses[lane_name] = LANE_STRUCTURAL_NOT_READY
+            lane_aggregates[lane_name] = {
+                "lane": lane_name,
+                "records_count": 0,
+                "status": "STRUCTURAL_NOT_READY",
+                "integrity_ok": False,
+            }
             continue
 
         # Evaluate the 3 winners on 15 frozen development blocks
@@ -1198,6 +1215,8 @@ def run_v38_development(
     return {
         "prototypes_generated_count": prototypes_generated_count,
         "decoder_runs_count": decoder_runs_count,
+        "all_prototype_metrics": all_prototype_metrics,
+        "lane_winners": lane_winners,
         "lane_statuses": lane_statuses,
         "lane_aggregates": lane_aggregates,
         "terminal_state": terminal_state,

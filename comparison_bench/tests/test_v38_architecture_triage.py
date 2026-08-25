@@ -257,7 +257,6 @@ def test_lane_a_tie_break_rules():
     field = GF2mField.create(32)
 
     # Test A: If old_val = 17 and candidate 1 gives identical cycle objective, selected coefficient must be 1
-    # Create graph with 1 edge and no cycles
     H_no_cyc = np.array([[17, 0], [0, 5]], dtype=np.uint8)
     supp = (H_no_cyc != 0).astype(np.uint8)
     H_opt, _, updates, _, _ = optimize_lane_a_coefficients(H_no_cyc, supp, max_sweeps=1, field=field)
@@ -285,7 +284,6 @@ def test_lane_a_tie_break_rules():
 
     # Brute-force reference
     c4, c6, c8, _ = enumerate_canonical_simple_cycles(supp_t)
-    all_cyc = c4 + c6 + c8
     H_bf = H_test.copy()
     edges = get_canonical_support_edges(supp_t)
     for _ in range(2):
@@ -359,7 +357,7 @@ def test_t9_t10_t25_t26_t35_lane_b_properties():
 # ---------------------------------------------------------------------------
 
 def test_t11_t12_t38_lane_c_properties():
-    """T11-T12, T38: Lane C variable column degrees, coupling window, and permutation sequence test."""
+    """T11-T12, T38: Lane C variable column degrees, coupling window, and permutation comparison."""
     H_c, metrics = construct_lane_c_prototype("1M", TEST_SEED_1)
     m = SOURCE_CHECKS["1M"]
     n = BLOCK_LENGTH
@@ -395,14 +393,14 @@ def test_t11_t12_t38_lane_c_properties():
             for c in check_indices:
                 assert min_c_7 <= c < max_c_7
 
-    # T38: Verify position permutations sequence 0..7
+    # T38: Compare actual position permutations with independently reconstructed permutations
     support_rng = get_substream_generator(TEST_SEED_1, stream_id=1)
-    expected_perms = []
+    actual_perms = metrics["position_permutations"]
+    assert len(actual_perms) == 8
     for p in range(8):
         c_range = list(range(check_offsets[p], check_offsets[p] + allocations[p]))
-        perm_p = support_rng.permutation(c_range).tolist()
-        expected_perms.append(perm_p)
-    assert len(expected_perms) == 8
+        expected_perm_p = support_rng.permutation(c_range).tolist()
+        assert actual_perms[p] == expected_perm_p, f"Permutation mismatch at position {p}"
 
 
 def test_t22_t23_t24_lane_c_capacity_calculation():
@@ -498,14 +496,12 @@ def test_t21_real_git_sha_verification():
     real_v37_res = "67da7c64fa4150a66d020243d6292420903297fe"
     real_v37_rev = "cc1483cd568ca41fb686c40492f40b5eed81f06c"
 
-    # Verify object existence directly in Git
     r1 = subprocess.run(["git", "cat-file", "-t", real_v37_res], capture_output=True, text=True, check=True)
     assert r1.stdout.strip() == "commit"
 
     r2 = subprocess.run(["git", "cat-file", "-t", real_v37_rev], capture_output=True, text=True, check=True)
     assert r2.stdout.strip() == "commit"
 
-    # Verify hallucinated SHAs do not appear in tracked V38 docs
     hallucinated_shas = [
         "cc1483cd4d7d3d2dc90bc02c4cf2db44d5ba73bf",
         "67da7c649646b9c9910d52489ae476ceae7fdb57",
@@ -553,7 +549,6 @@ def test_order_invariant_block_pairing():
     records_canonical = _create_dummy_15_records()
     agg_canonical = aggregate_lane_results(records_canonical)
 
-    # Permute list randomly
     rng = np.random.default_rng(12345)
     perm_indices = rng.permutation(len(records_canonical)).tolist()
     records_permuted = [records_canonical[i] for i in perm_indices]
@@ -642,7 +637,7 @@ def test_t18_t19_t32_triage_gate_branches():
 
     # Failure: source degradation > 5%
     recs_deg = _create_dummy_15_records(errors_map={
-        "1M": [190, 190, 190, 190, 190],  # median 190 vs baseline 171 -> +11% degradation
+        "1M": [190, 190, 190, 190, 190],
         "1p5M": [140, 140, 140, 140, 140],
         "2M": [140, 140, 140, 140, 140],
     })
@@ -766,45 +761,154 @@ def test_t39_t40_t41_lane_a_behavioral_rank_and_early_stop():
     """T39-T41: Behavioral tests for Lane A sweep-1 rank continuation, final rank gate, and early stop."""
     field = GF2mField.create(32)
 
-    # T39: Sweep-1 rank deficiency does not prematurely stop or invalidate execution
-    # Fixture: 3 checks, 4 vars, initial matrix has identical row 0 and row 1 (rank 2 < 3)
-    H_rank_def = np.array([
-        [1, 2, 3, 0],
-        [1, 2, 3, 0],  # rank deficient initially
-        [0, 0, 1, 1],
+    # T39: Explicit intermediate rank deficiency fixture (4 checks, 4 vars)
+    # Check 2 and Check 3 both connect only to var 0 (no cycles).
+    # After sweep 1, row 2 becomes [1, 0, 0, 0] and row 3 becomes [1, 0, 0, 0].
+    # Therefore, rank_after_sweep_1 is strictly 3 < 4 (deficient!).
+    H_fixture = np.array([
+        [1, 2, 0, 0],
+        [0, 3, 4, 0],
+        [5, 0, 0, 0],
+        [6, 0, 0, 0],
     ], dtype=np.uint8)
-    supp = (H_rank_def != 0).astype(np.uint8)
+    supp = (H_fixture != 0).astype(np.uint8)
     H_opt, sweeps, updates, rank_s1, final_rank = optimize_lane_a_coefficients(
-        H_rank_def, supp, max_sweeps=2, field=field
+        H_fixture, supp, max_sweeps=2, field=field
     )
-    # Execution completes both sweeps (or early stops gracefully)
-    assert sweeps >= 1
-    assert rank_s1 > 0
+    # Explicitly assert intermediate rank deficiency: rank_after_sweep_1 < number_of_checks
+    assert rank_s1 == 3
+    assert rank_s1 < 4, f"Expected rank_s1 < 4, got {rank_s1}"
+    # Assert search was permitted to proceed to sweep 2 without premature invalidation
+    assert sweeps == 2
 
     # T40: Final rank deficiency marks prototype structurally invalid
-    H_bad_final = np.zeros((184, 1024), dtype=np.uint8)
-    for j in range(1024):
-        H_bad_final[0, j] = 1
-        H_bad_final[1, j] = 1  # only 2 rows non-empty -> rank <= 2 < 184
-    valid, reason = check_structural_validity(H_bad_final, (184, 1024), dc_max=1024, field=field)
+    valid, reason = check_structural_validity(H_opt, (4, 4), dc_max=16, field=field)
     assert valid is False
     assert "rank deficient" in reason
 
     # T41: Zero-change early stop terminates before max sweeps and computes final rank
-    H_opt_1, sweeps_1, _, _, final_r1 = optimize_lane_a_coefficients(H_opt, supp, max_sweeps=5, field=field)
-    # Since H_opt is already local minimum, sweep 1 produces 0 updates and stops immediately
-    assert sweeps_1 == 1
-    assert final_r1 > 0
+    H_opt_2, sweeps_2, updates_2, _, final_r2 = optimize_lane_a_coefficients(
+        H_opt, supp, max_sweeps=5, field=field
+    )
+    # Already local optimum -> sweep 1 produces 0 updates and stops immediately
+    assert sweeps_2 == 1
+    assert updates_2 == 0
+    assert final_r2 == 3
 
 
 # ---------------------------------------------------------------------------
-# Production Orchestrator & Safety Tests
+# Orchestration & Fail-Closed Safety Tests
 # ---------------------------------------------------------------------------
 
 def test_production_orchestrator_guard():
-    """Safety: run_v38_development raises PermissionError when authorization is False."""
+    """Safety A: run_v38_development raises PermissionError when authorization is False."""
     with pytest.raises(PermissionError, match="V38 development execution not authorized"):
         run_v38_development(development_execution_authorized=False)
+
+
+def test_production_orchestration_all_27_attempts_and_fail_closed():
+    """Safety B-F: Orchestration completes all 27 attempts, manages NOT_READY lane decoder runs, and respects limits."""
+    # Create a test-only seed dictionary with 3 test seeds per lane/source (seeds >= 938001)
+    test_seed_dict = {
+        "lane_a": {
+            "1M": [938101, 938102, 938103],
+            "1p5M": [938104, 938105, 938106],
+            "2M": [938107, 938108, 938109],
+        },
+        "lane_b": {
+            "1M": [938201, 938202, 938203],
+            "1p5M": [938204, 938205, 938206],
+            "2M": [938207, 938208, 938209],
+        },
+        "lane_c": {
+            "1M": [938301, 938302, 938303],
+            "1p5M": [938304, 938305, 938306],
+            "2M": [938307, 938308, 938309],
+        },
+    }
+
+    # Execute authorized test-only orchestration with fake_runner=True
+    res = run_v38_development(
+        development_execution_authorized=True,
+        fake_runner=True,
+        custom_seed_dict=test_seed_dict,
+    )
+
+    # B: Exactly 27 structural attempts generated
+    assert res["prototypes_generated_count"] == 27
+    for lane in ("lane_a", "lane_b", "lane_c"):
+        for src in ("1M", "1p5M", "2M"):
+            assert len(res["all_prototype_metrics"][lane][src]) == 3
+
+    # D & E: Each READY lane receives 15 decoder runs; max decoder runs <= 45
+    for lane, st in res["lane_statuses"].items():
+        if st in (LANE_READY, LANE_EVALUATED_NO_SIGNAL, LANE_PROMISING_DIRECTION_SIGNAL):
+            assert res["lane_aggregates"][lane]["records_count"] == 15
+        else:
+            assert res["lane_aggregates"][lane]["records_count"] == 0
+
+    assert res["decoder_runs_count"] <= 45
+
+    # F: Assert no fourth seed is ever used in pre-registered lists
+    for lane in ("lane_a", "lane_b", "lane_c"):
+        for src in ("1M", "1p5M", "2M"):
+            assert len(LANE_PRODUCTION_SEEDS[lane][src]) == 3
+
+
+def test_orchestration_not_ready_lane_gets_zero_decoder_runs(monkeypatch):
+    """Safety C & D: If one source in a lane lacks a winner, that lane gets 0 decoder runs while other READY lanes get 15."""
+    test_seed_dict = {
+        "lane_a": {
+            "1M": [938101, 938102, 938103],
+            "1p5M": [938104, 938105, 938106],
+            "2M": [938107, 938108, 938109],
+        },
+        "lane_b": {
+            "1M": [938201, 938202, 938203],
+            "1p5M": [938204, 938205, 938206],
+            "2M": [938207, 938208, 938209],
+        },
+        "lane_c": {
+            "1M": [938301, 938302, 938303],
+            "1p5M": [938304, 938305, 938306],
+            "2M": [938307, 938308, 938309],
+        },
+    }
+
+    # Monkeypatch construct_lane_a_prototype for 1M to return structurally invalid matrix
+    orig_construct_a = construct_lane_a_prototype
+
+    def _mock_construct_a(source: str, seed: int, **kwargs):
+        H, metrics = orig_construct_a(source=source, seed=seed, **kwargs)
+        if source == "1M":
+            metrics["structurally_valid"] = False
+            metrics["structural_failure_reason"] = "Mocked structural failure"
+        return H, metrics
+
+    monkeypatch.setattr(
+        "comparison_bench.formal_ir.v38_architecture_triage.construct_lane_a_prototype",
+        _mock_construct_a,
+    )
+
+    res = run_v38_development(
+        development_execution_authorized=True,
+        fake_runner=True,
+        custom_seed_dict=test_seed_dict,
+    )
+
+    # All 27 structural attempts were STILL generated unconditionally
+    assert res["prototypes_generated_count"] == 27
+    assert len(res["all_prototype_metrics"]["lane_a"]["1p5M"]) == 3
+    assert len(res["all_prototype_metrics"]["lane_a"]["2M"]) == 3
+
+    # Lane A is NOT READY and received 0 decoder runs
+    assert res["lane_statuses"]["lane_a"] == LANE_STRUCTURAL_NOT_READY
+    assert res["lane_aggregates"]["lane_a"]["records_count"] == 0
+
+    # Lanes B and C are READY and received exactly 15 decoder runs each
+    assert res["lane_aggregates"]["lane_b"]["records_count"] == 15
+    assert res["lane_aggregates"]["lane_c"]["records_count"] == 15
+    assert res["decoder_runs_count"] == 30  # 15 + 15 = 30
 
 
 def test_production_seeds_protected_constants():
