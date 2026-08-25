@@ -1,3 +1,23 @@
+## 2026-08-25 V38P0 invalidation and V38R1 implementation acceptance
+
+- Root-cause invalidation [repo-observed, decision]: V38P0 `run_01` passed
+  `u2_bob` instead of complete `bob` to `get_conditional_posterior_l2`.
+  Therefore the 45-record decoder evidence and `V38_NO_ROUTE_SIGNAL` are
+  invalid; the terminal state is `V38_DIRECTION_EVIDENCE_INVALID`.
+- Bounded structural evidence [decision]: the 27/27 structural records remain
+  retained, but they do not support lane-performance claims, a `d_v >= 3`
+  conclusion, or a claim that cycle optimization is ineffective.
+- V38R1 implementation [repo-observed]: corrected implementation candidate
+  `8f7bc7d8d7366772ff425528cd1080fa67ef7509`; independent implementation
+  acceptance commit `65301365517af5718fce382cc8c9e40dd371ad65`. This is an
+  accepted implementation boundary, not a scientific result, qualification,
+  promotion, or decoder-performance claim.
+- Execution boundary [decision]: V38R1 `run_02` is absent, unauthorized, and
+  unexecuted. Any future decoder run requires a new explicit user
+  `EXECUTE_AUTH` bound to the accepted implementation SHA. Do not record
+  V38R1 as scientific evidence until that separately authorized execution and
+  review occur.
+
 ## 2026-08-25 V37R1 P1 empirical-P DE screening: bounded negative result (`P1_NO_FINITE_FEASIBLE_DE_ADVANCE`)
 
 - Direct evidence [repo-observed]: 2,349 real empirical-P GF(32) DE screening
