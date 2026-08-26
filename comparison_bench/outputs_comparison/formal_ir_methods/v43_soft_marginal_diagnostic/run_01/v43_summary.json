@@ -1,0 +1,302 @@
+{
+  "cycle_id": "V43P0",
+  "change_id": "formal-ir-v43-soft-marginal-diagnostic",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "execution_scope": "v43_diagnostic_18_calls_exactly_once",
+  "fake_runner": false,
+  "mechanism_id": "cond_soft_marginal",
+  "mechanism_candidate": "soft-marginal",
+  "provenance": {
+    "authorized_target_sha": "bc47f0f236f829410bad3a2a95a0e621b7574ec3",
+    "sha_binding": {
+      "HEAD": "bc47f0f236f829410bad3a2a95a0e621b7574ec3",
+      "origin/formal-ir-mainline": "bc47f0f236f829410bad3a2a95a0e621b7574ec3"
+    },
+    "structural_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v38_architecture_triage\\run_01\\v38_structural_prototypes.json",
+    "structural_records_strict_match": 3,
+    "predecessor_cycle": "V42P0",
+    "predecessor_terminal_state": "V42_GO_STRUCTURE / BOTH_ARMS_GATES_FAILED",
+    "predecessor_plan_sha": "53fb371655c5d8c644395ef07dcd9e0a24ec804f",
+    "predecessor_execution_sha": "f2ea4fa2c97f6c2ffe5fe6c27f0d84c8f7874e9b",
+    "predecessor_result_sha": "1920939200f02be91a8c4849a711ffa7857c5f8f",
+    "v43_accepted_plan_sha": "13c791e58c0f2a886af5d49cd26af493476dd4f9"
+  },
+  "v25_counts_provenance": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+    "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts",
+    "role": "source-specific V25 TRAIN empirical counts (read-only)",
+    "exists": true
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": 18
+    },
+    "decoder_calls_started": {
+      "total": 18
+    },
+    "decoder_calls_completed": {
+      "total": 18
+    },
+    "structural_reconstruction_decoder_calls": 0,
+    "preflight_decoder_calls": 0
+  },
+  "npz_policy": {
+    "forbidden_winner_npz_read": false,
+    "any_npz_output_written": false,
+    "v25_channel_counts_npz_read_only_allowed": true
+  },
+  "routing_trace": [
+    "rule_0_integrity_ok",
+    "rule_2_only_oracle_passes -> V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK"
+  ],
+  "terminal_state": "V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK",
+  "terminal_reason": "SOFT_MARGINAL_ARM_GATE_FAILED",
+  "stopped_for_analysis": {
+    "cond_oracle": false,
+    "cond_soft_marginal": true
+  },
+  "oracle_arm_wrong_codeword_anomaly": false,
+  "needs_1p5m_structure_branch": false,
+  "soft_marginal_diagnostics_by_source": {
+    "1M": {
+      "mean_abs_diff_oracle_vs_soft": 0.0007486881153289864
+    },
+    "1p5M": {
+      "mean_abs_diff_oracle_vs_soft": 0.0006797150718445936
+    },
+    "2M": {
+      "mean_abs_diff_oracle_vs_soft": 0.0007634794230303019
+    }
+  },
+  "gate_evaluation": {
+    "cond_oracle": {
+      "condition": "cond_oracle",
+      "calls": 9,
+      "g1_overall_exact_ge_7_of_9": {
+        "exact_total": 8,
+        "threshold": 7,
+        "pass": true
+      },
+      "g2_every_source_ge_2_of_3": {
+        "exact_by_source": {
+          "1M": 3,
+          "1p5M": 2,
+          "2M": 3
+        },
+        "threshold_per_source": 2,
+        "pass": true
+      },
+      "g3_wrong_zero": {
+        "wrong_count": 0,
+        "pass": true
+      },
+      "passed": true
+    },
+    "cond_soft_marginal": {
+      "condition": "cond_soft_marginal",
+      "calls": 9,
+      "g1_overall_exact_ge_7_of_9": {
+        "exact_total": 6,
+        "threshold": 7,
+        "pass": false
+      },
+      "g2_every_source_ge_2_of_3": {
+        "exact_by_source": {
+          "1M": 2,
+          "1p5M": 2,
+          "2M": 2
+        },
+        "threshold_per_source": 2,
+        "pass": true
+      },
+      "g3_wrong_zero": {
+        "wrong_count": 1,
+        "pass": false
+      },
+      "passed": false
+    }
+  },
+  "aggregates": {
+    "per_condition": {
+      "cond_oracle": {
+        "calls": 9,
+        "exact_total": 8,
+        "wrong_count": 0,
+        "exact_by_source": {
+          "1M": 3,
+          "1p5M": 2,
+          "2M": 3
+        }
+      },
+      "cond_soft_marginal": {
+        "calls": 9,
+        "exact_total": 6,
+        "wrong_count": 1,
+        "exact_by_source": {
+          "1M": 2,
+          "1p5M": 2,
+          "2M": 2
+        }
+      }
+    },
+    "per_source": {
+      "1M": {
+        "calls": 6,
+        "exact_total": 5,
+        "by_condition": {
+          "cond_oracle": 3,
+          "cond_soft_marginal": 2
+        }
+      },
+      "1p5M": {
+        "calls": 6,
+        "exact_total": 4,
+        "by_condition": {
+          "cond_oracle": 2,
+          "cond_soft_marginal": 2
+        }
+      },
+      "2M": {
+        "calls": 6,
+        "exact_total": 5,
+        "by_condition": {
+          "cond_oracle": 3,
+          "cond_soft_marginal": 2
+        }
+      }
+    },
+    "wrong_total": 1,
+    "paired_outcomes": [
+      {
+        "block_seed": 390113,
+        "source": "1M",
+        "both_exact": true,
+        "oracle_only_exact": false,
+        "soft_marginal_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_soft_marginal": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390114,
+        "source": "1M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "soft_marginal_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_soft_marginal": 4,
+        "errors_final_delta": 4,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390115,
+        "source": "1M",
+        "both_exact": true,
+        "oracle_only_exact": false,
+        "soft_marginal_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_soft_marginal": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390213,
+        "source": "1p5M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "soft_marginal_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_soft_marginal": 186,
+        "errors_final_delta": 186,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390214,
+        "source": "1p5M",
+        "both_exact": true,
+        "oracle_only_exact": false,
+        "soft_marginal_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_soft_marginal": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390215,
+        "source": "1p5M",
+        "both_exact": false,
+        "oracle_only_exact": false,
+        "soft_marginal_only_exact": true,
+        "neither_exact": false,
+        "errors_final_oracle": 42,
+        "errors_final_soft_marginal": 0,
+        "errors_final_delta": -42,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390313,
+        "source": "2M",
+        "both_exact": true,
+        "oracle_only_exact": false,
+        "soft_marginal_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_soft_marginal": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390314,
+        "source": "2M",
+        "both_exact": true,
+        "oracle_only_exact": false,
+        "soft_marginal_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_soft_marginal": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390315,
+        "source": "2M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "soft_marginal_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_soft_marginal": 112,
+        "errors_final_delta": 112,
+        "pairing_errors_initial_equal": true
+      }
+    ],
+    "soft_marginal_diagnostics_by_source": {
+      "1M": {
+        "mean_abs_diff_oracle_vs_soft": 0.0007486881153289864
+      },
+      "1p5M": {
+        "mean_abs_diff_oracle_vs_soft": 0.0006797150718445936
+      },
+      "2M": {
+        "mean_abs_diff_oracle_vs_soft": 0.0007634794230303019
+      }
+    }
+  },
+  "master_stop_rule": "\u552f\u4e00\u4e00\u6b21 18-call \u53cc\u6761\u4ef6\u914d\u5bf9\u8bca\u65ad\uff1b\u4ec5 Lane C\u3001\u56fa\u5b9a\u5404 source ordinal-2 \u4ee3\u8868\u77e9\u9635\u3001max_iter=90\u3001damping_alpha=1.0\uff0c\u4e0d\u518d\u8c03\u53c2\uff1bcond_soft_marginal \u6309\u51bb\u7ed3\u8f6f\u8fb9\u7f18\u5316\uff08marginal_counts[u2,b]=\u03a3_u1 counts_true[u1*32+u2,b]\uff0cP_soft=marginal/\u03a3_u2' marginal\uff0c\u6bcf b \u5171\u4eab\u5f52\u4e00\u5316\uff0c\u4e0d\u505a hard u1_hat\uff0c\u65e0 pilot/\u566a\u58f0/\u91cf\u5316/\u5931\u914d\u4fe1\u9053\u5f8b/joint \u8fed\u4ee3/\u65b0\u77e9\u9635/\u65b0 decoder \u53c2\u6570\uff09\u540e\u4e0d\u518d\u66f4\u6539\u3002\u65e0\u8bba\u7ed3\u679c\u5982\u4f55\uff1a\u4e0d\u8ffd\u52a0 blocks\u3001\u4e0d\u8865\u8dd1\u3001\u4e0d\u505a\u7b2c\u4e8c\u8f6e\u8bca\u65ad\u3002",
+  "statistics_note": "Descriptive only; sample is tiny and clustered (18 calls = 9 unique blocks x 2 paired conditions). Exact-recovery proportions reported with n and raw counts; any interval is naive and uncorrected for clustering; no significance testing. Success means exact_l2 only.",
+  "claim_boundary": [
+    "results support ONLY bounded conditional attribution on V25 TRAIN empirical-count development blocks",
+    "the oracle arm is a capability UPPER BOUND (true Alice L1, unobtainable in practice)",
+    "the cond_soft_marginal arm is an idealized soft marginalization built from the real public empirical counts (counts_true summed over u1 per b, shared normalization, no hard u1_hat, no pilot/noise/quantization/distortion law), is NOT any concrete coded/operational L1 reconciliation result, and SHALL NOT be generalized as a real condition",
+    "V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK attributes loss ONLY to the frozen soft-marginal conditioning mechanism, never to Lane C graph structure nor to a concrete upstream coding scheme or real system",
+    "V43_ANOMALOUS_INVERSION means ONLY finite-sample/iteration/posterior differences require inspection; never evidence that soft-marginal outperforms oracle"
+  ],
+  "integrity_failures": [],
+  "performance_interpretation_presented": true
+}
