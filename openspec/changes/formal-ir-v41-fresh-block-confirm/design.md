@@ -233,7 +233,10 @@ second argument element-equal to complete `bob`), `corrected_equals_direct`,
 (max-abs difference vs the `u2_bob` prior > 1e-6), `argmax_divergence`. A
 failing sentinel probe is replaceable only at plan-review stage.
 
-Integrity checks (any failure -> `V41_EVIDENCE_INVALID`):
+Integrity checks (failures of the scientific-preflight and post-evaluation
+classes J2-J6/J8-J12 yield `V41_EVIDENCE_INVALID`, whereas J1 and J7 are
+Tier 0 execution refusals - e.g. J7 = output-root-exists - that create
+NOTHING and exit non-zero with ZERO calls):
 
 | id | check |
 |---|---|

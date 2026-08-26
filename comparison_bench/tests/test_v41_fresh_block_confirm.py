@@ -8,7 +8,6 @@ is read or written (the read-only V25 counts loader stays allowed).
 from __future__ import annotations
 
 import csv
-import itertools
 import json
 import subprocess
 import sys
@@ -436,16 +435,13 @@ def test_t4_g3_single_wrong_codeword_fails_lane():
 
 
 @pytest.mark.parametrize("integrity_ok", [True, False])
-@pytest.mark.parametrize("wrong_total", [0, 1, 3])
 @pytest.mark.parametrize("pass_pair", [(True, True), (True, False), (False, True), (False, False)])
-def test_t5_truth_table_exhaustive_mutually_exclusive(integrity_ok, wrong_total, pass_pair):
+def test_t5_truth_table_exhaustive_mutually_exclusive(integrity_ok, pass_pair):
     pc, pb = pass_pair
-    terminal, reason, trace = v41.determine_v41_terminal(integrity_ok, wrong_total, pc, pb)
+    terminal, reason, trace = v41.determine_v41_terminal(integrity_ok, pc, pb)
     assert terminal in v41.ALL_TERMINALS
     if not integrity_ok:
         expected = v41.TERMINAL_EVIDENCE_INVALID
-    elif wrong_total > 0:
-        expected = v41.TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION
     elif pc and pb:
         expected = v41.TERMINAL_BOTH_LANES_RETAINED
     elif pc:
@@ -457,36 +453,56 @@ def test_t5_truth_table_exhaustive_mutually_exclusive(integrity_ok, wrong_total,
     assert terminal == expected  # lands in EXACTLY ONE terminal
     if not integrity_ok:
         assert reason is None
-    elif wrong_total > 0:
-        assert reason == v41.REASON_WRONG_CODEWORD_GLOBAL
     elif not pc and not pb:
         assert reason == v41.REASON_BOTH_LANES_GATES_FAILED
     else:
         assert reason is None
 
 
-def test_t5_stop_precedes_retained_when_any_wrong_exists():
-    for pc, pb in itertools.product([True, False], repeat=2):
-        terminal, reason, _ = v41.determine_v41_terminal(True, 1, pc, pb)
-        assert terminal == v41.TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION
-        assert reason == v41.REASON_WRONG_CODEWORD_GLOBAL
-
-
 # ---------------------------------------------------------------------------
-# T6: wrong-codeword GLOBAL termination through the full guarded runner
+# T6: wrong codewords act ONLY through each lane's own G3 (lane-local)
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("pos,lane_of_pos", [(0, "lane_c"), (5, "lane_b"), (12, "lane_c"), (17, "lane_b")])
-def test_t6_single_wrong_codeword_terminates_globally(tmp_path, monkeypatch, real_counts, pos, lane_of_pos):
-    outcome = make_positional_outcome({pos: (False, 7, True)})
-    result, root = run_scenario(tmp_path, monkeypatch, real_counts, outcome, name=f"wrong_{pos}")
-    assert result["terminal_state"] == v41.TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION
-    assert result["terminal_reason"] == v41.REASON_WRONG_CODEWORD_GLOBAL
+@pytest.mark.parametrize(
+    "wrong_positions,expected_terminal",
+    [
+        ({0}, "B_ONLY"),   # lane_c wrong at C01, lane_b clean -> B_ONLY_RETAINED
+        ({5}, "C_ONLY"),   # lane_b wrong at C06, lane_c clean -> C_ONLY_RETAINED
+        ({0, 5}, "STOP"),  # each lane carries its own wrong -> both G3 fail -> STOP
+    ],
+)
+def test_t6_wrong_codewords_act_through_own_lane_g3_only(
+    tmp_path, monkeypatch, real_counts, wrong_positions, expected_terminal,
+):
+    outcome = make_positional_outcome({pos: (False, 7, True) for pos in wrong_positions})
+    result, root = run_scenario(tmp_path, monkeypatch, real_counts, outcome, name="wrong")
     summary = json.loads((root / "v41_summary.json").read_text(encoding="utf-8"))
-    assert summary["aggregates"]["wrong_total"] >= 1
-    # even when both lanes' count clauses would numerically pass, STOP fires first
-    assert summary["routing_trace"][1].startswith("rule_1_wrong_total=")
+    assert summary["aggregates"]["wrong_total"] == len(wrong_positions)
+
+    if expected_terminal == "B_ONLY":
+        assert result["terminal_state"] == v41.TERMINAL_B_ONLY_RETAINED
+        assert result["terminal_reason"] is None
+        # the wrong-holding lane fails ONLY its own G3; the clean lane passes whole
+        assert summary["gate_evaluation"]["lane_c"]["g3_wrong_zero"]["pass"] is False
+        assert summary["gate_evaluation"]["lane_c"]["passed"] is False
+        assert summary["gate_evaluation"]["lane_b"]["passed"] is True
+    elif expected_terminal == "C_ONLY":
+        assert result["terminal_state"] == v41.TERMINAL_C_ONLY_RETAINED
+        assert result["terminal_reason"] is None
+        assert summary["gate_evaluation"]["lane_b"]["g3_wrong_zero"]["pass"] is False
+        assert summary["gate_evaluation"]["lane_b"]["passed"] is False
+        assert summary["gate_evaluation"]["lane_c"]["passed"] is True
+    else:
+        assert result["terminal_state"] == v41.TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION
+        assert result["terminal_reason"] == v41.REASON_BOTH_LANES_GATES_FAILED
+        for lane in ("lane_c", "lane_b"):
+            gate = summary["gate_evaluation"][lane]
+            # wrongs bite via own-lane G3 while this lane's count clauses still pass
+            assert gate["g3_wrong_zero"]["pass"] is False
+            assert gate["g1_overall_exact_ge_7_of_9"]["pass"] is True
+            assert gate["g2_every_source_ge_2_of_3"]["pass"] is True
+            assert gate["passed"] is False
 
 
 # ---------------------------------------------------------------------------

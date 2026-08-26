@@ -9,7 +9,8 @@ Implements the frozen V41P0 confirmation protocol (change
   ordinal-2 matrix, at the single fixed setting max_iter=90, damping_alpha=1.0.
 - Per-lane independent retention gates G1/G2/G3 (route retention only, not a
   B/C superiority test) and a total, disjoint terminal machine
-  (design Section 8 rules 0-5; integrity-first; global wrong-codeword scope).
+  (design Section 8 rules 0-4; integrity-first; wrong codewords act ONLY
+  through each lane's own zero-wrong clause G3 - no global wrong rule).
 - Hard cap 18 with structural refusal of call 19; execution exactly once;
   additive evidence outputs; no NPZ ever written.
 
@@ -230,7 +231,6 @@ ALL_TERMINALS = frozenset(
     }
 )
 
-REASON_WRONG_CODEWORD_GLOBAL = "WRONG_CODEWORD_GLOBAL"
 REASON_BOTH_LANES_GATES_FAILED = "BOTH_LANES_GATES_FAILED"
 
 G1_MIN_EXACT_TOTAL = 7  # out of 9 per lane
@@ -661,30 +661,30 @@ def evaluate_lane_gate(lane: str, records: list[dict[str, Any]]) -> dict[str, An
 
 def determine_v41_terminal(
     integrity_ok: bool,
-    wrong_total: int,
     pass_lane_c: bool,
     pass_lane_b: bool,
 ) -> tuple[str, Optional[str], list[str]]:
-    """Total, disjoint terminal machine (design Section 8 rules 0-5; first-match-wins)."""
+    """Total, disjoint terminal machine (design Section 8 rules 0-4; first-match-wins).
+
+    ``pass_lane_*`` already folds in each lane's own G1/G2/G3 outcome,
+    including its zero-wrong clause G3; wrong codewords act ONLY through that
+    lane-local gate and can never veto the other lane (no global wrong rule).
+    """
     trace: list[str] = []
     if not integrity_ok:
         trace.append("rule_0_integrity_or_execution_failure -> V41_EVIDENCE_INVALID")
         return TERMINAL_EVIDENCE_INVALID, None, trace
     trace.append("rule_0_integrity_ok")
-    if wrong_total > 0:
-        trace.append(f"rule_1_wrong_total={wrong_total} -> V41_STOP_BC_PARAMETER_OPTIMIZATION")
-        return TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION, REASON_WRONG_CODEWORD_GLOBAL, trace
-    trace.append("rule_1_no_wrong_codeword_no_fire")
     if pass_lane_c and pass_lane_b:
-        trace.append("rule_2_both_gates_pass -> V41_BOTH_LANES_RETAINED")
+        trace.append("rule_1_both_gates_pass -> V41_BOTH_LANES_RETAINED")
         return TERMINAL_BOTH_LANES_RETAINED, None, trace
     if pass_lane_c:
-        trace.append("rule_3_only_lane_c_passes -> V41_C_ONLY_RETAINED")
+        trace.append("rule_2_only_lane_c_passes -> V41_C_ONLY_RETAINED")
         return TERMINAL_C_ONLY_RETAINED, None, trace
     if pass_lane_b:
-        trace.append("rule_4_only_lane_b_passes -> V41_B_ONLY_RETAINED")
+        trace.append("rule_3_only_lane_b_passes -> V41_B_ONLY_RETAINED")
         return TERMINAL_B_ONLY_RETAINED, None, trace
-    trace.append("rule_5_both_gates_failed -> V41_STOP_BC_PARAMETER_OPTIMIZATION")
+    trace.append("rule_4_both_gates_failed -> V41_STOP_BC_PARAMETER_OPTIMIZATION")
     return TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION, REASON_BOTH_LANES_GATES_FAILED, trace
 
 
@@ -1082,7 +1082,6 @@ def run_v41_confirmation(
         gate_evaluation = {lane: evaluate_lane_gate(lane, records) for lane in LANE_ORDER}
         terminal_state, terminal_reason, routing_trace = determine_v41_terminal(
             integrity_ok=True,
-            wrong_total=int(aggregates["wrong_total"]),
             pass_lane_c=bool(gate_evaluation["lane_c"]["passed"]),
             pass_lane_b=bool(gate_evaluation["lane_b"]["passed"]),
         )
