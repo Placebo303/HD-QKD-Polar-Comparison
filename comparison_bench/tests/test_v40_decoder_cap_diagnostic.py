@@ -661,13 +661,14 @@ def test_t9_machine_truth_table_total_disjoint_invalid_precedence():
     }
     assert j12_unreachable > 0
 
-    # Impossible combinations cannot fire: probe data is ignored whenever W_A > 0.
-    terminal, term_reason, _ = v40.determine_v40_terminal(
-        integrity_ok=True, w_a=1, r_a=4, imp_a=0.9, phase_b_ran=True, w_b=1,
-        r_b_new=9, probe_ran=True, probe_aggregates=PROBE_VARIANTS[3],
-    )
-    assert terminal == v40.TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION
-    assert term_reason == v40.REASON_WRONG_CODEWORD_PHASE_A
+    # V40P0 revision: illegal Phase B/probe combinations are never absorbed.
+    # W_A > 0 with phase_b_ran=True raises J12 instead of mapping to STOP_BC.
+    with pytest.raises(v40.IntegrityFailure) as excinfo:
+        v40.determine_v40_terminal(
+            integrity_ok=True, w_a=1, r_a=4, imp_a=0.9, phase_b_ran=True, w_b=1,
+            r_b_new=9, probe_ran=True, probe_aggregates=PROBE_VARIANTS[3],
+        )
+    assert excinfo.value.check_id == "J12"
 
     # EVIDENCE_INVALID precedence overrides every combination.
     for w_a, r_a, imp_a in itertools.product((0, 1), (0, 2, 4), (0.0, 0.3)):
@@ -699,10 +700,17 @@ def test_t9_probe_truth_table_exhaustive_and_mutually_exclusive():
 
 
 def test_t10_boundaries_phase_routing():
-    # R_A = 4 with W_A > 0 -> STOP_BC (probe unreachable despite strong rescues).
+    # V40P0 revision: with W_A > 0 a probe record is illegal (no CAP_MATERIAL
+    # route) -> J12, never absorbed by STOP_BC.
+    with pytest.raises(v40.IntegrityFailure) as excinfo:
+        v40.determine_v40_terminal(
+            integrity_ok=True, w_a=1, r_a=4, imp_a=0.9, probe_ran=True,
+            probe_aggregates=PROBE_VARIANTS[3])
+    assert excinfo.value.check_id == "J12"
+    # The same routing without the illegal probe record still lands on STOP_BC
+    # (probe unreachable despite strong rescues).
     terminal, reason, _ = v40.determine_v40_terminal(
-        integrity_ok=True, w_a=1, r_a=4, imp_a=0.9, probe_ran=True,
-        probe_aggregates=PROBE_VARIANTS[3])
+        integrity_ok=True, w_a=1, r_a=4, imp_a=0.9)
     assert (terminal, reason) == (v40.TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION, v40.REASON_WRONG_CODEWORD_PHASE_A)
 
     # R_A = 4 with W_A = 0 -> CAP_MATERIAL -> probe at (90, 1.0).
@@ -1110,3 +1118,179 @@ def test_t16_phase_gating_j12():
     with pytest.raises(v40.IntegrityFailure) as excinfo:
         v40.determine_v40_terminal(integrity_ok=True, w_a=0, r_a=4, imp_a=0.0, probe_ran=False)
     assert excinfo.value.check_id == "J12"
+
+
+# ---------------------------------------------------------------------------
+# T17: scientific-preflight failures persist invalid evidence (V40P0 revision)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "check_id,target",
+    [
+        ("J1", "extract_instances"),
+        ("J3", "verify_representative_ordinals"),
+        ("POSTERIOR_BINDING", "posterior_binding_preflight"),
+    ],
+)
+def test_t17_scientific_preflight_failure_persists_invalid_evidence(
+    tmp_path, monkeypatch, real_counts, check_id, target
+):
+    world = FakeWorld()
+    calls: list[dict] = []
+    install_stub(monkeypatch, lambda kwargs: (False, 100), calls)
+
+    def boom(*args, **kwargs):
+        raise v40.IntegrityFailure(check_id, f"injected {check_id} failure")
+
+    monkeypatch.setattr(v40, target, boom)
+    root = tmp_path / f"preflight_{check_id}"
+    kwargs = dict(
+        execution_authorized=True,
+        authorized_target_sha="f" * 40,
+        fake_runner=True,
+        output_root=root,
+        structural_authority_path=world.authority_file(tmp_path),
+        counts_by_source=real_counts,
+        check_git=False,
+        check_scoped_dirty=False,
+        constructors=world.constructors,
+    )
+    result = v40.run_v40_diagnostic(**kwargs)
+
+    assert result["terminal_state"] == v40.TERMINAL_EVIDENCE_INVALID
+    assert result["terminal_reason"] is None
+    assert result["integrity_failures"] == [(check_id, f"injected {check_id} failure")]
+    assert calls == []  # evaluator truly never invoked
+
+    names = {p.name for p in root.iterdir()}
+    assert names == {"v40_invalid_notice.json", "v40_summary.json"}
+    notice = json.loads((root / "v40_invalid_notice.json").read_text(encoding="utf-8"))
+    assert notice["terminal_state"] == v40.TERMINAL_EVIDENCE_INVALID
+    assert notice["partial_records_retained_byte_for_byte"] is False
+    assert notice["integrity_failures"] == [{"check": check_id, "message": f"injected {check_id} failure"}]
+
+    summary = json.loads((root / "v40_summary.json").read_text(encoding="utf-8"))
+    assert summary["terminal_state"] == v40.TERMINAL_EVIDENCE_INVALID
+    assert summary["performance_interpretation_presented"] is False
+    assert summary["signals"] == {} and summary["improvements"] == {}
+    assert summary["rescue_and_wrong_counts"] == {} and summary["probe_results"] is None
+    assert summary["routing_trace"] == []
+    assert not {"gates", "paired", "aggregates"} & set(summary)
+    acc = summary["accounting"]
+    assert acc["decoder_calls_planned"] == {"total": 30, "phase_a": 12, "phase_b": 12, "probe": 6}
+    assert acc["decoder_calls_started"] == {"total": 0, "phase_a": 0, "phase_b": 0, "probe": 0}
+    assert acc["decoder_calls_completed"] == {"total": 0, "phase_a": 0, "phase_b": 0, "probe": 0}
+    assert summary["integrity_failures"] == [
+        {"check": check_id, "message": f"injected {check_id} failure"}
+    ]
+
+    # Relaunch on the same root is refused (J8): stop, no rerun.
+    with pytest.raises(FileExistsError):
+        v40.run_v40_diagnostic(**kwargs)
+
+
+def test_t13_runner_refuses_sha_mismatch_before_root_creation(tmp_path, real_counts):
+    world = FakeWorld()
+    root = tmp_path / "sha_mismatch_root"
+    with pytest.raises(v40.IntegrityFailure) as excinfo:
+        v40.run_v40_diagnostic(
+            execution_authorized=True,
+            authorized_target_sha="0" * 40,
+            fake_runner=True,
+            output_root=root,
+            structural_authority_path=world.authority_file(tmp_path),
+            counts_by_source=real_counts,
+            check_git=True,
+            check_scoped_dirty=False,
+            constructors=world.constructors,
+        )
+    assert excinfo.value.check_id == "J11_SHA_BINDING_MISMATCH"
+    assert not root.exists()
+
+
+# ---------------------------------------------------------------------------
+# T18: terminal-machine phase-consistency guards (V40P0 revision)
+# ---------------------------------------------------------------------------
+
+
+def test_t18_phase_b_ran_without_trigger_raises_j12():
+    cases = [
+        dict(w_a=0, r_a=2, imp_a=0.5),   # R_A=2 outside the trigger
+        dict(w_a=0, r_a=4, imp_a=0.9),   # R_A=4 outside the trigger
+        dict(w_a=1, r_a=0, imp_a=0.9),   # W_A>0 forbids Phase B outright
+    ]
+    for case in cases:
+        with pytest.raises(v40.IntegrityFailure) as excinfo:
+            v40.determine_v40_terminal(integrity_ok=True, phase_b_ran=True, **case)
+        assert excinfo.value.check_id == "J12"
+
+
+def test_t18_probe_without_legal_route_raises_j12():
+    # No legal trigger anywhere (IMP_A < 0.25) yet a probe record exists -> J12.
+    with pytest.raises(v40.IntegrityFailure) as excinfo:
+        v40.determine_v40_terminal(
+            integrity_ok=True, w_a=0, r_a=0, imp_a=0.2,
+            probe_ran=True, probe_aggregates=PROBE_VARIANTS[3])
+    assert excinfo.value.check_id == "J12"
+
+    # Routing ends at WEAK_RESIDUAL (no probe route) yet a probe ran -> J12.
+    with pytest.raises(v40.IntegrityFailure) as excinfo:
+        v40.determine_v40_terminal(
+            integrity_ok=True, w_a=0, r_a=2, imp_a=0.9,
+            probe_ran=True, probe_aggregates=PROBE_VARIANTS[3])
+    assert excinfo.value.check_id == "J12"
+
+
+def test_t18_legal_routes_match_original_terminal_machine():
+    # Legal Phase B path ending DAMPING_NO_VALUE.
+    terminal, reason, _ = v40.determine_v40_terminal(
+        integrity_ok=True, w_a=0, r_a=1, imp_a=0.5, phase_b_ran=True, w_b=0, r_b_new=2)
+    assert (terminal, reason) == (v40.TERMINAL_GO_STRUCTURE, v40.REASON_DAMPING_NO_VALUE)
+
+    # Legal CAP_MATERIAL probe route -> setting (90, 1.0) -> CONFIRM_ALLOWED.
+    assert v40.resolve_probe_setting(True, False) == (90, 1.0)
+    terminal, _, trace = v40.determine_v40_terminal(
+        integrity_ok=True, w_a=0, r_a=4, imp_a=0.0, probe_ran=True,
+        probe_aggregates=PROBE_VARIANTS[3])
+    assert terminal == v40.TERMINAL_PROBE_CONFIRM_ALLOWED
+    assert v40.SIGNAL_CAP_MATERIAL in trace[-2]
+
+    # Legal DAMPING_VALUE probe route -> setting (90, 0.7) -> CONFIRM_ALLOWED.
+    assert v40.resolve_probe_setting(False, True) == (90, 0.7)
+    terminal, _, _ = v40.determine_v40_terminal(
+        integrity_ok=True, w_a=0, r_a=1, imp_a=0.5, phase_b_ran=True,
+        w_b=0, r_b_new=3, probe_ran=True, probe_aggregates=PROBE_VARIANTS[3])
+    assert terminal == v40.TERMINAL_PROBE_CONFIRM_ALLOWED
+
+
+def test_t18_runner_routes_machine_j12_to_invalid_evidence(tmp_path, monkeypatch, real_counts):
+    world = FakeWorld()
+    calls: list[dict] = []
+    install_stub(monkeypatch, sc_cap_material_confirm(), calls)
+
+    def boom(**kwargs):
+        raise v40.IntegrityFailure("J12", "injected machine inconsistency")
+
+    monkeypatch.setattr(v40, "determine_v40_terminal", boom)
+    root = tmp_path / "j12run"
+    result = v40.run_v40_diagnostic(
+        execution_authorized=True,
+        authorized_target_sha="f" * 40,
+        fake_runner=True,
+        output_root=root,
+        structural_authority_path=world.authority_file(tmp_path),
+        counts_by_source=real_counts,
+        check_git=False,
+        check_scoped_dirty=False,
+        constructors=world.constructors,
+    )
+    assert result["terminal_state"] == v40.TERMINAL_EVIDENCE_INVALID
+    assert result["integrity_failures"][0][0] == "J12"
+    summary = json.loads((root / "v40_summary.json").read_text(encoding="utf-8"))
+    assert summary["terminal_state"] == v40.TERMINAL_EVIDENCE_INVALID
+    assert summary["integrity_failures"] == [
+        {"check": "J12", "message": "injected machine inconsistency"}
+    ]
+    assert summary["accounting"]["decoder_calls_completed"]["total"] == 18
+    assert "v40_invalid_notice.json" in {p.name for p in root.iterdir()}

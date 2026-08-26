@@ -79,13 +79,10 @@ HARD_CALL_CAP = 30
 
 # Frozen instance table A01-A12 (design Section 3). Extracted rows must equal
 # this table field-by-field in this exact order (J1).
-# NOTE (transcription reconciliation, flagged for main-thread ratification):
-# the design Section 3 table lists errors_initial=259 for A11/A12, but the
-# committed paired-comparison authority (design Section 2, read-only) records
-# 252 for block 390101 -- identical to A01-A06 on the same block_seed, as
-# required by the design's own deterministic sampling semantics and J7
-# cross-lane equality rule. The authority value 252 is frozen here; 259 is
-# unreachable under the frozen protocol and would force a spurious J1/J7.
+# NOTE: errors_initial=252 for A11/A12 (block 390101) comes from the V39
+# run_01 paired-comparison authority (design Section 2, read-only) --
+# identical to A01-A06 on the same block_seed, as required by the design's
+# deterministic sampling semantics and the J7 cross-lane equality rule.
 FROZEN_INSTANCES: tuple[dict[str, Any], ...] = (
     {"idx": "A01", "pair_no": 1, "lane": "lane_c", "source": "1M", "construction_seed_ordinal": 1, "construction_seed": 383101, "block_seed": 390101, "matrix_id": "lane_c_1M_s383101", "v39_reference_errors_initial": 252, "v39_reference_errors_final": 139, "v39_reference_exact_l2": False},
     {"idx": "A02", "pair_no": 1, "lane": "lane_b", "source": "1M", "construction_seed_ordinal": 1, "construction_seed": 382101, "block_seed": 390101, "matrix_id": "lane_b_1M_s382101", "v39_reference_errors_initial": 252, "v39_reference_errors_final": 127, "v39_reference_exact_l2": False},
@@ -684,12 +681,35 @@ def determine_v40_terminal(
     """Total/disjoint first-match-wins machine over design Section 13 rules 0-6.
 
     Returns (terminal_state, terminal_reason, routing_trace). Unreachable
-    combinations raise J12 rather than silently mapping anywhere.
+    combinations raise J12 rather than silently mapping anywhere: Phase B may
+    have run only when the unique R10 trigger holds (W_A == 0, R_A <= 1 of 12,
+    IMP_A >= 0.25), and the probe may have run only on the CAP_MATERIAL route
+    or a legal DAMPING_VALUE route; illegal Phase B/probe combinations are
+    never absorbed by a normal terminal.
     """
     trace: list[str] = []
     if not integrity_ok:
         trace.append("rule_0:integrity_first")
         return TERMINAL_EVIDENCE_INVALID, None, trace
+
+    # J12 phase-consistency guards: illegal combinations precede any routing.
+    if phase_b_ran and not phase_b_trigger(w_a, r_a, imp_a):
+        raise IntegrityFailure(
+            "J12",
+            f"Phase B ran but the unique trigger is unsatisfied "
+            f"(requires W_A==0, R_A<=1 (out of 12), IMP_A>=0.25); "
+            f"got W_A={w_a}, R_A={r_a}, IMP_A={imp_a!r}",
+        )
+    cap_material_route = w_a == 0 and r_a >= 4
+    damping_value_route = (
+        phase_b_trigger(w_a, r_a, imp_a) and phase_b_ran and w_b == 0 and r_b_new >= 3
+    )
+    if probe_ran and not (cap_material_route or damping_value_route):
+        raise IntegrityFailure(
+            "J12",
+            "probe ran but neither the CAP_MATERIAL route nor a legal "
+            "DAMPING_VALUE route (W_B==0, R_B_new>=3 after a triggered Phase B) is active",
+        )
     if w_a > 0:
         trace.append(f"rule_1:W_A>0->{TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION}")
         return TERMINAL_STOP_BC_PARAMETER_OPTIMIZATION, REASON_WRONG_CODEWORD_PHASE_A, trace
@@ -1216,6 +1236,7 @@ def _persist_invalid_evidence(
     accounting: CallAccounting,
     summary_ctx: dict[str, Any],
     failures: list[tuple[str, str]],
+    partial_records_retained: bool = True,
 ) -> None:
     """Retain raw collected records byte-for-byte plus notice/summary; no aggregates.
 
@@ -1248,7 +1269,7 @@ def _persist_invalid_evidence(
         )
         with (root / "v40_summary.json").open("w", encoding="utf-8") as handle:
             json.dump(summary, handle, indent=2)
-        write_invalid_notice(root, failures, partial_records_retained=True)
+        write_invalid_notice(root, failures, partial_records_retained=partial_records_retained)
     except Exception:  # never mask the original failure with writer problems
         pass
 
@@ -1297,29 +1318,61 @@ def run_v40_diagnostic(
         verify_scoped_clean(REPO_ROOT)
 
     # ---- preflight (decoder-free, nothing written yet) --------------------
-    paired_path = Path(paired_authority_path) if paired_authority_path else PAIRED_AUTHORITY_PATH
-    summary_path = Path(summary_authority_path) if summary_authority_path else SUMMARY_AUTHORITY_PATH
-    instances = extract_instances(paired_path)  # J1/J2
-    verify_representative_ordinals(summary_path)  # J3
-    registry_ok, registry_msg = validate_probe_seeds()
-    if not registry_ok:
-        raise IntegrityFailure("J4", registry_msg)
+    # Execution-refusal failures above raise without creating any root.
+    # SCIENTIFIC preflight failures (J1-J4, matrix reconstruction, J9 counts,
+    # posterior binding) are captured here and persisted as invalid evidence
+    # in a formal additive root: planned fixed per protocol, started=0,
+    # completed=0, zero evaluator calls, no performance aggregates. Stop; no
+    # rerun.
+    summary_ctx: dict[str, Any] = {
+        "fake_runner": fake_runner,
+        "authorized_target_sha": authorized_target_sha,
+        "sha_binding": sha_binding,
+        "counts_provenance": {},
+        "structural_rows_count": 0,
+        "executed_phases": [],
+    }
+    try:
+        paired_path = Path(paired_authority_path) if paired_authority_path else PAIRED_AUTHORITY_PATH
+        summary_path = Path(summary_authority_path) if summary_authority_path else SUMMARY_AUTHORITY_PATH
+        instances = extract_instances(paired_path)  # J1/J2
+        verify_representative_ordinals(summary_path)  # J3
+        registry_ok, registry_msg = validate_probe_seeds()
+        if not registry_ok:
+            raise IntegrityFailure("J4", registry_msg)
 
-    spath = Path(structural_authority_path) if structural_authority_path else STRUCTURAL_AUTHORITY_PATH
-    matrices = reconstruct_v40_matrices(
-        reference_metrics_path=spath,
-        field=field,
-        constructors=constructors,
-        only=reconstruct_only,
-    )
+        spath = Path(structural_authority_path) if structural_authority_path else STRUCTURAL_AUTHORITY_PATH
+        matrices = reconstruct_v40_matrices(
+            reference_metrics_path=spath,
+            field=field,
+            constructors=constructors,
+            only=reconstruct_only,
+        )
+        summary_ctx["structural_rows_count"] = len(matrices)
 
-    counts = counts_by_source if counts_by_source is not None else load_v25_channel_counts()
-    for source in SOURCE_ORDER:
-        if counts[source].shape != (1024, 1024):
-            raise IntegrityFailure("J9", f"unexpected counts shape for {source}: {counts[source].shape}")
-    counts_provenance = describe_v25_counts_provenance()
+        counts = counts_by_source if counts_by_source is not None else load_v25_channel_counts()
+        for source in SOURCE_ORDER:
+            if counts[source].shape != (1024, 1024):
+                raise IntegrityFailure("J9", f"unexpected counts shape for {source}: {counts[source].shape}")
+        counts_provenance = describe_v25_counts_provenance()
+        summary_ctx["counts_provenance"] = counts_provenance
 
-    posterior_binding_preflight(counts)  # raises IntegrityFailure on any sentinel failure
+        posterior_binding_preflight(counts)  # raises IntegrityFailure on any sentinel failure
+    except IntegrityFailure as exc:
+        _persist_invalid_evidence(
+            root,
+            records=[],
+            accounting=CallAccounting(),
+            summary_ctx=summary_ctx,
+            failures=[(exc.check_id, exc.message)],
+            partial_records_retained=False,
+        )
+        return {
+            "output_root": str(root),
+            "terminal_state": TERMINAL_EVIDENCE_INVALID,
+            "terminal_reason": None,
+            "integrity_failures": [(exc.check_id, exc.message)],
+        }
 
     # ---- decoder stage: occupy the additive root NOW ----------------------
     # From this point any crash — including KeyboardInterrupt or process kill —
@@ -1328,14 +1381,6 @@ def run_v40_diagnostic(
     root.mkdir(parents=True)
     accounting = CallAccounting()
     records: list[dict[str, Any]] = []
-    summary_ctx: dict[str, Any] = {
-        "fake_runner": fake_runner,
-        "authorized_target_sha": authorized_target_sha,
-        "sha_binding": sha_binding,
-        "counts_provenance": counts_provenance,
-        "structural_rows_count": len(matrices),
-        "executed_phases": [],
-    }
     try:
         # Phase A always: exactly 12 calls in frozen order A01..A12.
         phase_a_specs = [dict(inst) for inst in instances]
@@ -1401,17 +1446,30 @@ def run_v40_diagnostic(
                 "integrity_failures": failures,
             }
 
-        terminal_state, terminal_reason, routing_trace = determine_v40_terminal(
-            integrity_ok=True,
-            w_a=w_a,
-            r_a=r_a,
-            imp_a=imp_a,
-            phase_b_ran=phase_b_ran,
-            w_b=w_b,
-            r_b_new=r_b_new,
-            probe_ran=probe_ran,
-            probe_aggregates=probe_results,
-        )
+        try:
+            terminal_state, terminal_reason, routing_trace = determine_v40_terminal(
+                integrity_ok=True,
+                w_a=w_a,
+                r_a=r_a,
+                imp_a=imp_a,
+                phase_b_ran=phase_b_ran,
+                w_b=w_b,
+                r_b_new=r_b_new,
+                probe_ran=probe_ran,
+                probe_aggregates=probe_results,
+            )
+        except IntegrityFailure as exc:
+            # Runner-layer consistency guard: a machine-detected J12 (illegal
+            # Phase B/probe combination) terminates as invalid evidence with
+            # the check id retained -- never absorbed by a normal terminal.
+            _persist_invalid_evidence(root, records=records, accounting=accounting,
+                                      summary_ctx=summary_ctx, failures=[(exc.check_id, exc.message)])
+            return {
+                "output_root": str(root),
+                "terminal_state": TERMINAL_EVIDENCE_INVALID,
+                "terminal_reason": None,
+                "integrity_failures": [(exc.check_id, exc.message)],
+            }
 
         improvements = {"IMP_A": imp_a_report}
         if imp_b_report is not None:
