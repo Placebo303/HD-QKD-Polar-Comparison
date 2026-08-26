@@ -1,0 +1,289 @@
+{
+  "cycle_id": "V42P0",
+  "change_id": "formal-ir-v42-conditional-realism-diagnostic",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "execution_scope": "v42_diagnostic_18_calls_exactly_once",
+  "fake_runner": false,
+  "mechanism_id": "cond_estimated_l1",
+  "mechanism_candidate": "Candidate A",
+  "provenance": {
+    "authorized_target_sha": "f2ea4fa2c97f6c2ffe5fe6c27f0d84c8f7874e9b",
+    "sha_binding": {
+      "HEAD": "f2ea4fa2c97f6c2ffe5fe6c27f0d84c8f7874e9b",
+      "origin/formal-ir-mainline": "f2ea4fa2c97f6c2ffe5fe6c27f0d84c8f7874e9b"
+    },
+    "structural_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v38_architecture_triage\\run_01\\v38_structural_prototypes.json",
+    "structural_records_strict_match": 3,
+    "predecessor_cycle": "V41P0",
+    "predecessor_terminal_state": "V41_C_ONLY_RETAINED",
+    "predecessor_plan_sha": "e340982ea9362da532130daae9003ca742b7ef19",
+    "predecessor_execution_sha": "6d75e754899e8470445c2bf58f2f4ff84130fc33",
+    "v42_accepted_plan_sha": "53fb371655c5d8c644395ef07dcd9e0a24ec804f"
+  },
+  "v25_counts_provenance": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+    "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts",
+    "role": "source-specific V25 TRAIN empirical counts (read-only)",
+    "exists": true
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": 18
+    },
+    "decoder_calls_started": {
+      "total": 18
+    },
+    "decoder_calls_completed": {
+      "total": 18
+    },
+    "structural_reconstruction_decoder_calls": 0,
+    "preflight_decoder_calls": 0
+  },
+  "npz_policy": {
+    "forbidden_winner_npz_read": false,
+    "any_npz_output_written": false,
+    "v25_channel_counts_npz_read_only_allowed": true
+  },
+  "routing_trace": [
+    "rule_0_integrity_ok",
+    "rule_3_both_gates_failed -> V42_GO_STRUCTURE"
+  ],
+  "terminal_state": "V42_GO_STRUCTURE",
+  "terminal_reason": "BOTH_ARMS_GATES_FAILED",
+  "stopped_for_analysis": {
+    "cond_oracle": false,
+    "cond_estimated_l1": false
+  },
+  "oracle_arm_wrong_codeword_anomaly": false,
+  "l1_map_accuracy_by_source": {
+    "1M": 0.9928385416666666,
+    "1p5M": 0.9925130208333334,
+    "2M": 0.9925130208333334
+  },
+  "gate_evaluation": {
+    "cond_oracle": {
+      "condition": "cond_oracle",
+      "calls": 9,
+      "g1_overall_exact_ge_7_of_9": {
+        "exact_total": 7,
+        "threshold": 7,
+        "pass": true
+      },
+      "g2_every_source_ge_2_of_3": {
+        "exact_by_source": {
+          "1M": 3,
+          "1p5M": 1,
+          "2M": 3
+        },
+        "threshold_per_source": 2,
+        "pass": false
+      },
+      "g3_wrong_zero": {
+        "wrong_count": 0,
+        "pass": true
+      },
+      "passed": false
+    },
+    "cond_estimated_l1": {
+      "condition": "cond_estimated_l1",
+      "calls": 9,
+      "g1_overall_exact_ge_7_of_9": {
+        "exact_total": 0,
+        "threshold": 7,
+        "pass": false
+      },
+      "g2_every_source_ge_2_of_3": {
+        "exact_by_source": {
+          "1M": 0,
+          "1p5M": 0,
+          "2M": 0
+        },
+        "threshold_per_source": 2,
+        "pass": false
+      },
+      "g3_wrong_zero": {
+        "wrong_count": 0,
+        "pass": true
+      },
+      "passed": false
+    }
+  },
+  "aggregates": {
+    "per_condition": {
+      "cond_oracle": {
+        "calls": 9,
+        "exact_total": 7,
+        "wrong_count": 0,
+        "exact_by_source": {
+          "1M": 3,
+          "1p5M": 1,
+          "2M": 3
+        }
+      },
+      "cond_estimated_l1": {
+        "calls": 9,
+        "exact_total": 0,
+        "wrong_count": 0,
+        "exact_by_source": {
+          "1M": 0,
+          "1p5M": 0,
+          "2M": 0
+        }
+      }
+    },
+    "per_source": {
+      "1M": {
+        "calls": 6,
+        "exact_total": 3,
+        "by_condition": {
+          "cond_oracle": 3,
+          "cond_estimated_l1": 0
+        }
+      },
+      "1p5M": {
+        "calls": 6,
+        "exact_total": 1,
+        "by_condition": {
+          "cond_oracle": 1,
+          "cond_estimated_l1": 0
+        }
+      },
+      "2M": {
+        "calls": 6,
+        "exact_total": 3,
+        "by_condition": {
+          "cond_oracle": 3,
+          "cond_estimated_l1": 0
+        }
+      }
+    },
+    "wrong_total": 0,
+    "paired_outcomes": [
+      {
+        "block_seed": 390110,
+        "source": "1M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "estimated_l1_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_estimated_l1": 193,
+        "errors_final_delta": 193,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390111,
+        "source": "1M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "estimated_l1_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_estimated_l1": 216,
+        "errors_final_delta": 216,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390112,
+        "source": "1M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "estimated_l1_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_estimated_l1": 136,
+        "errors_final_delta": 136,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390210,
+        "source": "1p5M",
+        "both_exact": false,
+        "oracle_only_exact": false,
+        "estimated_l1_only_exact": false,
+        "neither_exact": true,
+        "errors_final_oracle": 248,
+        "errors_final_estimated_l1": 320,
+        "errors_final_delta": 72,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390211,
+        "source": "1p5M",
+        "both_exact": false,
+        "oracle_only_exact": false,
+        "estimated_l1_only_exact": false,
+        "neither_exact": true,
+        "errors_final_oracle": 188,
+        "errors_final_estimated_l1": 221,
+        "errors_final_delta": 33,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390212,
+        "source": "1p5M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "estimated_l1_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_estimated_l1": 182,
+        "errors_final_delta": 182,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390310,
+        "source": "2M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "estimated_l1_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_estimated_l1": 239,
+        "errors_final_delta": 239,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390311,
+        "source": "2M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "estimated_l1_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_estimated_l1": 223,
+        "errors_final_delta": 223,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390312,
+        "source": "2M",
+        "both_exact": false,
+        "oracle_only_exact": true,
+        "estimated_l1_only_exact": false,
+        "neither_exact": false,
+        "errors_final_oracle": 0,
+        "errors_final_estimated_l1": 199,
+        "errors_final_delta": 199,
+        "pairing_errors_initial_equal": true
+      }
+    ],
+    "l1_map_accuracy_by_source": {
+      "1M": 0.9928385416666666,
+      "1p5M": 0.9925130208333334,
+      "2M": 0.9925130208333334
+    }
+  },
+  "master_stop_rule": "\u552f\u4e00\u4e00\u6b21 18-call \u53cc\u6761\u4ef6\u914d\u5bf9\u8bca\u65ad\uff1b\u4ec5 Lane C\u3001\u56fa\u5b9a\u5404 source ordinal-2 \u4ee3\u8868\u77e9\u9635\u3001max_iter=90\u3001damping_alpha=1.0\uff0c\u4e0d\u518d\u8c03\u53c2\uff1bcond_estimated_l1 \u673a\u5236\u6309\u7528\u6237\u88c1\u51b3 Candidate A \u51bb\u7ed3\uff08u1_hat(b)=argmax_u1 \u03a3_u2 counts[u1*32+u2,b]\uff0cprior=get_conditional_posterior_l2(counts_true,bob,u1_hat)\uff0c\u91c7\u6837\u5171\u4eab\u540c\u4e00 counts_true\uff0c\u65e0 pilot/\u566a\u58f0/\u91cf\u5316/\u5931\u914d\u4fe1\u9053\u5f8b\uff09\u540e\u4e0d\u518d\u66f4\u6539\u3002\u65e0\u8bba\u7ed3\u679c\u5982\u4f55\uff1a\u4e0d\u8ffd\u52a0 blocks\u3001\u4e0d\u8865\u8dd1\u3001\u4e0d\u505a\u7b2c\u4e8c\u8f6e\u8bca\u65ad\u3002",
+  "statistics_note": "Descriptive only; sample is tiny and clustered (18 calls = 9 unique blocks x 2 paired conditions). Exact-recovery proportions reported with n and raw counts; any interval is naive and uncorrected for clustering; no significance testing. Success means exact_l2 only.",
+  "claim_boundary": [
+    "results support ONLY bounded conditional-realism attribution on V25 TRAIN empirical-count development blocks",
+    "the oracle arm is a capability UPPER BOUND (true Alice L1, unobtainable in practice)",
+    "the cond_estimated_l1 arm (frozen Candidate A, adjudicated 2026-08-26) removes ONLY the Alice-L1 oracle while the channel law remains the TRUE V25 empirical counts",
+    "its conditioning is an idealized UNCODED MAP-L1 estimate built from the real public empirical counts, is NOT any concrete coded/operational L1 reconciliation result, and SHALL NOT be generalized as a real condition",
+    "V42_ORACLE_ONLY_CONDITIONING_BOTTLENECK attributes loss ONLY to the frozen MAP-L1 conditioning mechanism, never to a concrete upstream coding scheme or real system",
+    "V42_ANOMALOUS_INVERSION means ONLY finite-sample/iteration/posterior differences require inspection; never evidence that estimated-L1 outperforms oracle"
+  ],
+  "integrity_failures": [],
+  "performance_interpretation_presented": true
+}
