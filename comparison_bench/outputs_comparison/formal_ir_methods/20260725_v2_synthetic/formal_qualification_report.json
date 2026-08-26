@@ -1,0 +1,34 @@
+{
+  "deterministic_vectors": {
+    "cascade": "comparison_bench.tests.test_cascade_formal.CascadeFormalTest.test_noiseless_single_error_and_determinism",
+    "ldpc": "comparison_bench.tests.test_ldpc_formal.LdpcFormalTest.test_verify_failure_abort_and_real_backend_smoke",
+    "required_result": "pass_before_qualification",
+    "toeplitz": "comparison_bench.tests.test_formal_verification.FormalVerificationTest.test_golden_toeplitz_vector_and_seed_id"
+  },
+  "promotion_gates": {
+    "cascade_formal_v1|0.01": {
+      "promoted": true,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 31
+    },
+    "cascade_formal_v1|0.02": {
+      "promoted": true,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 32
+    },
+    "ldpc_formal_v1|0.01": {
+      "promoted": false,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 29
+    },
+    "ldpc_formal_v1|0.02": {
+      "promoted": false,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 14
+    }
+  }
+}

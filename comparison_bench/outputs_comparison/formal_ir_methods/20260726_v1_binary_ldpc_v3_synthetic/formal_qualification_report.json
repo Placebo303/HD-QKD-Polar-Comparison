@@ -1,0 +1,23 @@
+{
+  "decoder_reexecution": false,
+  "formal_run_manifest_sha256": "0cfb672142d99a716b1fa9d670f633f004e1252f6751835ba86f5b84d1503148",
+  "promoted": false,
+  "promotion_gates": {
+    "calibrated": {
+      "denominator": 32,
+      "promoted": false,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 3
+    },
+    "stress_125": {
+      "denominator": 32,
+      "promoted": false,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 1
+    }
+  },
+  "run_id": "binary_ldpc_v3_phase6b_synthetic_v1",
+  "run_status": "completed",
+  "schema": "binary_ldpc_v3_phase6b_report_v1",
+  "stop_reason": ""
+}

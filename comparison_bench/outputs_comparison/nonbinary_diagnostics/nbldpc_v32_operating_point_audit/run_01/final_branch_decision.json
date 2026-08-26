@@ -1,0 +1,39 @@
+{
+  "schema": "nbldpc_v32_operating_point_audit_branch_decision_v1",
+  "branch_table_frozen": [
+    {
+      "branch": "A",
+      "condition": "total infeasible",
+      "consequence": "LDPC 与 Polar 同速率方案均暂停，先重审泄漏预算/运行点"
+    },
+    {
+      "branch": "B",
+      "condition": "total feasible 且 L2 allocation infeasible",
+      "consequence": "当前 multilevel allocation 失败，joint/重新分配的 NB-Polar feasibility 价值上升，不值得先换 QC 图"
+    },
+    {
+      "branch": "C",
+      "condition": "layer 与 total 均可行",
+      "consequence": "finite graph/decoder 值得一次 corrected matched control（后续单独变更，不在本审计内执行）"
+    }
+  ],
+  "selected_branch": "C",
+  "selection_reasons": [
+    "layer-specific (L1,L2) and total feasibility hold for every source"
+  ],
+  "branch_inputs": {
+    "l1_all_ok": true,
+    "l2_all_ok": true,
+    "total_verbatim_ok": true,
+    "total_pure_ok": true
+  },
+  "d0_signature_mismatch": false,
+  "generated_by_execution_order": [
+    "manifest_freeze",
+    "d0",
+    "d1",
+    "d2",
+    "d3",
+    "final_branch_decision"
+  ]
+}

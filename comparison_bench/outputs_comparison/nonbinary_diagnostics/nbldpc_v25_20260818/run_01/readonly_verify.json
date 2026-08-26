@@ -1,0 +1,8 @@
+{
+  "schema": "nbldpc_v25_readonly_verify_v1",
+  "ok": false,
+  "problems": [
+    "missing data_inventory.json"
+  ],
+  "checked_root": "comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_01"
+}

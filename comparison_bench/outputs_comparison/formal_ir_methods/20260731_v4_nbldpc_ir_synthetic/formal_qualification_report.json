@@ -1,0 +1,21 @@
+{
+  "formal_run_manifest_sha256": "5adbc3ae5e347f547a2ac08cba74f78394c7a08bf352708292586c441cb4c572",
+  "promoted": false,
+  "promotion_gates": {
+    "0.2": {
+      "denominator_included": 128,
+      "prohibited_failures": 0,
+      "requested": 128,
+      "verified_success": 128
+    },
+    "0.3": {
+      "denominator_included": 128,
+      "prohibited_failures": 0,
+      "requested": 128,
+      "verified_success": 120
+    }
+  },
+  "readiness": true,
+  "run_id": "20260731_v4_nbldpc_ir_synthetic",
+  "run_status": "completed"
+}

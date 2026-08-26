@@ -1,0 +1,18 @@
+{
+  "candidate_ids": [
+    "nbldpc_formal_v3_layered_l050",
+    "nbldpc_formal_v3_layered_l075"
+  ],
+  "codebook_manifest_id": "265fd0d07ce44e195bf35a01a241bce7a0eab167cbdcf2322ee9d5a0954c66fe",
+  "decoder_definitions": {
+    "nbldpc_formal_v3_layered_l050": {
+      "damping": 0.5,
+      "schedule": "row_layered_fft_qspa"
+    },
+    "nbldpc_formal_v3_layered_l075": {
+      "damping": 0.75,
+      "schedule": "row_layered_fft_qspa"
+    }
+  },
+  "method": "nbldpc_formal_v3"
+}

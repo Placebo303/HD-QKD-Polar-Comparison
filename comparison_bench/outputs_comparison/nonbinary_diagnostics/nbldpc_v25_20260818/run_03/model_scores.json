@@ -1,0 +1,200 @@
+{
+  "type2_1M_20260121_184040": {
+    "ser_train": 0.23944010416666667,
+    "empirical_H_AbB_train_bits": 0.8010378248976788,
+    "per_model_split": {
+      "C01_qsc:val": {
+        "nll_bits": 3.199829878252474,
+        "mean_conf": 0.577747566898827,
+        "zero_prob_count": 0
+      },
+      "C01_qsc:hold": {
+        "nll_bits": 3.1962981828221046,
+        "mean_conf": 0.5779777436665037,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:val": {
+        "nll_bits": 3.322767066845582,
+        "mean_conf": 0.702617573599295,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:hold": {
+        "nll_bits": 3.321114233956791,
+        "mean_conf": 0.7028988788262025,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:val": {
+        "nll_bits": 0.8082277373744372,
+        "mean_conf": 0.6345464529500217,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:hold": {
+        "nll_bits": 0.8066270142211347,
+        "mean_conf": 0.6347392819362677,
+        "zero_prob_count": 0
+      },
+      "C04_source_delta:val": {
+        "nll_bits": 0.8082277373744372,
+        "mean_conf": 0.6345464529500217,
+        "zero_prob_count": 0
+      },
+      "C04_source_delta:hold": {
+        "nll_bits": 0.8066270142211347,
+        "mean_conf": 0.6347392819362677,
+        "zero_prob_count": 0
+      },
+      "C05_source_parity:val": {
+        "nll_bits": 0.8081911925051333,
+        "mean_conf": 0.6345457731496214,
+        "zero_prob_count": 0
+      },
+      "C05_source_parity:hold": {
+        "nll_bits": 0.8066807505209042,
+        "mean_conf": 0.6347304207356556,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:val": {
+        "nll_bits": 0.8820049255736981,
+        "mean_conf": 0.6028679584275206,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:hold": {
+        "nll_bits": 0.8804121318445945,
+        "mean_conf": 0.6030511459644543,
+        "zero_prob_count": 0
+      }
+    }
+  },
+  "type2_1p5M_20260121_183806": {
+    "ser_train": 0.2545651355421687,
+    "empirical_H_AbB_train_bits": 0.8255660516217248,
+    "per_model_split": {
+      "C01_qsc:val": {
+        "nll_bits": 3.374716602974077,
+        "mean_conf": 0.5550273288670476,
+        "zero_prob_count": 0
+      },
+      "C01_qsc:hold": {
+        "nll_bits": 3.3472413348288312,
+        "mean_conf": 0.5568001947238918,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:val": {
+        "nll_bits": 3.5252950914648595,
+        "mean_conf": 0.6886793866482463,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:hold": {
+        "nll_bits": 3.4967518260931922,
+        "mean_conf": 0.6908727640556888,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:val": {
+        "nll_bits": 0.8316129448255132,
+        "mean_conf": 0.6193203057841772,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:hold": {
+        "nll_bits": 0.8271290515654385,
+        "mean_conf": 0.6205163363612267,
+        "zero_prob_count": 0
+      },
+      "C04_source_delta:val": {
+        "nll_bits": 0.8316129448255132,
+        "mean_conf": 0.6193203057841772,
+        "zero_prob_count": 0
+      },
+      "C04_source_delta:hold": {
+        "nll_bits": 0.8271290515654385,
+        "mean_conf": 0.6205163363612267,
+        "zero_prob_count": 0
+      },
+      "C05_source_parity:val": {
+        "nll_bits": 0.8316623862422254,
+        "mean_conf": 0.6193193344430348,
+        "zero_prob_count": 0
+      },
+      "C05_source_parity:hold": {
+        "nll_bits": 0.8271552256906389,
+        "mean_conf": 0.6205149430173279,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:val": {
+        "nll_bits": 0.905388128718709,
+        "mean_conf": 0.5884031186199684,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:hold": {
+        "nll_bits": 0.9009107767342406,
+        "mean_conf": 0.5895393476681654,
+        "zero_prob_count": 0
+      }
+    }
+  },
+  "type2_2M_20260121_183657": {
+    "ser_train": 0.25713020118884317,
+    "empirical_H_AbB_train_bits": 0.832562721922195,
+    "per_model_split": {
+      "C01_qsc:val": {
+        "nll_bits": 3.371475712222964,
+        "mean_conf": 0.5533274858624244,
+        "zero_prob_count": 0
+      },
+      "C01_qsc:hold": {
+        "nll_bits": 3.335088649295819,
+        "mean_conf": 0.5556712480089784,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:val": {
+        "nll_bits": 3.5155521124185647,
+        "mean_conf": 0.6889383782942564,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:hold": {
+        "nll_bits": 3.4778372652259733,
+        "mean_conf": 0.6918550150149161,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:val": {
+        "nll_bits": 0.8329045918909466,
+        "mean_conf": 0.618068764080871,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:hold": {
+        "nll_bits": 0.8276894386979127,
+        "mean_conf": 0.6196185992988806,
+        "zero_prob_count": 0
+      },
+      "C04_source_delta:val": {
+        "nll_bits": 0.8329045918909466,
+        "mean_conf": 0.618068764080871,
+        "zero_prob_count": 0
+      },
+      "C04_source_delta:hold": {
+        "nll_bits": 0.8276894386979127,
+        "mean_conf": 0.6196185992988806,
+        "zero_prob_count": 0
+      },
+      "C05_source_parity:val": {
+        "nll_bits": 0.8328966807878492,
+        "mean_conf": 0.6180708489638097,
+        "zero_prob_count": 0
+      },
+      "C05_source_parity:hold": {
+        "nll_bits": 0.8276894499477973,
+        "mean_conf": 0.6196190669715013,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:val": {
+        "nll_bits": 0.9066838007767974,
+        "mean_conf": 0.5872141540018274,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:hold": {
+        "nll_bits": 0.9014715941876669,
+        "mean_conf": 0.5886864974589365,
+        "zero_prob_count": 0
+      }
+    }
+  }
+}

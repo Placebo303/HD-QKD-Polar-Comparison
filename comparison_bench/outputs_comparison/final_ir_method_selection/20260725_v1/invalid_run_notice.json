@@ -1,0 +1,11 @@
+{
+  "status": "excluded_from_all_decisions",
+  "scope": "Phase-3 tuning and confirmation outputs only; Phase-2 data-lock artifacts remain authoritative and read-only.",
+  "reason": "The persisted tuning grid was not the pre-reviewed fairness grid for the locked medium-SER domain.",
+  "wrong_grid": {
+    "cascade_lite": "[8,16,32,64] and [16,32,64,128] with 4/6 passes",
+    "layered_ldpc_lite": "parity 0.50/0.67 including empirical_bitplane/per_bitplane_raw_ber variants"
+  },
+  "correction_trigger": "Coordinator review required documented robust Cascade schedules [16,32,64,128], [12,6,24,13], [8,4,16,13] plus the 3-pass schedule, and LDPC parity 0.80/0.90/1.00 with bsc_estimated/uniform settings.",
+  "replacement": "20260725_v2 uses the same v1 immutable lock with a corrected, pre-persisted grid and is the only Phase-3 decision evidence."
+}

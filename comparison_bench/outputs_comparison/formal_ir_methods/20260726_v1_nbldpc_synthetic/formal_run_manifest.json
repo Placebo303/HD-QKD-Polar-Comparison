@@ -1,0 +1,14 @@
+{
+  "artifacts": {
+    "formal_codebook_manifest.json": "0e766837d69f0cd6e192469fc97b7533edf89172a1a72893a99317e526448f4b",
+    "formal_frame_outcomes.csv": "027524a8e37a017b5954bdf4a950920e5cff16755dbaf8ff0b46566fc1bb0bf2",
+    "formal_policy_manifest.json": "9da945a20989ee5c3d5f0f6cc2d3acce9399d45549be5713daa222e99e385d26",
+    "formal_transcript.jsonl": "94124395008b6618cbb690727cb0c39f9c5fa95f54c9c333578ef0c1583bec56",
+    "pre_run_plan.json": "a573cbc5b73856f39bf43b77fcb873017b0db83ebcfcad87d36c5111596237f4"
+  },
+  "outcome_count": 64,
+  "plan_sha256": "a573cbc5b73856f39bf43b77fcb873017b0db83ebcfcad87d36c5111596237f4",
+  "run_id": "20260726_v1_nbldpc_synthetic",
+  "run_status": "completed",
+  "selected_policy_sha256": "23a1b46300f1c841eed3ffc6f672840c7be17608260de6b09944cac74228983d"
+}

@@ -1,0 +1,8 @@
+{
+  "method": "nbldpc_formal_v5d_post",
+  "policies": [
+    "nbldpc_v5d_sched_post",
+    "nbldpc_v5d_ems_post"
+  ],
+  "v3_codebook_manifest_id": "8e3584ef798dda7c072f6a19419b50ff10382ae1f716c7345daa187803a0d094"
+}

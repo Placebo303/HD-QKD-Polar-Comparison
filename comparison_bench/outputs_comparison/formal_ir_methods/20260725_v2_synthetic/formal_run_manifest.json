@@ -1,0 +1,38 @@
+{
+  "artifacts": {
+    "formal_codebook_manifest.json": "a89992bc3aa49bf2fe976e10c8520948d6560a1d108bf3da7044d5b6efb62516",
+    "formal_frame_outcomes.csv": "3cf2fc784586709bb09e84ca600d29a1966ec9fad8c725df326d6c9d2844c460",
+    "formal_qualification_report.json": "1bf08f0d20b85cc10a4cff5b69fbeaaa4924343502017b2eb03179d4ce02a4ac",
+    "formal_transcript.jsonl": "0634b20880c3b2a29ed59a0389e811005af1d50771b034afe5bf6f87fb74917e",
+    "pre_run_plan.json": "88432fccec8135e10fcd41f384f97b51d5eb6ab8f956628ac3a7b0f969e35652"
+  },
+  "command": "python -m comparison_bench.src.comparison_bench.cli.run_formal_synthetic_qualification --output-dir comparison_bench\\outputs_comparison\\formal_ir_methods\\20260725_v2_synthetic",
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.12"
+  },
+  "finished_monotonic": 881406.015,
+  "ldpc_version": "2.4.1",
+  "limits": {
+    "cascade": {
+      "corrections": 4096,
+      "events": 100000,
+      "queue_pops": 10000
+    },
+    "frame_s": 5,
+    "ldpc_max_iter": 50,
+    "total_s": 600
+  },
+  "outcome_count": 128,
+  "run_id": "20260725_v2_synthetic",
+  "runtime_s": 2.0,
+  "source_hashes": {
+    "codebook_manifest_sha256": "a89992bc3aa49bf2fe976e10c8520948d6560a1d108bf3da7044d5b6efb62516",
+    "plan_sha256": "88432fccec8135e10fcd41f384f97b51d5eb6ab8f956628ac3a7b0f969e35652",
+    "runner_sha256": "542a9dbfc6f31c5f6431bcfaf50bc0a03856c9e19b780f5ed9aa8109650634a6"
+  },
+  "started_monotonic": 881404.015,
+  "stop_reason": "completed",
+  "transcript_sha256": "0634b20880c3b2a29ed59a0389e811005af1d50771b034afe5bf6f87fb74917e",
+  "verification_union_bound": 6.938893903907228e-18
+}

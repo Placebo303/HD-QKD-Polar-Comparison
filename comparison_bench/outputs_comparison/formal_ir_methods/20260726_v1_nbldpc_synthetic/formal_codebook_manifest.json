@@ -1,0 +1,66 @@
+{
+  "construction_seed": 2026072601,
+  "field": {
+    "backend_id": "internal_polynomial_basis_gf2m",
+    "backend_version": "1",
+    "basis": "polynomial",
+    "field_id": "c53f194db6af8b1afdfdcb189ce1b91617f7172937ab025a08001f609385c79a",
+    "m": 10,
+    "method": "nbldpc_formal_v1",
+    "primitive_polynomial": 1033,
+    "q": 1024,
+    "symbol_encoding": "unsigned_coefficient_integer_lsb_x_to_the_i"
+  },
+  "field_id": "c53f194db6af8b1afdfdcb189ce1b91617f7172937ab025a08001f609385c79a",
+  "frozen_family": {
+    "canonical_magic": "NBLDPC1\\n",
+    "canonical_schema": "NBLDPC1",
+    "check_counts": [
+      16,
+      24,
+      32
+    ],
+    "coefficient_derivation": "1+sha256_ascii_NBLDPC1_coef_q_seed_row_edge_mod_q_minus_1",
+    "coefficient_encoding": "unsigned_16_bit_big_endian",
+    "matrix_ordering": "row_major",
+    "mother_dimensions": [
+      32,
+      64
+    ],
+    "n": 64,
+    "ordered_circulant_shifts": [
+      5,
+      24,
+      22
+    ],
+    "topology": "three_shift_cyclic_information_half_plus_identity_parity_half"
+  },
+  "manifest_id": "5dcb29690a2f3a0349383d09b6a77c1f261468dc2eb2a22135b86f009240fc33",
+  "method": "nbldpc_formal_v1",
+  "ordered_entries": [
+    {
+      "byte_length": 2872,
+      "check_count": 16,
+      "codebook_id": "410824d9fa62f69b374e3800b28f7e0c5ddad599962b9def7eb7b5158785ecfa",
+      "prefix_of_check_count": 32,
+      "rank": 16
+    },
+    {
+      "byte_length": 3896,
+      "check_count": 24,
+      "codebook_id": "27c2219c703af6fe51a8e0db1acbf3d587ab5fad84200db72674562c0858c962",
+      "prefix_of_check_count": 32,
+      "rank": 24
+    },
+    {
+      "byte_length": 4920,
+      "check_count": 32,
+      "codebook_id": "bc94bff90f7148c65d55ccebd5098ad10eab90713c9b2dfd544281e94e6d97aa",
+      "prefix_of_check_count": 32,
+      "rank": 32
+    }
+  ],
+  "prefix_relationship": "each_entry_is_the_exact_ordered_row_prefix_of_the_32x64_mother_matrix",
+  "q": 1024,
+  "schema": "NBLDPC1-manifest"
+}

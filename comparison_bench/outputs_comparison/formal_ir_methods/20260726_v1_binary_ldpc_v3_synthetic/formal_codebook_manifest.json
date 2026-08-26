@@ -1,0 +1,287 @@
+{
+  "entries": [
+    {
+      "bytes": 32782,
+      "candidate_id": 1,
+      "plane_id": 0,
+      "prefix_id": "p050",
+      "sha256": "57e3fc8df16d2c7978b12d607660d47db262aa8d67a3537eb556cc8840233698"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 1,
+      "plane_id": 0,
+      "prefix_id": "p0625",
+      "sha256": "fa809bf4b6f1e2e298ee20d2fadb461e63b98c7a2a95715b8da39f7806e73567"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 1,
+      "plane_id": 0,
+      "prefix_id": "p075",
+      "sha256": "255589cf689e6ca9900b041413e470efdcd26a393dacf50e991fbb291b1ef8fe"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 1,
+      "plane_id": 0,
+      "prefix_id": "p0875",
+      "sha256": "e8cb759cee59b1f8bbb63db2ca498a1cd11353789a86d5a8660674c8eacf42ce"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 0,
+      "plane_id": 1,
+      "prefix_id": "p050",
+      "sha256": "80852607ba01811e1781c97bd6e675655592513bfea6050b0b3122edd29e6482"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 0,
+      "plane_id": 1,
+      "prefix_id": "p0625",
+      "sha256": "7b415ec2b9c7bbb26de36805cd3b26390ec60cc9a9e80ff9400fcae55647497d"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 0,
+      "plane_id": 1,
+      "prefix_id": "p075",
+      "sha256": "844d32aa13c888760b76f7e8fee22276112d497e5c0181034754ac4a8c7df03b"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 0,
+      "plane_id": 1,
+      "prefix_id": "p0875",
+      "sha256": "4551b291780546ee7a127d60cb2be7ee69c782426554953b3c417a58799eb00e"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 1,
+      "plane_id": 2,
+      "prefix_id": "p050",
+      "sha256": "c5d9d47fcb9b064366f06a27f56b3500c9cc12ea7ba4ea2316543671490ec0a1"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 1,
+      "plane_id": 2,
+      "prefix_id": "p0625",
+      "sha256": "76ffb9024ac8f0ff67c05affc391eb5fc0c116a0f263d03fa85fc23f46bb39ce"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 1,
+      "plane_id": 2,
+      "prefix_id": "p075",
+      "sha256": "b59c9b22ea914159af7e1707f963123504442ebf0f1ccc7fc096263457e8b9b7"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 1,
+      "plane_id": 2,
+      "prefix_id": "p0875",
+      "sha256": "999dcaf369a245b6382877d8712a78038d7df81c2d15f9e35945ee13960f9394"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 2,
+      "plane_id": 3,
+      "prefix_id": "p050",
+      "sha256": "ea6da3c8dcc214198ee58b943b43c3057f545e2c9f4143176da203886b03ab12"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 2,
+      "plane_id": 3,
+      "prefix_id": "p0625",
+      "sha256": "b3f5886a8fe5ad78f59093b972f6da220c1b88ce89f4a8fffd25b2a0059f2128"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 2,
+      "plane_id": 3,
+      "prefix_id": "p075",
+      "sha256": "f32419c24f97cf1d083435c44121fd04d2cd2b0a68c13918fcbb92d47159d71f"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 2,
+      "plane_id": 3,
+      "prefix_id": "p0875",
+      "sha256": "d92d0c54199f99a9f9ef7803f9c4bc6617a037fb5d026f6acf6bb63c0bedcf88"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 0,
+      "plane_id": 4,
+      "prefix_id": "p050",
+      "sha256": "27d0ad6b3f2d27d68990b9d3da054bf1b5cccd9eb8971ce548207528e5649972"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 0,
+      "plane_id": 4,
+      "prefix_id": "p0625",
+      "sha256": "bb98c17eb584d48ac3e71c9b099a6f818f3082ed1d565cabc33e75535f016d94"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 0,
+      "plane_id": 4,
+      "prefix_id": "p075",
+      "sha256": "6867ae2f6f8975f5b5cf3aabd654b83a5a546f11360a9a9b0216ba1065f8baab"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 0,
+      "plane_id": 4,
+      "prefix_id": "p0875",
+      "sha256": "f82e33cdfa21558953b8e4d926d36fb8eef29a53c0ed7c1cfde8913d66523d28"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 0,
+      "plane_id": 5,
+      "prefix_id": "p050",
+      "sha256": "b7b56feab718bf9fefdcdde2e9bc449cb502fe865fd2e4636bebc0dce9e94c08"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 0,
+      "plane_id": 5,
+      "prefix_id": "p0625",
+      "sha256": "19850ee187682d6f42ba49b4f017ceb4a7048299fe85c26bf2be9f667e444215"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 0,
+      "plane_id": 5,
+      "prefix_id": "p075",
+      "sha256": "2dfde81fd3b0927e63780c07d31085cf322e3db1e717001e023449993357fcb9"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 0,
+      "plane_id": 5,
+      "prefix_id": "p0875",
+      "sha256": "19b3a652ae7f18319e26a093402c6c88235b4e94a3f17792cbdcaf57b9290cb6"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 1,
+      "plane_id": 6,
+      "prefix_id": "p050",
+      "sha256": "b487f3acdcf35f9a8fdf8ae81eb60c415be13f19db0e8f661adae5182c789dd2"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 1,
+      "plane_id": 6,
+      "prefix_id": "p0625",
+      "sha256": "b2df1b3791018485a4b31c6174607ec90e90bd7ded8e17548ad61b3821d9a088"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 1,
+      "plane_id": 6,
+      "prefix_id": "p075",
+      "sha256": "fa5a77dfc93550f29558180596b3c108ead7e1b166e12e8a7b4dc3f02a26dbe6"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 1,
+      "plane_id": 6,
+      "prefix_id": "p0875",
+      "sha256": "c8f0c8628ee91762b738bfe6d108fe4ca54a81128823cfa934f209e8f360a3cf"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 3,
+      "plane_id": 7,
+      "prefix_id": "p050",
+      "sha256": "3f0e4d62d043172c44600d5ac8dd142d26e430a5b28ee00be1e22d2236d9c1f1"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 3,
+      "plane_id": 7,
+      "prefix_id": "p0625",
+      "sha256": "a0515da3e90f49eecbcf64039f206681f25f33ceb12ab3754c4ac0180335148e"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 3,
+      "plane_id": 7,
+      "prefix_id": "p075",
+      "sha256": "e2604ae9556410c943d95cf600ad988098fa944961ce04de657ab457e3953cc6"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 3,
+      "plane_id": 7,
+      "prefix_id": "p0875",
+      "sha256": "1b0196909665f6ce8357c4f4843aa66489871925c131e98edb162c98872019dc"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 2,
+      "plane_id": 8,
+      "prefix_id": "p050",
+      "sha256": "35c0af72795aee415ae1465b5f72a228ae99ae869e1fa2f7cfd2a996faebc3cf"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 2,
+      "plane_id": 8,
+      "prefix_id": "p0625",
+      "sha256": "51120bc363b6b73a6414e6de753fe142d81815fe8b05bd306c4366439cf3ea85"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 2,
+      "plane_id": 8,
+      "prefix_id": "p075",
+      "sha256": "d9e22bdd3443395d34abaa550794e5c80febcbe4bbdb8b4736d9763cf5290173"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 2,
+      "plane_id": 8,
+      "prefix_id": "p0875",
+      "sha256": "fa55d2ad0ac4d9615c7541139e0fc8dea89d4dd7e6c5b0b4c5a55f398bd1b368"
+    },
+    {
+      "bytes": 32782,
+      "candidate_id": 3,
+      "plane_id": 9,
+      "prefix_id": "p050",
+      "sha256": "9f54a53baca00b972ee9d8269db0f6937f7567d221ab2ca42c5d61e95a05baee"
+    },
+    {
+      "bytes": 40974,
+      "candidate_id": 3,
+      "plane_id": 9,
+      "prefix_id": "p0625",
+      "sha256": "3d673d515ea0d1ca8f0381e38bc5efe7bb0da59e3db6a36321fc49e001f402d4"
+    },
+    {
+      "bytes": 49166,
+      "candidate_id": 3,
+      "plane_id": 9,
+      "prefix_id": "p075",
+      "sha256": "1653bda7b7ec366598a6407998a01ff3dc30fc8d9bb7ebfe09be080bb0a2730c"
+    },
+    {
+      "bytes": 57358,
+      "candidate_id": 3,
+      "plane_id": 9,
+      "prefix_id": "p0875",
+      "sha256": "95129895ed54d2df3fa151458dcce97741a678456cd492adf7811be3be4c23b5"
+    }
+  ],
+  "manifest_sha256": "a795b301abfcc949f8318d36da0a202bd2fa53c7c7605b5a8084466df5de3b31",
+  "method": "ldpc_formal_v3",
+  "selection_binding_sha256": "1319938ff6c989642950d4e3f3dba7ae9d0cbea14eb0c1e3a90d826e4fbc3227"
+}

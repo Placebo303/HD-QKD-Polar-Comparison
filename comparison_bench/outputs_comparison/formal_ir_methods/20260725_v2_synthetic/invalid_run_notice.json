@@ -1,0 +1,12 @@
+{
+  "qualification_eligible": false,
+  "run_id": "20260725_v2_synthetic",
+  "reasons": [
+    "declared alice_symbols seed 2026072501 was unused",
+    "runner used unapproved extra Alice seeds instead of one canonical Alice RNG",
+    "declared frame_order seed 2026072531 was unused",
+    "runner mutated stored events with qualification_group, so outcome transcript hashes were not hashes of original emitted event bytes",
+    "deterministic-test and arbitrary-exception evidence did not satisfy the revised pre-run requirements"
+  ],
+  "superseded_by": "20260725_v3_synthetic"
+}

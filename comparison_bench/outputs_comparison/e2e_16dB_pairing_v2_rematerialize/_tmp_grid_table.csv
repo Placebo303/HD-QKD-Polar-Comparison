@@ -1,0 +1,4 @@
+dimension,bin_width_ps,status,out_root,coincidence_rate_hz
+1024,150,PASS,D:\Code\HD-QKD_Polar_Comparison\comparison_bench\outputs_comparison\e2e_16dB_pairing_v2_rematerialize,24763.667981328526
+1024,180,PASS,D:\Code\HD-QKD_Polar_Comparison\comparison_bench\outputs_comparison\e2e_16dB_pairing_v2_rematerialize,24799.334649888675
+1024,200,PASS,D:\Code\HD-QKD_Polar_Comparison\comparison_bench\outputs_comparison\e2e_16dB_pairing_v2_rematerialize,24820.33465100353

@@ -1,0 +1,12 @@
+{
+  "base_seed_mismatch": true,
+  "formal_method_calls": 0,
+  "locked_base_seed": 2026072521,
+  "pre_run_plan_sha256": "3fd15043dc6e43c0eb4365e5ebaf57990dfc917eff908ef26d3804cbcaea07ab",
+  "real_data_lock_sha256": "aec7ffa3cdcb471748e6c41920cfa82b9df1dc4745d85c4ce66456f9fce904c9",
+  "required_real_base_seed": 2026072522,
+  "run_artifacts_present": false,
+  "run_id": "20260725_v1_real_cascade",
+  "seeds_reusable": false,
+  "successor": "comparison_bench/outputs_comparison/formal_ir_methods/20260725_v2_real_cascade"
+}

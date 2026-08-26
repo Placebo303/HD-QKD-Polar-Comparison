@@ -1,0 +1,22 @@
+{
+  "formal_run_manifest_sha256": "091b5941994bee2a28d335bb611c059905f95f18e620a27b8b40d054c5042aca",
+  "promoted": false,
+  "promotion_gates": {
+    "p20": {
+      "denominator_included": 0,
+      "prohibited_failures": 0,
+      "promoted": false,
+      "requested": 32,
+      "verified_success": 0
+    },
+    "p30": {
+      "denominator_included": 0,
+      "prohibited_failures": 0,
+      "promoted": false,
+      "requested": 32,
+      "verified_success": 0
+    }
+  },
+  "run_id": "20260726_v2_nbldpc_synthetic",
+  "run_status": "non_promoted_development"
+}

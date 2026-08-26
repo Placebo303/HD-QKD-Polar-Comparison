@@ -1,0 +1,167 @@
+{
+  "schema": "nbldpc_v32_candidate_recount_v1",
+  "candidate_only": true,
+  "main_acceptance_pending": true,
+  "qualification": false,
+  "promotion": false,
+  "source_file": "per_block.jsonl",
+  "record_count_total": 247,
+  "per_arm_source_counts": {
+    "B5": {
+      "all": {
+        "total": 1,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 1
+      }
+    },
+    "B0": {
+      "1M": {
+        "total": 2,
+        "exact": 2,
+        "tag": 2,
+        "syndrome": 2,
+        "false_accept": 0,
+        "success": 2
+      },
+      "1p5M": {
+        "total": 2,
+        "exact": 2,
+        "tag": 2,
+        "syndrome": 2,
+        "false_accept": 0,
+        "success": 2
+      },
+      "2M": {
+        "total": 2,
+        "exact": 2,
+        "tag": 2,
+        "syndrome": 2,
+        "false_accept": 0,
+        "success": 2
+      }
+    },
+    "B1": {
+      "1M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      },
+      "1p5M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      },
+      "2M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      }
+    },
+    "B2": {
+      "1M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      },
+      "1p5M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      },
+      "2M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      }
+    },
+    "B3": {
+      "1M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      },
+      "1p5M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      },
+      "2M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      }
+    },
+    "B4": {
+      "1M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      },
+      "1p5M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      },
+      "2M": {
+        "total": 20,
+        "exact": 0,
+        "tag": 0,
+        "syndrome": 0,
+        "false_accept": 0,
+        "success": 0
+      }
+    }
+  },
+  "arm_pass_recounted": {
+    "B0": true,
+    "B1": false,
+    "B2": false,
+    "B3": false,
+    "B4": false
+  },
+  "duplicate_block_uids": {},
+  "duplicate_block_uid_count": 0,
+  "truth_use_violation_count": 0,
+  "truth_use_violations": [],
+  "truth_use_audit_note": "Persisted-marker audit only: runtime decoder-input key gate (audit_decoder_input, forbidden substrings alice/truth/_symbols, B2 oracle-L2-prior ban) is enforced in-harness before any block record is written; a violation would have halted the run at implementation_blocked. Raw decoder request dicts are not persisted.",
+  "posterior_anomaly_b3_b4_fraction": 0.5833333333333334,
+  "posterior_anomaly_present": true,
+  "resume_event_count": 0,
+  "resume_reasons": []
+}

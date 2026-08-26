@@ -1,0 +1,56 @@
+{
+  "v1_data_lock_manifest": {
+    "path": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\data_lock_manifest.json",
+    "recorded_hash_matches": true,
+    "recorded_sha256": "28efc5d1654bfc241681a3a9e320aeded213f96f94e23273e33e4f4ea68acd95",
+    "sha256": "28efc5d1654bfc241681a3a9e320aeded213f96f94e23273e33e4f4ea68acd95"
+  },
+  "v1_invalid_run_notice": {
+    "path": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\invalid_run_notice.json",
+    "recorded_hash_matches": null,
+    "recorded_sha256": null,
+    "sha256": "5a1895e105fe3eb61225916df77d5f7448d8d16353455a409e13ba2fb04696d8"
+  },
+  "v1_locked_frame_split": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\locked_frame_split.csv",
+    "recorded_hash_matches": true,
+    "recorded_sha256": "915eb3212b801e7a3539d28b1b8de77dff8c2bcb7629fc6e9a08cd4e0fea20cb",
+    "sha256": "915eb3212b801e7a3539d28b1b8de77dff8c2bcb7629fc6e9a08cd4e0fea20cb"
+  },
+  "v1_source": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_sidecars_frame_batch.parquet",
+    "recorded_hash_matches": true,
+    "recorded_sha256": "967f569c3b3977cc9846025fc9af9b2faf3aa7d89b4e52e0d0ca804f5ab972cc",
+    "sha256": "967f569c3b3977cc9846025fc9af9b2faf3aa7d89b4e52e0d0ca804f5ab972cc"
+  },
+  "v2_aggregate_summary": {
+    "path": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v2\\aggregate_summary.csv",
+    "recorded_hash_matches": null,
+    "recorded_sha256": null,
+    "sha256": "10f6ebbf71347d4a32a878229fe6a941816e594fc940123ee9bcdf9970a4decd"
+  },
+  "v2_confirmation_frame_outcomes": {
+    "path": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v2\\confirmation_frame_outcomes.csv",
+    "recorded_hash_matches": null,
+    "recorded_sha256": null,
+    "sha256": "66952c7aa7a8e813afa90772477e515812151d31a53f1e8b84cabaa2b09be324"
+  },
+  "v2_frozen_candidate_configs": {
+    "path": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v2\\frozen_candidate_configs.json",
+    "recorded_hash_matches": null,
+    "recorded_sha256": null,
+    "sha256": "f49fa871192ea59506e2d2a3583fd2f452a5f291127927ab53034dc4480a1921"
+  },
+  "v2_predeclared_tuning_grid": {
+    "path": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v2\\predeclared_tuning_grid.json",
+    "recorded_hash_matches": null,
+    "recorded_sha256": null,
+    "sha256": "574640335e3d949bddc5f0a73aacd769be500259ec0c21b90165cc21dad11a56"
+  },
+  "v2_run_manifest": {
+    "path": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v2\\run_manifest.json",
+    "recorded_hash_matches": null,
+    "recorded_sha256": null,
+    "sha256": "55c27aeaaca02db86539d0780eb6f59b31af7cd7596ffe01523f4e99036f4a2b"
+  }
+}

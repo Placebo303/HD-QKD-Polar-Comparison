@@ -1,0 +1,21 @@
+{
+  "schema": "nbldpc_v32_candidate_terminal_v1",
+  "terminal": "finite_graph_decoder_mismatch",
+  "arms_pass": {
+    "B0": true,
+    "B1": false,
+    "B2": false,
+    "B3": false,
+    "B4": false
+  },
+  "b5_import_ok": true,
+  "posterior_anomaly_present": true,
+  "complete_execution": true,
+  "recount_matches_terminal_reconstruction": true,
+  "flags": {
+    "candidate_only": true,
+    "main_acceptance_pending": true,
+    "qualification": false,
+    "promotion": false
+  }
+}

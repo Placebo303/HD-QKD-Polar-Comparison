@@ -1,0 +1,58 @@
+{
+  "candidate_ids": [
+    "nbldpc_formal_v2_control_n1_flooding",
+    "nbldpc_formal_v2_qc48_flooding",
+    "nbldpc_formal_v2_qc48_damped_l050",
+    "nbldpc_formal_v2_qc48_damped_l050_tempered_t080"
+  ],
+  "canonical_codebooks": {
+    "control_n1": {
+      "manifest_id": "5dcb29690a2f3a0349383d09b6a77c1f261468dc2eb2a22135b86f009240fc33",
+      "ordered_codebook_ids": [
+        "410824d9fa62f69b374e3800b28f7e0c5ddad599962b9def7eb7b5158785ecfa",
+        "27c2219c703af6fe51a8e0db1acbf3d587ab5fad84200db72674562c0858c962",
+        "bc94bff90f7148c65d55ccebd5098ad10eab90713c9b2dfd544281e94e6d97aa"
+      ]
+    },
+    "qc48": {
+      "manifest_id": "0bea0219271f5071061e7e35c69a68779bf6580b1ccd92ebf1f31cf9b2ad11df",
+      "ordered_codebook_ids": [
+        "a4d8375f0d7803825779756aa76ac858a0c115b7e26f0146a845471eba2c8632",
+        "1f19bbc58af740138bddf1c392401838720a795a72d962662270dc45a4fc92a1",
+        "3f73f55720ffbd8413feb8e2c703f3ff77aa8c6db9b75516fb87ee33d1f05410",
+        "77adca1f8115b760aadf79469f107ee82eef3577ed4bfe3228b8c488b9cdbaf0"
+      ]
+    }
+  },
+  "codebook_by_candidate": {
+    "nbldpc_formal_v2_control_n1_flooding": "control_n1",
+    "nbldpc_formal_v2_qc48_damped_l050": "qc48",
+    "nbldpc_formal_v2_qc48_damped_l050_tempered_t080": "qc48",
+    "nbldpc_formal_v2_qc48_flooding": "qc48"
+  },
+  "decoder_definitions": {
+    "nbldpc_formal_v2_control_n1_flooding": {
+      "damping": null,
+      "schedule": "flooding",
+      "tempering": null
+    },
+    "nbldpc_formal_v2_qc48_damped_l050": {
+      "damping": 0.5,
+      "schedule": "flooding",
+      "tempering": null
+    },
+    "nbldpc_formal_v2_qc48_damped_l050_tempered_t080": {
+      "damping": 0.5,
+      "schedule": "flooding",
+      "tempering": 0.8
+    },
+    "nbldpc_formal_v2_qc48_flooding": {
+      "damping": null,
+      "schedule": "flooding",
+      "tempering": null
+    }
+  },
+  "float": "float64",
+  "method": "nbldpc_formal_v2",
+  "truth_isolated": true
+}

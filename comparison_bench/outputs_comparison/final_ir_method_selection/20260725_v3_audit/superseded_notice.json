@@ -1,0 +1,7 @@
+{
+  "status": "superseded_for_authoritative_decision",
+  "replacement": "comparison_bench/outputs_comparison/final_ir_method_selection/20260725_v4_audit/",
+  "reason": "The generic paired-decision branch could not emit layered_ldpc_lite or insufficient_evidence when its direction or integrity/sample gates applied.",
+  "current_case_unchanged": "The persisted 60/60 versus 59/60 evidence has p=1.0 and remains no_decision under corrected code.",
+  "scope": "v3 files remain immutable historical audit evidence; v4 is authoritative."
+}

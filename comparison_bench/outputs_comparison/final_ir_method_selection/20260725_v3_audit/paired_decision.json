@@ -1,0 +1,26 @@
+{
+  "alpha": 0.05,
+  "decision": "no_decision",
+  "decision_reason": "pre_registered_test_not_significant",
+  "domain": {
+    "data_mode": "real_data",
+    "dataset_raw_ser_stratum": {
+      "lower_inclusive": 0.2,
+      "upper_exclusive": 0.3
+    },
+    "dimension": 1024,
+    "frame_len_symbols": 64
+  },
+  "exact_two_sided_p_value": 1.0,
+  "non_claims": [
+    "No claim outside real d=1024, 64-symbol frames, dataset raw-SER [0.20, 0.30).",
+    "No Polar or qLDPC winner comparison; they were not frame-identical executable candidates.",
+    "No cross-method leakage ranking and no Route A numerical/proof claim."
+  ],
+  "paired_outcomes": {
+    "cascade_only_success": 1,
+    "discordant_pairs": 1,
+    "layered_ldpc_only_success": 0,
+    "missing_pairs": []
+  }
+}

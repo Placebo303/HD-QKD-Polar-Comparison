@@ -1,0 +1,239 @@
+{
+  "schema": "nbldpc_v32_operating_point_audit_d2_v1",
+  "margin_method_frozen_in_manifest": "simple gap reporting at n=1024 only: gap_bits = leakage_bits - required_bits per layer and total, plus leakage/required ratio; no normal approximation and no other statistics",
+  "h_cross_check_tol_bits": 1e-06,
+  "per_source": {
+    "1M": {
+      "source_id": "type2_1M_20260121_184040",
+      "computed": {
+        "H_U1_given_B_bits": 0.024280546818678417,
+        "H_U2_given_B_U1_bits": 0.7767572780789997,
+        "H_A_given_B_bits": 0.8010378248976772,
+        "chain_rule_total_bits": 0.8010378248976782
+      },
+      "v31_manifest_quoted": {
+        "field_citation": "nbldpc_v31_20260820/run_01/RUN_MANIFEST.json configs[\"1024\"].sources[1M]",
+        "H": {
+          "L1": 0.0242805468186788,
+          "L2": 0.7767572780789986
+        },
+        "m1": 16,
+        "m2": 184,
+        "m_total": 200,
+        "leak_total_bits": 1064.0,
+        "f_total": 1.2971453628082137
+      },
+      "matrix_audits_quoted": {
+        "packet_id": "m1_16_n1024_n1024|QC-cyclic-projective",
+        "m2_by_source": {
+          "1M": 184,
+          "1p5M": 190,
+          "2M": 192
+        },
+        "L1_shape": [
+          16,
+          1024
+        ]
+      },
+      "m1_registry_quoted": {
+        "L1": {
+          "rate": 0.984375,
+          "H_bits_per_symbol": 0.0242805468186788,
+          "m1": 16,
+          "m2": 184
+        },
+        "L2": {
+          "rate": 0.8203125,
+          "H_bits_per_symbol": 0.7767572780789986,
+          "m1": 16,
+          "m2": 184
+        }
+      },
+      "required_bits_n1024": {
+        "L1": 24.8632799423267,
+        "L2": 795.3994527528957,
+        "total_chain_rule": 820.2627326952214
+      },
+      "leakage_bits": {
+        "L1_syndrome": 80.0,
+        "L2_syndrome": 920.0,
+        "total_pure_syndrome_recomputed": 1000.0,
+        "total_verbatim_leak_total_bits": 1064.0,
+        "definitions_note": "verbatim manifest leak_total_bits includes budget overhead beyond the pure syndrome value; the two definitions are kept explicitly separate and never merged"
+      },
+      "margin_simple_gap_n1024": {
+        "gap_L1_bits": 55.1367200576733,
+        "gap_L2_bits": 124.60054724710426,
+        "gap_total_pure_syndrome_bits": 179.73726730477858,
+        "gap_total_verbatim_leak_total_bits_bits": 243.73726730477858,
+        "ratio_L1_leakage_over_required": 3.2175963986074807,
+        "ratio_L2_leakage_over_required": 1.1566515375587183,
+        "ratio_total_pure": 1.2191215815866672,
+        "ratio_total_verbatim": 1.297145362808214
+      },
+      "feasible": {
+        "L1": true,
+        "L2": true,
+        "total_pure_syndrome": true,
+        "total_verbatim": true
+      }
+    },
+    "1p5M": {
+      "source_id": "type2_1p5M_20260121_183806",
+      "computed": {
+        "H_U1_given_B_bits": 0.025199496877855054,
+        "H_U2_given_B_U1_bits": 0.8003665547438708,
+        "H_A_given_B_bits": 0.8255660516217238,
+        "chain_rule_total_bits": 0.8255660516217258
+      },
+      "v31_manifest_quoted": {
+        "field_citation": "nbldpc_v31_20260820/run_01/RUN_MANIFEST.json configs[\"1024\"].sources[1p5M]",
+        "H": {
+          "L1": 0.02519949687785432,
+          "L2": 0.8003665547438693
+        },
+        "m1": 16,
+        "m2": 190,
+        "m_total": 206,
+        "leak_total_bits": 1094.0,
+        "f_total": 1.2940931532992892
+      },
+      "matrix_audits_quoted": {
+        "packet_id": "m1_16_n1024_n1024|QC-cyclic-projective",
+        "m2_by_source": {
+          "1M": 184,
+          "1p5M": 190,
+          "2M": 192
+        },
+        "L1_shape": [
+          16,
+          1024
+        ]
+      },
+      "m1_registry_quoted": {
+        "L1": {
+          "rate": 0.984375,
+          "H_bits_per_symbol": 0.02519949687785432,
+          "m1": 16,
+          "m2": 190
+        },
+        "L2": {
+          "rate": 0.814453125,
+          "H_bits_per_symbol": 0.8003665547438693,
+          "m1": 16,
+          "m2": 190
+        }
+      },
+      "required_bits_n1024": {
+        "L1": 25.804284802923576,
+        "L2": 819.5753520577236,
+        "total_chain_rule": 845.3796368606452
+      },
+      "leakage_bits": {
+        "L1_syndrome": 80.0,
+        "L2_syndrome": 950.0,
+        "total_pure_syndrome_recomputed": 1030.0,
+        "total_verbatim_leak_total_bits": 1094.0,
+        "definitions_note": "verbatim manifest leak_total_bits includes budget overhead beyond the pure syndrome value; the two definitions are kept explicitly separate and never merged"
+      },
+      "margin_simple_gap_n1024": {
+        "gap_L1_bits": 54.195715197076424,
+        "gap_L2_bits": 130.42464794227635,
+        "gap_total_pure_syndrome_bits": 184.62036313935482,
+        "gap_total_verbatim_leak_total_bits_bits": 248.62036313935482,
+        "ratio_L1_leakage_over_required": 3.100260309905437,
+        "ratio_L2_leakage_over_required": 1.1591368598565301,
+        "ratio_total_pure": 1.2183875209307746,
+        "ratio_total_verbatim": 1.2940931532992888
+      },
+      "feasible": {
+        "L1": true,
+        "L2": true,
+        "total_pure_syndrome": true,
+        "total_verbatim": true
+      }
+    },
+    "2M": {
+      "source_id": "type2_2M_20260121_183657",
+      "computed": {
+        "H_U1_given_B_bits": 0.025662048796871062,
+        "H_U2_given_B_U1_bits": 0.8069006731253232,
+        "H_A_given_B_bits": 0.832562721922195,
+        "chain_rule_total_bits": 0.8325627219221943
+      },
+      "v31_manifest_quoted": {
+        "field_citation": "nbldpc_v31_20260820/run_01/RUN_MANIFEST.json configs[\"1024\"].sources[2M]",
+        "H": {
+          "L1": 0.02566204879687012,
+          "L2": 0.8069006731253252
+        },
+        "m1": 16,
+        "m2": 192,
+        "m_total": 208,
+        "leak_total_bits": 1104.0,
+        "f_total": 1.294947481567344
+      },
+      "matrix_audits_quoted": {
+        "packet_id": "m1_16_n1024_n1024|QC-cyclic-projective",
+        "m2_by_source": {
+          "1M": 184,
+          "1p5M": 190,
+          "2M": 192
+        },
+        "L1_shape": [
+          16,
+          1024
+        ]
+      },
+      "m1_registry_quoted": {
+        "L1": {
+          "rate": 0.984375,
+          "H_bits_per_symbol": 0.02566204879687012,
+          "m1": 16,
+          "m2": 192
+        },
+        "L2": {
+          "rate": 0.8125,
+          "H_bits_per_symbol": 0.8069006731253252,
+          "m1": 16,
+          "m2": 192
+        }
+      },
+      "required_bits_n1024": {
+        "L1": 26.277937967995967,
+        "L2": 826.266289280331,
+        "total_chain_rule": 852.5442272483277
+      },
+      "leakage_bits": {
+        "L1_syndrome": 80.0,
+        "L2_syndrome": 960.0,
+        "total_pure_syndrome_recomputed": 1040.0,
+        "total_verbatim_leak_total_bits": 1104.0,
+        "definitions_note": "verbatim manifest leak_total_bits includes budget overhead beyond the pure syndrome value; the two definitions are kept explicitly separate and never merged"
+      },
+      "margin_simple_gap_n1024": {
+        "gap_L1_bits": 53.72206203200403,
+        "gap_L2_bits": 133.73371071966903,
+        "gap_total_pure_syndrome_bits": 187.45577275167227,
+        "gap_total_verbatim_leak_total_bits_bits": 251.45577275167227,
+        "ratio_L1_leakage_over_required": 3.044378904365799,
+        "ratio_L2_leakage_over_required": 1.1618530399396418,
+        "ratio_total_pure": 1.2198780623460495,
+        "ratio_total_verbatim": 1.2949474815673447
+      },
+      "feasible": {
+        "L1": true,
+        "L2": true,
+        "total_pure_syndrome": true,
+        "total_verbatim": true
+      }
+    }
+  },
+  "layer_and_total_conclusions": {
+    "L1_feasible_all_sources": true,
+    "L2_allocation_feasible_all_sources": true,
+    "total_feasible_verbatim_budget_all_sources": true,
+    "total_feasible_pure_syndrome_all_sources": true,
+    "conclusion_levels": "both mandatory levels reported: layer-specific (L1, L2) AND total"
+  }
+}

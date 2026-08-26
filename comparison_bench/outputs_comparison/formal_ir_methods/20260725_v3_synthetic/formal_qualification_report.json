@@ -1,0 +1,50 @@
+{
+  "deterministic_preflight": {
+    "command": [
+      "D:\\software\\Miniforge3\\python.exe",
+      "-m",
+      "pytest",
+      "comparison_bench/tests/test_formal_verification.py",
+      "comparison_bench/tests/test_cascade_formal.py",
+      "comparison_bench/tests/test_ldpc_formal.py",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp",
+      "C:\\Users\\admin\\.codex\\visualizations\\2026\\07\\25\\019f986c-4cd6-7643-a7f7-e6f0ff69c32f\\formal-v3-production-preflight\\formal-ir-v3-preflight-_q46oo4v"
+    ],
+    "exit_code": 0,
+    "output_sha256": "62db15317dfad9b3a69e41b8d7342f360be51f2ec771c4947fb7586300d72a38",
+    "passed": true,
+    "passed_count": 17
+  },
+  "formal_run_manifest_sha256": "4b59f2de07e370652ab191dd1124c29c92b3b194ce0b8ed0b6df88dc817d038b",
+  "promotion_gates": {
+    "cascade_formal_v1|0.01": {
+      "promoted": true,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 32
+    },
+    "cascade_formal_v1|0.02": {
+      "promoted": true,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 32
+    },
+    "ldpc_formal_v1|0.01": {
+      "promoted": false,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 29
+    },
+    "ldpc_formal_v1|0.02": {
+      "promoted": false,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 0,
+      "verified_success": 14
+    }
+  },
+  "run_id": "20260725_v3_synthetic",
+  "run_status": "completed"
+}

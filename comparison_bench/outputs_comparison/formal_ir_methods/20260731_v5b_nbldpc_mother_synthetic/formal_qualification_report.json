@@ -1,0 +1,21 @@
+{
+  "formal_run_manifest_sha256": "44b07ba56606919f6107f367ad52fb8c4f49ab8e5861415a8bce581020953aee",
+  "promoted": false,
+  "promotion_gates": {
+    "0.2": {
+      "denominator_included": 128,
+      "prohibited_failures": 0,
+      "requested": 128,
+      "verified_success": 128
+    },
+    "0.3": {
+      "denominator_included": 128,
+      "prohibited_failures": 0,
+      "requested": 128,
+      "verified_success": 127
+    }
+  },
+  "readiness": true,
+  "run_id": "20260731_v5b_nbldpc_mother_synthetic",
+  "run_status": "completed"
+}

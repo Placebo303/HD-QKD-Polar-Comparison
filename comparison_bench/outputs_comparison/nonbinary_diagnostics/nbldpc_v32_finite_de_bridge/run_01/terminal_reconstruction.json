@@ -1,0 +1,20 @@
+{
+  "schema": "nbldpc_v32_terminal_reconstruction_v1",
+  "terminal": "finite_graph_decoder_mismatch",
+  "gate_event": null,
+  "arms_pass": {
+    "B0": true,
+    "B1": false,
+    "B2": false,
+    "B3": false,
+    "B4": false
+  },
+  "b5_import_ok": true,
+  "posterior_anomaly_present": true,
+  "complete_execution": true,
+  "decision_procedure": "design.md section 5: gate layer first-match-wins, then scientific table R01-R16; uncovered -> bridge_inconclusive",
+  "candidate_only": true,
+  "main_acceptance_pending": true,
+  "qualification": false,
+  "promotion": false
+}

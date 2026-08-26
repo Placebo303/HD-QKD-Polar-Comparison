@@ -1,0 +1,27 @@
+{
+  "arm": "B4",
+  "stratum": "real_retrospective_oracle_l1",
+  "arm_pass": false,
+  "per_source": {
+    "1M": {
+      "n": 20,
+      "successes": 0,
+      "threshold": 19,
+      "pass": false
+    },
+    "1p5M": {
+      "n": 20,
+      "successes": 0,
+      "threshold": 19,
+      "pass": false
+    },
+    "2M": {
+      "n": 20,
+      "successes": 0,
+      "threshold": 19,
+      "pass": false
+    }
+  },
+  "false_accept_total": 0,
+  "development_discriminator_only": true
+}

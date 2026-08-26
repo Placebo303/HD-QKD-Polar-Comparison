@@ -1,0 +1,11 @@
+{
+  "formal_run_manifest_sha256": "42d18066cc13740fd4367430b0319020ec4b943e5c01bf43f4df0759257ce172",
+  "promotion_gate": {
+    "promoted": true,
+    "requested": 60,
+    "unclassified_internal_provenance_accounting_failures": 0,
+    "verified_success": 60
+  },
+  "run_id": "20260725_v2_real_cascade",
+  "run_status": "completed"
+}

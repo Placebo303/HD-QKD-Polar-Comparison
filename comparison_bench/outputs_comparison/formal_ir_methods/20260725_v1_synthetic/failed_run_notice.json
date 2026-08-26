@@ -1,0 +1,9 @@
+{
+  "failure_stage": "before_codebook_materialization",
+  "frame_execution_count": 0,
+  "qualification_eligible": false,
+  "reason": "The original runner wrote its plan before calling a fresh-root-only codebook materializer; no formal method was invoked.",
+  "referenced_pre_run_plan_sha256": "46e067663dba4b353bec3fe57eaaa37e32c38d30c94479a4e53c8f670c8db9df",
+  "run_id": "20260725_v1_synthetic",
+  "superseded_by": "20260725_v2_synthetic"
+}

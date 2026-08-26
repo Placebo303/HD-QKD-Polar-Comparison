@@ -1,0 +1,19 @@
+{
+  "n_pairs": 74398,
+  "n_pairs_actual": 74398,
+  "raw_ser": 0.06941046802333396,
+  "delta_mode": 0,
+  "delta_mode_frac": 0.930589531976666,
+  "near_neighbor_frac": 1.0,
+  "n_unique_a": 1024,
+  "n_unique_b": 1024,
+  "top_a_frac": 0.0014247694830506197,
+  "top_b_frac": 0.0013710045968977661,
+  "d": 1024,
+  "note": "delta=(b_eff-a_eff) mod d",
+  "pairing_mode": "nearest",
+  "gate_width_ps": 180,
+  "peak_center_ps": -13,
+  "peak_sigma_ps": 109.36553566549081,
+  "peak_to_bg": 530.0909090909091
+}
