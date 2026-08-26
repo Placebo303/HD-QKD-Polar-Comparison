@@ -3,7 +3,7 @@
 - 触发条件 [decision]: 每次正式 execution 完成后必做，首个适用 scope 为 `v42_diagnostic_18_calls_exactly_once`，后续所有同类正式 run 均适用。
 - 分析维度 [decision]: 覆盖有效性门禁（J6等）、总体/分源门禁、成对增量、迭代/残留误码行为、终态归属。
 - 输出边界 [decision]: 分析结果仅通过消息口头告知用户，不得自动写入 `run_summary`、`decision-log` 或其他产出文档/制品，除非用户显式要求写入。
-- 衔接约束 [decision]: 不改变 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED` 生命周期与现有授权/归档流程，不增加任何额外输出文件。
+- 衔接约束 [decision]: 口头分析本身不改变生命周期；生命周期继续按 execution、result-candidate 和独立结果评审流程推进，不增加任何额外输出文件。
 
 ## 2026-08-25 V38R1 accepted development result: bounded machine candidate
 
