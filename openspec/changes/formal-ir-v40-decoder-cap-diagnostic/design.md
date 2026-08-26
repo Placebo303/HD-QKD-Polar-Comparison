@@ -57,8 +57,8 @@ integrity failure J1.
 | A08 | P4 | lane_b | 2 | 382102 | 390102 | lane_b_1M_s382102 | 258 | 77 | false |
 | A09 | P5 | lane_c | 2 | 383102 | 390103 | lane_c_1M_s383102 | 274 | 195 | false |
 | A10 | P5 | lane_b | 2 | 382102 | 390103 | lane_b_1M_s382102 | 274 | 97 | false |
-| A11 | P6 | lane_c | 3 | 383103 | 390101 | lane_c_1M_s383103 | 259 | 184 | false |
-| A12 | P6 | lane_b | 3 | 382103 | 390101 | lane_b_1M_s382103 | 259 | 220 | false |
+| A11 | P6 | lane_c | 3 | 383103 | 390101 | lane_c_1M_s383103 | 252 | 184 | false |
+| A12 | P6 | lane_b | 3 | 382103 | 390101 | lane_b_1M_s382103 | 252 | 220 | false |
 
 Frozen reference residuals: lane_c side median = (171+184)/2 = **177.5**;
 lane_b side median = (97+127)/2 = **112.0**; pooled 12-instance median =
@@ -501,3 +501,12 @@ until then; D8 deterministic enumeration/call order
 order, lane_c first); D9 minimal fixed file set (records json/csv +
 summary + optional invalid notice); D10 B-phase improvement metrics are
 report-only; B gating uses R_B_new and W_B exclusively.
+
+Plan revision, cycle V40P0 (2026-08-26), user-approved transcription
+correction: §3 table rows A11/A12 `errors_initial` 259 → **252**, per the
+V39 run_01 paired authority and J7 cross-lane equality semantics (block
+390101 already carries 252 on pairs P1/P3). No other plan value changes;
+the implementation module has been frozen at the authoritative 252 since
+the implementation candidate (noted in module comments), so lifecycle
+remains PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED and no code change is
+required.
