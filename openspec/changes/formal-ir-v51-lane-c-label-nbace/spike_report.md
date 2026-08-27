@@ -1,7 +1,7 @@
 # V51P0 Lane C Label Optimization Spike Report — decoder-free (deg4-first, incremental)
 
 **Cycle**: `V51P0`
-**Branch / HEAD**: `formal-ir-mainline` plan HEAD `c67a071f3b59924e81bd2bbbd452ab45f5a5c0e9`, predecessor `e3e14c9518bf44d03054e720a6230ea11d08f99a` (V50)
+**Branch**: `formal-ir-mainline`, Plan commit: resolved externally by independent PLAN_ACCEPT record; implementation SHALL bind the accepted full SHA.; predecessor `e3e14c9518bf44d03054e720a6230ea11d08f99a` (V50)
 **Status**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — decoder-free, no formal output, no V52
 **Scope**: Three Lane C ordinal-2 supports (frozen support/perm/m2/decoder=90/1.0) → deterministic label relabel (primary lexicographic `(deg4,deg6,deg8,cand)` deg4-first, custom `check_extrinsic_score` secondary, single-run, incremental `edge_to_cycle_ids`)
 **Spike script**: `openspec/changes/formal-ir-v51-lane-c-label-nbace/spike_label_nbace.py` (decoder-free, `python spike_label_nbace.py`; no `decode_*` call)

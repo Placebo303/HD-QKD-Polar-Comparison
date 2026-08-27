@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **只规划，不实现，不执行。等待独立评审。本轮仅完成 decoder-free 标签优化 spike。**
 **Execution status**: 本轮完成 decoder-free spike；以下 P1..E 任务待独立 plan ACCEPT + 三源词典序准入后方可进入；当前不跑 decoder，不写产出。
-**HEAD**: `c67a071f3b59924e81bd2bbbd452ab45f5a5c0e9` branch `formal-ir-mainline`（实现冻结时重绑至未来 implementation SHA）
+**Plan commit**: resolved externally by independent PLAN_ACCEPT record; implementation SHALL bind the accepted full SHA.（实现冻结时重绑至未来 implementation SHA）
 **Revision**: V51R1 — 修复 deg4 优先、自定义 score 命名、准入一致性、spike 增量效率、四工件去 NB-ACE 文献声称
 
 ## Phase A — 语义冻结（plan ACCEPT 后）
