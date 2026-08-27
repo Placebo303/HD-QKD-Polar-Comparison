@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **只规划，不实现，不执行，不启动 V51。等待独立评审。本轮先执行 spike。**
 **Execution status**: 本轮仅完成 decoder-free 结构 spike；以下 P1..E 任务待独立 plan ACCEPT 后方可进入；当前不跑 decoder，不写产出。
-**HEAD**: `f58955f3e794dbde11b4d813eec061182319846d`（实现冻结时重绑）
+**HEAD**: `d95d46ac559ac9e5860ebcc793abc0500ba9b09b`（plan SHA；实现冻结时重绑至未来 implementation SHA，旧 `f58955f...` 已弃用）
 
 ## Phase A — 语义冻结（plan ACCEPT 后）
 
@@ -33,7 +33,7 @@
 
 ## Phase D — 授权 2×2 因子执行（需 EXECUTE_AUTH，90 calls @15 块）
 
-- [ ] **D1** 主线程获独立 plan ACCEPT + 显式用户 `EXECUTE_AUTH`（绑定 repository、分支 `formal-ir-mainline`、完整实现 SHA、cycle V50P0、scope `v50_factorial_90_calls_2x2_exactly_once` 冻结，HEAD `f58955f3e794dbde11b4d813eec061182319846d`）。
+- [ ] **D1** 主线程获独立 plan ACCEPT + 显式用户 `EXECUTE_AUTH`（绑定 repository、分支 `formal-ir-mainline`、完整未来实现 SHA、cycle V50P0、scope `v50_factorial_90_calls_2x2_exactly_once` 冻结，plan 引用 HEAD `d95d46ac559ac9e5860ebcc793abc0500ba9b09b`，旧 `f58955f...` 已清理）。
 - [ ] **D2** 恰好一次：`python scripts/execute_v50_structure_factorial.py --execution-authorized --authorized-target-sha <sha>`；`90 calls (L1 30 + L2 60: 15×(2 L1+4 L2))`，60 L2 records（per factor 每源/每结构/每 prior），每条含 `prior_id/structure_id/target_tag/candidate_tag/tag_ok/reclassified` (L2-only) 与 `exact_u1/exact_l2/exact_full/entropy/||q-p||1/leak_total/frame_ids/sampling_mode`；保留 run_01；出错止、原样保留 raw partial 无聚合、返回 blocker；不 rerun/resume/tuning/加块/改 seed/机制/加权重/重实现 canonical；无论结果不做第二轮；执行期测量真实 `q≠p`/`iterations`/`tag_ok` 分流；采样恒 deterministic 未使用 held-out.
 - [ ] **D3** 只读 postcheck：记账 `planned 90 / l1 30 / l2 60 / total 90`、L2 60 记录与序每块 `A,B,C,D` 正确、L1 30 次、`prior_id` 双溯源、未使用 held-out 块（`frame_ids/ordinal` 逐块比对 design §2.4）、无 NPZ、V38–V48 输出 byte-identical、summary 完备（含分层记账与主效应 `E_structure/E_prior/E_interaction` 及四个 simple effects + 四类/G3' + 终态 + `f_total` + provenance）、独立重算.
 

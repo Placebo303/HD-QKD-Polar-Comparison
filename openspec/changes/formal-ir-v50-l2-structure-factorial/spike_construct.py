@@ -21,16 +21,12 @@ BLOCK_LENGTH=1024
 DET_IDS = {"1M":500001, "1p5M":500002, "2M":500003}
 
 def degree2_chain_and_pure_ring(binary_support):
-    """Compute max degree-2 chain length (vars) and pure ring count len<=12.
+    """Compute max degree-2 chain length (vars) and pure ring count len<=12 (G2 graph definition).
     Chain: maximal path where internal checks have degree 2 within G2 induced subgraph.
-    Pure ring: cycle where every var has dv==2 and cycle length <=12 (i.e. 4,6,8,10,12 in terms of vars*2?).
-    For our dv mixed case, only vars with dv==2 contribute.
-    We approximate:
-      - Build G2 = subgraph induced by dv==2 vars + all checks (but edges only to G2 vars)
-      - Find connected components, classify.
-    Simplified metrics:
-      max_chain = longest path length in vars where internal checks degree==2 (within G2).
-      pure_ring_count = number of simple cycles length<=12 where all vars dv==2 (using enumerated 4/6/8 cycles filtered).
+    Pure ring (authoritative G2 graph definition for V50 gate): cycle where every check on
+    the cycle has degree exactly 2 within G2 (induced by dv==2 vars). This is stricter than
+    \"all vars dv==2\"; enumerated pure_4/6/8 (all-vars-dv2) is reported separately and is NOT
+    the gate metric. Unified gate uses this graph metric only (pure_ring_via_graph).
     """
     m,n = binary_support.shape
     col_deg = np.count_nonzero(binary_support, axis=0)
@@ -146,23 +142,20 @@ def construct_mixed(source, det_id, dv_list=None):
     for j, d in enumerate(dv_list):
         chosen=[]
         for k in range(d):
-            # eligible checks not yet chosen for this col
             eligible=[c for c in range(m) if c not in chosen]
-            # minimal degree
-            min_deg=min(check_degrees[c] for c in eligible)
-            min_set=[c for c in eligible if check_degrees[c]==min_deg]
-            # prefer those that don't create duplicate pair with already chosen
-            if chosen:
-                # for each candidate, count duplicate pairs with chosen
-                scored=[]
-                for c in min_set:
-                    dup=sum(1 for pc in chosen if (min(pc,c), max(pc,c)) in check_pairs)
-                    scored.append((dup, rank_in_perm[c], c))
-                scored.sort()
-                # pick smallest dup then rank
-                c_pick=scored[0][2]
-                # if best dup>0 and there exists alternative with higher degree but zero dup? We strictly enforce degree first, so keep min degree
-            else:
+            # ponytail: strict 4-cycle avoidance — search degree levels in ascending order for a zero-duplicate-pair candidate; fallback only if no level offers one
+            uniq_degs=sorted({int(check_degrees[c]) for c in eligible})
+            c_pick=None
+            for deg in uniq_degs:
+                min_set=[c for c in eligible if int(check_degrees[c])==deg]
+                zero_dup=[c for c in min_set if all((min(pc,c), max(pc,c)) not in check_pairs for pc in chosen)]
+                if zero_dup:
+                    c_pick=min(zero_dup, key=lambda c: rank_in_perm[c])
+                    break
+            if c_pick is None:
+                # no zero-dup at any degree level -> forced to create a 4-cycle (should not happen for these parameters)
+                min_deg=min(int(check_degrees[c]) for c in eligible)
+                min_set=[c for c in eligible if int(check_degrees[c])==min_deg]
                 c_pick=min(min_set, key=lambda c: rank_in_perm[c])
             chosen.append(c_pick)
             check_degrees[c_pick]+=1
@@ -192,13 +185,13 @@ def metrics_for(H, H_support, E):
     deg4=sum(classify_cycle_algebraic_degeneracy(c,H,field) for c in c4)
     deg6=sum(classify_cycle_algebraic_degeneracy(c,H,field) for c in c6)
     deg8=sum(classify_cycle_algebraic_degeneracy(c,H,field) for c in c8)
-    max_chain, pure_ring = degree2_chain_and_pure_ring(H_support)
-    # also count pure cycles len<=12 among enumerated: filter cycles where all vars dv==2
+    max_chain, pure_ring_graph = degree2_chain_and_pure_ring(H_support)
+    # enumerated reporting: cycles where every var has dv==2 (for information, NOT gate)
     col_deg_map=col_deg
     pure4=sum(1 for cyc in c4 if all(col_deg_map[v]==2 for v in cyc.vars))
     pure6=sum(1 for cyc in c6 if all(col_deg_map[v]==2 for v in cyc.vars))
     pure8=sum(1 for cyc in c8 if all(col_deg_map[v]==2 for v in cyc.vars))
-    pure_total_len12 = pure4+pure6+pure8  # 4,6,8 only; 10,12 not enumerated
+    pure_total_len12 = pure4+pure6+pure8  # 4,6,8 only; 10,12 not enumerated (reported, not gate)
     return {
         "shape": (m,n),
         "rank": rank,
@@ -223,7 +216,7 @@ def metrics_for(H, H_support, E):
         "pure_8": pure8,
         "max_degree2_chain": max_chain,
         "pure_ring_len12_enumerated": pure_total_len12,
-        "pure_ring_via_graph": pure_ring,
+        "pure_ring_via_graph": pure_ring_graph,
         "full_row_rank": rank==m,
         "zero_col": int((col_deg==0).sum()),
         "zero_row": int((row_deg==0).sum()),
@@ -231,6 +224,7 @@ def metrics_for(H, H_support, E):
 
 def run_once(label, dv_list):
     print(f"\n=== {label} ===")
+    any_fail=False
     for src in ["1M","1p5M","2M"]:
         det=DET_IDS[src]
         H, Hs, E,_=construct_mixed(src, det, dv_list)
@@ -238,24 +232,37 @@ def run_once(label, dv_list):
         print(f"\n-- {src} m={SOURCE_CHECKS[src]} det={det} --")
         for k,v in met.items():
             print(f"  {k}: {v}")
-        # gate checks
+        # gate checks — authoritative pure-ring is graph metric (pure_ring_via_graph); enumerated pure_* is reporting only
         ok = (met["full_row_rank"] and met["zero_col"]==0 and met["zero_row"]==0 and met["dc_max_ok"] and met["support_cycles_4"]==0 and met["max_degree2_chain"]<=4 and met["pure_ring_via_graph"]==0)
-        print(f"  GATE_ALL: {'PASS' if ok else 'FAIL'} (rank/zero/dc<=16/4-cycle==0/chain<=4/ring==0)")
+        print(f"  GATE_ALL: {'PASS' if ok else 'FAIL'} (rank/zero/dc<=16/4-cycle==0/chain<=4/ring(graph)==0)")
         if met["support_cycles_4"]!=0:
             print("  -> 4-cycle hard gate FAILED")
+            any_fail=True
         if met["max_degree2_chain"]>4:
             print(f"  -> chain {met['max_degree2_chain']} >4 FAILED")
+            any_fail=True
         if met["pure_ring_via_graph"]!=0:
-            print(f"  -> pure ring {met['pure_ring_via_graph']} !=0 FAILED")
+            print(f"  -> pure ring(graph) {met['pure_ring_via_graph']} !=0 FAILED")
+            any_fail=True
+        if not ok:
+            any_fail=True
+    return any_fail
 
 if __name__=="__main__":
+    fail=False
     # Test 1: all dv=2 (PEG-dv2) E=2048
-    run_once("PEG-dv2 (dv=2 *1024) E=2048", [2]*1024)
-    # Test 2: mixed MET {512x2,512x3} E=2560
-    run_once("MET-mixed {dv2:512,dv3:512} E=2560", [2]*512+[3]*512)
+    fail |= run_once("PEG-dv2 (dv=2 *1024) E=2048", [2]*1024)
+    # Test 2: mixed MET {512x2,512x3} E=2560  — authoritative main candidate
+    fail |= run_once("MET-mixed {dv2:512,dv3:512} E=2560", [2]*512+[3]*512)
     # Test 3: interleaved mixed for balance
     interleaved=[]
     for i in range(512):
         interleaved.extend([2,3])
     # interleaved length 1024, 512 each alternating -> same E
-    run_once("MET-mixed-interleaved 2,3 alternating E=2560", interleaved)
+    fail |= run_once("MET-mixed-interleaved 2,3 alternating E=2560", interleaved)
+    if fail:
+        print("\nGATE_ALL: SOME FAIL — exiting 1")
+        sys.exit(1)
+    else:
+        print("\nGATE_ALL: ALL PASS")
+        sys.exit(0)

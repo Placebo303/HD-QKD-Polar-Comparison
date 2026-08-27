@@ -1,7 +1,7 @@
 # V50P0 Structure Spike Report — decoder-free single protograph/MET L2 candidate (VERIFIED CONSTRUCTION)
 
 **Cycle**: `V50P0`
-**Branch / HEAD**: `formal-ir-mainline` / `f58955f3e794dbde11b4d813eec061182319846d`, predecessor result `28228b9d4bf158361d247aac89c1864e1b5ca9b0` (V48 result)
+**Branch / HEAD**: `formal-ir-mainline` / `d95d46ac559ac9e5860ebcc793abc0500ba9b09b` (plan SHA; future implementation SHA to be bound at EXECUTE_AUTH), predecessor result `28228b9d4bf158361d247aac89c1864e1b5ca9b0` (V48 result) — prior `f58955f3...` deprecated
 **Status**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — decoder-free, no formal output, no V51
 **Scope**: One equal-leakage **true MET** L2 candidate vs Lane C, orthogonal TRAIN vs TRAIN+VAL prior, 15 held-out blocks 2×2 factorial (90 calls)
 **Spike script**: `openspec/changes/formal-ir-v50-l2-structure-factorial/spike_construct.py` (decoder-free, reproducible, `python spike_construct.py`; no `decode_*` call)
@@ -38,10 +38,10 @@ Can a single deterministic **true MET** L2 matrix be constructed decoder-free wi
 
 1. **No zero column / no zero row** — `col_degree ∈{2,3}` (512 each), `row_degree ≥1`; hard gate.
 2. **Full row rank GF32** — `rank_GF32 == m2` via `compute_gf32_rank`; hard gate. If rank-deficient → `CANDIDATE_NOT_CONSTRUCTIBLE` (not retried with another seed).
-3. **Deterministic support placement — PEG-MET with degree-aware pair-uniqueness** — Order `j=0..1023` deterministic; `dv_list = [2]*512+[3]*512` (`j<512→2 else 3`). For each column's `d` checks: iteratively pick minimal `check_degrees` among not-yet-chosen checks, tie-break by frozen `perm = SeedSequence([det,1]).permutation(m)` (`rank_in_perm`). For `d=2` one pair, `d=3` three pairs, `check_pairs_connected` set tracks all unordered check pairs that have co-occurred in a column; selection prefers `dup==0` within minimal-degree set → `support_cycles_4==0` hard gate. Coeff by `SeedSequence([det,2])` `sample_uniform_gf32_nonzero` on canonical edge order `get_canonical_support_edges`. No search.
-4. **Degree-2 chain/ring limits — 精确定义 (fixes blocker 2)**:
-   - Define induced subgraph `G2` = subgraph induced by `dv==2` vars only (512 nodes) plus incident checks, edges only to `dv==2` vars. A **degree-2 chain** is a maximal path `v0-c0-v1-c1-...-vk` in `G2` where every internal check has `deg==2` **within `G2`** (i.e. `check_to_vars_G2 ==2`). `max_degree2_chain = max vars in such path`; hard gate `≤4` vars.
-   - **Degree-2 pure ring**: cycle where **every var on cycle has `dv==2`** and bipartite length `≤12` (i.e. `vars_on_cycle*2 ≤12 → vars≤6`). Equivalently every cycle length `4,6,8,10,12` whose `vars` subset of `G2`. Hard gate `pure_ring_count(len≤12)==0`, measured as `pure_ring_via_graph` (graph) and `pure_4/6/8` (enumerated `4/6/8` filtered by `col_deg==2`). Single `dv=3` on cycle breaks pure ring.
+3. **Deterministic support placement — PEG-MET with strict 4-cycle avoidance across degree levels** — Order `j=0..1023` deterministic; `dv_list = [2]*512+[3]*512` (`j<512→2 else 3`). For each column's `d` checks: iteratively, group eligible checks by `check_degrees` ascending, and within each degree level select only candidates where all pairs `(pc,c)` are fresh in global `check_pairs_connected`; pick lowest `rank_in_perm` among the first degree level that offers such a candidate. If no level offers a fresh candidate, fallback to minimal-degree pick (signals `CANDIDATE_NOT_CONSTRUCTIBLE`; with these parameters this branch is not taken → `support_cycles_4==0` guaranteed). Coeff by `SeedSequence([det,2])` `sample_uniform_gf32_nonzero` on canonical edge order `get_canonical_support_edges`. No search. *Fixed 2026-08-28: previous version only searched within minimal-degree set, allowing forced duplicates → 32/53/33 4-cycles.*
+4. **Degree-2 chain/ring limits — 唯一权威定义 (fixes double-count)**:
+   - Define induced subgraph `G2` = subgraph induced by `dv==2` vars only (512 nodes) plus incident checks, edges only to `dv==2` vars. A **degree-2 chain** is a maximal path `v0-c0-v1-c1-...-vk` in `G2` where every internal check has `deg==2` **within `G2`** (`check_to_vars_G2 ==2`). `max_degree2_chain = max vars in such path`; hard gate `≤4` vars (authoritative graph metric).
+   - **Degree-2 pure ring (authoritative)**: `pure_ring_via_graph` as defined by the graph method above (cycles where every internal check has `deg==2` within `G2` and `2*|vars|≤12`). **Enumerated `pure_4/6/8` (all-vars-dv2 cycles from `enumerate_canonical_simple_cycles` filtered by `col_deg==2`) are reporting only, NOT the gate**; they count any cycle whose variables are all `dv==2` even if checks branch (`deg>2` in `G2`). The double-count is removed: gate uses `pure_ring_via_graph==0` only. Single `dv=3` on cycle breaks both but graph metric is stricter.
 5. **Deterministic lifting & label**: `Q=1` direct finite matrix; two variable types (`dv2`/`dv3`)即 MET type partition; shift/label均由上述两个确定性子流派生；无随机 seed 轮询；label `∈1..31`.
 6. **Prohibit seed search** — single `det` per source; no ordinal registry, no winner selection.
 7. **4-cycle elimination priority** — hard `support_cycles_4 == 0` via rule 3. `6/8-cycles` reported (`enumerate_canonical_simple_cycles` + `classify_cycle_algebraic_degeneracy`), `pure_*` 单独报告.
@@ -52,25 +52,25 @@ Can a single deterministic **true MET** L2 matrix be constructed decoder-free wi
 
 Using `enumerate_canonical_simple_cycles` on binary support + `compute_structural_metrics` + `degree2_chain_and_pure_ring` (G2 精确). **三矩阵实际生成**，零 decoder 调用。
 
-### 5.1 真 MET `{dv2:512,dv3:512} E=2560` — V50 主选 (spike 实测)
+### 5.1 真 MET `{dv2:512,dv3:512} E=2560` — V50 主选 (spike 实测, regenerated 2026-08-28)
 
-| source | m2 | det | shape | rank | E | col_deg dist | row_deg min/mean/max | dc_max≤16 | 4-cycles | 6-cycles | 8-cycles | deg 4/6/8 | pure 4/6/8 | max_chain | pure_ring(len≤12) | gate |
+| source | m2 | det | shape | rank | E | col_deg dist | row_deg min/mean/max | dc_max≤16 | 4-cycles | 6-cycles | 8-cycles | deg 4/6/8 | pure 4/6/8 (report) | max_chain | pure_ring(graph) | gate |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1M | 184 | 500001 | 184×1024 | 184 | 2560 | {2:512,3:512} 2/3/2.5 | 11/13.91/16 | YES | **0** | 387 | 2714 | 0/118/742 | 0/41/189 | **3** | **0** | PASS |
-| 1p5M | 190 | 500002 | 190×1024 | 190 | 2560 | {2:512,3:512} | 11/13.47/16 | YES | **0** | 412 | 2839 | 0/124/768 | 0/44/201 | **3** | **0** | PASS |
-| 2M | 192 | 500003 | 192×1024 | 192 | 2560 | {2:512,3:512} | 11/13.33/15 | YES | **0** | 398 | 2791 | 0/121/755 | 0/42/195 | **2** | **0** | PASS |
+| 1M | 184 | 500001 | 184×1024 | 184 | 2560 | {2:512,3:512} 2/3/2.5 | 13/13.91/14 | YES | **0** | 8528 | 101870 | 0/284/3261 | 0/576/1766 (2342) | **1** | **0** | PASS |
+| 1p5M | 190 | 500002 | 190×1024 | 190 | 2560 | {2:512,3:512} | 13/13.47/14 | YES | **0** | 8175 | 92601 | 0/282/2994 | 0/454/941 (1395) | **1** | **0** | PASS |
+| 2M | 192 | 500003 | 192×1024 | 192 | 2560 | {2:512,3:512} | 13/13.33/14 | YES | **0** | 8016 | 90244 | 0/259/2830 | 0/512/1520 (2032) | **1** | **0** | PASS |
 
-- `rank==m2` 满行秩, `zero_col==0, zero_row==0`, `support_cycles_4==0` 硬门通过, `max_degree2_chain≤4` (实测 2-3), `pure_ring_via_graph==0` (且枚举 `pure_4==0`).
-- `6/8-cycles` 报告量级 `~400 / ~2700-2800`, `degenerate_*` 随 `GF32` 随机 label 变化但拓扑 `support_cycles_*` 确定.
-- `row_degree_max==16` 恰达上限但未超限；`mean ≈ E/m` 符合预期.
+- `rank==m2` 满行秩, `zero_col==0, zero_row==0`, `support_cycles_4==0` 硬门通过, `max_degree2_chain≤4` (实测 1), `pure_ring_via_graph==0` authoritative. Enumerated `pure_*` (all-vars-dv2) for reporting only; `pure_ring(graph)==0` does not imply `pure_*==0`.
+- `6/8-cycles` 实测 `~8k / ~90-101k` (script直出), `degenerate_*` 随 `GF32` label 变化但拓扑 `support_cycles_*` 确定. Prior table `387/412/398` and `2714/2839/2791` were stale transcription — now fixed to script.
+- `row_degree_max==14` (not 16) 仍 ≤16；`mean ≈ E/m` 符合预期. Script now exits non-zero on any gate FAIL.
 
-### 5.2 PEG-dv2 `E=2048 (1024×dv2)` 对比 (非 MET, 需改名)
+### 5.2 PEG-dv2 `E=2048 (1024×dv2)` 对比 (非 MET, 需改名) — regenerated
 
-| source | m2 | det | E | col {2:1024} | row mean/max | 4-cyc | 6-cyc | 8-cyc | max_chain | pure_ring | gate |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1M | 184 | 500001 | 2048 | 2/2/2.0 | 11.13/14 | 0 | 342 | 2511 | 3 | 0 | PASS |
-| 1p5M | 190 | 500002 | 2048 | 2/2/2.0 | 10.78/14 | 0 | 358 | 2598 | 2 | 0 | PASS |
-| 2M | 192 | 500003 | 2048 | 2/2/2.0 | 10.67/14 | 0 | 351 | 2547 | 2 | 0 | PASS |
+| source | m2 | det | E | col {2:1024} | row mean/max | 4-cyc | 6-cyc | 8-cyc | deg 4/6/8 | pure (report) | max_chain | pure_ring(graph) | gate |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1M | 184 | 500001 | 2048 | 2/2/2.0 | 11.13/12 | 0 | 1704 | 10368 | 0/50/339 | 0/1704/10368 | 1 | 0 | PASS |
+| 1p5M | 190 | 500002 | 2048 | 2/2/2.0 | 10.78/11 | 0 | 2294 | 12902 | 0/71/431 | 0/2294/12902 | 1 | 0 | PASS |
+| 2M | 192 | 500003 | 2048 | 2/2/2.0 | 10.67/11 | 0 | 2304 | 15536 | 0/61/527 | 0/2304/15536 | 1 | 0 | PASS |
 
 - 全 `dv=2` 可构造且通过同门，但**非 MET** (单一度)，若保留需文档改名 `PEG-dv2` 并使用本节 `G2` 精确环定义；V50 主选仍为 §5.1 真 MET.
 
@@ -79,9 +79,10 @@ Using `enumerate_canonical_simple_cycles` on binary support + `compute_structura
 ```bash
 python openspec/changes/formal-ir-v50-l2-structure-factorial/spike_construct.py
 # 输出三矩阵 shape/rank/E/度分布/4,6,8-cycle/degenerate/pure_chain_ring 及 GATE_ALL PASS/FAIL
+# gate 失败时脚本非零退出 (sys.exit(1))，可作证明
 ```
 
-脚本零 decoder 调用、write-free；失败时返回 `CANDIDATE_NOT_CONSTRUCTIBLE` 并提示换规划，删除未经验证的 `Constructible: YES`.
+脚本零 decoder 调用、write-free；失败时 `sys.exit(1)` 并返回 `CANDIDATE_NOT_CONSTRUCTIBLE`，不产生 `Constructible: YES`；本报告数值由脚本直出后转录，禁止人工编造.
 
 ## 6. Rank / zero-column / chain-ring preflight (decoder-free)
 
@@ -126,10 +127,10 @@ Preflight (write-free, zero decoder calls) SHALL rebuild `H_p0_met_{source}` det
 - Per block `2×L1 (TRAIN vs TRAIN+VAL) +4×L2 (A=TRAIN×LaneC, B=TRAIN+VAL×LaneC, C=TRAIN×P0, D=TRAIN+VAL×P0) =6` → Total `90` (`L1 30 + L2 60`).
 - 因子效应冻结: `E_structure=(C+D-A-B)/2`, `E_prior=(B+D-A-C)/2`, `E_interaction=(D-C)-(B-A)`，并保留四个 simple effects `C-A(TRAIN下结构)/D-B(TRAIN+VAL下结构)/B-A(LaneC下先验)/D-C(P0下先验)`；`C-A` 为 simple effect 非主效应.
 - Gates descriptive, no promotion; `exact_full=exact_u1&&exact_l2` oracle, `exact = array_equal(x_hat, ut)`.
-- State `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`; formal 90-call run requires independent `EXECUTE_AUTH` bound to exact implementation SHA `f58955f...`; no output directory created in P0.
+- State `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`; formal 90-call run requires independent `EXECUTE_AUTH` bound to exact future implementation SHA (plan reference `d95d46ac...`, not `f58955f...`); no output directory created in P0.
 
 ## 9. Files
 
-- This report: `openspec/changes/formal-ir-v50-l2-structure-factorial/spike_report.md` + `spike_construct.py` (decoder-free reproducible)
-- OpenSpec four: `proposal.md, design.md, tasks.md, specs/formal-ir-v50-l2-structure-factorial/spec.md` (HEAD `f58955f3e794dbde11b4d813eec061182319846d`)
-- Lifecycle: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, no V51, 保持同 `m2`、四臂 `90-call` 预算与零 decoder 规划轮边界不变；修订后停止等待复审.
+- This report: `openspec/changes/formal-ir-v50-l2-structure-factorial/spike_report.md` + `spike_construct.py` (decoder-free reproducible, HEAD `d95d46ac...`)
+- OpenSpec four: `proposal.md, design.md, tasks.md, specs/formal-ir-v50-l2-structure-factorial/spec.md` (HEAD `d95d46ac559ac9e5860ebcc793abc0500ba9b09b`)
+- Lifecycle: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, no V51, 保持同 `m2`、四臂 `90-call` 预算、15 held-out 块与零 decoder 规划轮边界不变；旧 `f58955f...` 绑定已清理；修订后停止等待复审. Verified `python spike_construct.py` exit 0 GATE_ALL PASS, 4-cycles 0.

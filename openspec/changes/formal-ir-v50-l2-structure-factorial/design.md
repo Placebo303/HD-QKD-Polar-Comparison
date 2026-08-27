@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **只规划，不实现，不执行，不启动 V51。等待独立评审。**
 **Cycle**: `V50P0`
-**Predecessor**: V48 held-out-confirm result `28228b9d` + diagnostic `f58955f3e794dbde11b4d813eec061182319846d`, branch `formal-ir-mainline` HEAD `f58955f3e794dbde11b4d813eec061182319846d`
+**Predecessor**: V48 held-out-confirm result `28228b9d` + diagnostic `f58955f3e794dbde11b4d813eec061182319846d` (deprecated), branch `formal-ir-mainline` plan HEAD `d95d46ac559ac9e5860ebcc793abc0500ba9b09b`
 **Feasibility**: 单一等泄漏真 MET 候选可在 `n=1024, m2=184/190/192, GF32 poly37, dc_max=16, E=2560 ({dv2:512,dv3:512})` 下 decoder-free 构造并通过秩/零列/4-cycle/链环门（已由 spike 三矩阵实证）；全 `dv=2` 非 MET，若用则改名 `PEG-dv2, E=2048`；15 未使用 held-out 块富余；90-call 2×2 因子预算冻结
 
 ## 1. 科学问题（两个正交因子，单一等泄漏结构候选）
@@ -35,8 +35,8 @@
 ### 2.2 结构候选 P0-MET-1（唯一，禁止 seed 搜索）— 真 MET
 
 - 每源确定性矩阵 `p0_met_{source}_det1` shape `m2×1024`, `GF32 poly37`, **真 MET 混合度 `{dv2:512,dv3:512}, E=2560, dv_mean=2.5`**（`E` 不决定泄漏；全 `dv=2 E=2048` 非 MET，若用则改名 `PEG-dv2`），`dc_max≤16`, `col_degree_min≥1` (分布 `512×2+512×3`, 无零列), `rank==m2`.
-- **构造**：deterministic PEG-MET — 每列 `j` 按 `dv_list`（`j<512→2, else 3`）依次选最小度 check 集合中按 frozen `perm_p=SeedSequence([50000x,1])` tie-break 的 check 集合，且 `check_pairs_connected` 对 `dv=2` 的 1 对与 `dv=3` 的 3 对全局唯一 → `support_cycles_4==0` 硬门。 coeff 由 `SeedSequence([50000x,2])` 的 `sample_uniform_gf32_nonzero` 按规范边序映射。
-- **Degree-2 约束（精确）**：定义 `G2` 为仅 `dv=2` 变量及其关联边诱导子图。**degree-2 链**为 `G2` 内极大路径且内部校验在 `G2` 内度为 2；`max_degree2_chain≤4` vars 硬门。**degree-2 纯环**为双分长度 `≤12`（即 `vars*2 ≤12`，`vars≤6`）且环上所有变量 `dv=2` 的闭环；`degree2_pure_ring(len≤12)==0` 硬门，度量为 `pure_ring_via_graph` 与枚举 `pure_4/6/8`（spike §5 实测）。
+- **构造**：deterministic PEG-MET with strict 4-cycle avoidance — 每列 `j` 按 `dv_list`（`j<512→2, else 3`）依次按度升序扫描度层级，仅在该层级内挑选使 `check_pairs_connected` 对 `dv=2` 的 1 对与 `dv=3` 的 3 对全局唯一的 check（按 frozen `perm_p=SeedSequence([50000x,1])` tie-break），保证 `support_cycles_4==0` 真满足（修复前仅在最小度子集内择优导致 32/53/33 失败）。 coeff 由 `SeedSequence([50000x,2])` 的 `sample_uniform_gf32_nonzero` 按规范边序映射。
+- **Degree-2 约束（精确，唯一权威）**：定义 `G2` 为仅 `dv=2` 变量及其关联边诱导子图。**degree-2 链**为 `G2` 内极大路径且内部校验在 `G2` 内度为 2；`max_degree2_chain≤4` vars 硬门。**degree-2 纯环**为双分长度 `≤12`（即 `vars*2 ≤12`，`vars≤6`）且环上所有变量 `dv=2` 且环上每个校验在 `G2` 内度为 2 的闭环；`degree2_pure_ring(len≤12)==0` 硬门，**唯一权威度量为 `pure_ring_via_graph`（graph）**，枚举 `pure_4/6/8`（所有变量 `dv==2` 的 4/6/8 支撑环）仅作报告、非门禁，双计数已清理（spike §5 实测由脚本直出）。
 - **Lifting/label 确定性**：`Q=1` 直接有限矩阵（`2` 种变量类型即 MET 类型划分），shift/label 均由上述两个确定性子流派生；无随机 seed 轮询。
 - **与 Lane C 等泄漏**：相同 `m2` → 相同 `leak_total=5*m2+80+64`，`f_total=leak/[N(H1+H2)] N=1024` 一致；`E` 不同不影响泄漏。
 - **4-cycle 优先消除**：硬 `0`；`6/8-cycles` 仅报告（`enumerate_canonical_simple_cycles` + `classify_cycle_algebraic_degeneracy`，`pure_*` 单独报告）。
@@ -107,7 +107,7 @@
 
 ## 6. 科学 preflight、守卫序
 
-1. **拒绝类最先**：默认拒绝；必带 `--execution-authorized`；`git rev-parse HEAD` 与 `origin/formal-ir-mainline` 与 `--authorized-target-sha` 精确等值绑定 `f58955f3e794dbde11b4d813eec061182319846d`；四文件 SCOPED dirty（含 `v50` 模块、`v50` CLI、`v38_architecture_triage.py`、`v35_algorithm_development.py`）；输出根已存在即拒（J7）；任一拒绝零 calls 不建文件.
+1. **拒绝类最先**：默认拒绝；必带 `--execution-authorized`；`git rev-parse HEAD` 与 `origin/formal-ir-mainline` 与 `--authorized-target-sha` 精确等值绑定未来实现 SHA（plan 引用 `d95d46ac559ac9e5860ebcc793abc0500ba9b09b`，旧 `f58955f...` 已弃用）；四文件 SCOPED dirty（含 `v50` 模块、`v50` CLI、`v38_architecture_triage.py`、`v35_algorithm_development.py`）；输出根已存在即拒（J7）；任一拒绝零 calls 不建文件. Spike 脚本任一门禁失败时 `sys.exit(1)` 非零退出。
 2. **科学 preflights（decoder-free, write-free）**：seed registry 校验（新区 15 与 FORBIDDEN 141 block ID 零重叠 per source 连续且与 V48 180 帧 `frame_ids` 零重叠）；P0 母矩阵 `E=2560`（MET）确定性重建与 `full_row_rank/capacity/4-cycle/chain-ring/dc_max` 比对（含 `G2` 精确链/环）；TRAIN 与 TRAIN+VAL counts 形态校验；held-out 未使用池可达；首块哨兵 `391001/391101/391201` 各 `L1_T/L1_TV→P_i(U2)` 通路 + `tag_import_ok` + `leakage_accounted` (1064/1094/1104, 与 `E` 无关) + `tag_scope_l2_only`.
 3. **Preflight 失败** → 建增量根写 `v50_invalid_notice.json` + 空 records + `v50_summary.json` (terminal `V50_EVIDENCE_INVALID`, planned 90) 后零 decoder calls 停止.
 4. **建根**仅在全部守卫与 preflights 通过后、首个 decoder call 前.
@@ -144,8 +144,8 @@ comparison_bench/outputs_comparison/formal_ir_methods/v50_l2_structure_factorial
 
 ## 10. 实现草图（后继轮次，当前未授权）
 
-- `comparison_bench/src/comparison_bench/formal_ir/v50_l2_structure_factorial.py`：import `construct_lane_c_prototype` 常量与 `v35.compute_tag_64`，实现 `P0-MET-1` 真 MET 确定性 PEG-MET（`dv2:512,dv3:512 E=2560`，§2.2，含 `G2` 链/环）+ 双 prior loader (`TRAIN` / `TRAIN+VAL` 合并) + 2×2 runner (per block `2 L1 +4 L2`).
-- `scripts/execute_v50_structure_factorial.py`：默认拒绝；`--execution-authorized --authorized-target-sha <sha>`；HEAD/origin 精确绑定 `f58955f3e794dbde11b4d813eec061182319846d`；四文件 SCOPED dirty；budget 硬帽 90.
+- `comparison_bench/src/comparison_bench/formal_ir/v50_l2_structure_factorial.py`：import `construct_lane_c_prototype` 常量与 `v35.compute_tag_64`，实现 `P0-MET-1` 真 MET 确定性 PEG-MET（`dv2:512,dv3:512 E=2560`，§2.2，含 `G2` 链/环，严格跨度层 4-cycle avoidance）+ 双 prior loader (`TRAIN` / `TRAIN+VAL` 合并) + 2×2 runner (per block `2 L1 +4 L2`).
+- `scripts/execute_v50_structure_factorial.py`：默认拒绝；`--execution-authorized --authorized-target-sha <sha>`；HEAD/origin 精确绑定未来实现 SHA（plan `d95d46ac...`）；四文件 SCOPED dirty；budget 硬帽 90；任一 gate 失败非零退出.
 - 仅 fake-runner 测试；不以 V48 outcomes 定结构.
 
 ## 11. 自由裁量 D1–D10

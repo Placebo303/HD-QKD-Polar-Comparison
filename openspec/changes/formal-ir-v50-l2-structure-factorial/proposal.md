@@ -4,7 +4,7 @@
 **Domain**: Formal IR / L2 structure × prior factorial (protograph/MET vs Lane C)
 **Change ID**: `formal-ir-v50-l2-structure-factorial`
 **Cycle ID**: `V50P0`
-**Predecessor**: `formal-ir-v48-heldout-confirm` (result SHA `28228b9d4bf158361d247aac89c1864e1b5ca9b0`) + diagnostic `f58955f3e794dbde11b4d813eec061182319846d`, branch `formal-ir-mainline` HEAD `f58955f3e794dbde11b4d813eec061182319846d`
+**Predecessor**: `formal-ir-v48-heldout-confirm` (result SHA `28228b9d4bf158361d247aac89c1864e1b5ca9b0`) + diagnostic `f58955f3e794dbde11b4d813eec061182319846d` (deprecated), branch `formal-ir-mainline` plan HEAD `d95d46ac559ac9e5860ebcc793abc0500ba9b09b` (future implementation SHA to be bound at EXECUTE_AUTH)
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, `formal_execution_authorized=false`
 
 > ponytail lite: 本轮仅 decoder-free 结构 spike + 单候选等泄漏 protograph/MET 与 2×2 因子计划；更懒路径是零新增矩阵直接复用 Lane C，需独立评审确认结构重构价值是否值得 90-call 预算。
@@ -43,7 +43,7 @@
 
 ## Acceptance Criteria
 
-- [ ] 四工件 + spike 报告齐全一致且 lifecycle 为 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，HEAD 绑定 `f58955f3e794dbde11b4d813eec061182319846d`，明确“不实现不执行不启动 V51，等待独立评审”。
+- [ ] 四工件 + spike 报告齐全一致且 lifecycle 为 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，plan HEAD 绑定 `d95d46ac559ac9e5860ebcc793abc0500ba9b09b`（旧 `f58955f...` 已清理，正式执行绑定未来 implementation SHA），明确“不实现不执行不启动 V51，等待独立评审”。
 - [ ] 单一等泄漏 protograph/MET 候选 `P0-MET-1` 冻结：`n=1024, m2=184/190/192` 按源、`GF32 poly37`、`无零列`、`满行秩`、真 MET `{dv2:512,dv3:512} E=2560`（全 `dv2` 则改名 `PEG-dv2`）、`degree-2 链≤4 / 纯环(≤12)==0`（`G2` 精确定义）、`确定性 lifting/label`、`禁止 seed 搜索`；与 Lane C 相同 `m2` 与泄漏 `1064/1094/1104`（`E` 不决定泄漏），行度上限 `16` 冻结，`4-cycles==0` 硬门、`6/8-cycles` 报告，构造规则不接触 V48 outcomes。
 - [ ] Spike 可构造性已实证（decoder-free 三矩阵实际生成，报告 rank/E/度分布/4,6,8-cycle/degree-2 chain/pure ring，无 decoder 调用，无正式 output；失败则换规划，删除未经验证的 `Constructible: YES`）。
 - [ ] 15 未使用 held-out blocks 冻结：与 `FORBIDDEN 141` block ID 零重叠、无内部重复、每源均分 5、连续 IDs `391001..` 且每块写死 `4` 真实 `frame_ids` 与 `ordinal start/end`，与 V48 180 帧 `frame_ids` 零重叠 per source 可机械校验；每块 `2×L1+4×L2=6` → 总 `90` calls (`L1 30 / L2 60`) 的 2×2 因子 workload 冻结。
@@ -56,4 +56,4 @@
 
 ## Lifecycle
 
-V48 前代 result `28228b9d4bf158361d247aac89c1864e1b5ca9b0` + 诊断 `f58955f`，分支 `formal-ir-mainline` HEAD `f58955f3e794dbde11b4d813eec061182319846d`；V50 当前 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，修订后仍保持不实现不执行、等待独立 plan 评审；实现候选止于 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；任何执行需显式用户 `EXECUTE_AUTH` 绑定到精确实现 SHA；不启动 V51。
+V48 前代 result `28228b9d4bf158361d247aac89c1864e1b5ca9b0` + 诊断 `f58955f` (已弃用)，分支 `formal-ir-mainline` plan HEAD `d95d46ac559ac9e5860ebcc793abc0500ba9b09b`；V50 当前 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，修订后仍保持不实现不执行、等待独立 plan 评审；实现候选止于 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；任何执行需显式用户 `EXECUTE_AUTH` 绑定到精确未来实现 SHA；不启动 V51。Spike 已修复为确定性 4-cycles 0 + 非零退出 + 唯一 pure-ring 权威定义。
