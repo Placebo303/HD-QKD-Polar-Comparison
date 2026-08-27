@@ -39,6 +39,7 @@ _G_SHARED_BY_TTBIN: dict[str, dict[str, Any]] = {}
 _G_TTBIN_BY_POINT: dict[str, str] = {}
 _G_REPAIR_DIAGNOSTICS: bool = False
 _G_MATERIALIZE_PROCESSING_RULE_VERSION: str = "legacy_v1"
+_G_REAL_SEQ_POOL_ROOT: str = ""
 
 
 def _progress(iterable, *, total: int, desc: str):
@@ -60,8 +61,9 @@ def _init_extract_worker(
     ttbin_by_point: dict[str, str] | None = None,
     repair_diagnostics: bool = False,
     materialize_processing_rule_version: str = "legacy_v1",
+    real_seq_pool_root: str = "",
 ) -> None:
-    global _G_GRID_MAP, _G_OUT_ROOT_S, _G_FORCE_ALIGN, _G_OFFSET_OVERRIDE_PS, _G_COINC_WINDOW_OVERRIDE_PS, _G_SHARED_BY_TTBIN, _G_TTBIN_BY_POINT, _G_REPAIR_DIAGNOSTICS, _G_MATERIALIZE_PROCESSING_RULE_VERSION
+    global _G_GRID_MAP, _G_OUT_ROOT_S, _G_FORCE_ALIGN, _G_OFFSET_OVERRIDE_PS, _G_COINC_WINDOW_OVERRIDE_PS, _G_SHARED_BY_TTBIN, _G_TTBIN_BY_POINT, _G_REPAIR_DIAGNOSTICS, _G_MATERIALIZE_PROCESSING_RULE_VERSION, _G_REAL_SEQ_POOL_ROOT
     _G_GRID_MAP = grid_map
     _G_OUT_ROOT_S = str(out_root_s)
     _G_FORCE_ALIGN = bool(force_align)
@@ -71,6 +73,7 @@ def _init_extract_worker(
     _G_TTBIN_BY_POINT = dict(ttbin_by_point or {})
     _G_REPAIR_DIAGNOSTICS = bool(repair_diagnostics)
     _G_MATERIALIZE_PROCESSING_RULE_VERSION = str(materialize_processing_rule_version or "legacy_v1").strip().lower() or "legacy_v1"
+    _G_REAL_SEQ_POOL_ROOT = str(real_seq_pool_root or "").strip()
 
 
 def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
@@ -266,6 +269,7 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
                     materialize_shared_t0_ps=shared_t0,
                     materialize_shared_t1_ps=shared_t1,
                     materialize_global_peak_center_ps=global_peak_center_ps,
+                    pool_root=(str(_G_REAL_SEQ_POOL_ROOT) if _G_REAL_SEQ_POOL_ROOT else None),
                 )
                 map_ser = float(res.get("map_ser", float("nan")))
                 sidecar_verdict = str(res.get("verdict") or "").strip().upper()
@@ -977,6 +981,7 @@ def _run_extract_batch(
     ttbin_by_point: dict[str, str] | None = None,
     repair_diagnostics: bool = False,
     materialize_processing_rule_version: str = "legacy_v1",
+    real_seq_pool_root: str = "",
 ) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     _init_extract_worker(
@@ -989,6 +994,7 @@ def _run_extract_batch(
         ttbin_by_point=ttbin_by_point,
         repair_diagnostics=bool(repair_diagnostics),
         materialize_processing_rule_version=str(materialize_processing_rule_version),
+        real_seq_pool_root=str(real_seq_pool_root or ""),
     )
     if extract_workers <= 1:
         iter_points = _progress(points_batch, total=len(points_batch), desc="E2E extract")
@@ -1009,6 +1015,7 @@ def _run_extract_batch(
             dict(ttbin_by_point or {}),
             bool(repair_diagnostics),
             str(materialize_processing_rule_version),
+            str(real_seq_pool_root or ""),
         ),
     ) as ex:
         fut_map: dict[concurrent.futures.Future[dict[str, Any]], tuple[int, int]] = {}
@@ -1162,6 +1169,15 @@ def main() -> int:
         default="legacy_v1",
         help="sidecar materialization processing rule version; use a dedicated --out-root for pairing_v2 batch runs",
     )
+    ap.add_argument(
+        "--real-seq-pool-root",
+        dest="real_seq_pool_root",
+        default="",
+        help=(
+            "optional root directory for materialized real-sequence pools "
+            "(pools land at <root>/d{d}_bw{bw}/blk{b}; default: results/real_sequences)"
+        ),
+    )
     args = ap.parse_args()
 
     dims = _parse_int_list(args.dims)
@@ -1196,6 +1212,9 @@ def main() -> int:
         print(f"[E2E] coincidence window override ps={coinc_window_override_ps}")
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    real_seq_pool_root = str(args.real_seq_pool_root or "").strip()
+    if real_seq_pool_root:
+        print(f"[E2E] real-seq pool root={_resolve_path(real_seq_pool_root)}")
     out_root = _resolve_path(args.out_root) if str(args.out_root).strip() else (default_project_results_root(REPO_ROOT) / f"e2e_pipeline_{ts}")
     out_root.mkdir(parents=True, exist_ok=True)
     print(f"[E2E] materialize processing rule version={args.materialize_processing_rule_version}")
@@ -1257,6 +1276,7 @@ def main() -> int:
                 ttbin_by_point=ttbin_by_point,
                 repair_diagnostics=bool(args.repair_diagnostics),
                 materialize_processing_rule_version=str(args.materialize_processing_rule_version),
+                real_seq_pool_root=real_seq_pool_root,
             )
             all_results.extend(batch_res)
         finally:
@@ -1286,6 +1306,7 @@ def main() -> int:
                 ttbin_by_point={},
                 repair_diagnostics=bool(args.repair_diagnostics),
                 materialize_processing_rule_version=str(args.materialize_processing_rule_version),
+                real_seq_pool_root=real_seq_pool_root,
             )
         )
 

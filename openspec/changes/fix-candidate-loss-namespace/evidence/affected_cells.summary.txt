@@ -1,0 +1,7 @@
+[affected-cells] wrote 94 affected cells -> openspec\changes\fix-candidate-loss-namespace\evidence\affected_cells.csv
+[affected-cells] 10dB∩16dB: got 56, event record says 56 [OK]
+[affected-cells] 6dB∩10dB: got 40, event record says 40 [OK]
+[affected-cells] 6dB∩16dB: got 56, event record says 56 [OK]
+[affected-cells] 6dB union: got 67, event record ≈61
+[affected-cells] 20dB shared-with-any: 0 (event record: 0)
+[affected-cells] counts match the event record exactly

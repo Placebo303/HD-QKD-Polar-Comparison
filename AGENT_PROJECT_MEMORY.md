@@ -8,6 +8,186 @@
 > provenance and MUST NOT be treated as this checkout's active backlog.
 > New entries should cover the Polar mainline only.
 
+## 2026-08-26 METHODOLOGICAL WARNING — v3 ↔ v4(lossfix) same-grid deltas are NOT directly comparable
+
+- **Do not cite** two-generation same-grid differences as "the cost of the
+  rate-search fix". On high-dimensional grids — (4096,200), (2048,200),
+  (1024,150) — the apparent PIE/SKR drop (v3 ≈ 6.79 vs v4fix ≈ 4.65)
+  **confounds two independent factors**:
+  1. **Data-lineage correction**: lossfix pools were rebuilt from original
+     ttbin (`raw_ser` 0.07 → 0.24); old-pool bytes understated ser
+     (contaminated shared sequence pool, see 2026-08-25 entry).
+  2. **Rate-search conservatism**: frames300 + 26-step fine ladder +
+     Wilson FER; deep rate tiers heavily downgraded / shifted to SCL.
+- Through the single `Σk_best` lever these synthesize into an apparent gap
+  of roughly **54% kept / 46% leak** contribution.
+- **Isolation rule**: strategy-effect isolation requires grids whose data is
+  bit-identical across generations — e.g. (64,200): PIE +0.47 ⇒ the PURE
+  rate-search-strategy effect there is a **positive gain**, not a cost.
+- IAB / beta_eff_empirical / secure series two-generation deltas are SER
+  downstream mirrors of the same lineage shift — likewise not directly
+  comparable across generations.
+- Evidence: `openspec/changes/fix-candidate-loss-namespace/evidence/`
+  (verified present 2026-08-26). The per-layer decomposition table from the
+  attribution round exists only in chat history — **pending**: fold it into
+  docs at change closeout (T5.x). [decision]
+
+## 2026-08-26 档间 map_ser 差异机制诊断（lossfix 四档；同晚仅改衰减采集）
+
+- 结构事实：全部错误 100% 为 ±1 邻 bin 穿越（near_neighbor_frac≡1.0），
+  无随机散布错误。 [repo-observed]
+- 假设鉴别：偶然符合占比被三重否决（错误方向相反 / peak_to_bg 随通量上升 /
+  错误非均匀）；多对发射为次要因素（≤2.5%）；最近邻配对竞争方向对但量级不足
+  （≤6~27%）。幸存主因＝**速率相关定时劣化家族**（死时/堆积/时间游走）：
+  d64 同锚内控下通量 74k→688k 对应 ser 平滑单调上升；peak_sigma 随通量
+  +36~43%；窄 bin 格呈阈值式单侧位移并饱和。 [decision]
+- 未决混淆：归档 metrics 缺每档 singles 遥测，且 pairing_v2 自动延时重锚定
+  （~100ps 粒度，used_delay_ps=peak_center_ps，见
+  `src/workflow/export_joint_sequence_sidecar.py` L1094/L1163-1164，行号已核对）
+  使「探测器物理」与「漂移×重锚定」两因素暂不可分。 [repo-observed]
+- 可行动含义：①便宜判别实验＝禁用 auto_peak_delay、固定锚后四档重跑配对，
+  若档间 ser 差收窄则说明重锚定策略参与制造差异（上游白捡收益）；
+  ②PIE 恢复路径优先级修正——先评估上游定时/锚定优化（抬 IAB 上限），再评估
+  解码器升级（自适应冻结序，抬 β）。 [decision]
+- 证据：鉴别诊断表仅存于对话记录 —— 与上方 v3↔v4 条目的 T5.x 待办同类，
+  建议 T5 收尾时一并补入 docs/troubleshooting 或 docs/。 [pending]
+
+## 2026-08-26 fix-candidate-loss-namespace approved — Phases 0–3 PASS, Phase 4 rerun RUNNING; G3 criteria lesson
+
+- OpenSpec change `fix-candidate-loss-namespace` **approved by user
+  2026-08-25** and implemented through Phase 4. Decisions: Q1 = re-verify
+  16dB shared 56 cells via full rebuild; Q2 = full grid, all 121 cells/tier;
+  Q3 = quarantine-rename old shared pool to
+  `real_sequences_quarantined_20260825` (**pending, T5.3, requires explicit
+  authorization**); Q4 = `*_lossfix_v1` naming. [decision]
+- Feasibility verified: all four tiers' raw ttbin (+`.1` shards) present and
+  non-zero under `D:\Data\Raw Data\QKD_Loss\TypeII_776.1nm_3s\`
+  (`evidence/G0_precheck_report.md`); materialization/gate tooling in-repo;
+  extraction chain deterministic — same inputs reproduce byte-identically
+  (pilot double-runs + G2 fingerprint reconciliation). [repo-observed]
+- Affected-cell exact census supersedes event-record approximations:
+  10∩16=56, 6∩16=56, 6∩10=40, three-way intersection 29, 6dB union **67**
+  (event record ≈61 was approximate), cross-tier union **94**, 20dB shares 0.
+  Artifacts: `evidence/affected_cells.csv` / `.summary.txt`. [repo-observed]
+- Materialization complete: 10dB×121 + 6dB×121 + 16dB×121 (83 rebuilt +
+  **38 backfilled byte-for-byte from old authoritative** with per-file sha256
+  proof `backfill_from_old_authoritative_MANIFEST.csv`; 38∩affected(16dB)=0);
+  MANIFEST.csv 325 rows incl. chan_ll_sha256. [repo-observed]
+- Gates G0–G4 ALL PASS post-backfill: G2 = 1452 six-pair cross-tier array
+  comparisons, 0 collisions; G3 = zero exact-equality + strict tier-mean
+  ordering (0.24727 > 0.233595 > 0.198166 > 0.17006); G4 = 484 sidecar
+  provenance fields pass (`evidence/phase3_gates_final_report.md`).
+  [repo-observed]
+- **Durable lesson — gate criteria took THREE revisions; binding pattern**:
+  contamination gates must be only ① zero hash-level exact ser equality
+  across tiers (the contamination signature) and ② strict tier-mean ser
+  ordering. Per-cell monotonicity and map_sanity-style PASS are NOT
+  achievable gates: historical per-cell FAIL rates of 94/89/89/77 per 121
+  (6/10/16/20 dB) and 95/121 old-data violations under a monotonicity gate
+  show such failures are properties of the physical map/grid, not of
+  contamination. Arbitrary percentage thresholds fail in the face of
+  evidence — a draft ≥2% inversion threshold sat BELOW the measured maximum
+  inversion (2.2303%) of clean rebuilt data; never let such thresholds gate.
+  Per-cell inversions are diagnostic-only with statistical background
+  (small-sample σ, high-dim near-degenerate band). [decision]
+- Parallelism directive (user, standing for these replays): use as much CPU
+  as the host provides; frozen at workers=12 / metric-jobs=12 / shards=16 on
+  a 20-logical-core host (basis: `evidence/phase4_launch_config.md`). Science
+  params frozen frames300 / seed20260228 / tag-bits64 / shards16. [decision]
+- lossfix namespace layout (do not conflate with pre-incident roots):
+  candidates `results/authoritative_nsfix/e2e_{10dB,6dB,16dB}_fullgrid_pairing_v2_candidate_lossfix_v1/`
+  (each with `sidecars/`, grid tables, `MANIFEST.csv`; 16dB additionally the
+  backfill manifest); replay outputs
+  `results/paper_grade_v4_rate_search_fix/four_loss_parts_frames300_lossfix_v1/{loss_10dB,loss_6dB,loss_16dB}/`;
+  20dB reference stays `results/authoritative/e2e_20dB_fullgrid_pairing_v2_candidate_t15/sidecars`
+  (read-only). Old roots (`results/real_sequences/*`,
+  `four_loss_parts_frames300`) remain read-only until T5.3 rename.
+  [repo-observed]
+- Frozen-baseline touch surface (all reviewed, default behavior unchanged):
+  `export_sidecar_for_point` optional `pool_root` param +
+  `run_e2e_pipeline.py --real-seq-pool-root` passthrough;
+  `routeA_run_formal_cross_loss.py` new `--candidate-dirs` flag.
+  [repo-observed]
+- Phase 4 RUNNING since 2026-08-26T01:52:41+08:00: serial separated
+  processes 10→6→16dB into the lossfix output root; monitoring via
+  `workspace/fix-candidate-loss-namespace/p4_20260826_020352/` and
+  `openspec/changes/fix-candidate-loss-namespace/evidence/phase4_launch_record.md`.
+  Remaining: per-tier validator 121/121 checks → T5 closeout (T5.1/T5.2
+  reports, T5.3 rename under explicit authorization, T5.4 memory/decision-log
+  updates, T5.5 triage + `/finish-change`). 20dB reuses existing artifacts,
+  no rerun. [repo-observed]
+
+## 2026-08-25 v4 rerun TERMINATED — cross-loss shared sequence-pool defect (durable lesson)
+
+- The rate-search-fix v4 four-loss full-chain rerun (PID 17828, launched
+  2026-08-22, decision-log 2026-08-14 待办 #1) was **terminated by explicit
+  user authorization** at 2026-08-25 20:58:53 (+08:00, `taskkill /F /T /PID
+  17828`, tree verified gone, no residue). Forensics confirmed the candidate
+  sidecar sources used a **loss-free namespace shared sequence pool**
+  (`results/real_sequences/d{d}_bw{bw}/blk0`, materialized 2026-03-18, plus
+  the since-deleted `workspace/override_points`): the same (d,bw) cell held
+  byte-identical inputs across loss tiers ⇒ same-seed deterministic replay
+  emitted bit-identical outputs per tier pair. [repo-observed, decision]
+- Impact census: 10∩16dB=56 cells, 6∩16=56, 6∩10=40 byte-identical; **20dB
+  clean** (independent t15 materialization, 0 sharing); provenance of 16dB's
+  56 shared cells untraceable. Validity: within-20dB usable; within-16dB
+  usable but its 56 shared cells barred from cross-loss comparison; any
+  10/6dB cross-loss comparison invalid. [repo-observed]
+- Disposition: all three produced tiers (267 files) preserved in place as
+  forensic evidence, nothing overwritten or deleted; `loss_6dB/` retains an
+  empty skeleton only. Full incident record:
+  `results/paper_grade_v4_rate_search_fix/DATA_PROVENANCE_INCIDENT_20260825.md`;
+  decision recorded in docs/decision-log.md 2026-08-25 entry. [repo-observed]
+- **Durable lesson (binding on all future work)**: any future candidate
+  materialization MUST (a) carry the loss namespace in its storage identity,
+  and (b) pass a cross-tier byte-uniqueness check BEFORE downstream replay
+  consumes it. Deterministic same-seed replay propagates identical inputs to
+  identical outputs silently — a shared source pool is indistinguishable
+  from genuine replication unless uniqueness is enforced at materialization
+  time. [decision]
+- Pending (new task scope, NOT started, requires user authorization +
+  planner): rebuild per-point sequences from raw ttbin under per-loss
+  namespaces (the old shared pool is deleted), then rerun affected tiers —
+  at least 10dB and 6dB; whether the 16dB shared 56 cells get re-verified is
+  undecided. Do not start without authorization. [decision-pending]
+
+## 2026-08-22 Stage 0 full-chain rerun LAUNCHED (rate-search fix v4) — monitoring state
+
+- Decision-log 2026-08-14 entry #1 待办 #1 (full-chain rerun with new rate-search
+  params) was **authorized and actually restarted**: Stage 0 separated-process
+  launch at 2026-08-22T22:00:19+08:00, main PID **17828** (6 python
+  subprocesses; workers=2 + metric-jobs=4). Frozen command recorded verbatim in
+  `results/paper_grade_v4_rate_search_fix/stage0_launch_record_20260822.txt`
+  and `results/paper_grade_v4_rate_search_fix/launch_stage0.ps1`; logs
+  `stage0_stdout_20260822.log` / `stage0_stderr_20260822.log` in the same dir.
+  Output root: `results/paper_grade_v4_rate_search_fix/four_loss_parts_frames300`
+  (pre-launch it contained only the empty skeleton dirs noted last session —
+  zero valid output). [repo-observed]
+- Red lines while running: do NOT touch `paper_grade_v2/`, `paper_grade_v3/`,
+  `authoritative/`, `supporting/`; no parameter changes post-launch; failed
+  artifacts stay in place; NO security-correctness claims from this run until
+  verified. [decision]
+- Completion criteria for next-session verification: every loss directory under
+  the output root must contain `round1a_summary.txt`,
+  `actual_ir_block_table.csv`, `security_calibrated_master_table.csv`, and the
+  validator must pass 121/121 with eps ≤ 1e-10. [decision]
+- Next steps after completion: (1) key-sifting accounting recompute modeled on
+  `results/diagnostics/leak_negative_layer_accounting_20260814/run_accounting.py`
+  with inputs pointed at the v4 new root → (2) old-vs-new comparison report →
+  (3) closeout writes to decision-log / project memory / CURRENT_TASK.md.
+  [decision]
+- Branch state update: pending pushes from the separation entry are DONE —
+  `codex/feat/polar-diagnostics-occupancy` (e049415..1b7055c) and
+  `project-restructure-20260427` (0e4f735..7d9a77f) pushed; `polar-mainline`
+  == `origin/polar-mainline` at `6f33a26`. Earlier handover notes saying
+  "pushes pending" are stale. [repo-observed]
+- reviewer-go reviewed f21c94f boundary declarations: PASS, 4 non-blocking doc
+  leftovers deferred as cleanup backlog (AGENTS.md §9 tree header still says
+  `HD-QKD_Polar_Comparison/`; §0 blacklist does not cover surviving real-IR
+  change dirs; L19–20 "provenance" sentence outdated;
+  AGENT_HANDOFF.md is a dangling research-line reference). Any AGENTS.md edit
+  requires an OpenSpec change first. [repo-observed]
+
 ## 2026-08-22 Repository separation executed (boundary plans 1-3)
 
 - Roles fixed after the crosstalk incident: THIS checkout = binary Polar

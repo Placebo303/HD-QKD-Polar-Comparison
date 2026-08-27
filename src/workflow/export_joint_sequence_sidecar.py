@@ -1393,6 +1393,7 @@ def export_sidecar_for_point(
     materialize_global_peak_center_ps: int | None = None,
     materialize_occupancy_filter: int = 0,
     materialize_processing_rule_version: str = "legacy_v1",
+    pool_root: str | None = None,
 ) -> dict:
     root = Path(out_root)
     root.mkdir(parents=True, exist_ok=True)
@@ -1480,7 +1481,8 @@ def export_sidecar_for_point(
 
         if mode == "strict" and int(materialize_missing_real_seq) == 1:
             materialize_attempted = 1
-            mat_dir = REPO_ROOT / "results" / "real_sequences" / f"d{d}_bw{bw}" / f"blk{int(block_index)}"
+            pool_base = Path(pool_root) if pool_root else REPO_ROOT / "results" / "real_sequences"
+            mat_dir = pool_base / f"d{d}_bw{bw}" / f"blk{int(block_index)}"
             materialize_out_dir = str(mat_dir)
             mat = materialize_real_sequences_for_point(
                 point=point_s,

@@ -39,12 +39,25 @@ def main() -> int:
     ap.add_argument("--frames", type=int, default=100)
     ap.add_argument("--seed", type=int, default=20260228)
     ap.add_argument("--verification-tag-bits", type=int, default=64)
+    ap.add_argument("--candidate-dirs", default="",
+                    help='explicit per-loss candidate dirs, e.g. "10=D:/x/cand,6=D:/y/cand"; '
+                         "overrides candidate_dir_for_loss lookup; empty = default behavior")
     ap.add_argument("--overwrite", action="store_true")
     args = ap.parse_args()
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     losses = [int(x.strip()) for x in str(args.losses).split(",") if x.strip()]
+    explicit_candidates = {}
+    if str(args.candidate_dirs).strip():
+        for part in str(args.candidate_dirs).split(","):
+            part = part.strip()
+            if not part:
+                continue
+            if "=" not in part:
+                raise SystemExit(f"--candidate-dirs entry needs loss=path, got: {part}")
+            k, v = part.split("=", 1)
+            explicit_candidates[int(k.strip())] = Path(v.strip())
 
     masters: list[pd.DataFrame] = []
     lines = [
@@ -55,11 +68,14 @@ def main() -> int:
         "loss_runs:",
     ]
     for loss_db in losses:
-        candidate_dir = candidate_dir_for_loss(loss_db)
-        if not candidate_dir.exists():
-            archived_candidate = REPO_ROOT / "results" / "authoritative" / candidate_dir.name
-            if archived_candidate.exists():
-                candidate_dir = archived_candidate
+        if loss_db in explicit_candidates:
+            candidate_dir = explicit_candidates[loss_db]
+        else:
+            candidate_dir = candidate_dir_for_loss(loss_db)
+            if not candidate_dir.exists():
+                archived_candidate = REPO_ROOT / "results" / "authoritative" / candidate_dir.name
+                if archived_candidate.exists():
+                    candidate_dir = archived_candidate
         loss_root = output_dir / f"loss_{int(loss_db)}dB"
         replay_index_dir = loss_root / "stage0_replay_index"
         stage1_dir = loss_root / "stage1_actual_ir"
