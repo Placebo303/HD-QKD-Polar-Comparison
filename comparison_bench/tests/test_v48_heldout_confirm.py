@@ -507,3 +507,127 @@ def test_no_30_block_path():
     # 30-block ids should not be defined as limit
     flat=len([s for src in v48.SOURCE_ORDER for s in v48.NEW_BLOCK_SEEDS[src]])
     assert flat==45
+
+# ---- Task 7: real parquet anchor tests ----
+
+def test_real_parquet_anchor_390128():
+    # Task 7.1: read 390128 frame 1600-1603 assert 1024 pairs and head/tail consistency
+    import pandas as pd
+    v48._clear_heldout_cache()
+    alice, bob = v48.load_heldout_block(390128)
+    assert len(alice) == 1024
+    assert len(bob) == 1024
+    # symbol range 0..1023
+    assert int(alice.min()) >= 0 and int(alice.max()) < 1024
+    assert int(bob.min()) >= 0 and int(bob.max()) < 1024
+    # direct parquet query for ground truth
+    parquet_path = v48._heldout_parquet_path("1M")
+    df = pd.read_parquet(parquet_path)
+    win = v48.BLOCK_WINDOWS[390128]
+    fids = win["frame_ids"]
+    assert fids == [1600, 1601, 1602, 1603]
+    filt = df[df["frame_id"].isin(fids)].sort_values(["frame_id", "pair_idx"])
+    assert len(filt) == 1024
+    alice_direct = filt["alice_symbol"].to_numpy()
+    bob_direct = filt["bob_symbol"].to_numpy()
+    assert (alice == alice_direct).all()
+    assert (bob == bob_direct).all()
+    # head/tail consistency
+    assert int(alice[0]) == int(filt.iloc[0]["alice_symbol"])
+    assert int(bob[0]) == int(filt.iloc[0]["bob_symbol"])
+    assert int(alice[-1]) == int(filt.iloc[-1]["alice_symbol"])
+    assert int(bob[-1]) == int(filt.iloc[-1]["bob_symbol"])
+    # per-frame 256 and ordering
+    for fid in fids:
+        sub = filt[filt["frame_id"] == fid]
+        assert len(sub) == 256
+        assert list(sub["pair_idx"]) == list(range(256))
+
+def test_monkeypatch_sample_empirical_block_still_succeeds(tmp_path, monkeypatch, real_counts):
+    # Task 7.2: monkeypatch sample_empirical_block to throw, production/fake still must succeed
+    def _boom(*a, **kw):
+        raise RuntimeError("sample_empirical_block should not be called in V48 production")
+    monkeypatch.setattr(v48, "sample_empirical_block", _boom)
+    # also patch the original module import path that sentinel might use
+    import comparison_bench.formal_ir.v35_algorithm_development as v35mod
+    monkeypatch.setattr(v35mod, "sample_empirical_block", _boom)
+    v48._clear_heldout_cache()
+    # fake runner
+    outcome = make_positional_outcome({})
+    result, root = run_scenario(tmp_path, monkeypatch, real_counts, outcome, name="monkey_fake")
+    records = json.loads((root / "v48_records.json").read_text(encoding="utf-8"))
+    assert len(records) == 45
+    # production-like fake also uses parquet; real sentinel should also not have called boom
+    # explicit check: load one more block directly still works despite boom
+    alice, bob = v48.load_heldout_block(390228)
+    assert len(alice) == 1024
+    v48._clear_heldout_cache()
+
+def test_tamper_frame_id_or_missing_row_fails_before_decoder(tmp_path, monkeypatch, real_counts):
+    # Task 7.3: tamper frame ID or delete row must fail before decoder call
+    import pandas as pd
+    v48._clear_heldout_cache()
+    real_df = v48._load_heldout_df("1M")
+    # tamper 1: change one frame_id
+    tampered = real_df.copy()
+    # pick first row of frame 1600 and change to illegal frame 9999
+    mask = tampered["frame_id"] == 1600
+    first_idx = tampered[mask].index[0]
+    tampered.loc[first_idx, "frame_id"] = 9999
+    # inject tampered cache
+    v48._HELDOUT_DF_CACHE["1M"] = tampered
+    with pytest.raises(v48.IntegrityFailure) as exc:
+        v48.load_heldout_block(390128)
+    assert exc.value.check_id == "J4"
+    v48._clear_heldout_cache()
+    # tamper 2: delete one row from 1600
+    real_df2 = v48._load_heldout_df("1M")
+    tampered2 = real_df2[~((real_df2["frame_id"] == 1600) & (real_df2["pair_idx"] == 0))].copy()
+    v48._HELDOUT_DF_CACHE["1M"] = tampered2
+    with pytest.raises(v48.IntegrityFailure) as exc2:
+        v48.load_heldout_block(390128)
+    assert exc2.value.check_id == "J4"
+    v48._clear_heldout_cache()
+    # tamper via workload must fail before decoder invoked
+    # inject tampered again and run diagnostic with counting decoder
+    v48._HELDOUT_DF_CACHE["1M"] = tampered  # frame_id tamper
+    calls = {"decode": 0}
+    def counting_decode(*a, **kw):
+        calls["decode"] += 1
+        return SimpleNamespace(x_hat=np.zeros(1024, dtype=np.uint8), syndrome_ok=True, iterations=1, runtime_s=0.001, status="ok", final_beliefs=np.zeros((1024, 32)))
+    world = FakeWorld()
+    root = tmp_path / "tamper_before_decode"
+    # run should raise IntegrityFailure before any decode call (caught as invalid evidence)
+    # use direct _run_workload_calls path via run_v48_diagnostic fake
+    # monkeypatch _load_heldout_df to return tampered for 1M
+    def _fake_load(source):
+        if source == "1M":
+            return tampered
+        return v48._HELDOUT_DF_CACHE.get(source) or real_df2
+    # Instead use cache injection already; run diagnostic
+    try:
+        result = v48.run_v48_diagnostic(execution_authorized=True, authorized_target_sha="f"*40, fake_runner=True, output_root=root, structural_authority_path=world.authority_file(tmp_path), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=counting_decode)
+        # If it returned invalid evidence, decode should still be zero
+        assert calls["decode"] == 0
+        assert result["terminal_state"] == v48.TERMINAL_EVIDENCE_INVALID
+    finally:
+        v48._clear_heldout_cache()
+        # ensure cache cleared for subsequent tests
+        if "1M" in v48._HELDOUT_DF_CACHE:
+            v48._clear_heldout_cache()
+
+def test_validate_train_heldout_isolation_real():
+    ok, msg = v48.validate_train_heldout_isolation()
+    assert ok, msg
+    # check zero overlap explicitly per source
+    for src in v48.SOURCE_ORDER:
+        tr_lo, tr_hi = v48.TRAIN_FRAME_RANGES[src]
+        ho_lo, ho_hi = v48.HELDOUT_FRAME_RANGES[src]
+        assert tr_hi < ho_lo, f"{src} train {tr_hi} must be < held-out {ho_lo}"
+        for bid in v48.NEW_BLOCK_SEEDS[src]:
+            for fid in v48.BLOCK_WINDOWS[bid]["frame_ids"]:
+                assert ho_lo <= fid <= ho_hi
+                assert not (tr_lo <= fid <= tr_hi)
+    # seed registry still checked separately (forbidden 96) but not used as isolation proof
+    flat45 = {s for src in v48.SOURCE_ORDER for s in v48.NEW_BLOCK_SEEDS[src]}
+    assert flat45.isdisjoint(v48.FORBIDDEN_96)

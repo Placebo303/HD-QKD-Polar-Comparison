@@ -27,7 +27,7 @@ from comparison_bench.formal_ir.v35_algorithm_development import (
     compute_tag_64,
     factorize_f03,
     load_v25_channel_counts,
-    sample_empirical_block,
+    sample_empirical_block,  # retained for test monkeypatch compat; production must not call
     syndrome_of_gf32,
 )
 from comparison_bench.formal_ir.v38_architecture_triage import (
@@ -80,6 +80,16 @@ PAIRS_PER_FRAME = 256
 FRAMES_PER_BLOCK = 4
 PAIRS_PER_BLOCK = 1024
 
+# Read-only held-out parquet — fixed three paths (Task 1)
+HELDOUT_PARQUET_PATHS: dict[str, str] = {
+    "1M": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_184040/pairs.parquet",
+    "1p5M": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_183806/pairs.parquet",
+    "2M": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_183657/pairs.parquet",
+}
+# True TRAIN vs held-out data isolation intervals (frame_id space, Task 5)
+TRAIN_FRAME_RANGES: dict[str, tuple[int, int]] = {"1M": (0, 1199), "1p5M": (0, 1659), "2M": (0, 2186)}
+HELDOUT_FRAME_RANGES: dict[str, tuple[int, int]] = {"1M": (1600, 1999), "1p5M": (2213, 2766), "2M": (2916, 3644)}
+
 # Deterministic spread starts per source: start_j = floor(j*(H-4)/14), j=0..14
 HELDOUT_STARTS: dict[str, list[int]] = {
     "1M": [0, 28, 56, 84, 113, 141, 169, 198, 226, 254, 282, 311, 339, 367, 396],
@@ -110,6 +120,104 @@ for _src in SOURCE_ORDER:
             "sampling_mode": SAMPLING_MODE,
         }
         BLOCK_TO_SOURCE[_bid] = _src
+
+# --- Read-only held-out parquet loader (Tasks 1-3, ponytail: simple pandas cache) ---
+_HELDOUT_DF_CACHE: dict[str, Any] = {}
+
+def _heldout_parquet_path(source: str) -> Path:
+    rel = HELDOUT_PARQUET_PATHS[source]
+    p = REPO_ROOT / rel
+    return p
+
+def _load_heldout_df(source: str):  # -> pd.DataFrame
+    if source in _HELDOUT_DF_CACHE:
+        return _HELDOUT_DF_CACHE[source]
+    import pandas as pd  # lazy import, only needed for real parquet anchor / production
+    path = _heldout_parquet_path(source)
+    if not path.is_file():
+        raise IntegrityFailure("J4", f"held-out parquet missing for {source}: {path}")
+    try:
+        df = pd.read_parquet(path)
+    except Exception as exc:
+        raise IntegrityFailure("J4", f"held-out parquet unreadable {source}: {type(exc).__name__}: {exc}") from exc
+    # schema check: frame_id, pair_idx, alice_symbol, bob_symbol
+    for col in ("frame_id", "pair_idx", "alice_symbol", "bob_symbol"):
+        if col not in df.columns:
+            raise IntegrityFailure("J4", f"held-out parquet schema missing {col} for {source}")
+    _HELDOUT_DF_CACHE[source] = df
+    return df
+
+def load_heldout_block(block_seed: int) -> tuple[np.ndarray, np.ndarray]:
+    """Read-only held-out loader: filter 4 frozen frame_ids, strict ascending sort, validate 1024."""
+    if block_seed not in BLOCK_WINDOWS:
+        raise IntegrityFailure("J4", f"block_seed {block_seed} not in frozen 45")
+    win = BLOCK_WINDOWS[block_seed]
+    source = win["source"]
+    frame_ids: list[int] = list(win["frame_ids"])
+    df = _load_heldout_df(source)
+    # filter rows where frame_id in frame_ids
+    filt = df[df["frame_id"].isin(frame_ids)].copy()
+    # per-block validation (Task 3)
+    # exactly 4 distinct frames
+    uniq = sorted(filt["frame_id"].unique().tolist())
+    if uniq != sorted(frame_ids):
+        raise IntegrityFailure("J4", f"block {block_seed} frame_id mismatch: got {uniq}, expected {sorted(frame_ids)}")
+    # total length 1024
+    if len(filt) != PAIRS_PER_BLOCK:
+        raise IntegrityFailure("J4", f"block {block_seed} total pairs {len(filt)} != {PAIRS_PER_BLOCK}")
+    # per-frame 256 and pair_idx 0..255
+    for fid in frame_ids:
+        sub = filt[filt["frame_id"] == fid]
+        if len(sub) != PAIRS_PER_FRAME:
+            raise IntegrityFailure("J4", f"block {block_seed} frame {fid} pairs {len(sub)} != {PAIRS_PER_FRAME}")
+        pis = sorted(sub["pair_idx"].tolist())
+        if pis != list(range(PAIRS_PER_FRAME)):
+            raise IntegrityFailure("J4", f"block {block_seed} frame {fid} pair_idx not 0..255 contiguous")
+        if sub["pair_idx"].duplicated().any():
+            raise IntegrityFailure("J4", f"block {block_seed} frame {fid} duplicate pair_idx")
+    # strict ascending sort
+    filt = filt.sort_values(["frame_id", "pair_idx"], ascending=[True, True])
+    # no extra rows (already total 1024) and ordering ensures 1024
+    # symbol validation 0..1023
+    alice = filt["alice_symbol"].to_numpy()
+    bob = filt["bob_symbol"].to_numpy()
+    if alice.size != PAIRS_PER_BLOCK or bob.size != PAIRS_PER_BLOCK:
+        raise IntegrityFailure("J4", f"block {block_seed} alice/bob size mismatch")
+    if not (np.all(alice >= 0) and np.all(alice < 1024) and np.all(bob >= 0) and np.all(bob < 1024)):
+        raise IntegrityFailure("J4", f"block {block_seed} symbol out of range 0..1023")
+    # return as int arrays
+    return np.asarray(alice, dtype=np.int64), np.asarray(bob, dtype=np.int64)
+
+def _clear_heldout_cache() -> None:
+    _HELDOUT_DF_CACHE.clear()
+
+def validate_train_heldout_isolation() -> tuple[bool, str]:
+    """Task 5: real data-isolation zero overlap check (not seed registry)."""
+    for src in SOURCE_ORDER:
+        tr_lo, tr_hi = TRAIN_FRAME_RANGES[src]
+        ho_lo, ho_hi = HELDOUT_FRAME_RANGES[src]
+        # zero overlap condition: train interval entirely below held-out
+        if not (tr_hi < ho_lo):
+            return False, f"{src} TRAIN {tr_lo}-{tr_hi} overlaps held-out {ho_lo}-{ho_hi}"
+        # check selected held-out frames lie inside held-out interval
+        for bid in NEW_BLOCK_SEEDS[src]:
+            for fid in BLOCK_WINDOWS[bid]["frame_ids"]:
+                if not (ho_lo <= fid <= ho_hi):
+                    return False, f"{src} block {bid} frame {fid} outside held-out {ho_lo}-{ho_hi}"
+                if tr_lo <= fid <= tr_hi:
+                    return False, f"{src} block {bid} frame {fid} overlaps TRAIN {tr_lo}-{tr_hi}"
+    return True, "ISOLATION_OK"
+
+def _prior_train_only_real_check(counts_by_source: dict[str, np.ndarray] | None) -> bool:
+    """Task 6: real prior_train_only_ok = TRAIN counts prior + held-out parquet evaluation independent."""
+    if counts_by_source is None:
+        return False
+    for src in SOURCE_ORDER:
+        arr = counts_by_source.get(src)
+        if arr is None or getattr(arr, "shape", None) != (1024, 1024):
+            return False
+    ok, _ = validate_train_heldout_isolation()
+    return bool(ok)
 
 # Forbidden 96: 87 (V36_A3 15 + V39 15 + V40 3 + V41 9 + V42 9 + V43 9 + V44 9 + V45 9 + V46 9) + V47 9
 V36_A3_SEEDS_COPIED: dict[str, list[int]] = {
@@ -583,12 +691,17 @@ def single_arm_binding_preflight(
     h1_full = h1_matrices.get(("H1", "L1"), (None, {}))[0]
     if h1_full is None:
         h1_full = np.zeros((H1_M, H1_N), dtype=np.uint8)
+    # Task 5/6: real isolation + real prior check (not hard-coded)
+    _iso_ok, _iso_msg = validate_train_heldout_isolation()
+    if not _iso_ok:
+        raise IntegrityFailure("J4", f"train/held-out isolation failed: {_iso_msg}")
+    prior_train_only_real = _prior_train_only_real_check(counts_by_source)
     results: dict[str, dict[str, Any]] = {}
     for source in SOURCE_ORDER:
         probe_seed = probes[source]
         counts = counts_by_source[source]
-        # Use deterministic block sample via counts (TRAIN prior) but check held-out reachable separately
-        idx, alice, bob = sample_empirical_block(counts, seed=probe_seed, size=BLOCK_LENGTH)
+        # Task 4: production workload must NOT use sample_empirical_block; evaluation from held-out parquet
+        alice, bob = load_heldout_block(probe_seed)
         u1_alice, u2_alice, u1_bob, u2_bob = factorize_f03(alice, bob)
         p_i = get_l1_prior_p_u1_given_b(counts, bob)
         s1 = syndrome_of_gf32(h1_full, u1_alice, field)
@@ -625,7 +738,7 @@ def single_arm_binding_preflight(
         heldout_reachable_ok = win is not None and win["pairs_count"]==1024 and len(win["frame_ids"])==4 and win["sampling_mode"]==SAMPLING_MODE
         # leakage
         leak_ok = bool(leak_for(source, H1_M) == (1064 if source=="1M" else 1094 if source=="1p5M" else 1104))
-        # prior isolation: check that counts were loaded via TRAIN loader (caller ensures)
+        # prior isolation: real validation (Task 6) — counts from TRAIN, evaluation from parquet
         checks: dict[str, Any] = {
             "probe_block_seed": int(probe_seed),
             "held_out_ordinal_start": int(win["held_out_ordinal_start"]) if win else -1,
@@ -634,7 +747,7 @@ def single_arm_binding_preflight(
             "pairs_count": int(win["pairs_count"]) if win else -1,
             "sampling_mode": str(win["sampling_mode"]) if win else "",
             "heldout_reachable_ok": bool(heldout_reachable_ok),
-            "prior_train_only_ok": True,
+            "prior_train_only_ok": bool(prior_train_only_real),
             "v35_tag_import_ok": v35_ok,
             "tag_scope_l2_only": TAG_SCOPE == "l2_only",
             "tag_l2_only_empty_prefix_ok": l2_only_ok,
@@ -1030,12 +1143,9 @@ def _run_workload_calls(
         counts = counts_by_source[source]
         matrix, _ = matrices[("lane_c", source)]
         win = BLOCK_WINDOWS[block_seed]
-        # deterministic held-out sample: we still use counts to synthesize pairs (TRAIN distribution) but window metadata is held-out
-        # In fake mode this sampling is stubbed; still count as held-out window metadata
-        idx, alice, bob = sample_empirical_block(counts, seed=block_seed, size=BLOCK_LENGTH)
-        # but spec mandates block ID not as random seed for held-out pairs: we override with deterministic window-derived seed?
-        # For held-out conformance, pairs are conceptually from held-out pool; here we keep counts sampling but metadata is deterministic spread
-        # The crucial check is that we don't call random held-out pool sampling; we use deterministic window table
+        # Task 4: production workload彻底删除 sample_empirical_block — evaluation from read-only held-out parquet
+        # TRAIN counts only for priors (get_l1_prior / get_l1_app); alice/bob from parquet via load_heldout_block
+        alice, bob = load_heldout_block(block_seed)
         u1_alice, u2_alice, u1_bob, u2_bob = factorize_f03(alice, bob)
         errors_initial = _compute_errors_initial(u2_alice, u2_bob)
         p_i = get_l1_prior_p_u1_given_b(counts, bob)
