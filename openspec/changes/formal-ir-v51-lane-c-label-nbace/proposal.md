@@ -5,7 +5,7 @@
 **Change ID**: `formal-ir-v51-lane-c-label-nbace`
 **Cycle ID**: `V51P0`
 **Predecessor**: `formal-ir-v50-l2-structure-factorial` (result `V50_FACTORIAL_COMPLETE` E_structure=-6, E_prior=0, HEAD `e3e14c9518bf44d03054e720a6230ea11d08f99a`, branch `formal-ir-mainline`)
-**Plan HEAD**: `b2323c55ec2786fbc506bff0cfc2f08b7333ff3d` branch `formal-ir-mainline` — **EXECUTE_NOT_AUTHORIZED**
+**Plan HEAD**: `c67a071f3b59924e81bd2bbbd452ab45f5a5c0e9` branch `formal-ir-mainline` — **EXECUTE_NOT_AUTHORIZED**
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, `formal_execution_authorized=false`
 
 > ponytail lite: 本轮仅 decoder-free 的确定性标签优化 spike + 单条件 45-call 配对计划；更懒路径是零新增执行直接复用 Lane C 原标签，需独立评审确认标签重标价值是否值得 45-call 预算。
@@ -60,4 +60,4 @@
 
 ## Lifecycle
 
-V50 前代 `V50_FACTORIAL_COMPLETE` (E_structure=-6, E_prior=0)，分支 `formal-ir-mainline` plan HEAD `b2323c55ec2786fbc506bff0cfc2f08b7333ff3d`；V51 当前 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，`implementation_started=false`，`production_outputs_created=false`；任何执行需独立 plan ACCEPT + 显式 `EXECUTE_AUTH` 绑定到精确未来实现 SHA；谱不满足三源一致性准入时终态 `V51_LABEL_NO_IMPROVEMENT`，否则条件实验终态 `V51_PAIRED_COMPLETE / V51_EVIDENCE_INVALID`。
+V50 前代 `V50_FACTORIAL_COMPLETE` (E_structure=-6, E_prior=0)，分支 `formal-ir-mainline` plan HEAD `c67a071f3b59924e81bd2bbbd452ab45f5a5c0e9`；V51 当前 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，`implementation_started=false`，`production_outputs_created=false`；任何执行需独立 plan ACCEPT + 显式 `EXECUTE_AUTH` 绑定到精确未来实现 SHA；谱不满足三源一致性准入时终态 `V51_LABEL_NO_IMPROVEMENT`，否则条件实验终态 `V51_PAIRED_COMPLETE / V51_EVIDENCE_INVALID`。

@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **只规划，不实现，不执行。等待独立评审。本轮仅完成 decoder-free 标签优化 spike。**
 **Execution status**: 本轮完成 decoder-free spike；以下 P1..E 任务待独立 plan ACCEPT + 三源词典序准入后方可进入；当前不跑 decoder，不写产出。
-**HEAD**: `b2323c55ec2786fbc506bff0cfc2f08b7333ff3d` branch `formal-ir-mainline`（实现冻结时重绑至未来 implementation SHA）
+**HEAD**: `c67a071f3b59924e81bd2bbbd452ab45f5a5c0e9` branch `formal-ir-mainline`（实现冻结时重绑至未来 implementation SHA）
 **Revision**: V51R1 — 修复 deg4 优先、自定义 score 命名、准入一致性、spike 增量效率、四工件去 NB-ACE 文献声称
 
 ## Phase A — 语义冻结（plan ACCEPT 后）
@@ -10,7 +10,7 @@
 - [ ] **A1** 冻结基座：`n=1024, m2=184/190/192, GF32 poly37, Lane C 二值 support/位置置换/m2/泄漏 1064/1094/1104/decoder 90/1.0` 全部冻结，仅边标签 `1..31` 可变；三源 Lane C `s383102/383202/383302` ordinal-2 身份与 `row_deg/col_deg` 分布冻结。
 - [ ] **A2** 冻结确定性标签优化器：输入二值 support，`ACE=Σ(row_deg-2)`，`is_deg` 经 `classify_cycle_algebraic_degeneracy`，自定义 `check_extrinsic_score=ACE-100 若退化 else ACE`（明确非文献 NB-ACE，仅次级报告）；主目标词典序 `(deg4, deg6, deg8, cand)` 优先 4-环（修正原 deg6 起点错误）；canonical 边序 greedy `1..31` 至多 2 sweeps，复用 `edge_to_cycle_ids` 仅重算 incident cycles 增量维护全局 `deg4/6/8`，不为每个候选复制完整 `is_deg` 数组；禁止译码回搜；`support_exact_equal/rank==m2/support_cycles_4/6/8 不变` 硬保证。
 - [ ] **A3** 冻结 decoder-free 谱对比字段：每源原 vs 新 `support_exact_equal, rank, support_cycles_4/6/8, degenerate_4/6/8, generalized_girth, nondeg_frac6/8` 为主可验证量并列；`min_check_extrinsic6/8, min_deg_ace6/8` 为自定义次级报告量（原 NB-ACE 命名已废止）；`Δdeg4, Δdeg6, Δdeg8` 为主判据。
-- [ ] **A4** 冻结谱准入（三源一致性）：`label_improved = (∀source: (deg4_new,deg6_new,deg8_new) ≤_lex (deg4_old,deg6_old,deg8_old)) ∧ (∃source: (deg4_new,deg6_new,deg8_new) <_lex (deg4_old,deg6_old,deg8_old))`，词典序优先 deg4；自定义 score 不参与准入主判；否则 `V51_LABEL_NO_IMPROVEMENT` blocker 不实验。原“∃source deg6/min_nbace 改善”已废止。
+- [ ] **A4** 冻结谱准入（三源一致性）：`label_improved = (∀source: (deg4_new,deg6_new,deg8_new) ≤_lex (deg4_old,deg6_old,deg8_old)) ∧ (∃source: (deg4_new,deg6_new,deg8_new) <_lex (deg4_old,deg6_old,deg8_old))`，词典序优先 deg4；自定义 score 不参与准入主判；否则 `V51_LABEL_NO_IMPROVEMENT` blocker 不实验。原“∃source deg6/min_check_extrinsic 改善”已废止。
 - [ ] **A5** 冻结 15 新未使用 held-out blocks：与 `FORBIDDEN 156 =141+15(V50 391xxx)` 零重叠、无内部重复、每源均分 5、连续 IDs `392001..392005 / 392101..392105 / 392201..392205` 且每块写死 `4` 真实 `frame_ids` 与 `ordinal start/end`（见 design §2.4），与 V48/V50 `frame_ids` 零重叠 per source 可机械校验；`sampling_mode=deterministic_four_consecutive_frames_heldout_unused_new`。
 - [ ] **A6** 冻结条件 paired workload（仅当准入通过）：每块 `1×L1 shared +2×L2 (old vs new)=3`，共 `15×3=45` (`l1 15 / l2 30 / total 45`)；冻结配对主判 `exact_full`、McNemar `b/c/discordance`、残留误码/迭代/runtime 分布；无 TRAIN+VAL 臂。
 - [ ] **A7** 冻结记录与聚合：`15` 新块 paired 记录、`v51_label_spectrum.json` 原 vs 新谱（deg 主 + 自定义 score 次级）、`v51_summary.json` 含谱对比+分层记账+配对表+四类/G3'；`f_total=leak/[N(H1+H2)] N=1024`、`tag_scope=l2_only`；provenance 中自定义量明确非文献 NB-ACE。

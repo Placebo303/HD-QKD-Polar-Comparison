@@ -16,7 +16,7 @@ The system SHALL emit for each source a decoder-free spectrum delta `original vs
 
 ### R-V51-04: Label Improvement Gate (three-source lexicographic consistency)
 
-The system SHALL compute `label_improved = (∀source: (deg4_new,deg6_new,deg8_new) ≤_lex (deg4_old,deg6_old,deg8_old)) ∧ (∃source: (deg4_new,deg6_new,deg8_new) <_lex (deg4_old,deg6_old,deg8_old))` where `≤_lex` is lexicographic non-worsening with `deg4` first. Custom `check_extrinsic_score` SHALL NOT be used for gate primary decision. If `label_improved==false` (any source worsens or no source strictly improves), the system SHALL NOT enter the paired decoder experiment and SHALL report terminal `V51_LABEL_NO_IMPROVEMENT` as blocker. The prior rule "∃source deg6/min_nbace improves" that allowed other sources to worsen is revoked.
+The system SHALL compute `label_improved = (∀source: (deg4_new,deg6_new,deg8_new) ≤_lex (deg4_old,deg6_old,deg8_old)) ∧ (∃source: (deg4_new,deg6_new,deg8_new) <_lex (deg4_old,deg6_old,deg8_old))` where `≤_lex` is lexicographic non-worsening with `deg4` first. Custom `check_extrinsic_score` SHALL NOT be used for gate primary decision. If `label_improved==false` (any source worsens or no source strictly improves), the system SHALL NOT enter the paired decoder experiment and SHALL report terminal `V51_LABEL_NO_IMPROVEMENT` as blocker. The prior rule "∃source deg6/min_check_extrinsic improves" that allowed other sources to worsen is revoked.
 
 ### R-V51-05: Conditional Paired Held-Out Experiment
 

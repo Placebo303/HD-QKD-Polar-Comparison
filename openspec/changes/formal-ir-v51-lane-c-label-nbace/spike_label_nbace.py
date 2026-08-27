@@ -77,9 +77,7 @@ def compute_spectrum(H):
         "col_deg_min": int(col_deg.min()), "col_deg_max": int(col_deg.max()), "col_deg_mean": float(col_deg.mean()),
         "support_cycles_4": len(c4), "support_cycles_6": len(c6), "support_cycles_8": len(c8),
         "degenerate_4": deg4, "degenerate_6": deg6, "degenerate_8": deg8,
-        # custom secondary (NOT NB-ACE) — keep min_nbace* as alias for backward compat
         "min_check_extrinsic4": min_check_extrinsic4, "min_check_extrinsic6": min_check_extrinsic6, "min_check_extrinsic8": min_check_extrinsic8,
-        "min_nbace4": min_check_extrinsic4, "min_nbace6": min_check_extrinsic6, "min_nbace8": min_check_extrinsic8,
         "min_deg_ace4": min_deg_ace4, "min_deg_ace6": min_deg_ace6, "min_deg_ace8": min_deg_ace8,
         "generalized_girth": gg,
         "nondeg_frac4": (len(c4)-deg4)/len(c4) if len(c4)>0 else 1.0,

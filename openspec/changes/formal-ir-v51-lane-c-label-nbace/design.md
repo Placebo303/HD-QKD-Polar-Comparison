@@ -3,7 +3,7 @@
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **只规划，不实现，不执行。等待独立评审。**
 **Cycle**: `V51P0`
 **Predecessor**: V50 `V50_FACTORIAL_COMPLETE` (E_structure=-6, E_prior=0) HEAD `e3e14c9518bf44d03054e720a6230ea11d08f99a`
-**Plan HEAD**: `b2323c55ec2786fbc506bff0cfc2f08b7333ff3d` branch `formal-ir-mainline`
+**Plan HEAD**: `c67a071f3b59924e81bd2bbbd452ab45f5a5c0e9` branch `formal-ir-mainline`
 **Feasibility**: 三源 Lane C support 184/190/192×1024 decoder-free 可重建且满秩；确定性标签重标 decoder-free 可执行且保持支撑/秩/4/6/8 不变，仅改变退化谱；V50 已验证 held-out 池 1683 frames / 430k pairs 富余；45-call paired 预算冻结
 
 ## 1. 科学问题（单因子标签谱）
