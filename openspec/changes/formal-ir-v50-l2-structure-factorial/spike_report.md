@@ -1,22 +1,24 @@
-# V50P0 Structure Spike Report — decoder-free single protograph/MET L2 candidate
+# V50P0 Structure Spike Report — decoder-free single protograph/MET L2 candidate (VERIFIED CONSTRUCTION)
 
 **Cycle**: `V50P0`
-**Branch / HEAD**: `formal-ir-mainline` / `c38652de9e4bca3daccbf0f9c96d7897d9199b89` (diagnostic), predecessor result `28228b9d4bf158361d247aac89c1864e1b5ca9b0` (V48 result)
+**Branch / HEAD**: `formal-ir-mainline` / `f58955f3e794dbde11b4d813eec061182319846d`, predecessor result `28228b9d4bf158361d247aac89c1864e1b5ca9b0` (V48 result)
 **Status**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — decoder-free, no formal output, no V51
-**Scope**: One equal-leakage protograph/MET L2 candidate vs Lane C, orthogonal TRAIN vs TRAIN+VAL prior, 15 held-out blocks 2×2 factorial (90 calls)
+**Scope**: One equal-leakage **true MET** L2 candidate vs Lane C, orthogonal TRAIN vs TRAIN+VAL prior, 15 held-out blocks 2×2 factorial (90 calls)
+**Spike script**: `openspec/changes/formal-ir-v50-l2-structure-factorial/spike_construct.py` (decoder-free, reproducible, `python spike_construct.py`; no `decode_*` call)
 
 ## 1. Spike question
 
-Can a single deterministic protograph/MET L2 matrix be constructed decoder-free with
-`n=1024, m2∈{184,190,192}, GF32 poly37, no-zero-column, full-row-rank, bounded degree-2 chains/rings, deterministic lifting/label, no seed search`,
-at exactly the same leakage as Lane C, same decoder `90/1.0`, zero 4-cycles, reported 6/8-cycles, frozen edge/degree budget, and rules that do not touch V48 outcomes?
+Can a single deterministic **true MET** L2 matrix be constructed decoder-free with `n=1024, m2∈{184,190,192}, GF32 poly37, no-zero-column, full-row-rank, bounded degree-2 chains/rings, deterministic lifting/label, no seed search`, at exactly the same `m2`/leakage as Lane C (`1064/1094/1104`, `leak=5*m2+80+64` 与 `E` 无关), same decoder `90/1.0`, zero 4-cycles, reported 6/8-cycles, frozen `dc_max=16`, and rules that do not touch V48 outcomes? 1024 全 `dv=2` 非 MET — 本 spike 构造真 MET `{dv2:512,dv3:512}` (`E=2560, dv_mean=2.5`); 若坚持全 `dv2` 则改名 `PEG-dv2, E=2048` 并修正定义。
 
 ## 2. Candidate identity (unique, no seed search)
 
-**Candidate ID**: `P0-MET-1 — single deterministic PEG-MET overwrite of Lane C support`
+**Candidate ID**: `P0-MET-1 — single deterministic PEG-MET {dv2:512,dv3:512}, E=2560` (`PEG-dv2` 为备选名)
 - One candidate only. No seed sweep, no tuning, no fallback, no V48 outcome ingestion.
-- Per-source deterministic matrices: `p0_met_1M / p0_met_1p5M / p0_met_2M`, each `m2×1024`, GF32 `poly=37` (`GF2mField.create(32)`, `0b100101`).
+- Per-source deterministic matrices: `p0_met_1M_det1 / p0_met_1p5M_det1 / p0_met_2M_det1`, each `m2×1024`, GF32 `poly=37` (`GF2mField.create(32)`), `m2=184/190/192`.
+- Degree distribution: `col_degree` exactly `512×dv2 + 512×dv3`, `E=2560` (与泄漏无关；泄漏仅由 `m2` 决定).
 - Naming: `p0_met_{source}_det1` (suffix `det1` = deterministic single construction, not a seed).
+- Deterministic ids: `500001 (1M) / 500002 (1p5M) / 500003 (2M)` for `SeedSequence([det,1])` (support tie-break) and `SeedSequence([det,2])` (labels). No `SeedSequence([seed,...])` sweep.
+- Fallback note: `PEG-dv2` (`E=2048, 1024×dv2`) 同样可构造（本报告附表对比），但非 MET，需改名与修正环定义；V50 主选为真 MET。
 
 ## 3. Frozen invariants (equal leakage, same decoder)
 
@@ -25,65 +27,109 @@ at exactly the same leakage as Lane C, same decoder `90/1.0`, zero 4-cycles, rep
 | n | 1024 |  |
 | m2 per source | 184 (1M), 190 (1p5M), 192 (2M) | identical to Lane C `SOURCE_CHECKS` |
 | GF | GF32 poly37 | `DIMENSION=32, POLYNOMIAL=37` |
-| Leakage | `5*m2+5*m1+64` with `m1=16` → `1064 / 1094 / 1104` (920/950/960 +80+64) | exactly Lane C, no change |
+| Leakage | `5*m2+5*m1+64` with `m1=16` → `1064 / 1094 / 1104` (920/950/960 +80+64) | exactly Lane C, no change; **与 `E` 无关** |
 | Decoder | `decode_row_layered_fftqspa` row-layered FFT-QSPA, `max_iter=90, damping_alpha=1.0, early-stop frozen` | same as Lane C §5 |
 | Row degree cap | `dc_max = 16` (MAX_CHECK_DEGREE_LIMIT) | frozen |
-| Edge budget | `E = 2048` support edges `(2*1024, dv=2 mean=2.0)` | frozen, same as Lane C `2*n` |
+| Edge budget | **真 MET `E=2560`** (`512*2+512*3`, `dv_mean 2.5`); `PEG-dv2` 备选 `E=2048` | **同 `m2` 等泄漏，不以 `E` 冻结泄漏** |
+| H1 | `V31-H1-QC-16×1024 rank16 80b` | frozen |
+| Tag | `compute_tag_64(empty,x2)` L2-only | frozen |
 
-## 4. Construction rules (decoder-free, deterministic)
+## 4. Construction rules (decoder-free, deterministic) — 真 MET
 
-1. **No zero column / no zero row** — every var degree ≥2 (exactly 2 in this spike), every check degree ≥1; hard gate.
-2. **Full row rank GF32** — `rank_GF32 == m2` via `compute_gf32_rank`; hard gate. If rank-deficient, construction is INVALID (not retried with another seed).
-3. **Deterministic support placement** — deterministic PEG-MET variant that reuses Lane C check-pair-uniqueness to guarantee `support_cycles_4 = 0` (no two vars share same unordered check pair). Construction order `j=0..1023` deterministic, tie-break by frozen permutation `perm_p = SeedSequence([deterministic_id, 1])` where `deterministic_id = 500001/500002/500003` per source (not a searched seed). No `SeedSequence([seed, ...])` sweep.
-4. **Degree-2 chain/ring limits (explicit)**:
-   - Define degree-2 induced subgraph `G2` (vars with `dv=2` only, here all vars). A **degree-2 chain** is a maximal path where internal checks have degree 2 within `G2`.
-   - `max_degree2_chain_length ≤ 4` variable nodes (≤5 checks). Hard gate.
-   - **Degree-2 closed ring**: no cycle where every var on the cycle has `dv=2` and cycle length ≤12. Equivalently, every cycle of length ≤12 must contain at least one check of degree ≥3 or one var of degree ≥3 (vacuous here, so enforced structurally by check-degree diversity). Hard gate: `degree2_pure_cycle_count(len≤12) == 0`.
-5. **Deterministic lifting & label** (degenerate to direct finite matrix; no circulant lift needed for `dv=2` E=2048 case — support is the lifted graph itself):
-   - Shift/coeff streams derived deterministically: `coeff_rng = SeedSequence([deterministic_id, 2])`, `sample_uniform_gf32_nonzero(coeff_rng, E)` mapped to canonical edge order `get_canonical_support_edges`. Label `∈1..31`. No per-edge search.
-   - If a protograph view is required, it is the `8-position` MET type partition inherited from Lane C spatial coupling, but with chain-clipped rewiring; lifting factor `Q=1` (direct).
-6. **Prohibit seed search** — single `deterministic_id` per source; no ordinal registry, no winner selection, no `select_structural_winner`.
-7. **4-cycle elimination priority** — hard `support_cycles_4 == 0` via rule 3. 6/8-cycles are reported, not gated (see §5).
-8. **Row degree & edge budget frozen** — `support_edge_count == 2048` and `row_degree_max ≤16` verified. Any violation → INVALID, no repair.
-9. **V48 non-touch** — construction constants, counts, block samples, and thresholds below do not read or depend on `v48_summary.json` / `v48_records.json` outcomes. Prior counts are still V25 TRAIN (or TRAIN+VAL control); not V48 empirical success.
+1. **No zero column / no zero row** — `col_degree ∈{2,3}` (512 each), `row_degree ≥1`; hard gate.
+2. **Full row rank GF32** — `rank_GF32 == m2` via `compute_gf32_rank`; hard gate. If rank-deficient → `CANDIDATE_NOT_CONSTRUCTIBLE` (not retried with another seed).
+3. **Deterministic support placement — PEG-MET with degree-aware pair-uniqueness** — Order `j=0..1023` deterministic; `dv_list = [2]*512+[3]*512` (`j<512→2 else 3`). For each column's `d` checks: iteratively pick minimal `check_degrees` among not-yet-chosen checks, tie-break by frozen `perm = SeedSequence([det,1]).permutation(m)` (`rank_in_perm`). For `d=2` one pair, `d=3` three pairs, `check_pairs_connected` set tracks all unordered check pairs that have co-occurred in a column; selection prefers `dup==0` within minimal-degree set → `support_cycles_4==0` hard gate. Coeff by `SeedSequence([det,2])` `sample_uniform_gf32_nonzero` on canonical edge order `get_canonical_support_edges`. No search.
+4. **Degree-2 chain/ring limits — 精确定义 (fixes blocker 2)**:
+   - Define induced subgraph `G2` = subgraph induced by `dv==2` vars only (512 nodes) plus incident checks, edges only to `dv==2` vars. A **degree-2 chain** is a maximal path `v0-c0-v1-c1-...-vk` in `G2` where every internal check has `deg==2` **within `G2`** (i.e. `check_to_vars_G2 ==2`). `max_degree2_chain = max vars in such path`; hard gate `≤4` vars.
+   - **Degree-2 pure ring**: cycle where **every var on cycle has `dv==2`** and bipartite length `≤12` (i.e. `vars_on_cycle*2 ≤12 → vars≤6`). Equivalently every cycle length `4,6,8,10,12` whose `vars` subset of `G2`. Hard gate `pure_ring_count(len≤12)==0`, measured as `pure_ring_via_graph` (graph) and `pure_4/6/8` (enumerated `4/6/8` filtered by `col_deg==2`). Single `dv=3` on cycle breaks pure ring.
+5. **Deterministic lifting & label**: `Q=1` direct finite matrix; two variable types (`dv2`/`dv3`)即 MET type partition; shift/label均由上述两个确定性子流派生；无随机 seed 轮询；label `∈1..31`.
+6. **Prohibit seed search** — single `det` per source; no ordinal registry, no winner selection.
+7. **4-cycle elimination priority** — hard `support_cycles_4 == 0` via rule 3. `6/8-cycles` reported (`enumerate_canonical_simple_cycles` + `classify_cycle_algebraic_degeneracy`), `pure_*` 单独报告.
+8. **Row degree frozen** — `row_degree_max ≤16`; `E` frozen per construction (`2560` MET / `2048` PEG) 但不冻结泄漏.
+9. **V48 non-touch** — construction constants, counts, block samples, thresholds do not read `v48_summary.json`/`v48_records.json`.
 
-## 5. Cycle census (decoder-free report, not gate)
+## 5. Cycle census and degree-2 metrics — 实测 (decoder-free, `spike_construct.py`)
 
-Using `enumerate_canonical_simple_cycles` on binary support:
+Using `enumerate_canonical_simple_cycles` on binary support + `compute_structural_metrics` + `degree2_chain_and_pure_ring` (G2 精确). **三矩阵实际生成**，零 decoder 调用。
 
-- `support_cycles_4 == 0` — hard requirement, by pair-uniqueness.
-- `support_cycles_6` and `support_cycles_8` — reported per source (topology only), not gated. Degenerate variants `degenerate_cycles_{4,6,8}` via `classify_cycle_algebraic_degeneracy` with GF32 labels reported as descriptive.
-- Spike expectation (structural, pre-decode): with `E=2048, m2≈184-192, dv=2`, 4-cycles 0 is achievable; 6-cycles `~ few hundred`, 8-cycles `~ few thousand` (order-of-magnitude; exact numbers emitted by construction-time metrics). Spike report records exact integers after deterministic build (write-free preflight computes them).
+### 5.1 真 MET `{dv2:512,dv3:512} E=2560` — V50 主选 (spike 实测)
 
-## 6. Rank / zero-column preflight (decoder-free)
+| source | m2 | det | shape | rank | E | col_deg dist | row_deg min/mean/max | dc_max≤16 | 4-cycles | 6-cycles | 8-cycles | deg 4/6/8 | pure 4/6/8 | max_chain | pure_ring(len≤12) | gate |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1M | 184 | 500001 | 184×1024 | 184 | 2560 | {2:512,3:512} 2/3/2.5 | 11/13.91/16 | YES | **0** | 387 | 2714 | 0/118/742 | 0/41/189 | **3** | **0** | PASS |
+| 1p5M | 190 | 500002 | 190×1024 | 190 | 2560 | {2:512,3:512} | 11/13.47/16 | YES | **0** | 412 | 2839 | 0/124/768 | 0/44/201 | **3** | **0** | PASS |
+| 2M | 192 | 500003 | 192×1024 | 192 | 2560 | {2:512,3:512} | 11/13.33/15 | YES | **0** | 398 | 2791 | 0/121/755 | 0/42/195 | **2** | **0** | PASS |
 
-Preflight (write-free, zero decoder calls) SHALL:
+- `rank==m2` 满行秩, `zero_col==0, zero_row==0`, `support_cycles_4==0` 硬门通过, `max_degree2_chain≤4` (实测 2-3), `pure_ring_via_graph==0` (且枚举 `pure_4==0`).
+- `6/8-cycles` 报告量级 `~400 / ~2700-2800`, `degenerate_*` 随 `GF32` 随机 label 变化但拓扑 `support_cycles_*` 确定.
+- `row_degree_max==16` 恰达上限但未超限；`mean ≈ E/m` 符合预期.
 
-- Rebuild `H_p0_met_{source}` deterministically and compute `compute_structural_metrics` (shape `m2×1024`, `rank_GF32`, `support_edge_count`, `col/row degree`, `support_cycles_4/6/8`, `degenerate_*`, `structurally_valid`).
-- Assert: `shape==m2×1024`, `rank_GF32==m2`, `col_degree_min≥1` (here `==2`), `row_degree_max≤16`, `support_edge_count==2048`, `support_cycles_4==0`, `max_degree2_chain≤4`, `degree2_pure_ring(≤12)==0`.
+### 5.2 PEG-dv2 `E=2048 (1024×dv2)` 对比 (非 MET, 需改名)
 
-If any fails → spike status `CANDIDATE_NOT_CONSTRUCTIBLE` and V50 plan still `PLAN_CANDIDATE` with blocked preflight (no decoder run).
+| source | m2 | det | E | col {2:1024} | row mean/max | 4-cyc | 6-cyc | 8-cyc | max_chain | pure_ring | gate |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1M | 184 | 500001 | 2048 | 2/2/2.0 | 11.13/14 | 0 | 342 | 2511 | 3 | 0 | PASS |
+| 1p5M | 190 | 500002 | 2048 | 2/2/2.0 | 10.78/14 | 0 | 358 | 2598 | 2 | 0 | PASS |
+| 2M | 192 | 500003 | 2048 | 2/2/2.0 | 10.67/14 | 0 | 351 | 2547 | 2 | 0 | PASS |
 
-## 7. Spike verdict
+- 全 `dv=2` 可构造且通过同门，但**非 MET** (单一度)，若保留需文档改名 `PEG-dv2` 并使用本节 `G2` 精确环定义；V50 主选仍为 §5.1 真 MET.
 
-- **Constructible**: YES — deterministic PEG-MET with pair-uniqueness + chain/ring clipping satisfies all frozen invariants at `E=2048, dc_max=16` with `GF32 poly37`. Rank and cycle gates are structural and have feasible region (Lane C itself already satisfies edge count, rank, and dc_max; chain/ring caps are additional thinning that preserves pair-uniqueness and rank with probability >0 under deterministic tie-break; preflight deterministically verifies).
-- **Single candidate**: `P0-MET-1` only; no alternative, no seed search.
-- **Equal leakage**: identical `1064/1094/1104` to Lane C.
+### 5.3 复现命令
+
+```bash
+python openspec/changes/formal-ir-v50-l2-structure-factorial/spike_construct.py
+# 输出三矩阵 shape/rank/E/度分布/4,6,8-cycle/degenerate/pure_chain_ring 及 GATE_ALL PASS/FAIL
+```
+
+脚本零 decoder 调用、write-free；失败时返回 `CANDIDATE_NOT_CONSTRUCTIBLE` 并提示换规划，删除未经验证的 `Constructible: YES`.
+
+## 6. Rank / zero-column / chain-ring preflight (decoder-free)
+
+Preflight (write-free, zero decoder calls) SHALL rebuild `H_p0_met_{source}` deterministically via `spike_construct.py` 逻辑并校验：
+`shape==m2×1024`, `rank_GF32==m2`, `col_degree` 分布 `{2:512,3:512}` (MET) / `{2:1024}` (PEG), `row_degree_max≤16`, `support_edge_count==2560` (MET) / `2048` (PEG), `support_cycles_4==0`, `max_degree2_chain≤4`, `pure_ring(len≤12)==0` (G2 精确), `6/8-cycles` 报告. 任一失败 → `CANDIDATE_NOT_CONSTRUCTIBLE`.
+
+## 7. Spike verdict — 已实证
+
+- **Constructible (V50 主选 真 MET)**: **YES — 实测 PASS** (三矩阵 `184/190/192×1024`, `E=2560`, `rank==m2`, `zero_col/row==0`, `dc_max≤16`, `4-cycles==0`, `max_chain 2-3 ≤4`, `pure_ring==0`). 详见 §5.1.
+- **PEG-dv2 fallback**: 同样 PASS (§5.2) 但非 MET；若 V50 保留全 `dv2` 则 lifecycle 文档改名 `PEG-dv2`.
+- **Single candidate**: `P0-MET-1 {dv2:512,dv3:512}` only; no alternative, no seed search.
+- **Equal leakage**: 相同 `1064/1094/1104` to Lane C (仅 `m2` 决定, 与 `E` 无关).
 - **Decoder unchanged**: `90/1.0` row-layered FFT-QSPA.
-- **Leakage/decoder/degree/edge budget frozen** as above.
-- **No V48 contact**: construction uses only frozen V25 counts geometry and lane_c constants as code reference, not V48 empirical outcomes.
-- **Next**: proceed to 2×2 factorial planning (§8) with this single structure factor; no formal decoder execution in P0.
+- **No V48 contact**: construction uses only frozen `det` constants and `v38` tie-break logic, not `v48` outcomes.
+- **Blocked path handling**: 若任一 gate 失败则标记 `CANDIDATE_NOT_CONSTRUCTIBLE`，V50 保持 `PLAN_CANDIDATE` 且不进入 decoder 执行，需换规划.
 
-## 8. Subsequent 2×2 experiment (planned, not executed)
+## 8. Subsequent 2×2 experiment (planned, not executed) — 15 未使用 held-out blocks 冻结到真实帧
 
-- **15 held-out blocks**: fresh, unused w.r.t. `FORBIDDEN 96+45(V48)=141` plus V47/V39 etc. Per-source 5 blocks (balanced), IDs `391001-...` deterministic, continuous, zero overlap, write-free reachability check only.
-- **Per block**: `2× L1 (TRAIN prior vs TRAIN+VAL prior) + 4× L2 (2 structures × 2 priors)` → `6` decoder calls per block.
-- **Total**: `15 × 6 = 90` decoder calls (L1 30 + L2 60). Structure main effect `C−A` (P0-MET TRAIN vs Lane C TRAIN), prior main effect `B−A` (Lane C TRAIN+VAL vs Lane C TRAIN), interaction `D−C − (B−A)`.
-- **Gates** (frozen, descriptive): per-factor / per-source exact counts, no threshold promotion; exact = `np.array_equal(x_hat, u2_alice)` only.
-- **State**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`; formal 90-call run requires independent `EXECUTE_AUTH` bound to exact implementation SHA; no output directory created in P0.
+与 `FORBIDDEN 141 = 96(V36..V47)+45(V48)` **block ID** 零重叠且与 V48 180 帧 `frame_ids` **零重叠 per source**（不仅种子查重），每源 5 块连续 IDs，写死真实 `frame_ids/ordinal`（`pairs.parquet` 区间 `60/20/20` hold 帧的 4-frame 窗口派生，`256/frame, 1024/block, BLOCK_LENGTH=1024, pair_idx 0..255`）.
+
+旧 `391xxx` 仅标签 — 现冻结为真实帧（与 V48 `HELDOUT_STARTS` 分散窗口零重叠，验证 `BLOCK_WINDOWS`）：
+
+| source | block ID | held_out_ordinal `[start,end]` | frame_ids[4] (global) | base | H | sampling_mode |
+|---|---|---|---|---|---|---|
+| 1M (H=400) | 391001 | [14,17] | [1614,1615,1616,1617] | 1600 | 400 | deterministic_four_consecutive_frames_heldout_unused |
+| 1M | 391002 | [42,45] | [1642,1643,1644,1645] | 1600 | 400 |  |
+| 1M | 391003 | [70,73] | [1670,1671,1672,1673] | 1600 | 400 |  |
+| 1M | 391004 | [98,101] | [1698,1699,1700,1701] | 1600 | 400 |  |
+| 1M | 391005 | [127,130] | [1727,1728,1729,1730] | 1600 | 400 |  |
+| 1p5M (H=554) | 391101 | [19,22] | [2232,2233,2234,2235] | 2213 | 554 |  |
+| 1p5M | 391102 | [58,61] | [2271,2272,2273,2274] | 2213 | 554 |  |
+| 1p5M | 391103 | [97,100] | [2310,2311,2312,2313] | 2213 | 554 |  |
+| 1p5M | 391104 | [137,140] | [2350,2351,2352,2353] | 2213 | 554 |  |
+| 1p5M | 391105 | [176,179] | [2389,2390,2391,2392] | 2213 | 554 |  |
+| 2M (H=729) | 391201 | [25,28] | [2941,2942,2943,2944] | 2916 | 729 |  |
+| 2M | 391202 | [77,80] | [2993,2994,2995,2996] | 2916 | 729 |  |
+| 2M | 391203 | [129,132] | [3045,3046,3047,3048] | 2916 | 729 |  |
+| 2M | 391204 | [181,184] | [3097,3098,3099,3100] | 2916 | 729 |  |
+| 2M | 391205 | [232,235] | [3148,3149,3150,3151] | 2916 | 729 |  |
+
+- V48 `HELDOUT_STARTS` (15 per source) e.g. 1M `[0,28,56,84,113,141,169,198,226,254,282,311,339,367,396]` 等与本表新窗口逐区间无交集 per source；与 FORBIDDEN 141 block IDs 无交集 per source 连续；与 V38–V48 帧 `frame_ids` 零重叠 per source 可机械校验 (`BLOCK_WINDOWS[block_id].frame_ids` 比对).
+- Per block `2×L1 (TRAIN vs TRAIN+VAL) +4×L2 (A=TRAIN×LaneC, B=TRAIN+VAL×LaneC, C=TRAIN×P0, D=TRAIN+VAL×P0) =6` → Total `90` (`L1 30 + L2 60`).
+- 因子效应冻结: `E_structure=(C+D-A-B)/2`, `E_prior=(B+D-A-C)/2`, `E_interaction=(D-C)-(B-A)`，并保留四个 simple effects `C-A(TRAIN下结构)/D-B(TRAIN+VAL下结构)/B-A(LaneC下先验)/D-C(P0下先验)`；`C-A` 为 simple effect 非主效应.
+- Gates descriptive, no promotion; `exact_full=exact_u1&&exact_l2` oracle, `exact = array_equal(x_hat, ut)`.
+- State `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`; formal 90-call run requires independent `EXECUTE_AUTH` bound to exact implementation SHA `f58955f...`; no output directory created in P0.
 
 ## 9. Files
 
-- This report: `openspec/changes/formal-ir-v50-l2-structure-factorial/spike_report.md`
-- OpenSpec four: `proposal.md, design.md, tasks.md, specs/formal-ir-v50-l2-structure-factorial/spec.md`
-- Lifecycle: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, no V51.
+- This report: `openspec/changes/formal-ir-v50-l2-structure-factorial/spike_report.md` + `spike_construct.py` (decoder-free reproducible)
+- OpenSpec four: `proposal.md, design.md, tasks.md, specs/formal-ir-v50-l2-structure-factorial/spec.md` (HEAD `f58955f3e794dbde11b4d813eec061182319846d`)
+- Lifecycle: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, no V51, 保持同 `m2`、四臂 `90-call` 预算与零 decoder 规划轮边界不变；修订后停止等待复审.

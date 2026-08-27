@@ -2,28 +2,28 @@
 
 **Cycle**: `V50P0`
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **只规划，不实现，不执行，不启动 V51。等待独立评审。**
-**Predecessor**: V48 result `28228b9d` + diagnostic `c38652de`, branch `formal-ir-mainline` HEAD `c38652de`
+**Predecessor**: V48 result `28228b9d` + diagnostic `f58955f3e794dbde11b4d813eec061182319846d`, branch `formal-ir-mainline` HEAD `f58955f3e794dbde11b4d813eec061182319846d`
 **Mechanism id**: `p0_met_single_equal_leakage_protograph_met_with_train_vs_trainval_prior_factorial`
 **Tag source**: `v35:compute_tag_64(empty,x2)` (`empty=np.empty(0,dtype=np.uint8)`, `hex[:16]` trunc64, `tag_scope=l2_only`)
-**HEAD**: `c38652de9e4bca3daccbf0f9c96d7897d9199b89`（实现冻结时重绑）
+**HEAD**: `f58955f3e794dbde11b4d813eec061182319846d`（实现冻结时重绑）
 **H1 provenance**: `V31-H1-QC-16×1024 rank16 80b`
-**Candidate**: `P0-MET-1 p0_met_{1M,1p5M,2M}_det1`, `n=1024, m2=184/190/192`, `GF32 poly37`, `E=2048`, `dc_max=16`, `support_cycles_4==0`
+**Candidate**: `P0-MET-1 p0_met_{1M,1p5M,2M}_det1`, `n=1024, m2=184/190/192`, `GF32 poly37`, 真 MET `{dv2:512,dv3:512} E=2560 dc_mean 2.5`（全 `dv2` 则 `PEG-dv2 E=2048`），`dc_max=16`, `support_cycles_4==0`
 
 ## R1. Predecessor binding
 
-V50 SHALL 仅基于 V38 Lane C 常量与 V35 tag 原语规划，复用 `n=1024` 与 `m2` 定义，不读取 V48 outcomes 选结构或阈值。V50 SHALL 冻结 `P0-MET-1` 单一等泄漏候选与 `lane_c` 3 矩阵 ordinal-2 + `90/1.0 poly37` + `H1-16 80b` + L2-only `compute_tag_64(empty,x2)` + 四类 `G3'=undetected==0` 不变。V50 SHALL 为 15 未使用 held-out 块的 2×2 因子实验（结构×先验，共 90 calls）规划。V50 SHALL NOT 启动 V51，实现前需独立 plan ACCEPT + 显式 `EXECUTE_AUTH`（绑定 `formal-ir-mainline`、实现 SHA、`c38652de`）。
+V50 SHALL 仅基于 V38 Lane C 常量与 V35 tag 原语规划，复用 `n=1024` 与 `m2` 定义，不读取 V48 outcomes 选结构或阈值。V50 SHALL 冻结 `P0-MET-1` 单一等泄漏真 MET 候选 `{dv2:512,dv3:512} E=2560` 与 `lane_c` 3 矩阵 ordinal-2 + `90/1.0 poly37` + `H1-16 80b` + L2-only `compute_tag_64(empty,x2)` + 四类 `G3'=undetected==0` 不变。V50 SHALL 为 15 未使用 held-out 块的 2×2 因子实验（结构×先验，共 90 calls）规划。V50 SHALL NOT 启动 V51，实现前需独立 plan ACCEPT + 显式 `EXECUTE_AUTH`（绑定 `formal-ir-mainline`、实现 SHA、`f58955f3e794dbde11b4d813eec061182319846d`）。
 
 ## R2. Single equal-leakage protograph/MET candidate — P0-MET-1 (no seed search)
 
-本变更 SHALL 仅评估单一冻结候选 `P0-MET-1`：每源 `m2×1024` (`184/190/192`), `GF32 poly37`, `无零列` (`col_degree_min≥1`, 实际 `2`), `满行秩` (`rank_GF32==m2`), `E==2048`, `row_degree_max≤16`, `support_cycles_4==0` 硬门、`6/8-cycles` 报告、`max_degree2_chain≤4` 且 `degree2_pure_ring(len≤12)==0` 硬门、确定性 lifting/label、禁止 seed 搜索、与 Lane C 相同 `m2` 与泄漏 `1064/1094/1104` (5·m2+80+64) 及 `f_total=leak/[N(H1+H2)] N=1024`、相同 decoder `90/1.0`。SHALL NOT 改 `m2/leak/max_iter/damping`、不引入第二候选。矩阵 SHALL 经确定性 PEG-MET 规则单次重建并与 spike §4 严格比对。
+本变更 SHALL 仅评估单一冻结候选 `P0-MET-1`：每源 `m2×1024` (`184/190/192`), `GF32 poly37`, `无零列` (`col_degree` 分布 `{dv2:512,dv3:512}` 无零列), `满行秩` (`rank_GF32==m2`), `E==2560`（全 `dv2` 则 `PEG-dv2 E==2048` 并改名）、`row_degree_max≤16`, `support_cycles_4==0` 硬门、`6/8-cycles` 报告（含 `pure_4/6/8`）、`max_degree2_chain≤4` 且 `degree2_pure_ring(len≤12)==0` 硬门（`G2` 精确：链为 `G2` 内内部校验度 2 的极大路径，环为双分长度 `≤12` 且全 `dv=2` 闭环）、确定性 lifting/label、禁止 seed 搜索、与 Lane C 相同 `m2` 与泄漏 `1064/1094/1104` (5·m2+80+64, 与 `E` 无关) 及 `f_total=leak/[N(H1+H2)] N=1024`、相同 decoder `90/1.0`。SHALL NOT 改 `m2/leak/max_iter/damping`、不引入第二候选。矩阵 SHALL 经确定性 PEG-MET 规则单次重建并与 spike §4 严格比对。
 
 ## R3. Factorial workload — 90 calls on 15 unused held-out blocks with TRAIN vs TRAIN+VAL prior
 
-Workload SHALL 为 `15` 未使用 held-out 块 × `6`=90 decoder calls：每块 `L1_T 1 + L1_TV 1 + L2_{A,B,C,D} 4`（`A=TRAIN×LaneC, B=TRAIN+VAL×LaneC, C=TRAIN×P0, D=TRAIN+VAL×P0`），`L1 30` + `L2 60` records。与 `FORBIDDEN 141` 零重叠 per source、连续、均分（每源5 `391001..`/`391101..`/`391201..`）、每块 `4 frames=1024 pairs (256/frame)`、`sampling_mode=deterministic_four_consecutive_frames_heldout_unused`。每块 L1 双 prior 同 `bob` 不同 `counts` (`counts_T` vs `counts_TV=TRAIN⊕VAL`)；每块 4 L2 同 `bob` 派生 `P_i(U2)=Σ q_i P(U2|B,u1)` 与各自 `H_L2` syndrome。SHALL NOT 复用 V48 45 块、SHALL NOT 用 `sample_empirical_block` 随机池作正式样本（FAKE 测试除外）。
+Workload SHALL 为 `15` 未使用 held-out 块 × `6`=90 decoder calls：每块 `L1_T 1 + L1_TV 1 + L2_{A,B,C,D} 4`（`A=TRAIN×LaneC, B=TRAIN+VAL×LaneC, C=TRAIN×P0, D=TRAIN+VAL×P0`），`L1 30` + `L2 60` records。与 `FORBIDDEN 141` block ID 零重叠 per source、连续、均分（每源5 `391001..`/`391101..`/`391201..`）且每块写死 `4` 真实 `frame_ids` 与 `held_out_ordinal_start/end`（design §2.4 冻结表）与 V48 180 帧 `frame_ids` 零重叠 per source 可机械校验、每块 `4 frames=1024 pairs (256/frame)`、`sampling_mode=deterministic_four_consecutive_frames_heldout_unused`。每块 L1 双 prior 同 `bob` 不同 `counts` (`counts_T` vs `counts_TV=TRAIN⊕VAL`)；每块 4 L2 同 `bob` 派生 `P_i(U2)=Σ q_i P(U2|B,u1)` 与各自 `H_L2` syndrome。SHALL NOT 复用 V48 45 块的任何 `frame_ids`、SHALL NOT 用 `sample_empirical_block` 随机池作正式样本（FAKE 测试除外）。
 
 ## R4. Leakage and tag provenance — frozen equal leakage
 
-Tag SHALL 为 `compute_tag_64(empty_uint8,x2)` trunc64 直复用，不另行归一化；`tag_scope` 恒 `l2_only`。泄漏 SHALL 固定：`H1-16 1064/1094/1104` 等泄漏于 Lane C；P0 同 `m2` 同泄漏。Summary SHALL 声名 `leakage_already_accounted` 与工程 verification L2-only.
+Tag SHALL 为 `compute_tag_64(empty_uint8,x2)` trunc64 直复用，不另行归一化；`tag_scope` 恒 `l2_only`。泄漏 SHALL 固定：`H1-16 1064/1094/1104` 等泄漏于 Lane C；P0 同 `m2` 同泄漏（`E=2560` 与泄漏无关）。Summary SHALL 声名 `leakage_already_accounted` 与工程 verification L2-only.
 
 ## R5. Four-way reclassification
 
@@ -43,7 +43,7 @@ V50 SHALL NOT 修改任何 V38–V48 已有输出；既有文件 byte-identical�
 
 ## R9. Evidence outputs — minimal fixed set (future, not in P0)
 
-授权写出 SHALL 仅为：`v50_records.json/.csv` (60 L2 行含 `prior_id/structure_id/tag_ok/reclassified/leak/frame_ids/sampling_mode`), `v50_summary.json` (含分层记账 90 + 因子聚合 `C−A/B−A/交互` + 四类/G3' + `f_total` + provenance 等泄漏 P0 与双 prior + 未使用 held-out 溯源), `v50_invalid_notice.json`(失败时). 禁写 NPZ。P0 轮 SHALL NOT 创建上述输出.
+授权写出 SHALL 仅为：`v50_records.json/.csv` (60 L2 行含 `prior_id/structure_id/tag_ok/reclassified/leak/frame_ids/held_out_ordinal/sampling_mode`), `v50_summary.json` (含分层记账 90 + 因子聚合 主效应 `E_structure/E_prior/E_interaction` 与四个 simple effects + 四类/G3' + `f_total` + provenance 等泄漏 P0 `{dv2:512,dv3:512}` 与双 prior + 未使用 held-out 溯源含每块 `frame_ids/ordinal`), `v50_invalid_notice.json`(失败时). 禁写 NPZ。P0 轮 SHALL NOT 创建上述输出.
 
 ## R10. Terminal distinguishability — factorial complete (descriptive)
 
@@ -51,7 +51,7 @@ Summary 终态 SHALL 为：`V50_EVIDENCE_INVALID` 优先、`V50_FACTORIAL_COMPLE
 
 ## R11. Integrity, guard ordering, seed registry 141, and tiers
 
-Runner SHALL 三层：Tier0 拒绝（默认拒绝、`--execution-authorized --authorized-target-sha` 与 `HEAD==origin/formal-ir-mainline==c38652de`、`SCOPED dirty` 四文件 `v50 模块/v50 CLI/v38/v35`、输出根已存在）、Tier1 预检失败（J2 141 并集 96+45 新区 15 零重叠、`P0 rank/dc/E/4-cycle/chain-ring`、双 prior counts 形态、未使用池可达）、Tier2 中途异常保留 raw partial。P0 spike SHALL 仅执行 Tier1 的 decoder-free 分支（write-free）且零 decoder calls.
+Runner SHALL 三层：Tier0 拒绝（默认拒绝、`--execution-authorized --authorized-target-sha` 与 `HEAD==origin/formal-ir-mainline==f58955f3e794dbde11b4d813eec061182319846d`、`SCOPED dirty` 四文件 `v50 模块/v50 CLI/v38/v35`、输出根已存在）、Tier1 预检失败（J2 141 并集 96+45 新区 15 block ID 零重叠且与 V48 180 帧 `frame_ids` 零重叠、`P0 rank/dc/E/4-cycle/chain-ring(G2精确)`、双 prior counts 形态、未使用池可达）、Tier2 中途异常保留 raw partial。P0 spike SHALL 仅执行 Tier1 的 decoder-free 分支（write-free）且零 decoder calls.
 
 ## R12. Workload and stop rules (frozen 90)
 
@@ -63,7 +63,7 @@ Runner SHALL 三层：Tier0 拒绝（默认拒绝、`--execution-authorized --au
 
 ## R14. Claim boundary
 
-结果仅支持 `n=1024 m2=184/190/192` 上单一等泄漏 P0-MET-1 与 `TRAIN vs TRAIN+VAL` 在 15 未使用 held-out 块上的 2×2 有界因子归因（`90/1.0 poly37, early-stop, leak 1064/1094/1104, E=2048 dc_max=16 4-cycles==0 6/8 报告 链≤4 纯环≤12==0 满秩无零列 确定性 label 禁 seed 搜索 构造不触 V48 L2-only tag≈2^-64`），`exact_full` oracle 不经 tag；均非 FER/阈值/SKR/安全/资格/晋升证据；不启动 V51。
+结果仅支持 `n=1024 m2=184/190/192` 上单一等泄漏真 MET P0-MET-1 `{dv2:512,dv3:512} E=2560 dc_mean 2.5`（全 `dv2` 则 `PEG-dv2 E=2048`）与 `TRAIN vs TRAIN+VAL` 在 15 未使用 held-out 块上的 2×2 有界因子归因（`90/1.0 poly37, early-stop, leak 1064/1094/1104 与E无关, dc_max=16 4-cycles==0 6/8 报告 链≤4 纯环≤12==0(G2精确) 满秩无零列 确定性 label 禁 seed 搜索 构造不触 V48 L2-only tag≈2^-64`），`exact_full` oracle 不经 tag；均非 FER/阈值/SKR/安全/资格/晋升证据；不启动 V51。
 
 ## R15. Lifecycle
 

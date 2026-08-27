@@ -4,17 +4,17 @@
 **Domain**: Formal IR / L2 structure × prior factorial (protograph/MET vs Lane C)
 **Change ID**: `formal-ir-v50-l2-structure-factorial`
 **Cycle ID**: `V50P0`
-**Predecessor**: `formal-ir-v48-heldout-confirm` (result SHA `28228b9d4bf158361d247aac89c1864e1b5ca9b0`) + diagnostic `c38652de9e4bca3daccbf0f9c96d7897d9199b89`, branch `formal-ir-mainline` HEAD `c38652de`
+**Predecessor**: `formal-ir-v48-heldout-confirm` (result SHA `28228b9d4bf158361d247aac89c1864e1b5ca9b0`) + diagnostic `f58955f3e794dbde11b4d813eec061182319846d`, branch `formal-ir-mainline` HEAD `f58955f3e794dbde11b4d813eec061182319846d`
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, `formal_execution_authorized=false`
 
 > ponytail lite: 本轮仅 decoder-free 结构 spike + 单候选等泄漏 protograph/MET 与 2×2 因子计划；更懒路径是零新增矩阵直接复用 Lane C，需独立评审确认结构重构价值是否值得 90-call 预算。
 
 ## Goal
 
-在**完全冻结 `n=1024, m2∈{184,190,192}, GF32 poly37, 无零列, 满行秩, degree-2 链/环受限, 确定性 lifting/label, 禁止 seed 搜索, 与 Lane C 相同 decoder `90/1.0`, 行度上限与边数预算冻结, 构造规则不接触 V48 outcomes, 零 formal output** 的前提下：
+在**完全冻结 `n=1024, m2∈{184,190,192}, GF32 poly37, 无零列, 满行秩, degree-2 链/环受限, 确定性 lifting/label, 禁止 seed 搜索, 与 Lane C 相同 decoder `90/1.0`, 行度上限冻结、同 `m2` 等泄漏（泄漏仅由 `m2` 决定，不冻结边数 `E`）, 构造规则不接触 V48 outcomes, 零 formal output** 的前提下：
 
-1. **构造唯一等泄漏 protograph/MET L2 候选 `P0-MET-1`**（主方向），与当前 Lane C 保持相同 `m2` 与泄漏 `1064/1094/1104`，显式限制 degree-2 长链/闭环，优先消除 4-cycles 并报告 6/8-cycles。
-2. **规划后续 15 个未使用 held-out blocks 的 2×2 因子实验**：每块 `2×L1 +4×L2 =6` calls，共 `90` calls；因子为 **结构(Lane C vs P0-MET-1)** × **先验(TRAIN vs TRAIN+VAL)**；主效应为结构 `C−A` 与先验 `B−A`。
+1. **构造唯一等泄漏 protograph/MET L2 候选 `P0-MET-1` = 真 MET 混合度 `{dv2:512,dv3:512}, E=2560, dv_mean=2.5`**（主方向；1024 全 `dv=2` 非 MET，若坚持全 `dv=2` 则改名 `PEG-dv2`），与当前 Lane C 保持相同 `m2` 与泄漏 `1064/1094/1104`（`leak=5*m2+80+64` 与 `E` 无关），显式限制 degree-2 长链/闭环，优先消除 4-cycles 并报告 6/8-cycles。
+2. **规划后续 15 个未使用 held-out blocks 的 2×2 因子实验**：每块 `2×L1 +4×L2 =6` calls，共 `90` calls；因子为 **结构(Lane C vs P0-MET-1)** × **先验(TRAIN vs TRAIN+VAL)**；冻结主效应 `E_structure=(C+D-A-B)/2`, `E_prior=(B+D-A-C)/2`, `E_interaction=(D-C)-(B-A)`，并保留四个 simple effects `C-A(TRAIN下结构) / D-B(TRAIN+VAL下结构) / B-A(LaneC下先验) / D-C(P0下先验)`。
 
 本轮**只产出 spike 报告 + 四 OpenSpec 工件**，状态 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；**不得运行 decoder、不得创建正式 output、不得启动 V51**。
 
@@ -28,10 +28,10 @@
 
 ## Scope
 
-1. **唯一等泄漏结构候选** `P0-MET-1`：`n=1024, m2=184/190/192` 按源、`GF32 poly37`、`无零列`、`满行秩`、`degree-2 链≤4 / degree-2 纯环(≤12)==0`、`确定性 lifting/label`、`禁止 seed 搜索`；与 Lane C 相同 decoder `90/1.0` 与相同泄漏口径 `leak_total=5*m2+5*16+64`；`4-cycles==0` 硬门、`6/8-cycles` 报告；行度上限 `16` 与边数预算 `E=2048` 冻结。
+1. **唯一等泄漏结构候选** `P0-MET-1`：`n=1024, m2=184/190/192` 按源、`GF32 poly37`、`无零列`、`满行秩`、真 MET 混合度 `{dv2:512,dv3:512}, E=2560, dv_mean=2.5`（`E` 不冻结泄漏；若坚持全 `dv2` 则为 `PEG-dv2 E=2048` 并改名）、`degree-2 链≤4 / 纯 degree-2 环(≤12)==0`（精确定义见 design §2.2：仅 `dv=2` 变量诱导子图 `G2` 内，链为内部校验度 2 的极大路径，环为全 `dv=2` 且双分长度 `≤12` 的闭环）、`确定性 lifting/label`、`禁止 seed 搜索`；与 Lane C 相同 decoder `90/1.0` 与相同泄漏口径 `leak_total=5*m2+5*16+64`；`4-cycles==0` 硬门、`6/8-cycles` 报告；行度上限 `16` 冻结。
 2. **先验正交对照**：`TRAIN prior`（V25 `channel_counts.npz` 经 `load_v25_channel_counts()`）vs `TRAIN+VAL prior`（`TRAIN⊕VAL` 合并 counts，经同一 loader 接口隔离构造）；先验仅影响 `L1 APP q_i` 与 `P_i(U2)`，不改矩阵/泄漏/decoder。
-3. **15 未使用 held-out blocks**（每源 5，均分，连续 deterministic IDs，与 `FORBIDDEN 141 = 96(V36..V47)+45(V48)` 零重叠、无内部重复），每块 `2×L1 (TRAIN vs TRAIN+VAL) +4×L2 (2 structures×2 priors) =6` → 总 `90` calls (`L1 30 + L2 60`)。Block 由 held-out 区间 `60/20/20` hold 帧的 4-frame 窗口派生，`256 pairs/frame, 1024/block`，`sample_empirical_block` 语义但 IDs 为未使用新区。
-4. **2×2 因子主效应**：以 `exact_full = exact_u1 && exact_l2` oracle 为主判据，配对结构主效应 `C(TRAIN,P0)−A(TRAIN,LaneC)` 与先验主效应 `B(TRAIN+VAL,LaneC)−A(TRAIN,LaneC)`，交互 `D−C − (B−A)`；同时报告 `exact_u1/exact_l2/exact_full`、四类 `exact/detected/decoder_non_syndrome/undetected`、迭代/运行时、`APP entropy/||q-p||1`。
+3. **15 未使用 held-out blocks**（每源 5，均分，连续 deterministic IDs `391001..391005 / 391101..391105 / 391201..391205` 与 `FORBIDDEN 141 = 96(V36..V47)+45(V48)` block ID 零重叠、无内部重复，且与 V48 180 帧 `frame_ids` 零重叠 per source；每块写死 `4` 真实 `frame_ids`、`held_out_ordinal_start/end`、`pairs_count=1024`，与 V38–V48 终态帧查重，不仅 `FORBIDDEN` seeds），每块 `2×L1 (TRAIN vs TRAIN+VAL) +4×L2 (2 structures×2 priors) =6` → 总 `90` calls (`L1 30 + L2 60`)。Block 由 held-out 区间 `60/20/20` hold 帧的 4-frame 窗口派生，`256 pairs/frame, 1024/block`，`sampling_mode=deterministic_four_consecutive_frames_heldout_unused`，新窗口与 V48 `HELDOUT_STARTS` 分散窗口零重叠（见 spike_report §8 冻结表）。
+4. **2×2 因子效应**：以 `exact_full = exact_u1 && exact_l2` oracle 为主判据，冻结主效应 `E_structure=(C+D-A-B)/2`、`E_prior=(B+D-A-C)/2`、`E_interaction=(D-C)-(B-A)`，并保留四个 simple effects `C-A(TRAIN先验下结构) / D-B(TRAIN+VAL下结构) / B-A(LaneC下先验) / D-C(P0下先验)`；`C-A` 为 simple effect 非主效应；同时报告 `exact_u1/exact_l2/exact_full`、四类 `exact/detected/decoder_non_syndrome/undetected`、迭代/运行时、`APP entropy/||q-p||1`。
 5. **Lifecycle 冻结**：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，`implementation_started=false`，`production_outputs_created=false`；任何实现/执行需独立 plan ACCEPT + 显式 `EXECUTE_AUTH` 绑定到精确实现 SHA；不启动 V51。
 
 ## Impact Scope
@@ -43,11 +43,11 @@
 
 ## Acceptance Criteria
 
-- [ ] 四工件 + spike 报告齐全一致且 lifecycle 为 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，HEAD 绑定 `c38652de9e4bca3daccbf0f9c96d7897d9199b89`，明确“不实现不执行不启动 V51，等待独立评审”。
-- [ ] 单一等泄漏 protograph/MET 候选 `P0-MET-1` 冻结：`n=1024, m2=184/190/192` 按源、`GF32 poly37`、`无零列`、`满行秩`、`degree-2 链≤4 / 纯环(≤12)==0`、`确定性 lifting/label`、`禁止 seed 搜索`；与 Lane C 相同 `m2` 与泄漏 `1064/1094/1104`，行度上限 `16` 与边数预算 `E=2048` 冻结，`4-cycles==0` 硬门、`6/8-cycles` 报告，构造规则不接触 V48 outcomes。
-- [ ] Spike 可构造性已判定（decoder-free 结构校验：shape/rank/零列/行度/边数/4-cycle/链环），报告参数完整，无 decoder 调用，无正式 output。
-- [ ] 15 未使用 held-out blocks 冻结：与 `FORBIDDEN 141` 零重叠、无内部重复、每源均分 5、连续 IDs，确定性窗口可达，采样模式与 frame_ids 可机械校验；每块 `2×L1+4×L2=6` → 总 `90` calls (`L1 30 / L2 60`) 的 2×2 因子 workload 冻结。
-- [ ] 2×2 因子与主效应定义冻结：`A=TRAIN×LaneC, B=TRAIN+VAL×LaneC, C=TRAIN×P0, D=TRAIN+VAL×P0`，结构主效应 `C−A`、先验主效应 `B−A`、交互 `D−C−(B−A)`，以 `exact_full` 为主判据，同时报告 `exact_u1/exact_l2` 与四类/G3'。
+- [ ] 四工件 + spike 报告齐全一致且 lifecycle 为 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，HEAD 绑定 `f58955f3e794dbde11b4d813eec061182319846d`，明确“不实现不执行不启动 V51，等待独立评审”。
+- [ ] 单一等泄漏 protograph/MET 候选 `P0-MET-1` 冻结：`n=1024, m2=184/190/192` 按源、`GF32 poly37`、`无零列`、`满行秩`、真 MET `{dv2:512,dv3:512} E=2560`（全 `dv2` 则改名 `PEG-dv2`）、`degree-2 链≤4 / 纯环(≤12)==0`（`G2` 精确定义）、`确定性 lifting/label`、`禁止 seed 搜索`；与 Lane C 相同 `m2` 与泄漏 `1064/1094/1104`（`E` 不决定泄漏），行度上限 `16` 冻结，`4-cycles==0` 硬门、`6/8-cycles` 报告，构造规则不接触 V48 outcomes。
+- [ ] Spike 可构造性已实证（decoder-free 三矩阵实际生成，报告 rank/E/度分布/4,6,8-cycle/degree-2 chain/pure ring，无 decoder 调用，无正式 output；失败则换规划，删除未经验证的 `Constructible: YES`）。
+- [ ] 15 未使用 held-out blocks 冻结：与 `FORBIDDEN 141` block ID 零重叠、无内部重复、每源均分 5、连续 IDs `391001..` 且每块写死 `4` 真实 `frame_ids` 与 `ordinal start/end`，与 V48 180 帧 `frame_ids` 零重叠 per source 可机械校验；每块 `2×L1+4×L2=6` → 总 `90` calls (`L1 30 / L2 60`) 的 2×2 因子 workload 冻结。
+- [ ] 2×2 因子与效应定义冻结：`A=TRAIN×LaneC, B=TRAIN+VAL×LaneC, C=TRAIN×P0, D=TRAIN+VAL×P0`，主效应 `E_structure=(C+D-A-B)/2`、`E_prior=(B+D-A-C)/2`、`E_interaction=(D-C)-(B-A)`，simple effects `C-A(TRAIN下结构) / D-B / B-A / D-C`（`C-A` 非主效应），以 `exact_full` 为主判据，同时报告 `exact_u1/exact_l2` 与四类/G3'。
 - [ ] 禁止清单冻结：禁止 seed 搜索、禁止第二候选、禁止调参/调泄漏/调 decoder、禁止用 V48 outcomes 选结构、禁止创建正式 output、禁止启动 V51。
 
 ## Tasks
@@ -56,4 +56,4 @@
 
 ## Lifecycle
 
-V48 前代 result `28228b9d4bf158361d247aac89c1864e1b5ca9b0` + 诊断 `c38652de`，分支 `formal-ir-mainline`；V50 当前 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，修订后仍保持不实现不执行、等待独立 plan 评审；实现候选止于 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；任何执行需显式用户 `EXECUTE_AUTH` 绑定到精确实现 SHA；不启动 V51。
+V48 前代 result `28228b9d4bf158361d247aac89c1864e1b5ca9b0` + 诊断 `f58955f`，分支 `formal-ir-mainline` HEAD `f58955f3e794dbde11b4d813eec061182319846d`；V50 当前 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`，修订后仍保持不实现不执行、等待独立 plan 评审；实现候选止于 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；任何执行需显式用户 `EXECUTE_AUTH` 绑定到精确实现 SHA；不启动 V51。
