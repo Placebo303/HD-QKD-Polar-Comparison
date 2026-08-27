@@ -49,7 +49,7 @@ CYCLE_ID = "V45P0"
 CHANGE_ID = "formal-ir-v45-l1-app-soft-transfer"
 ACCEPTED_PLAN_SHA = "d89d9e932b11208802c595e9f2ef471da16fcbbd"
 BRANCH_REF = "origin/formal-ir-mainline"
-EXECUTION_SCOPE = "v45_diagnostic_27_invocations_exactly_once"
+EXECUTION_SCOPE = "v45_l1_app_soft_transfer_27_calls_exactly_once"
 
 POLYNOMIAL = 37
 DIMENSION = 32
@@ -699,13 +699,16 @@ def build_record(spec: dict[str, Any], raw: dict[str, Any], setting: tuple[int, 
     # raw contains: condition, source, block_seed, construction_seed, matrix_id, h1_matrix_id,
     # errors_initial, errors_final, exact_l2, exact_u1, exact_full, syndrome_ok_l2, syndrome_ok_l1,
     # wrong_l2, wrong_l1, iterations_l1, iterations_l2, entropy, mean_abs, status, runtime_s
+    # ponytail: Control exact_u1/exact_full are null (not applicable) to keep leakage-calibrated scope; Treatment carries L1.
     exact_l2 = bool(raw["exact_l2"])
-    exact_u1 = bool(raw["exact_u1"])
-    exact_full = bool(raw.get("exact_full", exact_l2 and exact_u1))
+    raw_u1 = raw["exact_u1"]
+    exact_u1 = None if raw_u1 is None else bool(raw_u1)
+    raw_full = raw.get("exact_full")
+    exact_full = None if raw_full is None else bool(raw_full)
     syndrome_ok_l2 = bool(raw["syndrome_ok_l2"])
     syndrome_ok_l1 = bool(raw["syndrome_ok_l1"])
     wrong_l2 = bool(syndrome_ok_l2 and not exact_l2)
-    wrong_l1 = bool(syndrome_ok_l1 and not exact_u1)
+    wrong_l1 = None if exact_u1 is None else bool(syndrome_ok_l1 and not exact_u1)
     record = {
         "call_id": spec["call_id"],
         "condition": raw["condition"],
@@ -744,9 +747,19 @@ def validate_record_schema(record: dict[str, Any]) -> tuple[bool, str]:
         return False, f"invalid call_id {record['call_id']!r}"
     if record["condition"] not in CONDITION_ORDER or record["source"] not in SOURCE_ORDER:
         return False, f"invalid condition/source {record['condition']!r}/{record['source']!r}"
-    for key in ("exact_l2", "exact_u1", "exact_full", "syndrome_ok_l2", "syndrome_ok_l1", "wrong_codeword_l2", "wrong_codeword_l1"):
-        if not isinstance(record[key], bool):
-            return False, f"field {key} must be bool"
+    is_control = record["condition"] == COND_CONTROL
+    # Control: exact_u1/exact_full/wrong_codeword_l1 are not applicable (null); Treatment: bool
+    if is_control:
+        for key in ("exact_u1", "exact_full", "wrong_codeword_l1"):
+            if record[key] is not None:
+                return False, f"field {key} must be null for Control (leakage-calibrated scope)"
+        for key in ("exact_l2", "syndrome_ok_l2", "syndrome_ok_l1", "wrong_codeword_l2"):
+            if not isinstance(record[key], bool):
+                return False, f"field {key} must be bool"
+    else:
+        for key in ("exact_l2", "exact_u1", "exact_full", "syndrome_ok_l2", "syndrome_ok_l1", "wrong_codeword_l2", "wrong_codeword_l1"):
+            if not isinstance(record[key], bool):
+                return False, f"field {key} must be bool"
     for key in ("errors_initial", "errors_final", "iterations_l1", "iterations_l2", "max_iter", "block_seed", "construction_seed", "construction_seed_ordinal"):
         if not isinstance(record[key], int) or isinstance(record[key], bool):
             return False, f"field {key} must be int"
@@ -754,10 +767,14 @@ def validate_record_schema(record: dict[str, Any]) -> tuple[bool, str]:
         return False, f"record setting {record['max_iter']}/{record['damping_alpha']} != frozen {DECODER_SETTING} (J9)"
     if record["wrong_codeword_l2"] != (record["syndrome_ok_l2"] and not record["exact_l2"]):
         return False, "wrong_codeword_l2 must equal syndrome_ok_l2 and not exact_l2"
-    if record["wrong_codeword_l1"] != (record["syndrome_ok_l1"] and not record["exact_u1"]):
-        return False, "wrong_codeword_l1 must equal syndrome_ok_l1 and not exact_u1"
-    if record["exact_full"] != (record["exact_u1"] and record["exact_l2"]):
-        return False, "exact_full must equal exact_u1 and exact_l2"
+    if is_control:
+        # Control has no applicable L1 exact; skip L1 wrong/exact_full checks
+        pass
+    else:
+        if record["wrong_codeword_l1"] != (record["syndrome_ok_l1"] and not record["exact_u1"]):
+            return False, "wrong_codeword_l1 must equal syndrome_ok_l1 and not exact_u1"
+        if record["exact_full"] != (record["exact_u1"] and record["exact_l2"]):
+            return False, "exact_full must equal exact_u1 and exact_l2"
     return True, "SCHEMA_OK"
 
 def validate_post_evaluation(records: list[dict[str, Any]]) -> list[tuple[str, str]]:
@@ -808,13 +825,14 @@ def aggregate_results(records: list[dict[str, Any]], counts_by_source: Optional[
     per_condition: dict[str, Any] = {}
     for cond in CONDITION_ORDER:
         recs = [r for r in records if r["condition"] == cond]
+        # ponytail: exact_full only meaningful for Treatment (Control exact_full is null, not counted)
         per_condition[cond] = {
             "calls": len(recs),
             "exact_l2_total": sum(1 for r in recs if r["exact_l2"]),
-            "exact_full_total": sum(1 for r in recs if r["exact_full"]),
+            "exact_full_total": sum(1 for r in recs if r["exact_full"] is True),
             "wrong_count": sum(1 for r in recs if r["wrong_codeword_l2"]),
             "exact_by_source_l2": {source: sum(1 for r in recs if r["source"] == source and r["exact_l2"]) for source in SOURCE_ORDER},
-            "exact_by_source_full": {source: sum(1 for r in recs if r["source"] == source and r["exact_full"]) for source in SOURCE_ORDER},
+            "exact_by_source_full": {source: sum(1 for r in recs if r["source"] == source and r["exact_full"] is True) for source in SOURCE_ORDER},
         }
     per_source: dict[str, Any] = {}
     for source in SOURCE_ORDER:
@@ -822,9 +840,10 @@ def aggregate_results(records: list[dict[str, Any]], counts_by_source: Optional[
         per_source[source] = {
             "calls": len(recs),
             "exact_l2_total": sum(1 for r in recs if r["exact_l2"]),
-            "exact_full_total": sum(1 for r in recs if r["exact_full"]),
+            # exact_full only counted for Treatment (Control null)
+            "exact_full_total": sum(1 for r in recs if r["condition"] == COND_L1_APP and r["exact_full"] is True),
             "by_condition_l2": {cond: sum(1 for r in recs if r["condition"] == cond and r["exact_l2"]) for cond in CONDITION_ORDER},
-            "by_condition_full": {cond: sum(1 for r in recs if r["condition"] == cond and r["exact_full"]) for cond in CONDITION_ORDER},
+            "by_condition_full": {cond: sum(1 for r in recs if r["condition"] == cond and r["exact_full"] is True) for cond in CONDITION_ORDER},
         }
     paired: list[dict[str, Any]] = []
     by_block_map: dict[int, dict[str, dict[str, Any]]] = {}
@@ -846,7 +865,8 @@ def aggregate_results(records: list[dict[str, Any]], counts_by_source: Optional[
                 "control_only_exact": control_only,
                 "treatment_only_exact": treatment_only,
                 "neither_exact": neither,
-                "both_exact_full": bool(o["exact_full"] and e["exact_full"]),
+                # ponytail: Control exact_full is null; paired full only reflects Treatment's full (Control not applicable)
+                "both_exact_full": bool(e["exact_full"] is True) if o["exact_full"] is None else bool(o["exact_full"] and e["exact_full"]),
                 "errors_final_control": o["errors_final"],
                 "errors_final_treatment": e["errors_final"],
                 "errors_final_delta": int(e["errors_final"] - o["errors_final"]),
@@ -1101,14 +1121,19 @@ def _evaluate_one_condition(
         syn_ok = bool(res.syndrome_ok)
         exact_l2 = bool(np.array_equal(res.x_hat, u2_alice))
         status = res.status
-    # L1 diagnostics carried from l1_res
+    # L1 diagnostics carried from l1_res; Control has no applicable full recovery (984/1014/1024 without 80-bit L1 syndrome)
     assert l1_res is not None
-    exact_u1 = bool(l1_res["exact_u1"])
+    l1_exact_u1 = bool(l1_res["exact_u1"])
     syndrome_ok_l1 = bool(l1_res["syndrome_ok"])
     iterations_l1 = int(l1_res["iterations"])
     entropy = float(l1_res["entropy"])
     mean_abs = float(l1_res["mean_abs_diff"])
-    exact_full = bool(exact_u1 and exact_l2)
+    if is_control:
+        exact_u1 = None
+        exact_full = None
+    else:
+        exact_u1 = bool(l1_exact_u1)
+        exact_full = bool(l1_exact_u1 and exact_l2)
     return {
         "condition": condition,
         "source": source,
@@ -1119,8 +1144,8 @@ def _evaluate_one_condition(
         "errors_initial": int(errors_initial),
         "errors_final": int(final_errors),
         "exact_l2": bool(exact_l2),
-        "exact_u1": bool(exact_u1),
-        "exact_full": bool(exact_full),
+        "exact_u1": exact_u1,
+        "exact_full": exact_full,
         "syndrome_ok_l2": bool(syn_ok),
         "syndrome_ok_l1": bool(syndrome_ok_l1),
         "iterations_l1": int(iterations_l1),

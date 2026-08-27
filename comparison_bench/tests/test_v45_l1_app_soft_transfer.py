@@ -110,15 +110,19 @@ def run_scenario(tmp_path, monkeypatch, real_counts, fake_outcome, calls=None, n
             syn_ok_l2 = bool(vals[2]) if len(vals)>2 else bool(exact_l2)
             syn_ok_l1 = True
             exact_u1 = True
-        # need l1_res already provided; but for spy we use provided l1_res entropy etc.
-        # Return dict matching expected raw
-        # Determine iterations etc.
+        # Control must not carry L1 full exact (leakage 984/1014/1024 without 80-bit); only Treatment carries exact_full = l1_exact && treatment_exact_l2
+        if is_control:
+            exact_u1_out = None
+            exact_full_out = None
+        else:
+            exact_u1_out = bool(exact_u1)
+            exact_full_out = bool(exact_l2 and exact_u1)
         return {
             "condition": condition, "source": source, "block_seed": block_seed,
             "construction_seed": spec["construction_seed"], "matrix_id": spec["matrix_id"],
             "h1_matrix_id": spec.get("h1_matrix_id", v45.H1_MATRIX_ID),
             "errors_initial": int(errors_initial), "errors_final": int(final),
-            "exact_l2": bool(exact_l2), "exact_u1": bool(exact_u1), "exact_full": bool(exact_l2 and exact_u1),
+            "exact_l2": bool(exact_l2), "exact_u1": exact_u1_out, "exact_full": exact_full_out,
             "syndrome_ok_l2": bool(syn_ok_l2), "syndrome_ok_l1": bool(syn_ok_l1),
             "iterations_l1": 5, "iterations_l2": 5 if exact_l2 else 90,
             "bp_posterior_entropy": 4.5, "mean_abs_diff_q_p": 0.02,
@@ -588,8 +592,13 @@ def test_t11_schema_and_decoder_contract(tmp_path, monkeypatch, real_counts):
         assert set(rec.keys())==set(v45.RECORD_FIELDS)
         assert rec["max_iter"]==90 and rec["damping_alpha"]==1.0
         assert rec["wrong_codeword_l2"]==(rec["syndrome_ok_l2"] and not rec["exact_l2"])
-        assert rec["wrong_codeword_l1"]==(rec["syndrome_ok_l1"] and not rec["exact_u1"])
-        assert rec["exact_full"]==(rec["exact_u1"] and rec["exact_l2"])
+        if rec["condition"] == v45.COND_CONTROL:
+            assert rec["exact_u1"] is None
+            assert rec["exact_full"] is None
+            assert rec["wrong_codeword_l1"] is None
+        else:
+            assert rec["wrong_codeword_l1"]==(rec["syndrome_ok_l1"] and not rec["exact_u1"])
+            assert rec["exact_full"]==(rec["exact_u1"] and rec["exact_l2"])
         ok,msg=v45.validate_record_schema(rec)
         assert ok, msg
         assert rec["condition"] in v45.CONDITION_ORDER
@@ -646,7 +655,8 @@ def test_t12_writer_contract(tmp_path, monkeypatch, real_counts):
     assert acc["structural_reconstruction_decoder_calls"]==0
     assert acc["preflight_decoder_calls"]==0
     assert summary["aggregates"]["per_condition"]["cond_control"]["exact_l2_total"]==9
-    assert summary["aggregates"]["per_condition"]["cond_control"]["exact_full_total"]==9
+    assert summary["aggregates"]["per_condition"]["cond_control"]["exact_full_total"]==0
+    assert summary["aggregates"]["per_condition"]["cond_l1_app"]["exact_full_total"]==9
     assert summary["master_stop_rule"]==v45.MASTER_STOP_RULE
     assert summary["claim_boundary"]
     assert summary["leakage"]["per_source"]["1M"]["control_leak_total"]==984
@@ -685,3 +695,45 @@ def test_t12_all_terminals(tmp_path, monkeypatch, real_counts):
         return (is_treat, 0 if is_treat else 100, True if is_treat else False)
     result,_ = run_scenario(tmp_path, monkeypatch, real_counts, treat_only, name="treat_only")
     assert result["terminal_state"]==v45.TERMINAL_L1APP_ADDED_VALUE_SIGNAL
+
+# Control must not obtain exact_full=true from shared L1 (leakage-calibrated isolation)
+def test_control_exact_full_isolation(tmp_path, monkeypatch, real_counts):
+    # fake L1 exact=true + Control L2 exact=true => Control exact_full stays null, Treatment exact_full true
+    outcome = make_positional_outcome({})
+    result, root = run_scenario(tmp_path, monkeypatch, real_counts, outcome, name="isolation")
+    records = json.loads((root / "v45_records.json").read_text(encoding="utf-8"))
+    with (root / "v45_records.csv").open(newline="", encoding="utf-8") as handle:
+        csv_rows = list(csv.DictReader(handle))
+    for rec, crow in zip(records, csv_rows):
+        if rec["condition"] == v45.COND_CONTROL:
+            assert rec["exact_u1"] is None
+            assert rec["exact_full"] is None
+            assert rec["wrong_codeword_l1"] is None
+            # CSV must be empty/NA for null fields
+            assert crow["exact_u1"] in ("", "NA", "null")
+            assert crow["exact_full"] in ("", "NA", "null")
+            # JSON null verified above; CSV already checked
+        else:
+            assert rec["exact_u1"] is True
+            assert rec["exact_full"] is True
+            assert crow["exact_u1"] == "true"
+            assert crow["exact_full"] == "true"
+    # Aggregates must not count Control as full protocol result
+    summary = json.loads((root / "v45_summary.json").read_text(encoding="utf-8"))
+    assert summary["aggregates"]["per_condition"]["cond_control"]["exact_full_total"] == 0
+    assert summary["aggregates"]["per_condition"]["cond_l1_app"]["exact_full_total"] == 9
+    for src in v45.SOURCE_ORDER:
+        assert summary["aggregates"]["per_source"][src]["exact_full_total"] == 3
+        assert summary["aggregates"]["per_source"][src]["by_condition_full"][v45.COND_CONTROL] == 0
+    # paired both_exact_full now reflects Treatment only (Control is null, not counted as full)
+    for p in summary["aggregates"]["paired_outcomes"]:
+        assert p["both_exact_full"] is True
+    # Direct record-level check via build_record: control raw with L1 exact true still yields null
+    raw_control = {"condition": v45.COND_CONTROL, "source": "1M", "block_seed": 390119, "construction_seed": 383102, "matrix_id": "lane_c_1M_s383102", "errors_initial": 5, "errors_final": 0, "exact_l2": True, "exact_u1": None, "exact_full": None, "syndrome_ok_l2": True, "syndrome_ok_l1": True, "iterations_l1": 5, "iterations_l2": 5, "bp_posterior_entropy": 4.5, "mean_abs_diff_q_p": 0.02, "status": "ok", "runtime_s": 0.001}
+    rec_c = v45.build_record({"call_id": "C01", "construction_seed_ordinal": 2, "construction_seed": 383102}, raw_control, v45.DECODER_SETTING)
+    assert rec_c["exact_full"] is None
+    assert v45._csv_value(None) == ""
+    # Treatment with same L1 exact true and L2 exact true must be true
+    raw_treat = dict(raw_control, condition=v45.COND_L1_APP, exact_u1=True, exact_full=True)
+    rec_t = v45.build_record({"call_id": "C02", "construction_seed_ordinal": 2, "construction_seed": 383102}, raw_treat, v45.DECODER_SETTING)
+    assert rec_t["exact_full"] is True
