@@ -631,3 +631,77 @@ def test_validate_train_heldout_isolation_real():
     # seed registry still checked separately (forbidden 96) but not used as isolation proof
     flat45 = {s for src in v48.SOURCE_ORDER for s in v48.NEW_BLOCK_SEEDS[src]}
     assert flat45.isdisjoint(v48.FORBIDDEN_96)
+
+# ---- new preload tests (task 4) ----
+
+def test_preload_all_45_blocks_180_frame_ids_46080_pairs():
+    v48._clear_heldout_cache()
+    all_45_block_ids = [bid for src in v48.SOURCE_ORDER for bid in v48.NEW_BLOCK_SEEDS[src]]
+    assert len(all_45_block_ids) == 45
+    heldout_blocks = {block_id: v48.load_heldout_block(block_id) for block_id in all_45_block_ids}
+    assert len(heldout_blocks) == 45
+    # total pairs 46080
+    total_pairs = sum(len(v[0]) for v in heldout_blocks.values())
+    assert total_pairs == 46080
+    # 180 unique frame IDs across all blocks
+    all_fids = [fid for bid in all_45_block_ids for fid in v48.BLOCK_WINDOWS[bid]["frame_ids"]]
+    assert len(all_fids) == 180
+    assert len(set(all_fids)) == 180
+    # per-block checks already inside load_heldout_block, but verify symbol range and TRAIN zero overlap here
+    for bid, (alice, bob) in heldout_blocks.items():
+        assert len(alice) == 1024 and len(bob) == 1024
+        assert int(alice.min()) >= 0 and int(alice.max()) < 1024
+        assert int(bob.min()) >= 0 and int(bob.max()) < 1024
+        win = v48.BLOCK_WINDOWS[bid]
+        src = win["source"]
+        tr_lo, tr_hi = v48.TRAIN_FRAME_RANGES[src]
+        for fid in win["frame_ids"]:
+            assert not (tr_lo <= fid <= tr_hi)
+    v48._clear_heldout_cache()
+
+def test_preload_mapping_used_by_workload():
+    src = Path(v48.__file__).read_text(encoding="utf-8")
+    # required exact preload line
+    assert "heldout_blocks = {block_id: load_heldout_block(block_id) for block_id in all_45_block_ids}" in src
+    # workload must read from mapping, not re-read parquet
+    assert "alice, bob = heldout_blocks[block_id]" in src
+    # alternative exact string with block_seed
+    assert "heldout_blocks[block_seed]" in src or "heldout_blocks[block_id]" in src
+    # heldout_blocks must be passed into _run_workload_calls
+    assert "heldout_blocks" in src
+    # all_45_block_ids must be defined before preload
+    assert "all_45_block_ids" in src
+    # HELDOUT_BASE_GLOBAL comment must be corrected
+    assert "actual per-source parquet hold-start frame_id" in src
+    assert "synthetic global frame offset" not in src
+    # _run_workload_calls must accept heldout_blocks param
+    assert "heldout_blocks" in src
+
+def test_delete_last_window_one_row_fails_before_decoder_zero_calls(tmp_path, monkeypatch, real_counts):
+    # delete one row from last window 390342 (2M last frame 3644)
+    v48._clear_heldout_cache()
+    real_df = v48._load_heldout_df("2M")
+    # 390342 frames [3641,3642,3643,3644]; delete pair_idx 0 of 3644
+    tampered = real_df[~((real_df["frame_id"] == 3644) & (real_df["pair_idx"] == 0))].copy()
+    assert len(tampered) == len(real_df) - 1
+    v48._HELDOUT_DF_CACHE["2M"] = tampered
+    calls = {"decode": 0}
+    def counting_decode(*a, **kw):
+        calls["decode"] += 1
+        return SimpleNamespace(x_hat=np.zeros(1024, dtype=np.uint8), syndrome_ok=True, iterations=1, runtime_s=0.001, status="ok", final_beliefs=np.zeros((1024, 32)))
+    world = FakeWorld()
+    root = tmp_path / "delete_last_window"
+    try:
+        result = v48.run_v48_diagnostic(execution_authorized=True, authorized_target_sha="f"*40, fake_runner=True, output_root=root, structural_authority_path=world.authority_file(tmp_path), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=counting_decode)
+        assert result["terminal_state"] == v48.TERMINAL_EVIDENCE_INVALID
+        assert calls["decode"] == 0
+        # accounting must be zero at failure before any decoder call
+        summary = json.loads((root / "v48_summary.json").read_text(encoding="utf-8"))
+        assert summary["accounting"]["decoder_calls_started"]["total"] == 0
+        assert summary["accounting"]["decoder_calls_started"]["l1"] == 0
+        assert summary["accounting"]["decoder_calls_started"]["l2"] == 0
+        assert summary["terminal_state"] == v48.TERMINAL_EVIDENCE_INVALID
+        # invalid notice also present
+        assert (root / "v48_invalid_notice.json").exists()
+    finally:
+        v48._clear_heldout_cache()

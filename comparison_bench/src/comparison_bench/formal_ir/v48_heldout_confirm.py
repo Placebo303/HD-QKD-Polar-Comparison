@@ -75,7 +75,7 @@ H1_FAMILY = "QC-cyclic-projective"
 
 # Held-out inventory
 HELDOUT_H: dict[str, int] = {"1M": 400, "1p5M": 554, "2M": 729}
-HELDOUT_BASE_GLOBAL: dict[str, int] = {"1M": 1600, "1p5M": 2213, "2M": 2916}  # synthetic global frame offset for held-out hold interval
+HELDOUT_BASE_GLOBAL: dict[str, int] = {"1M": 1600, "1p5M": 2213, "2M": 2916}  # actual per-source parquet hold-start frame_id
 PAIRS_PER_FRAME = 256
 FRAMES_PER_BLOCK = 4
 PAIRS_PER_BLOCK = 1024
@@ -1130,6 +1130,7 @@ def _run_workload_calls(
     accounting: CallAccounting,
     sink: list[dict[str, Any]],
     decode_fn: Optional[Callable[..., Any]] = None,
+    heldout_blocks: Optional[dict[int, tuple[np.ndarray, np.ndarray]]] = None,
 ) -> None:
     from comparison_bench.formal_ir.v35_algorithm_development import decode_row_layered_fftqspa
     decode = decode_fn if decode_fn is not None else decode_row_layered_fftqspa
@@ -1140,12 +1141,14 @@ def _run_workload_calls(
     for spec in rows:
         source = spec["source"]
         block_seed = spec["block_seed"]
+        block_id = block_seed
         counts = counts_by_source[source]
         matrix, _ = matrices[("lane_c", source)]
         win = BLOCK_WINDOWS[block_seed]
-        # Task 4: production workload彻底删除 sample_empirical_block — evaluation from read-only held-out parquet
-        # TRAIN counts only for priors (get_l1_prior / get_l1_app); alice/bob from parquet via load_heldout_block
-        alice, bob = load_heldout_block(block_seed)
+        # workload must read from preloaded mapping, never re-read parquet in decoder loop
+        if heldout_blocks is None or block_id not in heldout_blocks:
+            raise IntegrityFailure("J4", f"held-out block {block_id} not preloaded before accounting")
+        alice, bob = heldout_blocks[block_id]
         u1_alice, u2_alice, u1_bob, u2_bob = factorize_f03(alice, bob)
         errors_initial = _compute_errors_initial(u2_alice, u2_bob)
         p_i = get_l1_prior_p_u1_given_b(counts, bob)
@@ -1510,11 +1513,33 @@ def run_v48_diagnostic(
         _persist_invalid_evidence(root, records=[], accounting=CallAccounting(), summary_ctx=summary_ctx, failures=[(exc.check_id, exc.message)], partial_records_retained=False)
         return {"output_root": str(root), "terminal_state": TERMINAL_EVIDENCE_INVALID, "terminal_reason": None, "integrity_failures": [(exc.check_id, exc.message)]}
     root.mkdir(parents=True)
+    # Preload all 45 held-out blocks before any accounting.register_start() — per-block validation already inside load_heldout_block
+    all_45_block_ids = [bid for src in SOURCE_ORDER for bid in NEW_BLOCK_SEEDS[src]]
+    try:
+        heldout_blocks = {block_id: load_heldout_block(block_id) for block_id in all_45_block_ids}
+        # preload-stage per-block TRAIN zero-overlap (complements load_heldout_block checks: 4 frame IDs, 256 per frame, pair_idx 0..255, 1024 total, symbol range)
+        for block_id in all_45_block_ids:
+            win = BLOCK_WINDOWS[block_id]
+            src = win["source"]
+            tr_lo, tr_hi = TRAIN_FRAME_RANGES[src]
+            for fid in win["frame_ids"]:
+                if tr_lo <= fid <= tr_hi:
+                    raise IntegrityFailure("J4", f"block {block_id} frame {fid} overlaps TRAIN {tr_lo}-{tr_hi}")
+        # overall uniqueness: 180 unique frame IDs, 46080 pairs (45*1024)
+        _all_fids = [fid for bid in all_45_block_ids for fid in BLOCK_WINDOWS[bid]["frame_ids"]]
+        if len(set(_all_fids)) != 180:
+            raise IntegrityFailure("J4", f"held-out preload unique frame_ids {len(set(_all_fids))} != 180")
+        _total_pairs = sum(len(v[0]) for v in heldout_blocks.values())
+        if _total_pairs != 46080:
+            raise IntegrityFailure("J4", f"held-out preload total pairs {_total_pairs} != 46080")
+    except IntegrityFailure as preload_exc:
+        _persist_invalid_evidence(root, records=[], accounting=CallAccounting(), summary_ctx=summary_ctx, failures=[(preload_exc.check_id, preload_exc.message)], partial_records_retained=False)
+        return {"output_root": str(root), "terminal_state": TERMINAL_EVIDENCE_INVALID, "terminal_reason": None, "integrity_failures": [(preload_exc.check_id, preload_exc.message)]}
     accounting = CallAccounting()
     records: list[dict[str, Any]] = []
     try:
         try:
-            _run_workload_calls(matrices, counts, field, fake_runner, DECODER_SETTING, accounting, records, decode_fn=decode_fn)
+            _run_workload_calls(matrices, counts, field, fake_runner, DECODER_SETTING, accounting, records, decode_fn=decode_fn, heldout_blocks=heldout_blocks)
         except IntegrityFailure as wf_exc:
             if accounting.started == 0 and accounting.completed == 0:
                 _persist_invalid_evidence(root, records=records, accounting=accounting, summary_ctx=summary_ctx, failures=[(wf_exc.check_id, wf_exc.message)], partial_records_retained=False)
