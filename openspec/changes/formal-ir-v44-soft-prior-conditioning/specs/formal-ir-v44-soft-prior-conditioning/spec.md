@@ -1,9 +1,10 @@
 # Delta Specification: formal-ir-v44-soft-prior-conditioning
 
 **Cycle**: `V44P0`
-**Lifecycle of this change**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`（待本线程独立 plan ACCEPT 后进入 `PLAN_ACCEPTED / EXECUTE_NOT_AUTHORIZED`，当前仍为 `PLAN_CANDIDATE`，通过后需独立 result 接受才进入 `DEVELOPMENT_RESULT_ACCEPTED`）
+**Lifecycle of this change**: `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED` — **停止当前 18-call 计划，不进入实现/执行**。原因：`q(u1|b)=P(U1|B)` mixture 严格退化为 V43 `P(U2|B)`，NO NOVEL MECHANISM，解析恒等式见 `docs/formal-ir-mathematical-method-map-v25-v44.md §3.4`（`P^{V44}_i=∑q_i p_i(u2|u1)=p_i(u2)`）。原 `PLAN_CANDIDATE` 冻结定义保留为被否决参照。
 **Predecessor**: V43P0 `formal-ir-v43-soft-marginal-diagnostic` — terminal `V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`，result SHA `4e2ed4db`
-**Mechanism id**: `soft_prior_q_no_code_counts_bob_only`
+**Mechanism id**: `soft_prior_q_no_code_counts_bob_only`（已判定退化为 V43，無方法新颖性；保留作被否决参照）
+**Disposition**: 只有找到真实可获得的 L1 syndrome/message-derived `q_i(u1)`（即 `M_{H1,s1→i}` 非平凡，`q^{(t)}_i ∝ p_i·M^{(t)}_{H1,s1→i}`）后才创建后继 OpenSpec；当前不启动 V45，不新增生产代码。
 
 ## R1. Predecessor binding
 
@@ -90,10 +91,16 @@ Runner SHALL 一一实现 design §11 三层边界：
 
 每 call SHALL 产一条记录，schema 见 design §12（含 `condition`）。授权跑 SHALL 仅在增量根 `comparison_bench/outputs_comparison/formal_ir_methods/v44_soft_prior_conditioning/run_01/` 下写：`v44_records.json/.csv`、`v44_summary.json`，完整性失败时加 `v44_invalid_notice.json`；CSV/JSON 对等；SHALL NOT 写任何 NPZ；SHALL NOT 以非 accepted loader 读 NPZ；输出根在全部守卫与 preflights 通过后、首个 decoder call 前创建，已存在即 fail-closed（J7）；summary SHALL 含 planned/completed/started actuals、`soft_prior_diagnostics_by_source`（上下文永不 gate）、per-condition 聚合、per-source 聚合、per-block 配对结果与 errors_final delta、两臂门禁明细（在 terminal 之后）、路由轨迹、terminal+reason、`stopped_for_analysis`、`oracle_arm_wrong_codeword_anomaly`、`needs_1p5m_structure_branch`（当且仅当 `oracle exact on 1p5M < 2/3` 时为 true，orthogonal 标志）、verbatim stop rule、claim boundary、statistics note、provenance 含 O1 机制 id `soft_prior_q_no_code_counts_bob_only`；既有 results/、V38-V43 输出保持 byte-identical。
 
-## R14. Lifecycle, authorization
+## R14. Lifecycle, authorization (REVISED — PLAN_REVISE_REQUIRED)
 
-本变更 lifecycle SHALL 保持 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` 直至独立 plan ACCEPT；实现候选止于 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。单次诊断执行需显式用户 `EXECUTE_AUTH`（绑定 repository、分支、完整实现 SHA、cycle V44P0、scope `v44_diagnostic_18_calls_exactly_once`）；CLI SHALL 默认拒绝、要求 `--execution-authorized --authorized-target-sha <sha>`、校验 HEAD 与 origin/formal-ir-mainline 精确等值、执行 SCOPED tracked-dirty；禁止 rerun/tuning/阈值或机制替换/加 seeds/加权重/自接受/自动后继。
+本变更 lifecycle **已修订为 `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED`**（原 `PLAN_CANDIDATE` 定义保留为被否决参照，不删除）。当前停止 18-call 计划，不进入 `IMPLEMENTATION_CANDIDATE`，不申请 `EXECUTE_AUTH`，不产生 `run_01`。只有找到真实可获得的 L1 syndrome/message-derived `q_i(u1)`（即 `M_{H1,s1→i}` 非平凡，`q^{(t)}_i ∝ p_i·M^{(t)}_{H1,s1→i} ≠ p_i`，见 `docs/formal-ir-mathematical-method-map-v25-v44.md §4 §7.2`）后才创建后继 OpenSpec；未满足前不启动 V45。原授权语句（需 `EXECUTE_AUTH` 绑定 `v44_diagnostic_18_calls_exactly_once` 等）保留作历史参照，当前不适用。
 
 ## R15. Claim boundary
 
 结果仅支持 V25 TRAIN 经验 counts 开发块上的有界条件归因。Oracle 臂为真 Alice L1 的能力上界（实践不可得）；`cond_soft_prior` 臂按 R7 用真实公共经验 counts 做无码 Bob-only 软先验 `q_i(u1)=P(U1|B=b)`（`counts_true` 对 `u2` 求和归一、每 `b` 归一和=1、floor 1e-15，纯 `counts+bob`，零额外通信，counts 公共先验不计泄漏，不做 hard 估计、无 pilot/噪声/量化/失真律/C04，无 oracle 泄漏）且两臂共享一次生成的块，NOT 任何具体 coded L1 结果，SHALL NOT 泛化为真实条件；`V44_ORACLE_ONLY_SOFT_BOTTLENECK` 仅归因到本次无码软先验的局限，永不归因到具体上游编码或真实系统；`V44_ANOMALOUS_INVERSION` 仅意味有限样本/迭代/先验差异需检查，永不作 soft 优于 oracle 的证据；均非真帧 FER 证据，不推阈值/SKR/正式执行/资格/晋升。无论结果如何禁止：FER、渐近阈值、SKR、安全、正式资格/晋升、真帧行为、条件/lane 间优劣或比较排名、历史门禁“现已通过”陈述；成功仅 `exact_l2`；样本 tiny 且成簇（9 唯一块 ×2 配对条件）且未校正簇聚。
+
+## R16. Disposition (PLAN_REVISE_REQUIRED，不删除冻结定义)
+
+> **状态**：`PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED`，停止当前 18-call 计划。`q(u1|b)=P(U1|B)` 的 `cond_soft_prior` 严格退化为 V43 `P(U2|B)`（`docs/formal-ir-mathematical-method-map-v25-v44.md §3.4` 恒等式），NO NOVEL MECHANISM。
+> **保留**：R1-R15 冻结定义整体保留为被否决的参照，不删除历史内容，仅追加本处置段。
+> **后继开放条件**：只有找到真实可获得的 L1 syndrome/message-derived `q_i(u1)`（即 `M_{H1,s1→i}` 非平凡）后才创建后继 OpenSpec；未满足前不启动 V45。

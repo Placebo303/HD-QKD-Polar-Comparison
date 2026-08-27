@@ -1,8 +1,9 @@
 # OpenSpec Design: formal-ir-v44-soft-prior-conditioning
 
-**Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`（待本线程独立 plan ACCEPT 后进入 `PLAN_ACCEPTED / EXECUTE_NOT_AUTHORIZED`）
+**Lifecycle**: `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED` — **停止当前 18-call 计划**。原因：`q(u1|b)=P(U1|B)` mixture 严格退化为 V43 `P(U2|B)`，NO NOVEL MECHANISM，解析恒等式见 `docs/formal-ir-mathematical-method-map-v25-v44.md §3.4`（`P^{V44}_i(u2)=∑q_i(u1)p_i(u2|u1)=p_i(u2)`）。原 `PLAN_CANDIDATE` 冻结定义保留为被否决参照，不删除。
 **Cycle**: `V44P0`
 **Predecessor**: V43P0 `formal-ir-v43-soft-marginal-diagnostic`（terminal `V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`，result SHA `4e2ed4db`；继承其 Lane C / 三矩阵 / 90/1.0 / 9 blocks×2 arms=18 calls 恰好一次 / J6 SCOPED 路径 / Master Stop Rule 形态；本变更仅把 `cond_soft_marginal` 替换为单一 `cond_soft_prior`，延续五终态与 orthogonal 标志语义，重命名 `SOFT_MARGINAL` 为 `SOFT_PRIOR` 相关）
+**Disposition**: 只有找到真实可获得的 L1 syndrome/message-derived `q_i(u1)`（即 `M_{H1,s1→i}` 非平凡，`q^{(t)}_i ∝ p_i·M^{(t)}_{H1,s1→i} ≠ p_i`，`§7.2` 开放判据）后才创建后继 OpenSpec；否则不启动 V45，不进入实现/执行。
 
 ## 1. 科学问题（单一，明确来源）
 
@@ -252,3 +253,9 @@ CSV/JSON 行对等；禁写任何 `.npz`；禁以非 accepted loader 读 NPZ；�
 - **D13 O1 机制**：soft-prior 按 §7 冻结（`q_i(u1)=Σ_{u2} counts/Σ_{u1',u2'} counts`，每 `b` 共享归一化，floor 1e-15，零额外通信，无 hard/噪声/量化/失真律/C04）；一经冻结不再更改；来源仅 `counts+bob`，spike 已验。
 - **D14 errors_initial 策略**：沿用 V42/V43 严格 per-pair 跨臂等值 J6 门，先于该对解码检查，不等→`V44_EVIDENCE_INVALID`；字段 `pairing_errors_initial_equal` 仍作冗余记录。
 - **D15 组合双条件路径**：替代复用 `evaluate_single_block`；单码路径、可注入 `decode_fn`；plan-review attention 项。
+
+## 17. 处置追加（PLAN_REVISE_REQUIRED，不删除冻结定义）
+
+> **状态**：`PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED`，停止当前 18-call 计划。`q(u1|b)=P(U1|B)` 的 `cond_soft_prior` 严格退化为 V43 `P(U2|B)`（`docs/formal-ir-mathematical-method-map-v25-v44.md §3.4` 恒等式 `P^{V44}=P^{V43}` element-wise），NO NOVEL MECHANISM。V43 已在相同门禁下证伪 soft-marginal（6/9 且 1 wrong），V44 复测无信息增益。
+> **保留**：§1-§16 冻结定义整体保留为被否决的参照，不删除历史内容，仅标注处置结论。
+> **后继开放条件**：只有找到真实可获得的 L1 syndrome/message-derived `q_i(u1)`（即 `M_{H1,s1→i}` 非平凡，`q^{(t)}_i ∝ p_i·M^{(t)}_{H1,s1→i}`，见数学图谱 §4 §7.2）后才创建后继 OpenSpec；未满足前不启动 V45，不得以 Bob-only 再加权/温度缩放等 V43 等价类立项。

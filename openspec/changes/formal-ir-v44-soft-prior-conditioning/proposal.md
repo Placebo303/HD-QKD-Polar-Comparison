@@ -1,6 +1,6 @@
 # OpenSpec Proposal: formal-ir-v44-soft-prior-conditioning
 
-**Status**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`（待本线程独立 plan ACCEPT 后进入 `PLAN_ACCEPTED / EXECUTE_NOT_AUTHORIZED`，当前仍为 `PLAN_CANDIDATE`，通过后进入 `DEVELOPMENT_RESULT_ACCEPTED` 需另行 result 接受）
+**Status**: `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED` — **停止当前 18-call 计划，不进入实现/执行**。原因：`q(u1|b)=P(U1|B)` mixture 严格退化为 V43 `P(U2|B)`，NO NOVEL MECHANISM。解析恒等式见 `docs/formal-ir-mathematical-method-map-v25-v44.md §3.4`（`q_i(u1)=p_i(u1) ⇒ P^{V44}_i(u2)=∑_{u1}q_i(u1)p_i(u2|u1)=p_i(u2)=prior^{V43}` element-wise）。原 `PLAN_CANDIDATE` 定义整体保留为被否决的参照（下文冻结内容不删除）；本次修订仅追加处置结论，plan SHA `c51a21c0` 冻结内容仍可追溯。
 **Domain**: Formal Information Reconciliation / Nonbinary LDPC research
 **Change ID**: `formal-ir-v44-soft-prior-conditioning`
 **Cycle ID**: `V44P0`
@@ -35,7 +35,9 @@ V44 在**机制来源明确且无 oracle 泄漏**的前提下创建，回答下�
 5. **总量互斥五终态机 + orthogonal 标志**：`V44_EVIDENCE_INVALID` 优先；其余四态 `V44_BOTH_PASS / V44_ORACLE_ONLY_SOFT_BOTTLENECK / V44_GO_STRUCTURE / V44_ANOMALOUS_INVERSION` 穷尽互斥覆盖 `(oracle_pass, soft_prior_pass)` 平面；`needs_1p5m_structure_branch` 当且仅当 `oracle exact on 1p5M < 2/3` 时立旗，独立于终态。
 6. 预算记账（planned/completed/started actuals）、科学 preflight 优先失效（零 call 停止）、硬上限 18 且结构性拒绝第 19 call、增量证据输出、`errors_initial` 严格 per-pair 跨臂等值门（J6）、Master Stop Rule、no-rerun/no-post-hoc-tuning 边界。
 
-本轮不执行。实现须先获独立 plan ACCEPT；任何实现候选止于 `IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；诊断执行需显式用户 `EXECUTE_AUTH` 绑定到精确实现 SHA，scope `v44_diagnostic_18_calls_exactly_once`。
+本轮不执行。原计划要求实现须先获独立 plan ACCEPT（已由 `docs/formal-ir-mathematical-method-map-v25-v44.md §3.4 §7.1` 的恒等式与处置结论否决）；当前修订为 `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED`，停止 18-call 计划，任何实现候选不得进入 `IMPLEMENTATION_CANDIDATE`；后继仅当满足 L1 syndrome/message-derived `q_i(u1)`（`M_{H1,s1→i}` 非平凡）开放条件后另立 OpenSpec。
+
+> **处置追加（2026-08-27, HEAD 686a2596, plan SHA c51a21c0 冻结保留）**：V44 `cond_soft_prior` 严格等价于 V43 `cond_soft_marginal`（`P^{V44}(U2|B)=P^{V43}(U2|B)`），NO NOVEL MECHANISM，不产生新执行；保留原冻结定义作被否决参照，详见 `docs/formal-ir-mathematical-method-map-v25-v44.md §3.4 §7.1-7.2`。
 
 ## Non-goals
 
@@ -52,4 +54,4 @@ V44 在**机制来源明确且无 oracle 泄漏**的前提下创建，回答下�
 
 ## Lifecycle
 
-V43 predecessor lifecycle=`DEVELOPMENT_RESULT_ACCEPTED`（terminal `V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`，result SHA `4e2ed4db`）。V44 当前为 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；独立计划接受后进入 `PLAN_ACCEPTED / EXECUTE_NOT_AUTHORIZED`，`development_execution_authorized`、`formal_execution_authorized`、`scientific_promotion`、`implementation_started`、`production_outputs_created` 均为 false。需独立 plan ACCEPT + 显式用户 `EXECUTE_AUTH`（绑定到精确实现 SHA，scope `v44_diagnostic_18_calls_exactly_once`）方可进入实现/执行；V44 不追溯改写历史结论。
+V43 predecessor lifecycle=`DEVELOPMENT_RESULT_ACCEPTED`（terminal `V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`，result SHA `4e2ed4db`）。V44 **已修订为 `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED`**（原 `PLAN_CANDIDATE` 定义作为被否决参照保留，不删除）；**停止当前 18-call 计划，不申请 `EXECUTE_AUTH`，不产生 `run_01`**。`development_execution_authorized`、`formal_execution_authorized`、`scientific_promotion`、`implementation_started`、`production_outputs_created` 均为 false 且保持 false。只有找到真实可获得的 L1 syndrome/message-derived `q_i(u1)`（即 `M_{H1,s1→i}` 非平凡，`q^{(t)}_i(u1) ∝ p_i(u1)·M^{(t)}_{H1,s1→i}(u1) ≠ p_i(u1)`）后才创建后继 OpenSpec；未满足此开放条件不得以新 arms 名义立项，不启动 V45。V44 不追溯改写历史结论。

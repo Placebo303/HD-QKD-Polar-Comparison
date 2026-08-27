@@ -1,7 +1,7 @@
 # OpenSpec Tasks: formal-ir-v44-soft-prior-conditioning
 
-**Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`（待本线程独立 plan ACCEPT 后进入 `PLAN_ACCEPTED / EXECUTE_NOT_AUTHORIZED`）
-**Execution status**: 以下均未开始、未授权。V43 已 durable（terminal `V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`，result SHA `4e2ed4db`）。无独立 plan ACCEPT 不得开工；无显式用户 `EXECUTE_AUTH`（绑定到精确实现 SHA）不得跑生产 decoder。（V44 不改历史结论；单一机制 `cond_soft_prior` 已冻结，无 oracle 泄漏）
+**Lifecycle**: `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED` — **停止当前 18-call 计划，不进入实现/执行**。原因：`q(u1|b)=P(U1|B)` mixture 严格退化为 V43 `P(U2|B)`，NO NOVEL MECHANISM（`docs/formal-ir-mathematical-method-map-v25-v44.md §3.4` 恒等式 `P^{V44}=P^{V43}`）。原 `PLAN_CANDIDATE` 冻结定义保留为被否决参照。
+**Execution status**: **PLAN_REVISE_REQUIRED 已生效：停止执行。** 以下 18-call 任务均不启动、不授权。V43 已 durable（terminal `V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`，result SHA `4e2ed4db`）。只有找到真实可获得的 L1 syndrome/message-derived `q_i(u1)`（即 `M_{H1,s1→i}` 非平凡）后才创建后继 OpenSpec；当前不申请 `EXECUTE_AUTH`，不跑生产 decoder，不启动 V45。（V44 不改历史结论；冻结定义仅作被否决参照保留）
 
 ## Phase A — 实现候选（plan ACCEPT 后）
 
@@ -54,3 +54,9 @@
 ## 本变更期间显式禁止
 
 plan ACCEPT 前实现；实现时自选/改非 oracle 机制或并行测试多 joint/soft 方案；加事后权重/C04 调参/引入 Alice 真值入先验；授权 Phase D 外跑任何生产 decoder 或 longrun/minrerun/routeA 脚本；动 V35/V38/V39/V40/V41/V42/V43 代码/测试/docs/输出、AGENT_PROJECT_MEMORY.md、既有 OpenSpec 变更、constructors/loaders/evaluators/decoders、results/、任何官方输出根；import v39/v40/v41/v42/v43 模块；以非 accepted loader 读 NPZ；写任何 NPZ；复用历史块（360101-105 族、390101-315 族）作样本；把 wrong 计为 exact；作条件/lane 优劣或比较排名；FER/阈值/SKR/安全/资格/晋升/真帧陈述；结果后加块/加 seeds/改阈值/改机制/加权重；rerun/resume/补偿 partial；任何结果下开第二轮诊断；任何结果下调 decoder 参数；把跨条件 outcome 差异判为完整性失败；自接受；自动启动后继。
+
+## 处置追加（PLAN_REVISE_REQUIRED，不删除冻结定义）
+
+> **状态**：`PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED`，停止当前 18-call 计划。`q(u1|b)=P(U1|B)` 严格退化为 V43 `P(U2|B)`，NO NOVEL MECHANISM（`docs/formal-ir-mathematical-method-map-v25-v44.md §3.4 §7.1`）。V43 已证伪 soft-marginal，不复测。
+> **保留**：Phase A-E 任务清单整体保留为被否决的参照，不删除历史内容，仅追加本处置段。
+> **后继开放条件**：只有找到真实可获得的 L1 syndrome/message-derived `q_i(u1)`（即 `M_{H1,s1→i}` 非平凡，`q^{(t)}_i ∝ p_i·M^{(t)}_{H1,s1→i} ≠ p_i`）后才创建后继 OpenSpec；未满足前不启动 V45，不新增生产代码。
