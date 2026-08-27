@@ -1,0 +1,4 @@
+source,hold_nll_u1_train,hold_nll_u1_cand,delta_u1,hold_nll_u2_train,hold_nll_u2_cand,delta_u2,hold_nll_total_train,hold_nll_total_cand,delta_total
+1M,0.440,0.425,-0.015,0.450,0.438,-0.012,0.890,0.863,-0.027
+1p5M,0.420,0.412,-0.008,0.430,0.424,-0.006,0.850,0.836,-0.014
+2M,0.410,0.405,-0.005,0.430,0.426,-0.004,0.840,0.831,-0.009
