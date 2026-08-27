@@ -66,11 +66,11 @@ $$H_1:=H(U_1\mid B,Z),\qquad H_2:=H(U_2\mid U_1,B,Z)$$
 
 对 F03：$a_1=a_2=5$ bits。$H_1+H_2$ 在同一计数器/同一估计器下与 $H(A\mid B,Z)$ 在浮点误差内闭合（V25 M3-6 校验）。
 
-参考码率（$f=1.3$ 假设，仅信息论参考）：
+参考码率（$f=1.3$ 假设，仅信息论参考，$a_i=5$ bits，$N=1024$ 符号，$H_i$ 为每符号条件熵 bits/symbol）：
 
-$$R_{i,\text{ref}}=1-\frac{1.3\,H_i}{a_i},\quad\text{泄漏 } \approx m_i\cdot a_i =1.3\,H_i\cdot\frac{N}{a_i}\text{ 对应 bits}$$
+$$R_{i,\text{ref}}=1-\frac{1.3\,H_i}{a_i},\quad m_i \approx \left\lceil\frac{f\,N\,H_i}{5}\right\rceil,\quad \text{泄漏 } leak_i =5\,m_i \approx f\,N\,H_i\ \text{bits}$$
 
-应用于 $U_2$ 层时，$m_2$ 对应 $H_2$，**总泄漏必须包含全部层 syndrome**，不得只计高位。
+应用于 $U_2$ 层时，$m_2$ 对应 $H_2$，**总泄漏必须包含全部层 syndrome**，不得只计高位；总效率 $f_{\text{total}} = 5(m_1+m_2) / \{N\,[H(U_1\mid B)+H(U_2\mid U_1,B)]\} = 5(m_1+m_2)/[N(H_1+H_2)]$。
 
 ### 2.2 四类信息的严格区分
 
@@ -141,9 +141,9 @@ q_i(u_1) &= \frac{\sum_{u_2}C(u_1\! \cdot\!32+u_2,b_i)}{\sum_{u_1',u_2'}C(u_1'\!
 
 逐元素相等（分母 floor 仅在空列时生效，空列下 $p_i$ 与 $q_i$ 同步为均匀/ floor 产物，恒等式仍成立）。全帧矩阵 `prior_V44 == prior_V43` element-wise。
 
-**结论（V44 处置依据）**：V44 不引入任何超出 $C$ 与 $B$ 的 L1 校验信息，不改变 $p_i(u_1)$ 或 $p_i(u_2\mid u_1)$ 的定义域，**方法学严格退化为 V43 的 soft marginal**，无论 $q_i$ 被称作“soft prior”/“无码先验”/“Bob-only soft”。数值等价性已由 V43 18-call 诊断在冻结门禁下证伪（V43 soft insufficient：`6/9` exact，1 wrong，不满足 `≥7/9` 且 `G3' zero-wrong`）。
+**结论（V44 处置依据）**：V44 不引入任何超出 $C$ 与 $B$ 的 L1 校验信息，不改变 $p_i(u_1)$ 或 $p_i(u_2\mid u_1)$ 的定义域，**方法学严格退化为 V43 的 soft marginal**，无论 $q_i$ 被称作“soft prior”/“无码先验”/“Bob-only soft”。数值等价性对应的数学 prior 已由 V43 18-call 诊断在冻结门禁下测试（V43 soft insufficient：`6/9` exact，1 wrong，不满足 `≥7/9` 且 `G3' zero-wrong`）；V43 已测试两者共同的数学 prior，V44 不值得重复测试。
 
-此退化与 block 样本、矩阵、译码参数、阈值无关，为计数定义级恒等，任何 fresh-block 复测只会重复 V43 的两类失败（exact 不足或 wrong≠0）。
+此退化与 block 样本、矩阵、译码参数、阈值无关，为计数定义级恒等；V44 不提供新机制信息，fresh blocks 可能因样本波动得到不同门禁结果，但无法归因于算法进步。
 
 ---
 
@@ -162,6 +162,9 @@ $$P^{(t)}_i(u_2)=\sum_{u_1} q^{(t)}_i(u_1)\,p_i(u_2\mid u_1),\quad \sum_{u_1}q^{
 - $p_i(u_1)=P(U_1\mid B=b_i)$ 为信道因子（V43 已有）。
 - $M^{(t)}_{H_1,s_1\to i}(u_1)$ 为 L1 Tanner 图在 syndrome $s_1=H_1\,u_1^{\text{true}}$ 约束下、经 BP/FFT-QSPA 迭代 $t$ 后对变量节点 $i$ 的外信息（校验约束因子）。可写为对数域 $L^{(t)}_i(u_1)=\log p_i(u_1)+\log M^{(t)}_i(u_1)$。
 - 归一化：$q^{(t)}_i(u_1)=\text{softmax}_{u_1} L^{(t)}_i(u_1)$，floor 仅防零。
+- 完整可复用数学链（L1 APP → L2 mixture）：
+  $$p_i(u_1)=P(U_1\mid B_i),\quad s_1=H_1\,u_1^{\text{Alice}},\quad L_i=\text{decode\_row\_layered\_fftqspa}(H_1,\,p,\,s_1).\text{final\_beliefs},\quad q_i=\text{softmax}\,L_i,\quad P_i(U_2)=\sum_{u_1} q_i(u_1)\,P(U_2\mid B_i,u_1)$$
+  其中 `decode_row_layered_fftqspa(H, prior, syndrome).final_beliefs` 为可复用 L1 APP 来源：通用 $(H,\text{prior},\text{syndrome})$ 接口，返回每位置 32 状态 log-beliefs（$L_i$），非 L2 专用；$H_1$ 存在性不等于验收性（见 §5 分支 A）。
 
 ### 4.2 何时超越 V43
 
@@ -178,7 +181,7 @@ $$q^{(t)}\neq p(\cdot\mid B),\quad P^{(t)}\neq P(\cdot\mid B)$$
 ### 4.3 泄漏与语义边界
 
 - V43/V44 零额外泄漏：$C$ 为公共先验，$q$ 构造不发送新公开 bits。
-- 真实 $\text{L1}\to\text{L2}$ soft 转移必计 $m_1\cdot5$ bits 的 $s_1$ 泄漏于总泄漏；若计 $R_{1,\text{ref}}$ 约 $1.3H_1/5$，则 $m_1\ge \lceil 1.3H_1/ \log_2 32\rceil$ 由 DE/有限长设计决定。
+- 真实 $\text{L1}\to\text{L2}$ soft 转移必计 $m_1\cdot5$ bits 的 $s_1$ 泄漏于总泄漏；若计 $R_{1,\text{ref}}$ 约 $1.3H_1/5$，则 $m_1 \approx \lceil f\,N\,H_1/5\rceil$（$f=1.3$ 时 $\lceil 1.3\,N\,H_1/5\rceil$）由 DE/有限长设计决定，$leak_1=5m_1\approx f\,N\,H_1$，$f_{\text{total}}=5(m_1+m_2)/[N(H_1+H_2)]$。
 - 任何声称“soft 不计泄漏却超越 marginal”的机制，若无 $H_1,s_1,M$，必落回 V43 恒等式；若有 $H_1,s_1$，则泄漏必须入账。
 
 ---
@@ -191,11 +194,13 @@ $$q^{(t)}\neq p(\cdot\mid B),\quad P^{(t)}\neq P(\cdot\mid B)$$
 
 - 新增信息：$s_1$ 约束下 $M_{H_1,s_1\to i}(u_1)$ 的 per-symbol APP（L1 行分层 FFT-QSPA 软输出），非硬判。
 - 所需码/消息：GF(32) L1 矩阵 $H_1$（$m_1$ 行，多项式 37，列重>2 规避 V31 trapping）、syndrome $s_1$、$p_i(u_1)$ 与 $M_i$ 的对数相加、归一 $q^{(1)}$、单次前向得 $P^{(1)}(U_2)$ 送 L2。
-- 泄漏：$m_1\cdot5$（L1）+$m_2\cdot5$（L2），总计 $f=(m_1+m_2)\cdot5 / (H_1+H_2)$。
+- 泄漏：$m_1\cdot5$（L1）+$m_2\cdot5$（L2），总计 $f_{\text{total}} = 5(m_1+m_2)/\{N\,[H(U_1\mid B)+H(U_2\mid U_1,B)]\}=5(m_1+m_2)/[N(H_1+H_2)]$，$N=1024$，$H_i$ 为每符号比特。
 - 复杂度：L1 解码 $O(n\,d_v\,32\log32)$ + L2 解码一次；存 $q$ 32×1024。
 - 可归因性强：唯一新增因子为 $M_{H_1,s_1}$，对照臂即 V43 marginal（$M\equiv1$），同块配对，$\Delta exact$ 与 `arms_differ` 直接归因。
 - 主要风险：L1 自身在真实 $H_1$ 下不收敛（$R_1$ 超阈），$q^{(1)}\approx p$ 无增益；V42 已证 hard 失败 0/9，soft-marginal 亦不足，单向 soft 需证明 $M$ 非均匀。
-- 最小可测实验：三源各 3 块（9×2=18 calls，配对：V43 vs A-$q^{(1)}$，同 $H_{L2}$、同 90/1.0），门禁 `G1'≥7/9, G2'≥2/3, G3'=0`，报告 $m_1$、$f$、$mean\_abs\_diff(q^{(1)},p)$、per-source exact、wrong。未通过即停，转 protograph。
+- 最小可测实验：三源各 3 块（9×2=18 calls，配对：V43 vs A-$q^{(1)}$，同 $H_{L2}$、同 90/1.0），门禁 `G1'≥7/9, G2'≥2/3, G3'=0`，报告 $m_1$、$f_{\text{total}}$、$mean\_abs\_diff(q^{(1)},p)$、per-source exact、wrong。未通过即停，转 protograph。
+- L1 APP 来源（可复用接口）：`decode_row_layered_fftqspa(H, prior, syndrome).final_beliefs` 为通用 $(H,\text{prior},\text{syndrome})$ 接口，返回每位置 32 状态 log-beliefs（$L_i(u_1)$），经 softmax 得 $q_i$，与 $H$ 是否原为 L2 专用无关；FFT-QSPA 非 L2 专用。
+- H1 候选说明：`matrix_payloads` / `build_matrix_packet()["matrices"]["L1"]` 提供的 $H_1$ 候选（$m_1=16$）为现有候选，但尚未科学验收为当前 soft-transfer 的 $H_1$，不得默认其已验。
 
 ### 分支 B — 1–2 轮 L1↔L2 迭代（turbo-like iterative multistage）
 
@@ -252,7 +257,7 @@ $$q^{(t)}\neq p(\cdot\mid B),\quad P^{(t)}\neq P(\cdot\mid B)$$
 | **V40 Probe** | **新 3 块** 390106/206/306，各 lane ordinal-2 代表矩阵 | 6 代表矩阵（ordinal 2 / source） | $90/1.0$ | 5/6 exact（C 3/3, B 2/3, 零 wrong），`V40_PROBE_CONFIRM_ALLOWED` | 扩展设置在全新块上仍有信号，允许**一次** confirmation | 不能说已确认（仅允许提 V41） |
 | **V41** | **新 9 块** 390107–109/207–209/307–309，oracle 仅，重叠检查 42 seeds 禁止 | Lane C/B 各 ordinal-2 代表矩阵（6 唯一） | $90/1.0$，18 calls | Lane C 8/9（3/3/2）保留，Lane B 6/9 未过，零 wrong；`V41_C_ONLY_RETAINED` | Lane C 在更长批次上独立保留，Lane B 不保留 | 不能说 Lane B 优/劣于 Lane C（非优劣检验）；不能说真帧 FER |
 | **V42** | **新 9 块** 390110–112/210–212/310–312，**配对双条件**（同块共享采样） | Lane C ordinal-2（3 矩阵） | 同 $90/1.0$，18 calls | oracle 7/9（$G2$ 在 1p5M 1/3 未过），estimated 0/9；$l1\_map\_acc\approx0.9925$；`V42_GO_STRUCTURE / BOTH_ARMS_GATES_FAILED` | hard MAP $\hat U_1$ conditioning 全败；oracle 在新批次亦不稳（1p5M＜2/3） | 不能把 1p5M oracle 失败归为 hard-MAP 机制（两臂同败）；不能说“换 soft 就过” |
-| **V43** | **新 9 块** 390113–115/213–215/313–315，**配对双条件** | Lane C ordinal-2（3 矩阵） | 同 $90/1.0$，18 calls | oracle 8/9 pass，soft-marginal 6/9 fail（$G1$ 6＜7 且 $G3$ 1 wrong），paired 含 1 次 `soft_only_exact` 与 3 次 `neither`/`both` 混合；`V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`；`needs_1p5m=false`（本批 oracle 1p5M 2/3 恰过） | soft marginalization 不足；V42 的 hard 失败非“硬判本身”可由 marginal 挽回；oracle 在本批回升但跨批次方差大（V42 7/9 vs V43 8/9 vs V41 negligible 1p5M 波动） | **不得**把 V42 的 $M$ 批次与 V43 的 $M'$ 批次写成“hard $0/9\to$soft $6/9$ = soft 修复 hard 6 块”的同块因果；两轮样本不相交，差异含批次效应。亦不得把 V44 未测的 $q=P(U_1\mid B)$ 读作已测 |
+| **V43** | **新 9 块** 390113–115/213–215/313–315，**配对双条件** | Lane C ordinal-2（3 矩阵） | 同 $90/1.0$，18 calls | oracle 8/9 pass，soft-marginal 6/9 fail（$G1$ 6＜7 且 $G3$ 1 wrong），paired：both=5、oracle-only=3、soft-only=1、neither=0（`soft_only_exact`=1）；`V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`；`needs_1p5m=false`（本批 oracle 1p5M 2/3 恰过） | soft marginalization 不足；V42 的 hard 失败非“硬判本身”可由 marginal 挽回；oracle 在本批回升但跨批次方差大（V42 7/9 vs V43 8/9 vs V41 negligible 1p5M 波动） | **不得**把 V42 的 $M$ 批次与 V43 的 $M'$ 批次写成“hard $0/9\to$soft $6/9$ = soft 修复 hard 6 块”的同块因果；两轮样本不相交，差异含批次效应。亦不得把 V44 未测的 $q=P(U_1\mid B)$ 读作已测；V43 已测试两者共同的数学 prior，V44 不值得重复测试 |
 
 补充：V42 的 `paired_outcomes` 中 oracle 5/6 块为 0 残差，estimated 全 $136$–$320$；V43 中 soft wrong 在 `390114`（4 残差 wrong codeword）、oracle wrong-free。所有 `pairing_errors_initial_equal=true`，`errors_initial` 与 selector 无关的校验成立。
 
@@ -263,7 +268,7 @@ $$q^{(t)}\neq p(\cdot\mid B),\quad P^{(t)}\neq P(\cdot\mid B)$$
 ### 7.1 处置判定：NO NOVEL MECHANISM — 停止当前 18-call 计划
 
 - **恒等式已证**：$q_i(u_1)=P(U_1\mid B=b_i)$ 的 V44 构造与 $p_i(u_1)$ 定义级一致，$P^{\text{V44}}(U_2\mid B)=P^{\text{V43}}(U_2\mid B)$ 元素级相等（§3.4）。V44 **无方法新颖性**，不满足“新增信息需来自真实 $H_1,s_1,M$”的必要条件（§4.2）。
-- **证据已证伪**：V43 在相同三矩阵、相同 $90/1.0$、相同门禁下 soft-marginal 已判 `ORACLE_ONLY`（6/9 且 1 wrong），V44 重测只会复现“exact 不足或 wrong≠0”两类失败中的一类，无信息增益。
+- **证据覆盖**：V43 在相同三矩阵、相同 $90/1.0$、相同门禁下 soft-marginal 已判 `ORACLE_ONLY`（6/9 且 1 wrong，paired both=5/oracle-only=3/soft-only=1/neither=0）；V43 已测试两者共同的数学 prior，V44 不值得重复测试。V44 不提供新机制信息，fresh blocks 可能因样本波动得到不同门禁结果，但无法归因于算法进步。
 - **泄漏语义已闭合**：V44 零额外泄漏（$C$ 公共先验）符合 V43，同为无码；故不存在“新泄漏换新性能”的权衡空间。
 - **建议动作**：
   1. **立即停止** `formal-ir-v44-soft-prior-conditioning` 的实现与执行授权（不进入 `IMPLEMENTATION_CANDIDATE`，不申请 `EXECUTE_AUTH`，不产生 `run_01`）。
