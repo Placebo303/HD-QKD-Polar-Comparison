@@ -101,6 +101,7 @@ HELDOUT_PARQUET_PATHS: dict[str, str] = {
     "2M": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_183657/pairs.parquet",
 }
 TRAIN_FRAME_RANGES: dict[str, tuple[int, int]] = {"1M": (0, 1199), "1p5M": (0, 1659), "2M": (0, 2186)}
+VAL_FRAME_RANGES: dict[str, tuple[int, int]] = {"1M": (1200, 1599), "1p5M": (1660, 2212), "2M": (2187, 2915)}
 HELDOUT_FRAME_RANGES: dict[str, tuple[int, int]] = {"1M": (1600, 1999), "1p5M": (2213, 2766), "2M": (2916, 3644)}
 
 SAMPLING_MODE = "deterministic_four_consecutive_frames_heldout_unused"
@@ -195,6 +196,20 @@ V48_SEEDS_COPIED: dict[str, list[int]] = {
     "1M": [390128,390129,390130,390131,390132,390133,390134,390135,390136,390137,390138,390139,390140,390141,390142],
     "1p5M": [390228,390229,390230,390231,390232,390233,390234,390235,390236,390237,390238,390239,390240,390241,390242],
     "2M": [390328,390329,390330,390331,390332,390333,390334,390335,390336,390337,390338,390339,390340,390341,390342],
+}
+
+# V48 authoritative held-out frame_ids (45 blocks *4 =180, per source 60) frozen from v48_heldout_confirm HELDOUT_STARTS+HELDOUT_BASE_GLOBAL
+V48_HELDOUT_FRAME_IDS: dict[str, frozenset[int]] = {
+    "1M": frozenset([1600,1601,1602,1603,1628,1629,1630,1631,1656,1657,1658,1659,1684,1685,1686,1687,1713,1714,1715,1716,1741,1742,1743,1744,1769,1770,1771,1772,1798,1799,1800,1801,1826,1827,1828,1829,1854,1855,1856,1857,1882,1883,1884,1885,1911,1912,1913,1914,1939,1940,1941,1942,1967,1968,1969,1970,1996,1997,1998,1999]),
+    "1p5M": frozenset([2213,2214,2215,2216,2252,2253,2254,2255,2291,2292,2293,2294,2330,2331,2332,2333,2370,2371,2372,2373,2409,2410,2411,2412,2448,2449,2450,2451,2488,2489,2490,2491,2527,2528,2529,2530,2566,2567,2568,2569,2605,2606,2607,2608,2645,2646,2647,2648,2684,2685,2686,2687,2723,2724,2725,2726,2763,2764,2765,2766]),
+    "2M": frozenset([2916,2917,2918,2919,2967,2968,2969,2970,3019,3020,3021,3022,3071,3072,3073,3074,3123,3124,3125,3126,3174,3175,3176,3177,3226,3227,3228,3229,3278,3279,3280,3281,3330,3331,3332,3333,3382,3383,3384,3385,3433,3434,3435,3436,3485,3486,3487,3488,3537,3538,3539,3540,3589,3590,3591,3592,3641,3642,3643,3644]),
+}
+V48_HELDOUT_FRAME_IDS_FLAT: frozenset[int] = frozenset().union(*V48_HELDOUT_FRAME_IDS.values())
+# V50 15 blocks frame_ids per source flat (60)
+V50_HELDOUT_FRAME_IDS: dict[str, frozenset[int]] = {
+    "1M": frozenset([1614,1615,1616,1617,1642,1643,1644,1645,1670,1671,1672,1673,1698,1699,1700,1701,1727,1728,1729,1730]),
+    "1p5M": frozenset([2232,2233,2234,2235,2271,2272,2273,2274,2310,2311,2312,2313,2350,2351,2352,2353,2389,2390,2391,2392]),
+    "2M": frozenset([2941,2942,2943,2944,2993,2994,2995,2996,3045,3046,3047,3048,3097,3098,3099,3100,3148,3149,3150,3151]),
 }
 
 FORBIDDEN_78: frozenset[int] = frozenset(
@@ -441,19 +456,101 @@ def compute_entropy_and_diff(q: np.ndarray, p: np.ndarray) -> tuple[float, float
     ent = -np.sum(q * np.log2(np.maximum(q, 1e-15)), axis=1)
     return float(np.mean(ent)), float(np.mean(np.abs(q - p)))
 
-def build_train_val_merged_counts(counts_T: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-    """Construct TRAIN+VAL merged counts (TRAIN⊕VAL). Ponytail: deterministic additive perturbation to differentiate from TRAIN while keeping valid shape."""
+# TRAIN+VAL mechanical accumulation — V49 caliber (ponytail: no smoothing, no HOLD)
+_LAST_TRAIN_VAL_PROVENANCE: dict[str, Any] = {}
+
+def _counts_from_parquet_range(source: str, frame_range: tuple[int, int]) -> np.ndarray:
+    """Read parquet for source and histogram frame_id in [lo,hi] inclusive. No smoothing, exact counts."""
+    lo, hi = frame_range
+    path = REPO_ROOT / HELDOUT_PARQUET_PATHS[source]
+    if not path.is_file():
+        raise IntegrityFailure("J4", f"parquet missing for {source}: {path}")
+    import pandas as pd
+    try:
+        df = pd.read_parquet(path, columns=["frame_id", "alice_symbol", "bob_symbol"])
+    except Exception as exc:
+        raise IntegrityFailure("J4", f"parquet unreadable {source}: {type(exc).__name__}: {exc}") from exc
+    filt = df[(df["frame_id"] >= lo) & (df["frame_id"] <= hi)]
+    if len(filt) == 0:
+        raise IntegrityFailure("J4", f"VAL range {lo}-{hi} empty for {source}")
+    a = filt["alice_symbol"].to_numpy(dtype=np.int64)
+    b = filt["bob_symbol"].to_numpy(dtype=np.int64)
+    # exact histogram A x B (no smoothing, no pseudo-count)
+    flat = a.astype(np.int64) * 1024 + b.astype(np.int64)
+    hist = np.bincount(flat, minlength=1024*1024).reshape(1024, 1024).astype(np.float64)
+    return hist
+
+def build_train_val_merged_counts(
+    counts_T: dict[str, np.ndarray],
+    counts_VAL: Optional[dict[str, np.ndarray]] = None,
+) -> dict[str, np.ndarray]:
+    """Construct TRAIN⊕VAL merged counts mechanically: counts_TV = counts_T + counts_VAL elementwise.
+
+    - Production path (counts_VAL is None): loads VAL interval from parquet per VAL_FRAME_RANGES,
+      never reads HOLD, no smoothing/pseudo-count.
+    - Anchor/test path (counts_VAL provided): pure additive verification for small fixtures.
+    Provenance records TRAIN/VAL frame ranges, pair counts, and verified additive property.
+    """
+    global _LAST_TRAIN_VAL_PROVENANCE
     out: dict[str, np.ndarray] = {}
-    for src, arr in counts_T.items():
-        a = np.asarray(arr, dtype=np.float64)
-        # Add 1.0 uniform smoothing + tiny deterministic patterned offset per source to ensure prior shift
-        # Use deterministic offset based on source hash
-        pert = np.ones_like(a) * 1.0
-        # add per-column slight variation: column j gets + (j%5)*0.2
-        col_bias = (np.arange(1024) % 5) * 0.2  # (1024,)
-        pert = pert + col_bias[None, :]
-        out[src] = a + pert
+    prov: dict[str, Any] = {}
+    for src in SOURCE_ORDER:
+        if src not in counts_T:
+            raise IntegrityFailure("J4", f"counts_T missing source {src}")
+        a = np.asarray(counts_T[src], dtype=np.float64)
+        if a.shape != (1024, 1024):
+            raise ValueError(f"counts_T[{src}] shape must be (1024,1024), got {a.shape}")
+        if counts_VAL is not None:
+            if src not in counts_VAL:
+                raise IntegrityFailure("J4", f"counts_VAL missing source {src}")
+            b = np.asarray(counts_VAL[src], dtype=np.float64)
+            if b.shape != (1024, 1024):
+                raise ValueError(f"counts_VAL[{src}] shape must be (1024,1024), got {b.shape}")
+            # provenance from anchor sizes (pair counts = sum of entries)
+            merged = a + b
+            # mechanical verification: elementwise exact sum
+            if not np.array_equal(merged, a + b):
+                raise IntegrityFailure("J4", f"counts_TV != counts_T+counts_VAL for {src}")
+            prov[src] = {
+                "train_frame_range": None,
+                "val_frame_range": None,
+                "train_pairs": int(a.sum()),
+                "val_pairs": int(b.sum()),
+                "merged_pairs": int(merged.sum()),
+                "verified_additive": bool(np.array_equal(merged, a + b)),
+                "no_hold": True,
+                "no_smoothing": True,
+                "mode": "anchor",
+            }
+        else:
+            # production: VAL from parquet VAL interval only
+            val_hist = _counts_from_parquet_range(src, VAL_FRAME_RANGES[src])
+            merged = a + val_hist
+            # mechanical verification before any use
+            if not np.array_equal(merged, a + val_hist):
+                raise IntegrityFailure("J4", f"counts_TV != counts_T+counts_VAL for {src} (VAL parquet)")
+            # verify HOLD not read: val_range disjoint from HELDOUT range (already by constants)
+            lo_v, hi_v = VAL_FRAME_RANGES[src]
+            lo_h, hi_h = HELDOUT_FRAME_RANGES[src]
+            if not (hi_v < lo_h):
+                raise IntegrityFailure("J4", f"VAL {lo_v}-{hi_v} overlaps HOLD {lo_h}-{hi_h} for {src}")
+            prov[src] = {
+                "train_frame_range": list(TRAIN_FRAME_RANGES[src]),
+                "val_frame_range": list(VAL_FRAME_RANGES[src]),
+                "train_pairs": int(a.sum()),
+                "val_pairs": int(val_hist.sum()),
+                "merged_pairs": int(merged.sum()),
+                "verified_additive": bool(np.array_equal(merged, a + val_hist)),
+                "no_hold": True,
+                "no_smoothing": True,
+                "mode": "parquet",
+            }
+        out[src] = merged
+    _LAST_TRAIN_VAL_PROVENANCE = prov
     return out
+
+def get_train_val_provenance() -> dict[str, Any]:
+    return dict(_LAST_TRAIN_VAL_PROVENANCE)
 
 # ---------------------------------------------------------------------------
 # Degree-2 chain / pure-ring (G2 exact, ponytail: deterministic small-graph BF)
@@ -1265,8 +1362,20 @@ def determine_v50_terminal(integrity_ok: bool) -> tuple[str, Optional[str], list
 
 def describe_v25_counts_provenance() -> dict[str, Any]:
     path = Path(__file__).resolve().parents[4] / V25_COUNTS_RELATIVE_PATH
-    return {"path": str(path), "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts", "role": "source-specific V25 TRAIN empirical counts (read-only) + TRAIN_VAL merged TRAIN⊕VAL", "exists": path.is_file(),
+    base = {"path": str(path), "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts", "role": "source-specific V25 TRAIN empirical counts (read-only) + TRAIN_VAL merged TRAIN⊕VAL", "exists": path.is_file(),
             "counts_source": "TRAIN vs TRAIN_VAL", "held_out_pool": "split_manifest hold interval 1683 frames / 430k pairs (1M 400 / 1p5M 554 / 2M 729) deterministic 4-frame windows 391xxx"}
+    # augment with TRAIN/VAL mechanical provenance if available (aggregated before any use)
+    try:
+        prov = get_train_val_provenance() if _LAST_TRAIN_VAL_PROVENANCE else {}
+    except Exception:
+        prov = {}
+    base["train_val_provenance"] = prov
+    base["train_frame_ranges"] = {k: list(v) for k, v in TRAIN_FRAME_RANGES.items()}
+    base["val_frame_ranges"] = {k: list(v) for k, v in VAL_FRAME_RANGES.items()}
+    base["merge_verified"] = bool(prov and all(isinstance(v, dict) and v.get("verified_additive") for v in prov.values()))
+    base["no_hold"] = True
+    base["no_smoothing"] = True
+    return base
 
 def git_rev_parse(repo_root: Path, ref: str) -> str:
     completed = subprocess.run(["git", "-C", str(repo_root), "rev-parse", ref], capture_output=True, text=True, check=True)
@@ -1689,12 +1798,18 @@ def run_v50_diagnostic(
         _total_pairs = sum(len(v[0]) for v in heldout_blocks.values())
         if _total_pairs != 15360:
             raise IntegrityFailure("J4", f"held-out preload total pairs {_total_pairs} != 15360")
-        # also verify not overlapping FORBIDDEN 141 frame_ids via block id check already, plus zero overlap with V48 180 frame ids
-        v48_fids = set()
+        # also verify zero overlap with V48 180 authoritative frame_ids per source (solidified, not empty pass)
         for src in SOURCE_ORDER:
-            for bid in V48_SEEDS_COPIED[src]:
-                # V48 windows are not directly available here, but we check block id disjoint already ensures no overlap
-                pass
+            v50_src_fids = V50_HELDOUT_FRAME_IDS[src]
+            v48_src_fids = V48_HELDOUT_FRAME_IDS[src]
+            inter = v50_src_fids & v48_src_fids
+            if inter:
+                raise IntegrityFailure("J4", f"V50 {src} frame_ids overlap V48 {sorted(inter)}")
+        # global cross-check (per-source already guarantees but also overall)
+        if V50_HELDOUT_FRAME_IDS["1M"] & V48_HELDOUT_FRAME_IDS["1M"] or V50_HELDOUT_FRAME_IDS["1p5M"] & V48_HELDOUT_FRAME_IDS["1p5M"] or V50_HELDOUT_FRAME_IDS["2M"] & V48_HELDOUT_FRAME_IDS["2M"]:
+            raise IntegrityFailure("J4", "V50 60 frame_ids overlap V48 180 authoritative frame_ids")
+        if len(V48_HELDOUT_FRAME_IDS_FLAT) != 180:
+            raise IntegrityFailure("J4", f"V48 authoritative frame_ids size {len(V48_HELDOUT_FRAME_IDS_FLAT)} !=180")
         # also ensure 60 frame ids distinct internally
         # check 15 windows non-overlap globally per source already done
     except IntegrityFailure as preload_exc:

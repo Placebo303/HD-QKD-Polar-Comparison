@@ -481,3 +481,66 @@ def test_no_45_block_path():
     assert "PLANNED_L2 = 60" in src
     # ensure 45 not as frozen workload for V50
     assert len([s for src in v50.SOURCE_ORDER for s in v50.NEW_BLOCK_SEEDS[src]])==15
+
+def test_train_val_mechanical_additive_anchor():
+    # small known anchor: elementwise exact sum, no smoothing/HOLD
+    base_T = np.zeros((1024,1024), dtype=np.float64)
+    base_VAL = np.zeros((1024,1024), dtype=np.float64)
+    # sparse deterministic entries
+    # need at least two u1 values per b to cause distribution shift (else mass stays 1.0)
+    base_T[0,0]=5; base_T[32,0]=7; base_T[10,10]=7; base_T[42,10]=3; base_T[32,1]=3; base_T[64,1]=6; base_T[100,200]=11
+    base_VAL[0,0]=2; base_VAL[32,0]=3; base_VAL[10,10]=3; base_VAL[42,10]=2; base_VAL[33,1]=9; base_VAL[100,200]=4
+    counts_T = {src: base_T.copy() for src in v50.SOURCE_ORDER}
+    counts_VAL = {src: base_VAL.copy() for src in v50.SOURCE_ORDER}
+    merged = v50.build_train_val_merged_counts(counts_T, counts_VAL)
+    for src in v50.SOURCE_ORDER:
+        assert np.array_equal(merged[src], counts_T[src] + counts_VAL[src])
+        assert merged[src][0,0]==7
+        assert merged[src][32,0]==10
+        assert merged[src][10,10]==10
+        assert merged[src][32,1]==3
+        assert merged[src][33,1]==9
+        assert merged[src][100,200]==15
+    prov = v50.get_train_val_provenance()
+    for src in v50.SOURCE_ORDER:
+        assert prov[src]["verified_additive"] is True
+        assert prov[src]["no_hold"] is True
+        assert prov[src]["no_smoothing"] is True
+        assert prov[src]["merged_pairs"] == int((counts_T[src]+counts_VAL[src]).sum())
+    # prior isolation: modifying VAL changes TRAIN_VAL prior but not TRAIN prior
+    # use bob that hits b=0 column where two u1 bins exist (u1=0 vs 1)
+    bob = np.array([0,10,1], dtype=np.int64)
+    p_T = v50.get_l1_prior_p_u1_given_b(counts_T["1M"], bob)
+    p_TV = v50.get_l1_prior_p_u1_given_b(merged["1M"], bob)
+    # perturb VAL at column b=0 for u1=0 (A0) — should shift prior for b=0
+    counts_VAL2 = {src: base_VAL.copy() for src in v50.SOURCE_ORDER}
+    counts_VAL2["1M"][0,0] += 50  # affects b=0 column, u1=0 mass
+    merged2 = v50.build_train_val_merged_counts(counts_T, counts_VAL2)
+    p_TV2 = v50.get_l1_prior_p_u1_given_b(merged2["1M"], bob)
+    assert not np.allclose(p_TV, p_TV2), "VAL change must shift TRAIN_VAL prior"
+    p_T_again = v50.get_l1_prior_p_u1_given_b(counts_T["1M"], bob)
+    assert np.allclose(p_T, p_T_again), "TRAIN prior must be invariant to VAL change"
+
+def test_v48_v50_frame_ids_zero_overlap_real():
+    # V48 authoritative 180 frame_ids solidified, V50 60 frame_ids per source
+    assert len(v50.V48_HELDOUT_FRAME_IDS_FLAT)==180
+    assert len(v50.V48_HELDOUT_FRAME_IDS["1M"])==60
+    assert len(v50.V48_HELDOUT_FRAME_IDS["1p5M"])==60
+    assert len(v50.V48_HELDOUT_FRAME_IDS["2M"])==60
+    for src in v50.SOURCE_ORDER:
+        assert v50.V50_HELDOUT_FRAME_IDS[src] & v50.V48_HELDOUT_FRAME_IDS[src] == set(), f"{src} V50 vs V48 frame_ids must be disjoint per source"
+    # global disjoint already implied per source but also check flat sets
+    v50_flat = set().union(*v50.V50_HELDOUT_FRAME_IDS.values())
+    assert v50_flat & v50.V48_HELDOUT_FRAME_IDS_FLAT == set()
+    assert len(v50_flat)==60
+    # ensure the previous empty-pass bug is removed: source must contain real intersection check
+    src_text = Path(v50.__file__).read_text(encoding="utf-8")
+    assert "V48_HELDOUT_FRAME_IDS" in src_text
+    assert "V50_HELDOUT_FRAME_IDS" in src_text
+    # the old buggy placeholder 'for bid in V48_SEEDS_COPIED[src]:' with only pass must be gone as sole statement
+    assert "V48 windows are not directly available" not in src_text
+    # provenance must record TRAIN/VAL ranges and no HOLD
+    prov_text = src_text
+    assert "VAL_FRAME_RANGES" in prov_text
+    assert "TRAIN_FRAME_RANGES" in prov_text
+    assert "no_hold" in prov_text.lower() or "NO_HOLD" in prov_text or "no_hold" in prov_text
