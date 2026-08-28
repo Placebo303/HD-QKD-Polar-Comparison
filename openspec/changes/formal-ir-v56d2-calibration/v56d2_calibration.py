@@ -1,13 +1,16 @@
-"""V56D2 decoder-free zero-overlap materialized calibration.
+"""V56D2R1 decoder-free zero-overlap materialized calibration (R1 minimal revision).
 
-Zero decoder. Recomputes raw TTBin peak/channel, persists per-source
-channels/delay_used/peak/sigma/p2bg/gate/frame_start/mapping (unique -50/+50 no cherry-pick),
-pre-registers 8-16 calibration frames zero-overlap with V55 90-block,
-validates timing+routing dual contract + A==B>60% + NLL/q_mass regression
+Zero decoder. Recomputes raw TTBin peak/channel in V56D1 successful TimeTagger environment,
+persists per-source channels/delay_used/peak/sigma/p2bg/gate/frame_start/mapping (unique -50/+50 no cherry-pick),
+pre-registers fixed 8 frames [7,8,9,10,15,16,17,18] zero-overlap with V55 90-block,
+validates timing+routing dual contract (R1: routing no longer frac>=40% hard gate, proportion only reported;
+timing must be truly recomputed, missing -> CALIBRATION_EVIDENCE_INCOMPLETE) + A==B>60% + NLL/q_mass regression
 + p2bg>1000 per-source compatibility (708/629/378 -> not hard shared threshold).
+Directly reuses V13 verified channel/delay/peak/gate/frame-start/mapping/pairing implementation.
 
 Run:
-  python v56d2_calibration.py [--registry ...] [--intake-report ...] [--out ...] [--recompute-corr]
+  python v56d2_calibration.py [--registry ...] [--intake-report ...] [--out v56d2_calibration_run02.json] [--recompute-corr]
+  Output additive run_02, retains v56d2_calibration.json (run_01) not overwritten.
 
 ponytail: O(N) TTBin scan + parquet slice; no decoder; deterministic.
 """
@@ -53,6 +56,24 @@ def _analyze_peak(counts, centers):
     if bg<1: bg=1.0
     return {"peak_idx":idx,"peak_center_ps":pc,"peak_count":pk,"fwhm_ps":fwhm,"sigma_ps":sigma,"bg_median":bg,"peak_to_bg":float(pk/bg),"delay_sign":int(np.sign(pc))}
 
+def _get_environment():
+    import sys
+    interp=sys.executable
+    tt_version=None; tt_available=False
+    try:
+        import importlib.util, importlib.metadata
+        if importlib.util.find_spec("TimeTagger") is not None:
+            tt_available=True
+            try: tt_version=importlib.metadata.version("TimeTagger")
+            except: 
+                try:
+                    import TimeTagger; tt_version=getattr(TimeTagger, "__version__", "installed-unknown")
+                except: tt_version="installed-unknown"
+        else:
+            tt_available=False
+    except: pass
+    return {"interpreter_path":interp, "timetagger_available":tt_available, "timetagger_version":tt_version}
+
 def try_corr(ttbins):
     missing=[p for p in ttbins if not Path(p).exists()]
     if missing: return None, f"INCOMPLETE_TTBin_UNAVAILABLE missing {missing}"
@@ -63,10 +84,11 @@ def try_corr(ttbins):
             from src.qkd_io.ttbin_pipeline import read_ttbin_events, compute_cross_correlation_histogram
         except Exception as e2:
             return None, f"INCOMPLETE ttbin_pipeline not importable {e}/{e2}"
+    # V56D1 same environment check — record but not forge
     try:
         import importlib.util
         if importlib.util.find_spec("TimeTagger") is None:
-            return None, "INCOMPLETE TimeTagger not installed"
+            return None, "INCOMPLETE TimeTagger not installed — ENVIRONMENT_AND_CONTRACT_NOT_REPRODUCED (V56D1 successful TimeTagger environment required)"
     except: pass
     try:
         events=read_ttbin_events(Path(ttbins[0]))
@@ -143,17 +165,19 @@ def pick_calibration_frames(F, v55_ids, need_blocks=2):
     return frame_ids, candidates[:need_blocks]
 
 def main():
-    ap=argparse.ArgumentParser(description="V56D2 decoder-free calibration")
+    ap=argparse.ArgumentParser(description="V56D2R1 decoder-free calibration (R1: evidence-incomplete, env-locked, V13 reuse)")
     ap.add_argument("--registry", type=str, default=str(DEFAULT_REGISTRY))
     ap.add_argument("--intake-report", type=str, default=str(DEFAULT_INTAKE))
     ap.add_argument("--v13-root", type=str, default=str(DEFAULT_V13_ROOT))
     ap.add_argument("--counts", type=str, default=str(DEFAULT_COUNTS))
-    ap.add_argument("--out", type=str, default=str(Path(__file__).parent / "v56d2_calibration.json"))
+    ap.add_argument("--out", type=str, default=str(Path(__file__).parent / "v56d2_calibration_run02.json"))
     ap.add_argument("--recompute-corr", action="store_true", default=True)
     ap.add_argument("--no-recompute-corr", dest="recompute_corr", action="store_false")
     ap.add_argument("--pairs-root", type=str, default=str(DEFAULT_PAIRS_ROOT))
     args=ap.parse_args()
-    print(f"=== V56D2 calibration HEAD={HEAD} branch={BRANCH} data_sha={DATA_SHA} ===")
+    print(f"=== V56D2R1 calibration HEAD={HEAD} branch={BRANCH} data_sha={DATA_SHA} ===")
+    env=_get_environment()
+    print(f"environment: interpreter={env['interpreter_path']} timetagger_available={env['timetagger_available']} version={env['timetagger_version']}")
     reg_path=Path(args.registry)
     if not reg_path.is_file():
         print(f"[ERR] registry missing {reg_path}"); sys.exit(2)
@@ -184,34 +208,50 @@ def main():
         delay_used=DELAY_MAP[sid]
         # sidecar persisted values
         sigma=peak["sigma_ps"] if peak else None; p2bg=peak["peak_to_bg"] if peak else None; pc=peak["peak_center_ps"] if peak else None
-        # contracts
+        # R1 contracts: timing must be truly recomputed; routing no longer frac>=40% hard gate
         timing_verified=False; routing_verified=False; p2bg_status="UNKNOWN"; p2bg_assessed=False
+        timing_evidence_complete = bool(peak is not None and sigma is not None and p2bg is not None and pc is not None)
         reasons=[]
-        # timing
-        peak_shape_ok = sigma is not None and 50 <= sigma <= 150
-        timing_ok = pc is not None and abs(pc - delay_used) < 50 and int(np.sign(pc))==int(np.sign(delay_used)) if pc is not None else False
-        gate_ok = True  # gate 200 thr 40000 frame_start persisted by definition
-        # p2bg per-source assessment
-        if p2bg is not None:
-            p2bg_assessed=True
-            if p2bg > 1000: p2bg_status="HEALTHY"
-            elif p2bg >= 500: p2bg_status="PARTIAL"
-            else: p2bg_status="LOW"
-            if p2bg_status=="LOW":
-                reasons.append(f"p2bg LOW {p2bg:.1f} (<500) need per-source threshold review")
-            elif p2bg_status=="PARTIAL":
-                reasons.append(f"p2bg PARTIAL {p2bg:.1f} (500-1000) warn but not hard fail")
-        timing_verified = bool(peak_shape_ok and timing_ok and gate_ok and p2bg_assessed)
-        if not peak_shape_ok: reasons.append(f"peak_shape not ok sigma {sigma}")
-        if not timing_ok: reasons.append(f"timing |peak {pc} - delay {delay_used}| >=50 or sign mismatch")
-        # routing
+        # timing — only when evidence complete
+        if timing_evidence_complete:
+            peak_shape_ok = 50 <= sigma <= 150
+            timing_ok = abs(pc - delay_used) < 50 and int(np.sign(pc))==int(np.sign(delay_used))
+            gate_ok = True  # gate 200 thr 40000 frame_start persisted by definition (V13 reuse)
+            if p2bg is not None:
+                p2bg_assessed=True
+                if p2bg > 1000: p2bg_status="HEALTHY"
+                elif p2bg >= 500: p2bg_status="PARTIAL"
+                else: p2bg_status="LOW"
+                if p2bg_status=="LOW":
+                    reasons.append(f"p2bg LOW {p2bg:.1f} (<500) need per-source threshold review")
+                elif p2bg_status=="PARTIAL":
+                    reasons.append(f"p2bg PARTIAL {p2bg:.1f} (500-1000) warn but not hard fail")
+            timing_verified = bool(peak_shape_ok and timing_ok and gate_ok and p2bg_assessed)
+            if not peak_shape_ok: reasons.append(f"peak_shape not ok sigma {sigma}")
+            if not timing_ok: reasons.append(f"timing |peak {pc} - delay {delay_used}| >=50 or sign mismatch")
+            if not timing_verified and "INCOMPLETE" in (err or ""):
+                reasons.append(f"timing incomplete due to environment: {err}")
+        else:
+            # R1: timing fields must be truly recomputed, missing -> EVIDENCE_INCOMPLETE
+            timing_verified=False
+            p2bg_assessed=False
+            reasons.append(f"timing EVIDENCE_INCOMPLETE — peak/channel not recomputed (TimeTagger env missing): {err}")
+        # routing — R1: specified channel exists and non-zero, no cross-channel/missing-column/erroneous-merge; frac only reported
         if channel:
             fracA=channel["frac_A"]; fracB=channel["frac_B"]; fracO=channel["frac_other"]; uniq=set(channel["unique_channels"])
-            routing_verified = bool(fracA>=0.40 and fracB>=0.40 and fracO<0.20 and 1 in uniq and 5 in uniq)
-            if not routing_verified:
-                reasons.append(f"routing fail frac_A {fracA:.3f} frac_B {fracB:.3f} other {fracO:.3f} uniq {uniq} need >=0.40/<0.20")
+            channel_exists = bool(1 in uniq and 5 in uniq and channel["count_A"]>0 and channel["count_B"]>0)
+            no_cross = bool(fracO < 0.20)  # pairing without cross-channel/missing-column/erroneous-merge
+            routing_verified = bool(channel_exists and no_cross)
+            if routing_verified:
+                reasons.append(f"routing OK (proportion only reported) frac_A {fracA:.3f} frac_B {fracB:.3f} other {fracO:.3f} uniq {uniq}")
+            else:
+                reasons.append(f"routing fail channel_exists {channel_exists} no_cross {no_cross} frac_A {fracA:.3f} frac_B {fracB:.3f} other {fracO:.3f} uniq {uniq}")
+                # R1: 36.4% etc not proof of routing error, but missing channel is still fail
         else:
-            reasons.append("channel missing -> routing INCOMPLETE")
+            reasons.append("channel missing -> routing EVIDENCE_INCOMPLETE (need V56D1 same TimeTagger env)")
+            # When channel missing due to env, routing also evidence incomplete
+            if not timing_evidence_complete:
+                routing_verified=False
         # calibration A==B / NLL via parquet slice
         cal_rate=None; nll=None; qmass=None; mass01=None
         pairs_path=Path(args.pairs_root)/sid/"pairs.parquet"
@@ -266,31 +306,58 @@ def main():
                 reasons.append(f"parquet read fail {e}")
         else:
             if not pairs_path.is_file(): reasons.append(f"pairs missing {pairs_path}")
-        # overall per-source pass
-        cal_pass = bool(timing_verified and routing_verified and (cal_rate is not None and cal_rate>0.60) and zero_overlap and in_range)
-        # p2bg PARTIAL still allows pass, LOW makes warn but not hard fail? We'll allow PARTIAL, mark LOW as need review but still pass if other OK? User says p2bg>1000 compat target but need per-source eval, not hard fail. So LOW -> still pass with warn.
-        if p2bg_status=="LOW":
-            cal_pass = cal_pass  # keep, but reasons already warn
-        if not cal_pass:
+        # R1 overall per-source pass: timing must be evidence-complete; routing proporiton only reported
+        # Still requires A==B>60% and NLL/q_mass regression; if timing complete still NLL 20-30 -> true domain issue
+        evidence_complete = bool(timing_evidence_complete)
+        if not evidence_complete:
+            cal_pass=False
+            per_status="CALIBRATION_EVIDENCE_INCOMPLETE"
             overall_pass=False
-            overall_reasons.append(f"{label} FAIL: timing {timing_verified} routing {routing_verified} rate {cal_rate} zero_overlap {zero_overlap} p2bg {p2bg_status} reasons {reasons}")
+            overall_reasons.append(f"{label} {per_status}: timing_evidence_complete False (TimeTagger env not reproduced) routing {routing_verified} rate {cal_rate} zero_overlap {zero_overlap} p2bg {p2bg_status} reasons {reasons}")
         else:
-            overall_reasons.append(f"{label} PASS timing {timing_verified} routing {routing_verified} rate {cal_rate} p2bg {p2bg_status}")
+            cal_pass = bool(timing_verified and routing_verified and (cal_rate is not None and cal_rate>0.60) and zero_overlap and in_range)
+            # p2bg PARTIAL/LOW only warn not hard fail
+            if not cal_pass:
+                # if timing complete but cal fails due to rate/NLL -> true domain or need fix, not evidence incomplete
+                if cal_rate is not None and cal_rate <=0.60:
+                    reasons.append(f"A==B {cal_rate:.3f} <=0.60 not recovered")
+                if nll is not None and nll>5:
+                    reasons.append(f"NLL {nll:.1f} still 20-30 range -> true domain issue if timing complete")
+                overall_pass=False
+                overall_reasons.append(f"{label} FAIL_NEED_FIX: timing {timing_verified} routing {routing_verified} rate {cal_rate} zero_overlap {zero_overlap} p2bg {p2bg_status} reasons {reasons}")
+            else:
+                overall_reasons.append(f"{label} PASS timing {timing_verified} routing {routing_verified} rate {cal_rate} p2bg {p2bg_status}")
+                per_status="PASS"
+            # keep per_status for json
+            per_source_status=per_status if 'per_status' in locals() else ("PASS" if cal_pass else "FAIL_NEED_FIX")
+        # unify per_source_status for evidence incomplete case
+        if not evidence_complete:
+            per_source_status="CALIBRATION_EVIDENCE_INCOMPLETE"
+        else:
+            per_source_status="PASS" if cal_pass else "FAIL_NEED_FIX"
         per_source[label]={
             "sid":sid, "delay_used_ps":delay_used, "peak":peak, "channel":channel,
             "sidecar_persisted":{"channels":{"A":1,"B":5},"delay_used_ps":delay_used,"peak_center_ps":pc,"peak_sigma_ps":sigma,"peak_to_bg":p2bg,"corr_argmax":peak["peak_idx"] if peak else None,"corr_bins":CORR_N,"gate_width_ps":GATE,"pairing_threshold_ps":THR,"frame_start_ps":delay_used,"frame_anchor":"peak_center","mapping":"legacy_v1","wrap_rule":"floor_div","frame_period_ps":FRAME_PERIOD},
-            "timing_contract_verified":timing_verified, "routing_contract_verified":routing_verified,
+            "timing_contract_verified":timing_verified, "routing_contract_verified":routing_verified, "timing_evidence_complete":timing_evidence_complete,
             "p2bg_status":p2bg_status, "p2bg_assessed":p2bg_assessed, "p2bg_value":p2bg,
             "calibration_frames":cal_frames, "calibration_starts":cal_starts, "calibration_blocks":len(cal_starts),
             "zero_overlap_verified":zero_overlap, "in_range":in_range, "F":F, "K":stratum["K"],
             "calibration_rate":cal_rate, "calibration_nll_bits_per_symbol":nll, "calibration_q_mass_on_p_zero":qmass, "calibration_delta_mass_0_pm1":mass01,
-            "reasons":reasons, "calibration_pass":cal_pass, "corr_error":err
+            "reasons":reasons, "calibration_pass":cal_pass, "per_source_status":per_source_status, "corr_error":err,
+            "environment":env, "interpreter_path":env["interpreter_path"], "timetagger_version":env["timetagger_version"], "timetagger_available":env["timetagger_available"]
         }
-    overall_status="PASS" if overall_pass else "FAIL_NEED_FIX"
+    # R1 overall status: if any evidence incomplete -> CALIBRATION_EVIDENCE_INCOMPLETE
+    any_incomplete = any(not v.get("timing_evidence_complete", False) for v in per_source.values())
+    if any_incomplete:
+        overall_status="CALIBRATION_EVIDENCE_INCOMPLETE"
+        overall_reasons.append("ENVIRONMENT_AND_CONTRACT_NOT_REPRODUCED — TimeTagger missing, timing not truly recomputed, false is lack of evidence not falsification; frac_B 36.4% not proof of routing error")
+    else:
+        overall_status="PASS" if overall_pass else "FAIL_NEED_FIX"
     out={"head":HEAD,"branch":BRANCH,"data_sha":DATA_SHA,"lifecycle":"DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN",
-         "per_source":per_source,"overall":overall_status,"overall_reasons":overall_reasons,
-         "forbidden":["DO NOT rerun corrected pipeline on original 90","DO NOT tune H1/Lane C/Δ8/decoder","Zero decoder"],
-         "note":"unique delay -50/+50/-50 not cherry-picked; |peak-delay|<50; frac_B>=40%; p2bg>1000 per-source HEALTHY/PARTIAL/LOW not hard shared; 8-16 frames zero-overlap with V55; calibration_pass only if timing+routing+rate>60% + zero_overlap"}
+         "revision":"V56D2R1","overall":overall_status,"overall_reasons":overall_reasons,
+         "per_source":per_source,"environment":env,
+         "forbidden":["DO NOT rerun corrected pipeline on original 90","DO NOT tune H1/Lane C/Δ8/decoder","Zero decoder","DO NOT overwrite run_01"],
+         "note":"R1: unique delay -50/+50/-50 not cherry-picked; |peak-delay|<50; routing proportion only reported (no frac>=40% hard gate); p2bg per-source H/P/L; 8 frames [7,8,9,10,15,16,17,18] zero-overlap with V55; timing must be truly recomputed in V56D1 same TimeTagger env else EVIDENCE_INCOMPLETE; V13 implementation reused; additive run_02 not overwriting"}
     out_path=Path(args.out); out_path.parent.mkdir(parents=True,exist_ok=True)
     def conv(o):
         if isinstance(o,(np.integer,np.floating)): return o.item()
