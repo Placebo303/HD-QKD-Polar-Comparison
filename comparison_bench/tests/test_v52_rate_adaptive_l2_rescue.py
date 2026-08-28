@@ -354,3 +354,255 @@ def test_no_old_duplicate_decode():
     assert "old_exact = base_exact" in src or "old_exact = exact_base" in src or "old_exact" in src
     # ensure runner does not call decode for old separately: count base+rescue only
     assert "base 1(兼 old" in src or "兼 old" in src
+
+# ---- V52补测：阻塞点显式测试（f1e94e5 真调用计数、q复用、verify真exact假不rescue）----
+
+def test_l1_fifteen_true_bp_calls(tmp_path, monkeypatch, real_counts):
+    """15次 L1 真调用（mock H1 BP 计数==15，非 fake shortcut）。"""
+    import comparison_bench.formal_ir.v35_algorithm_development as v35
+
+    # fake parq 块数据，避免依赖真实 parquet
+    def _fake_load(block_seed: int):
+        rng = np.random.default_rng(int(block_seed) ^ 0x9E3779B9)
+        alice = rng.integers(0, 1024, size=1024, dtype=np.int64)
+        bob = rng.integers(0, 1024, size=1024, dtype=np.int64)
+        return alice, bob
+
+    monkeypatch.setattr(v52, "load_heldout_block", _fake_load)
+
+    l1_calls: list[dict] = []
+
+    class _MockL1:
+        def __init__(self, final_beliefs):
+            self.final_beliefs = final_beliefs
+            self.iterations = 5
+            self.syndrome_ok = True
+            self.status = "converged_exact"
+            self.runtime_s = 0.001
+            # x_hat not used for L1 path beyond syndrome/exact_u1 derived via q
+            self.x_hat = np.zeros(1024, dtype=np.uint8)
+
+    orig_dec = v35.decode_row_layered_fftqspa
+
+    def _mock_dec(matrix, prior, syn, max_iter=90, damping_alpha=1.0, field=None):
+        # limit to H1 shape 16x1024 to ensure we only count L1 calls
+        l1_calls.append({"shape": tuple(matrix.shape), "prior_shape": tuple(prior.shape)})
+        # return valid beliefs so q computable
+        fb = np.log(np.maximum(prior, 1e-15)) + 0.01 * np.random.default_rng(0).standard_normal(prior.shape)
+        return _MockL1(fb)
+
+    monkeypatch.setattr(v35, "decode_row_layered_fftqspa", _mock_dec)
+
+    # also mock L2 via _evaluate_one_l2 to always succeed (avoid L2 decode counting confusion)
+    orig_eval = v52._evaluate_one_l2
+
+    def _fake_eval(matrix, source, block_seed, counts, bob, u2_alice, u2_bob, field, setting, fake_runner, decode_fn, errors_initial, spec, q=None, p_prior=None, **kw):
+        empty = np.empty(0, dtype=np.uint8)
+        target = compute_tag_64(empty, u2_alice)
+        win = v52.BLOCK_WINDOWS[block_seed]
+        return {
+            "source": source, "block_seed": block_seed, "matrix_id": spec["matrix_id"], "h1_matrix_id": v52.H1_MATRIX_ID,
+            "frame_ids": list(win["frame_ids"]), "held_out_ordinal_start": int(win["held_out_ordinal_start"]), "held_out_ordinal_end": int(win["held_out_ordinal_end"]),
+            "pairs_count": 1024, "sampling_mode": v52.SAMPLING_MODE,
+            "errors_initial": int(errors_initial), "errors_final": 0,
+            "exact_l2": True, "exact_u1": True, "exact_full": True,
+            "syndrome_ok_l2": True, "syndrome_ok_l1": True,
+            "target_tag": target, "candidate_tag": target, "tag_ok": True, "tag_scope": v52.TAG_SCOPE, "reclassified": "exact",
+            "iterations_l1": 5, "iterations_l2": 5,
+            "bp_posterior_entropy": 4.2, "mean_abs_diff_q_p": 0.03,
+            "leak_total": v52.leak_for(source), "leak_joint": v52.leak_joint_for(source),
+            "status": "converged_exact", "runtime_s": 0.001,
+            "arm": spec.get("arm", "base_shared"), "pass_index": int(spec.get("pass_index", 1)), "used_increment": bool(spec.get("used_increment", False)), "joint": bool(spec.get("joint", False)),
+        }
+
+    monkeypatch.setattr(v52, "_evaluate_one_l2", _fake_eval)
+
+    world = FakeWorld()
+    root = tmp_path / "l1count"
+    result = v52.run_v52_diagnostic(
+        execution_authorized=True, authorized_target_sha="f" * 40,
+        fake_runner=False,  # 非 fake shortcut，强制走真 L1 BP 分支
+        output_root=root, structural_authority_path=world.authority_file(tmp_path),
+        counts_by_source=real_counts, check_git=False, check_scoped_dirty=False,
+        constructors=world.constructors, decode_fn=None,
+    )
+    # restore
+    monkeypatch.setattr(v35, "decode_row_layered_fftqspa", orig_dec)
+    monkeypatch.setattr(v52, "_evaluate_one_l2", orig_eval)
+
+    assert len(l1_calls) == 15, f"H1 BP 真调用次数应为15，实际{len(l1_calls)}"
+    assert all(c["shape"] == (16, 1024) for c in l1_calls)
+    # accounting 也应为 15
+    summary = json.loads((root / "v52_summary.json").read_text(encoding="utf-8"))
+    assert summary["accounting"]["decoder_calls_completed"]["l1"] == 15
+    assert summary["accounting"]["decoder_calls_completed"]["total"] == 30  # 15 L1 +15 base，无 rescue
+    # 确认走的是真分支而非 fake_runner shortcut：_mock_dec 被调用即证明
+    assert result["terminal_state"] == v52.TERMINAL_NESTED_RESCUE_COMPLETE
+
+
+def test_q_reused_between_base_and_rescue(tmp_path, monkeypatch, real_counts):
+    """q 传入 base 与 rescue 两遍一致（同一对象/数值相等，rescue 复用 q 不重算 prior）。"""
+    captured: dict[int, dict[str, np.ndarray]] = {}
+
+    orig = v52._evaluate_one_l2
+
+    def _capture(matrix, source, block_seed, counts, bob, u2_alice, u2_bob, field, setting, fake_runner, decode_fn, errors_initial, spec, q=None, p_prior=None, **kw):
+        arm = spec.get("arm")
+        entry = captured.setdefault(int(block_seed), {})
+        # 记录 q 的 id 与数值拷贝
+        if q is not None:
+            entry[arm] = {"q_id": id(q), "q": np.array(q, copy=True), "p_prior_id": id(p_prior) if p_prior is not None else None}
+        # base 对首个块构造失败以触发 rescue，其余成功
+        empty = np.empty(0, dtype=np.uint8)
+        target = compute_tag_64(empty, u2_alice)
+        alt = compute_tag_64(empty, (u2_alice + 1) % 32)
+        win = v52.BLOCK_WINDOWS[block_seed]
+        # 让 393001 失败，其余成功，rescue 对 393001 成功
+        if arm == "base_shared" and int(block_seed) == 393001:
+            return {
+                "source": source, "block_seed": block_seed, "matrix_id": spec["matrix_id"], "h1_matrix_id": v52.H1_MATRIX_ID,
+                "frame_ids": list(win["frame_ids"]), "held_out_ordinal_start": int(win["held_out_ordinal_start"]), "held_out_ordinal_end": int(win["held_out_ordinal_end"]),
+                "pairs_count": 1024, "sampling_mode": v52.SAMPLING_MODE,
+                "errors_initial": int(errors_initial), "errors_final": 10,
+                "exact_l2": False, "exact_u1": True, "exact_full": False,
+                "syndrome_ok_l2": True, "syndrome_ok_l1": True,
+                "target_tag": target, "candidate_tag": alt, "tag_ok": False, "tag_scope": v52.TAG_SCOPE, "reclassified": "detected_verification_failure",
+                "iterations_l1": 5, "iterations_l2": 90,
+                "bp_posterior_entropy": 4.2, "mean_abs_diff_q_p": 0.03,
+                "leak_total": v52.leak_for(source), "leak_joint": v52.leak_joint_for(source),
+                "status": "max_iter", "runtime_s": 0.001,
+                "arm": "base_shared", "pass_index": 1, "used_increment": False, "joint": False,
+            }
+        else:
+            # base 成功或 rescue 成功
+            is_rescue = arm == "rescue"
+            return {
+                "source": source, "block_seed": block_seed, "matrix_id": spec["matrix_id"], "h1_matrix_id": v52.H1_MATRIX_ID,
+                "frame_ids": list(win["frame_ids"]), "held_out_ordinal_start": int(win["held_out_ordinal_start"]), "held_out_ordinal_end": int(win["held_out_ordinal_end"]),
+                "pairs_count": 1024, "sampling_mode": v52.SAMPLING_MODE,
+                "errors_initial": int(errors_initial), "errors_final": 0,
+                "exact_l2": True, "exact_u1": True, "exact_full": True,
+                "syndrome_ok_l2": True, "syndrome_ok_l1": True,
+                "target_tag": target, "candidate_tag": target, "tag_ok": True, "tag_scope": v52.TAG_SCOPE, "reclassified": "exact",
+                "iterations_l1": 5, "iterations_l2": 5,
+                "bp_posterior_entropy": 4.2, "mean_abs_diff_q_p": 0.03,
+                "leak_total": v52.leak_joint_for(source) if is_rescue else v52.leak_for(source), "leak_joint": v52.leak_joint_for(source),
+                "status": "converged_exact", "runtime_s": 0.001,
+                "arm": arm, "pass_index": 2 if is_rescue else 1, "used_increment": bool(is_rescue), "joint": bool(is_rescue),
+            }
+
+    monkeypatch.setattr(v52, "_evaluate_one_l2", _capture)
+    world = FakeWorld()
+    root = tmp_path / "qreuse"
+    result = v52.run_v52_diagnostic(
+        execution_authorized=True, authorized_target_sha="f" * 40, fake_runner=True,
+        output_root=root, structural_authority_path=world.authority_file(tmp_path),
+        counts_by_source=real_counts, check_git=False, check_scoped_dirty=False,
+        constructors=world.constructors, decode_fn=None,
+    )
+    monkeypatch.setattr(v52, "_evaluate_one_l2", orig)
+
+    # 393001 应有 base 与 rescue 两次捕获
+    assert 393001 in captured and "base_shared" in captured[393001] and "rescue" in captured[393001]
+    base_q = captured[393001]["base_shared"]["q"]
+    rescue_q = captured[393001]["rescue"]["q"]
+    base_id = captured[393001]["base_shared"]["q_id"]
+    rescue_id = captured[393001]["rescue"]["q_id"]
+    # 同一对象或数值相等（实现复用 q 不重新计算 prior）
+    assert (base_id == rescue_id) or np.array_equal(base_q, rescue_q), "rescue 应复用与 base 相同的 prior q"
+    assert base_q.shape == (1024, 32)
+    assert np.allclose(base_q, rescue_q, equal_nan=False)
+    # 仅该块触发 rescue
+    summary = json.loads((root / "v52_summary.json").read_text(encoding="utf-8"))
+    assert summary["leakage"]["n_rescue_attempted"] == 1
+    # p_prior 也应一致（同一次 L1 计算）
+    assert captured[393001]["base_shared"]["p_prior_id"] == captured[393001]["rescue"]["p_prior_id"]
+
+
+def test_verify_true_exact_false_no_rescue(tmp_path, monkeypatch, real_counts):
+    """verify=true / exact=false 时不 rescue（syndrome_ok&&tag_ok==True 但 exact==False 的 undetected 块）。"""
+    orig = v52._evaluate_one_l2
+    rescue_calls: list[int] = []
+    base_calls: list[int] = []
+
+    def _trap(matrix, source, block_seed, counts, bob, u2_alice, u2_bob, field, setting, fake_runner, decode_fn, errors_initial, spec, q=None, p_prior=None, **kw):
+        arm = spec.get("arm")
+        empty = np.empty(0, dtype=np.uint8)
+        target = compute_tag_64(empty, u2_alice)
+        win = v52.BLOCK_WINDOWS[block_seed]
+        if arm == "base_shared":
+            base_calls.append(int(block_seed))
+            # 对 393002 构造 syndrome_ok&&tag_ok True 但 exact False 的块（undetected_accepted_wrong）
+            if int(block_seed) == 393002:
+                return {
+                    "source": source, "block_seed": block_seed, "matrix_id": spec["matrix_id"], "h1_matrix_id": v52.H1_MATRIX_ID,
+                    "frame_ids": list(win["frame_ids"]), "held_out_ordinal_start": int(win["held_out_ordinal_start"]), "held_out_ordinal_end": int(win["held_out_ordinal_end"]),
+                    "pairs_count": 1024, "sampling_mode": v52.SAMPLING_MODE,
+                    "errors_initial": int(errors_initial), "errors_final": 10,
+                    "exact_l2": False, "exact_u1": False, "exact_full": False,
+                    "syndrome_ok_l2": True, "syndrome_ok_l1": True,
+                    "target_tag": target, "candidate_tag": target, "tag_ok": True, "tag_scope": v52.TAG_SCOPE, "reclassified": "undetected_accepted_wrong",
+                    "iterations_l1": 5, "iterations_l2": 5,
+                    "bp_posterior_entropy": 4.2, "mean_abs_diff_q_p": 0.03,
+                    "leak_total": v52.leak_for(source), "leak_joint": v52.leak_joint_for(source),
+                    "status": "converged_exact", "runtime_s": 0.001,
+                    "arm": "base_shared", "pass_index": 1, "used_increment": False, "joint": False,
+                }
+            # 其余块正常成功
+            return {
+                "source": source, "block_seed": block_seed, "matrix_id": spec["matrix_id"], "h1_matrix_id": v52.H1_MATRIX_ID,
+                "frame_ids": list(win["frame_ids"]), "held_out_ordinal_start": int(win["held_out_ordinal_start"]), "held_out_ordinal_end": int(win["held_out_ordinal_end"]),
+                "pairs_count": 1024, "sampling_mode": v52.SAMPLING_MODE,
+                "errors_initial": int(errors_initial), "errors_final": 0,
+                "exact_l2": True, "exact_u1": True, "exact_full": True,
+                "syndrome_ok_l2": True, "syndrome_ok_l1": True,
+                "target_tag": target, "candidate_tag": target, "tag_ok": True, "tag_scope": v52.TAG_SCOPE, "reclassified": "exact",
+                "iterations_l1": 5, "iterations_l2": 5,
+                "bp_posterior_entropy": 4.2, "mean_abs_diff_q_p": 0.03,
+                "leak_total": v52.leak_for(source), "leak_joint": v52.leak_joint_for(source),
+                "status": "converged_exact", "runtime_s": 0.001,
+                "arm": "base_shared", "pass_index": 1, "used_increment": False, "joint": False,
+            }
+        else:
+            rescue_calls.append(int(block_seed))
+            # rescue 正常成功（但本测试不应进入）
+            return {
+                "source": source, "block_seed": block_seed, "matrix_id": spec["matrix_id"], "h1_matrix_id": v52.H1_MATRIX_ID,
+                "frame_ids": list(win["frame_ids"]), "held_out_ordinal_start": int(win["held_out_ordinal_start"]), "held_out_ordinal_end": int(win["held_out_ordinal_end"]),
+                "pairs_count": 1024, "sampling_mode": v52.SAMPLING_MODE,
+                "errors_initial": int(errors_initial), "errors_final": 0,
+                "exact_l2": True, "exact_u1": True, "exact_full": True,
+                "syndrome_ok_l2": True, "syndrome_ok_l1": True,
+                "target_tag": target, "candidate_tag": target, "tag_ok": True, "tag_scope": v52.TAG_SCOPE, "reclassified": "exact",
+                "iterations_l1": 5, "iterations_l2": 5,
+                "bp_posterior_entropy": 4.2, "mean_abs_diff_q_p": 0.03,
+                "leak_total": v52.leak_joint_for(source), "leak_joint": v52.leak_joint_for(source),
+                "status": "converged_exact", "runtime_s": 0.001,
+                "arm": "rescue", "pass_index": 2, "used_increment": True, "joint": True,
+            }
+
+    monkeypatch.setattr(v52, "_evaluate_one_l2", _trap)
+    world = FakeWorld()
+    root = tmp_path / "verify_no_rescue"
+    result = v52.run_v52_diagnostic(
+        execution_authorized=True, authorized_target_sha="f" * 40, fake_runner=True,
+        output_root=root, structural_authority_path=world.authority_file(tmp_path),
+        counts_by_source=real_counts, check_git=False, check_scoped_dirty=False,
+        constructors=world.constructors, decode_fn=None,
+    )
+    monkeypatch.setattr(v52, "_evaluate_one_l2", orig)
+
+    # 393002 的 syndrome/tag 均为 true，verify=true，故不应 rescue
+    assert 393002 not in rescue_calls, f"verify true 时不应 rescue，但 rescue_calls={rescue_calls}"
+    assert len(rescue_calls) == 0, f"预期 rescue_calls==0，实际{rescue_calls}"
+    assert len(base_calls) == 15
+    summary = json.loads((root / "v52_summary.json").read_text(encoding="utf-8"))
+    assert summary["leakage"]["n_rescue_attempted"] == 0
+    assert summary["accounting"]["decoder_calls_completed"]["rescue"] == 0
+    # 该 undetected 块的记录仍为 base_shared，reclassified 为 undetected_accepted_wrong
+    records = json.loads((root / "v52_records.json").read_text(encoding="utf-8"))
+    rec_393002 = next(r for r in records if r["block_seed"] == 393002)
+    assert rec_393002["reclassified"] == "undetected_accepted_wrong"
+    assert rec_393002["syndrome_ok_l2"] is True and rec_393002["tag_ok"] is True
+    assert rec_393002["exact_l2"] is False  # exact false 但 verify true -> 不 rescue
+
