@@ -1,8 +1,8 @@
 # OpenSpec Design: formal-ir-v53-rate-adaptive-l2-heldout-confirm
 
-**Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **仅规划，不实现，不执行 decoder，不创建 run_01。等待独立复审。**
+**Lifecycle**: `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED` — **修订中，仅规划，不实现，不执行 decoder，不创建 run_01。等待独立复审。**
 **Cycle**: `V53P0`
-**Predecessor**: `formal-ir-v52-rate-adaptive-l2-rescue` (plan HEAD `6aa33eadc872bb4551f458ee750a94cd24566314`, branch `formal-ir-mainline`), **freeze HEAD** `d61d5a3189b54fc0b82e2df688dae3e9bde5ff8e` (branch `formal-ir-mainline`)
+**Predecessor**: `formal-ir-v52-rate-adaptive-l2-rescue` (plan HEAD `6aa33eadc872bb4551f458ee750a94cd24566314`, branch `formal-ir-mainline`), **freeze HEAD** `93c12fa5a8524eb5a8a52d071f135c653c746ebaf` (revised from `d61d5a3189b54fc0b82e2df688dae3e9bde5ff8e`, branch `formal-ir-mainline`)
 **Feasibility**: V52增量`Δm=8`嵌套L2行已由spike三源实证`rank==m2+8`满秩嵌套；1M/1p5M/2M hold库存1683 frames /430k pairs中，排除V48 180+V50 60+V51 60+V52 60=360帧已用后仍富余约1323帧（331个非重叠4帧窗口理论上限），分散选15/源=45块可行；两遍条件执行预算`45 L1+45 base+≤45 rescue=90-135 硬帽135`描述性
 **V52 history note**: V52 `12/15`仅作历史描述，非门禁依据
 
@@ -46,7 +46,7 @@
 - **嵌套性**：`H_joint = vstack([H_base, H_inc])`，`H_base == H_joint[0:m2, :]`逐比特相等；`syndrome_base`为`syndrome_joint`前缀。
 - **独立性**：`rank(H_inc \ rowspace(H_base)) ==8`，即`rank(H_joint)-rank(H_base)==8`。
 - **构造（decoder-free确定性，复用V52）**：基于`SeedSequence([600001/600002/600003,1])`的PEG-增量（见V52 spike §4），保证行度均衡`≤16`且与base无短环次级；`coeff`由`SeedSequence([det,2/3])`的`sample_uniform_gf32_nonzero`按规范边序映射。**本变更不重新设计构造规则**，仅复核`rank/nested/independence/row≤16/col≤1/E_inc≈96/泄漏+40`。
-- **泄漏**：`leak_joint = leak_base+40`（`5*Δm`）；`Δleak=40`冻结。`first_pass_success_leak=leak_base (1064/1094/1104)`；`rescued_success_leak=leak_joint (1104/1134/1144)`；`final_failure_leak=leak_joint`；`avg_leak = leak_base +40×N_rescue_attempted/45`（`N_rescue_attempted =45 - N_first_pass_success`，含救回与仍失败）。
+- **泄漏**：`leak_joint = leak_base+40`（`5*Δm`）；`Δleak=40`冻结。`first_pass_success_leak=leak_base (1064/1094/1104)`；`rescued_success_leak=leak_joint (1104/1134/1144)`；`final_failure_leak=leak_joint`；`per_source_avg[s]=leak_base[s]+40×N_rescue_attempted[s]/15`（`N_rescue_attempted[s]=count(!verify_base) per source`），`overall_avg=(Σ leak_base[source(block)]+40×N_rescue_total)/45`（`N_rescue_total=count(!verify_base) overall`，含救回与仍失败，因三源`leak_base`不同禁止用单一`leak_base+40N/45`当`overall`）。
 - **V48/V50/V51/V52无接触**：常量与校验不读其outcomes，仅读其已用`frame_ids`作重叠过滤。
 
 ### 2.3 两遍协议（条件HARQ，去重）
@@ -139,13 +139,13 @@ per source:
 
 对`45` held-out blocks判定：
 
-- **计数**：`base_exact_full` (首遍单遍, 兼old), `final_exact_full` (V53条件rescue后), `incremental_rescue = final - base`中`used_increment && final_exact`者, `rescue_rate = rescued / (45 - base_exact)`描述性。
+- **计数**：`base_exact_full` (oracle `array_equal`首遍)与`verify_base=count(syndrome_ok&&tag_ok)`分别计数（禁止假定`base_exact==verify_base`），`final_exact_full` (V53条件rescue后), `incremental_rescue = final - base`中`used_increment && final_exact`者, `rescue_rate = rescued / N_rescue_attempted`（`N_rescue_attempted=count(!verify_base)` overall；per source `N_rescue_attempted[s]=count(!verify_base) per source`，禁止用`45-base_exact`作分母）描述性。
 - **分源**：1M/1p5M/2M各自`base/final/rescued`。
-- **泄漏（三类+平均）**：`first_pass_success_leak = leak_base (1064/1094/1104)`；`rescued_success_leak = leak_joint (1104/1134/1144)`；`final_failure_leak = leak_joint`；`avg_leak = leak_base +40×N_rescue_attempted/45 = (N_first_success*leak_base + N_rescue_attempted*leak_joint)/45`（`N_rescue_attempted =45 - N_first_success`）；`failed_conditional = leak_joint`；`f_avg = avg_leak / [N(H1+H2)]`等报告；`avg disclosure per attempted frame = avg_leak /1024` bits/symbol 描述性。
-- **比特总量**：`total_disclosed_bits = Σ leak_total`（45块求和），`final_accepted_bits = Σ (verify_final? (1024*? - leak) ??)`描述性（净有效载荷概念，不作SKR宣称）。
+- **泄漏（三类+平均）**：`first_pass_success_leak = leak_base (1064/1094/1104)`；`rescued_success_leak = leak_joint (1104/1134/1144)`；`final_failure_leak = leak_joint`；`per_source_avg[s]=leak_base[s]+40×N_rescue_attempted[s]/15`（`N_rescue_attempted[s]=count(!verify_base) per source`），`overall_avg=(Σ leak_base[source(block)]+40×N_rescue_total)/45`（`N_rescue_total=count(!verify_base) overall`，因三源`leak_base`不同禁止用单一`leak_base+40N/45`当`overall`）；`failed_conditional = leak_joint`；`f_avg = avg_leak / [1024×(H(U1|B)+H(U2|U1,B))]`（若保留则分母为`1024×信息熵和`，禁`N_blocks×(H1+H2)`）等报告；`avg disclosure per attempted frame = overall_avg /1024` bits/symbol 描述性。
+- **比特总量**：`total_disclosed_bits = Σ leak_total`（45块求和），`disclosure_per_final_exact_block = total_disclosed_bits / final_exact_full_count`（`final_exact_full_count==0`则`null`，删除含糊`final_accepted_bits`，净披露/有效载荷描述性，不作SKR宣称）。
 - **矩阵**：每源`base_rank==m2`, `joint_rank==m2+8`, `nested==True`, `independence==8`, `row_degree_max≤16`；`E_inc`报告。
 - **Tag**：`tag_ok`真实接受率per pass，`G3' undetected==0`单独表；`syndrome_ok` vs `tag_ok`分流。
-- **Paired**：`Δexact = final - base` per block描述性，McNemar `b/c`仅描述性；`Δleak = avg_leak - leak_base`。
+- **Paired**：`Δexact = final - base` per block描述性，McNemar `b/c`仅描述性；`Δleak_per_source[s]=per_source_avg[s]-leak_base[s]=40×N_rescue_attempted[s]/15`，`Δleak_overall=overall_avg-Σ leak_base[source(block)]/45=40×N_rescue_total/45`。
 - 同时报告`exact_u1/exact_l2/exact_full`、四类、迭代/运行时、`APP entropy/||q-p||1`分布。
 - **V52 12/15仅历史描述**，不在V53判据中引用作阈值依据。
 
@@ -197,13 +197,13 @@ reclassified, iterations_l1/l2, bp_posterior_entropy, mean_abs_diff_q_p, leak_to
   // leak_total = first_pass_success_leak(1064/1094/1104) 若base通过 else leak_joint(1104/1134/1144)；old_exact派生自base_shared，不另记录
 ```
 
-Summary含：记账`base_exact_full / rescued_by_increment / final_exact_full / old_exact_full(derived from base)` (overall & per-source, 45块)、`N=45`、`first_pass_success_leak(1064/1094/1104) / rescued_success_leak(1104/1134/1144) / final_failure_leak(leak_joint) / avg_leak(=leak_base+40×N_rescue_attempted/45) / failed_conditional_leak(leak_joint) / avg_disclosure_per_attempted_frame / total_disclosed_bits / final_accepted_bits`描述性；`Δleak=40×N_rescue_attempted/45`；`H_inc joint_rank/nested/independence/E_inc/row_max` provenance；L1诊断；四类计数；G3'；门禁明细（G1/G2/G3'数值与PASS/FAIL，基于`undetected==0`，35/45与10/15权威）；`f_avg`；paired `base vs final Δexact` per block描述性（McNemar `b/c`仅描述，去重）；claim boundary；provenance（含`H_inc det1`与fresh held-out溯源含每块`frame_ids/ordinal`与`K/index_j`）。
+Summary含：记账`base_exact_full`与`verify_base`分别（overall & per-source, 45块）、`rescued_by_increment / final_exact_full / old_exact_full(derived from base)`、`N=45`、`first_pass_success_leak(1064/1094/1104) / rescued_success_leak(1104/1134/1144) / final_failure_leak(leak_joint) / per_source_avg[s]=leak_base[s]+40×N_rescue_attempted[s]/15 / overall_avg=(Σ leak_base+40×N_rescue_total)/45（`N_rescue_total=count(!verify_base)`，因三源`leak_base`不同禁单一`+40N/45`当`overall`） / failed_conditional_leak(leak_joint) / avg_disclosure_per_attempted_frame / total_disclosed_bits / disclosure_per_final_exact_block=total_disclosed_bits/final_exact_full_count（为0则null，删除含糊`final_accepted_bits`，`f_avg`若保留则分母`1024×(H(U1|B)+H(U2|U1,B))`）`描述性；`Δleak_per_source=40×N_rescue_attempted[s]/15`，`Δleak_overall=40×N_rescue_total/45`；`H_inc joint_rank/nested/independence/E_inc/row_max` provenance；L1诊断；四类计数；G3'；门禁明细（G1/G2/G3'数值与PASS/FAIL，基于`undetected==0`，35/45与10/15权威）；`f_avg`；paired `base vs final Δexact` per block描述性（McNemar `b/c`仅描述，去重）；claim boundary；provenance（含`H_inc det1`与fresh held-out溯源含每块`frame_ids/ordinal`与`K/index_j`）。
 
 ## 8. 统计与断言边界
 
 仅描述性；`n=45` blocks配对；比例带n与raw counts；区间naive未校正簇聚；无显著性晋升；终态仅`V53_EVIDENCE_INVALID / V53_HELDOUT_CONFIRM_PASS / V53_HELDOUT_CONFIRM_FAIL`。
 
-断言边界 verbatim：结果仅支持`n=1024, m2=184/190/192, Δm=8`上`H_joint=[H_base;H_inc] 8×1024 嵌套增量`在`45` fresh held-out块（每源15，4帧=1024 pairs，`deterministic_four_consecutive_frames_heldout_fresh_v53`经剩余窗口`K-1`分散`index_j=floor(j*(K-1)/14)`选择，与已用360帧零重叠）在`90-135` calls上的有界rescue归因（首遍冻结Lane C原support/标签/prior/MET图不改，decoder `90/1.0 poly37`, 泄漏`leak_base 1064/1094/1104` / `leak_joint=leak_base+40 (40=5*Δm)`, `first_pass_success已成功帧不增泄漏(1064/1094/1104)，rescued_success与final_failure均为leak_joint(1104/1134/1144)，avg_leak=leak_base+40×N_rescue_attempted/45`，总`90-135 硬帽135(old与pass1同一次确定性译码不重复)`，`row≤16 full rank nested independence==8`确定性构造不触outcomes, L2-only tag `≈2^-64`工程近似），`exact_full` oracle不经tag；`V52 12/15`仅历史描述；均非真帧FER全集/阈值/SKR/资格/晋升证据；`45块为最小确认规模，30块分源仅10不稳定；V53通过仍仅development confirmation，下一阶段qualification需新采集/独立TEST`；不启动V54。
+断言边界 verbatim：结果仅支持`n=1024, m2=184/190/192, Δm=8`上`H_joint=[H_base;H_inc] 8×1024 嵌套增量`在`45` fresh held-out块（每源15，4帧=1024 pairs，`deterministic_four_consecutive_frames_heldout_fresh_v53`经剩余窗口`K-1`分散`index_j=floor(j*(K-1)/14)`选择，与已用360帧零重叠）在`90-135` calls上的有界rescue归因（首遍冻结Lane C原support/标签/prior/MET图不改，decoder `90/1.0 poly37`, 泄漏`leak_base 1064/1094/1104` / `leak_joint=leak_base+40 (40=5*Δm)`, `first_pass_success已成功帧不增泄漏(1064/1094/1104)，rescued_success与final_failure均为leak_joint(1104/1134/1144)，per_source_avg[s]=leak_base[s]+40×N_rescue_attempted[s]/15，overall_avg=(Σ leak_base[source(block)]+40×N_rescue_total)/45（`N_rescue_total=count(!verify_base)`，因三源`leak_base`不同禁单一`leak_base+40N/45`当`overall`）`，总`90-135 硬帽135(old与pass1同一次确定性译码不重复)`，`row≤16 full rank nested independence==8`确定性构造不触outcomes, L2-only tag `≈2^-64`工程近似，`rescue_rate=rescued/N_rescue_attempted(N_rescue_attempted=count(!verify_base)禁45-base_exact，base_exact与verify_base分别报告)`，`disclosure_per_final_exact_block=total_disclosed_bits/final_exact_full_count（为0则null，删除含糊final_accepted_bits，f_avg若保留分母1024×(H(U1|B)+H(U2|U1,B))）`），`exact_full` oracle不经tag；`V52 12/15`仅历史描述；均非真帧FER全集/阈值/SKR/资格/晋升证据；`45块为最小确认规模，30块分源仅10不稳定；V53通过仍仅development confirmation，下一阶段qualification需新采集/独立TEST`；不启动V54。
 
 ## 9. 证据写出
 
@@ -227,8 +227,8 @@ comparison_bench/outputs_comparison/formal_ir_methods/v53_rate_adaptive_l2_heldo
 - D2 单一增量`Δm=8` per source嵌套rescue，45块 `base vs final`配对。
 - D3 剩余窗口枚举`[0..H-4]`过滤已用区间得`K`，`index_j=floor(j*(K-1)/14)`分散选15/源，建议IDs `394001..`但真实以`frame_ids`为准。
 - D4 代表矩阵3 Lane C base +3 H_inc det1 (8×1024)+3 H_joint (m2+8)。
-- D5 泄漏公式`leak_base 1064/1094/1104` / `leak_joint+40`冻结，`first_pass_success_leak=leak_base / rescued_success_leak=leak_joint / final_failure_leak=leak_joint / avg_leak=leak_base+40×N_attempt/45`冻结。
-- D6 报告门禁`base/final/rescued`与三类泄漏+avg/披露+比特总量描述性 + 四类/G3' + paired `Δexact(去重)`，`V52 12/15`仅历史。
+- D5 泄漏公式`leak_base 1064/1094/1104` / `leak_joint+40`冻结，`first_pass_success_leak=leak_base / rescued_success_leak=leak_joint / final_failure_leak=leak_joint / per_source_avg[s]=leak_base[s]+40×N_rescue_attempted[s]/15 / overall_avg=(Σ leak_base+40×N_rescue_total)/45（`N_rescue_total=count(!verify_base)`，因三源`leak_base`不同禁单一`+40N/45`）`冻结，`rescue_rate=rescued/N_rescue_attempted（禁45-base_exact，base_exact与verify_base分别报告）`。
+- D6 报告`base_exact_full`与`verify_base`分别计数、`rescue_rate=rescued/N_rescue_attempted（禁45-base_exact）`、`per_source_avg`与`overall_avg`区分、三类泄漏+`disclosure_per_final_exact_block`（为0则null，删除含糊`final_accepted_bits`，`f_avg`分母`1024×(H(U1|B)+H(U2|U1,B))`）+ 四类/G3' + paired `Δexact(去重)`，`V52 12/15`仅历史。
 - D7 哨兵每源首块`394001/394101/394201`单L1通路。
 - D8 终态`V53_EVIDENCE_INVALID / V53_HELDOUT_CONFIRM_PASS / V53_HELDOUT_CONFIRM_FAIL`，`EVIDENCE_INVALID`优先。
 - D9 执行偏差防复发：不设600s timeout、建议≥3600s、session/cell ID只轮询同一进程禁重启、中断保留raw partial不聚合、不自动重跑。

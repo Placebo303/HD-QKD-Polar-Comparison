@@ -1,6 +1,9 @@
 """V53 decoder-free sample-registry + nested rescue spike: verify 45 fresh held-out blocks zero-overlap and H_base+H_inc nesting/joint rank/independence/leakage.
 Zero decoder calls. Reproducible. Uses v38/v35 primitives only.
-Run: python spike_sample_registry.py
+Run: python spike_sample_registry.py  # exit 0 GATE_ALL PASS (revised: per-source vs overall leakage, de-oracled rescue_rate, disclosure_per_final_exact_block, plan HEAD 93c12fa5)
+Revised: rescue_rate=rescued/N_rescue_attempted N_rescue_attempted=count(!verify_base) prohibits 45-base_exact; base_exact vs verify_base reported separately;
+         per_source_avg[s]=leak_base[s]+40*N[s]/15 overall_avg=(sum leak_base+40*N_total)/45 prohibits single base+40N/45 as overall;
+         final_accepted_bits removed -> disclosure_per_final_exact_block=total_disclosed_bits/final_exact_full_count (0 then null); f_avg denominator 1024*(H(U1|B)+H(U2|U1,B)) prohibits N_blocks*(H1+H2)
 Gate failure -> sys.exit(1)
 """
 import sys
@@ -318,13 +321,18 @@ def run():
     print(f"  total fresh frames this change: {total_fresh_frames} (45*4)")
     print(f"  per source fresh frames: 60 each")
 
-    # Leakage formula check
-    print("\n=== Leakage formula ===")
+    # Leakage formula check — per-source vs overall distinction (revised)
+    print("\n=== Leakage formula (revised per-source vs overall, de-oracled) ===")
+    print("  per_source_avg[s] = leak_base[s] + 40*N_rescue_attempted[s]/15 where N_rescue_attempted[s]=count(!verify_base) per source")
+    print("  overall_avg = (sum leak_base[source(block)] + 40*N_rescue_total)/45 where N_rescue_total=count(!verify_base) overall")
+    print("  prohibits single leak_base+40N/45 as overall (three sources differ); rescue_rate=rescued/N_rescue_attempted prohibits 45-base_exact; base_exact vs verify_base reported separately")
     for src in ["1M","1p5M","2M"]:
         m2 = SOURCE_CHECKS[src]
         leak_base = 5*m2 +80+64
         leak_joint = 5*(m2+DELTA_M)+80+64
-        print(f"  {src}: m2 {m2} leak_base {leak_base} leak_joint {leak_joint} +40 avg_leak = {leak_base} + 40*N_rescue/45")
+        print(f"  {src}: m2 {m2} leak_base {leak_base} leak_joint {leak_joint} +40 per_source_avg[s]={leak_base}+40*N_rescue_attempted[s]/15; overall_avg=(sum leak_base+40*N_rescue_total)/45")
+    print("  disclosure_per_final_exact_block = total_disclosed_bits / final_exact_full_count (0 then null, replaces vague final_accepted_bits)")
+    print("  f_avg denominator if retained: 1024*(H(U1|B)+H(U2|U1,B)) prohibits N_blocks*(H1+H2)")
 
     # Budget check
     print("\n=== Budget ===")
