@@ -5,7 +5,7 @@ Frozen V52/V53 complete method (H1-16 + syndrome-derived L1-APP via BP_i + Lane 
 Budget 45 L1 +45 base +≤45 stage1 +≤45 stage2 =90-180 hard cap 180 (L2 45-135). Leakage base 1064/1094/1104 stage1 +40 stage2 +80. Verification-only base→stage1→stage2; exact only oracle. Per-block L1 q reused.
 
 Lifecycle: IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED.
-Accepted plan SHA: bf5dd1686049156540328bac264296b17fee546c
+Accepted plan SHA: cb60c5ddd48b37965d555e42cb664522db314c49
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ from comparison_bench.formal_ir.v38_architecture_triage import (
 
 CYCLE_ID = "V54P0"
 CHANGE_ID = "formal-ir-v54-two-stage-incremental-l2-rescue"
-ACCEPTED_PLAN_SHA = "bf5dd1686049156540328bac264296b17fee546c"
+ACCEPTED_PLAN_SHA = "cb60c5ddd48b37965d555e42cb664522db314c49"
 BRANCH_REF = "origin/formal-ir-mainline"
 EXECUTION_SCOPE = "v54_two_stage_rescue_45_blocks_triple_exactly_once"
 
@@ -1278,7 +1278,10 @@ def run_v54_diagnostic(
     n_stage1_attempted = 0
     n_stage2_attempted = 0
     undetected = 0
-    per_source: dict[str, dict[str,int]] = {s: {"base_exact":0,"verify_base":0,"stage1_call_exact":0,"verify_stage1_call":0,"stage1_final":0,"verify_after_stage1":0,"final":0,"verify_final":0,"rescued_stage1":0,"rescued_stage2":0,"n_stage1":0,"n_stage2":0,"undetected":0} for s in SOURCE_ORDER}
+    undetected_base = 0
+    undetected_stage1_call = 0
+    undetected_stage2_call = 0
+    per_source: dict[str, dict[str,int]] = {s: {"base_exact":0,"verify_base":0,"stage1_call_exact":0,"verify_stage1_call":0,"stage1_final":0,"verify_after_stage1":0,"final":0,"verify_final":0,"rescued_stage1":0,"rescued_stage2":0,"n_stage1":0,"n_stage2":0,"undetected":0,"undetected_base":0,"undetected_stage1_call":0,"undetected_stage2_call":0,"undetected_after_stage1":0,"undetected_final":0} for s in SOURCE_ORDER}
     # track per-block final leaks for total
     per_block_final_leak: dict[int, int] = {}
     call_id_counter = 1
@@ -1350,7 +1353,9 @@ def run_v54_diagnostic(
                     per_source[source]["verify_base"]+=1
                 if verify_base_flag and not exact_base_flag:
                     undetected+=1
+                    undetected_base+=1
                     per_source[source]["undetected"]+=1
+                    per_source[source]["undetected_base"]+=1
                 # determine leak per block later; for now set base leak if verified
                 if verify_base_flag:
                     per_block_final_leak[bseed] = leak_for(source)
@@ -1390,7 +1395,9 @@ def run_v54_diagnostic(
                         per_source[source]["stage1_call_exact"]+=1
                     if verify_s1 and not exact_s1:
                         undetected+=1
+                        undetected_stage1_call+=1
                         per_source[source]["undetected"]+=1
+                        per_source[source]["undetected_stage1_call"]+=1
                     # rescued stage1 defined as verify_s1 && exact_s1 && !verify_base_flag
                     if verify_s1 and exact_s1:
                         stage1_rescued+=1
@@ -1428,7 +1435,9 @@ def run_v54_diagnostic(
                             stage2_call_exact+=1
                         if verify_s2 and not exact_s2:
                             undetected+=1
+                            undetected_stage2_call+=1
                             per_source[source]["undetected"]+=1
+                            per_source[source]["undetected_stage2_call"]+=1
                         if verify_s2 and exact_s2:
                             stage2_rescued+=1
                             per_source[source]["rescued_stage2"]+=1
@@ -1494,6 +1503,13 @@ def run_v54_diagnostic(
     for src in SOURCE_ORDER:
         per_source[src]["verify_stage2_call"] = per_source_recalc[src]["verify_stage2"]
         per_source[src]["verify_final"] = per_source[src]["verify_after_stage1"] + per_source[src]["verify_stage2_call"]
+    undetected_after_stage1 = undetected_base + undetected_stage1_call
+    undetected_final = undetected_after_stage1 + undetected_stage2_call
+    for src in SOURCE_ORDER:
+        ps = per_source[src]
+        ps["undetected_after_stage1"] = ps["undetected_base"] + ps["undetected_stage1_call"]
+        ps["undetected_final"] = ps["undetected_after_stage1"] + ps["undetected_stage2_call"]
+        ps["undetected"] = ps["undetected_final"]
     # leakage totals
     total_disclosed = sum(per_block_final_leak.values())
     overall_avg = float(total_disclosed / 45) if 45 else 0.0
@@ -1517,14 +1533,13 @@ def run_v54_diagnostic(
         rc = r.get("reclassified")
         if rc in reclassified_counts and rc != "undetected_accepted_wrong":
             reclassified_counts[rc]+=1
-    # gate
-    # stage1_final gate and final gate
+    # gate — separated undetected layers
     stage1_per_source_ok = all(per_source[s]["stage1_final"] >=10 for s in SOURCE_ORDER) and all(per_source[s]["verify_after_stage1"] >=10 for s in SOURCE_ORDER)
     stage1_overall_ok = stage1_final_exact >=35 and verify_after_stage1 >=35
-    stage1_gate = bool(stage1_overall_ok and stage1_per_source_ok and undetected==0)  # undetected same for stage1? spec undetected==0 overall at stage1? Use global undetected (any stage) but gate for stage1 should consider undetected overall? Keep undetected==0
+    stage1_gate = bool(stage1_overall_ok and stage1_per_source_ok and undetected_after_stage1==0)
     final_per_source_ok = all(per_source[s]["final"] >=10 for s in SOURCE_ORDER) and all(per_source[s]["verify_final"] >=10 for s in SOURCE_ORDER)
     final_overall_ok = final_exact >=35 and verify_final >=35
-    final_gate = bool(final_overall_ok and final_per_source_ok and undetected==0)
+    final_gate = bool(final_overall_ok and final_per_source_ok and undetected_final==0)
     # additional rank/nested checks already passed in preflight; but also need to ensure integrity for summary
     if stage1_gate and final_gate:
         terminal = TERMINAL_DELTA8_ALREADY_SUFFICIENT
@@ -1593,7 +1608,12 @@ def run_v54_diagnostic(
             "rescue_rate_stage1": float(stage1_rescued / n_stage1_attempted) if n_stage1_attempted else 0.0,
             "rescue_rate_stage2": float(stage2_rescued / n_stage2_attempted) if n_stage2_attempted else 0.0,
             "per_source": per_source,
-            "undetected_accepted_wrong": undetected,
+            "undetected_accepted_wrong": undetected_final,
+            "undetected_after_stage1": undetected_after_stage1,
+            "undetected_final": undetected_final,
+            "undetected_base": undetected_base,
+            "undetected_stage1_call": undetected_stage1_call,
+            "undetected_stage2_call": undetected_stage2_call,
             "reclassified": reclassified_counts,
             "stage1_final_gate": stage1_gate,
             "final_gate": final_gate,

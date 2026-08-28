@@ -223,3 +223,31 @@ def test_decoder_free_preflight_p1_p3(tmp_path):
     assert ok, msg
     # output root not created in preflight
     assert not (tmp_path/"should_not_exist").exists()
+
+def test_accepted_plan_sha_is_v54(tmp_path):
+    assert v54.ACCEPTED_PLAN_SHA == "cb60c5ddd48b37965d555e42cb664522db314c49"
+    assert "cb60c5ddd48b37965d555e42cb664522db314c49" in (Path(v54.__file__).read_text(encoding="utf-8"))
+
+def test_stage2_only_undetected_does_not_pollute_stage1_gate(tmp_path, real_counts):
+    # base: all fail -> stage1 attempted; stage1: all exact true (no undetected) -> stage1 gate would pass if not for stage2
+    # stage2: inject single undetected (verify true exact false) -> stage1 gate should remain true, final gate false => INSUFFICIENT
+    # choose numbers so gates otherwise pass: need stage1_final >=35 and final >=35 per-source >=10
+    # base 10 exact (verify), 35 fail; stage1 will be attempted for 35, make stage1 rescues 30 exact => stage1_final 40 passes, verify_after_stage1 40 passes, no undetected in base+stage1
+    base = [{"exact": True, "verify": True}] * 10 + [{"exact": False, "verify": False}] * 35
+    s1 = [{"exact": True, "verify": True}] * 30 + [{"exact": False, "verify": False}] * 5
+    # stage2 for remaining 5 failures: 4 exact, 1 undetected
+    s2 = [{"exact": True, "verify": True}] * 4 + [{"exact": False, "verify": True}] * 1
+    world = FakeWorld()
+    res = v54.run_v54_diagnostic(execution_authorized=True, authorized_target_sha="9" * 40, fake_runner=True, output_root=tmp_path / "t_stage2_undet", structural_authority_path=world.authority_file(tmp_path), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=_make_decode_fn(base, s1, s2))
+    c = res["summary"]["counts"]
+    # stage2 undetected isolated
+    assert c["undetected_after_stage1"] == 0
+    assert c["undetected_final"] == 1
+    assert c["undetected_base"] == 0
+    assert c["undetected_stage2_call"] == 1
+    # per-source also splits
+    for src in v54.SOURCE_ORDER:
+        assert c["per_source"][src]["undetected_after_stage1"] + c["per_source"][src]["undetected_stage2_call"] == c["per_source"][src]["undetected_final"]
+    assert c["stage1_final_gate"] is True
+    assert c["final_gate"] is False
+    assert res["terminal_state"] == v54.TERMINAL_DELTA16_INSUFFICIENT
