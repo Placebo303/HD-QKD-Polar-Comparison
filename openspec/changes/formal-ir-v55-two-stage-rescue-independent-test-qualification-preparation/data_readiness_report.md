@@ -35,25 +35,30 @@
 | G3 | 三源明确 | 1M/1p5M/2M 各一 session，互异且与 V13 三源一一对应 | **FAIL** — G1 未过 |
 | G4 | 256/frame 1024/block | 每帧256 pairs，每块4帧1024 pairs，`BLOCK_LENGTH=1024`，每源≥120 frames 建议≥160 | **FAIL** — G1 未过（理论 F=160 时 K≥30 可行，已示例校验） |
 | G5 | 与 V13 及 V48-V54 完全独立 | 新 session 全部帧与 V13 全部帧及 V48-V54 已用 540-720 帧零重叠 per source | **FAIL** — G1 未过（需新 session 路径与 date≠2026-01-21） |
-| G6 | V25 prior 只读 | `channel_counts.npz` 形态校验，不读新 TEST 做训练，`load_v25_channel_counts()` 可 import | **PASS** — V25 `channel_counts.npz` 存在且可 import（`nbldpc_v25_20260818/run_04/`） |
+| G6 | V25 prior 只读 | `channel_counts.npz` 形态校验，不读新 TEST 做训练，冻结候选 `nonbinary_v25_gate.py`/`v38_architecture_triage.py`/`v35_algorithm_development.py` 可读且 `py_compile` 通过 + 正确路径 `comparison_bench.formal_ir.*` 可 import | **PASS** — V25 `channel_counts.npz` 存在且冻结候选 3 模块 readable+py_compile+import 均 PASS（`nbldpc_v25_20260818/run_04/`，修复后 G6 独立判定，不再依赖错误路径 `v25_empirical_channel`） |
 | G7 | 冻结 90-block registry | `K≥30`，`index_j` 分散选 30/源，两两非重叠 gap≥4，与已用零重叠 | **FAIL** — G1 未过（示例 F=160 时 `K` 足够，30/源分散可行） |
 
 **全过方可 `V55_QUALIFICATION_PLAN_READY`，否则 `V55_DATA_NOT_READY`。**
 
-### 3.1 脚本实测（空跑，预期 DATA_NOT_READY）
+### 3.1 脚本实测（空跑，预期 DATA_NOT_READY；2026-08-28 仓库根重跑固化）
 
 ```bash
 python openspec/changes/formal-ir-v55-two-stage-rescue-independent-test-qualification-preparation/check_v55_data_readiness.py
-# 预期输出:
+# 2026-08-28 实测输出（G6 已修复为独立判定）:
 # G1 FAIL — no independent session registry found. Searched: .../v55_independent_test_sessions.json ...
 # G2 FAIL — G1 not pass
 # G3 FAIL — G1 not pass
 # G4 FAIL — G1 not pass
 # G5 FAIL — G1 not pass
-# G6 PASS — V25 prior files exist
-# G7 FAIL — G1 not pass
+# G6 PASS — V25 prior files: candidates[0].exists()=True, True -> exists=True
+#          frozen candidate nonbinary_v25_gate.py: readable=True py_compile=True
+#          frozen candidate v38_architecture_triage.py: readable=True py_compile=True
+#          frozen candidate v35_algorithm_development.py: readable=True py_compile=True
+#          import PASS: nonbinary_v25_gate + v38 + v35 -> code_ok=True
+# G7 FAIL — G1 not pass (example F=160 1M K=25 not feasible, 1p5M K=43 feasible, 2M K=71 feasible)
 # Terminal: V55_DATA_NOT_READY
 # exit 1 (阻断后续 decoder，不等同 EVIDENCE_INVALID)
+# 注：修复前 G6 因错误路径 comparison_bench.formal_ir.v25_empirical_channel 被误判 FAIL；修复后 G6 独立以真实冻结候选存在性判定为 PASS，G1-G5/G7 仍 FAIL，总终态仍 V55_DATA_NOT_READY
 ```
 
 **本轮未执行 decoder，未创建任何 `.../v55_*/run_01` 输出，符合 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。**
