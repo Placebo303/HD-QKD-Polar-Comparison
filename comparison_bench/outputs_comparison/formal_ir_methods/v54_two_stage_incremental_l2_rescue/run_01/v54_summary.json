@@ -1,0 +1,915 @@
+{
+  "cycle_id": "V54P0",
+  "change_id": "formal-ir-v54-two-stage-incremental-l2-rescue",
+  "accepted_plan_sha": "cb60c5ddd48b37965d555e42cb664522db314c49",
+  "branch_ref": "origin/formal-ir-mainline",
+  "execution_scope": "v54_two_stage_rescue_45_blocks_triple_exactly_once",
+  "mechanism_id": "nested_two_stage_incremental_l2_rescue_delta8_plus8_45blocks_v54",
+  "tag_scope": "l2_only",
+  "decoder_setting": [
+    90,
+    1.0
+  ],
+  "delta_m": 8,
+  "delta_m_total": 16,
+  "leakage": {
+    "per_source": {
+      "1M": {
+        "leak_base": 1064,
+        "leak_stage1": 1104,
+        "leak_stage2": 1144,
+        "delta": 40
+      },
+      "1p5M": {
+        "leak_base": 1094,
+        "leak_stage1": 1134,
+        "leak_stage2": 1174,
+        "delta": 40
+      },
+      "2M": {
+        "leak_base": 1104,
+        "leak_stage1": 1144,
+        "leak_stage2": 1184,
+        "delta": 40
+      }
+    },
+    "leakage_already_accounted": true,
+    "first_pass_success_leak": {
+      "1M": 1064,
+      "1p5M": 1094,
+      "2M": 1104
+    },
+    "stage1_success_leak": {
+      "1M": 1104,
+      "1p5M": 1134,
+      "2M": 1144
+    },
+    "stage2_leak": {
+      "1M": 1144,
+      "1p5M": 1174,
+      "2M": 1184
+    },
+    "per_source_avg": {
+      "1M": 1093.3333333333333,
+      "1p5M": 1120.6666666666667,
+      "2M": 1138.6666666666667
+    },
+    "overall_avg": 1117.5555555555557,
+    "formula": "per_source_avg[s]=leak_base[s]+40*N_stage1[s]/15+40*N_stage2[s]/15 overall_avg=(Σ leak_base[source(block)]+40*N_stage1_total+40*N_stage2_total)/45",
+    "n_stage1_attempted": 27,
+    "n_stage2_attempted": 7,
+    "total_disclosed_bits": 50290,
+    "avg_disclosure_per_attempted_frame": 1.0913628472222223,
+    "disclosure_per_final_exact_block": 1169.5348837209303,
+    "total_formula": "Σ leak_base[source(block)]+40*N_stage1+40*N_stage2"
+  },
+  "counts": {
+    "base_exact_full": 18,
+    "verify_base": 18,
+    "stage1_call_exact_full": 20,
+    "verify_stage1_call": 20,
+    "stage1_final_exact_full_count": 38,
+    "verify_after_stage1": 38,
+    "stage1_rescued": 20,
+    "stage2_call_exact_full": 5,
+    "verify_stage2_call": 5,
+    "stage2_rescued": 5,
+    "final_exact_full_count": 43,
+    "verify_final": 43,
+    "n_blocks": 45,
+    "n_stage1_attempted": 27,
+    "n_stage2_attempted": 7,
+    "rescue_rate_stage1": 0.7407407407407407,
+    "rescue_rate_stage2": 0.7142857142857143,
+    "per_source": {
+      "1M": {
+        "base_exact": 5,
+        "verify_base": 5,
+        "stage1_call_exact": 9,
+        "verify_stage1_call": 9,
+        "stage1_final": 14,
+        "verify_after_stage1": 14,
+        "final": 15,
+        "verify_final": 15,
+        "rescued_stage1": 9,
+        "rescued_stage2": 1,
+        "n_stage1": 10,
+        "n_stage2": 1,
+        "undetected": 0,
+        "undetected_base": 0,
+        "undetected_stage1_call": 0,
+        "undetected_stage2_call": 0,
+        "undetected_after_stage1": 0,
+        "undetected_final": 0,
+        "verify_stage2_call": 1
+      },
+      "1p5M": {
+        "base_exact": 9,
+        "verify_base": 9,
+        "stage1_call_exact": 2,
+        "verify_stage1_call": 2,
+        "stage1_final": 11,
+        "verify_after_stage1": 11,
+        "final": 14,
+        "verify_final": 14,
+        "rescued_stage1": 2,
+        "rescued_stage2": 3,
+        "n_stage1": 6,
+        "n_stage2": 4,
+        "undetected": 0,
+        "undetected_base": 0,
+        "undetected_stage1_call": 0,
+        "undetected_stage2_call": 0,
+        "undetected_after_stage1": 0,
+        "undetected_final": 0,
+        "verify_stage2_call": 3
+      },
+      "2M": {
+        "base_exact": 4,
+        "verify_base": 4,
+        "stage1_call_exact": 9,
+        "verify_stage1_call": 9,
+        "stage1_final": 13,
+        "verify_after_stage1": 13,
+        "final": 14,
+        "verify_final": 14,
+        "rescued_stage1": 9,
+        "rescued_stage2": 1,
+        "n_stage1": 11,
+        "n_stage2": 2,
+        "undetected": 0,
+        "undetected_base": 0,
+        "undetected_stage1_call": 0,
+        "undetected_stage2_call": 0,
+        "undetected_after_stage1": 0,
+        "undetected_final": 0,
+        "verify_stage2_call": 1
+      }
+    },
+    "undetected_accepted_wrong": 0,
+    "undetected_after_stage1": 0,
+    "undetected_final": 0,
+    "undetected_base": 0,
+    "undetected_stage1_call": 0,
+    "undetected_stage2_call": 0,
+    "reclassified": {
+      "exact": 43,
+      "detected_verification_failure": 2,
+      "decoder_non_syndrome_failure": 34,
+      "undetected_accepted_wrong": 0
+    },
+    "stage1_final_gate": true,
+    "final_gate": true
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": "90-180",
+      "l1": 45,
+      "l2_base": 45,
+      "l2_stage1_max": 45,
+      "l2_stage2_max": 45,
+      "l2_max": 135
+    },
+    "decoder_calls_started": {
+      "total": 124,
+      "l1": 45,
+      "l2": 79,
+      "base": 45,
+      "stage1": 27,
+      "stage2": 7
+    },
+    "decoder_calls_completed": {
+      "total": 124,
+      "l1": 45,
+      "l2": 79,
+      "base": 45,
+      "stage1": 27,
+      "stage2": 7
+    },
+    "hard_cap": 180
+  },
+  "matrix": {
+    "per_source": {
+      "1M": {
+        "m2": 184,
+        "m_joint1": 192,
+        "m_total": 200,
+        "delta_m": 8,
+        "joint1_rank": 192,
+        "total_rank": 200,
+        "nested_stage1": true,
+        "nested_stage2": true,
+        "independence1": 8,
+        "independence2": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc1": 96,
+        "E_inc2": 96
+      },
+      "1p5M": {
+        "m2": 190,
+        "m_joint1": 198,
+        "m_total": 206,
+        "delta_m": 8,
+        "joint1_rank": 198,
+        "total_rank": 206,
+        "nested_stage1": true,
+        "nested_stage2": true,
+        "independence1": 8,
+        "independence2": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc1": 96,
+        "E_inc2": 96
+      },
+      "2M": {
+        "m2": 192,
+        "m_joint1": 200,
+        "m_total": 208,
+        "delta_m": 8,
+        "joint1_rank": 200,
+        "total_rank": 208,
+        "nested_stage1": true,
+        "nested_stage2": true,
+        "independence1": 8,
+        "independence2": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc1": 96,
+        "E_inc2": 96
+      }
+    }
+  },
+  "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54",
+  "held_out_provenance": {
+    "block_windows": {
+      "395001": {
+        "source": "1M",
+        "held_out_ordinal_start": 18,
+        "held_out_ordinal_end": 21,
+        "frame_ids": [
+          1618,
+          1619,
+          1620,
+          1621
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395002": {
+        "source": "1M",
+        "held_out_ordinal_start": 48,
+        "held_out_ordinal_end": 51,
+        "frame_ids": [
+          1648,
+          1649,
+          1650,
+          1651
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395003": {
+        "source": "1M",
+        "held_out_ordinal_start": 105,
+        "held_out_ordinal_end": 108,
+        "frame_ids": [
+          1705,
+          1706,
+          1707,
+          1708
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395004": {
+        "source": "1M",
+        "held_out_ordinal_start": 160,
+        "held_out_ordinal_end": 163,
+        "frame_ids": [
+          1760,
+          1761,
+          1762,
+          1763
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395005": {
+        "source": "1M",
+        "held_out_ordinal_start": 183,
+        "held_out_ordinal_end": 186,
+        "frame_ids": [
+          1783,
+          1784,
+          1785,
+          1786
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395006": {
+        "source": "1M",
+        "held_out_ordinal_start": 204,
+        "held_out_ordinal_end": 207,
+        "frame_ids": [
+          1804,
+          1805,
+          1806,
+          1807
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395007": {
+        "source": "1M",
+        "held_out_ordinal_start": 220,
+        "held_out_ordinal_end": 223,
+        "frame_ids": [
+          1820,
+          1821,
+          1822,
+          1823
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395008": {
+        "source": "1M",
+        "held_out_ordinal_start": 243,
+        "held_out_ordinal_end": 246,
+        "frame_ids": [
+          1843,
+          1844,
+          1845,
+          1846
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395009": {
+        "source": "1M",
+        "held_out_ordinal_start": 264,
+        "held_out_ordinal_end": 267,
+        "frame_ids": [
+          1864,
+          1865,
+          1866,
+          1867
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395010": {
+        "source": "1M",
+        "held_out_ordinal_start": 287,
+        "held_out_ordinal_end": 290,
+        "frame_ids": [
+          1887,
+          1888,
+          1889,
+          1890
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395011": {
+        "source": "1M",
+        "held_out_ordinal_start": 303,
+        "held_out_ordinal_end": 306,
+        "frame_ids": [
+          1903,
+          1904,
+          1905,
+          1906
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395012": {
+        "source": "1M",
+        "held_out_ordinal_start": 326,
+        "held_out_ordinal_end": 329,
+        "frame_ids": [
+          1926,
+          1927,
+          1928,
+          1929
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395013": {
+        "source": "1M",
+        "held_out_ordinal_start": 348,
+        "held_out_ordinal_end": 351,
+        "frame_ids": [
+          1948,
+          1949,
+          1950,
+          1951
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395014": {
+        "source": "1M",
+        "held_out_ordinal_start": 371,
+        "held_out_ordinal_end": 374,
+        "frame_ids": [
+          1971,
+          1972,
+          1973,
+          1974
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395015": {
+        "source": "1M",
+        "held_out_ordinal_start": 388,
+        "held_out_ordinal_end": 391,
+        "frame_ids": [
+          1988,
+          1989,
+          1990,
+          1991
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395101": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 4,
+        "held_out_ordinal_end": 7,
+        "frame_ids": [
+          2217,
+          2218,
+          2219,
+          2220
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395102": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 67,
+        "held_out_ordinal_end": 70,
+        "frame_ids": [
+          2280,
+          2281,
+          2282,
+          2283
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395103": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 144,
+        "held_out_ordinal_end": 147,
+        "frame_ids": [
+          2357,
+          2358,
+          2359,
+          2360
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395104": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 211,
+        "held_out_ordinal_end": 214,
+        "frame_ids": [
+          2424,
+          2425,
+          2426,
+          2427
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395105": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 242,
+        "held_out_ordinal_end": 245,
+        "frame_ids": [
+          2455,
+          2456,
+          2457,
+          2458
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395106": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 268,
+        "held_out_ordinal_end": 271,
+        "frame_ids": [
+          2481,
+          2482,
+          2483,
+          2484
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395107": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 301,
+        "held_out_ordinal_end": 304,
+        "frame_ids": [
+          2514,
+          2515,
+          2516,
+          2517
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395108": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 334,
+        "held_out_ordinal_end": 337,
+        "frame_ids": [
+          2547,
+          2548,
+          2549,
+          2550
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395109": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 367,
+        "held_out_ordinal_end": 370,
+        "frame_ids": [
+          2580,
+          2581,
+          2582,
+          2583
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395110": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 397,
+        "held_out_ordinal_end": 400,
+        "frame_ids": [
+          2610,
+          2611,
+          2612,
+          2613
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395111": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 416,
+        "held_out_ordinal_end": 419,
+        "frame_ids": [
+          2629,
+          2630,
+          2631,
+          2632
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395112": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 449,
+        "held_out_ordinal_end": 452,
+        "frame_ids": [
+          2662,
+          2663,
+          2664,
+          2665
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395113": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 482,
+        "held_out_ordinal_end": 485,
+        "frame_ids": [
+          2695,
+          2696,
+          2697,
+          2698
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395114": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 515,
+        "held_out_ordinal_end": 518,
+        "frame_ids": [
+          2728,
+          2729,
+          2730,
+          2731
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395115": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 542,
+        "held_out_ordinal_end": 545,
+        "frame_ids": [
+          2755,
+          2756,
+          2757,
+          2758
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395201": {
+        "source": "2M",
+        "held_out_ordinal_start": 4,
+        "held_out_ordinal_end": 7,
+        "frame_ids": [
+          2920,
+          2921,
+          2922,
+          2923
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395202": {
+        "source": "2M",
+        "held_out_ordinal_start": 66,
+        "held_out_ordinal_end": 69,
+        "frame_ids": [
+          2982,
+          2983,
+          2984,
+          2985
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395203": {
+        "source": "2M",
+        "held_out_ordinal_start": 142,
+        "held_out_ordinal_end": 145,
+        "frame_ids": [
+          3058,
+          3059,
+          3060,
+          3061
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395204": {
+        "source": "2M",
+        "held_out_ordinal_start": 202,
+        "held_out_ordinal_end": 205,
+        "frame_ids": [
+          3118,
+          3119,
+          3120,
+          3121
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395205": {
+        "source": "2M",
+        "held_out_ordinal_start": 269,
+        "held_out_ordinal_end": 272,
+        "frame_ids": [
+          3185,
+          3186,
+          3187,
+          3188
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395206": {
+        "source": "2M",
+        "held_out_ordinal_start": 315,
+        "held_out_ordinal_end": 318,
+        "frame_ids": [
+          3231,
+          3232,
+          3233,
+          3234
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395207": {
+        "source": "2M",
+        "held_out_ordinal_start": 355,
+        "held_out_ordinal_end": 358,
+        "frame_ids": [
+          3271,
+          3272,
+          3273,
+          3274
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395208": {
+        "source": "2M",
+        "held_out_ordinal_start": 401,
+        "held_out_ordinal_end": 404,
+        "frame_ids": [
+          3317,
+          3318,
+          3319,
+          3320
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395209": {
+        "source": "2M",
+        "held_out_ordinal_start": 445,
+        "held_out_ordinal_end": 448,
+        "frame_ids": [
+          3361,
+          3362,
+          3363,
+          3364
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395210": {
+        "source": "2M",
+        "held_out_ordinal_start": 491,
+        "held_out_ordinal_end": 494,
+        "frame_ids": [
+          3407,
+          3408,
+          3409,
+          3410
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395211": {
+        "source": "2M",
+        "held_out_ordinal_start": 538,
+        "held_out_ordinal_end": 541,
+        "frame_ids": [
+          3454,
+          3455,
+          3456,
+          3457
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395212": {
+        "source": "2M",
+        "held_out_ordinal_start": 584,
+        "held_out_ordinal_end": 587,
+        "frame_ids": [
+          3500,
+          3501,
+          3502,
+          3503
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395213": {
+        "source": "2M",
+        "held_out_ordinal_start": 631,
+        "held_out_ordinal_end": 634,
+        "frame_ids": [
+          3547,
+          3548,
+          3549,
+          3550
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395214": {
+        "source": "2M",
+        "held_out_ordinal_start": 677,
+        "held_out_ordinal_end": 680,
+        "frame_ids": [
+          3593,
+          3594,
+          3595,
+          3596
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      },
+      "395215": {
+        "source": "2M",
+        "held_out_ordinal_start": 717,
+        "held_out_ordinal_end": 720,
+        "frame_ids": [
+          3633,
+          3634,
+          3635,
+          3636
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54"
+      }
+    },
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v54",
+    "fresh_45": {
+      "1M": [
+        395001,
+        395002,
+        395003,
+        395004,
+        395005,
+        395006,
+        395007,
+        395008,
+        395009,
+        395010,
+        395011,
+        395012,
+        395013,
+        395014,
+        395015
+      ],
+      "1p5M": [
+        395101,
+        395102,
+        395103,
+        395104,
+        395105,
+        395106,
+        395107,
+        395108,
+        395109,
+        395110,
+        395111,
+        395112,
+        395113,
+        395114,
+        395115
+      ],
+      "2M": [
+        395201,
+        395202,
+        395203,
+        395204,
+        395205,
+        395206,
+        395207,
+        395208,
+        395209,
+        395210,
+        395211,
+        395212,
+        395213,
+        395214,
+        395215
+      ]
+    },
+    "K2_per_source": {
+      "1M": 135,
+      "1p5M": 260,
+      "2M": 461
+    },
+    "index_formula": "floor(j*(K2-1)/14)"
+  },
+  "provenance": {
+    "h_inc1_det_ids": {
+      "1M": 600001,
+      "1p5M": 600002,
+      "2M": 600003
+    },
+    "h_inc2_det_ids": {
+      "1M": 600004,
+      "1p5M": 600005,
+      "2M": 600006
+    },
+    "deterministic": "single_run_no_seed_search",
+    "joint_rank_nested_independence": "verified",
+    "tag_scope": "l2_only"
+  },
+  "terminal_state": "V54_DELTA8_ALREADY_SUFFICIENT",
+  "claim_boundary": [
+    "results support ONLY nested two-stage incremental L2 rescue Δ8+8 on frozen Lane C support/prior/MET n=1024 m2 184/190/192 GF32 poly37 decoder 90/1.0 leak 1064/1094/1104 base 1104/1134/1144 stage1 1144/1174/1184 stage2 conditional only rescue frames +40 each stage avg per_source[s]=leak_base[s]+40*N1[s]/15+40*N2[s]/15 overall=(Σ base+40*N1+40*N2)/45",
+    "leakage H1-16 includes 64-bit tag L2-only random-hash-model approximate 2^-64 row≤16 col_inc≤1 deterministic no seed search nested rank m2+8 m2+16",
+    "not threshold/SKR/formal qualification/promotion; paired descriptive only Δexact_stage1 Δexact_stage2 McNemar descriptive four-way G3' undetected==0 45 blocks development confirmation"
+  ],
+  "statistics_note": "Descriptive only; sample is 45 blocks three-stage conditional base vs stage1 vs final (45 L1 +45 base +≤45 stage1 +≤45 stage2 =90-180 L2 45-135). Exact-recovery proportions with n and raw counts; any interval naive uncorrected clustering; no significance."
+}
