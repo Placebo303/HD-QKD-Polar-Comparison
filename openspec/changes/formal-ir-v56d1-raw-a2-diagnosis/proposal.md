@@ -22,10 +22,11 @@
 2. **核对 nearest threshold、pairing direction、frame start / bin origin**：读取实际 TTBin `pairing_threshold_ps / gate_width_ps / pairing_mode`、pairing 方向（`nearest_unique` greedy 单调 1-1）、`frame_start_ps / frame_anchor / bin_origin / wrap_rule / frame_period` 等，**对比 V13 实际 metrics（不硬编码 `delay -50/+50` 等，从 `workspace/v13r3fresh_20260816/sidecars/*/sidecar_meta.json` + `comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/build_manifest.json` + `nbldpc_v25_20260818/run_04/*` 实时读）**，输出逐字段 `PASS / MISMATCH / INCOMPLETE` 矩阵（缺失如实 `INCOMPLETE`，有值才比对）。
 
 3. **逐源 A2 判定，仍保持三源逐源 + 总体四态**（与 V56D0 一致，非单一 Path A/B）：
-   - 逐源：`PATH_A2_RAW_CONTRACT_ERROR`（明确契约错误，可修复） / `PATH_B_DOMAIN_SHIFT`（完整正确但相关率仍低，需重估条件熵/泄漏） / `INCONCLUSIVE` / `INCONCLUSIVE_NEED_CALIBRATION`；
-   - 总体：`PATH_A2_ALL / PATH_B_ALL / MIXED_BY_SOURCE / INCONCLUSIVE`（含 `INCONCLUSIVE_METADATA_INCOMPLETE` 子态）；
-   - 若发现**明确契约错误**（peak 中心与 `delay_used_ps` 不一致、peak 丢失/弥散、pairing 阈值/方向/frame_start 错误、channel 错配等），则**可修复后用 0 重叠 calibration frames 验证**（与原 90 零重叠、未揭盲、每源 8-16 frames 小批量，仅验基础相关性 `A==B>60%` 等价健康）；
-   - 若**完整正确而相关率仍低**（peak 正确对准但 `A==B 27-41%`、NLL 仍高、`delta mass_0+mass_±1` 弥散），则判 **Path B 需重估 `H(U1|B), H(U2|U1,B)` 与 `m1/m2/f` 泄漏**（source-adaptive 重算 `m_total = floor((1.3*1024*H -64)/5)`）。
+   - 逐源：`PATH_A2_RAW_CONTRACT_ERROR`（明确契约错误，可修复） / `PATH_B_DOMAIN_SHIFT`（仅当 `timing_contract_verified` 才允许） / `INCONCLUSIVE_A2_NOT_EXCLUDED`（peak 健康但 delay/pairing 不可追溯，不得判 B） / `INCONCLUSIVE` / `INCONCLUSIVE_NEED_CALIBRATION`；
+   - 总体：`PATH_A2_ALL / PATH_B_ALL / MIXED_BY_SOURCE / INCONCLUSIVE`（含 `INCONCLUSIVE_METADATA_INCOMPLETE`、`INCONCLUSIVE_A2_NOT_EXCLUDED` 子态）；
+   - **timing_contract_verified** 单独定义：只有恢复出 V55 实际使用的 `delay_used_ps` + `pairing_threshold_ps` 并确认与 raw peak 符号和数值 `|peak-delay|<50ps` 匹配，才允许进 Path B；已用 delay 与 raw peak 明确不匹配→ Path A2；健康峰但不可追溯→ `INCONCLUSIVE_A2_NOT_EXCLUDED`
+   - 若发现**明确契约错误**（peak 中心与 `delay_used_ps` 不一致/符号反、peak 丢失/弥散、pairing 阈值/方向/frame_start 错误、channel 错配等），则**可修复后用 0 重叠 calibration frames 验证**（与原 90 零重叠、未揭盲、每源 8-16 frames 小批量，仅验基础相关性 `A==B>60%` 等价健康）；加载后记录 `total_events/acquisition_duration_s/ttbin_merge {main_size,chunk_size,merge_verified}` 并与 intake sidecar 核对，避免静默漏读 `.1.ttbin`；
+   - 若**完整正确且契约已验证而相关率仍低**（`timing_contract_verified` + peak 正确对准但 `A==B 27-41%`、NLL 仍高、`delta mass_0+mass_±1` 弥散），则判 **Path B 需重估 `H(U1|B), H(U2|U1,B)` 与 `m1/m2/f` 泄漏**（source-adaptive 重算 `m_total = floor((1.3*1024*H -64)/5)`）。
 
 4. **禁止项**（硬约束）：**禁止在原 V55 90 块上重跑 corrected pipeline**（已揭盲，`base→Δ8→Δ16` 任何变体均禁，含 offset-corrected 重译）；**禁止调 `H1 / Lane C / Δ8 / decoder 90/1.0` 任一参数以拟合 V55**；**零 decoder、零码参数**（`rg "decode_" 0 hits` 可验）。
 

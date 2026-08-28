@@ -60,7 +60,8 @@
 
 ### 2.3 诊断统计量定义（decoder-free，raw 重算 + parquet 仅作背景）
 
-- **Channel 真实分布**：`channel_hist = bincount(channel)`, `count_A = hist[1]`, `count_B = hist[5]`, `other_channels = total - count_A - count_B`, `frac_A/B/other`，`unique_channels` 列表；校验声明 `A1/B5`。
+ - **Channel 真实分布**：`channel_hist = bincount(channel)`, `count_A = hist[1]`, `count_B = hist[5]`, `other_channels = total - count_A - count_B`, `frac_A/B/other`，`unique_channels` 列表；校验声明 `A1/B5`。同时记录 `total_events` 与 `acquisition_duration_s`（`tmax-tmin`），并验证 `.1.ttbin` 自动合并：`main_size` + `chunk_size` 需与 `intake sidecar provenance` 一致且 `total_events>50000` 否则 `merge_verified=false` 标记静默漏读风险，与 intake `diagnostics/n_pairs` 交叉核对。
+ - **timing_contract_verified**：单独布尔，仅当恢复出 V55 实际使用的 `delay_used_ps`（以及 `pairing_threshold_ps ==40000`）且与 raw `peak_center` 符号一致、数值 `|peak-delay|<50ps` 时为 true；只有该值为 true 且 `peak_shape_healthy` 时才允许进 `PATH_B`；健康峰但未验证→ `INCONCLUSIVE_A2_NOT_EXCLUDED`；明确不匹配→ `PATH_A2`。
 - **Cross-correlation histogram**：`lag = t_B - t_A`, `bin_width 100ps`, `max_lag 819200ps`, `n_bins 16384`, `counts[16384]` 由 `compute_cross_correlation_histogram` Chunked 统计；`peak_idx = argmax counts`, `peak_center = lag_center[peak_idx]`, `peak_count = counts[peak_idx]`。
 - **Peak width**：FWHM 估计：从 `peak_idx` 向两侧找 `counts < peak_count/2` 的最近 bin，`FWHM = (right-left)*100ps`，`σ ≈ FWHM/2.355`；若峰过窄（单 bin 尖）则 `σ` 取半高宽近似，报告 `peak_width_ps (σ)` 与 `FWHM`。
 - **Peak-to-background**：`bg = median(counts where |lag - peak_center| > 5σ)`（或 `>2000ps` 若 σ 未定），`p2bg = peak_count / max(bg,1)`；`p2bg_health >1000` 为 HEALTHY（V13 实测 `3300-3800`）。
@@ -79,12 +80,13 @@ per_source in {1M,1p5M,2M}:
   if raw_unavailable (TimeTagger missing / file missing):
     → INCONCLUSIVE_NEED_CALIBRATION (INCOMPLETE_TTBin_UNAVAILABLE)
   elif explicit_contract_error:
-    // peak_missing (p2bg<10 / no clear peak) OR |peak_center - delay_used|>50ps (when delay_used known)
-    // OR peak_width σ>150ps broad / channel_mismatch (A/B not dominant) /
-    // nearest_threshold MISMATCH / pairing_direction reversed / frame_start offset error
+    // peak_missing (p2bg<10) OR |peak_center - delay_used|>50ps when delay known OR sign mismatch
+    // OR σ>150ps broad / channel_mismatch / nearest_threshold !=40000 / pairing reversed / frame_start offset
     → PATH_A2_RAW_CONTRACT_ERROR (可修复，需 0重叠 calibration 验证)
-  elif peak_healthy (|peak-delay|<50ps && p2bg>1000 && σ 50-150ps) && still_low (A==B<45% && NLL>>1.0):
-    → PATH_B_DOMAIN_SHIFT (raw 正确但相关率仍低，需重估熵/泄漏)
+  elif peak_shape_healthy (p2bg>1000 && σ 50-150ps) && timing_contract_verified (|peak-delay|<50 && sign match && delay+pairing recovered) && still_low (A==B<45% && NLL>>1.0):
+    → PATH_B_DOMAIN_SHIFT (raw 正确且契约已验证但相关率仍低，需重估熵/泄漏)
+  elif peak_shape_healthy (p2bg>1000 && σ 50-150ps) && !timing_contract_verified && still_low:
+    → INCONCLUSIVE_A2_NOT_EXCLUDED (peak 健康但 V55 delay/pairing 不可追溯，不得判 B，A2 未排除)
   elif missing_raw_fields without actual raw evidence:
     → INCONCLUSIVE_METADATA_INCOMPLETE
   else:

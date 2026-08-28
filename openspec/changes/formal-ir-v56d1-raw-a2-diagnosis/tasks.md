@@ -20,14 +20,15 @@
 
 ## Phase C — 逐源 A2 判定与总体四态（decoder-free，三源逐源 + 总体四态）
 
-- [ ] **C1** 逐源 A2 判定（raw 证据驱动）：
-  - `INCOMPLETE_TTBin_UNAVAILABLE`：若 TimeTagger 不可用或文件缺失 → 该源 `INCONCLUSIVE_NEED_CALIBRATION`（INCOMPLETE_TTBin_UNAVAILABLE）
-  - `PATH_A2_RAW_CONTRACT_ERROR`：若 `peak_missing`（`p2bg<10` 或无单峰）或 `|peak_center - delay_used|>50ps`（delay 已知时）或 `σ>150ps` 弥散或 `channel_mismatch`（`count_A/B` 非主导 `<40%`）或 `nearest_threshold !=40000ps` / `pairing_direction` 反向 / `frame_start` 错位且 raw 证据确凿 → 该源 `PATH_A2`（可修复）
-  - `PATH_B_DOMAIN_SHIFT`：若 `peak_healthy`（`|peak-delay|<50ps && p2bg>1000 && σ 50-150ps`）但 `A==B 27-41%`、`NLL>>1.0`、`q_mass_on_p_zero 57-71%` 仍低（沿用 V56D0 parquet 统计作背景）→ 该源 `PATH_B`（需重估熵/泄漏）
-  - 否则 `INCONCLUSIVE` / `INCONCLUSIVE_METADATA_INCOMPLETE`
+ - [ ] **C1** 逐源 A2 判定（raw 证据驱动，`timing_contract_verified` 单独门禁）：
+   - `INCOMPLETE_TTBin_UNAVAILABLE`：若 TimeTagger 不可用或文件缺失 → 该源 `INCONCLUSIVE_NEED_CALIBRATION`（INCOMPLETE_TTBin_UNAVAILABLE）；TTBin 加载后记录 `total_events / acquisition_duration_s / ttbin_merge {main_size,chunk_size,merge_verified}` 并与 intake sidecar `provenance + diagnostics` 核对，`merge_verified=false` 标记静默漏读
+   - `PATH_A2_RAW_CONTRACT_ERROR`：若 `peak_missing`（`p2bg<10`）或 `|peak_center - delay_used|>50ps`（delay 已知时）或 sign mismatch 或 `σ>150ps` 弥散或 `channel_mismatch`（`count_A/B` 非主导 `<40%`）或 `nearest_threshold !=40000ps` / `pairing_direction` 反向 / `frame_start` 错位且 raw 证据确凿 → 该源 `PATH_A2`（可修复）；已用 delay 与 raw peak 明确不匹配必判 A2
+   - `timing_contract_verified` 单独定义：仅当恢复出 V55 实际使用的 `delay_used_ps`（+ `pairing_threshold_ps`）且与 raw peak 符号一致、数值 `|peak-delay|<50ps` 时为 true
+   - `PATH_B_DOMAIN_SHIFT`：仅当 `peak_shape_healthy (p2bg>1000 && σ 50-150ps)` 且 `timing_contract_verified==true` 且 `still_low (A==B<45% && NLL>>1.0)` 时 → 该源 `PATH_B`（需重估熵/泄漏）；健康峰但 `timing_contract_verified==false` → `INCONCLUSIVE_A2_NOT_EXCLUDED` 不得判 B
+   - 否则 `INCONCLUSIVE` / `INCONCLUSIVE_METADATA_INCOMPLETE` / `INCONCLUSIVE_A2_NOT_EXCLUDED`
 - [ ] **C2** 总体四态聚合（三源逐源 → 总体）：
-  - `PATH_A2_ALL`（三源全 A2） / `PATH_B_ALL`（三源全 B） / `MIXED_BY_SOURCE`（源间 A2/B/INCONCLUSIVE 混合） / `INCONCLUSIVE`（含 `INCONCLUSIVE_METADATA_INCOMPLETE`、`INCOMPLETE_TTBin_UNAVAILABLE`）
-  - 显式声明 `A1` 已由 V56D0 排除（`k*=0`），本诊断不再判 A1；`B` 为排除 A2 后物理域迁移
+   - `PATH_A2_ALL`（三源全 A2） / `PATH_B_ALL`（三源全 B，仅当每源 timing_verified 才允许） / `MIXED_BY_SOURCE`（源间 A2/B/INCONCLUSIVE_A2_NOT_EXCLUDED 混合） / `INCONCLUSIVE`（含 `INCONCLUSIVE_METADATA_INCOMPLETE`、`INCONCLUSIVE_A2_NOT_EXCLUDED`、`INCOMPLETE_TTBin_UNAVAILABLE`）
+   - 显式声明 `A1` 已由 V56D0 排除（`k*=0`），本诊断不再判 A1；`B` 为排除 A2 后物理域迁移；`INCONCLUSIVE_A2_NOT_EXCLUDED` 不得归入 B
 - [ ] **C3** 守卫：判定以 raw 实测峰为准，不以 `V25 P(A|B)` 重估；不对 parquet 做 offset 扫描重判；不将 `peak` 择优回注为新 pipeline；注明 `lag = t_B - t_A` 显式
 
 ## Phase D — 逐源分流后的修复/重估建议与校准优先（A2/B 分支）

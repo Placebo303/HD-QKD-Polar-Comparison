@@ -84,12 +84,13 @@
 
 **域拆分**：`A2 = raw TTBin delay/peak/pairing contract`（需 actual raw peak/delay/channel 证据），`B = 排除 A2 后物理域迁移`；`A1` 已由 V56D0 排除（`k*=0`），本诊断不再判 A1。`B` 为排除 A2 后物理域迁移。
 
-**判定逻辑**（见 design §3，逐源，阈启发仅证据描述，非门禁）：
+**判定逻辑**（见 design §3，逐源，阈启发仅证据描述，非门禁；`timing_contract_verified` 单独门禁）：
 
-- `peak_missing (p2bg<10 / no clear peak) || |peak_center - delay_used|>50ps (when delay known) || σ>150ps broad || channel_mismatch (A/B<40% or other>20%) || threshold MISMATCH || pairing reversed || frame_start offset` 且 raw 证据确凿 → `PATH_A2_RAW_CONTRACT_ERROR`（可修复，0重叠 calibration 验证）
-- `peak_healthy (|peak-delay|<50ps && p2bg>1000 && σ 50-150ps) && still_low (A==B<45% && NLL>>1.0)` → `PATH_B_DOMAIN_SHIFT`（raw 正确但相关率仍低，需重估熵/泄漏）
+- `peak_missing (p2bg<10) || |peak_center - delay_used|>50ps (delay 已知时) || delay_sign mismatch || σ>150ps broad || channel_mismatch (A/B<40% or other>20%) || threshold !=40000 || pairing reversed || frame_start offset` 且 raw 证据确凿 → `PATH_A2_RAW_CONTRACT_ERROR`（可修复，0重叠 calibration 验证）
+- `peak_shape_healthy (p2bg>1000 && σ 50-150ps) && timing_contract_verified (|peak-delay|<50 && sign match && V55 delay/pairing 已恢复) && still_low (A==B<45% && NLL>>1.0)` → `PATH_B_DOMAIN_SHIFT`（仅当契约已验证才允许进 B）
+- `peak_shape_healthy && !timing_contract_verified && still_low` → `INCONCLUSIVE_A2_NOT_EXCLUDED`（peak 健康但 V55 delay 不可追溯，不得判 B，A2 未排除）
 - `TimeTagger missing / file missing` → `INCONCLUSIVE_NEED_CALIBRATION` (`INCOMPLETE_TTBin_UNAVAILABLE`)
-- 缺 metadata 无 actual 证据 → `INCONCLUSIVE_METADATA_INCOMPLETE`
+- 缺 metadata 无 actual 证据 → `INCONCLUSIVE_METADATA_INCOMPLETE`；TTBin 加载后记录 `total_events / acquisition_duration_s / ttbin_merge {main_size,chunk_size,merge_verified}` 并与 intake sidecar `provenance + diagnostics` 交叉核对，`merge_verified=false` 时标记静默漏读分卷风险
 
 **总体四态**：`PATH_A2_ALL`（全 A2） / `PATH_B_ALL`（全 B） / `MIXED_BY_SOURCE`（源间不一致） / `INCONCLUSIVE`（含 `INCOMPLETE_TTBin_UNAVAILABLE`）
 

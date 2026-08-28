@@ -262,6 +262,25 @@ def try_recompute_corr_for_source(ttbin_paths: list[str], ch_a=1, ch_b=5):
         frac_A = float(count_A / ch.size) if ch.size else 0.0
         frac_B = float(count_B / ch.size) if ch.size else 0.0
         frac_other = float(other / ch.size) if ch.size else 0.0
+        try:
+            tps = np.asarray(events.time_ps, dtype=np.int64)
+            if tps.size:
+                tmin = int(np.min(tps))
+                tmax = int(np.max(tps))
+                acq_s = float(max(0, tmax - tmin)) * 1e-12
+            else:
+                tmin = 0
+                tmax = 0
+                acq_s = 0.0
+        except Exception:
+            tmin = 0
+            tmax = 0
+            acq_s = 0.0
+        chunk_path = Path(ttbin_paths[1]) if len(ttbin_paths) > 1 else None
+        main_size = int(Path(ttbin_paths[0]).stat().st_size) if Path(ttbin_paths[0]).exists() else None
+        chunk_size = int(chunk_path.stat().st_size) if chunk_path is not None and chunk_path.exists() else None
+        chunk_exists = bool(chunk_path is not None and chunk_path.exists() and chunk_size is not None and chunk_size > 0)
+        merge_verified = bool(chunk_exists and int(ch.size) > 50000)
         channel_result = {
             "unique_channels": sorted(hist.keys()),
             "hist": hist,
@@ -274,6 +293,20 @@ def try_recompute_corr_for_source(ttbin_paths: list[str], ch_a=1, ch_b=5):
             "frac_other": frac_other,
             "chan_A": ch_a,
             "chan_B": ch_b,
+            "acquisition_duration_s": acq_s,
+            "timetag_min_ps": tmin,
+            "timetag_max_ps": tmax,
+            "ttbin_merge": {
+                "main_path": str(ttbin_paths[0]),
+                "chunk_path": str(chunk_path) if chunk_path is not None else None,
+                "main_size": main_size,
+                "chunk_size": chunk_size,
+                "chunk_exists": chunk_exists,
+                "total_events_after_load": int(ch.size),
+                "acquisition_duration_s": acq_s,
+                "merge_verified": merge_verified,
+                "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts",
+            },
         }
     except Exception as e:
         return None, f"INCOMPLETE channel hist failed: {e}"
@@ -465,8 +498,7 @@ def main():
                 explicit_error = True
                 explicit_reasons.append(f"other_channels {channel_res['frac_other']:.3f} >0.20")
 
-        if peak is None:
-            # No raw peak -> INCOMPLETE, not auto error unless missing clearly
+        # default timing contract (separate gate) - must be recovered and matched before B
             if corr_err and "INCOMPLETE_TTBin_UNAVAILABLE" in corr_err:
                 decision = "INCONCLUSIVE_NEED_CALIBRATION"
                 rationale = f"TTBin unavailable: {corr_err}"
@@ -487,46 +519,60 @@ def main():
                 if abs(raw_center - delay_v55_decl) > 50:
                     explicit_error = True
                     explicit_reasons.append(f"|peak_center {raw_center:.1f} - delay_used {delay_v55_decl}| >50ps")
-            elif raw_center is not None and delay_v13 is not None:
-                # V55 missing delay, compare to V13 delay magnitude sanity: sign should match expected? Not error, but note
-                pass
             # threshold mismatch
             if thr_v55_decl is not None and thr_v55_decl != 40000:
-                # V13 is 40000, but if V55 differs, it's mismatch
                 explicit_error = True
                 explicit_reasons.append(f"nearest_threshold {thr_v55_decl} != 40000")
+            # sign mismatch is explicit A2 when delay known
+            if delay_v55_decl is not None and raw_center is not None:
+                if int(np.sign(raw_center)) != int(np.sign(delay_v55_decl)) and raw_center != 0 and delay_v55_decl != 0:
+                    explicit_error = True
+                    explicit_reasons.append(f"delay_sign mismatch raw {int(np.sign(raw_center))} vs declared {int(np.sign(delay_v55_decl))}")
             # frame_start/wrap_rule missing is INCOMPLETE, not explicit error unless raw peak offset clearly indicates
-            # Check healthy
-            if raw_center is not None and raw_sigma is not None and raw_p2bg is not None:
-                # delay check: if delay known, |peak-delay|<50, else just check sigma and p2bg
-                delay_ok = True
-                if delay_v55_decl is not None:
-                    delay_ok = abs(raw_center - delay_v55_decl) < 50
-                elif delay_v13 is not None:
-                    # if V55 missing, we can't check delay_ok, so require only sigma/p2bg
-                    delay_ok = True
-                if delay_ok and 50 <= raw_sigma <= 150 and raw_p2bg > 1000:
-                    healthy = True
+            # timing_contract_verified: separate gate, only when V55 delay/pairing recovered and matches raw peak
+            timing_contract_verified = False
+            timing_contract_reasons = []
+            if peak is not None and delay_v55_decl is not None and raw_center is not None:
+                sign_match = int(np.sign(raw_center)) == int(np.sign(delay_v55_decl)) or raw_center == 0 or delay_v55_decl == 0
+                numeric_match = abs(raw_center - delay_v55_decl) < 50
+                pairing_ok = (thr_v55_decl is None) or (thr_v55_decl == 40000)
+                if not sign_match:
+                    timing_contract_reasons.append(f"delay_sign mismatch raw {int(np.sign(raw_center))} vs declared {int(np.sign(delay_v55_decl))}")
+                if not numeric_match:
+                    timing_contract_reasons.append(f"|peak {raw_center:.1f} - delay {delay_v55_decl}| >=50ps")
+                if not pairing_ok:
+                    timing_contract_reasons.append(f"pairing threshold {thr_v55_decl} !=40000")
+                timing_contract_verified = bool(sign_match and numeric_match and pairing_ok)
+                if not timing_contract_verified:
+                    timing_contract_reasons.append("timing_contract not verified")
+            else:
+                timing_contract_reasons.append("delay_used or peak unavailable -> timing_contract INCOMPLETE")
+                timing_contract_verified = False
+            # Check healthy (peak shape only, no delay gating)
+            peak_shape_healthy = bool(raw_center is not None and raw_sigma is not None and raw_p2bg is not None and 50 <= raw_sigma <= 150 and raw_p2bg > 1000)
+            if peak_shape_healthy:
+                healthy = True
 
             # Decision
             if explicit_error:
                 decision = "PATH_A2_RAW_CONTRACT_ERROR"
                 rationale = "; ".join(explicit_reasons)
-            elif healthy:
-                # Check still_low background: use parquet rate
+            elif peak_shape_healthy:
                 still_low = False
                 rate = parquet_rates.get(label)
                 if rate is not None and rate < 0.45:
                     still_low = True
-                # Also check q_mass background from V56D0? we have 27-41% low
                 if still_low:
-                    decision = "PATH_B_DOMAIN_SHIFT"
-                    rationale = f"raw peak healthy center {raw_center:.1f} σ {raw_sigma:.1f} p2bg {raw_p2bg:.1f} but A==B {rate:.3f} <0.45 still low -> domain shift"
+                    if timing_contract_verified:
+                        decision = "PATH_B_DOMAIN_SHIFT"
+                        rationale = f"raw peak healthy center {raw_center:.1f} σ {raw_sigma:.1f} p2bg {raw_p2bg:.1f} timing_contract_verified (delay {delay_v55_decl} matched) but A==B {rate:.3f} <0.45 still low -> domain shift"
+                    else:
+                        decision = "INCONCLUSIVE_A2_NOT_EXCLUDED"
+                        rationale = f"raw peak healthy center {raw_center:.1f} σ {raw_sigma:.1f} p2bg {raw_p2bg:.1f} but timing_contract not verified ({'; '.join(timing_contract_reasons)}); A==B {rate} low -> cannot enter Path B, A2 not excluded"
                 else:
                     decision = "INCONCLUSIVE"
-                    rationale = f"raw peak healthy but rate {rate} not low enough to confirm B"
+                    rationale = f"raw peak healthy but rate {rate} not low enough to confirm B; timing_verified={timing_contract_verified}"
             else:
-                # missing fields without explicit error -> INCONCLUSIVE_METADATA_INCOMPLETE
                 incomplete_fields = [k for k, v in contract_status.items() if v == "INCOMPLETE"]
                 if incomplete_fields:
                     decision = "INCONCLUSIVE_METADATA_INCOMPLETE"
@@ -535,11 +581,15 @@ def main():
                     decision = "INCONCLUSIVE"
                     rationale = "insufficient evidence for A2/B"
 
-            # If corr unavailable -> INCONCLUSIVE_NEED_CALIBRATION
             if corr_err and "INCOMPLETE_TTBin_UNAVAILABLE" in corr_err:
                 decision = "INCONCLUSIVE_NEED_CALIBRATION"
                 rationale = f"TTBin unavailable after attempt: {corr_err}"
 
+        merge_info = channel_res.get("ttbin_merge") if channel_res else None
+        merge_verified = bool(merge_info and merge_info.get("merge_verified")) if merge_info else False
+        if channel_res and not merge_verified and not corr_err:
+            if channel_res.get("total_events", 0) < 50000:
+                rationale += f" [WARN ttbin_merge not verified: total_events {channel_res.get('total_events')} <50000, possible silent miss of .1.ttbin; chunk {merge_info.get('chunk_size') if merge_info else 'n/a'}]"
         per_source_decisions[label] = decision
         shunt_evidence[label] = {
             "channel": channel_res,
@@ -548,10 +598,16 @@ def main():
             "parquet_rate": parquet_rates.get(label),
             "explicit_reasons": explicit_reasons,
             "healthy": healthy,
+            "timing_contract_verified": timing_contract_verified,
+            "timing_contract_reasons": timing_contract_reasons,
+            "delay_declared_ps": delay_v55_decl,
+            "thr_declared_ps": thr_v55_decl,
+            "ttbin_merge": merge_info,
+            "ttbin_merge_verified": merge_verified,
             "per_source_decision": decision,
             "per_source_rationale": rationale,
             "corr_error": corr_err,
-            "note": "lag = t_B - t_A, bin 100ps max_lag 819200 n_bins 16384; A2 raw contract vs B domain shift; 0-overlap calibration required if A2",
+            "note": "lag = t_B - t_A, bin 100ps max_lag 819200 n_bins 16384; timing_contract_verified separate from peak healthy; A2 not excluded unless verified; 0-overlap calibration required if A2",
         }
 
     # overall
@@ -572,6 +628,15 @@ def main():
         overall = "PATH_B_ALL"
         rationale = f"All 3 sources PATH_B (raw peak healthy but A==B 27-41%): {per_source_decisions}"
         next_step = "re-estimate H(U1|B), H(U2|U1,B) from new intake N_ab, recompute source-adaptive m_total/f (1.3*n*H-64)/5, redesign if needed; calibrate with independent frames first"
+    elif any(d == "INCONCLUSIVE_A2_NOT_EXCLUDED" for d in decisions):
+        if all(d == "INCONCLUSIVE_A2_NOT_EXCLUDED" for d in decisions):
+            overall = "INCONCLUSIVE"
+            rationale = f"All 3 INCONCLUSIVE_A2_NOT_EXCLUDED (peak healthy but timing untraceable, cannot enter B): {per_source_decisions}"
+            next_step = "recover V55 actually used delay/pairing params and verify |peak-delay|<50 + sign match before Path B; then calibrate"
+        else:
+            overall = "MIXED_BY_SOURCE"
+            rationale = f"mixed with INCONCLUSIVE_A2_NOT_EXCLUDED: {per_source_decisions} -> A2 not excluded for healthy-peak sources"
+            next_step = "handle per-source: A2 sources fix contract, A2_NOT_EXCLUDED sources recover timing contract, then 0-overlap calibration"
     elif any(d == "INCONCLUSIVE_METADATA_INCOMPLETE" for d in decisions) and len(set(decisions)) == 1:
         overall = "INCONCLUSIVE"
         rationale = "per-source INCONCLUSIVE due to missing raw contract fields without explicit error"
