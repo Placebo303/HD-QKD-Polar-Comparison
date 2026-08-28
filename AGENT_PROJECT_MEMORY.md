@@ -1,3 +1,10 @@
+## 2026-08-28 V55 pre-EXECUTE / pre-RESULT 双重 review 门禁（强制）
+
+- 根因 [repo-observed]: V55 连续复用 V54 模板常量 `efd34ef` 作为 `ACCEPTED_PLAN_SHA` 未替换，导致计划绑定错误。
+- pre-EXECUTE review [decision, mandatory]: 每次正式 decoder 执行（`EXECUTE_AUTH` / 生产 `run_01`）前必须完成并记录：`HEAD == origin/<branch> == implementation SHA`、`ACCEPTED_PLAN_SHA` 重推导一致且 `rg <旧SHA>` 0 命中、目标 `run_01` 不存在、预算/门禁/`cycle_state` 与冻结 plan 一致、`py_compile` + 关键测试 PASS。FAIL 则阻塞执行，进入 `revise-required`/返工，新 SHA 重审。
+- pre-RESULT review [decision, mandatory]: 每次输出 development result（`OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` 固化/提交）前必须由独立线程或 reviewer 对照冻结 plan 复核阈值、泄漏公式分解、`undetected` 隔离（不得并入 success/FER）、per-source 分解、disclosure 等语义与实际产物。问题即返工，不得先产出后补 review；FAIL 阻塞固化，不得带病提交 `run_01`。
+- 权威流程 [decision]: `AGENTS.md` §3 Mandatory Processes 与 §10.3、`docs/research-cycle-sop.md` §10 为长期流程；每次 execution/result 周期无例外适用。
+
 ## 2026-08-27 执行后分析口头通报规则（V42起）
 
 - 触发条件 [decision]: 每次正式 execution 完成后必做，首个适用 scope 为 `v42_diagnostic_18_calls_exactly_once`，后续所有同类正式 run 均适用。

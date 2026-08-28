@@ -67,6 +67,9 @@ These rules apply to all agents operating in this repository.
 - If implementation reveals requirement ambiguity, **stop** and return to planner or OpenSpec instead of guessing.
 - If a change modifies behavior, architecture, prompt rules, tool semantics, or workflow rules, **create or update an OpenSpec change first**.
 - Before modifying any file, read it first. Never write to a file without reading its current contents.
+- **Pre-EXECUTE review is mandatory before every formal decoder execution** (origin `EXECUTE_AUTH` or any production `run_01`). Must verify on the exact implementation SHA: `HEAD == origin/<branch> == implementation SHA`, `ACCEPTED_PLAN_SHA` matches the accepted plan (re-derive from `git log`/`cycle_state.yaml`, `rg` for stale SHA returns 0 hits), `run_01` does not already exist under the target output root, budget/gate thresholds and `cycle_state` authorizations are consistent with the frozen plan, and `py_compile` + the plan's critical tests PASS. Record the checklist in the cycle docs before authorizing execution.
+- **Pre-RESULT review is mandatory before every development-result output is published or committed** (`OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` solidification). An independent thread or reviewer must re-check the frozen plan thresholds, leakage-formula decomposition, `undetected` isolation (never merged into success/FER), per-source breakdown, disclosure accounting, and other plan-specified semantics against the actual artifacts. Issues trigger immediate rework; do not publish first and patch review later.
+- **If either review FAILs, execution/solidification is blocked.** Enter `revise-required` / rework, fix the root cause on a new SHA, and re-review. Never submit `run_01` with a known review failure. Root cause: V55 repeated `ACCEPTED_PLAN_SHA` binding to the reused V54 template constant `efd34ef`.
 
 ---
 
@@ -338,6 +341,12 @@ pre-registered no-rerun/no-tuning rules intact.
 - Publish with ordinary non-force pushes. If a remote branch carries an
   incompatible Polar or sibling-checkout line, push a clearly named formal-IR
   branch instead of merging crosstalk or force-updating that branch.
+
+### 10.3 Pre-EXECUTE / Pre-RESULT Review Gates (Mandatory)
+
+- **Pre-EXECUTE** (formal decoder execution): verify `HEAD == origin/<branch> == implementation SHA`, `ACCEPTED_PLAN_SHA` is the accepted-plan SHA (re-derived, `rg <stale-SHA>` 0 hits), target `run_01` absent, budget/gate/`cycle_state` authorizations match the frozen plan, `py_compile` + critical tests PASS. Checklist recorded in cycle docs; FAIL blocks execution (`revise-required`).
+- **Pre-RESULT** (development-result publication): independent thread/reviewer re-checks plan thresholds, leakage-formula decomposition, `undetected` isolation, per-source breakdown, disclosure accounting and plan-specified semantics against actual artifacts before any `OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` commit. Issues → immediate rework; never publish-then-patch. FAIL blocks solidification.
+- Both gates apply to every execution/result cycle without exception; V55 `efd34ef` stale-constant reuse is the negative example.
 
 ---
 

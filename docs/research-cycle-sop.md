@@ -184,3 +184,40 @@ A research milestone is ready for review when all answers are yes:
 - Does the report avoid promoting residual improvement to exact recovery?
 - Is formal execution still blocked unless the user explicitly authorized it?
 
+## 10. Pre-EXECUTE / Pre-RESULT review gates (mandatory — V55 `efd34ef` fix)
+
+No formal decoder execution and no development-result publication without a
+recorded review. "Publish first, review later" is forbidden.
+
+### 10.1 Pre-EXECUTE review — before every formal decoder execution
+
+Applies to every production `run_01` / `EXECUTE_AUTH` execution. On the exact
+implementation SHA, verify and record in cycle docs:
+
+1. `HEAD == origin/<branch> == implementation SHA` (no drift)
+2. `ACCEPTED_PLAN_SHA` equals the accepted plan SHA — re-derive from `git log`
+   / `cycle_state.yaml`; `rg <stale-SHA>` (e.g. reused template constant
+   `efd34ef`) returns 0 hits
+3. Target `run_01` does not already exist under the output root (no overwrite)
+4. Budget, gate thresholds, and `cycle_state` authorizations match the frozen plan
+5. `py_compile` + plan-specified critical tests PASS
+
+FAIL → execution blocked, enter `revise-required`/rework, fix on a new SHA, re-review.
+
+### 10.2 Pre-RESULT review — before every development-result output
+
+Applies before any `OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01`
+solidification or commit. An **independent thread or reviewer** re-checks the
+actual artifacts against the frozen plan:
+
+- plan thresholds and gate semantics
+- leakage-formula decomposition and disclosure accounting
+- `undetected` isolation (never merged into success/FER)
+- per-source breakdown and other plan-specified semantics
+
+Any issue → immediate rework; do not publish then patch review. FAIL blocks
+solidification — never submit `run_01` with a known review failure.
+
+Root cause prompting this gate: V55 repeatedly bound `ACCEPTED_PLAN_SHA` to the
+V54 template constant `efd34ef` without replacement.
+
