@@ -1184,13 +1184,7 @@ def run_v52_diagnostic(
     per_source_counts: dict[str, dict[str,int]] = {s: {"first":0,"rescued":0,"final":0,"old":0,"rescue_attempted":0} for s in SOURCE_ORDER}
 
     call_id_counter = 1
-    # Need 15 L1 calls first
-    for source in SOURCE_ORDER:
-        for bseed in NEW_BLOCK_SEEDS[source]:
-            accounting.register_start(layer="l1")
-            accounting.register_complete(layer="l1")
-            # L1 APP entropy etc not recorded as L2 record; just accounting
-    # Now per block base + conditional rescue
+    # Now per block: L1 H1-16 BP then base L2 + conditional rescue (same q)
     for source in SOURCE_ORDER:
         for bseed in NEW_BLOCK_SEEDS[source]:
             win = BLOCK_WINDOWS[bseed]
@@ -1206,10 +1200,30 @@ def run_v52_diagnostic(
                 alice, bob = load_heldout_block(bseed)
                 u1a, u2a, u1b, u2b = factorize_f03(alice, bob)
             p_i = get_l1_prior_p_u1_given_b(counts_by_source[source], bob)
-            # fake BP: simple use p_i
-            q = softmax_beliefs(np.log(np.maximum(p_i,1e-15)))
+            # --- L1 H1-16 BP (must be real s1 + TRAIN prior, L1 accounting surrounds call) ---
+            s1 = syndrome_of_gf32(h1_full, u1a, field)
+            accounting.register_start(layer="l1")
+            validate_decoder_contract({"H": h1_full, "source": source, "block_seed": bseed, "h1_rows": H1_M, "lane": "lane_c", "construction_seed": _rep_seed("lane_c", source), "counts": counts_by_source[source], "max_iter": MAX_ITER, "damping_alpha": DAMPING_ALPHA}, DECODER_SETTING)
+            if fake_runner:
+                # fake L1 BP but still wrapped in L1 accounting; use perturbed beliefs so q != p_i
+                fake_beliefs = np.log(np.maximum(p_i, 1e-15)) + 0.05 * np.sin(np.arange(32))[None, :]
+                q = softmax_beliefs(fake_beliefs)
+                ent, md = compute_entropy_and_diff(q, p_i)
+                iterations_l1 = 5
+                syndrome_ok_l1 = True
+                exact_u1_for_record = True
+            else:
+                from comparison_bench.formal_ir.v35_algorithm_development import decode_row_layered_fftqspa as _dec_l1
+                _res_l1 = _dec_l1(h1_full, p_i, s1, max_iter=MAX_ITER, damping_alpha=DAMPING_ALPHA, field=field)
+                q = softmax_beliefs(_res_l1.final_beliefs)
+                ent, md = compute_entropy_and_diff(q, p_i)
+                # L1 diagnostics for records: derive from q vs u1a
+                _x_hat_u1 = np.argmax(q, axis=1).astype(np.uint8)
+                syndrome_ok_l1 = bool(np.array_equal(syndrome_of_gf32(h1_full, _x_hat_u1, field), s1))
+                exact_u1_for_record = bool(np.array_equal(_x_hat_u1, u1a))
+                iterations_l1 = int(_res_l1.iterations)
+            accounting.register_complete(layer="l1")
             prior_l2 = get_l1_app_prior_l2(counts_by_source[source], bob, q)
-            ent, md = compute_entropy_and_diff(q, p_i)
             errors_initial = _compute_errors_initial(u2a, u2b)
             # base spec
             m2 = SOURCE_CHECKS[source]
@@ -1226,8 +1240,11 @@ def run_v52_diagnostic(
             H_base = matrices[("lane_c", source)][0]
             accounting.register_start(layer="base")
             validate_decoder_contract({"H": H_base, "source": source, "block_seed": bseed, "h1_rows": H1_M, "lane": "lane_c", "construction_seed": _rep_seed("lane_c", source), "counts": counts_by_source[source], "max_iter": MAX_ITER, "damping_alpha": DAMPING_ALPHA}, DECODER_SETTING)
-            # decode base (also old)
-            raw_base = _evaluate_one_l2(H_base, source, bseed, counts_by_source[source], bob, u2a, u2b, field, DECODER_SETTING, fake_runner, decode_fn, errors_initial, base_spec, q=prior_l2, p_prior=p_i, iterations_l1=5, entropy=ent, mean_abs=md)
+            # decode base (also old) — same q shared to rescue
+            raw_base = _evaluate_one_l2(H_base, source, bseed, counts_by_source[source], bob, u2a, u2b, field, DECODER_SETTING, fake_runner, decode_fn, errors_initial, base_spec, q=prior_l2, p_prior=p_i, iterations_l1=iterations_l1, entropy=ent, mean_abs=md)
+            # expose L1 diagnostics in raw for record consistency (exact_u1/syndrome_ok_l1 come from real L1 BP)
+            raw_base["exact_u1"] = bool(exact_u1_for_record)
+            raw_base["syndrome_ok_l1"] = bool(syndrome_ok_l1)
             # raw_base already contains arm etc
             raw_base["arm"]="base_shared"; raw_base["pass_index"]=1; raw_base["used_increment"]=False; raw_base["joint"]=False
             raw_base["leak_total"]=leak_for(source)
@@ -1241,12 +1258,17 @@ def run_v52_diagnostic(
             if exact_base:
                 old_success+=1
                 per_source_counts[source]["old"]+=1
-            # first pass success accounting
-            if verify_base and exact_base:
+            # first pass success accounting: verify only (public syndrome&&tag), exact only for stats/G3'
+            if verify_base:
                 first_pass_success+=1
                 per_source_counts[source]["first"]+=1
-                final_success+=1
-                per_source_counts[source]["final"]+=1
+                # final counts exact only as descriptive; G3' undetected==0 uses tag
+                if exact_base:
+                    final_success+=1
+                    per_source_counts[source]["final"]+=1
+                else:
+                    # verify true but exact false = undetected/wrong would be counted elsewhere; still no rescue, not final success
+                    pass
                 # leak stays base, no rescue
             else:
                 # rescue attempt
@@ -1267,7 +1289,9 @@ def run_v52_diagnostic(
                 }
                 accounting.register_start(layer="rescue")
                 validate_decoder_contract({"H": H_joint, "source": source, "block_seed": bseed, "h1_rows": H1_M, "lane": "lane_c", "construction_seed": _rep_seed("lane_c", source), "counts": counts_by_source[source], "max_iter": MAX_ITER, "damping_alpha": DAMPING_ALPHA}, DECODER_SETTING)
-                raw_rescue = _evaluate_one_l2(H_joint, source, bseed, counts_by_source[source], bob, u2a, u2b, field, DECODER_SETTING, fake_runner, decode_fn, errors_initial, rescue_spec, q=prior_l2, p_prior=p_i, iterations_l1=5, entropy=ent, mean_abs=md)
+                raw_rescue = _evaluate_one_l2(H_joint, source, bseed, counts_by_source[source], bob, u2a, u2b, field, DECODER_SETTING, fake_runner, decode_fn, errors_initial, rescue_spec, q=prior_l2, p_prior=p_i, iterations_l1=iterations_l1, entropy=ent, mean_abs=md)
+                raw_rescue["exact_u1"] = bool(exact_u1_for_record)
+                raw_rescue["syndrome_ok_l1"] = bool(syndrome_ok_l1)
                 raw_rescue["arm"]="rescue"; raw_rescue["pass_index"]=2; raw_rescue["used_increment"]=True; raw_rescue["joint"]=True
                 raw_rescue["leak_total"]=leak_joint_for(source)
                 rec_rescue = build_record(rescue_spec, raw_rescue, DECODER_SETTING)
