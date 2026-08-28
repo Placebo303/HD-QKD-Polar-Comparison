@@ -79,61 +79,98 @@ per source:
   # verify selected2 zero-overlap with U2 and among themselves (gap≥4) and K2≥15
 ```
 
-**实测 K2 (`python spike_nested_rescue_stage2.py` 预期)**:
-- 1M `H=400`: `all=397`, `K (V53)=187`, `K2 (V54, excl V53) ≈ 142`, `K2_strict (s%4==0)≈ 42` — `selected2` 15 dispersed 零重叠 verified `gate PASS` (以 spike 实测固化)
-- 1p5M `H=554`: `all=551`, `K=341`, `K2≈260`, `K2_strict≈ 68` — `gate PASS`
-- 2M `H=729`: `all=726`, `K=520`, `K2≈380`, `K2_strict≈ 98` — `gate PASS`
-> 实测 `K2` 富余 `≥15`，`selected2` 45块两两 `gap≥4` 与已用 135 区间零重叠需 spike 实测 `GATE_ALL PASS` 后固化；以上 K2 为预估，真实以 spike 控制台输出为准。
+**实测 K2 (`python spike_nested_rescue_stage2.py` 实测 GATE_ALL PASS 2026-08-28 HEAD 8b29dee, 裸运行 `python openspec/changes/formal-ir-v54-two-stage-incremental-l2-rescue/spike_nested_rescue_stage2.py` exit 0)**:
+- 1M `H=400`: `all=397`, `K (V53)=224`, `K2 (V54, excl V53) = 135`, `K2_strict (s%4==0)= 34` — `selected2=[22,52,109,155,179,202,230,240,263,287,303,324,347,371,388]` 15 dispersed 零重叠 verified `GATE PASS`
+- 1p5M `H=554`: `all=551`, `K=357`, `K2=260`, `K2_strict= 65` — `selected2=[8,73,151,214,247,279,305,337,370,388,419,451,484,516,542]` `GATE PASS`
+- 2M `H=729`: `all=726`, `K=552`, `K2=461`, `K2_strict=111` — `selected2=[8,81,136,197,264,304,351,396,442,489,536,583,630,677,717]` `GATE PASS`
+> 实测 `K2` 富余 `≥15` (135/260/461)，`selected2` 45块两两 `gap≥4` 与已用 135 区间零重叠已实测 `GATE_ALL PASS` 固化。
 
 **分散选择** `index_j=floor(j*(K2-1)/14)` per source, `j=0..14`, `remaining2` 按 ordinal 排序，保证覆盖 hold 区间的两端与中间，且因 `K2` 大、步长约 `K2/14≈10-27`，相邻 `selected2` gap 自然 `>>3` 满足两两非重叠（`gap≥4`），若出现 `gap<4` 则 `REGISTRY_INVALID`.
 
-**Frozen 45 table V54 (actual, spike 实测输出为准，示例占位待固化)**
+**Frozen 45 table V54 (actual, spike 实测 GATE_ALL PASS 固化 2026-08-28)**
 
 | source | block ID (suggested) | held_out_ordinal `[start,end]` (spike actual) | frame_ids[4] (global, spike actual) | pairs |
 |---|---|---|---|---|
-| 1M (H=400, base1600) | 395001 | [4,7] example | [1604,1605,1606,1607] example | 1024 |
-| 1M | 395002 | [18,21] | [1618,1619,1620,1621] | 1024 |
-| … | … | … | … | … |
-| 1M | 395015 | [392,395] | [1992,1993,1994,1995] | 1024 |
-| 1p5M (H=554, base2213) | 395101 | [5,8] | [2218,2219,2220,2221] | 1024 |
-| … | 395115 | [545,548] | [2758,2759,2760,2761] | 1024 |
-| 2M (H=729, base2916) | 395201 | [7,10] | [2923,2924,2925,2926] | 1024 |
-| … | 395215 | [720,723] | [3636,3637,3638,3639] | 1024 |
+| 1M (H=400, base1600) | 395001 | [22,25] | [1622,1623,1624,1625] | 1024 |
+| 1M | 395002 | [52,55] | [1652,1653,1654,1655] | 1024 |
+| 1M | 395003 | [109,112] | [1709,1710,1711,1712] | 1024 |
+| 1M | 395004 | [155,158] | [1755,1756,1757,1758] | 1024 |
+| 1M | 395005 | [179,182] | [1779,1780,1781,1782] | 1024 |
+| 1M | 395006 | [202,205] | [1802,1803,1804,1805] | 1024 |
+| 1M | 395007 | [230,233] | [1830,1831,1832,1833] | 1024 |
+| 1M | 395008 | [240,243] | [1840,1841,1842,1843] | 1024 |
+| 1M | 395009 | [263,266] | [1863,1864,1865,1866] | 1024 |
+| 1M | 395010 | [287,290] | [1887,1888,1889,1890] | 1024 |
+| 1M | 395011 | [303,306] | [1903,1904,1905,1906] | 1024 |
+| 1M | 395012 | [324,327] | [1924,1925,1926,1927] | 1024 |
+| 1M | 395013 | [347,350] | [1947,1948,1949,1950] | 1024 |
+| 1M | 395014 | [371,374] | [1971,1972,1973,1974] | 1024 |
+| 1M | 395015 | [388,391] | [1988,1989,1990,1991] | 1024 |
+| 1p5M (H=554, base2213) | 395101 | [8,11] | [2221,2222,2223,2224] | 1024 |
+| 1p5M | 395102 | [73,76] | [2286,2287,2288,2289] | 1024 |
+| 1p5M | 395103 | [151,154] | [2364,2365,2366,2367] | 1024 |
+| 1p5M | 395104 | [214,217] | [2427,2428,2429,2430] | 1024 |
+| 1p5M | 395105 | [247,250] | [2460,2461,2462,2463] | 1024 |
+| 1p5M | 395106 | [279,282] | [2492,2493,2494,2495] | 1024 |
+| 1p5M | 395107 | [305,308] | [2518,2519,2520,2521] | 1024 |
+| 1p5M | 395108 | [337,340] | [2550,2551,2552,2553] | 1024 |
+| 1p5M | 395109 | [370,373] | [2583,2584,2585,2586] | 1024 |
+| 1p5M | 395110 | [388,391] | [2601,2602,2603,2604] | 1024 |
+| 1p5M | 395111 | [419,422] | [2632,2633,2634,2635] | 1024 |
+| 1p5M | 395112 | [451,454] | [2664,2665,2666,2667] | 1024 |
+| 1p5M | 395113 | [484,487] | [2697,2698,2699,2700] | 1024 |
+| 1p5M | 395114 | [516,519] | [2729,2730,2731,2732] | 1024 |
+| 1p5M | 395115 | [542,545] | [2755,2756,2757,2758] | 1024 |
+| 2M (H=729, base2916) | 395201 | [8,11] | [2924,2925,2926,2927] | 1024 |
+| 2M | 395202 | [81,84] | [2997,2998,2999,3000] | 1024 |
+| 2M | 395203 | [136,139] | [3052,3053,3054,3055] | 1024 |
+| 2M | 395204 | [197,200] | [3113,3114,3115,3116] | 1024 |
+| 2M | 395205 | [264,267] | [3180,3181,3182,3183] | 1024 |
+| 2M | 395206 | [304,307] | [3220,3221,3222,3223] | 1024 |
+| 2M | 395207 | [351,354] | [3267,3268,3269,3270] | 1024 |
+| 2M | 395208 | [396,399] | [3312,3313,3314,3315] | 1024 |
+| 2M | 395209 | [442,445] | [3358,3359,3360,3361] | 1024 |
+| 2M | 395210 | [489,492] | [3405,3406,3407,3408] | 1024 |
+| 2M | 395211 | [536,539] | [3452,3453,3454,3455] | 1024 |
+| 2M | 395212 | [583,586] | [3499,3500,3501,3502] | 1024 |
+| 2M | 395213 | [630,633] | [3546,3547,3548,3549] | 1024 |
+| 2M | 395214 | [677,680] | [3593,3594,3595,3596] | 1024 |
+| 2M | 395215 | [717,720] | [3633,3634,3635,3636] | 1024 |
 
-> **以上为算法示意占位，实际冻结值以 `python spike_nested_rescue_stage2.py` 执行后的控制台输出为准**（该脚本打印 `| source | block ID | ordinal | frame_ids |` 的完整冻结表 + `K2/K2_strict`）。Proposal/design/spike_report 三处最终一致时，示例将被替换为实测值；若 spike 执行失败则 `REGISTRY_INVALID`.
+> **以上为 `python openspec/changes/formal-ir-v54-two-stage-incremental-l2-rescue/spike_nested_rescue_stage2.py` 裸运行 (parents[3]) 实测 `GATE_ALL PASS` 固化值 (K2 135/260/461, K2_strict 34/65/111)，与设计冻结表一致。**
 
 - 每窗口 `4 frames×256=1024 pairs`，`BLOCK_LENGTH=1024`，`sampling_mode=deterministic_four_consecutive_frames_heldout_fresh_v54`。
 - 新 45 块与 `V48/V50/V51/V52/V53` `frame_ids` 零重叠 per source 可机械校验（`BLOCK_WINDOWS` 比对），且最终 45 间两两非重叠（`gap≥4`），与 `394xxx` (V53) 零重叠。
 - `K2≥15` 富余，45块仍为最小确认规模，分散选择保证覆盖整个 hold 区间。
 
-## 6. Joint census and nesting metrics — 预期实测 (decoder-free, `spike_nested_rescue_stage2.py`)
+## 6. Joint census and nesting metrics — 实测固化 GATE_ALL PASS (decoder-free, `spike_nested_rescue_stage2.py` 裸运行 parents[3] exit 0)
 
 Using `construct_lane_c_prototype` + `construct_h_inc` (inc1 & inc2) + `compute_gf32_rank`. **三源二阶段联合矩阵实际生成**，零 decoder 调用，预期 gate 全 PASS（需本机执行复现，失败则非零退出）。
 
-### 6.1 Per-source two-stage joint table (预期, spike 实测待固化 `GATE_ALL PASS`)
+### 6.1 Per-source two-stage joint table (实测固化 GATE_ALL PASS 2026-08-28, parents[3] 裸运行 exit 0)
 
 | source | m2 | H_base rank | H_inc1 shape | E_inc1 | H_inc1 row_deg | col_inc1 max | H_joint1 shape | rank_joint1 | rank_inc1 | nested1 | leak_base | leak_stage1 | H_inc2 shape | E_inc2 | col_inc2 max | H_total shape | rank_total | rank_inc2 | rank_total_inc | nested_total | leak_stage2 | +40/+80 | gate |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1M | 184 | 184 | 8×1024 | ≈96 | ~12/12/≤16 | 1 | 192×1024 | 192 | 8 | True | 1064 | 1104 | 8×1024 | ≈96 | 1 | 200×1024 | 200 | 8 | 16 | True | 1144 | 40/80 | PASS |
-| 1p5M | 190 | 190 | 8×1024 | ≈96 | ~12/12/≤16 | 1 | 198×1024 | 198 | 8 | True | 1094 | 1134 | 8×1024 | ≈96 | 1 | 206×1024 | 206 | 8 | 16 | True | 1174 | 40/80 | PASS |
-| 2M | 192 | 192 | 8×1024 | ≈96 | ~12/12/≤16 | 1 | 200×1024 | 200 | 8 | True | 1104 | 1144 | 8×1024 | ≈96 | 1 | 208×1024 | 208 | 8 | 16 | True | 1184 | 40/80 | PASS |
+| 1M | 184 | 184 | 8×1024 | 96 | 12/12/≤16 | 1 | 192×1024 | 192 | 8 | True | 1064 | 1104 | 8×1024 | 96 | 1 | 200×1024 | 200 | 8 | 16 | True | 1144 | 40/80 | PASS |
+| 1p5M | 190 | 190 | 8×1024 | 96 | 12/12/≤16 | 1 | 198×1024 | 198 | 8 | True | 1094 | 1134 | 8×1024 | 96 | 1 | 206×1024 | 206 | 8 | 16 | True | 1174 | 40/80 | PASS |
+| 2M | 192 | 192 | 8×1024 | 96 | 12/12/≤16 | 1 | 200×1024 | 200 | 8 | True | 1104 | 1144 | 8×1024 | 96 | 1 | 208×1024 | 208 | 8 | 16 | True | 1184 | 40/80 | PASS |
 
 - `rank_base==m2`, `rank_joint1==m2+8`, `rank_total==m2+16`, `nested1==True`, `nested_total_base==True`, `nested_total_joint1==True`, `rank_inc1==8`, `rank_inc2==8`, `row≤16`, `col_inc1≤1`, `col_inc2≤1`, `joint_zero_col==0`, `total_zero_col==0`, `+40/+80` formula hold.
-- `E_inc1` and `E_inc2` each exact `96` in this construction; `total row_deg max ≤16`.
-- `tag_import_ok` via `compute_tag_64(empty, zeros)` true.
-- **Spike 复现命令与预期结果**:
+- `E_inc1` and `E_inc2` each exact `96` in this construction; `total row_deg max 12` (min 10-12, mean 10.77-11.20), `col_deg_total max 4 mean 2.19 zero_col 0`.
+- `tag_import_ok` via `compute_tag_64(empty, zeros)` true, example `f5a5fd42d16a2030`.
+- **Spike 复现命令与实测结果 (parents[3] 裸运行, HEAD 8b29dee, exit 0 GATE_ALL PASS)**:
 ```bash
-python openspec/changes/formal-ir-v54-two-stage-incremental-l2-rescue/spike_nested_rescue_stage2.py
-# 预期输出（以本机实测为准）:
-# 1M: H_base 184×1024 rank 184, H_inc1 8×1024 E96, H_joint1 192×1024 rank 192 nested True rank_inc1 8 leak 1064→1104
-#      H_inc2 8×1024 E96, H_total 200×1024 rank 200 nested_total True rank_inc2 8 leak_stage2 1144 gate PASS
-# 1p5M: H_joint1 198 rank 198, H_total 206 rank 206 nested True 1094→1134→1174 PASS
-# 2M: H_joint1 200 rank 200, H_total 208 rank 208 nested True 1104→1144→1184 PASS
-# 1M K2≈142 K2_strict≈42, 1p5M K2≈260 K2_strict≈68, 2M K2≈380 K2_strict≈98 — selected2 45块零重叠（gap≥4）与已用135区间零重叠 per source verified
+python openspec/changes/formal-ir-v54-two-stage-incremental-l2-rescue/spike_nested_rescue_stage2.py  # 裸运行，无需 PYTHONPATH, parents[3] 固化
+# 实测输出 (已固化):
+# 1M: H_base 184×1024 rank 184, H_inc1 8×1024 E96 row_deg [12]*8, H_joint1 192×1024 rank 192 nested True rank_inc1 8 leak 1064→1104
+#      H_inc2 8×1024 E96 row_deg [12]*8, H_total 200×1024 rank 200 nested_total True rank_inc2 8 rank_total_inc 16 leak_stage2 1144 gate PASS total row max 12 col max 4 zero 0
+# 1p5M: H_base 190 rank 190, H_joint1 198 rank 198, H_total 206 rank 206 nested True 1094→1134→1174 PASS total row max 12
+# 2M: H_base 192 rank 192, H_joint1 200 rank 200, H_total 208 rank 208 nested True 1104→1144→1184 PASS total row max 12
+# 1M K2=135 K2_strict=34, 1p5M K2=260 K2_strict=65, 2M K2=461 K2_strict=111 — selected2 45块零重叠（gap≥4）与已用135区间零重叠 per source verified (V53 K 224/357/552)
 # GATE_ALL: ALL PASS (two-stage matrices nested m2+8+8 + registry 45 zero-overlap V54 + budget + leakage) — exit 0
 # gate 失败时脚本非零退出 (sys.exit(1))，不产生 Constructible: YES
 ```
-实测 `rank_total==m2+16`（200/206/208）`nested_total==True` `rank_inc2==8` `row≤16` `col_inc2≤1` `E_inc2=96` `leak +40+40` 均需 spike 退出码 `0` 后固化；脚本零 decoder 调用、write-free；失败时 `sys.exit(1)` 并返回 `NESTED_NOT_CONSTRUCTIBLE` 或 `REGISTRY_INVALID`.
+实测 `rank_total==m2+16`（200/206/208）`nested_total==True` `rank_inc2==8` `row≤16` `col_inc2≤1` `E_inc2=96` `leak +40+40` 已 spike 退出码 `0` 固化；脚本零 decoder 调用、write-free；失败时 `sys.exit(1)` 并返回 `NESTED_NOT_CONSTRUCTIBLE` 或 `REGISTRY_INVALID`。裸运行已验证 `parents[3]` 路径，无需临时 PYTHONPATH。
 
 ### 6.2 Leakage & budget formulas（三阶段，decoder-free 校验）
 
@@ -152,10 +189,10 @@ python openspec/changes/formal-ir-v54-two-stage-incremental-l2-rescue/spike_nest
 Preflight (write-free, zero decoder calls) SHALL rebuild deterministically via `spike_nested_rescue_stage2.py` logic 并校验：
 `H_base shape==m2×1024, rank==m2`, `H_inc1 shape==8×1024, col≤1, row≤16, E_inc1≈96, no zero row`, `H_joint1 shape==m2+8×1024, rank==m2+8, nested1==True, rank_increment_1==8`, `H_inc2 shape==8×1024, col≤1, row≤16, E_inc2≈96, no zero row`, `H_total shape==m2+16×1024, rank==m2+16, nested_total==True (both prefixes), rank_increment_2==8, joint1 & total col nonzero, joint & total row≤16`, `leak_stage1==leak_base+40`, `leak_stage2==leak_base+80`, `tag_import_ok`, `K2≥15`, `selected2 15/源 dispersed index_j`, `zero_overlap with used 135` per source, `final 45 pairwise gap≥4`, `45 distinct suggested IDs 395xxx`, `budget 90-180`。任一失败 → `REGISTRY_INVALID` 或 `NESTED_NOT_CONSTRUCTIBLE`.
 
-## 8. Spike verdict — 预期 PASS (需本机实测 `python spike_nested_rescue_stage2.py` exit 0 GATE_ALL PASS 后固化)
+## 8. Spike verdict — 实测 PASS (`python spike_nested_rescue_stage2.py` 裸运行 parents[3] exit 0 GATE_ALL PASS 已固化 2026-08-28)
 
-- **Constructible (V54 two-stage Δ8+8)**: **预期 YES** — 三源 `H_joint1` `192/198/200`（`m2+8`）满秩嵌套 + `H_total` `200/206/208`（`m2+16`）满秩、二阶段嵌套、`rank_increment_2==8`、泄漏 `+40/+80`（1064→1104→1144 等）、`row≤16` `col_inc1≤1` `col_inc2≤1` `E_inc=96+96` 均预期通过（`python spike_nested_rescue_stage2.py` 本机执行退出码 `0` `GATE_ALL PASS` 后固化；若 rank deficient 则 `NESTED_NOT_CONSTRUCTIBLE` 且 V54 保持 `PLAN_CANDIDATE` 不进入执行）。
-- **Registry (45 fresh V54)**: **预期 YES** — 实测 `K2≈142/260/380`（`K2_strict≈42/68/98`）富余，分散选 15/源 `index_j=floor(j*(K2-1)/14)` 零重叠且最终 45 两两 `gap≥4`、与已用 135 区间 540 帧零重叠 per source verified，`pairs_count=1024`, `sampling_mode=deterministic_four_consecutive_frames_heldout_fresh_v54`, `block IDs 395xxx` 建议且真实以 `frame_ids` 为准，`GATE_ALL PASS` 预期。
+- **Constructible (V54 two-stage Δ8+8)**: **实测 YES (GATE_ALL PASS)** — 三源 `H_joint1` `192/198/200`（`m2+8`）满秩嵌套 + `H_total` `200/206/208`（`m2+16`）满秩、二阶段嵌套、`rank_increment_2==8`、泄漏 `+40/+80`（1064→1104→1144 等）、`row≤16` `col_inc1≤1` `col_inc2≤1` `E_inc=96+96` 已实测 `GATE PASS` (1M rank 192→200, 1p5M 198→206, 2M 200→208, E_inc1=96 E_inc2=96 row max 12 tag f5a5fd42d16a2030)。
+- **Registry (45 fresh V54)**: **实测 YES (GATE_ALL PASS)** — 实测 `K2=135/260/461`（`K2_strict=34/65/111`）富余，分散选 15/源 `index_j=floor(j*(K2-1)/14)` 零重叠且最终 45 两两 `gap≥4`、与已用 135 区间零重叠 per source verified (V53 K 224/357/552, V54 K2 135/260/461)，`pairs_count=1024`, `sampling_mode=deterministic_four_consecutive_frames_heldout_fresh_v54`, `block IDs 395xxx` 建议且真实以 `frame_ids` 为准，`GATE_ALL PASS` 已固化。
 - **Budget & leakage**: `90-180 硬帽180 (L2 45-135)` 冻结；`leak_base 1064/1094/1104, stage1 1104/1134/1144, stage2 1144/1174/1184`, `total=Σbase+40*N_stage1+40*N_stage2, avg=total/45`, `per_source_avg` 与 `overall_avg` 区分（禁单一 `+40N/45` 当 overall），`rescue_rate_stage1/stage2` 分母分别为 `count(!verify_base)` 与 `count(!verify_base&&!verify_stage1)`（禁 `45-base_exact`），`disclosure_per_final_exact_block`（为0则null）冻结。
 - **Four terminals**: `V54_DELTA8_ALREADY_SUFFICIENT / V54_DELTA16_ADDED_VALUE_SIGNAL / V54_DELTA16_INSUFFICIENT / V54_EVIDENCE_INVALID` 互斥，`EVIDENCE_INVALID` 优先，门禁 `35/45 & 10/15 & undetected==0` 不因 V53 差两个改阈值。
 - **No V48-V53 outcome contact**: construction & registry use only frozen constants and `v38` logic, only reading used `frame_ids` for overlap filtering, not outcomes.
@@ -174,4 +211,4 @@ Preflight (write-free, zero decoder calls) SHALL rebuild deterministically via `
 
 - This report: `openspec/changes/formal-ir-v54-two-stage-incremental-l2-rescue/spike_report.md` + `spike_nested_rescue_stage2.py` (decoder-free reproducible, HEAD `bf5dd1686049156540328bac264296b17fee546c`)
 - OpenSpec four: `proposal.md, design.md, tasks.md, specs/spec.md` (HEAD `bf5dd168...`)
-- Lifecycle: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, no next-stage qualification, 保持冻结首遍与首增量与二阶段嵌套与 45 块分散 `K2/index_j` 零重叠冻结不变；本轮仅 decoder-free 二阶段 spike 与样本注册表，已按冻结内容完成六文件。Verified `python spike_nested_rescue_stage2.py` **预期** `GATE_ALL PASS` (需本机实测，三源 `rank_total 200/206/208 nested True`, `K2≈142/260/380`, 45块零重叠)。
+- Lifecycle: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`, `implementation_started=false`, `production_outputs_created=false`, no next-stage qualification, 保持冻结首遍与首增量与二阶段嵌套与 45 块分散 `K2/index_j` 零重叠冻结不变；本轮仅 decoder-free 二阶段 spike 与样本注册表，已按冻结内容完成六文件。Verified `python spike_nested_rescue_stage2.py` **实测** `GATE_ALL PASS` (裸运行 parents[3] exit 0, 三源 `rank_total 200/206/208 nested True rank_inc2 8 E_inc2 96`, `K2 135/260/461 K2_strict 34/65/111`, 45块零重叠 frame windows 见 §5 冻结表)。

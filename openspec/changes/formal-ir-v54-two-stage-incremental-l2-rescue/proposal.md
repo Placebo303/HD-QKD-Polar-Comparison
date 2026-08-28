@@ -25,8 +25,8 @@
 4. **预算**：每块 `L1 1 + base L2 1 + stage1≤1 + stage2≤1`，总 `L1 45 + base45 + stage1 0-45 + stage2 0-45 = 总90-180 硬帽180`，`L2 45-135`。`base` 兼 `old Lane C` 语义已在 V52/V53 去重，此处三阶段共享同一 `L1→P_i(U2)` 与 `bob`/`prior`。预计实际 `≈112 + 约12 stage2`（若 stage1  rescue 率 ~30%，stage2 需救约 12 块）。
 
 5. **主门禁与四终态**：门禁仍 `final_exact_full ≥35/45 (77.78%) 且每源≥10/15 (66.7%) 且 undetected==0`，**不因 V53 差两个改阈值**。四终态互斥（`EVIDENCE_INVALID` 优先）：
-   - `V54_DELTA8_ALREADY_SUFFICIENT` — `stage1` 已过门禁（`stage1_exact_full≥35/45 ∧ 每源≥10/15 ∧ undetected==0` 且 `joint1_rank==m2+8` 等完整性通过）
-   - `V54_DELTA16_ADDED_VALUE_SIGNAL` — `stage1` 未过但 `stage2 final` 过门禁
+   - `V54_DELTA8_ALREADY_SUFFICIENT` — `stage1` 已过门禁（`stage1_final_exact_full_count≥35/45 ∧ 每源≥10/15 ∧ undetected==0` 且 `verify_after_stage1` 同阈值 且 `joint1_rank==m2+8` 等完整性通过）
+   - `V54_DELTA16_ADDED_VALUE_SIGNAL` — `stage1_final` 未过但 `final_exact_full_count` 过门禁
    - `V54_DELTA16_INSUFFICIENT` — `stage1`与`final`均未过门禁但完整性通过
    - `V54_EVIDENCE_INVALID` — 完整性/守卫/秩/嵌套/重叠/记账失败优先
    不加复杂终态，不晋升 qualification。
@@ -34,6 +34,9 @@
 6. **本轮止于 PLAN**：只产出 decoder-free 二阶段嵌套 spike + 45块 registry + 四OpenSpec 工件，状态 `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`；**不得实现/执行 decoder，不得创建正式 `.../v54_*/run_01/`。**
 
 **报告承诺（shall）**：proposal/design/tasks/specs 显式承诺最终报告 SHALL 包含 — `base_exact_full` 与 `verify_base` 分别计数（禁止假定 `base_exact==verify_base`）、`stage1_exact_full` 与 `verify_stage1` 分别计数、`final_exact_full` 与 `verify_final` 分别计数、`stage1_rescued = stage1_exact - base_exact` 中 `used_inc1 && stage1_exact` 者、`stage2_rescued = final - stage1` 中 `used_inc2 && final_exact` 者、`N_stage1_attempted=count(!verify_base)` 与 `N_stage2_attempted=count(!verify_stage1 && !verify_base)` 及 `rescue_rate_stage1=rescued_stage1/N_stage1_attempted` 与 `rescue_rate_stage2=rescued_stage2/N_stage2_attempted`（禁止用 `45-base_exact` 作分母）、每源分层、三类泄漏（`first_pass_success_leak / stage1_success_leak / stage2_leak(成功与最终失败同为 leak_base+80)`）及 `per_source_avg[s]=leak_base[s]+40×N_stage1_attempted[s]/15+40×N_stage2_attempted[s]/15` 与 `overall_avg=(Σ leak_base[source(block)]+40×N_stage1_total+40×N_stage2_total)/45`（因三源 `leak_base` 不同禁止用单一 `leak_base+40N/45` 当 overall）、`per-stage avg disclosure per attempted frame`、`total_disclosed_bits=Σ leak_total` 与 `disclosure_per_final_exact_block=total_disclosed_bits/final_exact_full_count（为0则null）`（删除含糊 `final_accepted_bits`，若保留 `f_avg` 则分母为 `1024×(H(U1|B)+H(U2|U1,B))` 禁 `N_blocks×(H1+H2)`）、`iterations/runtime/residual`、四类 `exact/detected/decoder_non_syndrome/undetected`、`paired` 明细（`base vs stage1 vs final`）；`V53 33/45` 仅历史描述。
+
+> **Stage1/Final 累计口径冻结（45块累计，非调用记录）**：`stage1_final_exact_full_count = base_exact_full_count + inc1_rescued_exact_count`（`inc1_rescued = count(verify_stage1_call && exact_stage1 && !verify_base)`），对应 `verify_after_stage1_count = count(verify_base OR (!verify_base AND verify_stage1_call))`，`stage1_call_exact_full_count` 仅指 inc1 调用记录中 exact 数（=inc1_rescued），`verify_stage1_call` 仅指 inc1 调用中 verify 数；同理 `final_exact_full_count = stage1_final_exact_full_count + inc2_rescued_exact_count`（`inc2_rescued = count(verify_stage2_call && exact_stage2 && !verify_after_stage1)`），`stage2_call_exact_full_count = inc2_rescued`，`verify_final_count = verify_after_stage1_count + inc2_rescued_verify`；门禁与终态仅使用累计量 `stage1_final_exact_full_count / verify_after_stage1_count` 与 `final_exact_full_count / verify_final_count`，禁止用 `stage1_call_exact_full` 直接判门禁。
+> 含糊的 `stage1_exact_full` 已区分更名为 `stage1_call_exact_full_count`（仅 inc1 调用记录） vs `stage1_final_exact_full_count`（45块累计） vs `final_exact_full_count`（累计再加 inc2-rescued）；终态只能使用后两个累计量。
 
 ## Non-Goals
 

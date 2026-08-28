@@ -131,7 +131,10 @@ per source:
 
 - 每窗口 `4 frames×256=1024 pairs`，`BLOCK_LENGTH=1024`，`pair_idx 0..255` 连续；`sampling_mode` 固定。
 - **Per block calls 冻结**：每块 `L1 1(共享)+base 1+条件 stage1 ≤1+条件 stage2 ≤1`；每块 L2 1-3 次，总预算 `45 L1+45 base+≤45 stage1+≤45 stage2=90-180 硬帽180，L2 45-135`。
-- **Paired 比较**：同 block ID 同 `bob` 同 `P(U2)`，`base_exact_full` vs `stage1_exact_full` vs `final_exact_full`；stage1/stage2 救回定义为 `!verify_base && stage1_exact && used_inc1` 与 `!verify_stage1 && final_exact && used_inc2`。
+- **Paired 比较**：同 block ID 同 `bob` 同 `P(U2)`，`base_exact_full` vs `stage1_call_exact_full`（inc1 调用） vs `stage1_final_exact_full_count (=base+inc1_rescued)` vs `final_exact_full_count (=stage1_final+inc2_rescued)`；stage1/stage2 救回定义为 `!verify_base && stage1_exact && used_inc1` 与 `!verify_after_stage1 && final_exact && used_inc2`，`stage1_final_exact_full_count = base_exact_full_count + inc1_rescued_exact_count`，`final_exact_full_count = stage1_final_exact_full_count + inc2_rescued_exact_count`，门禁仅用累计量。
+
+> **Stage1/Final 累计口径冻结（45块累计，非调用记录）**：`stage1_final_exact_full_count = base_exact_full_count + inc1_rescued_exact_count`（`inc1_rescued = count(verify_stage1_call && exact_stage1 && !verify_base)`），对应 `verify_after_stage1_count = count(verify_base OR (!verify_base AND verify_stage1_call))`，`stage1_call_exact_full_count` 仅指 inc1 调用记录中 exact 数（=inc1_rescued），`verify_stage1_call` 仅指 inc1 调用中 verify 数；同理 `final_exact_full_count = stage1_final_exact_full_count + inc2_rescued_exact_count`（`inc2_rescued = count(verify_stage2_call && exact_stage2 && !verify_after_stage1)`），`stage2_call_exact_full_count = inc2_rescued`，`verify_final_count = verify_after_stage1_count + inc2_rescued_verify`；门禁与终态仅使用累计量 `stage1_final_exact_full_count / verify_after_stage1_count` 与 `final_exact_full_count / verify_final_count`，禁止用 `stage1_call_exact_full` 直接判门禁。
+> 含糊的 `stage1_exact_full` 已区分更名为 `stage1_call_exact_full_count`（仅 inc1 调用记录） vs `stage1_final_exact_full_count`（累计），`final_exact_full_count = stage1_final_exact_full_count + inc2_rescued`；终态只能使用后两个累计量。
 
 ## 3. 代表矩阵与译码合约
 
@@ -163,8 +166,8 @@ per source:
 V54_EVIDENCE_INVALID 优先 若 完整性/守卫/秩/嵌套/重叠/记账失败
 else if final_exact_full ≥35/45 (77.78%) ∧ 每源 final_exact_full ≥10/15 (66.7%) ∧ undetected_accepted_wrong ==0 (G3')
         ∧ joint1_rank==m2+8 ∧ total_rank==m2+16 ∧ nested_stage1 && nested_stage2 ∧ 记账90-180硬帽且每块L1 1+base1+stage1≤1+stage2≤1 ∧ 45 fresh块与已用零重叠
-     then if stage1_exact_full ≥35/45 ∧ 每源≥10/15 ∧ undetected==0  → V54_DELTA8_ALREADY_SUFFICIENT  (stage1 已足，stage2冗余)
-          else → V54_DELTA16_ADDED_VALUE_SIGNAL (stage1未过但final过，Δ16增量有价值)
+     then if stage1_final_exact_full_count ≥35/45 ∧ 每源≥10/15 ∧ undetected==0 (verify_after_stage1 同阈值) → V54_DELTA8_ALREADY_SUFFICIENT  (stage1_final 已足，stage2冗余)
+          else → V54_DELTA16_ADDED_VALUE_SIGNAL (stage1_final未过但final_exact_full_count过，Δ16增量有价值)
 else → V54_DELTA16_INSUFFICIENT (final未过但完整性通过)
 ```
 

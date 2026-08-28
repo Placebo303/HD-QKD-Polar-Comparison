@@ -5,7 +5,7 @@ Gate failure -> sys.exit(1)
 """
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "comparison_bench" / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "comparison_bench" / "src"))
 
 import numpy as np
 from comparison_bench.formal_ir.v35_algorithm_development import GF2mField, compute_gf32_rank
