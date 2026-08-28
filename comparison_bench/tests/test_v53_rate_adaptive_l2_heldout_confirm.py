@@ -391,3 +391,63 @@ def test_verify_true_exact_false_no_rescue(tmp_path, monkeypatch, real_counts):
     assert rec["reclassified"]=="undetected_accepted_wrong"
     assert rec["syndrome_ok_l2"] is True and rec["tag_ok"] is True
     assert rec["exact_l2"] is False
+
+def test_interrupt_partial_retention_no_summary_fail_closed(tmp_path, monkeypatch, real_counts):
+    # at least one base record completed then KeyboardInterrupt injected
+    call_counter={"n":0}
+    orig=v53._evaluate_one_l2
+    def _interrupting(matrix, source, block_seed, counts, bob, u2_alice, u2_bob, field, setting, fake_runner, decode_fn, errors_initial, spec, q=None, p_prior=None, **kw):
+        call_counter["n"]+=1
+        # after first base_shared complete, next call triggers interrupt (so at least 1 record completed)
+        if call_counter["n"]==3:
+            raise KeyboardInterrupt("injected after at least one base record")
+        empty=np.empty(0,dtype=np.uint8); target=compute_tag_64(empty,u2_alice); win=v53.BLOCK_WINDOWS[block_seed]
+        is_rescue=spec.get("arm")=="rescue"
+        return {"source":source,"block_seed":block_seed,"matrix_id":spec["matrix_id"],"h1_matrix_id":v53.H1_MATRIX_ID,"frame_ids":list(win["frame_ids"]),"held_out_ordinal_start":int(win["held_out_ordinal_start"]),"held_out_ordinal_end":int(win["held_out_ordinal_end"]),"pairs_count":1024,"sampling_mode":v53.SAMPLING_MODE,"errors_initial":int(errors_initial),"errors_final":0,"exact_l2":True,"exact_u1":True,"exact_full":True,"syndrome_ok_l2":True,"syndrome_ok_l1":True,"target_tag":target,"candidate_tag":target,"tag_ok":True,"tag_scope":v53.TAG_SCOPE,"reclassified":"exact","iterations_l1":5,"iterations_l2":5,"bp_posterior_entropy":4.2,"mean_abs_diff_q_p":0.03,"leak_total":v53.leak_joint_for(source) if is_rescue else v53.leak_for(source),"leak_joint":v53.leak_joint_for(source),"status":"converged_exact","runtime_s":0.001,"arm":spec.get("arm","base_shared"),"pass_index":int(spec.get("pass_index",1)),"used_increment":bool(is_rescue),"joint":bool(is_rescue)}
+    monkeypatch.setattr(v53,"_evaluate_one_l2", _interrupting)
+    # also need to patch L1 decode to not raise (use fake_runner path via _evaluate_one_l2 fake, but L1 decode is separate; we mock v35 decode to succeed)
+    import comparison_bench.formal_ir.v35_algorithm_development as v35
+    orig_dec=v35.decode_row_layered_fftqspa
+    calls_l1={"n":0}
+    class _MockL1:
+        def __init__(self, prior):
+            import numpy as np
+            self.final_beliefs = np.log(np.maximum(prior,1e-15))
+            self.iterations=5
+    def _mock_l1(matrix, prior, syn, max_iter=90, damping_alpha=1.0, field=None):
+        calls_l1["n"]+=1
+        return _MockL1(prior)
+    # we run with fake_runner False to exercise real L1 path but mocked L1 decode so no heavy compute
+    # Instead use fake_runner=True and intercept _evaluate_one_l2 only - simpler: use fake_runner True
+    # For this test we switch to fake_runner True, so L1 path is fake and not needing v35 mock
+    world=FakeWorld()
+    root=tmp_path/"interrupt"
+    with pytest.raises(KeyboardInterrupt):
+        v53.run_v53_diagnostic(execution_authorized=True, authorized_target_sha="f"*40, fake_runner=True, output_root=root, structural_authority_path=world.authority_file(tmp_path), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=None)
+    monkeypatch.setattr(v53,"_evaluate_one_l2", orig)
+    monkeypatch.setattr(v35,"decode_row_layered_fftqspa", orig_dec)
+    # partial retention: records exist, at least one base record
+    assert (root/"v53_records.json").exists()
+    assert (root/"v53_records.csv").exists()
+    records=json.loads((root/"v53_records.json").read_text(encoding="utf-8"))
+    assert len(records) >= 1
+    # ensure at least one base_shared completed
+    assert any(r["arm"]=="base_shared" for r in records)
+    # no summary aggregate on interrupt path
+    assert not (root/"v53_summary.json").exists()
+    # interrupted notice exists with layered accounting and exception type
+    assert (root/"v53_interrupted_notice.json").exists()
+    notice=json.loads((root/"v53_interrupted_notice.json").read_text(encoding="utf-8"))
+    assert notice["exception_type"]=="KeyboardInterrupt"
+    assert "planned" in notice and "started" in notice and "completed" in notice
+    assert notice["records_completed"]==len(records)
+    # call counts real: started/completed reflect actual completed before interrupt
+    assert notice["completed"]["total"] >= 1
+    assert notice["completed"]["total"] == len(records) + notice["completed"]["l1"]  # total includes l1+base+rescue, records are base/rescue only, so check consistency
+    # second start must be refused fail-closed (output root exists)
+    with pytest.raises(FileExistsError):
+        v53.run_v53_diagnostic(execution_authorized=True, authorized_target_sha="f"*40, fake_runner=True, output_root=root, structural_authority_path=world.authority_file(tmp_path), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=None)
+    # also CLI non-zero via execute script
+    import subprocess, sys, pathlib
+    # CLI test with same root via subprocess would collide with real OUTPUT_ROOT; we test via direct main call with existing root equivalent: fail-closed already tested above
+

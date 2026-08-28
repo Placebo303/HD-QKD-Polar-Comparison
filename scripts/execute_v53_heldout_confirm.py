@@ -46,6 +46,9 @@ def main(argv: Iterable[str] | None = None) -> int:
     except FileExistsError as exc:
         print(f"BLOCKED: {exc}", file=sys.stderr)
         return 2
+    except BaseException as exc:
+        print(f"INTERRUPTED: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return 2
     print(f"V53P0 additive evidence written to {results['output_root']}")
     print(f"Terminal state: {results['terminal_state']}")
     if results.get("summary"):
