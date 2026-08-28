@@ -1,0 +1,89 @@
+{
+  "terminal": "V55_DATA_NOT_READY",
+  "stratified": true,
+  "target_domain": [
+    "1M",
+    "1p5M",
+    "2M"
+  ],
+  "blocks_per_stratum": 30,
+  "blocks_per_stratum_alt": 15,
+  "total_blocks_primary": 90,
+  "budget_primary": "180-360 (L2 90-270)",
+  "total_blocks_alt": 45,
+  "budget_alt": "90-180 (L2 45-135)",
+  "per_stratum": {
+    "1M": {
+      "G1_file_readable": false,
+      "G2_provenance": false,
+      "G3_stratum": false,
+      "G4_shape": false,
+      "G5_independence": false,
+      "G6_prior_readonly": true,
+      "G7_registry": false,
+      "G7_details": {
+        "K": 25,
+        "need": 30,
+        "feasible": false,
+        "K_alt": 25,
+        "feasible_alt": true
+      },
+      "stratum_pass": false
+    },
+    "1p5M": {
+      "G1_file_readable": false,
+      "G2_provenance": false,
+      "G3_stratum": false,
+      "G4_shape": false,
+      "G5_independence": false,
+      "G6_prior_readonly": true,
+      "G7_registry": false,
+      "G7_details": {
+        "K": 43,
+        "need": 30,
+        "feasible": true,
+        "K_alt": 43,
+        "feasible_alt": true
+      },
+      "stratum_pass": false
+    },
+    "2M": {
+      "G1_file_readable": false,
+      "G2_provenance": false,
+      "G3_stratum": false,
+      "G4_shape": false,
+      "G5_independence": false,
+      "G6_prior_readonly": true,
+      "G7_registry": false,
+      "G7_details": {
+        "K": 71,
+        "need": 30,
+        "feasible": true,
+        "K_alt": 71,
+        "feasible_alt": true
+      },
+      "stratum_pass": false
+    }
+  },
+  "G6_prior_readonly": true,
+  "head": "efd34ef318014e1d0505605062057b042e2180eb",
+  "checked_at": "2026-08-28T00:00:00Z_stratified",
+  "registry_searched": [
+    "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\configs\\v55_independent_test_sessions.json",
+    "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\configs\\v55_independent_sessions.json",
+    "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\configs\\v55_available_datasets.json",
+    "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v55_independent_test_sessions.json"
+  ],
+  "found_registry": null,
+  "hold_adjudication": "HOLD polluted by V48-V54 135-180 intervals, even remaining frames不可改称TEST",
+  "required_new_data_per_stratum": {
+    "per_stratum_frames": ">=120 suggest >=160",
+    "frame_pairs": 256,
+    "block_pairs": 1024,
+    "blocks_per_stratum": 30,
+    "blocks_per_stratum_alt": 15,
+    "date_not": "2026-01-21",
+    "physical_conditions": "date/location/device/channel_params per stratum",
+    "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_stratified"
+  }
+}
