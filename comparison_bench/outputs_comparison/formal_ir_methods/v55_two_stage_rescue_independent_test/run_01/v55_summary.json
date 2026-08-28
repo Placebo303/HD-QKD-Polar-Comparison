@@ -1,0 +1,1545 @@
+{
+  "cycle_id": "V55P0",
+  "change_id": "formal-ir-v55-two-stage-rescue-independent-test",
+  "accepted_plan_sha": "3d7c63eefe655c9f25d199af3f7f4ea311ac454b",
+  "branch_ref": "origin/formal-ir-mainline",
+  "execution_scope": "v55_two_stage_rescue_independent_test_90_blocks_triple_exactly_once_authoritative",
+  "mechanism_id": "nested_two_stage_incremental_l2_rescue_delta8_plus8_90blocks_v55_authoritative",
+  "tag_scope": "l2_only",
+  "decoder_setting": [
+    90,
+    1.0
+  ],
+  "delta_m": 8,
+  "delta_m_total": 16,
+  "leakage": {
+    "per_source": {
+      "1M": {
+        "leak_base": 1064,
+        "leak_stage1": 1104,
+        "leak_stage2": 1144,
+        "delta": 40
+      },
+      "1p5M": {
+        "leak_base": 1094,
+        "leak_stage1": 1134,
+        "leak_stage2": 1174,
+        "delta": 40
+      },
+      "2M": {
+        "leak_base": 1104,
+        "leak_stage1": 1144,
+        "leak_stage2": 1184,
+        "delta": 40
+      }
+    },
+    "leakage_already_accounted": true,
+    "first_pass_success_leak": {
+      "1M": 1064,
+      "1p5M": 1094,
+      "2M": 1104
+    },
+    "stage1_success_leak": {
+      "1M": 1104,
+      "1p5M": 1134,
+      "2M": 1144
+    },
+    "stage2_leak": {
+      "1M": 1144,
+      "1p5M": 1174,
+      "2M": 1184
+    },
+    "per_source_avg": {
+      "1M": 1144.0,
+      "1p5M": 1174.0,
+      "2M": 1184.0
+    },
+    "overall_avg": 1167.3333333333333,
+    "formula": "per_source_avg[s]=leak_base[s]+40*N_stage1[s]/30+40*N_stage2[s]/30 overall_avg=(Σ leak_base[source(block)]+40*N_stage1_total+40*N_stage2_total)/90",
+    "n_stage1_attempted": 90,
+    "n_stage2_attempted": 90,
+    "total_disclosed_bits": 105060,
+    "avg_disclosure_per_attempted_frame": 1.1399739583333333,
+    "disclosure_per_final_exact_block": null,
+    "total_formula": "Σ leak_base[source(block)]+40*N_stage1+40*N_stage2"
+  },
+  "counts": {
+    "base_exact_full": 0,
+    "verify_base": 0,
+    "stage1_call_exact_full": 0,
+    "verify_stage1_call": 0,
+    "stage1_final_exact_full_count": 0,
+    "verify_after_stage1": 0,
+    "stage1_rescued": 0,
+    "stage2_call_exact_full": 0,
+    "verify_stage2_call": 0,
+    "stage2_rescued": 0,
+    "final_exact_full_count": 0,
+    "verify_final": 0,
+    "n_blocks": 90,
+    "n_stage1_attempted": 90,
+    "n_stage2_attempted": 90,
+    "rescue_rate_stage1": 0.0,
+    "rescue_rate_stage2": 0.0,
+    "per_source": {
+      "1M": {
+        "base_exact": 0,
+        "verify_base": 0,
+        "stage1_call_exact": 0,
+        "verify_stage1_call": 0,
+        "stage1_final": 0,
+        "verify_after_stage1": 0,
+        "final": 0,
+        "verify_final": 0,
+        "rescued_stage1": 0,
+        "rescued_stage2": 0,
+        "n_stage1": 30,
+        "n_stage2": 30,
+        "undetected": 0,
+        "undetected_base": 0,
+        "undetected_stage1_call": 0,
+        "undetected_stage2_call": 0,
+        "undetected_after_stage1": 0,
+        "undetected_final": 0,
+        "verify_stage2_call": 0
+      },
+      "1p5M": {
+        "base_exact": 0,
+        "verify_base": 0,
+        "stage1_call_exact": 0,
+        "verify_stage1_call": 0,
+        "stage1_final": 0,
+        "verify_after_stage1": 0,
+        "final": 0,
+        "verify_final": 0,
+        "rescued_stage1": 0,
+        "rescued_stage2": 0,
+        "n_stage1": 30,
+        "n_stage2": 30,
+        "undetected": 0,
+        "undetected_base": 0,
+        "undetected_stage1_call": 0,
+        "undetected_stage2_call": 0,
+        "undetected_after_stage1": 0,
+        "undetected_final": 0,
+        "verify_stage2_call": 0
+      },
+      "2M": {
+        "base_exact": 0,
+        "verify_base": 0,
+        "stage1_call_exact": 0,
+        "verify_stage1_call": 0,
+        "stage1_final": 0,
+        "verify_after_stage1": 0,
+        "final": 0,
+        "verify_final": 0,
+        "rescued_stage1": 0,
+        "rescued_stage2": 0,
+        "n_stage1": 30,
+        "n_stage2": 30,
+        "undetected": 0,
+        "undetected_base": 0,
+        "undetected_stage1_call": 0,
+        "undetected_stage2_call": 0,
+        "undetected_after_stage1": 0,
+        "undetected_final": 0,
+        "verify_stage2_call": 0
+      }
+    },
+    "undetected_accepted_wrong": 0,
+    "undetected_after_stage1": 0,
+    "undetected_final": 0,
+    "undetected_base": 0,
+    "undetected_stage1_call": 0,
+    "undetected_stage2_call": 0,
+    "reclassified": {
+      "exact": 0,
+      "detected_verification_failure": 0,
+      "decoder_non_syndrome_failure": 270,
+      "undetected_accepted_wrong": 0
+    },
+    "stage1_final_gate": false,
+    "final_gate": false
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": "180-360",
+      "l1": 90,
+      "l2_base": 90,
+      "l2_stage1_max": 90,
+      "l2_stage2_max": 90,
+      "l2_max": 270
+    },
+    "decoder_calls_started": {
+      "total": 360,
+      "l1": 90,
+      "l2": 270,
+      "base": 90,
+      "stage1": 90,
+      "stage2": 90
+    },
+    "decoder_calls_completed": {
+      "total": 360,
+      "l1": 90,
+      "l2": 270,
+      "base": 90,
+      "stage1": 90,
+      "stage2": 90
+    },
+    "hard_cap": 360
+  },
+  "matrix": {
+    "per_source": {
+      "1M": {
+        "m2": 184,
+        "m_joint1": 192,
+        "m_total": 200,
+        "delta_m": 8,
+        "joint1_rank": 192,
+        "total_rank": 200,
+        "nested_stage1": true,
+        "nested_stage2": true,
+        "independence1": 8,
+        "independence2": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc1": 96,
+        "E_inc2": 96
+      },
+      "1p5M": {
+        "m2": 190,
+        "m_joint1": 198,
+        "m_total": 206,
+        "delta_m": 8,
+        "joint1_rank": 198,
+        "total_rank": 206,
+        "nested_stage1": true,
+        "nested_stage2": true,
+        "independence1": 8,
+        "independence2": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc1": 96,
+        "E_inc2": 96
+      },
+      "2M": {
+        "m2": 192,
+        "m_joint1": 200,
+        "m_total": 208,
+        "delta_m": 8,
+        "joint1_rank": 200,
+        "total_rank": 208,
+        "nested_stage1": true,
+        "nested_stage2": true,
+        "independence1": 8,
+        "independence2": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc1": 96,
+        "E_inc2": 96
+      }
+    }
+  },
+  "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative",
+  "held_out_provenance": {
+    "block_windows": {
+      "397001": {
+        "source": "1M",
+        "held_out_ordinal_start": 0,
+        "held_out_ordinal_end": 3,
+        "frame_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397002": {
+        "source": "1M",
+        "held_out_ordinal_start": 73,
+        "held_out_ordinal_end": 76,
+        "frame_ids": [
+          73,
+          74,
+          75,
+          76
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397003": {
+        "source": "1M",
+        "held_out_ordinal_start": 146,
+        "held_out_ordinal_end": 149,
+        "frame_ids": [
+          146,
+          147,
+          148,
+          149
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397004": {
+        "source": "1M",
+        "held_out_ordinal_start": 219,
+        "held_out_ordinal_end": 222,
+        "frame_ids": [
+          219,
+          220,
+          221,
+          222
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397005": {
+        "source": "1M",
+        "held_out_ordinal_start": 293,
+        "held_out_ordinal_end": 296,
+        "frame_ids": [
+          293,
+          294,
+          295,
+          296
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397006": {
+        "source": "1M",
+        "held_out_ordinal_start": 366,
+        "held_out_ordinal_end": 369,
+        "frame_ids": [
+          366,
+          367,
+          368,
+          369
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397007": {
+        "source": "1M",
+        "held_out_ordinal_start": 439,
+        "held_out_ordinal_end": 442,
+        "frame_ids": [
+          439,
+          440,
+          441,
+          442
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397008": {
+        "source": "1M",
+        "held_out_ordinal_start": 513,
+        "held_out_ordinal_end": 516,
+        "frame_ids": [
+          513,
+          514,
+          515,
+          516
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397009": {
+        "source": "1M",
+        "held_out_ordinal_start": 586,
+        "held_out_ordinal_end": 589,
+        "frame_ids": [
+          586,
+          587,
+          588,
+          589
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397010": {
+        "source": "1M",
+        "held_out_ordinal_start": 659,
+        "held_out_ordinal_end": 662,
+        "frame_ids": [
+          659,
+          660,
+          661,
+          662
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397011": {
+        "source": "1M",
+        "held_out_ordinal_start": 733,
+        "held_out_ordinal_end": 736,
+        "frame_ids": [
+          733,
+          734,
+          735,
+          736
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397012": {
+        "source": "1M",
+        "held_out_ordinal_start": 806,
+        "held_out_ordinal_end": 809,
+        "frame_ids": [
+          806,
+          807,
+          808,
+          809
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397013": {
+        "source": "1M",
+        "held_out_ordinal_start": 879,
+        "held_out_ordinal_end": 882,
+        "frame_ids": [
+          879,
+          880,
+          881,
+          882
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397014": {
+        "source": "1M",
+        "held_out_ordinal_start": 953,
+        "held_out_ordinal_end": 956,
+        "frame_ids": [
+          953,
+          954,
+          955,
+          956
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397015": {
+        "source": "1M",
+        "held_out_ordinal_start": 1026,
+        "held_out_ordinal_end": 1029,
+        "frame_ids": [
+          1026,
+          1027,
+          1028,
+          1029
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397016": {
+        "source": "1M",
+        "held_out_ordinal_start": 1099,
+        "held_out_ordinal_end": 1102,
+        "frame_ids": [
+          1099,
+          1100,
+          1101,
+          1102
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397017": {
+        "source": "1M",
+        "held_out_ordinal_start": 1172,
+        "held_out_ordinal_end": 1175,
+        "frame_ids": [
+          1172,
+          1173,
+          1174,
+          1175
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397018": {
+        "source": "1M",
+        "held_out_ordinal_start": 1246,
+        "held_out_ordinal_end": 1249,
+        "frame_ids": [
+          1246,
+          1247,
+          1248,
+          1249
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397019": {
+        "source": "1M",
+        "held_out_ordinal_start": 1319,
+        "held_out_ordinal_end": 1322,
+        "frame_ids": [
+          1319,
+          1320,
+          1321,
+          1322
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397020": {
+        "source": "1M",
+        "held_out_ordinal_start": 1392,
+        "held_out_ordinal_end": 1395,
+        "frame_ids": [
+          1392,
+          1393,
+          1394,
+          1395
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397021": {
+        "source": "1M",
+        "held_out_ordinal_start": 1466,
+        "held_out_ordinal_end": 1469,
+        "frame_ids": [
+          1466,
+          1467,
+          1468,
+          1469
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397022": {
+        "source": "1M",
+        "held_out_ordinal_start": 1539,
+        "held_out_ordinal_end": 1542,
+        "frame_ids": [
+          1539,
+          1540,
+          1541,
+          1542
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397023": {
+        "source": "1M",
+        "held_out_ordinal_start": 1612,
+        "held_out_ordinal_end": 1615,
+        "frame_ids": [
+          1612,
+          1613,
+          1614,
+          1615
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397024": {
+        "source": "1M",
+        "held_out_ordinal_start": 1686,
+        "held_out_ordinal_end": 1689,
+        "frame_ids": [
+          1686,
+          1687,
+          1688,
+          1689
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397025": {
+        "source": "1M",
+        "held_out_ordinal_start": 1759,
+        "held_out_ordinal_end": 1762,
+        "frame_ids": [
+          1759,
+          1760,
+          1761,
+          1762
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397026": {
+        "source": "1M",
+        "held_out_ordinal_start": 1832,
+        "held_out_ordinal_end": 1835,
+        "frame_ids": [
+          1832,
+          1833,
+          1834,
+          1835
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397027": {
+        "source": "1M",
+        "held_out_ordinal_start": 1906,
+        "held_out_ordinal_end": 1909,
+        "frame_ids": [
+          1906,
+          1907,
+          1908,
+          1909
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397028": {
+        "source": "1M",
+        "held_out_ordinal_start": 1979,
+        "held_out_ordinal_end": 1982,
+        "frame_ids": [
+          1979,
+          1980,
+          1981,
+          1982
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397029": {
+        "source": "1M",
+        "held_out_ordinal_start": 2052,
+        "held_out_ordinal_end": 2055,
+        "frame_ids": [
+          2052,
+          2053,
+          2054,
+          2055
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397030": {
+        "source": "1M",
+        "held_out_ordinal_start": 2126,
+        "held_out_ordinal_end": 2129,
+        "frame_ids": [
+          2126,
+          2127,
+          2128,
+          2129
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397101": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 0,
+        "held_out_ordinal_end": 3,
+        "frame_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397102": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 176,
+        "held_out_ordinal_end": 179,
+        "frame_ids": [
+          176,
+          177,
+          178,
+          179
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397103": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 353,
+        "held_out_ordinal_end": 356,
+        "frame_ids": [
+          353,
+          354,
+          355,
+          356
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397104": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 529,
+        "held_out_ordinal_end": 532,
+        "frame_ids": [
+          529,
+          530,
+          531,
+          532
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397105": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 706,
+        "held_out_ordinal_end": 709,
+        "frame_ids": [
+          706,
+          707,
+          708,
+          709
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397106": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 882,
+        "held_out_ordinal_end": 885,
+        "frame_ids": [
+          882,
+          883,
+          884,
+          885
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397107": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 1059,
+        "held_out_ordinal_end": 1062,
+        "frame_ids": [
+          1059,
+          1060,
+          1061,
+          1062
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397108": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 1236,
+        "held_out_ordinal_end": 1239,
+        "frame_ids": [
+          1236,
+          1237,
+          1238,
+          1239
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397109": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 1412,
+        "held_out_ordinal_end": 1415,
+        "frame_ids": [
+          1412,
+          1413,
+          1414,
+          1415
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397110": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 1589,
+        "held_out_ordinal_end": 1592,
+        "frame_ids": [
+          1589,
+          1590,
+          1591,
+          1592
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397111": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 1765,
+        "held_out_ordinal_end": 1768,
+        "frame_ids": [
+          1765,
+          1766,
+          1767,
+          1768
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397112": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 1942,
+        "held_out_ordinal_end": 1945,
+        "frame_ids": [
+          1942,
+          1943,
+          1944,
+          1945
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397113": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 2119,
+        "held_out_ordinal_end": 2122,
+        "frame_ids": [
+          2119,
+          2120,
+          2121,
+          2122
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397114": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 2295,
+        "held_out_ordinal_end": 2298,
+        "frame_ids": [
+          2295,
+          2296,
+          2297,
+          2298
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397115": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 2472,
+        "held_out_ordinal_end": 2475,
+        "frame_ids": [
+          2472,
+          2473,
+          2474,
+          2475
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397116": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 2648,
+        "held_out_ordinal_end": 2651,
+        "frame_ids": [
+          2648,
+          2649,
+          2650,
+          2651
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397117": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 2825,
+        "held_out_ordinal_end": 2828,
+        "frame_ids": [
+          2825,
+          2826,
+          2827,
+          2828
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397118": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 3001,
+        "held_out_ordinal_end": 3004,
+        "frame_ids": [
+          3001,
+          3002,
+          3003,
+          3004
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397119": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 3178,
+        "held_out_ordinal_end": 3181,
+        "frame_ids": [
+          3178,
+          3179,
+          3180,
+          3181
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397120": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 3355,
+        "held_out_ordinal_end": 3358,
+        "frame_ids": [
+          3355,
+          3356,
+          3357,
+          3358
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397121": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 3531,
+        "held_out_ordinal_end": 3534,
+        "frame_ids": [
+          3531,
+          3532,
+          3533,
+          3534
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397122": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 3708,
+        "held_out_ordinal_end": 3711,
+        "frame_ids": [
+          3708,
+          3709,
+          3710,
+          3711
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397123": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 3884,
+        "held_out_ordinal_end": 3887,
+        "frame_ids": [
+          3884,
+          3885,
+          3886,
+          3887
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397124": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 4061,
+        "held_out_ordinal_end": 4064,
+        "frame_ids": [
+          4061,
+          4062,
+          4063,
+          4064
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397125": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 4238,
+        "held_out_ordinal_end": 4241,
+        "frame_ids": [
+          4238,
+          4239,
+          4240,
+          4241
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397126": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 4414,
+        "held_out_ordinal_end": 4417,
+        "frame_ids": [
+          4414,
+          4415,
+          4416,
+          4417
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397127": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 4591,
+        "held_out_ordinal_end": 4594,
+        "frame_ids": [
+          4591,
+          4592,
+          4593,
+          4594
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397128": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 4767,
+        "held_out_ordinal_end": 4770,
+        "frame_ids": [
+          4767,
+          4768,
+          4769,
+          4770
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397129": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 4944,
+        "held_out_ordinal_end": 4947,
+        "frame_ids": [
+          4944,
+          4945,
+          4946,
+          4947
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397130": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 5121,
+        "held_out_ordinal_end": 5124,
+        "frame_ids": [
+          5121,
+          5122,
+          5123,
+          5124
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397201": {
+        "source": "2M",
+        "held_out_ordinal_start": 0,
+        "held_out_ordinal_end": 3,
+        "frame_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397202": {
+        "source": "2M",
+        "held_out_ordinal_start": 189,
+        "held_out_ordinal_end": 192,
+        "frame_ids": [
+          189,
+          190,
+          191,
+          192
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397203": {
+        "source": "2M",
+        "held_out_ordinal_start": 379,
+        "held_out_ordinal_end": 382,
+        "frame_ids": [
+          379,
+          380,
+          381,
+          382
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397204": {
+        "source": "2M",
+        "held_out_ordinal_start": 569,
+        "held_out_ordinal_end": 572,
+        "frame_ids": [
+          569,
+          570,
+          571,
+          572
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397205": {
+        "source": "2M",
+        "held_out_ordinal_start": 759,
+        "held_out_ordinal_end": 762,
+        "frame_ids": [
+          759,
+          760,
+          761,
+          762
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397206": {
+        "source": "2M",
+        "held_out_ordinal_start": 949,
+        "held_out_ordinal_end": 952,
+        "frame_ids": [
+          949,
+          950,
+          951,
+          952
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397207": {
+        "source": "2M",
+        "held_out_ordinal_start": 1139,
+        "held_out_ordinal_end": 1142,
+        "frame_ids": [
+          1139,
+          1140,
+          1141,
+          1142
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397208": {
+        "source": "2M",
+        "held_out_ordinal_start": 1329,
+        "held_out_ordinal_end": 1332,
+        "frame_ids": [
+          1329,
+          1330,
+          1331,
+          1332
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397209": {
+        "source": "2M",
+        "held_out_ordinal_start": 1519,
+        "held_out_ordinal_end": 1522,
+        "frame_ids": [
+          1519,
+          1520,
+          1521,
+          1522
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397210": {
+        "source": "2M",
+        "held_out_ordinal_start": 1709,
+        "held_out_ordinal_end": 1712,
+        "frame_ids": [
+          1709,
+          1710,
+          1711,
+          1712
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397211": {
+        "source": "2M",
+        "held_out_ordinal_start": 1899,
+        "held_out_ordinal_end": 1902,
+        "frame_ids": [
+          1899,
+          1900,
+          1901,
+          1902
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397212": {
+        "source": "2M",
+        "held_out_ordinal_start": 2089,
+        "held_out_ordinal_end": 2092,
+        "frame_ids": [
+          2089,
+          2090,
+          2091,
+          2092
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397213": {
+        "source": "2M",
+        "held_out_ordinal_start": 2279,
+        "held_out_ordinal_end": 2282,
+        "frame_ids": [
+          2279,
+          2280,
+          2281,
+          2282
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397214": {
+        "source": "2M",
+        "held_out_ordinal_start": 2469,
+        "held_out_ordinal_end": 2472,
+        "frame_ids": [
+          2469,
+          2470,
+          2471,
+          2472
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397215": {
+        "source": "2M",
+        "held_out_ordinal_start": 2659,
+        "held_out_ordinal_end": 2662,
+        "frame_ids": [
+          2659,
+          2660,
+          2661,
+          2662
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397216": {
+        "source": "2M",
+        "held_out_ordinal_start": 2849,
+        "held_out_ordinal_end": 2852,
+        "frame_ids": [
+          2849,
+          2850,
+          2851,
+          2852
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397217": {
+        "source": "2M",
+        "held_out_ordinal_start": 3039,
+        "held_out_ordinal_end": 3042,
+        "frame_ids": [
+          3039,
+          3040,
+          3041,
+          3042
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397218": {
+        "source": "2M",
+        "held_out_ordinal_start": 3229,
+        "held_out_ordinal_end": 3232,
+        "frame_ids": [
+          3229,
+          3230,
+          3231,
+          3232
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397219": {
+        "source": "2M",
+        "held_out_ordinal_start": 3419,
+        "held_out_ordinal_end": 3422,
+        "frame_ids": [
+          3419,
+          3420,
+          3421,
+          3422
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397220": {
+        "source": "2M",
+        "held_out_ordinal_start": 3609,
+        "held_out_ordinal_end": 3612,
+        "frame_ids": [
+          3609,
+          3610,
+          3611,
+          3612
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397221": {
+        "source": "2M",
+        "held_out_ordinal_start": 3799,
+        "held_out_ordinal_end": 3802,
+        "frame_ids": [
+          3799,
+          3800,
+          3801,
+          3802
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397222": {
+        "source": "2M",
+        "held_out_ordinal_start": 3989,
+        "held_out_ordinal_end": 3992,
+        "frame_ids": [
+          3989,
+          3990,
+          3991,
+          3992
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397223": {
+        "source": "2M",
+        "held_out_ordinal_start": 4179,
+        "held_out_ordinal_end": 4182,
+        "frame_ids": [
+          4179,
+          4180,
+          4181,
+          4182
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397224": {
+        "source": "2M",
+        "held_out_ordinal_start": 4369,
+        "held_out_ordinal_end": 4372,
+        "frame_ids": [
+          4369,
+          4370,
+          4371,
+          4372
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397225": {
+        "source": "2M",
+        "held_out_ordinal_start": 4559,
+        "held_out_ordinal_end": 4562,
+        "frame_ids": [
+          4559,
+          4560,
+          4561,
+          4562
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397226": {
+        "source": "2M",
+        "held_out_ordinal_start": 4749,
+        "held_out_ordinal_end": 4752,
+        "frame_ids": [
+          4749,
+          4750,
+          4751,
+          4752
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397227": {
+        "source": "2M",
+        "held_out_ordinal_start": 4939,
+        "held_out_ordinal_end": 4942,
+        "frame_ids": [
+          4939,
+          4940,
+          4941,
+          4942
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397228": {
+        "source": "2M",
+        "held_out_ordinal_start": 5129,
+        "held_out_ordinal_end": 5132,
+        "frame_ids": [
+          5129,
+          5130,
+          5131,
+          5132
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397229": {
+        "source": "2M",
+        "held_out_ordinal_start": 5319,
+        "held_out_ordinal_end": 5322,
+        "frame_ids": [
+          5319,
+          5320,
+          5321,
+          5322
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      },
+      "397230": {
+        "source": "2M",
+        "held_out_ordinal_start": 5509,
+        "held_out_ordinal_end": 5512,
+        "frame_ids": [
+          5509,
+          5510,
+          5511,
+          5512
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative"
+      }
+    },
+    "sampling_mode": "deterministic_four_consecutive_frames_independent_test_v55_authoritative",
+    "authoritative_blocks": {
+      "1M": [
+        397001,
+        397002,
+        397003,
+        397004,
+        397005,
+        397006,
+        397007,
+        397008,
+        397009,
+        397010,
+        397011,
+        397012,
+        397013,
+        397014,
+        397015,
+        397016,
+        397017,
+        397018,
+        397019,
+        397020,
+        397021,
+        397022,
+        397023,
+        397024,
+        397025,
+        397026,
+        397027,
+        397028,
+        397029,
+        397030
+      ],
+      "1p5M": [
+        397101,
+        397102,
+        397103,
+        397104,
+        397105,
+        397106,
+        397107,
+        397108,
+        397109,
+        397110,
+        397111,
+        397112,
+        397113,
+        397114,
+        397115,
+        397116,
+        397117,
+        397118,
+        397119,
+        397120,
+        397121,
+        397122,
+        397123,
+        397124,
+        397125,
+        397126,
+        397127,
+        397128,
+        397129,
+        397130
+      ],
+      "2M": [
+        397201,
+        397202,
+        397203,
+        397204,
+        397205,
+        397206,
+        397207,
+        397208,
+        397209,
+        397210,
+        397211,
+        397212,
+        397213,
+        397214,
+        397215,
+        397216,
+        397217,
+        397218,
+        397219,
+        397220,
+        397221,
+        397222,
+        397223,
+        397224,
+        397225,
+        397226,
+        397227,
+        397228,
+        397229,
+        397230
+      ]
+    },
+    "K_per_source": {
+      "1M": 2127,
+      "1p5M": 5122,
+      "2M": 5510
+    },
+    "index_formula": "floor(j*(K-1)/29)"
+  },
+  "provenance": {
+    "h_inc1_det_ids": {
+      "1M": 600001,
+      "1p5M": 600002,
+      "2M": 600003
+    },
+    "h_inc2_det_ids": {
+      "1M": 600004,
+      "1p5M": 600005,
+      "2M": 600006
+    },
+    "deterministic": "single_run_no_seed_search",
+    "joint_rank_nested_independence": "verified",
+    "tag_scope": "l2_only"
+  },
+  "terminal_state": "V55_INDEPENDENT_TEST_FAIL",
+  "claim_boundary": [
+    "results support ONLY nested two-stage incremental L2 rescue Δ8+8 on frozen Lane C support/prior/MET n=1024 m2 184/190/192 GF32 poly37 decoder 90/1.0 leak 1064/1094/1104 base 1104/1134/1144 stage1 1144/1174/1184 stage2 conditional only rescue frames +40 each stage avg per_source[s]=leak_base[s]+40*N1[s]/30+40*N2[s]/30 overall=(Σ leak_base[source(block)]+40*N_stage1_total+40*N_stage2_total)/90 independent cross-session 90 blocks",
+    "leakage H1-16 includes 64-bit tag L2-only random-hash-model approximate 2^-64 row≤16 col_inc≤1 deterministic no seed search nested rank m2+8 m2+16",
+    "not threshold/SKR/formal qualification/promotion; paired descriptive only Δexact_stage1 Δexact_stage2 four-way G3' undetected==0 90 blocks independent cross-session 70/90 20/30 gates"
+  ],
+  "statistics_note": "Descriptive only; sample is 90 blocks three-stage conditional base vs stage1 vs final (90 L1 +90 base +≤90 stage1 +≤90 stage2 =180-360 L2 90-270). Exact-recovery proportions with n and raw counts; any interval naive uncorrected clustering; no significance. Independent cross-session non-iid."
+}
