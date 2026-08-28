@@ -1,0 +1,672 @@
+{
+  "cycle_id": "V50P0",
+  "change_id": "formal-ir-v50-l2-structure-factorial",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "execution_scope": "v50_factorial_90_calls_2x2_exactly_once",
+  "fake_runner": false,
+  "mechanism_id": "p0_met_single_equal_leakage_protograph_met_with_train_vs_trainval_prior_factorial",
+  "tag_scope": "l2_only",
+  "tag_source": "v35:compute_tag_64(empty,x2)[:16] tag_scope=l2_only",
+  "tag_bits": 64,
+  "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused",
+  "provenance": {
+    "authorized_target_sha": "e3e14c9518bf44d03054e720a6230ea11d08f99a",
+    "sha_binding": {
+      "HEAD": "e3e14c9518bf44d03054e720a6230ea11d08f99a",
+      "origin/formal-ir-mainline": "e3e14c9518bf44d03054e720a6230ea11d08f99a"
+    },
+    "structural_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v38_architecture_triage\\run_01\\v38_structural_prototypes.json",
+    "structural_records_strict_match": 7,
+    "h1_material": "V31-H1-QC-16\u00d71024 rank16 QC-cyclic-projective poly37",
+    "h1_rank": 16,
+    "tag_material": "v35:compute_tag_64(empty,x2)[:16] tag_scope=l2_only",
+    "tag_scope": "l2_only",
+    "p0_material": "P0-MET-1 {dv2:512,dv3:512} E=2560 det {'1M': 500001, '1p5M': 500002, '2M': 500003}"
+  },
+  "v25_counts_provenance": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+    "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts",
+    "role": "source-specific V25 TRAIN empirical counts (read-only) + TRAIN_VAL merged TRAIN\u2295VAL",
+    "exists": true,
+    "counts_source": "TRAIN vs TRAIN_VAL",
+    "held_out_pool": "split_manifest hold interval 1683 frames / 430k pairs (1M 400 / 1p5M 554 / 2M 729) deterministic 4-frame windows 391xxx",
+    "train_val_provenance": {
+      "1M": {
+        "train_frame_range": [
+          0,
+          1199
+        ],
+        "val_frame_range": [
+          1200,
+          1599
+        ],
+        "train_pairs": 307200,
+        "val_pairs": 102400,
+        "merged_pairs": 409600,
+        "verified_additive": true,
+        "no_hold": true,
+        "no_smoothing": true,
+        "mode": "parquet"
+      },
+      "1p5M": {
+        "train_frame_range": [
+          0,
+          1659
+        ],
+        "val_frame_range": [
+          1660,
+          2212
+        ],
+        "train_pairs": 424960,
+        "val_pairs": 141568,
+        "merged_pairs": 566528,
+        "verified_additive": true,
+        "no_hold": true,
+        "no_smoothing": true,
+        "mode": "parquet"
+      },
+      "2M": {
+        "train_frame_range": [
+          0,
+          2186
+        ],
+        "val_frame_range": [
+          2187,
+          2915
+        ],
+        "train_pairs": 559872,
+        "val_pairs": 186624,
+        "merged_pairs": 746496,
+        "verified_additive": true,
+        "no_hold": true,
+        "no_smoothing": true,
+        "mode": "parquet"
+      }
+    },
+    "train_frame_ranges": {
+      "1M": [
+        0,
+        1199
+      ],
+      "1p5M": [
+        0,
+        1659
+      ],
+      "2M": [
+        0,
+        2186
+      ]
+    },
+    "val_frame_ranges": {
+      "1M": [
+        1200,
+        1599
+      ],
+      "1p5M": [
+        1660,
+        2212
+      ],
+      "2M": [
+        2187,
+        2915
+      ]
+    },
+    "merge_verified": true,
+    "no_hold": true,
+    "no_smoothing": true
+  },
+  "held_out_provenance": {
+    "frames": {
+      "1M": 400,
+      "1p5M": 554,
+      "2M": 729
+    },
+    "total_frames": 1683,
+    "total_pairs": 430848,
+    "block_windows": {
+      "391001": {
+        "source": "1M",
+        "held_out_ordinal_start": 14,
+        "held_out_ordinal_end": 17,
+        "frame_ids": [
+          1614,
+          1615,
+          1616,
+          1617
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391002": {
+        "source": "1M",
+        "held_out_ordinal_start": 42,
+        "held_out_ordinal_end": 45,
+        "frame_ids": [
+          1642,
+          1643,
+          1644,
+          1645
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391003": {
+        "source": "1M",
+        "held_out_ordinal_start": 70,
+        "held_out_ordinal_end": 73,
+        "frame_ids": [
+          1670,
+          1671,
+          1672,
+          1673
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391004": {
+        "source": "1M",
+        "held_out_ordinal_start": 98,
+        "held_out_ordinal_end": 101,
+        "frame_ids": [
+          1698,
+          1699,
+          1700,
+          1701
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391005": {
+        "source": "1M",
+        "held_out_ordinal_start": 127,
+        "held_out_ordinal_end": 130,
+        "frame_ids": [
+          1727,
+          1728,
+          1729,
+          1730
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391101": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 19,
+        "held_out_ordinal_end": 22,
+        "frame_ids": [
+          2232,
+          2233,
+          2234,
+          2235
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391102": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 58,
+        "held_out_ordinal_end": 61,
+        "frame_ids": [
+          2271,
+          2272,
+          2273,
+          2274
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391103": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 97,
+        "held_out_ordinal_end": 100,
+        "frame_ids": [
+          2310,
+          2311,
+          2312,
+          2313
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391104": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 137,
+        "held_out_ordinal_end": 140,
+        "frame_ids": [
+          2350,
+          2351,
+          2352,
+          2353
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391105": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 176,
+        "held_out_ordinal_end": 179,
+        "frame_ids": [
+          2389,
+          2390,
+          2391,
+          2392
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391201": {
+        "source": "2M",
+        "held_out_ordinal_start": 25,
+        "held_out_ordinal_end": 28,
+        "frame_ids": [
+          2941,
+          2942,
+          2943,
+          2944
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391202": {
+        "source": "2M",
+        "held_out_ordinal_start": 77,
+        "held_out_ordinal_end": 80,
+        "frame_ids": [
+          2993,
+          2994,
+          2995,
+          2996
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391203": {
+        "source": "2M",
+        "held_out_ordinal_start": 129,
+        "held_out_ordinal_end": 132,
+        "frame_ids": [
+          3045,
+          3046,
+          3047,
+          3048
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391204": {
+        "source": "2M",
+        "held_out_ordinal_start": 181,
+        "held_out_ordinal_end": 184,
+        "frame_ids": [
+          3097,
+          3098,
+          3099,
+          3100
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      },
+      "391205": {
+        "source": "2M",
+        "held_out_ordinal_start": 232,
+        "held_out_ordinal_end": 235,
+        "frame_ids": [
+          3148,
+          3149,
+          3150,
+          3151
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused"
+      }
+    },
+    "pairs_per_frame": 256,
+    "pairs_per_block": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_unused",
+    "held_out_ordinal_windows": {
+      "391001": [
+        14,
+        17
+      ],
+      "391002": [
+        42,
+        45
+      ],
+      "391003": [
+        70,
+        73
+      ],
+      "391004": [
+        98,
+        101
+      ],
+      "391005": [
+        127,
+        130
+      ],
+      "391101": [
+        19,
+        22
+      ],
+      "391102": [
+        58,
+        61
+      ],
+      "391103": [
+        97,
+        100
+      ],
+      "391104": [
+        137,
+        140
+      ],
+      "391105": [
+        176,
+        179
+      ],
+      "391201": [
+        25,
+        28
+      ],
+      "391202": [
+        77,
+        80
+      ],
+      "391203": [
+        129,
+        132
+      ],
+      "391204": [
+        181,
+        184
+      ],
+      "391205": [
+        232,
+        235
+      ]
+    },
+    "frame_ids": {
+      "391001": [
+        1614,
+        1615,
+        1616,
+        1617
+      ],
+      "391002": [
+        1642,
+        1643,
+        1644,
+        1645
+      ],
+      "391003": [
+        1670,
+        1671,
+        1672,
+        1673
+      ],
+      "391004": [
+        1698,
+        1699,
+        1700,
+        1701
+      ],
+      "391005": [
+        1727,
+        1728,
+        1729,
+        1730
+      ],
+      "391101": [
+        2232,
+        2233,
+        2234,
+        2235
+      ],
+      "391102": [
+        2271,
+        2272,
+        2273,
+        2274
+      ],
+      "391103": [
+        2310,
+        2311,
+        2312,
+        2313
+      ],
+      "391104": [
+        2350,
+        2351,
+        2352,
+        2353
+      ],
+      "391105": [
+        2389,
+        2390,
+        2391,
+        2392
+      ],
+      "391201": [
+        2941,
+        2942,
+        2943,
+        2944
+      ],
+      "391202": [
+        2993,
+        2994,
+        2995,
+        2996
+      ],
+      "391203": [
+        3045,
+        3046,
+        3047,
+        3048
+      ],
+      "391204": [
+        3097,
+        3098,
+        3099,
+        3100
+      ],
+      "391205": [
+        3148,
+        3149,
+        3150,
+        3151
+      ]
+    },
+    "forbidden_141": 141,
+    "dual_prior": [
+      "TRAIN",
+      "TRAIN_VAL"
+    ]
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": 90,
+      "l1": 30,
+      "l2": 60
+    },
+    "decoder_calls_started": {
+      "total": 90,
+      "l1": 30,
+      "l2": 60
+    },
+    "decoder_calls_completed": {
+      "total": 90,
+      "l1": 30,
+      "l2": 60
+    },
+    "structural_reconstruction_decoder_calls": 0,
+    "preflight_decoder_calls": 0
+  },
+  "leakage": {
+    "per_source": {
+      "1M": {
+        "m2": 184,
+        "l2_syndrome_bits": 920,
+        "leak_total": 1064,
+        "f_total": 1.2971453628082137
+      },
+      "1p5M": {
+        "m2": 190,
+        "l2_syndrome_bits": 950,
+        "leak_total": 1094,
+        "f_total": 1.2940931532992892
+      },
+      "2M": {
+        "m2": 192,
+        "l2_syndrome_bits": 960,
+        "leak_total": 1104,
+        "f_total": 1.294947481567344
+      }
+    },
+    "H1_16_1064_1094_1104": true,
+    "note": "H1-16 1064/1094/1104 (syndrome 920/950/960 +80+64 tag f_total; leakage already accounted; E=2560 independent; SHA-trunc64 L2-only)",
+    "leakage_already_accounted": true,
+    "tag_approx_note": "SHA-trunc64 random-hash-model approximate 2^-64, not information-theoretic; strict bound requires universal2+seed; L2-only",
+    "tag_scope": "l2_only"
+  },
+  "npz_policy": {
+    "forbidden_winner_npz_read": false,
+    "any_npz_output_written": false,
+    "v25_channel_counts_npz_read_only_allowed": true
+  },
+  "routing_trace": [
+    "rule_0_integrity_ok -> V50_FACTORIAL_COMPLETE"
+  ],
+  "terminal_state": "V50_FACTORIAL_COMPLETE",
+  "terminal_reason": null,
+  "undetected_anomaly": false,
+  "aggregates": {
+    "exact_full_total": 18,
+    "exact_l2_total": 18,
+    "exact_u1_total": 56,
+    "factor_counts": {
+      "A_TRAIN_lane_c": 7,
+      "B_TRAINVAL_lane_c": 8,
+      "C_TRAIN_p0": 2,
+      "D_TRAINVAL_p0": 1
+    },
+    "main_effects": {
+      "E_structure": -6.0,
+      "E_prior": 0.0,
+      "E_interaction": -2
+    },
+    "simple_effects": {
+      "C-A_TRAIN_structure": -5,
+      "D-B_TRAINVAL_structure": -7,
+      "B-A_LaneC_prior": 1,
+      "D-C_P0_prior": -1
+    },
+    "per_prior": {
+      "TRAIN": {
+        "exact_full": 9,
+        "exact_l2": 9,
+        "exact_u1": 28,
+        "calls": 30
+      },
+      "TRAIN_VAL": {
+        "exact_full": 9,
+        "exact_l2": 9,
+        "exact_u1": 28,
+        "calls": 30
+      }
+    },
+    "per_structure": {
+      "lane_c": {
+        "exact_full": 15,
+        "exact_l2": 15,
+        "exact_u1": 28,
+        "calls": 30
+      },
+      "p0_met": {
+        "exact_full": 3,
+        "exact_l2": 3,
+        "exact_u1": 28,
+        "calls": 30
+      }
+    },
+    "per_source": {
+      "1M": {
+        "calls": 20,
+        "exact_full": 5,
+        "exact_l2": 5,
+        "exact_u1": 20,
+        "by_factor": {
+          "A_TRAIN_lane_c": 2,
+          "B_TRAINVAL_lane_c": 3,
+          "C_TRAIN_p0": 0,
+          "D_TRAINVAL_p0": 0
+        },
+        "detected": 0,
+        "decoder_non_syndrome": 15,
+        "undetected": 0,
+        "exact": 5
+      },
+      "1p5M": {
+        "calls": 20,
+        "exact_full": 9,
+        "exact_l2": 9,
+        "exact_u1": 16,
+        "by_factor": {
+          "A_TRAIN_lane_c": 3,
+          "B_TRAINVAL_lane_c": 3,
+          "C_TRAIN_p0": 2,
+          "D_TRAINVAL_p0": 1
+        },
+        "detected": 0,
+        "decoder_non_syndrome": 11,
+        "undetected": 0,
+        "exact": 9
+      },
+      "2M": {
+        "calls": 20,
+        "exact_full": 4,
+        "exact_l2": 4,
+        "exact_u1": 20,
+        "by_factor": {
+          "A_TRAIN_lane_c": 2,
+          "B_TRAINVAL_lane_c": 2,
+          "C_TRAIN_p0": 0,
+          "D_TRAINVAL_p0": 0
+        },
+        "detected": 0,
+        "decoder_non_syndrome": 16,
+        "undetected": 0,
+        "exact": 4
+      }
+    },
+    "detected_total": 0,
+    "decoder_non_syndrome_total": 42,
+    "undetected_total": 0,
+    "exact_total": 18,
+    "wrong_total_l2": 0,
+    "wrong_total_l1": 0,
+    "mean_bp_entropy": 0.001209049168059845,
+    "mean_abs_diff": 0.0006524921657432059
+  },
+  "factorial_effects": {
+    "E_structure": -6.0,
+    "E_prior": 0.0,
+    "E_interaction": -2
+  },
+  "simple_effects": {
+    "C-A_TRAIN_structure": -5,
+    "D-B_TRAINVAL_structure": -7,
+    "B-A_LaneC_prior": 1,
+    "D-C_P0_prior": -1
+  },
+  "master_stop_rule": "\u552f\u4e00\u4e00\u6b21 90-call 2\u00d72 \u56e0\u5b50\u5b9e\u9a8c\uff08\u542b 30 L1 BP +60 L2\uff0915 unused held-out blocks (391001-005/101-105/201-205) deterministic_four_consecutive_frames_heldout_unused \u6bcf\u57571024 pairs (256/frame) \u56e0\u5b50 \u7ed3\u6784(LaneC vs P0-MET-1 {dv2:512,dv3:512} E=2560) \u00d7 \u5148\u9a8c(TRAIN vs TRAIN+VAL) \u56db\u81c2 A=TRAIN\u00d7LaneC B=TRAIN+VAL\u00d7LaneC C=TRAIN\u00d7P0 D=TRAIN+VAL\u00d7P0 \u540c\u5757\u540cbob; P0 \u6ee1\u79e9 GF32 poly37 \u65e0\u96f6\u5217 dc_max16 max_chain\u22644 pure_ring(\u226412)==0 (G2\u7cbe\u786e graph\u6743\u5a01) 4-cycles==0, 6/8\u62a5\u544a, \u786e\u5b9a\u6027 lifting/label, \u7981seed\u641c\u7d22; \u7b49\u6cc4\u6f0f 1064/1094/1104 (\u4e0eE\u65e0\u5173) decoder 90/1.0 early-stop L2-only tag\u22482^-64 \u5de5\u7a0b\u8fd1\u4f3c; exact_full oracle \u4e0d\u7ecftag; \u6548\u5e94 E_structure=(C+D-A-B)/2 E_prior=(B+D-A-C)/2 E_inter=(D-C)-(B-A) four simple effects C-A/D-B/B-A/D-C \u65e0\u664b\u5347\u9608\u503c; \u6784\u9020\u4e0d\u89e6V48 outcomes, 15\u5757\u4e0eFORBIDDEN141\u53caV48 180\u5e27\u96f6\u91cd\u53e0, \u6267\u884c\u9700EXECUTE_AUTH\u7ed1\u5b9a\u672a\u6765\u5b9e\u73b0SHA (plan d95d46ac, accept 891aa6aa); \u4e0d\u542f\u52a8V51\u3002",
+  "statistics_note": "Descriptive only; sample is 15 blocks paired 2x2 (90 invocations = 15 blocks x(2 L1+4 L2); 60 L2 records factorial). Exact-recovery proportions reported with n and raw counts; any interval is naive and uncorrected for clustering; no significance testing. Success primary is exact_full = exact_u1 && exact_l2; exact_u1/exact_l2 reported separately.",
+  "claim_boundary": [
+    "results support ONLY bounded 2x2 factorial attribution on V25 TRAIN empirical-count prior vs TRAIN+VAL on 15 unused held-out blocks (1683 frames / 430k pairs, 1M 400 / 1p5M 554 / 2M 729) deterministic 4-frame windows 391001-005/101-105/201-205, prior P(U1|B)/P(U2|B,u1) TRAIN-only vs TRAIN+VAL merged via same loader isolation",
+    "single equal-leakage true MET P0-MET-1 {dv2:512,dv3:512} E=2560 dc_mean 2.5 (dc_max16, 4-cycles==0 hard, 6/8 report, chain\u22644 pure_ring(graph)==0 G2 exact, full rank no zero col deterministic label poly37, no seed search, no V48 outcome contact) vs Lane C L=8 w2 at exactly same m2 184/190/192 leak 1064/1094/1104 (E independent) single point 90/1.0 early-stop, reuse V35 compute_tag_64(empty,x2) L2-only no structure change",
+    "leakage H1-16 1064/1094/1104 already accounted 80+64 tag f_total=leak/[N(H1+H2)] N=1024, engineering verification L2-only SHA-trunc64 random-hash-model approximate 2^-64, exact_full oracle not via tag, joint not real FER",
+    "not threshold/SKR/formal qualification/promotion; factorial only descriptive main effects E_structure/E_prior/E_interaction and simple effects C-A/D-B/B-A/D-C, no V51"
+  ],
+  "integrity_failures": [],
+  "performance_interpretation_presented": true
+}
