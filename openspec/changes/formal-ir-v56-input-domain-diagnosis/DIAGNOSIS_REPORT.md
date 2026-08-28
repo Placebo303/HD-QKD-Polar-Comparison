@@ -47,27 +47,34 @@
 
 **方法**：`a,b = pairs.parquet alice_symbol/bob_symbol`，`rate_eq = mean(a==b)`，`u1=a>>5, u2=a&31` (F03 5+5 natural)，`P(A|B)=N_ab/colsum` (V25 TRAIN, `1e-15` 平滑)，`NLL = mean(-log2 P(a|b))`，`delta=(a-b) mod 1024` 直方图，`frame 级 rate_eq` 分布；V13 以 `v13r3fresh_pairs` 全量为参考基线。
 
-> **执行**：`python diagnosis_v55_domain.py` 生成 `diagnosis_v55_domain.json` 的 `per_source.v55 / v13 / delta`；下表为**脚本输出值的落盘位置**，首次运行前填 `待运行`，运行后由 json 回填。
+> **执行**：`python diagnosis_v55_domain.py` 生成 `diagnosis_v55_domain.json` 的 `per_source.v55 / v13 / delta`；下表为**脚本输出值的已回填结果**（`diagnosis_v55_domain.json: per_source`）。
 
 | 源 | 指标 | V13 (2026-01-21) 参考 | V55 (新 intake) | Δ (V55−V13) |
 |---|---|---|---|---|
-| **1M** | `A==B 率 / SER` | `0.760 (SER 0.240)` (channel_summary) / `0.760 (SER 0.240)` (data_inventory) | `待运行` (预期 `0.27-0.41` 区间) | `待运行` (预期 `-0.35` 至 `-0.49`) |
-|  | `U1 一致率` | `≈0.88` (由 `±1` 邻bin主导，V25 隐含) | `待运行` (预期 `0.35-0.50`) | `待运行` |
-|  | `U2 一致率` | `≈0.76` (A==B 主导) | `待运行` (预期 `0.27-0.41`) | `待运行` |
-|  | `Bob-conditioned NLL` | `0.81-0.83 bits/symbol` (`≈830-850 bits/block`) (V25 C04) | `待运行` (预期 `>1.5 bits/symbol`, `>1500 bits/block`) | `待运行` (预期 `+0.7` bits/symbol) |
-|  | `q_mass_on_p_zero` | `~0.0` (V25 TRAIN 覆盖好) | `待运行` (预期 `>0.15`) | `待运行` |
-|  | `delta mass_0 / ±1 / other` | `0.760 / +1 0.238 / -1 0.001` (1M, -50ps, 以 +1 为主) | `待运行` | `待运行` |
-|  | `frame 级 rate 均值±std` | `0.760±0.02` (time_block 6 块稳定) | `待运行` | `待运行` |
-| **1p5M** | `A==B 率 / SER` | `0.746 (SER 0.254)` | `待运行` (预期 `0.27-0.41`) | `待运行` |
-|  | `U1/U2` | `≈0.75` | `待运行` | `待运行` |
-|  | `NLL` | `0.82 bits/symbol` | `待运行` (预期 `>1.5`) | `待运行` |
-|  | `delta` | `0.746 / +1 0.001 / -1 0.253` (以 -1 为主, +50ps) | `待运行` | `待运行` |
-| **2M** | `A==B 率 / SER` | `0.744 (SER 0.256)` | `待运行` (预期 `0.27-0.41`) | `待运行` |
-|  | `U1/U2` | `≈0.74` | `待运行` | `待运行` |
-|  | `NLL` | `0.83 bits/symbol` | `待运行` | `待运行` |
-|  | `delta` | `0.744 / +1 0.001 / -1 0.254` (以 -1 为主) | `待运行` | `待运行` |
+| **1M** | `A==B 率 / SER` | `0.7602207 (SER 0.23979)` (n=512000) | `0.4149299 (SER 0.58507)` (n=545280, **41.5%**) | `Δrate -0.34529` (**76%→41.5%**) |
+|  | `U1 一致率` | `0.9927559` | `0.4549993` | `ΔU1 -0.53776` |
+|  | `U2 一致率` | `0.7602207` | `0.4320661` | `ΔU2 -0.32815` |
+|  | `Bob-conditioned NLL` | `0.81960 bits/symbol` (`839.27 bits/block`) | `28.57290 bits/symbol` (`29258.65 bits/block`) | `ΔNLL +27.75330 bits/symbol` |
+|  | `q_mass_on_p_zero` | `0.000381 (0.038%)` (zero_prob 195) | `0.568957 (56.9%)` (zero_prob 310241) | — |
+|  | `delta mass_0 / +1 / -1 / other` | `0.76022 / 0.001334 / 0.238445 / ~0` (以 -1 为主, direction_asym -0.237) | `0.41493 / 0.012709 / 0.011955 / 0.56041` (弥散, asym 0.000754) | — |
+|  | `frame 级 rate 均值±std` | `0.76022±0.02596` (2000 frames, 0.664-0.855) | `0.41493±0.03136` (2130 frames, 0.293-0.523) | — |
+| **1p5M** | `A==B 率 / SER` | `0.7455305 (SER 0.25447)` (n=708352) | `0.3754878 (SER 0.62451)` (n=1312000, **37.5%**) | `Δrate -0.37004` |
+|  | `U1 / U2` | `0.99231 / 0.74553` | `0.41544 / 0.39357` | `ΔU1 -0.57687 / ΔU2 -0.35196` |
+|  | `NLL` | `0.83880 bits/symbol` (`858.93 bits/block`) | `30.57725 bits/symbol` (`31311.10 bits/block`) | `ΔNLL +29.73845` |
+|  | `q_mass_on_p_zero` | `0.000285 (0.029%)` (202) | `0.609187 (60.9%)` (799253) | — |
+|  | `delta mass_0 / +1 / -1 / other` | `0.74553 / 0.253261 / 0.001208 / ~0` (以 +1 为主, asym +0.252) | `0.37549 / 0.010292 / 0.013156 / 0.60106` (弥散, asym -0.00286) | — |
+|  | `frame 级` | `0.74553±0.02729` (2767 frames) | `0.37549±0.03043` (5125 frames, 0.281-0.484) | — |
+| **2M** | `A==B 率 / SER` | `0.7442590 (SER 0.25574)` (n=933120) | `0.2748667 (SER 0.72513)` (n=1411328, **27.5%**) | `Δrate -0.46939` |
+|  | `U1 / U2` | `0.99218 / 0.74426` | `0.31344 / 0.29630` | `ΔU1 -0.67874 / ΔU2 -0.44796` |
+|  | `NLL` | `0.84259 bits/symbol` (`862.82 bits/block`) | `35.56324 bits/symbol` (`36416.76 bits/block`) | `ΔNLL +34.72065` |
+|  | `q_mass_on_p_zero` | `0.000267 (0.027%)` (249) | `0.710065 (71.0%)` (1002134) | — |
+|  | `delta mass_0 / +1 / -1 / other` | `0.74426 / 0.254257 / 0.001484 / ~0` (以 +1 为主, asym +0.253) | `0.27487 / 0.010060 / 0.008671 / 0.70640` (弥散, asym +0.00139) | — |
+|  | `frame 级` | `0.74426±0.02718` (3645 frames) | `0.27487±0.02824` (5513 frames, 0.168-0.391) | — |
+| **overall** | `avg_rate V55` | — | `0.35509` (三源均值) | — |
 
-**已确认的系统性信号（无需待运行）**：
+> **NLL 口径（失配评分，非物理条件熵）**：`NLL = mean(-log2 P_TRAIN(a|b))` 以 V25 `channel_counts.npz` 的 `P(A|B)=N_ab/colsum` 为参考，`1e-15` floor 平滑；`q_mass_on_p_zero 57-71%` 表示 `>50%` 的 `(a,b)` 在 TRAIN 中零计数，落入 `1e-15` 分支贡献 `≈49.83 bits/symbol` 惩罚，NLL 膨胀至 `28.57/30.58/35.56 bits/symbol` 属**失配评分**，**不是**新域的物理条件熵 `H(A|B)`，**不能直接用于码率/泄漏设计**，仅作 V25 模型与新域的失配度量。
+
+**已确认的系统性信号**：
 - `V13` 三源 `A==B 0.744-0.760` 且 `mass_0+mass_±1 ≈100%`、`other≈0`，`direction_asymmetry` 随 `delay -50→+1主导 / +50→-1主导` 翻转，是 `delay` 的确定性签名。
 - `V55` 已观测 `27-41%` 相关率（`76%→27-41%` 跌落 `35-49pp`），即使 `U1/U2` 分层亦同步跌落，非单比特平面问题。
 - `V55` 的 `NLL` 若以 V25 TRAIN `P(A|B)` 计算，预期因 `q_mass_on_p_zero` 高而 `>>1.5 bits/symbol`，`per-block NLL` 将远超 `1064/1094/1104` 的泄漏预算所能覆盖的 `H(U1|B)+H(U2|U1,B)`（`≈0.80 bits/symbol` 基线）。
@@ -78,13 +85,15 @@
 
 **方法**：`b'=(b+k) mod 1024` 仅为 parquet symbol/mapping shift (A1)，与 raw TTBin delay/peak/pairing contract (A2) 分离；直接由已有 1024-bin `delta=(a-b) mod 1024` histogram 得全 `k` 的 `rate_eq(k)=hist[k]`，仅对 `k=0` 与主峰 `k*` 算 `NLL(k)`，其余 `k` 不算 NLL；报告 `k vs 曲线` 与峰值 `k* = argmax rate_eq(k)`、`Δrate = rate(k*)-rate(0)`。**注明不等价 raw time-delay 扫描**。
 
-> 下表为脚本输出 `offset_scan[源].curve` 与 `peak` 的落盘位置，首次运行前填 `待运行`。
+> 下表为脚本输出 `offset_scan[源].curve` 与 `peak` 的已回填结果（`diagnosis_v55_domain.json: offset_scan`），**A1-only，不等价 raw TTBin time-delay 扫描**。
 
 | 源 | `k*` | `rate(k*)` | `Δrate` | `NLL(k*)` (bits/symbol, 仅 k* 与 0) | `delta hist[k*]` | 曲线形态 | 证据解读 (A1-only) |
 |---|---|---|---|---|---|---|---|
-| 1M | `待运行` | `待运行` (hist[k*]) | `待运行` | `待运行` (仅 k* 有) | `待运行` | `待运行` (单峰/平坦/多峰) | 若 `k*≠0` 且 `Δrate>0.20` 且 `NLL` 回落至 `~0.8-1.0` → `PATH_A1`；否则排除 A1，进入 A2/B 判定 |
-| 1p5M | `待运行` | `待运行` | `待运行` | `待运行` | `待运行` | `待运行` | 同上 |
-| 2M | `待运行` | `待运行` | `待运行` | `待运行` | `待运行` | `待运行` | 同上 |
+| 1M | `0` | `0.41493` | `0.0` | `NLL*=28.57290 = NLL0` (gap 0.40222, single_peak false) | `mass_0 0.41493 / ±1 0.0127/0.0120` | 平坦弥散（k=±1 仅 ~0.012，非峰） | **A1 基本排除**：k*=0 且 Δrate=0 且 NLL 不变，parquet `b'=(b+k)%1024` 不可修复；V25 严重不匹配，A2 尚未排除 |
+| 1p5M | `0` | `0.37549` | `0.0` | `NLL*=30.57725 = NLL0` (gap 0.36233, single_peak false) | `mass_0 0.37549 / ±1 0.0103/0.0132` | 平坦弥散 | **A1 基本排除**，同上 |
+| 2M | `0` | `0.27487` | `0.0` | `NLL*=35.56324 = NLL0` (gap 0.26481, single_peak false) | `mass_0 0.27487 / ±1 0.0101/0.00867` | 平坦弥散 | **A1 基本排除**，同上 |
+
+> **A1 守卫重申**：`b'=(b+k) mod 1024` 仅为 parquet symbol/mapping shift (A1)，由 1024-bin `delta=(a-b) mod 1024` histogram 直接得 `rate(k)=hist[k]`，与 raw TTBin 的 time-delay/peak/pairing contract (A2) 分离，**不等价 raw TTBin 扫描**；本次 `k*=0 / Δrate=0 / NLL*=NLL0` 三源一致，排除可由纯 A1 解释的假设。
 
 **守卫**：`b'=(b+k)%1024` 仅 `A1` parquet symbol/mapping shift，不等价 raw TTBin time-delay 扫描；扫描以 V25 TRAIN `P(A|B)` 为参考，不重估 `P`；不对 `a` 做偏移；不试 `a/b` 联合二维偏移；仅 `k=0/k*` 有 NLL（其余 `k` 仅 `rate_eq` 来自 histogram）；`k*` **不回注**为新 pipeline，**不用于**原 90 块重跑。
 
@@ -110,16 +119,18 @@
 
 ### 5.1 本次诊断的分流结论（逐源 + 总体四态）
 
-> **状态**：`待脚本运行后回填` — 运行 `diagnosis_v55_domain.py` 后，`diagnosis_v55_domain.json` 的 `shunt_decision` / `per_source_decisions` 字段即为权威结论，下表为结论回填位。
+> **状态**：已由 `diagnosis_v55_domain.py` 回填 — `diagnosis_v55_domain.json: shunt_evidence / per_source_decisions / shunt_decision` 为权威结论。
 
-| 字段 | 值 (待回填) |
+| 字段 | 值 (已回填) |
 |---|---|
-| `shunt_decision` | `PATH_A_ALL` / `PATH_B_ALL` / `MIXED_BY_SOURCE` / `INCONCLUSIVE` / `INCONCLUSIVE_METADATA_INCOMPLETE` |
-| `per_source_decisions` | `{1M: PATH_A1/INCONCLUSIVE_METADATA_INCOMPLETE/PATH_B/..., 1p5M: ..., 2M: ...}` |
-| `rationale` | `待回填` (与 §2-§4 证据链闭合，A1/A2/B 拆分) |
-| `avg_rate_v55` | `待回填` (三源均值，预期 `0.27-0.41`) |
-| `metadata INCOMPLETE` | 仅 `INCONCLUSIVE_METADATA_INCOMPLETE`，不自动判 A，需 actual raw 证据 |
-| `offset 单峰 (A1-only)` | `待回填` (仅 A1 证据，不等价 raw time-delay) |
+| `shunt_decision` (总体) | `INCONCLUSIVE_METADATA_INCOMPLETE` — 三源一致，因缺 raw 契约字段无法 auto-assign Path A2，归为 **INCONCLUSIVE** 总体 |
+| `per_source_decisions` | `{1M: INCONCLUSIVE_METADATA_INCOMPLETE, 1p5M: INCONCLUSIVE_METADATA_INCOMPLETE, 2M: INCONCLUSIVE_METADATA_INCOMPLETE}` (3/3 一致) |
+| `rationale` | `missing raw contract fields [delay_used_ps, peak_center_ps, peak_sigma_ps, corr_argmax, frame_start_ps, mapping] without actual raw peak/delay/channel evidence -> INCONCLUSIVE, cannot auto-assign Path A2` (json `shunt_evidence[*].per_source_rationale`) |
+| `avg_rate_v55` | `0.35509` (三源均值 (0.415+0.375+0.275)/3) |
+| `metadata INCOMPLETE` | 三源均仅 `INCONCLUSIVE_METADATA_INCOMPLETE`，不自动判 A/A2，需 actual raw 证据；`b'=(b+k)%1024 covers A1 only; A2 requires raw TTBin evidence; B after excluding A1/A2` |
+| `offset 单峰 (A1-only)` | `k*=0, Δrate=0, NLL*=NLL0, gap 0.26-0.40, single_peak_significant false` — **A1 基本排除**，不等价 raw time-delay 扫描 |
+
+逐源 `shunt_evidence` 明细：`1M gap 0.40222 / NLL 28.57=28.57 / still_low true`；`1p5M gap 0.36233 / 30.58=30.58 / still_low true`；`2M gap 0.26481 / 35.56=35.56 / still_low true` — 均 `single_peak_significant false`。
 
 **无论 Path A/B，均禁止在原 V55 authoritative 90-block 上重跑任何 corrected pipeline**（已揭盲，`base→Δ8→Δ16` 任一变体均禁，含 `offset-corrected` 重译）；**禁止调 `H1/Lane C/Δ8/decoder 90/1.0`**；**不得宣称 LDPC 证伪**。
 
@@ -161,10 +172,10 @@
 - **输入 SHAs**：V55 三源 `.ttbin/.1.ttbin` hash 见 `intake_report.json` (`ee79c5b.../5e6fcb8.../e8c6f67...`)；V13 三源 hash 见 `build_manifest.json` (`505fcadb.../b3d308c.../099259f...`)；counts `channel_counts.npz` 来自 `nbldpc_v25_20260818/run_04`
 - **输出**：`diagnosis_v55_domain.json` (machine-readable) + 本报告 (human-readable)，数据一致；不写 `run_01`
 
-## 9. 结论（待脚本回填后固化）
+## 9. 结论（已回填固化）
 
-- **系统性输入域失配信号**：`76%→27-41%` 跌落 + `NLL` 升高 + `sidecar 10+ 字段 INCOMPLETE` 已构成 **输入域失配** 的充分信号，非算法失败。
-- **分流**：`待回填` (Path A 契约修复 vs Path B 域迁移重估)，二选一互斥，已揭盲保护与校准优先为硬约束。
+- **系统性输入域失配信号**：`76%→27-41%` 跌落（1M 76.0%→41.5% Δ-34.5pp；1p5M 74.6%→37.5% Δ-37.0pp；2M 74.4%→27.5% Δ-46.9pp）+ `NLL 0.82→28.57/30.58/35.56 bits/symbol` 膨胀（Δ+27.75/+29.74/+34.72，`q_mass_on_p_zero 57-71%` 落 1e-15 floor）+ `sidecar 10+ 字段 INCOMPLETE (delay/peak/frame_start/mapping)` 已构成 **输入域失配** 的充分信号，非算法失败。**NLL 为 1e-15 floor 失配评分，不是物理条件熵，不可直接设计码率**。
+- **分流**：三源一致 `INCONCLUSIVE_METADATA_INCOMPLETE`，总体 **INCONCLUSIVE** (`avg_rate 0.355`)；**A1 基本排除**（`k*=0 / Δrate=0 / NLL*=NLL0, single_peak false, gap 0.26-0.40`，A1-only 不等价 raw TTBin）、**V25 严重不匹配**（`q_mass_on_p_zero 56.9%/60.9%/71.0%`）、**A2 尚未排除**（需 actual raw TTBin peak/delay/channel 证据才可判），已揭盲保护与校准优先为硬约束。
 - **Claim 边界**：本诊断仅为 `decoder-free` 根因诊断，不产生 `FER/阈值/SKR/资格/晋升` 证据；`V54` 二阶段在 `2026-01-21` 域上的 `43/45` 仍为有效开发确认，`V55 0/90` 不推翻。
 
 ---
