@@ -1,9 +1,9 @@
 # OpenSpec Design: formal-ir-v52-rate-adaptive-l2-rescue
 
-**Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **只规划，不实现，不执行 decoder，不创建 run_01。等待独立评审。**
+**Lifecycle**: `PLAN_REVISE_REQUIRED / EXECUTE_NOT_AUTHORIZED` — **已按阻塞点修订（去重 old 臂、修正泄漏分类），仍不实现不执行 decoder，不创建 run_01。等待独立复审。**
 **Cycle**: `V52P0`
 **Predecessor**: `6aa33eadc872bb4551f458ee750a94cd24566314` (plan HEAD, branch `formal-ir-mainline`)
-**Feasibility**: 增量 `Δm=8` 嵌套 L2 行可在 `n=1024, m2=184/190/192, GF32 poly37, row≤16` 下 decoder-free 联合满秩且嵌套（已由 spike 三源实证 `rank==m2+8`）；15 fresh held-out 块富余；两遍条件执行预算 `15×(1 old + 首遍+条件二遍)` 描述性
+**Feasibility**: 增量 `Δm=8` 嵌套 L2 行可在 `n=1024, m2=184/190/192, GF32 poly37, row≤16` 下 decoder-free 联合满秩且嵌套（已由 spike 三源实证 `rank==m2+8`）；15 fresh held-out 块富余；两遍条件执行预算 `15 L1 +15 base L2(兼 old baseline，与 V52 pass1 同一次确定性译码) + ≤15 rescue L2 = 总 30–45 硬帽45` 描述性（old Lane C 与 V52 pass1 完全同参同算子同输入，结果确定性一致，不重复译码；已删除此前 60 L2+15 L1 或每块≤4 L2 表述）
 
 ## 1. 科学问题（单因子增量冗余）
 
@@ -39,27 +39,27 @@
 - **嵌套性**：`H_joint = vstack([H_base, H_inc])`，`H_base == H_joint[0:m2, :]` 逐比特相等；`syndrome_base` 为 `syndrome_joint` 前缀。
 - **独立性**：`rank(H_inc \ rowspace(H_base)) == 8`，即 `rank(H_joint)-rank(H_base)==8`；等价 `check_independence_via_rank_increment`。
 - **构造（decoder-free 确定性）**：基于 `SeedSequence([600001/600002/600003,1])` 的 PEG-增量：按 `n=1024` 列序，每列若随机判定需新增边则在 `Δm` 行中按当前行度升序选最小度行（以 `SeedSequence([det,2])` permutation tie-break），保证行度均衡 `≤16` 且避免与 base 形成短环为次级；coeff 由 `SeedSequence([det,3])` 的 `sample_uniform_gf32_nonzero` 按规范边序映射；标签 `1..31`。无 seed 轮询；构造规则不触 V48/V50/V51 outcomes。
-- **泄漏**：`leak_joint = 5*(m2+Δm)+80+64 = leak_base + 5*Δm = leak_base+40`；`Δleak=40` 冻结。成功帧泄漏 `leak_base`；进入二遍的帧泄漏 `leak_joint`（无论救回与否）。
+- **泄漏（修正分类）**：`leak_joint = 5*(m2+Δm)+80+64 = leak_base + 5*Δm = leak_base+40`；`Δleak=40` 冻结。`first_pass_success_leak = leak_base (1064/1094/1104)`；`rescued_success_leak = leak_joint (1104/1134/1144)`；`final_failure_leak = leak_joint`；`avg_leak = leak_base + 40 × N_rescue_attempted /15`（`N_rescue_attempted = N - N_first_pass_success`，含救回与仍失败；等价 `(N_first_success*leak_base + N_rescue_attempted*leak_joint)/N`，`N=15`）；不得再用 `successful_conditional=leak_base` 单一口径。
 - **行度冻结**：`E_inc = Σ col_degree_inc` 约 `~ 8*~12 ≈ 96` (行均≈12)，具体由构造决定但 `≤128` 且每行≤16。
 - **V48/V50/V51 无接触**：常量与校验不读其 outcomes。
 
-### 2.3 两遍协议（条件 HARQ）
+### 2.3 两遍协议（条件 HARQ，去重后）
 
 ```
 per block per source:
-  prior = TRAIN prior (same for old and V52)
-  H1 s1 via true u1, L1 decode → BP → q → P(U2)
-  old arm:  decode_L2(H_base, P(U2), s_base) → verify1_old = syndrome_ok && tag_ok ; exact_old
-  V52 arm:
-    pass1: decode_L2(H_base, P(U2), s_base) → verify1 = syndrome_ok && tag_ok
-    if verify1:  final_exact = exact_pass1, leak = leak_base, rescued=False, used_increment=False
-    else:        s_inc = H_inc * u2_true ; s_joint=[s_base;s_inc]
-                 pass2: decode_L2(H_joint, P(U2), s_joint) → verify2 = syndrome_ok_joint && tag_ok_joint
-                 final_exact = exact_pass2, leak = leak_joint, rescued = (verify2 && exact_pass2 && !verify1), used_increment=True
+  prior = TRAIN prior (shared)
+  H1 s1 via true u1, L1 decode → BP → q → P(U2)  // 15 次总计，per block 1
+  base/pass1 (兼 old baseline): decode_L2(H_base, P(U2), s_base) → verify_base = syndrome_ok && tag_ok ; exact_base
+    // 此一次确定性译码同时作为 old Lane C baseline 与 V52 pass1；old_exact = exact_base, old_verify = verify_base，不另译码（同参同算子同输入，结果必然相同）
+  if verify_base:  final_exact = exact_base, leak = leak_base (=first_pass_success_leak 1064/1094/1104), rescued=False, used_increment=False
+  else:           s_inc = H_inc * u2_true ; s_joint=[s_base;s_inc]
+                  rescue: decode_L2(H_joint, P(U2), s_joint) → verify2 = syndrome_ok_joint && tag_ok_joint
+                  final_exact = exact_rescue, leak = leak_joint (=rescued_success_leak 1104/1134/1144 若救回 else final_failure_leak), rescued = (verify2 && exact_rescue), used_increment=True
+  // 每块 L1 1 + base L2 1 + 条件 rescue ≤1；15 块总 15 L1 +15 base + ≤15 rescue = 30–45 硬帽45，L2 ≤30（已删除此前 60 L2+15 L1 或每块≤4 L2 表述）
 ```
 
 - `exact_* = array_equal(x_hat, u2_true)` oracle；`tag_ok` 为真实 L2-only 哈希；公开成功以 `tag_ok` 判，`exact` 仅作 oracle 统计但报告两者。
-- **吞吐**：每块至多 1 次 L1 + old 1 L2 + V52 首遍 1 L2 + 条件二遍 1 L2。
+- **吞吐（去重后冻结）**：每块 `L1 1(共享) + base L2/pass1 1(兼 old baseline，不重复) + 条件 rescue ≤1`；总 `15 L1+15 base+≤15 rescue=30–45 硬帽45，L2 ≤30`。
 
 ### 2.4 块与 workload（15 fresh held-out, paired old vs V52, 条件二遍）
 
@@ -86,8 +86,8 @@ per block per source:
 | 2M | 393205 | [257,260] | [3173,3174,3175,3176] | 2916 | 729 | 1024 |
 
 - 每窗口 `4 frames ×256=1024 pairs`，`BLOCK_LENGTH=1024`，`pair_idx 0..255` 连续；`sampling_mode=deterministic_four_consecutive_frames_heldout_fresh`；新窗口与 V50 `391xxx`/`392xxx` 及 V48 `HELDOUT_STARTS` 均零重叠 per source 可机械校验（`BLOCK_WINDOWS` 比对）。
-- **Per block calls**：old 臂 `L1 0(共享) + L2 1 =1`，V52 臂 `L1 共享 1(总) + pass1 1 + 条件 pass2 ≤1`，合计每块 `≤4` L2 解码次；总预算 `15 块 × (最多 4 L2) = 60 L2 decodes` plus `15 L1`（共享）。
-- **Paired 比较**：同 block ID 同 `bob` 同 `P(U2)`，`old_exact_full` vs `V52_final_exact_full`；增量救回定义为 `!old_exact_full && V52_final_exact_full` 且 `used_increment`。
+- **Per block calls（去重后冻结）**：每块 `L1 1(共享) + base L2/pass1 1(兼 old baseline，确定性同结果，不重复译码) + 条件 joint rescue ≤1`；每块 L2 1–2 次，总预算 `15 L1 +15 base L2 + ≤15 rescue L2 = 总 30–45 (L1+L2) 硬帽45，L2 ≤30`；已删除此前 `60 L2+15 L1` 或每块≤4 L2 表述。
+- **Paired 比较（去重语义）**：同 block ID 同 `bob` 同 `P(U2)`，`old_exact_full (= base_exact_full)` vs `V52_final_exact_full`；二者首遍结果确定性同值，不重复译码求差；增量救回定义为 `!base_exact_full && V52_final_exact_full` 且 `used_increment`（即 rescue 成功）。
 
 ## 3. 代表矩阵与译码合约
 
@@ -103,7 +103,7 @@ per block per source:
 
 - **计数**：`first_pass_success (V52 pass1 verify && exact)`, `incremental_rescue = rescued_by_increment` (pass1 失败但 pass2 exact), `final_exact_full (V52)`, `old_exact_full`；`rescue_rate = rescued / (15 - first_pass_success)` 描述性。
 - **分源**：1M/1p5M/2M 各自 `first/rescued/final/old`。
-- **泄漏**：`avg_leak = (N_first_success*leak_base + N_attempt_rescue*leak_joint)/N`，`failed_conditional_leak = leak_joint`（最终失败帧均已尝试增量），`successful_conditional_leak = leak_base`；`f_avg = avg_leak / [N(H1+H2)]` 报告。
+- **泄漏（修正分类）**：`first_pass_success_leak = leak_base (1064/1094/1104)`；`rescued_success_leak = leak_joint (1104/1134/1144)`；`final_failure_leak = leak_joint`；`avg_leak = leak_base + 40 × N_rescue_attempted /15 = (N_first_success*leak_base + N_rescue_attempted*leak_joint)/N`（`N_rescue_attempted = N - N_first_success`，含救回与仍失败；`N=15`）；`failed_conditional_leak = leak_joint`；不得再用单一 `successful_conditional=leak_base`；`f_avg = avg_leak / [N(H1+H2)]` 等报告；`avg_leak = leak_base + 40 × N_rescue_attempted /15` 为主公式。
 - **矩阵**：每源 `base_rank==m2`, `joint_rank==m2+8`, `nested==True`, `independence==8`, `row_degree_max≤16`；`E_inc` 报告。
 - **Tag**：`tag_ok` 真实接受率 per pass，`G3' undetected==0` 单独表；`syndrome_ok` vs `tag_ok` 分流。
 - **Paired**：`Δexact = final_V52 - old` per block 描述性，McNemar `b/c` 仅描述性；`Δleak = avg_leak_V52 - leak_base_old`。
@@ -119,7 +119,7 @@ per block per source:
 
 ## 5. O3 配对语义
 
-- 同 `block ID` 的 held-out 样本 `(idx,alice,bob)` 每块确定性一次，`L1` 单次生成 `q_i` 与 `P_i(U2)`，`old` 单遍与 `V52` 首遍同 `bob`/`P_i(U2)`/`s_base`/`H_base`；`V52` 二遍仅在首遍未通过时以同一 `bob`/`P_i(U2)` 与 `H_joint/s_joint` 重译。
+- 同 `block ID` 的 held-out 样本 `(idx,alice,bob)` 每块确定性一次，`L1` 单次生成 `q_i` 与 `P_i(U2)`，`base/pass1` 同一次确定性译码兼作 `old` baseline 与 `V52` 首遍（同 `bob`/`P_i(U2)`/`s_base`/`H_base`，不重复译码，结果必然相同）；`rescue` 仅在 `base` 未通过时以同一 `bob`/`P_i(U2)` 与 `H_joint/s_joint` 重译。
 - 跨块/跨臂 outcome 差异为诊断量，永不作完整性失败。
 
 ## 6. 科学 preflight、守卫序
@@ -131,23 +131,24 @@ per block per source:
 
 ## 7. 记录、聚合、summary
 
-每 L2 call record schema（含 `tag_scope=l2_only, arm∈{old,V52_pass1,V52_pass2}`）：
+每 L2 call record schema（含 `tag_scope=l2_only, arm∈{base_shared,rescue}`，`base_shared` 兼 `old` 与 `V52_pass1`，确定性复用不重复译码）：
 
 ```
-call_id, source, block_seed(block ID), arm(old/V52_pass1/V52_pass2), pass_index(1/2), used_increment(bool),
-matrix_id(base/joint/inc), h1_matrix_id, frame_ids[4], held_out_ordinal_start/end, pairs_count 1024, sampling_mode,
+call_id, source, block_seed(block ID), arm(base_shared/rescue), pass_index(1/2), used_increment(bool),
+matrix_id(base/joint), h1_matrix_id, frame_ids[4], held_out_ordinal_start/end, pairs_count 1024, sampling_mode,
 max_iter 90, damping 1.0, errors_initial, errors_final, exact_l2, exact_u1, exact_full,
 syndrome_ok_l2/l1, wrong_codeword, target_tag, candidate_tag, tag_ok, tag_scope,
-reclassified, iterations_l1/l2, bp_posterior_entropy, mean_abs_diff_q_p, leak_total (1064/1094/1104 or +40), leak_joint, status, runtime_s
+reclassified, iterations_l1/l2, bp_posterior_entropy, mean_abs_diff_q_p, leak_total (1064/1094/1104 or 1104/1134/1144), leak_joint, status, runtime_s
+  // leak_total = first_pass_success_leak(1064/1094/1104) 若 base 通过 else leak_joint(1104/1134/1144)；old_exact 派生自 base_shared，不另记录
 ```
 
-Summary 含：记账 `first_pass_success / rescue_by_increment / final_exact_full / old_exact_full` (overall & per-source)；`N=15`；`avg_leak / failed_conditional_leak / successful_conditional_leak`；`Δleak=40*(1-p1)`；`H_inc joint_rank/nested/independence/E_inc/row_max` provenance；L1 诊断；四类计数；G3'；门禁描述；`f_avg`；paired `old vs V52` per block 描述性 (`Δexact`, McNemar `b/c` 仅描述)；claim boundary；provenance（含 `H_inc det1` 与 fresh held-out 溯源含每块 `frame_ids/ordinal`）。
+Summary 含：记账 `first_pass_success / rescue_by_increment / final_exact_full / old_exact_full(derived from base)` (overall & per-source)；`N=15`；`first_pass_success_leak(1064/1094/1104) / rescued_success_leak(1104/1134/1144) / final_failure_leak(leak_joint) / avg_leak(=leak_base+40×N_rescue_attempted/15) / failed_conditional_leak(leak_joint)`；`Δleak=40×N_rescue_attempted/15 =40*(1-p1)`；`H_inc joint_rank/nested/independence/E_inc/row_max` provenance；L1 诊断；四类计数；G3'；门禁描述；`f_avg`；paired `old vs V52` per block 描述性 (`Δexact`, McNemar `b/c` 仅描述，去重：old 与 pass1 同记录)；claim boundary；provenance（含 `H_inc det1` 与 fresh held-out 溯源含每块 `frame_ids/ordinal`）。
 
 ## 8. 统计与断言边界
 
 仅描述性；`n=15` blocks 配对；比例带 n 与 raw counts；区间 naive 未校正簇聚；无显著性晋升；终态仅 `V52_EVIDENCE_INVALID / V52_NESTED_RESCUE_COMPLETE`。
 
-断言边界 verbatim：结果仅支持 `n=1024, m2=184/190/192, Δm=8` 上 `H_joint=[H_base;H_inc] 8×1024 嵌套增量` 在 `15` fresh held-out 块上的有界 rescue 归因（首遍冻结 Lane C 原 support/标签/prior/MET 图不改，decoder `90/1.0 poly37`，泄漏 `leak_base 1064/1094/1104` / `leak_joint=leak_base+40` 仅失败帧追加，已成功帧不增泄漏，`row≤16 full rank nested independence==8` 确定性构造不触 outcomes, L2-only tag `≈2^-64` 工程近似），`exact_full` oracle 不经 tag；均非真帧 FER 全集/阈值/SKR/资格/晋升证据；不启动 V53.
+断言边界 verbatim：结果仅支持 `n=1024, m2=184/190/192, Δm=8` 上 `H_joint=[H_base;H_inc] 8×1024 嵌套增量` 在 `15` fresh held-out 块上的有界 rescue 归因（首遍冻结 Lane C 原 support/标签/prior/MET 图不改，decoder `90/1.0 poly37`，泄漏 `leak_base 1064/1094/1104` / `leak_joint=leak_base+40 (40=5*Δm)`，`first_pass_success 已成功帧不增泄漏(1064/1094/1104)，rescued_success 与 final_failure 均为 leak_joint(1104/1134/1144)，avg_leak=leak_base+40×N_rescue_attempted/15`，总 `30–45 硬帽45(old 与 pass1 同一次确定性译码不重复)`，`row≤16 full rank nested independence==8` 确定性构造不触 outcomes, L2-only tag `≈2^-64` 工程近似），`exact_full` oracle 不经 tag；均非真帧 FER 全集/阈值/SKR/资格/晋升证据；不启动 V53.
 
 ## 9. 证据写出
 
@@ -157,11 +158,11 @@ Summary 含：记账 `first_pass_success / rescue_by_increment / final_exact_ful
 comparison_bench/outputs_comparison/formal_ir_methods/v52_rate_adaptive_l2_rescue/run_01/
 ```
 
-文件：`v52_records.json/.csv` (≤45 L2 行：15 old + ≤30 V52 pass1/pass2)、`v52_summary.json`、`v52_invalid_notice.json`（失败时）. CSV/JSON 行对等；禁写 NPZ.
+文件：`v52_records.json/.csv` (≤30 L2 行：15 base/pass1(兼 old baseline，确定性复用，不重复译码) + ≤15 rescue；总调用 15 L1+15 base+≤15 rescue=30–45 硬帽45)、`v52_summary.json`、`v52_invalid_notice.json`（失败时）. CSV/JSON 行对等；禁写 NPZ.
 
 ## 10. 实现草图（后继轮次，当前未授权）
 
-- `comparison_bench/src/comparison_bench/formal_ir/v52_rate_adaptive_l2_rescue.py`：import `construct_lane_c_prototype` 常量与 `v35.compute_tag_64`，实现确定性 `H_inc 8×1024` (§2.2，PEG-增量 tie-break `SeedSequence([60000x,1/2/3])`，`col≤1 row≤16 joint rank`) + 双臂 runner (per block `old 1 L2 + V52 pass1 1 + 条件 pass2 ≤1`).
+- `comparison_bench/src/comparison_bench/formal_ir/v52_rate_adaptive_l2_rescue.py`：import `construct_lane_c_prototype` 常量与 `v35.compute_tag_64`，实现确定性 `H_inc 8×1024` (§2.2，PEG-增量 tie-break `SeedSequence([60000x,1/2/3])`，`col≤1 row≤16 joint rank`) + 单 base 译码兼 old/V52 pass1 + 条件 rescue runner (per block `base 1(兼 old) + 条件 rescue ≤1`，总 15 L1+15 base+≤15 rescue=30–45 硬帽45，old 与 pass1 不重复译码).
 - `scripts/execute_v52_nested_rescue.py`：默认拒绝；`--execution-authorized --authorized-target-sha <sha>`；HEAD/origin 精确绑定未来实现 SHA（plan `6aa33ead...`）；四文件 SCOPED dirty；budget 硬帽 15 块条件执行；任一 gate 失败非零退出.
 - 仅 fake-runner 测试；不以 outcomes 定增量或调 `Δm`.
 
@@ -170,10 +171,10 @@ comparison_bench/outputs_comparison/formal_ir_methods/v52_rate_adaptive_l2_rescu
 - D1 单一增量 `Δm=8` per source 嵌套 rescue，15 块 paired old vs V52。
 - D2 seed registry 新区 15 `393001..` `393101..` `393201..` 与 FORBIDDEN 171 零重叠且与 V48/V50/V51 帧零重叠 per source 连续，每块写死 4 真实 `frame_ids` 与 `ordinal`。
 - D3 代表矩阵 3 Lane C base + 3 H_inc det1 (8×1024) + 3 H_joint (m2+8)。
-- D4 泄漏公式 `leak_base 1064/1094/1104` / `leak_joint+40` 冻结，已成功帧不增泄漏。
-- D5 报告门禁描述性 `first/rescued/final/old`，`avg_leak/failed_conditional`，`paired Δexact`。
+- D4 泄漏公式 `leak_base 1064/1094/1104` / `leak_joint+40` 冻结，`first_pass_success_leak=leak_base / rescued_success_leak=leak_joint / final_failure_leak=leak_joint / avg_leak=leak_base+40×N_attempt/15` 冻结，已成功 first_pass 帧不增泄漏。
+- D5 报告门禁描述性 `first/rescued/final/old(derived)`，`first_pass/rescued/failure/avg 泄漏分类 + failed_conditional`，`paired Δexact(去重)`。
 - D6 哨兵每源首块 `393001/393101/393201` 单 L1 通路。
-- D7 call 序 `source 1M/1p5M/2M, block asc, within-block old→pass1→(条件)pass2`。
+- D7 call 序 `source 1M/1p5M/2M, block asc, within-block base_shared(兼 old/pass1)→(条件)rescue`；old 与 pass1 同记录不重复。
 - D8 SCOPED dirty 四文件。
 - D9 preflight 失败 invalid 三件套零 calls。
 - D10 文件集条件行记录 + 聚合 + 效应 + provenance.
