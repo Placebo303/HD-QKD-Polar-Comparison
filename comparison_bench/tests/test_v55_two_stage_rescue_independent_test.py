@@ -250,8 +250,8 @@ def test_existing_root_rejection(tmp_path, real_counts):
         assert "already exists" in str(e)
 
 def test_accepted_plan_sha_is_v55():
-    assert v55.ACCEPTED_PLAN_SHA == "efd34ef318014e1d0505605062057b042e2180eb"
-    assert "efd34ef" in Path(v55.__file__).read_text(encoding="utf-8")
+    assert v55.ACCEPTED_PLAN_SHA == "3d7c63eefe655c9f25d199af3f7f4ea311ac454b"
+    assert "3d7c63ee" in Path(v55.__file__).read_text(encoding="utf-8")
 
 def test_decoder_free_preflight(tmp_path):
     field=GF2mField.create(32)

@@ -5,7 +5,7 @@ Frozen V52/V53 complete method (H1-16 + syndrome-derived L1-APP via BP_i + Lane 
 Budget 90 L1 +90 base +≤45 stage1 +≤45 stage2 =90-180 hard cap 180 (L2 45-135). Leakage base 1064/1094/1104 stage1 +40 stage2 +80. Verification-only base→stage1→stage2; exact only oracle. Per-block L1 q reused.
 
 Lifecycle: IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED.
-Accepted plan SHA: efd34ef318014e1d0505605062057b042e2180eb
+Accepted plan SHA: 3d7c63eefe655c9f25d199af3f7f4ea311ac454b
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ from comparison_bench.formal_ir.v38_architecture_triage import (
 
 CYCLE_ID = "V55P0"
 CHANGE_ID = "formal-ir-v55-two-stage-rescue-independent-test"
-ACCEPTED_PLAN_SHA = "efd34ef318014e1d0505605062057b042e2180eb"
+ACCEPTED_PLAN_SHA = "3d7c63eefe655c9f25d199af3f7f4ea311ac454b"
 BRANCH_REF = "origin/formal-ir-mainline"
 EXECUTION_SCOPE = "v55_two_stage_rescue_independent_test_90_blocks_triple_exactly_once_authoritative"
 
