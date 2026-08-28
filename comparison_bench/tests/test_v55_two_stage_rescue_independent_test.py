@@ -179,27 +179,44 @@ def test_budget_180_270_360_and_361_rejection(tmp_path, real_counts):
 
 def test_gate_70_90_and_20_30_and_undetected(tmp_path, real_counts):
     world=FakeWorld()
-    # PASS case: 75 overall (25 per source) and undetected 0
-    base_pass=[{"exact":True,"verify":True}]*60 + [{"exact":False,"verify":False}]*30
-    s1_pass=[{"exact":True,"verify":True}]*15
-    s1_pass+=[{"exact":False,"verify":False}]*15
-    # Need 30 stage1 rescues? Actually we have 30 base fails, 15 rescued via stage1 -> final 75? For PASS need final >=70 per-source >=20
-    # Our base pattern distributes uniformly across blocks iteration order (source interleaved? Actually run iterates source order 1M then 1p5M then 2M). So first 30 blocks are 1M, next 30 1p5M, next 30 2M.
-    # So to get per-source 25 each, need exact per source 25. Base: 60 exact uniformly would be 20 per source, plus 15 rescued would be 5 per source -> 25 per source final 75 overall.
-    # Let's use pattern as above: base 60 exact (20 per source) +15 stage1 exact (5 per source) =75 overall 25 per source.
-    # Add stage2 none.
-    res_pass=v55.run_v55_diagnostic(execution_authorized=True, authorized_target_sha="e1"*20, fake_runner=True, output_root=tmp_path/"gate_pass", structural_authority_path=world.authority_file(tmp_path), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=_make_decode_fn(base_pass,s1_pass,[]))
+    # PASS: per-source 25 each => 75/90 overall, all >=20
+    def _per_source_build(base_exact_map, rescued_map):
+        base=[]; s1=[]; s2=[]
+        for src in v55.SOURCE_ORDER:
+            be=base_exact_map[src]; bf=30-be
+            base.extend([{"exact":True,"verify":True}]*be + [{"exact":False,"verify":False}]*bf)
+            sr=rescued_map[src]; sf=bf-sr
+            s1.extend([{"exact":True,"verify":True}]*sr + [{"exact":False,"verify":False}]*sf)
+            # stage2 attempts = sf per source, all fail for these tests (no stage2 rescue)
+            s2.extend([{"exact":False,"verify":False}]*sf)
+        return base,s1,s2
+    base_pass,s1_pass,s2_pass=_per_source_build({"1M":20,"1p5M":20,"2M":20},{"1M":5,"1p5M":5,"2M":5})
+    res_pass=v55.run_v55_diagnostic(execution_authorized=True, authorized_target_sha="e1"*20, fake_runner=True, output_root=tmp_path/"gate_pass", structural_authority_path=world.authority_file(tmp_path), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=_make_decode_fn(base_pass,s1_pass,s2_pass))
     assert res_pass["terminal_state"]==v55.TERMINAL_INDEPENDENT_TEST_PASS
-    # FAIL per-source: one source under 20
-    # Make base exact 60 but distribution skewed: first 30 (1M) all exact, next 30 (1p5M) 20 exact, last 30 (2M) 10 exact -> 60 overall but 2M only 10, stage1 rescues 10 for 2M -> final 2M 20 borderline, make it 19 to fail
-    # Simpler: construct patterns that fail per-source: keep overall 70 but one source 19
-    # We can directly craft counts via decode_fn patch not trivial; test undetected gate instead
+    assert res_pass["summary"]["counts"]["final_exact_full_count"]==75
+    for src in v55.SOURCE_ORDER:
+        assert res_pass["summary"]["counts"]["per_source"][src]["final"]==25
+    # FAIL per-source 19/30 boundary: one source 19, others 25
+    base_19,s1_19,s2_19=_per_source_build({"1M":15,"1p5M":20,"2M":20},{"1M":4,"1p5M":5,"2M":5})
+    res_19=v55.run_v55_diagnostic(execution_authorized=True, authorized_target_sha="e1b"*13+"1", fake_runner=True, output_root=tmp_path/"gate_19", structural_authority_path=world.authority_file(tmp_path/"a1b"), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=_make_decode_fn(base_19,s1_19,s2_19))
+    assert res_19["summary"]["counts"]["per_source"]["1M"]["final"]==19
+    assert res_19["terminal_state"]==v55.TERMINAL_INDEPENDENT_TEST_FAIL
+    # FAIL overall 69/90: per-source 23 each (69 overall) with undetected 0 -> fails coverage 70
+    base_69,s1_69,s2_69=_per_source_build({"1M":18,"1p5M":18,"2M":18},{"1M":5,"1p5M":5,"2M":5})
+    res_69=v55.run_v55_diagnostic(execution_authorized=True, authorized_target_sha="e1c"*13+"2", fake_runner=True, output_root=tmp_path/"gate_69", structural_authority_path=world.authority_file(tmp_path/"a1c"), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=_make_decode_fn(base_69,s1_69,s2_69))
+    assert res_69["summary"]["counts"]["final_exact_full_count"]==69
+    assert res_69["terminal_state"]==v55.TERMINAL_INDEPENDENT_TEST_FAIL
+    # PASS overall 70/90 boundary: per-source 24,23,23 =>70 with all >=20
+    base_70,s1_70,s2_70=_per_source_build({"1M":19,"1p5M":18,"2M":18},{"1M":5,"1p5M":5,"2M":5})
+    res_70=v55.run_v55_diagnostic(execution_authorized=True, authorized_target_sha="e1d"*13+"3", fake_runner=True, output_root=tmp_path/"gate_70", structural_authority_path=world.authority_file(tmp_path/"a1d"), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=_make_decode_fn(base_70,s1_70,s2_70))
+    assert res_70["summary"]["counts"]["final_exact_full_count"]==70
+    assert res_70["terminal_state"]==v55.TERMINAL_INDEPENDENT_TEST_PASS
+    # Undetected gate: 1 undetected base -> fail even if counts pass
     base_undet=[{"exact":True,"verify":True}]*75 + [{"exact":False,"verify":True}] + [{"exact":False,"verify":False}]*14
-    # This creates 1 undetected base -> undetected>0 should cause FAIL even if counts pass
     res_undet=v55.run_v55_diagnostic(execution_authorized=True, authorized_target_sha="e2"*20, fake_runner=True, output_root=tmp_path/"gate_undet", structural_authority_path=world.authority_file(tmp_path/"a2"), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=_make_decode_fn(base_undet,[],[]))
     assert res_undet["summary"]["counts"]["undetected_accepted_wrong"]>=1
     assert res_undet["terminal_state"]==v55.TERMINAL_INDEPENDENT_TEST_FAIL
-    # FAIL coverage: overall <70
+    # FAIL coverage: overall <70 with 50 exact
     base_low=[{"exact":True,"verify":True}]*50 + [{"exact":False,"verify":False}]*40
     res_low=v55.run_v55_diagnostic(execution_authorized=True, authorized_target_sha="e3"*20, fake_runner=True, output_root=tmp_path/"gate_low", structural_authority_path=world.authority_file(tmp_path/"a3"), counts_by_source=real_counts, check_git=False, check_scoped_dirty=False, constructors=world.constructors, decode_fn=_make_decode_fn(base_low,[{"exact":False,"verify":False}]*40,[{"exact":False,"verify":False}]*40))
     assert res_low["terminal_state"]==v55.TERMINAL_INDEPENDENT_TEST_FAIL

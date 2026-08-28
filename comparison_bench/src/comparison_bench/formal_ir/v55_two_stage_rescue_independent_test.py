@@ -1,8 +1,8 @@
-"""V55P0 two-stage incremental L2 rescue independent TEST 90 blocks Δ8+8 nested HARQ conditional 45 blocks.
+"""V55P0 two-stage incremental L2 rescue independent TEST 90 blocks Δ8+8 nested HARQ conditional 90 blocks.
 
 Frozen V52/V53 complete method (H1-16 + syndrome-derived L1-APP via BP_i + Lane C ordinal-2 support/label/position_permutations + m2 184/190/192 + H_inc1 8×1024 det1 + H_joint1 192/198/200 + decoder 90/1.0 poly37 + L2-only tag + TRAIN-only prior + verification-only) plus second increment H_inc2 8×1024 det2 second stage.
 
-Budget 90 L1 +90 base +≤45 stage1 +≤45 stage2 =90-180 hard cap 180 (L2 45-135). Leakage base 1064/1094/1104 stage1 +40 stage2 +80. Verification-only base→stage1→stage2; exact only oracle. Per-block L1 q reused.
+Budget 90 L1 +90 base +≤90 stage1 +≤90 stage2 =180-360 hard cap 360 (L2 90-270). Leakage base 1064/1094/1104 stage1 +40 stage2 +80. Verification-only base→stage1→stage2; exact only oracle. Per-block L1 q reused.
 
 Lifecycle: IMPLEMENTATION_CANDIDATE / EXECUTE_NOT_AUTHORIZED.
 Accepted plan SHA: 3d7c63eefe655c9f25d199af3f7f4ea311ac454b
@@ -436,7 +436,7 @@ ALLOWED_CALL_KEYS = frozenset(
 )
 
 CLAIM_BOUNDARY: tuple[str, ...] = (
-    "results support ONLY nested two-stage incremental L2 rescue Δ8+8 on frozen Lane C support/prior/MET n=1024 m2 184/190/192 GF32 poly37 decoder 90/1.0 leak 1064/1094/1104 base 1104/1134/1144 stage1 1144/1174/1184 stage2 conditional only rescue frames +40 each stage avg per_source[s]=leak_base[s]+40*N1[s]/30+40*N2[s]/30 overall=(Σ base+40*N1+40*N2)/90 independent cross-session 90 blocks",
+    "results support ONLY nested two-stage incremental L2 rescue Δ8+8 on frozen Lane C support/prior/MET n=1024 m2 184/190/192 GF32 poly37 decoder 90/1.0 leak 1064/1094/1104 base 1104/1134/1144 stage1 1144/1174/1184 stage2 conditional only rescue frames +40 each stage avg per_source[s]=leak_base[s]+40*N1[s]/30+40*N2[s]/30 overall=(Σ leak_base[source(block)]+40*N_stage1_total+40*N_stage2_total)/90 independent cross-session 90 blocks",
     "leakage H1-16 includes 64-bit tag L2-only random-hash-model approximate 2^-64 row≤16 col_inc≤1 deterministic no seed search nested rank m2+8 m2+16",
     "not threshold/SKR/formal qualification/promotion; paired descriptive only Δexact_stage1 Δexact_stage2 four-way G3' undetected==0 90 blocks independent cross-session 70/90 20/30 gates",
 )
@@ -597,7 +597,7 @@ def validate_seed_registry(seeds: Optional[dict[str, list[int]]] = None) -> tupl
         return False, f"registry must hold exactly 30 seeds per source: {dict(reg)}"
     duplicates = sorted({s for s in all_seeds if all_seeds.count(s) > 1})
     if duplicates:
-        return False, f"duplicate seeds among the 45: {duplicates}"
+        return False, f"duplicate seeds among the 90: {duplicates}"
     overlap = set(all_seeds) & FORBIDDEN_231
     if overlap:
         return False, f"new seeds overlap forbidden 231 registries: {sorted(overlap)}"
@@ -622,6 +622,82 @@ def validate_seed_registry(seeds: Optional[dict[str, list[int]]] = None) -> tupl
                     if abs(windows[i][0]-windows[j][0]) <=3:
                         return False, f"block intervals overlap within {src}: {windows[i]} vs {windows[j]}"
     return True, "SEED_REGISTRY_OK"
+
+
+def _validate_authoritative_registry() -> None:
+    """J7: bind runner to authoritative registry — read JSON and cross-check 90 blocks before any decoder call."""
+    path = AUTHORITATIVE_REGISTRY_PATH
+    if not path.is_file():
+        raise IntegrityFailure("J7", f"authoritative registry missing: {path}")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise IntegrityFailure("J7", f"authoritative registry unreadable: {exc}") from exc
+    if data.get("accepted_plan_sha") != ACCEPTED_PLAN_SHA:
+        raise IntegrityFailure("J7", f"registry accepted_plan_sha {data.get('accepted_plan_sha')!r} != {ACCEPTED_PLAN_SHA!r}")
+    intake_sha = data.get("intake_data_sha") or data.get("data_sha")
+    if intake_sha != "84d62779603e62de50ded5182ed65b65d3dc6084":
+        raise IntegrityFailure("J7", f"registry intake_data_sha {intake_sha!r} != 84d62779")
+    if data.get("processing_rule") != "legacy_v1":
+        raise IntegrityFailure("J7", f"processing_rule {data.get('processing_rule')!r} != legacy_v1")
+    if data.get("dimension") != 1024:
+        raise IntegrityFailure("J7", "dimension !=1024")
+    if data.get("bin_width_ps") != 200:
+        raise IntegrityFailure("J7", "bin_width_ps !=200")
+    if data.get("pairing") != "nearest":
+        raise IntegrityFailure("J7", "pairing !=nearest")
+    if data.get("channels") != {"A": 1, "B": 5}:
+        raise IntegrityFailure("J7", f"channels {data.get('channels')!r} != {{A:1,B:5}}")
+    if data.get("total_blocks") != 90 or data.get("blocks_per_stratum") != 30:
+        raise IntegrityFailure("J7", f"blocks {data.get('total_blocks')}/{data.get('blocks_per_stratum')} !=90/30")
+    strata = data.get("strata")
+    if not isinstance(strata, dict) or len(strata) != 3:
+        raise IntegrityFailure("J7", "strata must have 3 entries")
+    expected = {"20260123_1M_600k_0dB": "1M", "20260107_PPLN_1p5M": "1p5M", "20260123_2M_1p2M_0dB": "2M"}
+    for sess, src in expected.items():
+        entry = strata.get(sess)
+        if entry is None:
+            raise IntegrityFailure("J7", f"missing stratum {sess}")
+        if entry.get("stratum") != src:
+            raise IntegrityFailure("J7", f"stratum {sess} != {src}")
+        if entry.get("sampling_mode") != SAMPLING_MODE:
+            raise IntegrityFailure("J7", f"sampling_mode {entry.get('sampling_mode')!r} != {SAMPLING_MODE!r}")
+        if entry.get("pairs_count") != PAIRS_PER_BLOCK or entry.get("pairs_per_frame") != PAIRS_PER_FRAME:
+            raise IntegrityFailure("J7", f"pairs mismatch {sess}")
+        if entry.get("F") != INTAKE_F[src] or entry.get("K") != INTAKE_K[src]:
+            raise IntegrityFailure("J7", f"F/K mismatch {sess} {entry.get('F')}/{entry.get('K')} vs {INTAKE_F[src]}/{INTAKE_K[src]}")
+        starts = entry.get("selected_starts")
+        fids_list = entry.get("selected_frame_ids")
+        if not isinstance(starts, list) or len(starts) != 30 or not isinstance(fids_list, list) or len(fids_list) != 30:
+            raise IntegrityFailure("J7", f"selected length !=30 {sess}")
+        if starts != [BLOCK_WINDOWS[b]["held_out_ordinal_start"] for b in NEW_BLOCK_SEEDS[src]]:
+            raise IntegrityFailure("J7", f"selected_starts mismatch {sess}")
+        for idx, start in enumerate(starts):
+            fids = fids_list[idx]
+            if fids != [start, start + 1, start + 2, start + 3]:
+                raise IntegrityFailure("J7", f"frame_ids not consecutive 4 {sess} idx {idx}")
+            bseed = NEW_BLOCK_SEEDS[src][idx]
+            win = BLOCK_WINDOWS.get(bseed)
+            if win is None or win["source"] != src or win["held_out_ordinal_start"] != start or win["held_out_ordinal_end"] != start + 3 or win["frame_ids"] != fids:
+                raise IntegrityFailure("J7", f"BLOCK_WINDOWS mismatch {sess} idx {idx} seed {bseed}")
+            if win["pairs_count"] != PAIRS_PER_BLOCK or win["sampling_mode"] != SAMPLING_MODE:
+                raise IntegrityFailure("J7", f"window meta mismatch {bseed}")
+        for i in range(len(starts)):
+            for j in range(i + 1, len(starts)):
+                if abs(starts[i] - starts[j]) < 4:
+                    raise IntegrityFailure("J7", f"gap <4 within {sess}: {starts[i]} vs {starts[j]}")
+    # cross-check _V55_WINDOW_DEFS matches registry exactly (defensive against copied-def drift)
+    registry_windows = []
+    for sess in expected:
+        entry = strata[sess]
+        for s, fid in zip(entry["selected_starts"], entry["selected_frame_ids"]):
+            registry_windows.append((entry["stratum"], s, fid))
+    defs_windows = [(src, s, fids) for src, _, s, _, fids in _V55_WINDOW_DEFS]
+    if len(registry_windows) != len(defs_windows):
+        raise IntegrityFailure("J7", "registry vs _V55_WINDOW_DEFS count mismatch")
+    for (r_src, r_s, r_fids), (d_src, d_s, d_fids) in zip(registry_windows, defs_windows):
+        if r_src != d_src or r_s != d_s or r_fids != d_fids:
+            raise IntegrityFailure("J7", f"registry vs _V55_WINDOW_DEFS mismatch {r_src} {r_s}")
 
 
 # ---------------------------------------------------------------------------
@@ -919,7 +995,7 @@ def _compute_errors_initial(u2_alice: np.ndarray, u2_bob: np.ndarray) -> int:
     return int(np.sum(np.asarray(u2_alice) != np.asarray(u2_bob)))
 
 # ---------------------------------------------------------------------------
-# Budget accounting J10 hard cap 180
+# Budget accounting J10 hard cap 360
 # ---------------------------------------------------------------------------
 
 class CallAccounting:
@@ -1115,7 +1191,7 @@ def validate_record_schema(record: dict[str, Any]) -> tuple[bool, str]:
         return False, "frame_ids must be list of 4"
     win = BLOCK_WINDOWS.get(record["block_seed"])
     if win is None:
-        return False, f"block_seed {record['block_seed']} not in frozen 45"
+        return False, f"block_seed {record['block_seed']} not in frozen 90"
     if record["frame_ids"] != win["frame_ids"]:
         return False, f"frame_ids mismatch expected {win['frame_ids']}"
     if record["held_out_ordinal_start"] != win["held_out_ordinal_start"] or record["held_out_ordinal_end"] != win["held_out_ordinal_end"]:
@@ -1285,6 +1361,7 @@ def run_v55_diagnostic(
     iso_ok, iso_msg = validate_train_heldout_isolation()
     if not iso_ok:
         raise IntegrityFailure("J4", iso_msg)
+    _validate_authoritative_registry()
     if counts_by_source is None:
         try:
             counts_by_source = load_v25_channel_counts()
@@ -1481,7 +1558,7 @@ def run_v55_diagnostic(
                         # leak stage2 regardless success/failure per spec
                         per_block_final_leak[bseed] = leak_stage2_for(source)
                 # end per block
-        # fill per-block leak for any missing (should be all 45)
+        # fill per-block leak for any missing (should be all 90)
         for bseed in BLOCK_WINDOWS:
             if bseed not in per_block_final_leak:
                 per_block_final_leak[bseed] = leak_for(BLOCK_TO_SOURCE[bseed])
@@ -1549,7 +1626,7 @@ def run_v55_diagnostic(
         ps["undetected"] = ps["undetected_final"]
     # leakage totals
     total_disclosed = sum(per_block_final_leak.values())
-    overall_avg = float(total_disclosed / 90) if 45 else 0.0
+    overall_avg = float(total_disclosed / 90) if total_blocks else 0.0
     per_source_avg: dict[str,float] = {}
     per_source_total: dict[str,int] = {s:0 for s in SOURCE_ORDER}
     per_source_n: dict[str,int] = {s:0 for s in SOURCE_ORDER}
@@ -1559,7 +1636,7 @@ def run_v55_diagnostic(
         per_source_n[src]+=1
     for src in SOURCE_ORDER:
         per_source_avg[src] = float(per_source_total[src]/ per_source_n[src]) if per_source_n[src] else 0.0
-        # also formula check: leak_base +40*N1/15+40*N2/15
+        # also formula check: leak_base +40*N1/30+40*N2/30
         formula_avg = float(leak_for(src) + 40*per_source[src]["n_stage1"]/30 + 40*per_source[src]["n_stage2"]/30)
         # keep computed avg as per_block average (should match formula)
     avg_disclosure = float(overall_avg/1024)
@@ -1618,7 +1695,7 @@ def run_v55_diagnostic(
             "stage2_leak": {s: leak_stage2_for(s) for s in SOURCE_ORDER},
             "per_source_avg": per_source_avg,
             "overall_avg": overall_avg,
-            "formula": "per_source_avg[s]=leak_base[s]+40*N_stage1[s]/15+40*N_stage2[s]/15 overall_avg=(Σ leak_base[source(block)]+40*N_stage1_total+40*N_stage2_total)/45",
+            "formula": "per_source_avg[s]=leak_base[s]+40*N_stage1[s]/30+40*N_stage2[s]/30 overall_avg=(Σ leak_base[source(block)]+40*N_stage1_total+40*N_stage2_total)/90",
             "n_stage1_attempted": n_stage1_attempted,
             "n_stage2_attempted": n_stage2_attempted,
             "total_disclosed_bits": int(total_disclosed),
@@ -1668,9 +1745,9 @@ def run_v55_diagnostic(
         "held_out_provenance": {
             "block_windows": {str(k): v for k,v in BLOCK_WINDOWS.items()},
             "sampling_mode": SAMPLING_MODE,
-            "fresh_45": NEW_BLOCK_SEEDS,
-            "K2_per_source": {"1M":135,"1p5M":260,"2M":461},
-            "index_formula": "floor(j*(K2-1)/14)",
+            "authoritative_blocks": NEW_BLOCK_SEEDS,
+            "K_per_source": {"1M":2127,"1p5M":5122,"2M":5510},
+            "index_formula": "floor(j*(K-1)/29)",
         },
         "provenance": {
             "h_inc1_det_ids": INC1_DET_IDS,
