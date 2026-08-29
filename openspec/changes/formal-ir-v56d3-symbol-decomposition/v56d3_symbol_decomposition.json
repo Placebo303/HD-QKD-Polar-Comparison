@@ -1,0 +1,55 @@
+{
+  "head": "8d4df35c57fb168a389f591721b562b2baca5a8f",
+  "branch": "formal-ir-mainline",
+  "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
+  "lifecycle": "DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN",
+  "provenance": {
+    "head": "8d4df35c57fb168a389f591721b562b2baca5a8f",
+    "origin_head": "8d4df35c57fb168a389f591721b562b2baca5a8f",
+    "branch": "formal-ir-mainline",
+    "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
+    "src_qkd_io_frozen": true,
+    "chunk_inline": "hist_chunk() in this script only, not in src/",
+    "lifecycle": "DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN",
+    "equivalence": {
+      "sample_events": 1000,
+      "n_A": 800,
+      "n_B": 1000,
+      "bin_width_ps": 100,
+      "max_lag_ps": 819200,
+      "counts_equal": true,
+      "counts_sum_old": 2132,
+      "counts_sum_chunk": 2132
+    }
+  },
+  "fit_frames": [
+    7,
+    8,
+    9,
+    10
+  ],
+  "val_frames": [
+    15,
+    16,
+    17,
+    18
+  ],
+  "per_source": {},
+  "families": {
+    "global_shift": 1024,
+    "global_xor": 1024,
+    "axis_32x32": 8,
+    "gray_binary": 2,
+    "u1u2_order": 2
+  },
+  "total_candidates": 2060,
+  "pipeline_stages": [
+    "paired_timestamps",
+    "bin_200ps",
+    "frame_anchor_peak_center_vs_global_min",
+    "symbol_legacy_v1",
+    "U1U2_F03_5p5"
+  ],
+  "overall": "DIAGNOSIS_PLAN_READY",
+  "note": "decoder-free; run with --pairs-root pointing to v55_intake pairs for full H/I/MAP/family results"
+}
