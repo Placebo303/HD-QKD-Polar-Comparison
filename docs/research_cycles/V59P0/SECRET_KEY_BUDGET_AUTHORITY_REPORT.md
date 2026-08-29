@@ -1,5 +1,5 @@
 # V59 Secret Key Budget Authority — AUTHORITY_INPUTS_ACTIONABLE
-Plan 8a83a98dcff2eb304402410f82c9c8274895966f HEAD 8a83a98d origin 8a83a98d data 84d62779 lifecycle DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN
+Plan 8a83a98dcff2eb304402410f82c9c8274895966f HEAD 3d8e9756 origin 3d8e9756 data 84d62779 lifecycle DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN
 ## Formula Authority
 - tools/security_reports/_security_calibrated_common.py:chi_from_visibility 92-99 `h2((1-vis)/2)+e*log2(d-1)` unit bits/pair authority shadow
 - tools/security_reports/_security_calibrated_common.py:dary_mutual_info_proxy 102-117 `log2 d+(1-e)log(1-e)+e log(e/(d-1))` unit bits/pair authority proxy
