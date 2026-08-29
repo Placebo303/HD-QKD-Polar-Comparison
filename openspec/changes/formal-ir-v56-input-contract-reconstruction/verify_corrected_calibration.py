@@ -147,24 +147,54 @@ def check_timing_routing(sidecar_params, sidecar_status, v13_df, corrected_df):
             routing_note+="; EVIDENCE_INVALID_ttbin_unavailable"
     return timing_ok, routing_ok, timing_note, routing_note
 
-def stage_contract_equivalent(v13_df, corrected_df, sidecar_params, sidecar_status):
-    """Seven-stage array_equal V13 vs corrected. Any stage missing evidence -> False (fail closed)."""
+def stage_contract_equivalent(v13_df, corrected_df, sidecar_params, sidecar_status, v13_events=None, corrected_events=None, v13_cfg=None, corrected_cfg=None):
+    """Seven-stage array_equal V13 vs corrected via true TTBin materializer when events available; else fail-closed.
+    Raw/pairing/frame compare real arrays, not sidecar existence; bin not proxied by symbol (true floor_div)."""
+    # verifier must read replay manifest; if missing stages -> fail closed handled by caller
+    if v13_events is not None and corrected_events is not None and v13_cfg is not None and corrected_cfg is not None:
+        try:
+            from replay_v13_vs_current import materialize_7stages, STAGES as RS
+        except Exception:
+            # fallback import via path
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("replay_v13_vs_current", str(Path(__file__).parent / "replay_v13_vs_current.py"))
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            materialize_7stages = mod.materialize_7stages
+        # true materializer comparison per stage
+        v13_st = materialize_7stages(v13_events, v13_cfg)
+        co_st = materialize_7stages(corrected_events, corrected_cfg)
+        per_stage={}; overall=True
+        for s in STAGES:
+            if s not in v13_st or s not in co_st:
+                per_stage[s]={"array_equal": False, "note":"EVIDENCE_INVALID_missing_stage_"+s}
+                overall=False
+                continue
+            va=v13_st[s]["array"]; ca=co_st[s]["array"]
+            try:
+                eq=bool(va.shape==ca.shape and np.array_equal(va, ca))
+            except Exception:
+                eq=False
+            per_stage[s]={"array_equal": eq, "note": v13_st[s]["note"]+" | "+co_st[s]["note"]}
+            if not eq:
+                overall=False
+        return overall, per_stage, "OK" if overall else "EVIDENCE_INVALID_or_mismatch"
     if v13_df is None or corrected_df is None or len(v13_df)==0 or len(corrected_df)==0:
         per_stage={s: {"array_equal": False, "note":"EVIDENCE_INVALID_missing_df"} for s in STAGES}
         return False, per_stage, "EVIDENCE_INVALID_missing_df"
-    # check sidecar completeness for early stages
-    early_missing = sidecar_status != "OK" or sidecar_params.get("delay_used_ps") is None and sidecar_params.get("peak_center_ps") is None
-    # compare symbol arrays as proxy for bin/symbol/U1U2; early stages require sidecar
+    # fallback parquet path: require true stage arrays, bin not proxied — fail closed for early stages if TTBin missing
+    early_missing = sidecar_status != "OK" or (sidecar_params.get("delay_used_ps") is None and sidecar_params.get("peak_center_ps") is None)
     per_stage={}
     overall=True
-    # early stages: require sidecar evidence, otherwise False
     for s in ["raw_event_channel_selection","pairing_index_dt","delay_sign_position","frame_start_period_floor_div"]:
         if early_missing:
-            per_stage[s]={"array_equal": False, "note":"EVIDENCE_INVALID_sidecar_missing_for_"+s}
+            per_stage[s]={"array_equal": False, "note":"EVIDENCE_INVALID_sidecar_missing_for_"+s+" (fail-closed, not sidecar proxy)"}
             overall=False
         else:
-            per_stage[s]={"array_equal": True, "note":"sidecar_present_"+s}
-    # later stages: compare arrays
+            # need TTBin for these stages; parquet alone insufficient -> fail closed
+            per_stage[s]={"array_equal": False, "note":"EVIDENCE_INVALID_TTBin_required_for_"+s}
+            overall=False
+    # later stages: compare arrays but bin must be true floor_div not symbol proxy; with parquet we can only say evidence incomplete
     try:
         va=v13_df["alice_symbol"].to_numpy(); vb=v13_df["bob_symbol"].to_numpy()
         ca=corrected_df["alice_symbol"].to_numpy(); cb=corrected_df["bob_symbol"].to_numpy()
@@ -172,9 +202,9 @@ def stage_contract_equivalent(v13_df, corrected_df, sidecar_params, sidecar_stat
             eq=False
         else:
             eq=bool(np.array_equal(va, ca) and np.array_equal(vb, cb))
-        per_stage["bin_index"]={"array_equal": eq, "note":"bin≈symbol proxy"}
+        # bin true array requires TTBin; without events we cannot verify bin distinct from symbol -> mark incomplete
+        per_stage["bin_index"]={"array_equal": False, "note":"EVIDENCE_INVALID_TTBin_required_for_bin_index (not symbol proxy)"}
         per_stage["symbol_1024"]={"array_equal": eq, "note":"symbol array_equal"}
-        # U1U2
         u_eq=False
         if eq and len(va)>0:
             va_u1=(va>>5); va_u2=(va &31); vb_u1=(vb>>5); vb_u2=(vb &31)
@@ -184,16 +214,14 @@ def stage_contract_equivalent(v13_df, corrected_df, sidecar_params, sidecar_stat
         if not eq:
             overall=False
         if not per_stage["U1U2"]["array_equal"]:
-            # if bin/symbol equal but U1U2 not, still overall false
             if eq and not u_eq:
                 overall=False
+        overall=False  # parquet path cannot be contract_equivalent without TTBin
     except Exception as e:
         for s in ["bin_index","symbol_1024","U1U2"]:
             per_stage[s]={"array_equal": False, "note":f"EVIDENCE_INVALID_exception_{e}"}
         overall=False
-    if early_missing:
-        overall=False
-    return overall, per_stage, "OK" if overall else "EVIDENCE_INVALID_or_mismatch"
+    return overall, per_stage, "EVIDENCE_INVALID_TTBin_unavailable"
 
 def nll_qmass(df_val, counts_path: Path):
     if df_val is None or len(df_val)==0:
@@ -226,6 +254,8 @@ def main():
     p=argparse.ArgumentParser(description="V56 Phase C verification")
     p.add_argument("--pairs-root", type=str, default="comparison_bench/outputs_comparison/v55_intake_20260828/pairs")
     p.add_argument("--v13-root", type=str, default="comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816")
+    p.add_argument("--ttbin-root", type=str, default="comparison_bench/outputs_comparison/v13r3fresh_ttbin")
+    p.add_argument("--replay-manifest", type=str, default="openspec/changes/formal-ir-v56-input-contract-reconstruction/verification_manifest.json")
     p.add_argument("--new-frames", type=str, default="0,1,2,3,11,12,13,14")
     p.add_argument("--counts", type=str, default="comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz")
     p.add_argument("--out", type=str, default="openspec/changes/formal-ir-v56-input-contract-reconstruction/calibration_verification.json")
@@ -251,6 +281,28 @@ def main():
     assert len(set(new_frames) & v55_frames)==0, f"new_frames overlap V55 90 {set(new_frames)&v55_frames}"
     assert len(set(new_frames) & set([7,8,9,10,15,16,17,18]))==0, "new_frames must not overlap D4 fit/val"
     assert set(FIT_NEW) & set(VAL_NEW)==set()
+    # verifier must read replay manifest seven-stage逐阶段 array_equal, missing stage fail-closed, no symbol proxy bin
+    replay_manifest_missing=False
+    replay_manifest_path=Path(args.replay_manifest)
+    if replay_manifest_path.exists():
+        try:
+            rm=json.loads(replay_manifest_path.read_text(encoding="utf-8"))
+            for src, rec in rm.get("per_stage_per_source", {}).items():
+                stages=[p["stage"] for p in rec.get("per_stage",[])]
+                if stages != STAGES:
+                    replay_manifest_missing=True
+                for p in rec.get("per_stage",[]):
+                    if "array_equal" not in p:
+                        replay_manifest_missing=True
+                    # bin must not be proxy
+                    if p["stage"]=="bin_index" and "proxy" in p.get("note","").lower():
+                        replay_manifest_missing=True
+        except Exception:
+            replay_manifest_missing=True
+    else:
+        # without TTBin, production must fail-closed: missing manifest means evidence incomplete
+        if not args.allow_synthetic_for_test:
+            replay_manifest_missing=True
     pre_registered={}
     for src in ["1M","1p5M","2M"]:
         thr_u1=min(0.5*CE_CURRENT[src]["U1"], CE_V13REF[src]["U1"]+1.0)
@@ -298,8 +350,41 @@ def main():
                 corrected_df.loc[corrected_df.index[0], "bob_symbol"] = (int(corrected_df.iloc[0]["bob_symbol"]) + 1) % 1024
         # read real sidecar status for timing/routing
         corr_params, corr_sidecar_status = read_sidecar_status(Path(args.corrected_sidecars))
-        # contract_equivalent: seven-stage fail-closed
-        contract_equivalent, per_stage_ce, ce_note = stage_contract_equivalent(v13_df, corrected_df, corr_params, corr_sidecar_status)
+        # try true TTBin materializer path if TTBin available
+        ttbin_v13=None; ttbin_corr=None; v13_cfg=None; corr_cfg=None
+        try:
+            from pathlib import Path as _P
+            from src.qkd_io.ttbin_pipeline import TTBinEvents as _Ev
+            # attempt load ttbin events for new frames if present
+            tt_root=Path(args.ttbin_root)
+            # not requiring file existence; leave None -> fallback to parquet fail-closed path
+            if tt_root.exists():
+                cand = list(tt_root.rglob("*.ttbin"))
+                if cand:
+                    from src.qkd_io.ttbin_pipeline import read_ttbin_events as _read
+                    try:
+                        ttbin_v13=_read(cand[0]); ttbin_corr=ttbin_v13
+                        import importlib.util
+                        spec=importlib.util.spec_from_file_location("replay_v13_vs_current_tmp", str(Path(__file__).parent/"replay_v13_vs_current.py"))
+                        mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+                        v13_side,_ = mod.read_used_params(Path(args.v13_sidecars)) if hasattr(mod,"read_used_params") else ({}, "INCOMPLETE")
+                        v13_cfg=mod.build_cfg_from_params(v13_side, fallback_offset=-50)
+                        corr_cfg=mod.build_cfg_from_params(corr_params, fallback_offset=50)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+        # contract_equivalent: seven-stage fail-closed (true materializer when TTBin available)
+        if ttbin_v13 is not None and v13_cfg is not None and replay_manifest_missing:
+            contract_equivalent=False; per_stage_ce={s: {"array_equal": False, "note":"EVIDENCE_INVALID_replay_manifest_missing_or_proxy"} for s in STAGES}; ce_note="EVIDENCE_INVALID_replay_manifest"
+        elif ttbin_v13 is not None:
+            contract_equivalent, per_stage_ce, ce_note = stage_contract_equivalent(v13_df, corrected_df, corr_params, corr_sidecar_status, ttbin_v13, ttbin_corr, v13_cfg, corr_cfg)
+        else:
+            contract_equivalent, per_stage_ce, ce_note = stage_contract_equivalent(v13_df, corrected_df, corr_params, corr_sidecar_status)
+        if replay_manifest_missing and ttbin_v13 is None and not args.allow_synthetic_for_test:
+            contract_equivalent=False
+            for s in STAGES:
+                per_stage_ce[s]={"array_equal": False, "note":"EVIDENCE_INVALID_replay_manifest_missing_stage_or_proxy"}
         # timing/routing from real sidecar/phase
         timing_ok, routing_ok, timing_note, routing_note = check_timing_routing(corr_params, corr_sidecar_status, v13_df, corrected_df)
         # if synthetic used without real sidecar, timing/routing remain false
