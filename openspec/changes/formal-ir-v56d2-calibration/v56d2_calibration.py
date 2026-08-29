@@ -20,6 +20,8 @@ from pathlib import Path
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 DEFAULT_REGISTRY = REPO_ROOT / "openspec/changes/formal-ir-v55-two-stage-rescue-independent-test-qualification-preparation/v55_authoritative_registry.json"
 DEFAULT_INTAKE = REPO_ROOT / "comparison_bench/outputs_comparison/v55_intake_20260828/intake_report.json"
 DEFAULT_V13_ROOT = REPO_ROOT / "workspace/v13r3fresh_20260816/sidecars"
@@ -57,39 +59,67 @@ def _analyze_peak(counts, centers):
     return {"peak_idx":idx,"peak_center_ps":pc,"peak_count":pk,"fwhm_ps":fwhm,"sigma_ps":sigma,"bg_median":bg,"peak_to_bg":float(pk/bg),"delay_sign":int(np.sign(pc))}
 
 def _get_environment():
-    import sys
+    import sys, importlib.util, importlib.metadata
     interp=sys.executable
-    tt_version=None; tt_available=False
+    tt_version="unknown"; tt_available=False; tt_file=None
     try:
-        import importlib.util, importlib.metadata
-        if importlib.util.find_spec("TimeTagger") is not None:
+        spec=importlib.util.find_spec("TimeTagger")
+        if spec is not None:
             tt_available=True
-            try: tt_version=importlib.metadata.version("TimeTagger")
-            except: 
+            try:
+                tt_version=importlib.metadata.version("TimeTagger")
+            except:
                 try:
-                    import TimeTagger; tt_version=getattr(TimeTagger, "__version__", "installed-unknown")
-                except: tt_version="installed-unknown"
+                    import TimeTagger
+                    tt_version=getattr(TimeTagger, "__version__", "unknown")
+                    tt_file=getattr(TimeTagger, "__file__", None)
+                    if not tt_version:
+                        tt_version="unknown"
+                except:
+                    tt_version="unknown"
+            try:
+                import TimeTagger as _tt
+                tt_file=getattr(_tt, "__file__", tt_file)
+            except:
+                pass
+            if tt_file is None and spec is not None:
+                tt_file=getattr(spec, "origin", None)
         else:
             tt_available=False
-    except: pass
-    return {"interpreter_path":interp, "timetagger_available":tt_available, "timetagger_version":tt_version}
+            tt_version="unknown"
+    except:
+        pass
+    return {"interpreter_path":interp, "timetagger_available":tt_available, "timetagger_version":tt_version, "timetagger_file":tt_file, "sys_executable":interp}
+
+def _repo_import_smoke() -> dict:
+    """ponytail: smoke that REPO_ROOT is on sys.path and src.qkd_io importable."""
+    try:
+        import importlib.util
+        spec=importlib.util.find_spec("src.qkd_io.ttbin_pipeline")
+        return {"ok": spec is not None, "spec_origin": getattr(spec, "origin", None) if spec else None, "repo_root": str(REPO_ROOT), "sys_path_head": sys.path[0] if sys.path else None}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "repo_root": str(REPO_ROOT)}
 
 def try_corr(ttbins):
     missing=[p for p in ttbins if not Path(p).exists()]
     if missing: return None, f"INCOMPLETE_TTBin_UNAVAILABLE missing {missing}"
+    # ponytail: ensure repo root import works from deep OpenSpec dir
+    if str(REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(REPO_ROOT))
     try:
-        from comparison_bench.src.comparison_bench.io.ttbin_pipeline import read_ttbin_events, compute_cross_correlation_histogram
-    except Exception as e:
-        try:
-            from src.qkd_io.ttbin_pipeline import read_ttbin_events, compute_cross_correlation_histogram
-        except Exception as e2:
-            return None, f"INCOMPLETE ttbin_pipeline not importable {e}/{e2}"
-    # V56D1 same environment check — record but not forge
+        from src.qkd_io.ttbin_pipeline import read_ttbin_events, compute_cross_correlation_histogram
+    except Exception as e2:
+        return None, f"REPOSITORY_IMPORT_PATH_ERROR src.qkd_io.ttbin_pipeline not importable (REPO_ROOT={REPO_ROOT}, sys.executable={sys.executable}, sys.path[0]={sys.path[0] if sys.path else None}): {e2}"
+    # TimeTagger availability is distinct from repository path
     try:
         import importlib.util
         if importlib.util.find_spec("TimeTagger") is None:
-            return None, "INCOMPLETE TimeTagger not installed — ENVIRONMENT_AND_CONTRACT_NOT_REPRODUCED (V56D1 successful TimeTagger environment required)"
-    except: pass
+            return None, "TIMETAGGER_UNAVAILABLE TimeTagger not installed — ENVIRONMENT_AND_CONTRACT_NOT_REPRODUCED (V56D1 successful TimeTagger environment required; interpreter D:\\software\\Miniforge3\\python.exe with driver C:\\Program Files\\Swabian Instruments\\Time Tagger\\driver\\python\\TimeTagger expected)"
+        import TimeTagger  # noqa: F401 — verify importable
+    except Exception as e_tt:
+        return None, f"TIMETAGGER_UNAVAILABLE TimeTagger import failed: {e_tt}"
+    except:  # pragma: no cover
+        pass
     try:
         events=read_ttbin_events(Path(ttbins[0]))
     except Exception as e:
@@ -177,7 +207,9 @@ def main():
     args=ap.parse_args()
     print(f"=== V56D2R1 calibration HEAD={HEAD} branch={BRANCH} data_sha={DATA_SHA} ===")
     env=_get_environment()
-    print(f"environment: interpreter={env['interpreter_path']} timetagger_available={env['timetagger_available']} version={env['timetagger_version']}")
+    smoke=_repo_import_smoke()
+    env["repo_import_smoke"]=smoke
+    print(f"environment: interpreter={env['interpreter_path']} timetagger_available={env['timetagger_available']} version={env['timetagger_version']} file={env.get('timetagger_file')} smoke={smoke}")
     reg_path=Path(args.registry)
     if not reg_path.is_file():
         print(f"[ERR] registry missing {reg_path}"); sys.exit(2)
@@ -344,7 +376,7 @@ def main():
             "zero_overlap_verified":zero_overlap, "in_range":in_range, "F":F, "K":stratum["K"],
             "calibration_rate":cal_rate, "calibration_nll_bits_per_symbol":nll, "calibration_q_mass_on_p_zero":qmass, "calibration_delta_mass_0_pm1":mass01,
             "reasons":reasons, "calibration_pass":cal_pass, "per_source_status":per_source_status, "corr_error":err,
-            "environment":env, "interpreter_path":env["interpreter_path"], "timetagger_version":env["timetagger_version"], "timetagger_available":env["timetagger_available"]
+            "environment":env, "interpreter_path":env["interpreter_path"], "sys_executable":env.get("sys_executable"), "timetagger_version":env.get("timetagger_version","unknown"), "timetagger_available":env["timetagger_available"], "timetagger_file":env.get("timetagger_file")
         }
     # R1 overall status: if any evidence incomplete -> CALIBRATION_EVIDENCE_INCOMPLETE
     any_incomplete = any(not v.get("timing_evidence_complete", False) for v in per_source.values())
