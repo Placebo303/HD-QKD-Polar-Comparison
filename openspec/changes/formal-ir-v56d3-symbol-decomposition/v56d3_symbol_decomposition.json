@@ -1,11 +1,11 @@
 {
-  "head": "8d4df35c57fb168a389f591721b562b2baca5a8f",
+  "head": "b332b8a4a51e94fb905023862b8aed3650bac126",
   "branch": "formal-ir-mainline",
   "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
   "lifecycle": "DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN",
   "provenance": {
-    "head": "8d4df35c57fb168a389f591721b562b2baca5a8f",
-    "origin_head": "8d4df35c57fb168a389f591721b562b2baca5a8f",
+    "head": "b332b8a4a51e94fb905023862b8aed3650bac126",
+    "origin_head": "b332b8a4a51e94fb905023862b8aed3650bac126",
     "branch": "formal-ir-mainline",
     "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
     "src_qkd_io_frozen": true,
@@ -34,7 +34,237 @@
     17,
     18
   ],
-  "per_source": {},
+  "per_source": {
+    "1p5M": {
+      "frames_fit": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "frames_val": [
+        15,
+        16,
+        17,
+        18
+      ],
+      "n_fit": 1024,
+      "n_val": 1024,
+      "H_A_val": 9.1378,
+      "H_B_val": 9.1462,
+      "H_A_given_B_val": 0.7153,
+      "I_AB_val": 8.4225,
+      "H_A_bits_per_block": 9357.1,
+      "I_bits_per_block": 8624.6,
+      "acc_identity_val": 0.367188,
+      "acc_map_val": 0.222656,
+      "delta_map_minus_identity": -0.144531,
+      "acc_map_is_upper_bound": true,
+      "families_val": {
+        "global_shift": {
+          "best_on_fit": "shift_0",
+          "acc_fit": 0.398438,
+          "acc_val": 0.367188,
+          "nll_val_bits_per_sym": 25.0079,
+          "q_mass_val": 0.632812,
+          "candidates": 1024
+        },
+        "global_xor": {
+          "best_on_fit": "xor_0",
+          "acc_fit": 0.398438,
+          "acc_val": 0.367188,
+          "nll_val_bits_per_sym": 25.0079,
+          "q_mass_val": 0.632812,
+          "candidates": 1024
+        },
+        "axis_32x32": {
+          "best_on_fit": "axis_swap0_flipU10_flipU20",
+          "acc_fit": 0.398438,
+          "acc_val": 0.367188,
+          "nll_val_bits_per_sym": 25.0079,
+          "q_mass_val": 0.632812,
+          "candidates": 8
+        },
+        "gray_binary": {
+          "best_on_fit": "binary_to_gray",
+          "acc_fit": 0.001953,
+          "acc_val": 0.00293,
+          "nll_val_bits_per_sym": 39.7468,
+          "q_mass_val": 0.99707,
+          "candidates": 2
+        },
+        "u1u2_order": {
+          "best_on_fit": "u1u2_swapped_0",
+          "acc_fit": 0.398438,
+          "acc_val": 0.367188,
+          "nll_val_bits_per_sym": 25.0079,
+          "q_mass_val": 0.632812,
+          "candidates": 2
+        }
+      },
+      "best_family_val": {
+        "family": "global_shift",
+        "name": "shift_0",
+        "acc_val": 0.367188
+      }
+    },
+    "1M": {
+      "frames_fit": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "frames_val": [
+        15,
+        16,
+        17,
+        18
+      ],
+      "n_fit": 1024,
+      "n_val": 1024,
+      "H_A_val": 9.1789,
+      "H_B_val": 9.1797,
+      "H_A_given_B_val": 0.6355,
+      "I_AB_val": 8.5434,
+      "H_A_bits_per_block": 9399.1,
+      "I_bits_per_block": 8748.4,
+      "acc_identity_val": 0.428711,
+      "acc_map_val": 0.275391,
+      "delta_map_minus_identity": -0.15332,
+      "acc_map_is_upper_bound": true,
+      "families_val": {
+        "global_shift": {
+          "best_on_fit": "shift_0",
+          "acc_fit": 0.419922,
+          "acc_val": 0.428711,
+          "nll_val_bits_per_sym": 22.4878,
+          "q_mass_val": 0.571289,
+          "candidates": 1024
+        },
+        "global_xor": {
+          "best_on_fit": "xor_0",
+          "acc_fit": 0.419922,
+          "acc_val": 0.428711,
+          "nll_val_bits_per_sym": 22.4878,
+          "q_mass_val": 0.571289,
+          "candidates": 1024
+        },
+        "axis_32x32": {
+          "best_on_fit": "axis_swap0_flipU10_flipU20",
+          "acc_fit": 0.419922,
+          "acc_val": 0.428711,
+          "nll_val_bits_per_sym": 22.4878,
+          "q_mass_val": 0.571289,
+          "candidates": 8
+        },
+        "gray_binary": {
+          "best_on_fit": "gray_to_binary",
+          "acc_fit": 0.000977,
+          "acc_val": 0.0,
+          "nll_val_bits_per_sym": 39.689,
+          "q_mass_val": 1.0,
+          "candidates": 2
+        },
+        "u1u2_order": {
+          "best_on_fit": "u1u2_swapped_0",
+          "acc_fit": 0.419922,
+          "acc_val": 0.428711,
+          "nll_val_bits_per_sym": 22.4878,
+          "q_mass_val": 0.571289,
+          "candidates": 2
+        }
+      },
+      "best_family_val": {
+        "family": "global_shift",
+        "name": "shift_0",
+        "acc_val": 0.428711
+      }
+    },
+    "2M": {
+      "frames_fit": [
+        7,
+        8,
+        9,
+        10
+      ],
+      "frames_val": [
+        15,
+        16,
+        17,
+        18
+      ],
+      "n_fit": 1024,
+      "n_val": 1024,
+      "H_A_val": 9.1652,
+      "H_B_val": 9.1888,
+      "H_A_given_B_val": 0.7438,
+      "I_AB_val": 8.4214,
+      "H_A_bits_per_block": 9385.1,
+      "I_bits_per_block": 8623.5,
+      "acc_identity_val": 0.274414,
+      "acc_map_val": 0.130859,
+      "delta_map_minus_identity": -0.143555,
+      "acc_map_is_upper_bound": true,
+      "families_val": {
+        "global_shift": {
+          "best_on_fit": "shift_0",
+          "acc_fit": 0.264648,
+          "acc_val": 0.274414,
+          "nll_val_bits_per_sym": 28.5958,
+          "q_mass_val": 0.725586,
+          "candidates": 1024
+        },
+        "global_xor": {
+          "best_on_fit": "xor_0",
+          "acc_fit": 0.264648,
+          "acc_val": 0.274414,
+          "nll_val_bits_per_sym": 28.5958,
+          "q_mass_val": 0.725586,
+          "candidates": 1024
+        },
+        "axis_32x32": {
+          "best_on_fit": "axis_swap0_flipU10_flipU20",
+          "acc_fit": 0.264648,
+          "acc_val": 0.274414,
+          "nll_val_bits_per_sym": 28.5958,
+          "q_mass_val": 0.725586,
+          "candidates": 8
+        },
+        "gray_binary": {
+          "best_on_fit": "gray_to_binary",
+          "acc_fit": 0.00293,
+          "acc_val": 0.00293,
+          "nll_val_bits_per_sym": 39.7106,
+          "q_mass_val": 0.99707,
+          "candidates": 2
+        },
+        "u1u2_order": {
+          "best_on_fit": "u1u2_swapped_0",
+          "acc_fit": 0.264648,
+          "acc_val": 0.274414,
+          "nll_val_bits_per_sym": 28.5958,
+          "q_mass_val": 0.725586,
+          "candidates": 2
+        }
+      },
+      "best_family_val": {
+        "family": "global_shift",
+        "name": "shift_0",
+        "acc_val": 0.274414
+      }
+    }
+  },
+  "shunt_per_source": {
+    "1p5M": "INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT",
+    "1M": "INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT",
+    "2M": "INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT"
+  },
+  "overall_shunt": "INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT",
+  "overall_shunt_original_superseded": "PAIRING_OR_FRAME_ANCHOR_ERROR",
+  "revision": "V56D3R1_20260829_downgrade_bias_correction",
+  "downgrade_reason": "1024-state val 1024 plug-in MI severely positively biased (H(A|B)suppressed->I~8.4) and empirical MAP val worse than identity (~-0.14 delta) shows high I does not generalize; global shift/XOR/axis/Gray/U1U2 and fixed 1024 permutation already excluded, V25 prior severely mismatched, but pairing/frame-anchor vs true domain shift not distinguished without low-dim 32-state check and fixed train/val CE/accuracy (V56D4).",
+  "bias_note": "val4 1024 samples over 1024x1024 bins -> Hc underestimated, I overestimated; larger sanity val128 I=5.9-6.5 all-data I=2.5-4.4; MAP<identity proves no 1024-permutation generalizes; needs 32-state MI (1024 samples/1024 bins ~1 per bin vs 1M bins) and stage-wise V13-contract replay.",
   "families": {
     "global_shift": 1024,
     "global_xor": 1024,
@@ -50,6 +280,7 @@
     "symbol_legacy_v1",
     "U1U2_F03_5p5"
   ],
-  "overall": "DIAGNOSIS_PLAN_READY",
-  "note": "decoder-free; run with --pairs-root pointing to v55_intake pairs for full H/I/MAP/family results"
+  "overall": "INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT",
+  "overall_original_superseded": "PAIRING_OR_FRAME_ANCHOR_ERROR",
+  "note": "decoder-free; fit on [7,8,9,10] val on [15,16,17,18]; no decoder; REVISED V56D3R1 2026-08-29 downgraded: 1024 plug-in I biased, MAP<identity, pairing vs domain not separated, needs V56D4 low-dim decomposition"
 }
