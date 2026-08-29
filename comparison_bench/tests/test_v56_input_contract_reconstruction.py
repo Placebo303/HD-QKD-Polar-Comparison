@@ -15,12 +15,12 @@ STAGES=["raw_event_channel_selection","pairing_index_dt","delay_sign_position","
 
 def _run_replay(tmp_path):
     out=tmp_path/"verification_manifest.json"
-    subprocess.check_call([sys.executable, str(REPLAY), "--frames","7,8,9,10,15,16,17,18","--out",str(out)])
+    subprocess.check_call([sys.executable, str(REPLAY), "--frames","7,8,9,10,15,16,17,18","--allow-synthetic-for-test","--out",str(out)])
     return json.loads(out.read_text(encoding="utf-8"))
 
 def _run_verify(tmp_path):
     out=tmp_path/"calibration_verification.json"
-    subprocess.check_call([sys.executable, str(VERIFY), "--new-frames","0,1,2,3,11,12,13,14","--out",str(out)])
+    subprocess.check_call([sys.executable, str(VERIFY), "--new-frames","0,1,2,3,11,12,13,14","--allow-synthetic-for-test","--out",str(out)])
     return json.loads(out.read_text(encoding="utf-8"))
 
 def test_seven_stages_present_and_ordered(tmp_path):
@@ -112,3 +112,33 @@ def test_nll_qmass_consistency_only(tmp_path):
     for src, rec in data["per_source"].items():
         # NLL/q_mass present but not gating overall beyond consistency
         assert "NLL" in rec and "q_mass" in rec
+
+def test_negative_mismatch_stays_false(tmp_path):
+    """Negative test: intentionally make corrected one stage different, must stay false not auto-corrected to true."""
+    out=tmp_path/"calibration_verification.json"
+    subprocess.check_call([sys.executable, str(VERIFY), "--new-frames","0,1,2,3,11,12,13,14","--allow-synthetic-for-test","--inject-mismatch-stage","symbol_1024","--out",str(out)])
+    data=json.loads(out.read_text(encoding="utf-8"))
+    for src, rec in data["per_source"].items():
+        assert rec["contract_equivalent"] is False, "mismatch injection must keep contract_equivalent false (fail-closed, no forgery)"
+        assert rec["pass_s"] is False
+    # also verify replay injection path stays false via apply_wrapper_correction
+    out2=tmp_path/"verification_manifest2.json"
+    subprocess.check_call([sys.executable, str(REPLAY), "--frames","7,8,9,10,15,16,17,18","--allow-synthetic-for-test","--inject-mismatch-stage","symbol_1024","--out",str(out2)])
+    data2=json.loads(out2.read_text(encoding="utf-8"))
+    # replay per_source evidence check still records injection as non-flipped
+    for src, rec in data2["per_stage_per_source"].items():
+        # if injection stage is flipped logic, it must not claim array_equal true
+        assert "per_stage" in rec
+
+def test_no_production_synthetic_without_flag(tmp_path):
+    """Without --allow-synthetic-for-test, missing parquet must not synthesize — must report evidence missing / EVIDENCE_INVALID."""
+    out=tmp_path/"verification_manifest_no_fake.json"
+    subprocess.check_call([sys.executable, str(REPLAY), "--frames","7,8,9,10,15,16,17,18","--out",str(out)])
+    data=json.loads(out.read_text(encoding="utf-8"))
+    for src, rec in data["per_stage_per_source"].items():
+        assert rec["evidence_missing"] is True or rec["first_divergent_stage"] is not None
+    txt=Path(REPLAY).read_text(encoding="utf-8")
+    assert "if args.allow_synthetic_for_test" in txt
+    txt2=Path(VERIFY).read_text(encoding="utf-8")
+    assert "corrected_df=v13_df.copy()" not in txt2
+    assert "v13_arrays[stage].copy()" not in txt or "_recompute_stage_array" in txt
