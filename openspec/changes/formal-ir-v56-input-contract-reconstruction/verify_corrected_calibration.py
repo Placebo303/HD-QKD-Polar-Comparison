@@ -13,6 +13,37 @@ import numpy as np
 
 STAGES = ["raw_event_channel_selection","pairing_index_dt","delay_sign_position","frame_start_period_floor_div","bin_index","symbol_1024","U1U2"]
 
+# per-source authoritative session maps (fail-closed if missing/multiple)
+SOURCE_SESSION_MAP_CORRECTED = {"1M": "20260123_1M_600k_0dB", "1p5M": "20260107_PPLN_1p5M", "2M": "20260123_2M_1p2M_0dB"}
+SOURCE_SESSION_MAP_V13 = {"1M": "type2_1M_20260121_184040", "1p5M": "type2_1p5M_20260121_183806", "2M": "type2_2M_20260121_183657"}
+
+def _resolve_sidecar_for_source(sidecars_dir: Path, source: str):
+    """Authoritative per-source sidecar resolution via session ID. Fail-closed on 0 or >1 matches. Returns (Path|None, status, count)."""
+    if sidecars_dir is None or not Path(sidecars_dir).exists():
+        return None, "INCOMPLETE_no_sidecar", 0
+    candidates = list(Path(sidecars_dir).rglob("sidecar_meta.json"))
+    if not candidates:
+        return None, "INCOMPLETE_no_sidecar", 0
+    if source is None:
+        # legacy fallback without source -> fail closed if multiple (cannot disambiguate)
+        if len(candidates) != 1:
+            return None, f"INCOMPLETE_multiple_sidecars_no_source_{len(candidates)}", len(candidates)
+        return candidates[0], "OK", 1
+    expected = []
+    if source in SOURCE_SESSION_MAP_CORRECTED:
+        expected.append(SOURCE_SESSION_MAP_CORRECTED[source])
+    if source in SOURCE_SESSION_MAP_V13:
+        expected.append(SOURCE_SESSION_MAP_V13[source])
+    filtered = [p for p in candidates if any(exp in str(p) for exp in expected)] if expected else []
+    if not filtered:
+        # fallback loose contains source label
+        filtered = [p for p in candidates if source.lower() in str(p).lower()]
+    if len(filtered) == 0:
+        return None, f"INCOMPLETE_no_sidecar_for_source_{source}", 0
+    if len(filtered) > 1:
+        return None, f"INCOMPLETE_multiple_sidecars_for_source_{source}", len(filtered)
+    return filtered[0], "OK", 1
+
 NEW_FRAMES_DEFAULT = [0,1,2,3,11,12,13,14]
 FIT_NEW = [0,1,2,3]
 VAL_NEW = [11,12,13,14]
@@ -67,22 +98,30 @@ def load_pairs_df(pairs_root: Path, frames):
         df_all=df_all[df_all["frame_id"].isin(frames)]
     return df_all
 
-def read_sidecar_status(sidecars_dir: Path):
-    if not sidecars_dir.exists():
-        return {}, "INCOMPLETE_no_sidecar"
-    files=list(sidecars_dir.rglob("sidecar_meta.json"))
-    if not files:
-        return {}, "INCOMPLETE_no_sidecar"
+def read_sidecar_status(sidecars_dir: Path, source: str | None = None):
+    """Per-source sidecar resolution; fail-closed on 0 or >1 matches. Returns (params, status). Sidecar path via _resolve_sidecar_for_source."""
+    sidecar_path, status, _cnt = _resolve_sidecar_for_source(sidecars_dir, source)
+    if status != "OK" or sidecar_path is None:
+        return {}, status
     try:
-        j=json.loads(files[0].read_text(encoding="utf-8"))
+        j=json.loads(sidecar_path.read_text(encoding="utf-8"))
         mp=j.get("materialize_params",{})
         used=mp.get("used_params",{}) if isinstance(mp.get("used_params"),dict) else {}
         flat={**mp, **used}
-        # also try nested timing/raw
         flat.update({k:v for k,v in j.items() if k not in flat})
+        # attach resolved path for provenance
+        flat["_sidecar_abs_path"] = str(sidecar_path.resolve())
         return flat, "OK"
     except Exception as e:
         return {"error":repr(e)}, "INCOMPLETE_parse_error"
+
+def read_used_params(sidecars_dir: Path, source: str | None = None):
+    """Alias for per-source read (kept for task spec: read_used_params with source param)."""
+    return read_sidecar_status(sidecars_dir, source)
+
+def get_sidecar_abs_path(sidecars_dir: Path, source: str | None = None):
+    p, s, _ = _resolve_sidecar_for_source(sidecars_dir, source)
+    return str(p.resolve()) if p is not None else None
 
 def check_timing_routing(sidecar_params, sidecar_status, v13_df, corrected_df):
     """Real sidecar/phase result reading — no hardcoded true.
@@ -315,10 +354,31 @@ def main():
         import importlib.util as _ilu
         spec_r=_ilu.spec_from_file_location("replay_v13_vs_current", str(Path(__file__).parent/"replay_v13_vs_current.py"))
         mod_r=_ilu.module_from_spec(spec_r); spec_r.loader.exec_module(mod_r)
-        corr_params, corr_sidecar_status = read_sidecar_status(Path(args.corrected_sidecars))
-        v13_side,_ss = mod_r.read_used_params(Path(args.v13_sidecars)) if hasattr(mod_r,"read_used_params") else ({}, "INCOMPLETE")
+        # per-source sidecar binding (fail-closed on 0 or >1)
+        corr_params, corr_sidecar_status = read_sidecar_status(Path(args.corrected_sidecars), source=src)
+        # v13 side also per-source via same helper (read_used_params now supports source)
+        try:
+            if hasattr(mod_r, "read_used_params"):
+                # try source-aware call
+                try:
+                    v13_side, _ss = mod_r.read_used_params(Path(args.v13_sidecars), source=src)
+                except TypeError:
+                    v13_side, _ss = mod_r.read_used_params(Path(args.v13_sidecars))
+            else:
+                v13_side, _ss = {}, "INCOMPLETE"
+        except Exception as _e:
+            v13_side, _ss = {"error": repr(_e)}, f"INCOMPLETE_parse_{_e}"
+        corr_sidecar_abs = get_sidecar_abs_path(Path(args.corrected_sidecars), source=src)
+        try:
+            v13_sidecar_abs = mod_r.get_sidecar_abs_path(Path(args.v13_sidecars), source=src) if hasattr(mod_r, "get_sidecar_abs_path") else None
+            if v13_sidecar_abs is None and hasattr(mod_r, "_resolve_sidecar_for_source"):
+                p, _, _ = mod_r._resolve_sidecar_for_source(Path(args.v13_sidecars), src)
+                v13_sidecar_abs = str(p.resolve()) if p is not None else None
+        except Exception:
+            v13_sidecar_abs = None
         # resolve TTBin per source authoritative (registry filtered, not list(rglob)[0])
         events=None
+        ttbin_abs_path=None
         synthetic_used=False
         # try registry-based TTBin first
         try:
@@ -338,14 +398,15 @@ def main():
                     from src.qkd_io.ttbin_pipeline import read_ttbin_events as _read
                     for c in cand:
                         try:
-                            events=_read(c)
-                            if events is not None and events.time_ps.size>0:
+                            ev_try=_read(c)
+                            if ev_try is not None and ev_try.time_ps.size>0:
+                                events=ev_try
+                                ttbin_abs_path=str(c.resolve())
                                 break
                         except Exception:
                             continue
             if events is None:
                 tt_root=Path(args.ttbin_root)
-                # filtered rglob by source label
                 files=list(tt_root.rglob("*.ttbin")) if tt_root.exists() and tt_root.is_dir() else []
                 filtered=[f for f in files if src.lower() in f.name.lower() or src.lower() in str(f.parent).lower()] if files else []
                 use_files=filtered if filtered else files
@@ -353,6 +414,7 @@ def main():
                     from src.qkd_io.ttbin_pipeline import read_ttbin_events as _read2
                     try:
                         events=_read2(use_files[0])
+                        ttbin_abs_path=str(use_files[0].resolve())
                     except Exception:
                         events=None
         except Exception:
@@ -561,8 +623,50 @@ def main():
             shunt = "RECOVERED_s"
         else:
             shunt = "DOMAIN_SHIFT_s"
-        # if timing/routing missing, shunt stays UNRESOLVED_s if contract true but guard fails? keep EVIDENCE path via overall
-        per_source[src]={"contract_equivalent":bool(contract_equivalent),"per_stage_contract": per_stage_ce, "contract_note": ce_note, "A_eq_rate":round(float(rate_eq),4) if not math.isnan(rate_eq) else None,"threshold_60":0.60,"acc_U1":round(float(acc_u1),4) if not math.isnan(acc_u1) else None,"acc_U2":round(float(acc_u2),4) if not math.isnan(acc_u2) else None,"CE_U1":round(float(ce_u1),4) if not math.isnan(ce_u1) else None,"CE_U2":round(float(ce_u2),4) if not math.isnan(ce_u2) else None,"CE_current_U1":thr["CE_current_U1"],"CE_current_U2":thr["CE_current_U2"],"CE_V13ref_U1":thr["CE_V13ref_U1"],"CE_V13ref_U2":thr["CE_V13ref_U2"],"CE_thresh_U1":thr["CE_thresh_U1"],"CE_thresh_U2":thr["CE_thresh_U2"],"NLL": nll,"q_mass": qmass,"timing_complete":bool(timing_ok),"timing_note":timing_note,"routing_complete":bool(routing_ok),"routing_note":routing_note,"distribution_compatible":bool(dist_ok),"pass_s":pass_s,"shunt_s":shunt,"n_pairs_new":int(len(corrected_df)) if corrected_df is not None else 0}
+        # provenance per source: TTBin abs, sidecar abs, params, corrected_cfg diff
+        # compute corrected_cfg replaced unique key/value
+        corrected_replaced_key=None; corrected_replaced_value=None
+        try:
+            if 'corrected_cfg' in locals() and 'cur_cfg' in locals() and isinstance(corrected_cfg, dict) and isinstance(cur_cfg, dict):
+                for k in corrected_cfg:
+                    if corrected_cfg.get(k) != cur_cfg.get(k):
+                        corrected_replaced_key=k
+                        corrected_replaced_value=corrected_cfg.get(k)
+                        break
+                if corrected_replaced_key is None:
+                    # also check keys only in corrected
+                    for k in cur_cfg:
+                        if k not in corrected_cfg or corrected_cfg.get(k)!=cur_cfg.get(k):
+                            corrected_replaced_key=k
+                            corrected_replaced_value=corrected_cfg.get(k) if k in corrected_cfg else None
+                            break
+        except Exception:
+            pass
+        # extract delay/channels etc from sidecar params (corr for provenance, v13 also available)
+        delay_used_ps = corr_params.get("delay_used_ps", corr_params.get("delay_override_ps", corr_params.get("offset_ps")))
+        # fallback to cfg if sidecar missing delay
+        if delay_used_ps is None:
+            try:
+                delay_used_ps = cur_cfg.get("offset_ps") if 'cur_cfg' in locals() else None
+            except Exception:
+                delay_used_ps=None
+        provenance_src={
+            "ttbin_abs_path": ttbin_abs_path,
+            "sidecar_abs_path": corr_sidecar_abs,
+            "v13_sidecar_abs_path": v13_sidecar_abs,
+            "delay_used_ps": delay_used_ps,
+            "v13_delay_used_ps": v13_side.get("delay_used_ps", v13_side.get("delay_override_ps")) if isinstance(v13_side, dict) else None,
+            "channels": corr_params.get("channels", {"A": corr_params.get("ch_a"), "B": corr_params.get("ch_b")}) if isinstance(corr_params, dict) else None,
+            "bin_width_ps": corr_params.get("bin_width_ps", corr_params.get("bin_width") if isinstance(corr_params, dict) else None),
+            "frame_bins": corr_params.get("frame_bins", corr_params.get("dimension") if isinstance(corr_params, dict) else None),
+            "pairing_policy": corr_params.get("pairing_mode", corr_params.get("pairing") if isinstance(corr_params, dict) else None),
+            "frame_period_ps": 204800,
+            "corrected_cfg_replaced_key": corrected_replaced_key,
+            "corrected_cfg_replaced_value": corrected_replaced_value,
+            "corr_sidecar_status": corr_sidecar_status,
+            "v13_sidecar_status": _ss,
+        }
+        per_source[src]={"contract_equivalent":bool(contract_equivalent),"per_stage_contract": per_stage_ce, "contract_note": ce_note, "A_eq_rate":round(float(rate_eq),4) if not math.isnan(rate_eq) else None,"threshold_60":0.60,"acc_U1":round(float(acc_u1),4) if not math.isnan(acc_u1) else None,"acc_U2":round(float(acc_u2),4) if not math.isnan(acc_u2) else None,"CE_U1":round(float(ce_u1),4) if not math.isnan(ce_u1) else None,"CE_U2":round(float(ce_u2),4) if not math.isnan(ce_u2) else None,"CE_current_U1":thr["CE_current_U1"],"CE_current_U2":thr["CE_current_U2"],"CE_V13ref_U1":thr["CE_V13ref_U1"],"CE_V13ref_U2":thr["CE_V13ref_U2"],"CE_thresh_U1":thr["CE_thresh_U1"],"CE_thresh_U2":thr["CE_thresh_U2"],"NLL": nll,"q_mass": qmass,"timing_complete":bool(timing_ok),"timing_note":timing_note,"routing_complete":bool(routing_ok),"routing_note":routing_note,"distribution_compatible":bool(dist_ok),"pass_s":pass_s,"shunt_s":shunt,"n_pairs_new":int(len(corrected_df)) if corrected_df is not None else 0, "provenance": provenance_src}
     uniq=set(v["shunt_s"] for v in per_source.values())
     evidence_invalid = False
     # timing/routing missing is not overall EVIDENCE_INVALID by itself but any guard failure with synthetic would be

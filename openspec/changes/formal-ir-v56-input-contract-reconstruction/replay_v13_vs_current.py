@@ -28,6 +28,37 @@ PERIOD_PS = 204800
 BIN_WIDTH_PS = 200
 FIXED_FRAMES = [7,8,9,10,15,16,17,18]
 
+SOURCE_SESSION_MAP_CORRECTED = {"1M": "20260123_1M_600k_0dB", "1p5M": "20260107_PPLN_1p5M", "2M": "20260123_2M_1p2M_0dB"}
+SOURCE_SESSION_MAP_V13 = {"1M": "type2_1M_20260121_184040", "1p5M": "type2_1p5M_20260121_183806", "2M": "type2_2M_20260121_183657"}
+
+def _resolve_sidecar_for_source(sidecars_dir: Path, source: str | None):
+    if sidecars_dir is None or not Path(sidecars_dir).exists():
+        return None, "INCOMPLETE_no_sidecar", 0
+    candidates = list(Path(sidecars_dir).rglob("sidecar_meta.json"))
+    if not candidates:
+        return None, "INCOMPLETE_no_sidecar", 0
+    if source is None:
+        if len(candidates) != 1:
+            return None, f"INCOMPLETE_multiple_sidecars_no_source_{len(candidates)}", len(candidates)
+        return candidates[0], "OK", 1
+    expected=[]
+    if source in SOURCE_SESSION_MAP_CORRECTED:
+        expected.append(SOURCE_SESSION_MAP_CORRECTED[source])
+    if source in SOURCE_SESSION_MAP_V13:
+        expected.append(SOURCE_SESSION_MAP_V13[source])
+    filtered=[p for p in candidates if any(exp in str(p) for exp in expected)] if expected else []
+    if not filtered:
+        filtered=[p for p in candidates if source.lower() in str(p).lower()]
+    if len(filtered)==0:
+        return None, f"INCOMPLETE_no_sidecar_for_source_{source}", 0
+    if len(filtered)>1:
+        return None, f"INCOMPLETE_multiple_sidecars_for_source_{source}", len(filtered)
+    return filtered[0], "OK", 1
+
+def get_sidecar_abs_path(sidecars_dir: Path, source: str | None = None):
+    p,s,_=_resolve_sidecar_for_source(sidecars_dir, source)
+    return str(p.resolve()) if p is not None else None
+
 def build_cfg_from_params(params: dict, fallback_offset: int = 0) -> dict:
     return {
         "ch_a": int(params.get("ch_a", params.get("A", 1))),
@@ -204,22 +235,24 @@ def load_pairs_df(pairs_root: Path, frames):
         df_all = df_all[df_all["frame_id"].isin(frames)]
     return df_all
 
-def read_used_params(sidecars_dir: Path):
-    if not sidecars_dir.exists():
-        return {}, "INCOMPLETE_no_sidecar"
-    files=list(sidecars_dir.rglob("sidecar_meta.json"))
-    if not files:
-        return {}, "INCOMPLETE_no_sidecar"
+def read_used_params(sidecars_dir: Path, source: str | None = None):
+    sidecar_path, status, _cnt = _resolve_sidecar_for_source(sidecars_dir, source)
+    if status != "OK" or sidecar_path is None:
+        return {}, status
     try:
-        j=json.loads(files[0].read_text(encoding="utf-8"))
+        j=json.loads(sidecar_path.read_text(encoding="utf-8"))
         mp=j.get("materialize_params",{})
         used=mp.get("used_params",{}) if isinstance(mp.get("used_params"),dict) else {}
         flat={}
         for k,v in {**mp, **used}.items():
             flat[k]=v
+        flat["_sidecar_abs_path"] = str(sidecar_path.resolve())
         return flat, "OK"
     except Exception as e:
         return {"error":repr(e)}, "INCOMPLETE_parse_error"
+
+def read_sidecar_status(sidecars_dir: Path, source: str | None = None):
+    return read_used_params(sidecars_dir, source)
 
 def compare_stage(v13_arr, cur_arr):
     if v13_arr.size==0 and cur_arr.size==0:
@@ -399,12 +432,13 @@ def main():
     except Exception:
         origin=head
     provenance={"head":head,"origin_formal_ir_mainline":origin,"implementation_sha":head,"data_sha":"84d62779603e62de50ded5182ed65b65d3dc6084","frames":frames,"lifecycle":"PLAN_CANDIDATE / VERIFICATION_ONLY / DECODE_FORBIDDEN","accepted_plan_sha":"97602558a8047a1c3b30c2cddd70fd0ef3e2ed46"}
-    v13_params, v13_status = read_used_params(Path(args.v13_sidecars))
-    cur_params, cur_status = read_used_params(Path(args.current_sidecars))
     name_map={"20260123_1M_600k_0dB":"1M","20260107_PPLN_1p5M":"1p5M","20260123_2M_1p2M_0dB":"2M","type2_1M_20260121_184040":"1M","type2_1p5M_20260121_183806":"1p5M","type2_2M_20260121_183657":"2M"}
     per_source={}
     overall_first=None
     for src_label in ["1M","1p5M","2M"]:
+        # per-source sidecar binding (fail-closed on 0 or >1)
+        v13_params, v13_status = read_used_params(Path(args.v13_sidecars), source=src_label)
+        cur_params, cur_status = read_used_params(Path(args.current_sidecars), source=src_label)
         # authoritative per-source TTBin via registry, filtered by source/session/registry path
         ttbin_ev=try_load_ttbin_events(Path(args.ttbin_root)/src_label, frames, source_label=src_label)
         if ttbin_ev is None:
