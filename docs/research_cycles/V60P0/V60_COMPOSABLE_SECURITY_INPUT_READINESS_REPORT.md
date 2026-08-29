@@ -1,5 +1,5 @@
 # V60 Composable Security Input Readiness — V60_DATA_NOT_READY
-Plan b4d045a14ce49772e622aebdedb3ed72475bdfbc HEAD b4d045a1 origin b4d045a1 data 84d62779 lifecycle PLAN_CANDIDATE / DECODE_FORBIDDEN
+Plan b4d045a14ce49772e622aebdedb3ed72475bdfbc HEAD b414eab5 origin b414eab5 data 84d62779 lifecycle PLAN_CANDIDATE / DECODE_FORBIDDEN
 Fetch HEAD==origin: True (blocking gate per A1; warn if false)
 ## Formula Authority (file:function:lines:expr unit authority)
 - tools/security_reports/_security_calibrated_common.py:chi_from_visibility 92-99 `h2((1-vis)/2)+e*log2(d-1)` unit bits/pair authority shadow
