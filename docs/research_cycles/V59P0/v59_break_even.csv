@@ -1,0 +1,4 @@
+source,leak_total,optimistic_floor,optimistic_5pct,optimistic_10pct,shadow_low,shadow_high,shadow_5_low,shadow_5_high,shadow_10_low,shadow_10_high,composable_low,composable_high,gate
+1M,7089,6.9238,7.2882,7.6931,6.9238,6.9238,7.2882,7.2882,7.6931,7.6931,,,log2d10_pass
+1p5M,7439,7.2637,7.646,8.0707,7.2637,7.2637,7.646,7.646,8.0707,8.0707,,,log2d10_pass
+2M,7764,7.582,7.9811,8.4245,7.582,7.582,7.9811,7.9811,8.4245,8.4245,,,log2d10_pass
