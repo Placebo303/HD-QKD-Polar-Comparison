@@ -151,9 +151,12 @@ def main() -> int:
     # explicit: leak_other must not contain epsilon
     assert leak_other_from_transcript(64, leak_auth=0) == 0
     assert leak_other_from_transcript(128, leak_auth=0) == 64
-    # epsilon stays probability
+    # epsilon stays probability — must not be counted as bits
     leak_other_with_eps_wrong = 64 + eps_prob  # wrong if someone adds epsilon as bits
-    assert leak_other_from_transcript(128) != leak_other_with_eps_wrong or True  # document that wrong path exists; correct is without eps
+    assert leak_other_from_transcript(128) == 64, "leak_other must be 64 not 64+eps"
+    assert leak_other_from_transcript(128) != leak_other_with_eps_wrong, "epsilon probability must not be added to leak_other bits"
+    assert leak_other_from_transcript(64) == 0
+    assert leak_other_from_transcript(64) != eps_prob, "epsilon probability must not appear in leak_other"
 
     # build artifacts
     schema = build_schema(head, origin)

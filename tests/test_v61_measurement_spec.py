@@ -22,8 +22,16 @@ class TestV61(unittest.TestCase):
         # epsilon probability must not be added to leak_other/finite
         leak = leak_other_from_transcript(64, 0)
         self.assertEqual(leak, 0)
-        # wrong path would be leak + eps
         self.assertNotEqual(leak, eps)
+        # adding epsilon as bits must be detectable failure
+        self.assertEqual(leak_other_from_transcript(128, 0), 64)
+        self.assertNotEqual(leak_other_from_transcript(128, 0), 64 + eps)
+        self.assertEqual(leak_other_from_transcript(64, 0), 0)
+        self.assertNotEqual(leak_other_from_transcript(64, 0), eps)
+        # wrong path leak+eps must not equal correct leak
+        leak_wrong = 64 + eps
+        self.assertNotEqual(leak_other_from_transcript(128, 0), leak_wrong)
+        self.assertAlmostEqual(leak_wrong, 64 + eps)
         # ensure schema says epsilon not bits
         schema = json.loads((REPO / "docs/research_cycles/V61P0/v61_measurement_schema.json").read_text(encoding="utf-8"))
         self.assertIn("epsilon", schema.get("epsilon_note", "") or str(schema))
