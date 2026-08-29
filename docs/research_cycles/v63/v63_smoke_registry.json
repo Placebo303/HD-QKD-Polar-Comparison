@@ -1,0 +1,201 @@
+{
+  "registry_type": "INTEGRATION_REPLAY_SMOKE",
+  "total_blocks": 9,
+  "per_source": 3,
+  "entries": [
+    {
+      "block_id": "v63_smoke_1M_0018",
+      "source": "1M",
+      "held_out_ordinal_start": 18,
+      "held_out_ordinal_end": 21,
+      "frame_ids": [
+        1618,
+        1619,
+        1620,
+        1621
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    },
+    {
+      "block_id": "v63_smoke_1M_0245",
+      "source": "1M",
+      "held_out_ordinal_start": 245,
+      "held_out_ordinal_end": 248,
+      "frame_ids": [
+        1845,
+        1846,
+        1847,
+        1848
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    },
+    {
+      "block_id": "v63_smoke_1M_0392",
+      "source": "1M",
+      "held_out_ordinal_start": 392,
+      "held_out_ordinal_end": 395,
+      "frame_ids": [
+        1992,
+        1993,
+        1994,
+        1995
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    },
+    {
+      "block_id": "v63_smoke_1p5M_0004",
+      "source": "1p5M",
+      "held_out_ordinal_start": 4,
+      "held_out_ordinal_end": 7,
+      "frame_ids": [
+        2217,
+        2218,
+        2219,
+        2220
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    },
+    {
+      "block_id": "v63_smoke_1p5M_0333",
+      "source": "1p5M",
+      "held_out_ordinal_start": 333,
+      "held_out_ordinal_end": 336,
+      "frame_ids": [
+        2546,
+        2547,
+        2548,
+        2549
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    },
+    {
+      "block_id": "v63_smoke_1p5M_0546",
+      "source": "1p5M",
+      "held_out_ordinal_start": 546,
+      "held_out_ordinal_end": 549,
+      "frame_ids": [
+        2759,
+        2760,
+        2761,
+        2762
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    },
+    {
+      "block_id": "v63_smoke_2M_0004",
+      "source": "2M",
+      "held_out_ordinal_start": 4,
+      "held_out_ordinal_end": 7,
+      "frame_ids": [
+        2920,
+        2921,
+        2922,
+        2923
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    },
+    {
+      "block_id": "v63_smoke_2M_0403",
+      "source": "2M",
+      "held_out_ordinal_start": 403,
+      "held_out_ordinal_end": 406,
+      "frame_ids": [
+        3319,
+        3320,
+        3321,
+        3322
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    },
+    {
+      "block_id": "v63_smoke_2M_0721",
+      "source": "2M",
+      "held_out_ordinal_start": 721,
+      "held_out_ordinal_end": 724,
+      "frame_ids": [
+        3637,
+        3638,
+        3639,
+        3640
+      ],
+      "pairs_count": 1024,
+      "BLOCK_LENGTH": 1024,
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing": "nearest",
+      "processing_rule_version": "legacy_v1",
+      "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v63_smoke",
+      "data_sha": "84d62779",
+      "registry_type": "INTEGRATION_REPLAY_SMOKE"
+    }
+  ],
+  "K_per_source": {
+    "1M": 397,
+    "1p5M": 551,
+    "2M": 726
+  }
+}

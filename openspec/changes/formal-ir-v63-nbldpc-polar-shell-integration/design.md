@@ -217,3 +217,12 @@ comparison_bench/outputs_comparison/formal_ir_methods/v63_nbldpc_polar_shell/run
 - D6 预注册终态：`EVIDENCE_INVALID > SHELL_DOMAIN_NOT_ALIGNED > SHELL_DEVELOPMENT_PASS > CORRECTION_WORKS_BUT_NOT_PASS > NO_RETAINED_SIGNAL`。
 - D7 新 session 准入：`domain_check + calibration P(U1|B)/P(U2|B,U1) + m1/m2 重算`，不调 LDPC。
 - D8 本轮仅交付四工件，未来执行仍仅 development 证据，不扩大为 qualification。
+
+## R63 Revisions (PLAN_REVISION_CANDIDATE, 2026-08-30, HEAD 5602f11c)
+
+**R63 Lifecycle**: PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED revision of 5602f11c, decoder-free spike only.
+- **R63-01 32*u1+u2+exact**: See proposal R63-01. In shell pipeline, FrameBatch stores full symbols s in [0,1023]; adapter decomposes u1_true = s //32, u2_true = s %32 for L1/L2 processing, then recomposes s_hat = 32*u1_hat + u2_hat. reconciled_symbols field is full s_hat (1024-length array of 0..1023). Verification exact_full checks both sub-symbols. GF32 operations only on u1/u2 5-bit planes.
+- **R63-02 NbLdpcShellResult not change signature**: IRRunResult (base.py) fields frozen. New ShellResult dataclass: {ir_result: IRRunResult, reconciled_symbols: ndarray[1024], accepted, exact, undetected, actual_disclosure_bits, decoder_calls, stage_used, pa_leak, pa_proxy}. Adapter method signature run(batch: FrameBatch, source: str) -> ShellResult without mutating IRRunResult. Existing run_benchmark/compare_methods continue to accept IRRunResult.
+- **R63-03 smoke INTEGRATION_REPLAY_SMOKE 90 fresh zero overlap**: As proposal R63-03. Generation reads only frame_ids/pairs_count from held-out pool metadata (no decoder). Smoke 9 uses V54-verified replay blocks; fresh 90 uses remaining windows with zero-overlap proof (sorted frame_ids, interval overlap check). Registries stored under workspace/v63_shell_spike/registries/ plus mirrored docs/research_cycles/v63/.
+- **R63-04 DOMAIN_CALIBRATION_REQUIRED**: Domain gate evaluated decoder-free before any shell execution. If H(A|B) drift >0.05 or P(B) chi2 p<0.01, state DOMAIN_CALIBRATION_REQUIRED emitted, execution blocked. Calibration artifacts (P(U1|B), P(U2|B,U1), m_total/m1) must be persisted and reviewed before unlocking. Same-domain smoke bypass needs domain_check PASS but no recalibration.
+

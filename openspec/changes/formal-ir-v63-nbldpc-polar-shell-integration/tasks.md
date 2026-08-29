@@ -89,3 +89,13 @@ decoder 调用在 plan 侧新增；改 `V54 m1/m2/leak` 或 `H1/Lane C/Δ/decode
 - Phase C `30/source=90 blocks, 180-360 calls 硬帽360 (L2 90-270)` 门禁 `70/90 & 20/30 & undetected==0` 已显式，`accepted` 与 `exact` 分别达标，不跨源平均已验
 - Phase D `security/PIE/SKR` 沿用 Polar reference 参数标记 `POLAR_REFERENCE_PROXY` 仅排序已验，不宣称 composable 已验
 - Phase E `py_compile` PASS 未建 `run_01` 未进正式壳集成 未重跑 Polar IR 未改 `V54-V62` 已普通推送新 Plan SHA `PLAN_CANDIDATE/SHELL_INTEGRATION/EXECUTE_NOT_AUTHORIZED` 仅改本目录（`src//experiments//tools//V54-V62` 零改），`HEAD==origin (fad33f4b)` 已验，推送后等待独立审核，**不自动进入正式壳集成，不实现正式 adapter/pipeline**
+
+## R63 Revisions (PLAN_REVISION_CANDIDATE, 2026-08-30, HEAD 5602f11c)
+
+## R63 Revisions (PLAN_REVISION_CANDIDATE, 2026-08-30, HEAD 5602f11c)
+- [x] **R63-01 32*u1+u2+exact**: All four workpieces explicit s=32*u1+u2 (u1=s//32 0..31 high, u2=s%32 0..31 low), s_hat=32*u1_hat+u2_hat, exact_full=u1_hat==u1 and u2_hat==u2, reconciled_symbols for full 0..1023, not GF32-only.
+- [x] **R63-02 NbLdpcShellResult not change signature**: IRRunResult signature zero change (git diff on base.py zero verifiable), new ShellResult wrapper aggregates without altering original signature, adapter returns ShellResult containing IRRunResult.
+- [x] **R63-03 smoke INTEGRATION_REPLAY_SMOKE 90 fresh zero overlap**: Smoke 9 = INTEGRATION_REPLAY_SMOKE (V54-verified 43 among 3/source), Fresh 90 = INTEGRATION_FRESH_CANDIDATE (30/source=90), two registries frame_ids zero overlap verified (smoke intersect fresh = empty, both with V48-V54 used zero overlap).
+- [x] **R63-04 domain gate DOMAIN_CALIBRATION_REQUIRED**: New session needs domain_check (P(B) chi2 / H(A|B)>0.05) then calibration P(U1|B)/P(U2|B,U1) then recompute m_total/m1, otherwise DOMAIN_CALIBRATION_REQUIRED blocks, same-domain 84d62779 still needs domain_check PASS but no calibration.
+**R63 Lifecycle**: PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED decoder-free spike only, no run_01/real decoder/formal PA, 90-block only candidate registry.
+
