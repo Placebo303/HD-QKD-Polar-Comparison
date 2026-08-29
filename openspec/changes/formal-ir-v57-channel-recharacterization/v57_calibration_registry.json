@@ -3,12 +3,12 @@
   "lifecycle": "V57_CHANNEL_RECHARACTERIZATION_PENDING_REVISED",
   "data_sha": "84d62779",
   "data_sha_full": "84d62779603e62de50ded5182ed65b65d3dc6084",
-  "head": "777338e5a5e347d9e6ab3ed6258b594c3606bbf4",
+  "head": "18029407a3ad5f5a968b2a94f4b63b5ba3255b1b",
   "branch": "formal-ir-mainline",
   "processing_rule": "legacy_v1",
-  "smoothing": "Laplace P(a|b)=(C_ab+1.0)/(N_b+1.0*Q) Q=1024 alpha=1.0 Cal fixed, per-layer m_i=min(1024,ceil(f N H_i/5)) f=1.3 N=1024 tag=64",
-  "leakage_formula": "m1=min(1024,ceil(1.3*1024*H1/5)), m2=min(1024,ceil(1.3*1024*H2/5)), m_total=m1+m2 0..2048, FULL_DISCLOSURE_LAYER if ceil>1024, leak=5*m_total+64 tag once, f_eff=leak/(1024*H)",
-  "provenance_note": "Cal per-source available[0:512] 128 blocks*4 F03 5+5 natural, 84d62779 200ps legacy_v1 nearest 1024, four-fold zero overlap, Laplace alpha=1.0 per-layer",
+  "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024",
+  "leakage_formula": "m1=min(1024,ceil(1.3*1024*H1/5)), m2=min(1024,ceil(1.3*1024*H2/5)), m_total=m1+m2 0..2048, FULL_DISCLOSURE_LAYER if raw>1024 not INVALID, leak=5*m_total+64 tag once, Fano H鈮(Pe)+Pe log2(1023)鏍￠獙",
+  "provenance_note": "Cal per-source available[0:512] 128 blocks*4 F03 5+5 natural, 84d62779 200ps legacy_v1 nearest 1024, four-fold zero overlap, hierarchical per-layer R4",
   "per_source": {
     "1M": {
       "F": 2130,
@@ -551,7 +551,7 @@
           "frame_period": 204800
         },
         "processing_rule": "legacy_v1",
-        "smoothing": "Laplace P(a|b)=(C_ab+1.0)/(N_b+1.0*Q) Q=1024 alpha=1.0 Cal fixed, per-layer m_i=min(1024,ceil(f N H_i/5)) f=1.3 N=1024 tag=64"
+        "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024"
       }
     },
     "1p5M": {
@@ -1095,7 +1095,7 @@
           "frame_period": 204800
         },
         "processing_rule": "legacy_v1",
-        "smoothing": "Laplace P(a|b)=(C_ab+1.0)/(N_b+1.0*Q) Q=1024 alpha=1.0 Cal fixed, per-layer m_i=min(1024,ceil(f N H_i/5)) f=1.3 N=1024 tag=64"
+        "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024"
       }
     },
     "2M": {
@@ -1639,7 +1639,7 @@
           "frame_period": 204800
         },
         "processing_rule": "legacy_v1",
-        "smoothing": "Laplace P(a|b)=(C_ab+1.0)/(N_b+1.0*Q) Q=1024 alpha=1.0 Cal fixed, per-layer m_i=min(1024,ceil(f N H_i/5)) f=1.3 N=1024 tag=64"
+        "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024"
       }
     }
   },

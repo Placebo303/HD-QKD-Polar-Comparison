@@ -1,12 +1,16 @@
 {
   "schema": "v57_manifest_v2",
-  "head": "777338e5a5e347d9e6ab3ed6258b594c3606bbf4",
-  "origin_formal_ir_mainline": "777338e5a5e347d9e6ab3ed6258b594c3606bbf4",
+  "head": "18029407a3ad5f5a968b2a94f4b63b5ba3255b1b",
+  "origin_formal_ir_mainline": "18029407a3ad5f5a968b2a94f4b63b5ba3255b1b",
   "data_sha": "84d62779",
   "data_sha_full": "84d62779603e62de50ded5182ed65b65d3dc6084",
-  "alpha": 1.0,
-  "smoothing": "Laplace P(a|b)=(C_ab+1.0)/(N_b+1.0*Q) Q=1024 alpha=1.0 Cal fixed, per-layer m_i=min(1024,ceil(f N H_i/5)) f=1.3 N=1024 tag=64",
-  "leakage_formula": "per-layer m_i=min(1024,ceil(1.3*1024*H_i/5)) total 0..2048 dual gate",
+  "lambda_grid": [
+    0.1,
+    1.0,
+    10.0
+  ],
+  "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024",
+  "leakage_formula": "per-layer m1=min(1024,ceil(1.3*1024*H1/5)) m2=min(1024,ceil(1.3*1024*H2/5)) total 0..2048 FULL_DISCLOSURE not INVALID Fano鏍￠獙",
   "zero_overlap_proofs": {
     "cal_cap_val": true,
     "cal_val_cap_v55": true,
@@ -44,6 +48,7 @@
   "overall_zero_overlap_verified": true,
   "counts_valid_all": true,
   "chain_ok_all": true,
+  "fano_ok_all": true,
   "negative_control_archived": false,
-  "command": "python v57_channel_recharacterization.py --alpha 1.0"
+  "command": "python v57_channel_recharacterization.py --lambda-grid [0.1, 1.0, 10.0]"
 }
