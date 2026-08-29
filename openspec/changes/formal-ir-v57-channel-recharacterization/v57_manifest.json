@@ -1,7 +1,7 @@
 {
   "schema": "v57_manifest_v2",
-  "head": "18029407a3ad5f5a968b2a94f4b63b5ba3255b1b",
-  "origin_formal_ir_mainline": "18029407a3ad5f5a968b2a94f4b63b5ba3255b1b",
+  "head": "e81a88f23f76dd313f0ab7390495389f39f9bdcd",
+  "origin_formal_ir_mainline": "e81a88f23f76dd313f0ab7390495389f39f9bdcd",
   "data_sha": "84d62779",
   "data_sha_full": "84d62779603e62de50ded5182ed65b65d3dc6084",
   "lambda_grid": [
@@ -9,8 +9,8 @@
     1.0,
     10.0
   ],
-  "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024",
-  "leakage_formula": "per-layer m1=min(1024,ceil(1.3*1024*H1/5)) m2=min(1024,ceil(1.3*1024*H2/5)) total 0..2048 FULL_DISCLOSURE not INVALID Fano鏍￠獙",
+  "smoothing": "hierarchical P(a|b)=(C_ab+λ P_global(a))/(N_b+λ) λ grid [0.1, 1.0, 10.0] 4-fold Cal内择优 Val单次评估, Q=1024",
+  "leakage_formula": "per-layer m1=min(1024,ceil(1.3*1024*H1/5)) m2=min(1024,ceil(1.3*1024*H2/5)) total 0..2048 FULL_DISCLOSURE not INVALID Fano校验",
   "zero_overlap_proofs": {
     "cal_cap_val": true,
     "cal_val_cap_v55": true,
@@ -50,5 +50,8 @@
   "chain_ok_all": true,
   "fano_ok_all": true,
   "negative_control_archived": false,
-  "command": "python v57_channel_recharacterization.py --lambda-grid [0.1, 1.0, 10.0]"
+  "command": "python v57_channel_recharacterization.py --lambda-grid [0.1, 1.0, 10.0]",
+  "lifecycle": "V57_CHANNEL_RECHARACTERIZATION_RESULT_ACCEPTED_FAIL",
+  "result": "V57_CHANNEL_RECHARACTERIZATION_RESULT_ACCEPTED_FAIL",
+  "predictive_model": "PREDICTIVE_MODEL_NOT_STABLE"
 }

@@ -1,13 +1,13 @@
 {
   "schema": "v57_cal/val_v2",
-  "lifecycle": "V57_CHANNEL_RECHARACTERIZATION_PENDING_REVISED",
+  "lifecycle": "V57_CHANNEL_RECHARACTERIZATION_RESULT_ACCEPTED_FAIL",
   "data_sha": "84d62779",
   "data_sha_full": "84d62779603e62de50ded5182ed65b65d3dc6084",
-  "head": "18029407a3ad5f5a968b2a94f4b63b5ba3255b1b",
+  "head": "e81a88f23f76dd313f0ab7390495389f39f9bdcd",
   "branch": "formal-ir-mainline",
   "processing_rule": "legacy_v1",
-  "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024",
-  "provenance_note": "Val per-source available[512:1024] 128 blocks*4 F03 5+5 natural, hierarchical per-layer R4 Val鍗曟璇勪及",
+  "smoothing": "hierarchical P(a|b)=(C_ab+λ P_global(a))/(N_b+λ) λ grid [0.1, 1.0, 10.0] 4-fold Cal内择优 Val单次评估, Q=1024",
+  "provenance_note": "Val per-source available[512:1024] 128 blocks*4 F03 5+5 natural, hierarchical per-layer R4 Val单次评估",
   "per_source": {
     "1M": {
       "F": 2130,
@@ -550,7 +550,7 @@
           "frame_period": 204800
         },
         "processing_rule": "legacy_v1",
-        "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024"
+        "smoothing": "hierarchical P(a|b)=(C_ab+λ P_global(a))/(N_b+λ) λ grid [0.1, 1.0, 10.0] 4-fold Cal内择优Val单次评估, Q=1024"
       }
     },
     "1p5M": {
@@ -1094,7 +1094,7 @@
           "frame_period": 204800
         },
         "processing_rule": "legacy_v1",
-        "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024"
+        "smoothing": "hierarchical P(a|b)=(C_ab+λ P_global(a))/(N_b+λ) λ grid [0.1, 1.0, 10.0] 4-fold Cal内择优Val单次评估, Q=1024"
       }
     },
     "2M": {
@@ -1638,10 +1638,11 @@
           "frame_period": 204800
         },
         "processing_rule": "legacy_v1",
-        "smoothing": "hierarchical P(a|b)=(C_ab+位 P_global(a))/(N_b+位) 位 grid [0.1, 1.0, 10.0] 4-fold Cal鍐呮嫨浼?Val鍗曟璇勪及, Q=1024"
+        "smoothing": "hierarchical P(a|b)=(C_ab+λ P_global(a))/(N_b+λ) λ grid [0.1, 1.0, 10.0] 4-fold Cal内择优Val单次评估, Q=1024"
       }
     }
   },
   "overall_zero_overlap_verified": true,
-  "negative_control": "v57_channel_recharacterization_undersampled_mle_negative_control.json"
+  "negative_control": "v57_channel_recharacterization_undersampled_mle_negative_control.json",
+  "solidified": "R5 ACCEPTED_FAIL PREDICTIVE_MODEL_NOT_STABLE head==implementation SHA e81a88f2"
 }
