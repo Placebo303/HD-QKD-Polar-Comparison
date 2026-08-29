@@ -5,6 +5,7 @@
 **Predecessor**: `formal-ir-v56d4-low-dim-decomposition` `V56D4` `INCONCLUSIVE_MIXED_SIGNAL` (CE 13-16 acc 0.30-0.46 vs V13 CE0.19-0.91 acc0.74-0.99, I32 1.39-2.05 vs 4.17-4.93 仅辅助, occupancy 256 正常, first_drop U1U2_consistency)
 **Method frozen**: `V54二阶段 H1-16/Lane C m2 184/190/192/H_inc1/2 Δ8+8/decoder 90/1.0 poly37/L2-only tag/TRAIN prior` 零改直至 V57
 **Boundary**: `V55` 原 `90-block` 永久禁用；同 session 剩余帧仅 fresh within-session confirmation 不宣称完全独立 cross-session qualification；真正 qualification 放 `V57` 新 session
+**V56R2 amendment**: basis `97602558` 起点 `1e34dafb` VERIFICATION_ONLY/DECODE_FORBIDDEN；七阶段改为 `raw_channel_timetags→absolute_bin_indices floor_divide(t,200)→physical_frame_match bin//1024 双指针→pair_sequence(a=binA%1024,b=binB%1024)→logical_frame_grouping 每256对 frame_id=row//256→symbol_1024→U1U2`，204800ps为配对尺度，校准切片 `start=frame_id*256`；两链直接复用 `run_nbldpc_demo_point` 三函数，V13 溯源失败则 `AUTHORITY_LINEAGE_INCOMPLETE`；黄金锚点 T-AUTH-1/2 先过；三路复放禁复制；fit[0,1,2,3]val[11,12,13,14] 每源2048 pairs 零重叠；标记保留 `ENGINEERING_INVALID_FRAME_ID_SEMANTICS`；新输出 `*_r2.json/_R2.md` additive；禁decoder/V55 90/src改/V57/网格；≥14测试。
 
 ## Phase 0 — 固化 V56D4 独立 pre-RESULT review（阻塞门，decoder-free）
 

@@ -13,6 +13,8 @@
 
 > ponytail lite: 本变更仅 4 OpenSpec 工件 + 2 decoder-free 验证脚本 (`replay_v13_vs_current.py` + `verify_corrected_calibration.py`) + 1 报告模板；无 runner、无 decoder、无新矩阵、无新 prior，最短科学路径。laziest alternative: `numpy/pandas/pyarrow` 已装直算 I32/CE/acc，无需新依赖；V13 权威实现 `src/qkd_io/ttbin_pipeline` 只读复用，不重发明。
 
+> **V56R2 amendment (2026-08-29, basis 97602558,起点1e34dafb, VERIFICATION_ONLY/DECODE_FORBIDDEN):** 七阶段权威语义修正为 `raw_channel_timetags → absolute_bin_indices floor_divide(t,200) → physical_frame_match bin//1024 双指针 → pair_sequence (a=binA%1024,b=binB%1024) → logical_frame_grouping 每256对 frame_id=row//256 pair_idx=row%256 → symbol_1024 → U1U2`；明确 `204800ps=1024×200ps` 是配对尺度，V55 `frame_id` 是配对后逻辑帧，校准帧必须在完整 pair sequence 后 `start=frame_id*256 stop=start+256` 切片；raw peak/延迟仅诊断不得擅自注入 -50/+50。两条权威链直接复用 `src.reconciliation.run_nbldpc_demo_point._read_ttbin_timetags/_bin_indices_sorted_for_binwidth/_pairs_from_sorted_bins` 后256分组；V13 通过 sidecar/build manifest 追溯真实入口（同三函数则用 V13 used_params，否则调 export_joint_sequence_sidecar 实际入口，不重写近似版；无法确定返回 AUTHORITY_LINEAGE_INCOMPLETE）。标记保留 `ENGINEERING_INVALID_FRAME_ID_SEMANTICS`，新输出 additive `*_r2.json/_R2.md`，禁覆盖旧证据，禁 decoder/V55 90/src改码参/V57/网格搜索。
+
 ## Goal
 
 以**最短可判定科学路径**终结 V56 输入域诊断，**不再拆 D5/D6**，按 `0→A→B→C→D` 冻结顺序一次性完成：

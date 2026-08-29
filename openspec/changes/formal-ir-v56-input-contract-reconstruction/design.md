@@ -6,6 +6,14 @@
 **Feasibility**: `V56D4` 已在 `pairs.parquet` 上证 `CE 13-16 acc 0.30-0.46` 全面退化 vs `V13 CE0.19-0.91 acc0.74-0.99` 健康，但 `occupancy 256` 正常且 `I32 1.3-2.0` vs `V13 4.1-4.9` 仅辅助、`first_drop=U1U2_consistency` 混合不单点归因；`V13` 已验证 `channel/delay/peak/gate/frame-start/mapping/pairing` 实现可只读复用，无需网格搜索；逐函数复放可在 `debug` 层定位首次分叉，单点 V13 值修复后同批新帧 decoder-free 验收即可闭环，无需 decoder。
 **Key judgement**: **`0/90` 非算法证伪，`V56D4` 的 CE/acc 主证据已证输入域系统性失配，但 I32 仅辅助且 occupancy 正常说明非简单丢帧；必须逐函数复放找到第一次产生不同数组的位置，单点修 V13 合同值，再以新帧三源分别 `>60%` 验证可修复性，否则不得进入 decoder。**
 
+## 0. V56R2 修订语义（覆盖§1前，VERIFICATION_ONLY/DECODE_FORBIDDEN，basis 97602558）
+
+- **七阶段权威语义（覆盖旧七段定义）**：`raw_channel_timetags (ttbin ch1/5 time_ps) → absolute_bin_indices floor_divide(t,200) → physical_frame_match bin//1024 双指针消歧 → pair_sequence a=binA%1024,b=binB%1024 → logical_frame_grouping 每256对 frame_id=row//256 pair_idx=row%256 → symbol_1024 → U1U2 (sym>>5/&31)`；`204800ps=1024×200ps` 是**配对尺度**（physical_frame_match 分箱尺度），V55 `frame_id/pair_idx` 是**配对后逻辑帧**（logical grouping），不得混为 raw 帧先验。校准帧必须在**完整 pair sequence 后**按 `start=frame_id*256 stop=start+256` 切片，每源 `8*256=2048` pairs，零重叠检查 `∉V55 90 ∧ ∉D4[7,8,9,10,15,16,17,18]`。
+- **raw peak/延迟约束**：`peak_center/sigma/p2bg` 与 `delay_used_ps` 仅诊断一致性（`|peak-delay|<50 σ50-150`），**不得擅自注入 -50/+50** 作为配对参数；配对仅由 `_pairs_from_sorted_bins` 双指针决定。
+- **权威链复用**：V55 current 直接调用 `src.reconciliation.run_nbldpc_demo_point._read_ttbin_timetags/_bin_indices_sorted_for_binwidth/_pairs_from_sorted_bins` 后256分组；V13 authority 从 sidecar/build manifest 追溯真实入口（同三函数则用 V13 `used_params`，否则调 `export_joint_sequence_sidecar` 实际入口），**不重写近似版**；若无法确定返回 `AUTHORITY_LINEAGE_INCOMPLETE`，后续门禁按 `EVIDENCE_INVALID/UNRESOLVED` 闭合。保留标记 `ENGINEERING_INVALID_FRAME_ID_SEMANTICS`。
+- **黄金锚点先过**：`T-AUTH-1` current replay 与 `V55 pairs.parquet` 逐行 `frame_id/pair_idx/alice/bob` 100%一致；`T-AUTH-2` V13 replay 与 V13 权威 pairs 一致；任一失败不进修复。
+- **三路复放**：同一 raw session 依次 `V13_authority / V55_current / corrected_current`（仅替换一个由 lineage 证明不同的 V13 参数），从 raw 重新完整链，禁复制数组，输出每源 TTBin/sidecar/生成函数、全部参数、first divergent stage、唯一替换 key/value、七阶段 equality、前5条差异。
+
 ## 1. 科学问题与关键判断
 
 > V54 在 `2026-01-21` 域 `43/45`，V55 同方法同点新域 `0/90`；V56D0 猜 `A1/A2/B` 需分流，V56D1 补 raw `peak 窄127ps p2bg 378-708` 部分健康，V56D2 校准 `A==B 27-42% NLL 22-28` 未回落，V56D3 排除五类物理映射 `2060` 候选未恢复，V56D4 以 `32` 态去偏 + `fit→val CE/acc` 主证据证 `CE 13-16 acc 0.30-0.46` 全面退化但 `occupancy 256` 正常、`first_drop` 在 `U1U2` 且 `I32` 仅辅助、`INCONCLUSIVE_MIXED_SIGNAL` 混合不单点归因。**剩余怀疑集中于 `pairing/frame` 链路中某一步的 V13 vs current 合同/代码差异**（delay 符号、应用位置、`frame_start` 空值回退、`floor_div`、`bin`、`legacy_v1`、`U1U2`），需逐函数复放定位首次分叉。
