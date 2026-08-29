@@ -100,18 +100,21 @@ per paired block (45 blocks, 15/source):
 
 ## 3. 指标冻结（主/次分层，undetected 隔离）
 
-### 3.1 主指标（门禁与价值判定，per-source 分层）
+### 3.1 主指标（门禁与价值判定，per-source 分层，R62-03 严格）
+
+> **R62-03 严格 Polar 1024-block**：每冻结块 `Polar_block_verified_accept = 4 连续 256-frames 全部 success 且全部 verification pass ?1:0`；`Polar_block_leak=Σ4帧 disclosure`，`Polar_block_runtime=Σ4帧 runtime`；`Polar_block_exact` 仅当 Polar 含逐帧 exact truth 时聚合否则 `null`，禁止由 `accepted_frame_fraction` / aggregate FER 推导；缺逐帧 `ID/success/verification/leak/runtime` 任一 → `V62_COMPARISON_DATA_NOT_ALIGNED` 立即停止。禁止 `round(aggregate*45)`、aggregate FER 造 per-block、`accepted vs exact` 直比。
 
 | 指标 | 定义 | 分层 | 门禁 |
 |---|---|---|---|
-| `exact_full` / `accepted rate` | `exact_full = exact_u1 && exact_l2` per block 的 `overall 45` 与 `per-source 15` 计数与 `rate = count/45 或 /15` | overall + per source | `COMPETITIVE` 需 `NB-LDPC ≥ Polar -2 (overall) 且 per-source ≥ Polar per-source -1` |
-| `verify` 分别计数 | `verify_base / verify_stage1 / verify_final` 与 `Polar n_frames_success` 分别计数（禁止假定 `exact==verify`） | per stage per source | 完整性校验 |
+| `Polar_block_verified_accept` / `NB verify_final` 主比较 | `Polar: 4帧全 success&&verify ?1:0` per block；`NB: verify_final = syndrome_ok&&tag_ok` per block；`overall 45` 与 `per-source 15` 计数 `rate=count/45 或 /15` | overall + per source | `COMPETITIVE` 需 `NB verify_final ≥ Polar -2 (overall) 且 per-source ≥ Polar per-source -1 且 NB undetected==0` |
+| `NB exact_full` oracle audit | `exact_full = exact_u1 && exact_l2` 仅统计，不作主门禁；两侧均有逐帧 exact truth 时附加 paired 审计，否则不得用 accepted 代 exact | per source + overall | 仅审计（`exact==verify` 禁假定） |
+| `verify` 分别计数 | `verify_base / verify_stage1 / verify_final` 与 `Polar_block_verified_accept` 分别计数 | per stage per source | 完整性校验 |
 | `undetected` | `syndrome_ok&&tag_ok && !exact_full` | 全局单独表 | `undetected==0` 全局，否则 `EVIDENCE_INVALID` 优先 |
-| `disclosure bits/block` | `leak_base 1064/1094/1104, stage1 1104/1134/1144, stage2 1144/1174/1184` 三档分布 + `per_source_avg[s]=leak_base[s]+40*N_stage1[s]/15+40*N_stage2[s]/15` + `overall_avg=(Σ leak_base+40*N_stage1+40*N_stage2)/45` + `per accepted = total_disclosed_bits / final_exact_full_count (为0则null)` | per source + overall | 仅报告，不硬门禁，但需语义一致性校验 |
+| `disclosure bits/block` | `Polar: Σ4帧 leak`；`NB: leak_base 1064/1094/1104, stage1 1104/1134/1144, stage2 1144/1174/1184` 三档 + `per_source_avg[s]=leak_base[s]+40*N_stage1[s]/15+40*N_stage2[s]/15` + `overall_avg=(Σ leak_base+40*N_stage1+40*N_stage2)/45` + `per accepted = total_disclosed_bits / NB_verify_final_count (为0则null)` | per source + overall | 仅报告，不硬门禁，但需语义一致性校验 |
 | `calls/rescue` | `N_stage1_attempted=count(!verify_base)`, `N_stage2_attempted=count(!verify_base&&!verify_stage1)`, `rescued_stage1 = count(verify_stage1&&exact_stage1&&!verify_base)`, `rescued_stage2 = count(verify_stage2&&exact_stage2&&!verify_after_stage1)`, `rescue_rate = rescued/attempted` (禁 `45-base_exact` 分母) | per source + overall | 仅报告 |
-| `runtime/throughput` | `runtime_s per block + overall`, `throughput_input_bits_per_s = n_bits/runtime, throughput_output = n_success*frame_len_bits/runtime` (Polar 侧复用 `runtime_s`，NB-LDPC 侧实测) | per source + overall | 仅报告，需可复现 |
-| `paired delta` | `per block NB-LDPC final vs Polar` 的 `exact delta, leak delta, runtime delta` 明细 | per block | 诊断 |
-| `Wilson 95%` | `overall 45 与 per-source 15` 的 Wilson 下界按 `exact` 分别报告 | per source + overall | 仅报告，不作门禁 |
+| `runtime/throughput` | `Polar: Σ4帧 runtime_s` per block + overall；`NB: runtime_s per block + overall`；`throughput_input_bits_per_s = n_bits/runtime` (Polar 用 `Σ4帧`) | per source + overall | 仅报告，需可复现 |
+| `paired delta` | `per block NB-LDPC final vs Polar_block_verified_accept` 的 `verify delta, leak delta (=NB leak - Σ4帧 leak), runtime delta` 明细 | per block | 诊断 |
+| `Wilson 95%` | `overall 45 与 per-source 15` 的 Wilson 下界按 `verify`（主）与 `exact`（审计）分别报告 | per source + overall | 仅报告，不作门禁 |
 
 - 四类 `exact/detected/decoder_non_syndrome/undetected` 需分别计数；`undetected` 永不并入 `success/FER`。
 - 任意 `rank/nested/verification/记账` 失败 → `EVIDENCE_INVALID` 优先。
@@ -148,31 +151,34 @@ per paired block (45 blocks, 15/source):
 - `stage2 L2 0–45` 条件（仅 `!verify_base && !verify_stage1` 者）
 - 总 `45+45+0–45+0–45 =90-180 硬帽180，L2 45-135`，`per block 2-4 calls`
 
-## 6. 门禁与五终态（已冻结，COMPETITIVE 容差）
+## 6. 门禁与五终态（已冻结，COMPETITIVE 容差，R62-03 严格）
 
-对 `45-block` paired 开发基准判定 (15/source)：
+对 `45-block` paired 开发基准判定 (15/source，R62-03 严格 per-block)：
 
-- **计数**：`Polar overall_success = Σ n_frames_success / Σ n_frames_total` 折算 `Polar_success_45 = round(accepted_frame_fraction *45)` 与 `per-source = round(frac*15)`；`NB-LDPC final_exact_full` 与 `verify_final` 分别计数；`undetected` 单独表。
-- **分层**：各源各自 `NB-LDPC base/stage1/final/rescued_stage1/rescued_stage2` 与 `Polar per-source success` 及 `leakage/rescue_rate/runtime` 分别报告；`base/stage1` 仅分层报告不作主判。
-- **泄漏**：三档 `leak_base/stage1/stage2` 分布 + `per_source_avg` + `overall_avg` + `per accepted` + `Wilson 95%` per source & overall 的描述性；`H_inc1 joint1_rank/nested/independence` 与 `H_inc2 total_rank/nested/independence` provenance。
-- **预注册五终态（冻结，paired 45-block，first-match）**：
+- **计数（R62-03 禁 round/aggregate 拼块）**：`Polar_block_verified_accept` 按 `4 consecutive 256-frames 全部 success 且全部 verify ?1:0` 逐块求和得 `overall/ per-source (45/15)`，`Polar_block_leak=Σ4帧`，`Polar_block_runtime=Σ4帧`，`Polar_block_exact` 仅当逐帧 exact truth 齐全时聚合否则 `null`；**禁止** `round(accepted_frame_fraction*45)`、`aggregate FER 造 per-block`、`accepted vs exact 直比`；缺逐帧 `ID/success/verification/leak/runtime` 任一 → `V62_COMPARISON_DATA_NOT_ALIGNED` 立即停止。`NB-LDPC verify_final` 与 `exact_full` 分别计数；`undetected` 单独表。
+- **分层**：各源各自 `NB-LDPC base/stage1/final/rescued_stage1/rescued_stage2 (verify_final vs exact_full 分别)` 与 `Polar per-source verified_accept` 及 `leakage/rescue_rate/runtime` 分别报告；`base/stage1` 仅分层报告不作主判；`NB exact_full` 仅 oracle audit。
+- **泄漏**：Polar `Σ4帧 leak` vs NB 三档 `leak_base/stage1/stage2` 分布 + `per_source_avg` + `overall_avg` + `per accepted (=total_disclosed / verify_final)` + `Wilson 95%` per source & overall 的描述性；`H_inc1 joint1_rank/nested/independence` 与 `H_inc2 total_rank/nested/independence` provenance。
+- **预注册五终态（冻结，paired 45-block，first-match，R62-03）**：
 
 ```
-if not polar_reference_mechanically_extracted or not alignment_metadata_complete or old_data_fake_PE or rank/nested/verification/记账失败:
+if not polar_reference_mechanically_extracted or not alignment_metadata_complete or rank/nested/verification/记账失败:
     V62 = EVIDENCE_INVALID  # 优先
+elif not polar_per_frame_complete (缺逐帧 ID/success/verification/leak/runtime 任一):
+    V62 = COMPARISON_DATA_NOT_ALIGNED  # 立即停止，禁止 round/aggregate 拼 45 块
 elif not alignment_possible (K_aligned<45 or per_source<15 or V55_domain_incompatible or pairing_mismatch or not replayable):
     V62 = COMPARISON_DATA_NOT_ALIGNED  # 停止，不进 decoder
 elif nbldpc_not_yet_executed (本轮):
     V62 = PLAN_CANDIDATE__ALIGNMENT_SPIKE_DONE  # 仅 plan + spike
-# 未来执行后（需 alignment PASS + 独立 plan ACCEPT + EXECUTE_AUTH）再判：
-# elif nbldpc_overall_exact >= polar_overall_success -2  ∧ per_source nbldpc >= polar per_source -1  ∧ undetected==0  ∧ rank/nested/verification/记账通过
+# 未来执行后（需 alignment PASS + 独立 plan ACCEPT + EXECUTE_AUTH）再判（主门禁为 verified_accept）：
+# elif nbldpc_overall_verify >= polar_overall_verified_accept -2  ∧ per_source nbldpc_verify >= polar per_source -1  ∧ nb_undetected==0  ∧ rank/nested/verification/记账通过
+#      ∧ (若两侧均有逐帧 exact truth 则附加 exact paired 审计否则跳过)
 #        → V62_COMPETITIVE
 # elif nbldpc_has_signal (any exact>0 or rescued>0 or residual improved) but not COMPETITIVE → V62_CORRECTION_WORKS_BUT_NOT_COMPETITIVE
 # else → V62_NO_RETAINED_SIGNAL
 ```
 
-- **COMPETITIVE 容差冻结**：`overall NB-LDPC exact_full ≥ Polar overall success -2` (容差 2/45) 且 `per-source NB-LDPC exact_full ≥ Polar per-source success -1` (容差 1/15) 且 `undetected==0` 且 `rank/nested/verification/记账` 通过；`disclosure/PIE proxy` 仅报告不作硬门禁，但需语义一致性校验通过。
-- `Wilson 95%`/`rescue_rate`/`runtime`/`PIE proxy` 仅报告，不作门禁。
+- **COMPETITIVE 容差冻结（R62-03）**：`overall NB verify_final ≥ Polar_block_verified_accept -2` (容差 2/45) 且 `per-source NB verify_final ≥ Polar per-source -1` (容差 1/15) 且 `NB undetected==0` 且 `rank/nested/verification/记账` 通过；若两侧均有逐帧 `exact` truth 再附加 `exact` paired 审计，否则**不得用 accepted/exact 直比**；`disclosure/PIE proxy` 仅报告不作硬门禁，但需语义一致性校验通过。
+- `Wilson 95%`/`rescue_rate`/`runtime`/`PIE proxy` 仅报告，不作门禁；`exact` 仅审计。
 
 ## 7. O3 配对语义与预注册统计（分层，paired）
 

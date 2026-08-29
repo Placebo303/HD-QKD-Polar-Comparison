@@ -104,18 +104,27 @@ else:
 - 若 Polar 侧超集 `K_polar>45` 则 `index_j=floor(j*(K-1)/14) j=0..14` 分散选 `15/source`，否则直接取 aligned 45（`K_aligned==45` 才合法）。
 - `git diff -- ../HD-QKD_Polar_Release ==0` 已验，registry `禁换块`。
 
-## 5. Phase C — 指标冻结
+## 5. Phase C — 指标冻结（R62-03 严格）
 
-### 5.1 主指标（门禁与价值判定）
+### 5.1 Polar 1024-block 严格聚合（R62-03，禁止 round/aggregate 拼块）
 
-- `exact_full/accepted rate`: `exact_full = exact_u1 && exact_l2` per block 的 `overall 45` 与 `per-source 15` 计数与 `rate = count/45 或 /15`；`Polar_success_45 = round(accepted_frame_fraction*45)`, `per-source = round(frac*15)`。
-- `verify` 分别计数：`verify_base, verify_stage1, verify_final` 与 `Polar n_frames_success` 分别计数（禁止 `exact==verify` 假定）。
+- **Polar_block_verified_accept**：每冻结 `1024-symbol block =4 连续 256-symbol Polar frames`，`Polar_block_verified_accept = (4帧全部 success 且全部 verification pass) ?1:0`，`overall = Σ block (45)`、`per-source = Σ (15)`。
+- **Polar_block_leak**：`Σ 4帧 disclosure bits` per block。
+- **Polar_block_runtime**：`Σ 4帧 runtime_s` per block。
+- **Polar_block_exact**：仅当 Polar 输出含逐帧 `exact` truth 时 `= (4帧 exact 全真) ?1:0` 否则 `null`，**禁止由 `accepted_frame_fraction` / aggregate FER 推导或用 accepted 代 exact**。
+- **对齐必需**：若 Polar 输出缺少任一逐帧必需字段（`frame ID / success(o/ sidecar) / verification / leak / runtime`）则 `V62_COMPARISON_DATA_NOT_ALIGNED` 立即停止，禁止 `round(aggregate*45)`、aggregate FER 造 per-block、`accepted vs exact` 直比进入比较。
+
+### 5.2 主指标（门禁与价值判定，R62-03）
+
+- **主比较**：`Polar_block_verified_accept vs NB verify_final` 均按 `overall 45` 与 `per-source 15` 计数与 `rate = count/45 或 /15`。
+- **NB exact oracle audit**：`exact_full = exact_u1 && exact_l2` 仅统计作审计；若两侧均有逐帧 `exact` truth 再附加 `exact paired` 审计，否则不得用 accepted/exact 直比（禁止 `exact==verify` 假定，`verify` 与 `exact` 分别计数）。
+- `verify` 分别计数：`verify_base, verify_stage1, verify_final` (NB) 与 `Polar_block_verified_accept` 分别计数。
 - `undetected`: `syndrome_ok&&tag_ok && !exact_full` 全局单独表，永不并入 `success/FER`，`undetected>0` 则 `EVIDENCE_INVALID` 优先。
-- `disclosure`: `leak_base 1064/1094/1104, stage1 1104/1134/1144, stage2 1144/1174/1184` 三档 (`leak=5*m_total+64` 双校验) + `per_source_avg[s]=leak_base[s]+40*N_stage1[s]/15+40*N_stage2[s]/15` + `overall_avg=(Σ leak_base+40*N_stage1+40*N_stage2)/45` + `per accepted = total_disclosed_bits / final_exact_full_count (为0则null)`。
+- `disclosure`: `Polar: Σ4帧 leak` vs `NB: leak_base 1064/1094/1104, stage1 1104/1134/1144, stage2 1144/1174/1184` 三档 (`leak=5*m_total+64` 双校验) + `per_source_avg[s]=leak_base[s]+40*N_stage1[s]/15+40*N_stage2[s]/15` + `overall_avg=(Σ leak_base+40*N_stage1+40*N_stage2)/45` + `per accepted = total_disclosed_bits / NB_verify_final_count (为0则null)`。
 - `calls/rescue`: `N_stage1_attempted=count(!verify_base)`, `N_stage2_attempted=count(!verify_base&&!verify_stage1)`, `rescued_stage1 = count(verify_stage1&&exact_stage1&&!verify_base)`, `rescued_stage2 = count(verify_stage2&&exact_stage2&&!verify_after_stage1)`, `rescue_rate = rescued/attempted` (禁 `45-base_exact` 分母)。
-- `runtime/throughput`: `runtime_s per block + overall`, `throughput = bits/runtime` (Polar 复用，NB-LDPC 未来实测)。
-- `paired delta`: `per block NB-LDPC final vs Polar` 的 `exact/leak/runtime delta` 明细。
-- `Wilson 95%` per source & overall 的 `exact/rate` 报告，不作门禁。
+- `runtime/throughput`: `Polar: Σ4帧 runtime_s per block + overall` vs `NB: runtime_s per block + overall`, `throughput = bits/runtime`。
+- `paired delta`: `per block NB-LDPC final vs Polar_block_verified_accept` 的 `verify delta / exact audit delta / leak delta / runtime delta` 明细。
+- `Wilson 95%` per source & overall 按 `verify`（主）与 `exact`（审计）分别报告，不作门禁。
 
 ### 5.2 次级（仅排序，POLAR_REFERENCE_PROXY）
 
@@ -146,25 +155,28 @@ comp: exact_full=exact_u1&&exact_l2, verify=syndrome_ok&&tag_ok, tag=L2-only 64b
 - `rank_total==m2+16 nested/independence==8 row≤16` 已验；`leak_base/stage1/stage2` 三档已验。
 - 仅 `alignment PASS + 独立 plan ACCEPT + EXECUTE_AUTH` 后才允许创建正式实现并执行。
 
-### 6.4 五终态（first-match，COMPETITIVE 容差冻结）
+### 6.4 五终态（first-match，COMPETITIVE 容差冻结，R62-03 严格 per-block）
 
 ```
 if not polar_reference_mechanically_extracted or not alignment_metadata_complete or rank/nested/verification/记账失败:
     overall = V62_EVIDENCE_INVALID  # 优先
+elif not polar_per_frame_complete (缺逐帧 ID/success/verification/leak/runtime 任一):
+    overall = V62_COMPARISON_DATA_NOT_ALIGNED  # 立即停止，禁止 round/aggregate 拼 45 块
 elif not alignment_possible (K_aligned<45 or per_source<15 or V55_domain_incompatible or pairing_mismatch or not replayable):
     overall = V62_COMPARISON_DATA_NOT_ALIGNED  # 停止，不进 decoder
 elif nbldpc_not_yet_executed (本轮):
     overall = V62_PLAN_CANDIDATE__ALIGNMENT_SPIKE_DONE
-# 未来执行后:
-# elif nbldpc_overall_exact >= polar_overall_success -2  ∧ per_source nbldpc >= polar per_source -1  ∧ undetected==0 ∧ rank/nested/记账通过 → V62_COMPETITIVE
+# 未来执行后（主门禁为 verified_accept）:
+# elif nbldpc_overall_verify >= polar_overall_verified_accept -2  ∧ per_source nbldpc_verify >= polar per_source -1  ∧ nb_undetected==0 ∧ rank/nested/记账通过
+#      ∧ (若两侧均有逐帧 exact truth 则附加 exact paired 审计否则跳过 exact 门禁) → V62_COMPETITIVE
 # elif nbldpc_has_signal (any exact>0 or rescued>0 or residual improved) but not COMPETITIVE → V62_CORRECTION_WORKS_BUT_NOT_COMPETITIVE
 # else → V62_NO_RETAINED_SIGNAL
 ```
 
-- `COMPETITIVE`: `overall NB-LDPC exact_full ≥ Polar overall success -2` (容差 2/45) 且 `per-source NB-LDPC exact_full ≥ Polar per-source success -1` (容差 1/15) 且 `undetected==0` 且 `rank/nested/verification/记账` 通过；`disclosure/PIE proxy` 仅报告。
+- `COMPETITIVE`（R62-03）：`overall NB verify_final ≥ Polar_block_verified_accept -2` (容差 2/45) 且 `per-source NB verify_final ≥ Polar per-source -1` (容差 1/15) 且 `NB undetected==0` 且 `rank/nested/verification/记账` 通过；若两侧均有逐帧 `exact` truth 再附加 `exact` paired 审计（`exact_full ≥ verified -容差`），否则**不得用 accepted/exact 直比**；`disclosure/PIE proxy` 仅报告。
 - `CORRECTION_WORKS_BUT_NOT_COMPETITIVE`: `exact>0` 或 `rescued>0` 或 `mean residual improved` 但未达 `COMPETITIVE`。
 - `NO_RETAINED_SIGNAL`: `exact==0` 且 `rescued==0` 且无改善信号。
-- `EVIDENCE_INVALID` 优先于 `COMPARISON_DATA_NOT_ALIGNED`；`COMPETITIVE` 前需 `ALIGNMENT_READY`。
+- `EVIDENCE_INVALID` 优先于 `COMPARISON_DATA_NOT_ALIGNED`；`COMPETITIVE` 前需 `ALIGNMENT_READY`；禁止 `round(aggregate*45)` / aggregate FER 造 per-block / accepted vs exact 直比。
 
 ## 7. 证据写出（预冻结，未来执行）
 

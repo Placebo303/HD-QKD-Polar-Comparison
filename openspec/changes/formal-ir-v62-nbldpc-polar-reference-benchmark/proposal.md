@@ -12,7 +12,9 @@
 
 > ponytail lite: 本变更仅 4 OpenSpec 工件 + 1 decoder-free 对齐探针脚本 + 1 对齐报告 JSON/CSV；无 decoder、无矩阵改动、无新依赖（`numpy/pandas/pyarrow` 已装仅作探针校验）。laziest alternative: 若 Phase A/B 机械校验失败（无相同输入可重放），则直接落盘 `V62_COMPARISON_DATA_NOT_ALIGNED` 停止，不伪造对齐、不手填、不重估先验。
 
-> **研究问题**：在**完全相同冻结数据块**（相同 `frame IDs / 1024-block / pairing / source` 分层，且 NB-LDPC 能用相同 Alice/Bob symbols 重放）上，**最佳 NB-LDPC (H1-16+L1APP+Lane C+Δ8+Δ8, leak 1144/1174/1184 stage2)** 的**实际纠错价值**相对 Polar Release 已有结果如何？回答仅 `COMPETITIVE / CORRECTION_WORKS_BUT_NOT_COMPETITIVE / NO_RETAINED_SIGNAL / COMPARISON_DATA_NOT_ALIGNED / EVIDENCE_INVALID` 五选一，`COMPETITIVE` 需 `NB-LDPC exact 不低于 Polar 容差且 undetected==0`。
+> **研究问题**：在**完全相同冻结数据块**（相同 `frame IDs / 1024-block / pairing / source` 分层，且 NB-LDPC 能用相同 Alice/Bob symbols 重放）上，**最佳 NB-LDPC (H1-16+L1APP+Lane C+Δ8+Δ8, leak 1144/1174/1184 stage2)** 的**实际纠错价值**相对 Polar Release 已有结果如何？回答仅 `COMPETITIVE / CORRECTION_WORKS_BUT_NOT_COMPETITIVE / NO_RETAINED_SIGNAL / COMPARISON_DATA_NOT_ALIGNED / EVIDENCE_INVALID` 五选一，`COMPETITIVE` 需 `NB-LDPC verify_final 不低于 Polar_block_verified_accept 容差且 undetected==0`（`exact_full` 仅 oracle audit；`exact`↔`accepted` 禁直接比较）。
+>
+> **R62-03 严格 1024-block 聚合修订（2026-08-30）— 覆盖先前 `round(aggregate*45)` 语义**：对每个冻结 1024-symbol block（=4 连续 256-symbol Polar frames）`Polar_block_verified_accept = 4 帧全部 decode success 且全部 verification pass`（任一失败则该块 `0`）；`Polar_block_leak = Σ 4帧 disclosure bits`，`Polar_block_runtime = Σ 4帧 runtime_s`；`Polar_block_exact` 仅当 Polar 输出含逐帧 exact truth 时逐帧 `exact` 聚合否则 `null`，**禁止由 `accepted_frame_fraction` / aggregate FER 推导 per-block 或用 `accepted` 替代 `exact`**。若 Polar 输出缺少任一逐帧必需字段（`frame ID / success / verification / leak / runtime`）则 `V62_COMPARISON_DATA_NOT_ALIGNED` 立即停止。
 
 ## Goal
 
@@ -20,11 +22,11 @@
 
 1. **Phase A 只读提取 Polar reference（机械提取，零手填）**：从 `D:\Code\HD-QKD_Polar_Release` 及当前仓 `polar_existing` 桥接结果机械提取 Polar 版本/`commit`/结果 `provenance`、`frame/block IDs`、`success/FER`、`leakage`、`runtime`、`verification`、`PIE/SKR reference 公式/参数`，每项记录 `file/function/key`，禁止手填；Polar `finite-key/PIE/SKR` 仅标记 `POLAR_REFERENCE_PROXY` 不升级为 composable。
 2. **Phase B 冻结公平比较集（逐帧对应优先）**：优先**逐帧对应且 NB-LDPC 能用相同 Alice/Bob symbols 重放**，强制 `相同 frame IDs、1024-block (4×256 frames)、pairing nearest legacy_v1、source 分层 1M/1p5M/2M`、不重估先验、不使用 V55 domain-incompatible 输入；若无法逐块同输入则 `V62_COMPARISON_DATA_NOT_ALIGNED` 停止，不伪造对齐。
-3. **Phase C 指标冻结**：主指标 `exact_full/accepted rate (overall + per-source)、disclosure bits/block (总体与 per accepted)、calls/rescue (N_stage1_attempted/N_stage2_attempted/rescue_rate)、runtime/throughput、undetected==0`；次级仅用 Polar 同一 `shadow` 参数算 `PIE/SKR proxy` 作排序参考，不作门禁、不升级 claim。
+3. **Phase C 指标冻结（R62-03 严格）**：主比较 `Polar_block_verified_accept vs NB_verify_final` 均按 `45 blocks overall + 15/source` 计数；`NB exact_full` 仅 oracle audit，`undetected` 单独；`disclosure bits/block = Σ4帧 leak` 与 `per accepted`、`calls/rescue`、`runtime=Σ4帧`、`undetected==0`；次级仅用 Polar 同一 `shadow` 参数算 `PIE/SKR proxy` 作排序参考，不作门禁、不升级 claim。禁止 `round(aggregate*45)`、aggregate FER 造 per-block、`accepted vs exact` 直接比较。
 4. **Phase D 开发基准设计（45 blocks paired）**：先 `15/source =45 blocks` paired development benchmark，Polar 直接复用不重跑，NB-LDPC `90-180 calls 硬帽180 (L1 45+base45+stage1≤45+stage2≤45, L2 45-135)`，不得调矩阵/`prior`/`decoder`/增量。
-5. **终态五选一（first-match）**：`COMPETITIVE / CORRECTION_WORKS_BUT_NOT_COMPETITIVE / NO_RETAINED_SIGNAL / COMPARISON_DATA_NOT_ALIGNED / EVIDENCE_INVALID`，`COMPETITIVE` 至少 `NB-LDPC exact 不低于 Polar 容差且 undetected==0`（容差见 §Scope 冻结）。
+5. **终态五选一（first-match，R62-03）**：`COMPETITIVE / CORRECTION_WORKS_BUT_NOT_COMPETITIVE / NO_RETAINED_SIGNAL / COMPARISON_DATA_NOT_ALIGNED / EVIDENCE_INVALID`，`COMPETITIVE` 至少 `NB verified_accept ≥ Polar_block_verified_accept -2 overall 且 per-source ≥ -1 且 NB undetected==0`；若两侧均有逐帧 `exact` truth 再附加 `exact` paired 比较，否则不得用 `accepted` 代 `exact`（容差见 §Scope 冻结）。
 
-**报告承诺（shall）**：proposal/design/tasks/specs 显式承诺 — 若未来执行配对基准，最终报告 SHALL 按 `overall + per-source` 分别包含 `exact_full vs Polar success`、`verify` 分别计数、`undetected` 隔离、`disclosure bits/block` 三档分布与 `per accepted`、`calls/rescue_rate per stage`、`runtime/throughput`、`paired delta` 明细、`PIE/SKR proxy` 仅排序；门禁仅用主指标，secondary 仅描述性。
+**报告承诺（shall，R62-03）**：proposal/design/tasks/specs 显式承诺 — 若未来执行配对基准，最终报告 SHALL 按 `overall + per-source` 分别包含 `Polar_block_verified_accept vs NB verify_final` 主比较（`NB exact_full` 仅 oracle audit）、`undetected` 隔离、`disclosure bits/block = Σ4帧 (per accepted)` 三档分布、`calls/rescue_rate per stage`、`runtime/throughput (=Σ4帧)`、`paired delta` 明细、`PIE/SKR proxy` 仅排序；门禁仅用 `verified_accept` 主指标，`exact` 仅当两侧逐帧 truth 齐全时作附加审计，secondary 仅描述性。禁止 `round(aggregate*45)` 与 `accepted vs exact` 直比。
 
 ## Non-Goals
 
@@ -46,30 +48,34 @@
    - **禁用 V55 域不兼容输入**：若 Polar 侧处理点为 `V55 intake` 的 `frames×256` 非 legacy_v1 或 `dimension≠1024` 或 `bin_width≠200ps` 或 `pairing_mode != nearest`，则判 `domain-incompatible` 禁用，不纳入比较集（避免 V55 的 `86+86` 行 `pairing_mode` 漂移）。
    - **未对齐停止**：若 `K_aligned <45` 或无法满足每源 `15` 逐帧对应且符号可重放，则 `overall = V62_COMPARISON_DATA_NOT_ALIGNED` 停止，不伪造、不平均替代、不放宽。
    - **若对齐通过**：冻结 `v62_paired_registry.json`（每块 `block_id, source, Polar frame_ids[4], NB-LDPC frame_ids[4] (identical), held_out_ordinal_start/end, pairs_count=1024, BLOCK_LENGTH=1024, sampling_mode=paired_polar_nbldpc_v62_development, Polar source_path+Polar commit, NB-LDPC H provenance`），`K=45` 规模可机械校验。
-4. **Phase C 指标冻结（主/次分层，undetected 隔离）**：
-   - **主指标（门禁与价值判定）**：`exact_full/accepted rate (overall 45 + per-source 15)、per-source exact_full 与 verify 分别计数、四类 exact/detected/decoder_non_syndrome/undetected（undetected==0 单独表，永不并入 success/FER）、disclosure bits/block (三档 leak_base/stage1/stage2 分布) 与 per accepted (total_disclosed_bits / final_exact_full_count, 为0则null)、calls/rescue (N_stage1_attempted=count(!verify_base) 与 N_stage2_attempted=count(!verify_stage1&&!verify_base) 及 rescue_rate, 禁用 45-base_exact 作分母)、runtime/throughput (per block + overall, 仅描述性但需可复现)、pairwise delta (base vs stage1 vs final vs Polar per block)`。
-   - **次级（仅排序）**：用 Polar 同一 `shadow` 参数（`leak_EC_per_input_bit, raw_ber, beta_eff_empirical` 所在 `benchmark_rows_from_polar_output` 公式与 `compute_beta_eff_empirical` 的 `H(q)` 分解）计算 `PIE = beta_eff_empirical * H_binary_raw_ber` 与 `SKR proxy = accepted_frame_fraction * (PIE proxy - leak_per_frame)` 类 `shadow` 仅排序，不作门禁、不升级 claim，报告显式 `POLAR_REFERENCE_PROXY`。
-   - **禁止**：泄漏分解语义不一致时跨方法排序（`leak_EC_actual_bits` 的 `tag` 与 `leak_other` 记账需显式一致性校验）。
+4. **Phase C 指标冻结（主/次分层，undetected 隔离，R62-03 严格 per-block）**：
+   - **Polar 1024-block 严格聚合（R62-03）**：每冻结 1024-symbol block（=4 连续 256-symbol Polar frames）`Polar_block_verified_accept = 4帧全部 success 且全部 verification pass ? 1:0`；`Polar_block_leak = Σ 4帧 disclosure bits`，`Polar_block_runtime = Σ 4帧 runtime_s`；`Polar_block_exact` 仅当 Polar 输出含逐帧 `exact` truth 时 `=4帧 exact 全真 ?1:0` 否则 `null`，**禁止由 `accepted_frame_fraction` / aggregate FER 推导 per-block 或用 accepted 代 exact**；缺任一逐帧必需字段（ID/success/verification/leak/runtime）→ `V62_COMPARISON_DATA_NOT_ALIGNED` 立即停止。
+   - **主指标（门禁与价值判定）**：公平主比较 `Polar_block_verified_accept vs NB_verify_final` 均按 `overall 45 + per-source 15` 计数；`NB exact_full (=exact_u1&&exact_l2)` 仅 oracle audit 单独表；四类 `exact/detected/decoder_non_syndrome/undetected` 中 `undetected==0` 单独表永不并入 success/FER；`disclosure bits/block = Σ4帧 (三档 leak_base/stage1/stage2)` 与 `per accepted = total_disclosed_bits / NB_verify_final_count (为0则null)`；`calls/rescue (N_stage1_attempted=count(!verify_base) 与 N_stage2_attempted=count(!verify_stage1&&!verify_base) 及 rescue_rate, 禁用 45-base_exact 作分母)`；`runtime/throughput (per block=Σ4帧 + overall, 仅描述性但需可复现)`；`pairwise delta (NB base vs stage1 vs final vs Polar_block_verified_accept per block)`。
+   - **次级（仅排序）**：用 Polar 同一 `shadow` 参数（`leak_EC_per_input_bit, raw_ber, beta_eff_empirical` 所在 `benchmark_rows_from_polar_output` 公式与 `compute_beta_eff_empirical` 的 `H(q)` 分解）计算 `PIE = beta_eff_empirical * H_binary_raw_ber` 与 `SKR proxy = verified_accept_fraction * (PIE proxy - leak_per_block/1024)` 类 `shadow` 仅排序，不作门禁、不升级 claim，报告显式 `POLAR_REFERENCE_PROXY`。
+   - **禁止**：`round(aggregate*45)`、`aggregate FER 造 per-block`、`accepted vs exact` 直接比较；泄漏分解语义不一致时跨方法排序；`Polar_block_exact` 由 accepted 推导。
 5. **Phase D 开发基准设计（45 blocks paired, 硬帽180）**：
    - **规模**：`15/source =45 blocks` (`S=3, B=15`)，每块 `1024 symbols` (`4×256 frames`)，`K_aligned` 中确定性分散 `index_j=floor(j*(K-1)/14)` 若超集更大（否则直接取 aligned 45）。
    - **Polar 侧**：直接复用 `Polar reference` 已有结果 `n_frames_success/failed_*` 等，不重跑，不新增泄漏，不调参。
    - **NB-LDPC 侧**：`L1 45 + base45 + stage1≤45 + stage2≤45 =90-180 硬帽180 (L2 45-135)`，`per block L1 1+base1+stage1≤1+stage2≤1`，`verification-only` 触发 (`syndrome_ok&&tag_ok` 才增量)，`leak_base/stage1/stage2` 三档 `1064/1094/1104 →1104/1134/1144 →1144/1174/1184` (per source)。
    - **零改**：矩阵/`prior`/`decoder`/增量全冻，不引入第三增量或 `Δm=4/12/16` 多档，不以 outcomes 选行。
-6. **终态五选一（first-match，互斥，COMPETITIVE 容差冻结）**：
+6. **终态五选一（first-match，互斥，COMPETITIVE 容差冻结，R62-03）**：
    ```
    if not polar_reference_mechanically_extracted or not alignment_metadata_complete or old_data_fake_PE or verification_caliber_mismatch:
        overall = V62_EVIDENCE_INVALID
+   elif not polar_per_frame_complete (Polar 缺逐帧 ID/success/verification/leak/runtime 任一):
+       overall = V62_COMPARISON_DATA_NOT_ALIGNED  # 立即停止，禁止 round/aggregate 拼 45 块
    elif not alignment_possible (K_aligned<45 or not per_source_15_paired_replayable or V55_domain_incompatible or pairing_mismatch):
        overall = V62_COMPARISON_DATA_NOT_ALIGNED  # 停止，不进 decoder
    elif nbldpc_execution_not_yet_done (本轮):
        overall = V62_PLAN_CANDIDATE__ALIGNMENT_SPIKE_DONE  # 本轮仅 plan + spike，不判后续三态
-   # 未来执行后（需新 OpenSpec + 独立授权）再判：
-   # elif nbldpc_overall_exact >= polar_overall_success -2  ∧ per_source nbldpc >= polar per_source -1  ∧ undetected==0  ∧ rank/nested/verification/记账通过
+   # 未来执行后（需新 OpenSpec + 独立授权）再判（主门禁为 verified_accept）：
+   # elif nbldpc_overall_verify >= polar_overall_verified_accept -2  ∧ per_source nbldpc_verify >= polar per_source -1  ∧ nb_undetected==0  ∧ rank/nested/verification/记账通过
+   #      ∧ (若两侧均有逐帧 exact truth 则附加 paired exact 审计否则跳过 exact 门禁)
    #        → V62_COMPETITIVE
    # elif nbldpc_has_signal (any exact>0 or residual improvement) but not COMPETITIVE → V62_CORRECTION_WORKS_BUT_NOT_COMPETITIVE
    # else → V62_NO_RETAINED_SIGNAL
    ```
-   - **COMPETITIVE 容差冻结**（配对开发基准 45 块）：`overall exact_full ≥ Polar overall success -2` (44/45 容差) 且 `per-source exact_full ≥ Polar per-source success -1` 且 `undetected==0` 且 `rank/nested/verification/记账` 通过；`disclosure/PIE proxy` 仅报告不作硬门禁，但 `leak_per_accepted` 需可比（语义一致性校验通过）。
+   - **COMPETITIVE 容差冻结（R62-03，45 块严格）**：`overall NB verify_final ≥ Polar_block_verified_accept -2` (44/45 容差) 且 `per-source NB verify_final ≥ Polar_block_verified_accept per-source -1` 且 `NB undetected==0` 且 `rank/nested/verification/记账` 通过；若两侧均有逐帧 `exact` truth 再附加 `exact` paired 审计（`exact_full ≥ verified -容差`），否则**不得用 accepted/exact 直比**；`disclosure/PIE proxy` 仅报告不作硬门禁，但 `leak_per_block (=Σ4帧)` 需可比。
    - `CORRECTION_WORKS_BUT_NOT_COMPETITIVE`：NB-LDPC `exact_full>0` 或 `stage1/stage2 rescued>0` 或 `mean residual improvement` 但未达 `COMPETITIVE` 容差。
    - `NO_RETAINED_SIGNAL`：`exact_full==0` 且 `rescued==0` 且无残留改善信号。
    - `V62_EVIDENCE_INVALID` 优先于 `COMPARISON_DATA_NOT_ALIGNED`。

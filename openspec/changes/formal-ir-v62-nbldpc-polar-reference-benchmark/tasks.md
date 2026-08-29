@@ -37,9 +37,9 @@
 
 ## Phase C — 指标冻结（主/次分层，undetected 隔离，PIE/SKR 仅排序）
 
-- [ ] **C1 主指标 exact/accepted 冻结（overall+per-source）**：冻结 `exact_full = exact_u1 && exact_l2` per block 的 `overall 45` 与 `per-source 15` 计数/率，`verify_base/verify_stage1/verify_final` 与 `Polar n_frames_success` 分别计数（`exact != verify` 隔离），`Polar_success_45 = round(accepted_frame_fraction*45)` 与 `per-source = round(frac*15)` 折算已验
+- [ ] **C1 主指标冻结（R62-03 严格 per-block，禁止 round）**：冻结 Polar 严格 `Polar_block_verified_accept = 4连续256-frames 全部 success 且全部 verification pass ?1:0` 逐块聚合得 `overall 45 / per-source 15`，`Polar_block_leak=Σ4帧`, `Polar_block_runtime=Σ4帧`, `Polar_block_exact` 仅当逐帧 exact truth 齐全时聚合否则 `null` 禁推导；主比较 `Polar_block_verified_accept vs NB verify_final` (NB `verify_base/verify_stage1/verify_final` 分别，`exact_full` 仅 oracle audit)，缺逐帧 `ID/success/verification/leak/runtime` 任一 → `V62_COMPARISON_DATA_NOT_ALIGNED` 立即停止，禁止 `round(accepted*45)` / aggregate FER 拼块 / accepted vs exact 直比
 - [ ] **C2 四类与 undetected 隔离冻结**：冻结 `exact / detected (syndrome_fail) / decoder_non_syndrome (converged_no_syndrome) / undetected (syndrome_ok&&tag_ok&&!exact)` 四类计数，`undetected==0` 单独表永不并入 `success/FER`，`undetected>0` 则 `EVIDENCE_INVALID` 优先已验
-- [ ] **C3 泄漏与 calls/rescue 冻结（decoder-free 公式校验）**：冻结 `leak_base 1064/1094/1104, stage1 1104/1134/1144, stage2 1144/1174/1184` 三档 (`leak=5*m_total+64` 双校验 `m_total 1405/1475/1540`) + `per_source_avg[s]=leak_base[s]+40*N_stage1[s]/15+40*N_stage2[s]/15` + `overall_avg=(Σ leak_base+40*N_stage1+40*N_stage2)/45` + `per accepted = total_disclosed_bits / final_exact_full_count (为0则null)` + `calls: N_stage1_attempted=count(!verify_base) , N_stage2_attempted=count(!verify_base&&!verify_stage1), rescued_stage1, rescued_stage2, rescue_rate = rescued/attempted (禁 45-base_exact 分母)`，`py_compile` 前公式双校验已验
+- [ ] **C3 泄漏与 calls/rescue 冻结（decoder-free 公式校验，R62-03）**：冻结 `Polar Σ4帧 leak` vs `NB leak_base 1064/1094/1104, stage1 1104/1134/1144, stage2 1144/1174/1184` 三档 (`leak=5*m_total+64` 双校验 `m_total 1405/1475/1540`) + `per_source_avg[s]=leak_base[s]+40*N_stage1[s]/15+40*N_stage2[s]/15` + `overall_avg=(Σ leak_base+40*N_stage1+40*N_stage2)/45` + `per accepted = total_disclosed_bits / NB_verify_final_count (为0则null, 禁用 exact 作分母替代)` + `calls: N_stage1_attempted=count(!verify_base) , N_stage2_attempted=count(!verify_base&&!verify_stage1), rescued_stage1, rescued_stage2, rescue_rate = rescued/attempted (禁 45-base_exact 分母)`，`py_compile` 前公式双校验已验
 - [ ] **C4 runtime/throughput 冻结（仅报告可复现）**：冻结 `runtime_s per block + overall` (Polar 侧复用 `runtime_s`，NB-LDPC 侧未来实测) + `throughput_input/output` ( `n_bits/runtime`, `n_success*frame_len_bits/runtime` )，`benchmark_rows_from_polar_output` 的 `throughput` 派生已验
 - [ ] **C5 pair delta 与 Wilson 冻结**：冻结 `per block NB-LDPC final vs Polar` 的 `exact delta, leak delta, runtime delta` 明细 + `Wilson 95%` per source & overall ( `exact/rate` 分别报告，不作门禁 )
 - [ ] **C6 次级 PIE/SKR proxy 冻结（POLAR_REFERENCE_PROXY 仅排序）**：冻结 `PIE proxy = beta_eff_empirical * H_shannon` 与 `SKR proxy = accepted_frame_fraction * (PIE - leak_per_frame)` 用 Polar 同一 `shadow` 参数（`leak_EC_per_input_bit, raw_ber, beta_eff_empirical`）计算，报告显式 `POLAR_REFERENCE_PROXY` 不升级，不作门禁；泄漏分解语义不一致时该次对比次级失效已验
@@ -59,20 +59,23 @@
   ```
   `verification-only` 触发已验，`leak_base/stage1/stage2` 三档 `1064/1094/1104→1104/1134/1144→1144/1174/1184` 已验，`rank_total==m2+16 nested/independence==8 row≤16` 已验
 - [ ] **D4 零改校验（H/prior/decoder/增量）**：`H1-16 rank16, Lane C m2 184/190/192 support/标签/置换, H_inc1 det1 + joint1 192/198/200, H_inc2 det2 + total 200/206/208, decoder 90/1.0 poly37, TRAIN-only, L2-only tag, +40/+80` 全冻，不新增矩阵，不试 `Δm=4/12/16` 多档，不以 outcomes 选行，`rg "decode_" 0 hits` 在 plan 侧已验
-- [ ] **D5 五终态冻结（first-match，COMPETITIVE 容差）**：
+- [ ] **D5 五终态冻结（first-match，COMPETITIVE 容差，R62-03 verified_accept 主门禁）**：
   ```
   if not polar_reference_mechanically_extracted or not alignment_metadata_complete or rank/nested/verification/记账失败:
       overall = V62_EVIDENCE_INVALID  # 优先
+  elif not polar_per_frame_complete (缺逐帧 ID/success/verification/leak/runtime 任一):
+      overall = V62_COMPARISON_DATA_NOT_ALIGNED  # 立即停止，禁止 round/aggregate 拼 45 块
   elif not alignment_possible (K_aligned<45 or per_source<15 or V55_domain_incompatible or pairing_mismatch or not replayable):
       overall = V62_COMPARISON_DATA_NOT_ALIGNED  # 停止
   elif nbldpc_not_yet_executed (本轮):
       overall = V62_PLAN_CANDIDATE__ALIGNMENT_SPIKE_DONE
-  # 未来执行后（需 alignment PASS + 独立 plan ACCEPT + EXECUTE_AUTH）:
-  # elif nbldpc_overall_exact >= polar_overall_success -2  ∧ per_source nbldpc >= polar per_source -1  ∧ undetected==0 ∧ rank/nested/记账通过 → V62_COMPETITIVE
+  # 未来执行后（需 alignment PASS + 独立 plan ACCEPT + EXECUTE_AUTH，主门禁为 verified_accept）:
+  # elif nbldpc_overall_verify >= polar_overall_verified_accept -2  ∧ per_source nbldpc_verify >= polar per_source -1  ∧ NB undetected==0 ∧ rank/nested/记账通过
+  #      ∧ (若两侧均有逐帧 exact truth 则附加 exact paired 审计否则跳过) → V62_COMPETITIVE
   # elif nbldpc_has_signal (any exact>0 or rescued>0 or residual improved) but not COMPETITIVE → V62_CORRECTION_WORKS_BUT_NOT_COMPETITIVE
   # else → V62_NO_RETAINED_SIGNAL
   ```
-  `COMPETITIVE` 容差 `-2/45 overall, -1/15 per-source, undetected==0` 已显式，不以总体平均掩盖单源
+  `COMPETITIVE` 容差 `-2/45 overall, -1/15 per-source, NB undetected==0` 且主门禁为 `verified_accept`，`exact` 仅两侧逐帧 truth 齐全时附加审计，否则禁 `accepted vs exact 直比`，不以总体平均掩盖单源；禁止 `round(aggregate*45)` / aggregate FER 拼块
 - [ ] **D6 互斥性与伪造审计**：`assert overall in [EVIDENCE_INVALID, COMPARISON_DATA_NOT_ALIGNED, PLAN_CANDIDATE__ALIGNMENT_SPIKE_DONE, COMPETITIVE, CORRECTION_WORKS_BUT_NOT_COMPETITIVE, NO_RETAINED_SIGNAL] 且仅一态`，`rg "H_min.*=.*IAB|IAB.*H_min" 0 hits` 无自创，`old_data_fake_PE` 零验，`only_ALIGNMENT_READY_then_bench: assert (overall==COMPARISON_DATA_NOT_ALIGNED) == (K_aligned<45)` 已验
 
 ## Phase E — 对齐探针与报告交付（PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED，普通推送后停止）
