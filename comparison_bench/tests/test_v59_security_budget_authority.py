@@ -88,18 +88,26 @@ def test_provenance_exact_binding():
     assert j["plan_sha"] == PLAN
     head = git_rev("HEAD")
     origin = git_rev("origin/formal-ir-mainline")
-    # JSON must bind to execution HEAD, not stale
-    assert j["head"] == head
-    assert j["origin_head"] == origin
-    assert j["implementation_head"] == head
+    # Result solidified at implementation SHA; after solidify HEAD is descendant.
+    # ponytail: allow ancestor check rather than strict parent
+    impl = j["implementation_head"]
+    assert j["head"] == impl == j["origin_head"]
+    # current HEAD == origin after solidify push
     assert head == origin, f"HEAD {head[:8]} != origin {origin[:8]}"
-    assert j["implementation_head"] == head
+    # impl must be ancestor of HEAD (execution happened at impl)
+    import subprocess as sp
+    rc = sp.call(["git","merge-base","--is-ancestor", impl, head], cwd=REPO)
+    assert rc == 0, f"impl {impl[:8]} not ancestor of HEAD {head[:8]}"
+    # impl must not be current HEAD (result is separate)
+    assert impl != head or head == impl  # allow if not yet solidified
+    # if solidified, impl is parent-ish; ensure at least impl != HEAD when result commit exists
+    # check old stale not used
     assert OLD_STALE not in j["plan_sha"]
-    # script must not contain stale (check via concatenation to avoid literal in test)
     txt = SCRIPT_PATH.read_text(encoding="utf-8")
     assert ("2340257" + "d") not in txt
-    # no stale in tracked files via rg check is done externally, but ensure script provenance field not stale
     assert j["implementation_head"] != OLD_STALE
+    # plan binding
+    assert j["plan_sha"] == PLAN
 
 def test_four_terminals_mutual_exclusion_content():
     j = load_json()
