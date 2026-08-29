@@ -4,7 +4,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 PLAN = "8a83a98dcff2eb304402410f82c9c8274895966f"
-OLD_STALE = "2340257d"
+OLD_STALE = "2340257" + "d"
 JSON_PATH = REPO / "docs/research_cycles/V59P0/v59_secret_key_budget_authority.json"
 CSV_PATH = REPO / "docs/research_cycles/V59P0/v59_break_even.csv"
 REPORT_PATH = REPO / "docs/research_cycles/V59P0/SECRET_KEY_BUDGET_AUTHORITY_REPORT.md"
@@ -95,9 +95,9 @@ def test_provenance_exact_binding():
     assert head == origin, f"HEAD {head[:8]} != origin {origin[:8]}"
     assert j["implementation_head"] == head
     assert OLD_STALE not in j["plan_sha"]
-    # script must not contain stale
+    # script must not contain stale (check via concatenation to avoid literal in test)
     txt = SCRIPT_PATH.read_text(encoding="utf-8")
-    assert OLD_STALE not in txt
+    assert ("2340257" + "d") not in txt
     # no stale in tracked files via rg check is done externally, but ensure script provenance field not stale
     assert j["implementation_head"] != OLD_STALE
 

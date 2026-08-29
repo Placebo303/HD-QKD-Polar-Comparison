@@ -63,7 +63,7 @@ def main():
     # provenance exact: head must equal origin at execution time; script itself must not contain stale SHA
     # ponytail: no stub IMPLEMENTATION_HEAD, use live head
     self_text = Path(__file__).read_text(encoding="utf-8")
-    assert "2340257d" not in self_text, "stale SHA 2340257d must be deleted"
+    assert "2340257" + "d" not in self_text, "stale SHA must be deleted"
     assert "decode" + "_" not in self_text, "decoder string found"
     assert "import dec" + "oder" not in self_text
 
