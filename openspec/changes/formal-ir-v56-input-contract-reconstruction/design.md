@@ -1,8 +1,8 @@
 # OpenSpec Design: formal-ir-v56-input-contract-reconstruction
 
-**Lifecycle**: `PLAN_CANDIDATE / VERIFICATION_ONLY / DECODE_FORBIDDEN` — **整合重建，不拆 D5/D6，零 decoder 直至 C 通过后 V57**
-**Cycle**: `V56` (input-contract-reconstruction), predecessor `V56D4` `176bf34f` `INCONCLUSIVE_MIXED_SIGNAL`
-**Branch**: `formal-ir-mainline` HEAD `176bf34f` data SHA `84d62779603e62de50ded5182ed65b65d3dc6084` (200ps legacy_v1 nearest 1024, 单点)
+**Lifecycle**: `PLAN_CANDIDATE / VERIFICATION_ONLY / DECODE_FORBIDDEN` — **整合重建，不拆 D5/D6，零 decoder 直至 C 通过后 V57，修复仅 wrapper 不改 src/**
+**Cycle**: `V56` (input-contract-reconstruction), predecessor `V56D4` `49a415b` `INCONCLUSIVE_MIXED_SIGNAL`
+**Branch**: `formal-ir-mainline` HEAD `49a415b8253c9c73da0013588d0c50c0e9d41dba` data SHA `84d62779603e62de50ded5182ed65b65d3dc6084` (200ps legacy_v1 nearest 1024, 单点)
 **Feasibility**: `V56D4` 已在 `pairs.parquet` 上证 `CE 13-16 acc 0.30-0.46` 全面退化 vs `V13 CE0.19-0.91 acc0.74-0.99` 健康，但 `occupancy 256` 正常且 `I32 1.3-2.0` vs `V13 4.1-4.9` 仅辅助、`first_drop=U1U2_consistency` 混合不单点归因；`V13` 已验证 `channel/delay/peak/gate/frame-start/mapping/pairing` 实现可只读复用，无需网格搜索；逐函数复放可在 `debug` 层定位首次分叉，单点 V13 值修复后同批新帧 decoder-free 验收即可闭环，无需 decoder。
 **Key judgement**: **`0/90` 非算法证伪，`V56D4` 的 CE/acc 主证据已证输入域系统性失配，但 I32 仅辅助且 occupancy 正常说明非简单丢帧；必须逐函数复放找到第一次产生不同数组的位置，单点修 V13 合同值，再以新帧三源分别 `>60%` 验证可修复性，否则不得进入 decoder。**
 
@@ -13,7 +13,7 @@
 - **不变量**：`dimension 1024 / bin_width 200ps / pairing nearest / legacy_v1 / frame_period 204800ps / BLOCK 4×256 / F03 5+5` 为名义不变量；`V13` 的 `pairing policy/direction/threshold 40000ps/gate 200ps/frame_start/period/delay_used -50/+50/peak_center -50/+50/mapping/wrap_rule occupancy_filter` 为已知健康合同（从 `workspace/v13r3fresh_20260816/sidecars` 实时读）。
 - **去偏原理**：`V56D4` 已固化 `CE/acc` 主、`I32`辅（`32×32` 在 `N=1024` 时 `~1/格`，理论偏置 `~0.47 bits` 远小于 `1024×1024` 的 `~500 bits`，但仍需偏置声明）；`first_drop=U1U2_consistency` 说明 `raw coincidence` 与 `occupancy` 未先坍塌，**首次分叉在 `U1U2` 前的某一步**（`pairing/frame/bin/symbol` 链），需逐函数复放。
 - **单点修复原理**：不在 `delay/bin_width/mapping/frame anchor` 间搜索择优，仅当逐函数复放找到唯一代码/合同差异时，将该处值**必取 V13 权威合同**（`sidecar used_params` 或 `ttbin_pipeline` 权威实现），`old/current/corrected` 三路字节级对照可证修复必要且充分。
-- **校准验收原理**：新校准帧未进 `90` 且未进 `D4 fit/val`，与权威帧零重叠；`timing/routing` 合同完整且 `V13` 与 `corrected` 逐阶段 `array_equal PASS`，`A==B>60%` 且 `validation CE/acc` 显著恢复（`CE 13-16→<5`, `acc 0.30-0.46→>60%`）方可 `RECOVERED`；`NLL/q_mass` 仅一致性诊断（`V25 prior` 在新域可能失配，不以 `NLL` 单阈硬判）。
+- **校准验收原理**：新校准帧未进 `90` 且未进 `D4 fit/val`，与权威帧零重叠；`timing/routing` 合同完整且 `V13` 与 `corrected` 逐阶段 `array_equal PASS`，`A==B>60%` 且 `validation acc≥60%` 且 `CE ≤ min(0.5*CE_current, CE_V13ref+1.0)` 预注册硬上限（`CE_current 13-16` 相对至少下降 50% 且不高于 `V13 0.19-0.91 +1 bit`，三源分别）方可 `RECOVERED`；`NLL/q_mass` 仅一致性诊断（`V25 prior` 在新域可能失配，不以 `NLL` 单阈硬判）。
 
 ## 2. 冻结语义 — V54 方法与 V55 intake 零改
 
@@ -30,7 +30,7 @@
 | V13 合同 | 从 `workspace/v13r3fresh_20260816/sidecars/*/sidecar_meta.json` + `build_manifest.json` 实时读 | V13 |
 | Fit/Val | `fit=[7,8,9,10] val=[15,16,17,18]` assert ∩==∅ | V56D4 预注册 |
 
-**禁令**：`SHALL NOT` 任何 `decode_*` / `construct_*` / 调 `m2/leak/decoder/prior/H1/Lane C/H_inc1/2`；**零 decoder 直至 V57**；原 `V55 90-block` 永久禁用；**I32 仅辅助不能单独归因**；`V55` 与 `V13` 处理点 `200ps legacy_v1 nearest 1024` 单点锚点不改。
+**禁令**：`SHALL NOT` 任何 `decode_*` / `construct_*` / 调 `m2/leak/decoder/prior/H1/Lane C/H_inc1/2`；**零 decoder 直至 V57**；原 `V55 90-block` 永久禁用；**I32 仅辅助不能单独归因**；`V55` 与 `V13` 处理点 `200ps legacy_v1 nearest 1024` 单点锚点不改；**严禁改 `src/` 基线，修复仅 V56 wrapper/materializer**。
 
 ## 3. Phase 0 — 固化 V56D4 独立 pre-RESULT review（阻塞门）
 
@@ -60,44 +60,56 @@
   每阶段 `np.array_equal` / `mean_equal` / `Δt median` / `occupancy`，**保存首个不一致阶段及行级样例**（前 5 行 `pair_idx, t_A, t_B, Δt, bin_A, bin_B, sym_A, sym_B, U1_A, U2_A, U1_B, U2_B`），目标**找到第一次产生不同数组的位置**。
 - **产出**：`per_stage {stage, V13_val, current_val, delta, array_equal, sample_rows}` + `first_divergent_stage`。
 
-## 5. Phase B — 唯一修复（单点，V13 权威值）
+## 5. Phase B — 唯一修复（单点，V13 权威值，wrapper 内）
 
 - **条件**：A 找到唯一代码/合同差异（`first_divergent_stage` 非空且 `array_equal==False` 首次出现）。
-- **动作**：**只修复该一处**，**不搜索** `delay/bin_width/mapping/frame anchor` 多候选，不做 `threshold/policy/direction` 网格；**修复值必来自 V13 权威合同**（`sidecar used_params` 实时读或 `ttbin_pipeline` 权威实现），不手填经验值。
+- **动作**：**只修复该一处**，**不搜索** `delay/bin_width/mapping/frame anchor` 多候选，不做 `threshold/policy/direction` 网格；**修复值必来自 V13 权威合同**（`sidecar used_params` 实时读或 `ttbin_pipeline` 权威实现只读对照），不手填经验值。
+- **位置约束（硬）**：修复必须留在 **V56 wrapper/materializer**（`comparison_bench` 内 `v56_*` 物化层 / `replay/verify` 脚本参数层 / `comparison_bench/outputs_comparison/v56_*` 配置层），**严禁改 `src/` 基线**（`src/qkd_io/ttbin_pipeline.py` 等冻结只读复用，`git diff -- src/ ==0` 可验；`ttbin_pipeline` 仅作权威对照，不作写入目标）。
 - **对照**：`old = current` 原实现、`current` = 修复前、`corrected` = 单点修后，三路字节/数组级对照（`old→current diff` 非空，`current→corrected` 在首错阶段后显式分叉，阶段后 `array_equal` 翻转，前阶段仍一致）。
-- **守卫**：不改 `prior / H1 / Lane C / H_inc1/2 / decoder` 任何参数（`git diff -- comparison_bench/src/comparison_bench/formal_ir/` 0 改动，`rg "CHANNEL_COUNTS|H1|L1-APP"` 改动 0）；`src/qkd_io` 若需单行修复则 `HEAD` 新 SHA 重绑并记录 `ACCEPTED_PLAN_SHA` 重推导。
+- **守卫**：不改 `prior / H1 / Lane C / H_inc1/2 / decoder` 任何参数（`git diff -- comparison_bench/src/comparison_bench/formal_ir/` 0 改动，`rg "CHANNEL_COUNTS|H1|L1-APP"` 改动 0）；`src/qkd_io` 零改动（本变更不产生 `src/` diff，新 SHA 仅记录 wrapper 改动）。
 
-## 6. Phase C — decoder-free 校准验收（新帧，三源分别）
+## 6. Phase C — decoder-free 校准验收（新帧，三源分别，硬门槛）
 
 - **新校准帧**：未进 `V55 90-block`（`set(calibration_new) ∩ set(V55 90×4) ==∅`）也未进 `D4 fit=[7,8,9,10]/val=[15,16,17,18]`（`∩ ==∅`），预注册如每源 `8-16` 帧（例 `1M [0,1,2,3,11,12,13,14] 1p5M 同` `2M 同`，`frame_id∈[0,F-1]` 且 `pairs_per_frame 256` 连续，三源一致，`calibration_new_registry.json` 落盘，`gap≥4` 非必须但报告间距）。
-- **timing/routing 合同完整**：
+- **timing/routing 合同完整（前置守卫）**：
   - `timing_contract_verified` — 真实重算 `TimeTagger` 环境下 `peak_center/σ/p2bg`（记录 `interpreter_path/TimeTagger版本/输入事件数`，`V13` 同环境同版本），`peak` 健康（`σ 50-150ps` 窄）且 `|peak - delay_used|<50ps` 且 `sign` 一致且 `gate 200ps/threshold 40000ps/frame_start/period 204800` 已显式落盘；缺失时只能 `EVIDENCE_INCOMPLETE`，不得判 `RECOVERED`。
   - `routing` — 指定 `channel 1/5` 存在且非零（`count_A>0 && count_B>0 && unique⊇{1,5}`）且无跨 `channel`/丢列/错误合并（`other<20%` 完整性），比例仅报告（`1M/2M 36.4%` 可能来自探测效率非 routing 错误，R1 修正）。
-- **V13 与 corrected 逐阶段一致**：对新帧同批 `ttbin`，`V13-authoritative` 与 `corrected` 在上述 7 阶段均 `array_equal PASS`（附录对照）。
-- **A==B >60% 主门**：在新校准小批量上（`8-16` 帧 `2048-4096` pairs）`rate_eq = mean(a==b)` 三源分别 `>60%`（`V55` 原 `27-41%`，`V13` 健康 `~99% U1 / 74% U2`）。
-- **validation CE/accuracy 显著恢复**：`fit 4→val 4` 同切分（`fit` 新帧前 4 学 `P_fit(a|b) 1024→32` 列归一，`val` 后 4 测 `CE_U1/U2 = E[-log2 P_fit]`、`acc_U1/U2 = mean(a==argmax P_fit)`），三源分别 `CE` 从 `13-16` 向 `V13 0.19-0.91` 回落且 `<5`，`acc` 从 `0.30-0.46` 向 `0.74-0.99` 回升且 `>60%`；`CE/acc` 为一致性描述，门禁仅 `>60%` 一项。
+- **contract_equivalent（硬证据，门 1）**：对新帧同批 `ttbin`，`V13-authoritative` 与 `corrected` 在全部七阶段 `raw/channel → pairing/Δt → delay/位置 → frame-start/period/floor-div → bin → 1024 sym → U1/U2` 均 `np.array_equal PASS`（`per_stage_V13_corrected: {array_equal: true}` 附录对照，任一阶段 `False` 即 `contract_equivalent=False`）。
+- **distribution_compatible（硬门槛，门 2，三源分别，不用总体平均）**：对每源 `s∈{1M,1p5M,2M}` 分别需同时满足：
+  1. `A==B >60%`：`rate_eq = mean(a==b)` 在新校准 `8-16` 帧 `2048-4096` pairs 上 `>60%`；
+  2. `validation accuracy ≥60%`：`fit 4→val 4` 同切分下 `acc_U1 ≥60%` 且 `acc_U2 ≥60%`（`fit` 新帧前 4 学 `P_fit(a|b) 1024→32` 列归一，`val` 后 4 测 `CE_U1/U2 = E[-log2 P_fit]`、`acc_U1/U2 = mean(a==argmax P_fit)`）；
+  3. `validation CE 预注册明确上限`：`CE_U1 ≤ min(0.5*CE_current_U1, CE_V13ref_U1+1.0)` 且 `CE_U2 ≤ min(0.5*CE_current_U2, CE_V13ref_U2+1.0)`（`CE_current` 为同切分 `V56D4` 基线 `13-16`，`CE_V13ref` 取该源 `V13` 健康值 `0.19-0.91`，未取到则按 `0.91+1.0=1.91` 守卫；预注册于 `verification_manifest.json`，事后不调。相对当前至少下降 50% 且不高于 V13+1 bits，两条件取严）。
 - **NLL / q_mass 仅一致性诊断**：基于 `V25 channel_counts.npz` 的 `P(A|B)` 列归一，`NLL = mean(-log2 P(a|b))` 与 `q_mass_on_p_zero = sum_{N_ab=0} P_emp` 仅报告回落方向（`V55 NLL 28-35 q_mass 57-71%` → 新帧向 `V13 ~0.82/3%` 靠近），不作硬门禁。
-- **三源分别通过**：`1M` 且 `1p5M` 且 `2M` 均 `timing/routing` 完整 + `A==B>60%` + `CE/acc` 显著恢复 + `V13/corrected` 一致 → `C PASS`；任一源失败 → 终态 `V56_INPUT_CONTRACT_UNRESOLVED` 停止。
+- **三源分别通过**：`1M` 且 `1p5M` 且 `2M` 均 `timing/routing` 完整 + `contract_equivalent==True` + `distribution_compatible==True` → `C PASS`；任一源不满足则按 §7 优先级分流（`EVIDENCE_INVALID > MIXED_BY_SOURCE > RECOVERED > DOMAIN_SHIFT > UNRESOLVED`）。
 
-## 7. Phase D — 终态 5 选 1（互斥）
+## 7. Phase D — 终态 5 选 1（互斥，按优先级，不主观）
+
+- **硬定义**：`contract_equivalent` = V13 与 corrected 七阶段逐元素一致（§6 门 1）；`distribution_compatible` = 三源分别 `A==B>60%` 且 `acc≥60%` 且 `CE≤min(0.5*CE_current, V13ref+1)`（§6 门 2，预注册上限，不用总体平均）。两者为硬证据/硬门槛，非主观“显著恢复”。
 
 ```
-if C 三源均过 (timing/routing 完整, V13/corrected 一致, A==B>60%, validation CE/acc 显著恢复):
-    overall = V56_INPUT_CONTRACT_RECOVERED
-    # 输入合同可修复性得证，允许另起 V57 走 QUALIFICATION_PLAN_READY + EXECUTE_AUTH 的 decoder TEST
-elif A 未发现单点错 或 corrected 亦低 且 U1U2 后仍低 且 NLL/q_mass 仍高 且 first_drop 非 pairing/frame 单点:
-    overall = V56_TRUE_SESSION_DOMAIN_SHIFT
-    # 真域迁移，需重估 H(U1|B), H(U2|U1,B) 与 m_total=floor((1.3*1024*H-64)/5)，prior 仍 TRAIN-only
-elif per_source 判定不一致 (例 1M recovered 2M domain_shift):
-    overall = V56_MIXED_BY_SOURCE
-elif C 任一源失败 (timing 不完整 或 V13/corrected 不一致 或 A==B≤60% 或 CE/acc 未恢复):
-    overall = V56_INPUT_CONTRACT_UNRESOLVED
-else if 完整性/守卫/零重叠/rank/nested 失败 或 provenance 不可追溯:
+# 硬定义：contract_equivalent = V13 与 corrected 七阶段逐元素一致（§6 门 1，硬证据）；distribution_compatible = 三源分别 A==B>60% && acc≥60% && CE≤min(0.5*CE_current, V13ref+1.0) 预注册上限
+# 先逐源判定 per_source s: shunt_s = UNRESOLVED_s (contract_equivalent_s==False 或 TTBin 不可用) / RECOVERED_s (contract true && distribution true) / DOMAIN_SHIFT_s (contract true && distribution false)
+# 再总体 5 选 1（优先级高→低，互斥，不主观）：
+if 完整性/守卫/零重叠/rank/nested 失败 或 provenance 不可追溯 或 fit∩val≠∅ 或 set(new)∩set(90)≠∅ / ∩set(D4 fit/val)≠∅ 或 timing 缺失伪造:
     overall = V56_EVIDENCE_INVALID
+    # 证据/切分/零重叠失败，最高优先级
+elif per_source 判定不全同类 (例 1M RECOVERED_s / 2M DOMAIN_SHIFT_s / 1p5M UNRESOLVED_s 混排，三源 shunt_s 不一致):
+    overall = V56_MIXED_BY_SOURCE
+    # 不同源分别落两类，逐源分别报告修复/排查清单；含 contract 或 distribution 的源间异构
+elif 三源均 contract_equivalent==True 且 三源均 distribution_compatible==True:
+    overall = V56_INPUT_CONTRACT_RECOVERED
+    # 七阶段一致且 compatible（硬证据+硬门槛三源分别通过），输入合同可修复性得证，允许另起 V57 走 QUALIFICATION_PLAN_READY + EXECUTE_AUTH 的 decoder TEST
+elif 三源均 contract_equivalent==True 且 三源均 distribution_compatible==False:
+    overall = V56_TRUE_SESSION_DOMAIN_SHIFT
+    # 七阶段一致但统计均匀失败（contract 均一致，distribution 三源均未达硬门槛），真域迁移，需重估 H(U1|B), H(U2|U1,B) 与 m_total，prior 仍 TRAIN-only；NLL/q_mass 仍高为一致性佐证
+elif 三源均 contract_equivalent==False 或 V13 侧 INCOMPLETE_TTBin_UNAVAILABLE 均匀无法复放:
+    overall = V56_INPUT_CONTRACT_UNRESOLVED
+    # 无法重现权威路径或仍有分叉且三源均匀未闭合（任一源分叉但总体均匀；异构分叉已由 MIXED 捕获），修复未闭合
 ```
 
-- 三源 `MIXED_BY_SOURCE` 时逐源分别报告修复/排查清单；`UNRESOLVED` 时停留在 `PLAN_CANDIDATE / VERIFICATION_ONLY`，不进入 decoder。
+- `UNRESOLVED` / `DOMAIN_SHIFT` / `MIXED` 时停留在 `PLAN_CANDIDATE / VERIFICATION_ONLY`，不进入 decoder。
 - **仅 `RECOVERED` 才允许 `V57` decoder TEST**（需另起 OpenSpec，冻结新 TEST registry 与 `V57` 方法 `plan HEAD` + `data SHA` + `implementation SHA` 三方绑定，独立 `Pre-EXECUTE` / `Pre-RESULT` 双重 review）。
+- 修复必须留在 wrapper/materializer，不改 `src/` 基线（`git diff -- src/ ==0`）。
 
 ## 8. 边界与 V57 衔接
 
@@ -112,7 +124,7 @@ else if 完整性/守卫/零重叠/rank/nested 失败 或 provenance 不可追�
 - **脚本 2 `verify_corrected_calibration.py`** (本变更目录下, decoder-free):
   `python verify_corrected_calibration.py [--ttbin-root ...] [--corrected-pairs ...] [--v13-sidecars ...] [--new-frames ...] [--counts ...] [--out calibration_verification.json]` → 新校准帧 `timing/routing` + `V13/corrected` 一致 + `A==B>60%` + `validation CE/acc` + `NLL/q_mass` 一致性，`rg "decode_" 0 hits`，`py_compile` PASS；输出 `calibration_verification.json` + 控制台摘要；校验 `set(new)∩set(90)==∅` 且 `∩set(D4 fit/val)==∅`。
 - **报告 `RECONSTRUCTION_REPORT.md`**：每源 `A==B/CE/acc/NLL/q_mass` + `pipeline first_drop` + `V13 vs current` + `old/current/corrected` 三路对照 + `C` 新帧验收 + 总体 5 选 1 终态，数据与 `json` 一致，结论不扩大为 `FER/阈值/SKR/晋升`，显式 `V55 90 已揭盲不可复用` + `同 session 剩余帧仅 within-session confirmation` + `真正 qualification 放 V57`。
-- **守卫**：重建期 **零 decoder**、原 `90` 已揭盲保护、**不创建 `run_01` decoder 执行**、**不做阈值/方向/frame-start 网格**（`rg "grid" 0 hits`，候选数 `2→3` 仅 old/current/corrected）。
+- **守卫**：重建期 **零 decoder**、原 `90` 已揭盲保护、**不创建 `run_01` decoder 执行**、**不做阈值/方向/frame-start 网格**（`rg "grid" 0 hits`，候选数 `2→3` 仅 old/current/corrected）、**`git diff -- src/ ==0`（修复仅 wrapper）**。
 
 ## 10. 与 V56D4 衔接
 
