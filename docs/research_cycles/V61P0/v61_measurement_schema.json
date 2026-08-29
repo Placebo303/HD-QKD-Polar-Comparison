@@ -1,0 +1,250 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "V61 HD-QKD security measurement minimal schema",
+  "type": "object",
+  "required": [
+    "provenance",
+    "per_source",
+    "acceptance_formula"
+  ],
+  "properties": {
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "head": {
+          "type": "string"
+        },
+        "data_sha": {
+          "type": "string"
+        },
+        "spec_version": {
+          "type": "string"
+        }
+      }
+    },
+    "protocol_theorem": {
+      "type": "object",
+      "properties": {
+        "theorem_id": {
+          "type": "string"
+        },
+        "assumptions": {
+          "type": "array"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "visibility_dependence": {
+          "type": "boolean"
+        },
+        "decoy_dependence": {
+          "type": "boolean"
+        },
+        "readiness": {
+          "enum": [
+            "required_core",
+            "missing"
+          ]
+        },
+        "authority": {
+          "enum": [
+            "composable",
+            "missing"
+          ]
+        }
+      }
+    },
+    "conjugate_phase_error": {
+      "type": "object",
+      "properties": {
+        "e_ph": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "conjugate_basis_stats": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "decoy_chain": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "readiness": {
+          "enum": [
+            "required_core",
+            "required_if_theorem_applicable",
+            "not_applicable_with_theorem_reason",
+            "missing"
+          ]
+        }
+      }
+    },
+    "n_PE_sampling": {
+      "type": "object",
+      "properties": {
+        "n_PE": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "p_Z": {
+          "type": "number"
+        },
+        "p_X": {
+          "type": "number"
+        },
+        "sampling_rule": {
+          "type": "string"
+        },
+        "seed_or_counter": {
+          "type": "string"
+        },
+        "readiness": {
+          "enum": [
+            "required_core",
+            "missing"
+          ]
+        }
+      }
+    },
+    "visibility_per_source": {
+      "type": "object",
+      "properties": {
+        "readiness": {
+          "enum": [
+            "required_if_theorem_applicable",
+            "not_applicable_with_theorem_reason",
+            "missing"
+          ]
+        },
+        "per_source": {
+          "type": "array"
+        }
+      }
+    },
+    "eps_allocation": {
+      "type": "object",
+      "properties": {
+        "eps_sec": {
+          "type": "number"
+        },
+        "eps_cor": {
+          "type": "number"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "leak_verif_auth": {
+      "type": "object",
+      "properties": {
+        "actual_verification_bits_per_block": {
+          "type": "number"
+        },
+        "leak_verification_extra_bits_per_block": {
+          "type": "number"
+        },
+        "leak_auth_bits_per_block": {
+          "type": "number"
+        },
+        "tag_included_in_IR": {
+          "type": "boolean"
+        },
+        "epsilon_EC_probability": {
+          "type": "number"
+        }
+      }
+    },
+    "finite_size": {
+      "type": "object",
+      "properties": {
+        "DeltaFK_formula": {
+          "type": "string"
+        },
+        "n_eff": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "post_selection": {
+      "type": "object",
+      "properties": {
+        "accepted_frame_fraction": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "n_block": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "unit_timestamp_binding": {
+      "type": "object",
+      "properties": {
+        "unit_map": {
+          "type": "object"
+        }
+      }
+    },
+    "acceptance_formula_inputs": {
+      "type": "object",
+      "properties": {
+        "hmin_lower_bits_per_symbol": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "leak_other_bits_per_block": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "finite_bits_per_block": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ell_formula": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "provenance_values": {
+    "head": "1be38e39cd65469b97f395fdee15589510c5f07d",
+    "origin": "1be38e39cd65469b97f395fdee15589510c5f07d",
+    "data_sha": "84d62779",
+    "spec_version": "V61P0-R61"
+  },
+  "leak_IR_contains_tag64": true,
+  "leak_other_formula": "max(0, actual_verification_bits - 64) + leak_auth + ...",
+  "epsilon_note": "epsilon are probabilities, not bits unless theorem maps explicitly",
+  "readiness_classes": [
+    "required_core",
+    "required_if_theorem_applicable",
+    "not_applicable_with_theorem_reason",
+    "missing"
+  ]
+}

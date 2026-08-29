@@ -1,0 +1,4 @@
+source,leak_total,floor,margin_5pct,margin_10pct,hmin_lower_authority,hmin_lower_null_or_value,ell_or_null,gate,verification_extra
+1M,7089,6.9238,7.2882,7.6931,,,,log2d10_pass,"max(0,actual-64) placeholder 0"
+1p5M,7439,7.2637,7.646,8.0707,,,,log2d10_pass,"max(0,actual-64) placeholder 0"
+2M,7764,7.582,7.9811,8.4245,,,,log2d10_pass,"max(0,actual-64) placeholder 0"

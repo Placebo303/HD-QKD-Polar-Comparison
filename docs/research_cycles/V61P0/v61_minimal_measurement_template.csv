@@ -1,0 +1,17 @@
+source,field,symbol,meaning,unit,required_class,authority,example_value,source_trace,readiness_detail,depends_on
+all,protocol_theorem,theorem_id,composable theorem binding,-,required_core,missing,Renner 2005 file:theorem.tex:42:expr,MISSING round3_build_proof_gap_matrix,composable theorem missing -> V62 PENDING,none
+all,conjugate_phase_error,e_ph,phase-error rate,-,required_core,missing,"0.02 [0.015,0.025]",MISSING conjugate_basis_stats,required_core,theorem_id
+all,conjugate_phase_error,conjugate_basis_stats,X/Z basis counts,count,required_core,missing,n_X=5000 n_Z=5000 e_X=0.02,MISSING,required_core,theorem_id
+all,conjugate_phase_error,decoy_chain,decoy-state intensities/stats,-,required_if_theorem_applicable,missing,mu1=0.5 mu2=0.1 decoy stats,theorem Renner decoy_dependence=false -> N/A,not_applicable_with_theorem_reason when theorem decoy_dependence=false,theorem_id
+all,n_PE_sampling,n_PE,PE sample size authoritative,count,required_core,missing,8000,shadow n_eff only,required_core missing -> PENDING,e_ph
+1M,visibility,"[vis_low,vis_high]",Franson visibility interval per source,-,required_if_theorem_applicable,missing,"[0.92,0.95] vis_source=lab_cal_2026",global 0.95 shadow proxy,required_if_theorem_applicable when theorem visibility_dependence=true else not_applicable_with_theorem_reason,theorem_id
+1p5M,visibility,"[vis_low,vis_high]",visibility interval 1p5M,-,required_if_theorem_applicable,missing,"[0.91,0.94]",shadow,conditional,theorem_id
+2M,visibility,"[vis_low,vis_high]",visibility interval 2M,-,required_if_theorem_applicable,missing,"[0.90,0.93]",shadow,conditional,theorem_id
+all,eps_allocation,"eps_sec,eps_cor,eps_PE,eps_PA,eps_EC",secrecy/correctness epsilon budgets,-,required_core,shadow,eps_sec=1e-10 eps_cor=1e-10,build_actual_ir_finite_key_shadow,required_core; epsilon probabilities not bits,theorem_id
+all,verification_auth,actual_verification_bits,verification transcript bits,bits/block,required_core,missing,64 tag64-only extra 0; 128 extra 64,round2_build_finite_key_audit_table,"leak_verification_extra=max(0,actual-64) tag already in leak_IR",theorem_id
+all,verification_auth,leak_auth,authentication bits,bits/block,required_core,missing,32,MISSING,required_core,theorem_id
+all,verification_auth,epsilon_EC,EV epsilon probability,-,required_core,shadow,1e-10 probability not bits,epsilon not bits unless theorem maps,probability not added to leak_other/finite,theorem_id
+all,finite_size,"DeltaFK_formula,n_eff",finite-size penalty,bits/pair->bits/block,required_core,shadow,4*sqrt(log2(2/eps_sec)/n_eff)+...,_security_calibrated_common delta_fk_calibrated,required_core,n_PE
+all,post_selection,"accepted_frame_fraction,n_block,post_sel_penalty",post-selection and effective frames,-/count/bits/block,required_core,shadow,"0.85, n_block=1000",round2_build_finite_key_audit_table,required_core,n_PE
+all,unit_timestamp_binding,"unit_map,session_id,source_id,delay_used_ps,block_id,pairing",unit and spatiotemporal binding,bits/block vs bits/symbol vs bits/pair,required_core,shadow,pairing=legacy_v1 nearest 200ps,data_inventory session/source/timestamp,required_core,none
+all,acceptance_formula,"hmin_lower,leak_other,finite,ell_formula",ell =1024*hmin - leak_IR - leak_other - finite,bits/symbol / bits/block,required_core,missing,hmin_lower=null ell=null when not READY,V61 ell only when READY,only V62_OPEN computes ell else null,theorem_id
