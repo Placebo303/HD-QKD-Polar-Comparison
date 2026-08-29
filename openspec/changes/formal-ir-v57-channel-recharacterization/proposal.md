@@ -77,34 +77,37 @@
 
 - 每源报告 `H_smooth(A|B), H_smooth(U1|B), H_smooth(U2|B,U1), MAP_acc_smooth = mean[a==argmax P_smooth(a|b)]` 仅作信道难度描述，**不设 `acc≥60%` 硬阈**（前版 `V2` 因稀疏 MAP 36-42% 必FAIL，现改为 descriptive，记录但不门禁）。
 
-### 5. m1/m2 用 ceil 重算 floor((1.3*N*H-64)/5) → ceil，明确 tag 计入效率
+### 5. m1/m2 分层直算 m_i = min(1024, ceil(f N H_i /5))，纠正总量上界错误，FULL_DISCLOSURE 标记
 
-- **泄漏重算**（`f_target=1.3, n=1024, tag=64 bits, log2q=5`，`source-adaptive` 同 `V27R`，**修订：ceil**）：
+- **泄漏重算**（`f_target=1.3, n=1024, tag=64 bits, log2q=5`，**修订2：分层直算，纠正 `m_total≤1024` 错误** — 实际两层 GF32 各 `0≤m_i≤1024` 总 `0≤2048`）：
   ```
-  m_total_required = ceil((f_target * n * H_smooth_total - tag) / 5)   # 修订：floor→ceil，确保泄漏不低估
-  m1_required = ceil(m_total_required * H1_smooth / H_total)  # 修订：round→ceil，边界安全
-  m2_required = m_total_required - m1_required  # 保持 m1+m2=m_total，可为0..m_total
-  leak_total = 5*m_total_required + 64  # 明确 tag 64b 计入 total
-  f_eff = leak_total / (n*H_smooth_total)  # 明确 tag 计入效率
+  m1_required = min(1024, ceil(f_target * n * H1_smooth / 5))  # 层1由H1直算
+  m2_required = min(1024, ceil(f_target * n * H2_smooth / 5))  # 层2由H2直算，不先算总量再按比例
+  FULL_DISCLOSURE_LAYER_i = (ceil(f_target * n * H_i /5) > 1024)  # 若饱和记 FULL_DISCLOSURE_LAYER
+  m_total_required = m1_required + m2_required  # 0..2048
+  leak_total = 5*m_total_required + 64  # tag 64b 仅 total 计一次
+  f_eff = leak_total / (n*H_smooth_total)  # 重算真实 f_eff（含饱和截断）
   ```
-  显式声明 **不沿用 `V25` 的 `m2 184/190/192` 与 `m1=16`**，新 `m_total/m1/m2` 仅为 `V58` 预算建议，不在 `V57` 实例化新矩阵；`V57` 仍 `DECODE_FORBIDDEN`；`tag` 明确仅 `total` 计一次，不在层间重复计费。
+  显式声明 **不沿用 `V25` 的 `m2 184/190/192` 与 `m1=16`**，新 `m1/m2/m_total` 仅为 `V58` 预算建议；`V57` 仍 `DECODE_FORBIDDEN`；`m_i` 双门 `m1≤1024 && m2≤1024`（删 `m_total≤1024` 单门）；`FULL_DISCLOSURE_LAYER` 时落盘标记并重算 `f_eff`。
 
 ### 6. 本轮8192结果保留为 UNDERSAMPLED_MLE_NEGATIVE_CONTROL 不覆盖
 
 - 前版 `v57_channel_recharacterization.json / V57_CHANNEL_RECHARACTERIZATION_REPORT.md` 原地更名为 `v57_channel_recharacterization_undersampled_mle_negative_control.json/md`，标记 `schema: v57_undersampled_mle_negative_control_v1, lifecycle: ESTIMATOR_UNDERSAMPLED`，保留 `H 2.27-2.64 vs NLL 30-37, q_mass 59-74%, zero 99.4%` 的分裂证据作负对照，不覆盖。
 - 新 `131k` 平滑结果写入主 `v57_channel_recharacterization.json` 与主报告，并在报告中设 `Negative Control` 章节对比，证明稀疏过拟合已消除。
 
-### 7. 三源分别判定，仅全过才 V58（`V57_PASS` 硬门，估计器语义）
+### 7. 三源分别判定，仅全过才 V58（`V57_PASS` 硬门，估计器语义，修订2终态 FAIL_NOSTABLE）
 
 ```
-per_source s: PASS_s = EG1_s && EG2_s && EG3_s && zero_overlap_s && counts_valid_s  # V3/ACC 不入 gate
+per_source s: PASS_s = EG1_s && EG2_s && EG3_s && zero_overlap_s && counts_valid_s && m1≤1024&&m2≤1024  # V3/ACC 不入 gate，m双门
 overall:
-  if 完整性/零重叠/计数无效 → V57_EVIDENCE_INVALID (最高优先)
-  elif not all(PASS_s) → V57_CHANNEL_RECHARACTERIZATION_FAIL (含 MIXED_BY_SOURCE 子态，分源报告)
+  if 零重叠/链式/counts硬无效 → V57_EVIDENCE_INVALID (最高优先，仅硬完整性)
+  elif not all(PASS_s) → V57_CHANNEL_RECHARACTERIZATION_FAIL / PREDICTIVE_MODEL_NOT_STABLE (含 MIXED_BY_SOURCE，EG2三源fail且λ均选上界10→预测模型未稳定，不扩λ网格)
   else → V57_CHANNEL_RECHARACTERIZATION_PASS
 ```
 
-仅 `V57_CHANNEL_RECHARACTERIZATION_PASS`（`1M && 1p5M && 2M` 三源均 `EG1-3` 通过）才允许另起 `V58` 走 `QUALIFICATION_PLAN_READY + Pre-EXECUTE/Pre-RESULT 双重 review + EXECUTE_AUTH` 的 `decoder TEST`（`run_01`）；否则停留 `PENDING` 修 `Cal/Val` 或进一步扩样/调平滑，不进入 `decoder`。
+当前 `Cal self NLL 4.6-5.5` 但 `Cal-fold/Val NLL 8-10` 且 `λ三源均上界10` 证实预测模型未稳定，故终态为 `FAIL / PREDICTIVE_MODEL_NOT_STABLE` 而非 `EVIDENCE_INVALID`；不再扩 `λ` 网格。`m_i` 饱和 `1024` 记 `FULL_DISCLOSURE_LAYER` 并重算真实 `f_eff`，不判 `EVIDENCE_INVALID`。
+
+仅 `V57_CHANNEL_RECHARACTERIZATION_PASS`（`1M && 1p5M && 2M` 三源均 `EG1-3` 通过）才允许另起 `V58` 走 `QUALIFICATION_PLAN_READY + Pre-EXECUTE/Pre-RESULT 双重 review + EXECUTE_AUTH` 的 `decoder TEST`（`run_01`）；否则停留 `PENDING`，不进入 `decoder`，`推送新 SHA，DECODE_FORBIDDEN`。
 
 ### 8. 不改码参、不运行 decoder（`DECODE_FORBIDDEN` 冻结）
 
@@ -127,14 +130,14 @@ overall:
 
 1. **冻结方法零改**：`n=1024, m2 184/190/192 (对照), GF32 poly37, H1 16×1024 rank16 80b, L1-APP q via H1 BP (TRAIN channel_counts.npz, 仅对照), Lane C ordinal-2, H_inc1/2 Δ8+8 (冻结对照), decoder 90/1.0 early-stop, L2-only tag 64b, TRAIN-only prior (V57 不改 prior，仅重估 H 供 V58)` 全只读，**零 decoder**。
 2. **预注册 Cal/Val（零重叠，可机械校验，修订扩样）**：每源 `Cal ≥512 + Val ≥512`（每源独立 `available_s[0:512] / [512:1024]`，`131072/131072` pairs/源，三源 `F=2130/5125/5513` 范围内，`assert` 四重零重叠（含前版64），`provenance` 记录 `V55/V56/undersampled` 排除集，落盘 `v57_calibration_registry.json / v57_validation_registry.json + v57_manifest.json`。
-3. **Calibration 信道估计（decoder-free，弃裸MLE，平滑）**：每源 `Cal` 上算 `C_ab 1024×1024 → P_smooth(a|b)=(C+1)/(N_b+1024) → H_smooth(A|B), H_smooth(U1|B), H_smooth(U2|B,U1) (F03 5+5 natural, U1=>>5, U2=&31, 链式闭合 |H-H1-H2|<1e-9) → m_total/m1/m2/f_eff/leak_total (f_target1.3, n1024, tag64, log2q5, m_total/m1=ceil)`，**不沿用 `V25 184/190/192`**，新 `m` 仅报告。
+3. **Calibration 信道估计（decoder-free，弃裸MLE，平滑，修订2分层）**：每源 `Cal` 上算 `C_ab 1024×1024 → P_smooth(a|b)=(C+1)/(N_b+1024) → H_smooth(A|B), H_smooth(U1|B), H_smooth(U2|B,U1) (F03 5+5 natural, U1=>>5, U2=&31, 链式闭合 |H-H1-H2|<1e-9) → m1=min(1024,ceil(f n H1/5)), m2=min(1024,ceil(f n H2/5)), m_total=m1+m2 0..2048, FULL_DISCLOSURE_LAYER 标记, f_eff重算 (f_target1.3, n1024, tag64, log2q5, 分层ceil)`，**不沿用 `V25 184/190/192`**，新 `m` 仅报告。
 4. **Validation 估计器门禁（decoder-free，三源分别，修订）**：每源 `Val` 上 `NLL_val_smooth / NLL_cal_self_smooth / CV / H_val_smooth`，三阈预注册（`EG1 NLL有限改善; EG2 CV差≤0.5; EG3 熵稳定≤0.20&25%且随样本收敛`），`q_mass-zero_frac` 与 `MAP/ACC` 仅描述不入硬门，**三源分别，不用总体平均**。
-5. **三源判定与 V58 门**：`per_source PASS_s = EG1&&EG2&&EG3 && zero_overlap && counts_valid`；`overall PASS = all PASS_s` → `V57_CHANNEL_RECHARACTERIZATION_PASS` 才允许 `V58`；否则 `FAIL` (`MIXED_BY_SOURCE` 子态分源报告) 或 `EVIDENCE_INVALID`；不以单源或平均放行。
-6. **脚本与报告交付（DECODE_FORBIDDEN）**：`v57_channel_recharacterization.py` (decoder-free, `rg "decode_" 0 hits`, `py_compile PASS`) 输出 `v57_channel_recharacterization.json` (`per_source {H_smooth,H1,H2,NLL_smooth,acc_descriptive,q_mass_descriptive,zero_frac,m_total,m1,m2,f_eff, Δ, gate_pass} + overall`) 与 `V57_CHANNEL_RECHARACTERIZATION_REPORT.md`（含 `Negative Control` 对比），并产出 `UNDERSAMPLED_MLE_NEGATIVE_CONTROL` 归档；**未创建 `run_01`，已推送新 SHA 并停留 `PENDING/DECODE_FORBIDDEN`，等待独立审核后才允 `V58`**。
+5. **三源判定与 V58 门（修订2）**：`per_source PASS_s = EG1&&EG2&&EG3 && zero_overlap && counts_valid && m1≤1024&&m2≤1024`；`overall: 硬无效→EVIDENCE_INVALID, 否则 not all PASS_s → FAIL / PREDICTIVE_MODEL_NOT_STABLE (EG2三源fail+λ上界10→模型未稳定，不扩λ), else PASS` → 仅 `PASS` 允许 `V58`；`FULL_DISCLOSURE_LAYER` 仅标记重算 `f_eff` 不判 `INVALID`。
+6. **脚本与报告交付（DECODE_FORBIDDEN，修订2）**：`v57_channel_recharacterization.py` (decoder-free, `rg "decode_" 0 hits`, `py_compile PASS`, **分层 `m_i=min(1024,ceil(f N H_i/5))` + `m1≤1024&&m2≤1024` 双门 + `FULL_DISCLOSURE_LAYER` 标记 + `FAIL_NOSTABLE` 终态**) 输出 `v57_channel_recharacterization.json` (`per_source {H_smooth,H1,H2,NLL_smooth,acc_descriptive,q_mass_descriptive,zero_frac,m1,m2,m_total,f_eff, Δ, FULL_DISCLOSURE, gate_pass} + overall PREDICTIVE_MODEL_NOT_STABLE`) 与 `V57_CHANNEL_RECHARACTERIZATION_REPORT.md`（含 `Negative Control` 对比），并产出 `UNDERSAMPLED_MLE_NEGATIVE_CONTROL` 归档；**未创建 `run_01`，已推送新 SHA 并停留 `PENDING/DECODE_FORBIDDEN`，等待独立审核后才允 `V58`**。
 
 ## Impact Scope
 
-- **新增/修订（本变更）**：`openspec/changes/formal-ir-v57-channel-recharacterization/` 下 4 工件 `proposal.md/design.md/tasks.md/specs/spec.md` + 1 decoder-free 脚本 `v57_channel_recharacterization.py` (本变更目录下, `rg "decode_" 0 hits`, 修订平滑+ceil) + 2 注册表 `v57_calibration_registry.json / v57_validation_registry.json` (pre-registered 512+512 frames) + `v57_channel_recharacterization.json` (131k平滑主结果) + `v57_channel_recharacterization_undersampled_mle_negative_control.json/md` (8192负对照归档) + `V57_CHANNEL_RECHARACTERIZATION_REPORT.md` + `v57_manifest.json` (provenance, HEAD/data SHA, zero_overlap 证明)。
+- **新增/修订（本变更，修订2最小）**：`openspec/changes/formal-ir-v57-channel-recharacterization/` 下 4 工件 `proposal.md/design.md/tasks.md/specs/spec.md` + 1 decoder-free 脚本 `v57_channel_recharacterization.py` (本变更目录下, `rg "decode_" 0 hits`, **修订2 分层 `m_i=min(1024,ceil(f N H_i/5))` 替代总量比例 + `m1≤1024&&m2≤1024` 双门 + `FULL_DISCLOSURE_LAYER` + `FAIL_NOSTABLE`**) + 2 注册表 `v57_calibration_registry.json / v57_validation_registry.json` (pre-registered 512+512 frames) + `v57_channel_recharacterization.json` (131k平滑主结果，含 `FULL_DISCLOSURE_LAYER` 与 `PREDICTIVE_MODEL_NOT_STABLE`) + `v57_channel_recharacterization_undersampled_mle_negative_control.json/md` (8192负对照归档) + `V57_CHANNEL_RECHARACTERIZATION_REPORT.md` + `v57_manifest.json` (provenance, HEAD/data SHA, zero_overlap 证明)。
 - **只读依赖**：`v55_authoritative_registry.json (V55 90×4 frames)` + `comparison_bench/outputs_comparison/v55_intake_20260828/pairs/*.parquet` (`alice_symbol/bob_symbol` 1024) + `workspace/v13r3fresh_20260816/sidecars` (仅对照) + `comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz` (`V25 TRAIN prior` 仅作 `NLL_V25` 对照，不训) + `nonbinary_v25_gate.py` (`P(A|B)/熵定义` 仅参考) + `v38_architecture_triage.py` (Lane C 常量仅背景)。
 - **不修改**：任何既有 `spec/代码/测试/输出`（除本目录外）、`V38–V56` 输出、`outputs_comparison/workspace` 以外；**不改 `src/` 基线，不创建 `run_01` decoder 执行，零码参**。
 
@@ -142,16 +145,16 @@ overall:
 
 - [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle V57_CHANNEL_RECHARACTERIZATION_PENDING_REVISED / DECODE_FORBIDDEN`，`HEAD ea39a83` + `branch formal-ir-mainline` + `data SHA 84d62779` 已绑定，显式声明 decoder-free、零 decoder、禁重跑原 90、**三源分别判定**、仅全过才 `V58`，且本次修订 `ESTIMATOR_UNDERSAMPLED` 根因已记录。
 - [ ] **预注册零重叠可复现（扩样）**：每源 `Cal ≥512 + Val ≥512`（每源独立 `available_s[0:512]/[512:1024]`，`131072/131072` pairs/源），已 `assert` 四重零重叠（`Cal∩Val==∅`, `Cal∪Val ∩ V55 90×4==∅`, `∩ V56 [7,8,9,10,15,16,17,18]==∅`, `∩ 前版64==∅`），`frame_id∈[0,F-1]`、`pairs_per_frame 256`，注册表已落盘，负对照已归档不覆盖。
-- [ ] **Calibration 估计可复现（平滑）**：每源 `Cal` 上 `C_ab 1024×1024 → P_smooth=(C+1)/(N_b+1024) α=1.0 → H_smooth(A|B), H_smooth(U1|B), H_smooth(U2|B,U1) (F03 5+5, U1>>5 &31, 链式 |H-H1-H2|<1e-9)` 已算，`H/H1/H2` 与 `V25` 差值、`zero_cells/q_mass` 已报告但不入硬门，**不沿用 `V25 184/190/192`**，新 `m_total/m1/m2/f_eff/leak` (`f_target1.3, n1024, tag64, log2q5, m/m1=ceil, tag计入`) 已重算且与 `json` 一致。
+- [ ] **Calibration 估计可复现（平滑，分层m_i）**：每源 `Cal` 上 `C_ab 1024×1024 → P_smooth=(C+1)/(N_b+1024) α=1.0 → H_smooth(A|B), H_smooth(U1|B), H_smooth(U2|B,U1) (F03 5+5, U1>>5 &31, 链式 |H-H1-H2|<1e-9)` 已算，`H/H1/H2` 与 `V25` 差值、`zero_cells/q_mass` 已报告但不入硬门，**不沿用 `V25 184/190/192`**，新 `m1=min(1024,ceil(f N H1/5)), m2=min(1024,ceil(f N H2/5)), m_total=m1+m2 0..2048, 若饱和记 FULL_DISCLOSURE_LAYER 并重算真实 f_eff` (`f_target1.3, n1024, tag64, log2q5, 分层ceil, tag计入`) 已重算且与 `json` 一致，且 `m1≤1024&&m2≤1024` 双门已校验（删 `m_total≤1024` 单门）。
 - [ ] **Validation 估计器门禁可复现**：每源 `Val` 上 `NLL_val_smooth有限改善`、`CV差|NLL_val-NLL_cal|≤0.5`、`熵稳定性|H_val-H_cal|≤0.20&25%且随样本收敛` 已算，三阈已逐源判定，`q_mass/zero_frac` 与 `MAP acc` 仅描述不入硬门，**三源分别，不用总体平均**，`per_source PASS_s` 已落盘。
-- [ ] **三源独立判定可复现**：`overall = V57_CHANNEL_RECHARACTERIZATION_PASS` 当且仅当 `1M && 1p5M && 2M` 均 `PASS_s`，否则 `FAIL` (含 `MIXED_BY_SOURCE` 分源清单) 或 `EVIDENCE_INVALID`，**仅全过才允许 `V58`** 已声明。
-- [ ] `v57_channel_recharacterization.py` 为 decoder-free 可运行脚本（`python v57_channel_recharacterization.py [--pairs-root ...] [--counts ...] [--out ...]`），`rg "decode_" 0 hits`、`rg "import.*decoder" 0 hits`，仅 `numpy/pandas/pyarrow`，`py_compile` PASS，输出 `v57_channel_recharacterization.json` 与控制台摘要，**未创建 `run_01`**，且前版 `8192` 已归档为 `negative_control`。
+- [ ] **三源独立判定可复现（FAIL_NOSTABLE）**：`overall = V57_CHANNEL_RECHARACTERIZATION_PASS` 当且仅当 `1M && 1p5M && 2M` 均 `PASS_s`，否则 `V57_CHANNEL_RECHARACTERIZATION_FAIL / PREDICTIVE_MODEL_NOT_STABLE` (含 `MIXED_BY_SOURCE`，`EG2三源fail+λ均上界10` 证实模型未稳定，不扩λ，不判 `EVIDENCE_INVALID`，`FULL_DISCLOSURE_LAYER` 仅标记) 或 `EVIDENCE_INVALID`（仅零重叠/链式/counts硬无效），**仅全过才允许 `V58`** 已声明。
+- [ ] `v57_channel_recharacterization.py` 为 decoder-free 可运行脚本（`python v57_channel_recharacterization.py [--pairs-root ...] [--counts ...] [--out ...]`），`rg "decode_" 0 hits`、`rg "import.*decoder" 0 hits`，仅 `numpy/pandas/pyarrow`，`py_compile` PASS，**分层 `m_i=min(1024,ceil(f N H_i/5))` 不先算总量再比例，`m1≤1024&&m2≤1024` 双门，`FULL_DISCLOSURE_LAYER` 标记并重算 `f_eff`，`λ` 固定不扩网格，终态 `FAIL_NOSTABLE` 非 `INVALID`**，输出 `v57_channel_recharacterization.json` 与控制台摘要，**未创建 `run_01`**，且前版 `8192` 已归档为 `negative_control`。
 - [ ] `V57_CHANNEL_RECHARACTERIZATION_REPORT.md` 已记录每源 `H_smooth/H1/H2/NLL_smooth/NLL_V25/acc_descriptive/q_mass_descriptive/zero_frac/H_val/m_total/m1/m2/f_eff/Δ`、估计器三门明细与总体终态，含 `Negative Control` 章节对比 `8192 MLE 30bits` 与新平滑 `~2-4bits`，数据与 `json` 一致，结论不扩大为 `FER/阈值/SKR/晋升`，显式 `V55 90 已揭盲不可复用` + `V25 184/190/192 已废弃不沿用` + `仅全过才 V58`。
 - [ ] 已推送新 `SHA` 并停留在 `V57_CHANNEL_RECHARACTERIZATION_PENDING / DECODE_FORBIDDEN`，未创建任何 `.../v57_*/run_01` decoder 执行，不碰 `V55 90` 块，**推送后等待独立审核**（`Pre-RESULT` 独立线程复核 `HEAD/ACCEPTED_PLAN_SHA/rg 0 hits/run_01不存在/py_compile+关键测试 PASS`）。
 
 ## Tasks
 
-见 `tasks.md`（Phase A 预注册 Cal/Val 512+512零重叠；Phase B Calibration 平滑H/m重算ceil；Phase C Validation 估计器三门；Phase D 三源总体判定与 V58 门；Phase E 脚本与报告交付至 `PENDING/DECODE_FORBIDDEN`；负对照归档；显式禁止清单与 decoder-free 守卫）。
+见 `tasks.md`（Phase A 预注册 Cal/Val 512+512零重叠；Phase B Calibration 平滑H/**分层m_i=min(1024,ceil(f N H_i/5)) + FULL_DISCLOSURE**；Phase C Validation 估计器三门（`EG2` 三源 `fail`+`λ`上界10→模型未稳定）；Phase D 三源总体判定 `FAIL/PREDICTIVE_MODEL_NOT_STABLE`；Phase E 脚本与报告交付至 `PENDING/DECODE_FORBIDDEN` 推送新 SHA；负对照归档；显式禁止清单与 decoder-free 守卫 + **逐层 `m1≤1024&&m2≤1024` 双门**）。
 
 ## Lifecycle
 
