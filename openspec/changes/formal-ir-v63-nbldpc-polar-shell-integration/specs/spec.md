@@ -1,13 +1,13 @@
 # OpenSpec Spec: formal-ir-v63-nbldpc-polar-shell-integration
 
-**Lifecycle**: `PLAN_CANDIDATE / SHELL_INTEGRATION / EXECUTE_NOT_AUTHORIZED` — 仅 plan 四工件，未适配前禁止实现/运行 decoder，不改 Polar src
+**Lifecycle**: `PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED` — 仅 plan 四工件，未适配前禁止实现/运行 decoder，不改 Polar src
 **Change**: `formal-ir-v63-nbldpc-polar-shell-integration` (`V63P0`, branch `formal-ir-mainline`, HEAD `fad33f4b935e73972b5be4d02ec7901214fa0046`, data SHA `84d62779`)
 **Predecessor**: `formal-ir-v54-two-stage-incremental-l2-rescue` (`cb60c5dd48...`, V54 二阶段 `Δ8+Δ8` 性能候选) + `formal-ir-v62` 仅 proxy 参考
 
 ## 1. 变更类型与生命周期
 
 - **Type**: `SHELL_INTEGRATION` — Polar pipeline 外壳保留 + NB-LDPC IR 模块替换的壳集成（smoke 9 + development 90, 预算 18-36 / 180-360 硬帽），非 formal qualification/promotion/安全证明。
-- **Lifecycle**: `PLAN_CANDIDATE / SHELL_INTEGRATION / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件，未适配前禁止任何 decoder 实现/执行与正式 `run_01` 创建。
+- **Lifecycle**: `PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件，未适配前禁止任何 decoder 实现/执行与正式 `run_01` 创建。
 - **Branch**: `formal-ir-mainline`；`HEAD` `fad33f4b935e73972b5be4d02ec7901214fa0046` 实施前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞；本次推送新 Plan SHA 后停止。
 - **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200 pairing=nearest rule=legacy_v1`) — 同域单点；新 session 需 domain_check + calibration + m1/m2 重算后才可运行。
 
@@ -32,7 +32,7 @@
 ### 2.3 IR 替换接口（core replacement）
 
 - **Input**: `FrameBatch(dataset_id, alice_symbols: np.ndarray[1024,1024), bob_symbols: np.ndarray[1024,1024), dimension=1024, frame_len_symbols=1024, metadata={source, block_id, frame_ids[4], held_out_ordinal_start/end, pairs_count, sampling_mode, session_id, provenance})` via `load_pairs_table→normalize_pair_columns→build_frame_batch`.
-- **Output**: 统一 `IRRunResult` 扩展（per frame + aggregate）：
+- **Output**: 统一 `NbLdpcShellResult` 封装（`IRRunResult` 签名不变，完整符号 32*u1_hat+u2_hat）：
   ```
   reconciled_symbols: np.ndarray (x2_hat, 1024) per frame  # IR 输出
   accepted: bool per frame (=syndrome_ok && tag_ok)
@@ -73,7 +73,7 @@
 
 - `leak=5*m_total+64` 双校验 `m_total 184/190/192 +8/+16` 且 `stage1-base=40, stage2-stage1=40`。
 - `PA 输入 = actual_disclosure_bits` 非 `Polar leak_EC`。
-- `IRRunResult` 扩展字段完整性（`reconciled_symbols/accepted/exact/undetected/actual_disclosure_bits/decoder_calls/runtime/stage_used` 齐全）。
+- `NbLdpcShellResult` 封装字段完整性（`IRRunResult` 不变 + `reconciled_symbols/accepted/exact/undetected/actual_disclosure_bits/decoder_calls/runtime/stage_used` 齐全）。
 
 ## 4. Phase B — 同域 smoke 冻结（3/source=9 blocks，硬帽36）
 
@@ -84,7 +84,7 @@
 ### 4.2 规模与注册表
 
 - `S=3, B=3, total 9`, 每块 `1024 symbols`；若 held-out 超集 `K>9` 则 `index_j=floor(j*(K-1)/2) j=0..2` 分散选 `3/source`，否则取已验 43 中的 9。
-- `v63_smoke_registry.json` (authoritative): `block_id, source(1M/1p5M/2M), frame_ids[4], held_out_ordinal_start/end, pairs_count 1024, BLOCK_LENGTH 1024, sampling_mode=deterministic_four_consecutive_frames_heldout_fresh_v63_smoke`。
+- `v63_smoke_registry.json` (authoritative): `block_id, source(1M/1p5M/2M), frame_ids[4], held_out_ordinal_start/end, pairs_count 1024, BLOCK_LENGTH 1024, sampling_mode=deterministic_four_consecutive_frames_heldout_INTEGRATION_REPLAY_SMOKE`。
 - `git diff -- src/ ==0` 已验，registry `禁换块`。
 
 ### 4.3 贯通验证
@@ -152,7 +152,7 @@ elif nbldpc_not_yet_executed (本轮):
 ## 7. 真实数据二档边界（同域 vs 新 session）
 
 - **同域可直接运行**：`dimension 1024, bin_width 200ps, pairing nearest, rule legacy_v1, frame_len 1024, source 1M/1p5M/2M held-out 1600-1999/2213-2766/2916-3644`，`43/45` 已验 `hash_equal`，剩余需 `decoder-free 符号一致性校验`。
-- **新 session 准入**：`decoder-free 信道域检查`（`P(B)` χ² / `H(A|B)` 漂移 `>0.05 bits` 判 `out-of-domain`）→ `新 calibration P(U1|B) via get_l1_prior_p_u1_given_b + P(U2|B,U1) via get_l1_app_prior_l2/factorize_f03` → `重算 m_total=floor((1.3*n*H-64)/5), m1=round(m_total*H1/H_total)` 后才可运行；期间**不调 LDPC**。
+- **新 session 准入**：`decoder-free 信道域检查`（`P(B)` χ² / `H(A|B)` 漂移 `>0.05 bits` 判 `out-of-domain`）→ `新 calibration P(U1|B) via get_l1_prior_p_u1_given_b + P(U2|B,U1) via get_l1_app_prior_l2/factorize_f03` → `重算 m_total/m1 重算属后继 OpenSpec（本变更不自动重算）` 后才可运行；期间**不调 LDPC**。
 
 ## 8. 与 V54/V62 衔接与守卫
 
@@ -170,6 +170,6 @@ elif nbldpc_not_yet_executed (本轮):
 **R63 Lifecycle**: PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED revision of 5602f11c, decoder-free spike only.
 - **R63-01 32*u1+u2+exact**: Input FrameBatch holds full symbols s in [0,1023]; decomposition u1 = s //32 in [0,31], u2 = s %32 in [0,31]; reconstruction s_hat = 32*u1_hat + u2_hat (10-bit). reconciled_symbols is s_hat array (0..1023). exact_full = (u1_hat==u1_true and u2_hat==u2_true); exact_u1, exact_l2 separately counted. GF32 field operations apply to 5-bit sub-symbols only; full symbol is 10-bit composition.
 - **R63-02 NbLdpcShellResult not change signature**: IRRunResult (comparison_bench/src/comparison_bench/methods/base.py) signature frozen no field rename/add/remove. New type ShellResult/NbLdpcShellResult wraps IRRunResult plus reconciled_symbols, accepted, exact, undetected, actual_disclosure_bits, decoder_calls, stage_used, pa_proxy. Verification: git diff -- comparison_bench/src/comparison_bench/methods/base.py ==0.
-- **R63-03 smoke INTEGRATION_REPLAY_SMOKE 90 fresh zero overlap**: v63_smoke_registry.json authoritative 9 blocks sampling_mode=deterministic_four_consecutive_frames_heldout_fresh_v63_smoke (INTEGRATION_REPLAY_SMOKE); v63_dev_registry.json authoritative 90 blocks sampling_mode=deterministic_four_consecutive_frames_heldout_fresh_v63 (INTEGRATION_FRESH_CANDIDATE). Generation reads only frame_ids/metadata, zero decoder calls. Verified smoke intersect fresh = empty and smoke union fresh disjoint from V48..V54 used intervals (frame_ids exact overlap check).
-- **R63-04 DOMAIN_CALIBRATION_REQUIRED**: Gate DOMAIN_CALIBRATION_REQUIRED blocks new-session execution unless domain_check PASS (P(B) chi2 p>=0.01 and |delta H(A|B)|<=0.05 bits) and if out-of-domain then calibration P(U1|B)/P(U2|B,U1) + m_total/m1 recomputation completed and persisted. Same-domain (84d62779) requires domain_check PASS but skips recalibration. Failure emits DOMAIN_CALIBRATION_REQUIRED without decoder.
+- **R63-03 smoke INTEGRATION_REPLAY_SMOKE 90 fresh zero overlap**: v63_smoke_registry.json authoritative 9 blocks sampling_mode=deterministic_four_consecutive_frames_heldout_INTEGRATION_REPLAY_SMOKE (INTEGRATION_REPLAY_SMOKE); v63_dev_registry.json authoritative 90 blocks sampling_mode=deterministic_four_consecutive_frames_heldout_fresh_v63 (INTEGRATION_FRESH_CANDIDATE). Generation reads only frame_ids/metadata, zero decoder calls. Verified smoke intersect fresh = empty and smoke union fresh disjoint from V48..V54 used intervals (frame_ids exact overlap check).
+- **R63-04 DOMAIN_CALIBRATION_REQUIRED**: new/incompatible session → DOMAIN_CALIBRATION_REQUIRED → 停止，校准属后继 OpenSpec；同域仅需域检查 PASS。
 

@@ -12,7 +12,7 @@
 | 1 | Revise four workpieces R63-01 32*u1+u2+exact, R63-02 NbLdpcShellResult not change signature, R63-03 smoke INTEGRATION_REPLAY_SMOKE 90 fresh zero overlap, R63-04 DOMAIN_CALIBRATION_REQUIRED | DONE — proposal/design/tasks/specs all amended |
 | 2 | Shell audit 10 items file/function/signature → shell_api_audit.md | DONE — 10 items PASS, read-only |
 | 3 | Generate 9-block replay registry + 90-block fresh candidate registry, read-only frame IDs/symbols, zero overlap | DONE — v63_smoke_registry.json 9, v63_dev_registry.json 90, zero_overlap_proof.json PASS |
-| 4 | Prototype workspace/v63_shell_spike/ fake u1/u2→full symbol, three-tier leak tag single count, PA proxy, Polar leak_EC reject | DONE — 4 modules |
+| 4 | Prototype (decoder-free spike, 路径已清理) fake u1/u2→full symbol, three-tier leak tag single count, PA proxy, Polar leak_EC reject | DONE — 4 modules (路径已清理，权威见 V63P0) |
 | 5 | T1-T12 tests all green | DONE — 12 passed |
 | 6 | Independent read-only review → REVIEW_VERDICT.md PASS | DONE |
 | 7 | Atomic commit push new Plan SHA + DELIVERY.md | THIS FILE |
@@ -27,22 +27,12 @@
 - `openspec/changes/formal-ir-v63-nbldpc-polar-shell-integration/v63_smoke_registry.json`
 - `openspec/changes/formal-ir-v63-nbldpc-polar-shell-integration/v63_dev_registry.json`
 - `openspec/changes/formal-ir-v63-nbldpc-polar-shell-integration/REVIEW_VERDICT.md`
-- `workspace/v63_shell_spike/nbldpc_shell_adapter_fake.py`
-- `workspace/v63_shell_spike/leakage.py`
-- `workspace/v63_shell_spike/pa_proxy.py`
-- `workspace/v63_shell_spike/domain_check.py`
-- `workspace/v63_shell_spike/shell_api_audit.md`
-- `workspace/v63_shell_spike/registries/v63_smoke_registry.json`
-- `workspace/v63_shell_spike/registries/v63_dev_registry.json`
-- `workspace/v63_shell_spike/registries/zero_overlap_proof.json`
-- `workspace/v63_shell_spike/tests/test_v63_spike.py`
-- `workspace/v63_shell_spike/REVIEW_VERDICT.md`
-- `docs/research_cycles/v63/shell_api_audit.md`
-- `docs/research_cycles/v63/v63_smoke_registry.json`
-- `docs/research_cycles/v63/v63_dev_registry.json`
-- `docs/research_cycles/v63/zero_overlap_proof.json`
-- `docs/research_cycles/v63/REVIEW_VERDICT.md`
-- `docs/research_cycles/v63/DELIVERY.md` (this file)
+- `docs/research_cycles/V63P0/shell_api_audit.md`
+- `docs/research_cycles/V63P0/v63_smoke_registry.json` (authoritative INTEGRATION_REPLAY_SMOKE)
+- `docs/research_cycles/V63P0/v63_dev_registry.json` (authoritative INTEGRATION_FRESH_CANDIDATE)
+- `docs/research_cycles/V63P0/zero_overlap_proof.json`
+- `docs/research_cycles/V63P0/REVIEW_VERDICT.md`
+- `docs/research_cycles/V63P0/DELIVERY.md` (this file)
 
 **Forbidden**: `src/`, `experiments/`, `tools/`, `comparison_bench/outputs_comparison/formal_ir_methods/v63*/run_01` — zero mutation (git diff -- src/ ==0 etc verified).
 
@@ -68,8 +58,8 @@
 
 ### 2. Registry Paths (Authoritative)
 
-- Smoke (execution-ready after ACCEPT): `workspace/v63_shell_spike/registries/v63_smoke_registry.json` (also mirrored `docs/research_cycles/v63/v63_smoke_registry.json` and `openspec/.../v63_smoke_registry.json`) — 9 blocks INTEGRATION_REPLAY_SMOKE, 3/source, frame_ids exact, zero overlap with V48-V54
-- Dev candidate (90, DECODE_FORBIDDEN until smoke PASS): `workspace/v63_shell_spike/registries/v63_dev_registry.json` (mirrors) — 90 blocks INTEGRATION_FRESH_CANDIDATE, 30/source, deterministic index_j=floor(j*(K2-1)/29), zero overlap smoke ∩ fresh = ∅, candidate only
+- Smoke (execution-ready after ACCEPT): `docs/research_cycles/V63P0/v63_smoke_registry.json` (mirrored `openspec/changes/formal-ir-v63-nbldpc-polar-shell-integration/v63_smoke_registry.json`) — 9 blocks INTEGRATION_REPLAY_SMOKE, 3/source, frame_ids exact, zero overlap with V48-V54
+- Dev candidate (90, DECODE_FORBIDDEN until smoke PASS): `docs/research_cycles/V63P0/v63_dev_registry.json` (mirrored `openspec/changes/formal-ir-v63-nbldpc-polar-shell-integration/v63_dev_registry.json`) — 90 blocks INTEGRATION_FRESH_CANDIDATE, 30/source, deterministic index_j=floor(j*(K2-1)/29), zero overlap smoke ∩ fresh = ∅, candidate only
 
 ### 3. Symbol Factorization Contract (R63-01)
 
@@ -89,10 +79,8 @@
 
 ### 5. Domain Gate (R63-04)
 
-- `domain_check(H_drift_bits, p_b_chi2_p) -> DOMAIN_OK | DOMAIN_CALIBRATION_REQUIRED`
-- Thresholds: |H drift| >0.05 bits or chi2 p <0.01 → DOMAIN_CALIBRATION_REQUIRED
-- New session: domain_check → calibration P(U1|B) via get_l1_prior_p_u1_given_b + P(U2|B,U1) via get_l1_app_prior_l2/factorize_f03 → recompute m_total=floor((1.3*n*H-64)/5), m1=round(m_total*H1/H_total) → persisted, reviewed, then unlock
-- Same-domain 84d62779: domain_check PASS required, calibration skipped
+- new/incompatible session → DOMAIN_CALIBRATION_REQUIRED → 停止，校准属后继 OpenSpec
+- Same-domain 84d62779: 域检查 PASS 即可复用
 
 ### 6. Budget & Gating
 
@@ -111,7 +99,7 @@
 ```
 git fetch && git rev-parse HEAD == origin/formal-ir-mainline == <new Plan SHA>  # 40-char exact
 python -m py_compile $(git diff --name-only HEAD~1 | grep .py)
-python -m pytest workspace/v63_shell_spike/tests/test_v63_spike.py -p no:cacheprovider  # 12 passed
+python -m pytest docs/research_cycles/V63P0/tests -p no:cacheprovider  # 12 passed (路径已清理)
 python -m pytest comparison_bench/tests -k v63 -p no:cacheprovider  # future
 # registries zero overlap proof: python -c "import json,pathlib; ..."
 ```

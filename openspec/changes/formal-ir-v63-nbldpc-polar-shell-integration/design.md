@@ -1,6 +1,6 @@
 # OpenSpec Design: formal-ir-v63-nbldpc-polar-shell-integration
 
-**Lifecycle**: `PLAN_CANDIDATE / SHELL_INTEGRATION / EXECUTE_NOT_AUTHORIZED` — **仅 plan 四工件，未适配前禁止实现/运行 decoder，不改 Polar src，不继续 V61/V60**
+**Lifecycle**: `PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED` — **仅 plan 四工件，未适配前禁止实现/运行 decoder，不改 Polar src，不继续 V61/V60**
 **Cycle**: `V63P0`
 **Predecessor**: `formal-ir-v54-two-stage-incremental-l2-rescue` (`cb60c5dd48...`) 冻结二阶段 `Δ8+Δ8` NB-LDPC + `formal-ir-v62` 参考对比仅作 proxy 参数来源
 **Freeze HEAD**: `fad33f4b935e73972b5be4d02ec7901214fa0046` (branch `formal-ir-mainline`, 实施前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核) — **data SHA** `84d62779` (`d=1024 bw=200 pairing=nearest rule=legacy_v1`, 同域单点)
@@ -60,7 +60,7 @@
 ### 2.3 数据裁决（同域 vs 新 session）
 
 - **同域可直接运行**：`comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816` 的 held-out 池，与 V54 同处理点 `84d62779` (`d1024 bw200 nearest legacy_v1`)，`43/45` 已实证 `alice/bob` 可重放（`hash` 相等），剩余 2 块经 `decoder-free 符号一致性校验`（`hash(alice||bob)` 比对）后纳入。
-- **新 session 准入**：`decoder-free 信道域检查`（`P(B)` 分布 χ² / `H(A|B)` 均值漂移 > `τ=0.05 bits` 则 `out-of-domain`）→ `新 calibration P(U1|B) via get_l1_prior_p_u1_given_b + P(U2|B,U1) via factorize_f03` → `重算 m1/m2`（`m_total=floor((1.3*n*H -64)/5)`, `m1=round(m_total*H1/H_total)`）后才可运行；**不调 LDPC**（矩阵/decoder/增量仍冻）。
+- **新 session 准入**：`decoder-free 信道域检查`（`P(B)` 分布 χ² / `H(A|B)` 均值漂移 > `τ=0.05 bits` 则 `out-of-domain`）→ `新 calibration P(U1|B) via get_l1_prior_p_u1_given_b + P(U2|B,U1) via factorize_f03` → `重算 m1/m2`（`m_total/m1 重算属后继 OpenSpec`, `m1=round(m_total*H1/H_total)`）后才可运行；**不调 LDPC**（矩阵/decoder/增量仍冻）。
 - **未对齐停止**：若同域 `K_available<90` 或新 session 未通过域检查/未完成 calibration，则 `SHELL_DOMAIN_NOT_ALIGNED` 停止，不伪造。
 
 ### 2.4 合格比较样本（smoke 9 + development 90，冻结）
@@ -73,7 +73,7 @@
 
 ### 2.5 IR 接口与 PA 泄漏传递（core replacement）
 
-- **IR 接口替换**：Polar 原 `IRRunResult` 的 `leak_EC_actual_bits` 来源由 Polar 侧 `leak_EC` 改为 `NbLdcShellIRAdapter.actual_disclosure_bits`（per frame `leak_base/stage1/stage2` 按 `stage_used`），接口输出 `reconciled_symbols (=x2_hat), accepted (=verify pass), rejected, exact (=exact_full), syndrome_ok, tag_ok, undetected, actual_disclosure_bits, decoder_calls, runtime_s, stage_used`。
+- **IR 接口替换**：Polar 原 `IRRunResult` 的 `leak_EC_actual_bits` 来源由 Polar 侧 `leak_EC` 改为 `NbLdcShellIRAdapter.actual_disclosure_bits`（per frame `leak_base/stage1/stage2` 按 `stage_used`），接口输出 `reconciled_symbols (full 32*u1_hat+u2_hat), accepted (=verify pass), rejected, exact (=exact_full), syndrome_ok, tag_ok, undetected, actual_disclosure_bits, decoder_calls, runtime_s, stage_used`。
 - **PA 输入**：`PA.leak = actual_disclosure_bits per frame`（含 tag 64b，已计，不重复扣除），`PA.input = reconciled_symbols` 仅对 `accepted` 帧；`undetected` 帧虽 `accepted` 但 `!exact`，计入 `undetected` 单独表，永不并入 `accepted` 成功。
 - **泄漏三档**：`base 1064/1094/1104 → stage1 1104/1134/1144 (+40) → stage2 1144/1174/1184 (+80)` per source，`per_source_avg[s]=leak_base[s]+40*N_stage1[s]/B+40*N_stage2[s]/B`，`overall_avg=(Σ leak_base+40*N_stage1+40*N_stage2)/90`（三源 `leak_base` 不同禁单一公式）。
 - **禁止**：复用 Polar `leak_EC_actual_bits` 作 NB-LDPC PA 输入；`leak_EC` 与 `actual_disclosure_bits` 语义混淆；`tag 64` 重复扣除。
@@ -215,7 +215,7 @@ comparison_bench/outputs_comparison/formal_ir_methods/v63_nbldpc_polar_shell/run
 - D4 同域 smoke `3/source=9` 与 development `30/source=90` 注册算法：若超集更大则分散选，否则判 `SHELL_DOMAIN_NOT_ALIGNED`，frame_ids 已冻，禁换块。
 - D5 预算 `smoke 18-36 / dev 180-360` 硬帽，`L2 9-27 / 90-270`，`base` 兼 old 不重复。
 - D6 预注册终态：`EVIDENCE_INVALID > SHELL_DOMAIN_NOT_ALIGNED > SHELL_DEVELOPMENT_PASS > CORRECTION_WORKS_BUT_NOT_PASS > NO_RETAINED_SIGNAL`。
-- D7 新 session 准入：`domain_check + calibration P(U1|B)/P(U2|B,U1) + m1/m2 重算`，不调 LDPC。
+- D7 新 session 准入：new/incompatible session → DOMAIN_CALIBRATION_REQUIRED → 停止，校准属后继 OpenSpec，不调 LDPC。
 - D8 本轮仅交付四工件，未来执行仍仅 development 证据，不扩大为 qualification。
 
 ## R63 Revisions (PLAN_REVISION_CANDIDATE, 2026-08-30, HEAD 5602f11c)
@@ -223,6 +223,6 @@ comparison_bench/outputs_comparison/formal_ir_methods/v63_nbldpc_polar_shell/run
 **R63 Lifecycle**: PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED revision of 5602f11c, decoder-free spike only.
 - **R63-01 32*u1+u2+exact**: See proposal R63-01. In shell pipeline, FrameBatch stores full symbols s in [0,1023]; adapter decomposes u1_true = s //32, u2_true = s %32 for L1/L2 processing, then recomposes s_hat = 32*u1_hat + u2_hat. reconciled_symbols field is full s_hat (1024-length array of 0..1023). Verification exact_full checks both sub-symbols. GF32 operations only on u1/u2 5-bit planes.
 - **R63-02 NbLdpcShellResult not change signature**: IRRunResult (base.py) fields frozen. New ShellResult dataclass: {ir_result: IRRunResult, reconciled_symbols: ndarray[1024], accepted, exact, undetected, actual_disclosure_bits, decoder_calls, stage_used, pa_leak, pa_proxy}. Adapter method signature run(batch: FrameBatch, source: str) -> ShellResult without mutating IRRunResult. Existing run_benchmark/compare_methods continue to accept IRRunResult.
-- **R63-03 smoke INTEGRATION_REPLAY_SMOKE 90 fresh zero overlap**: As proposal R63-03. Generation reads only frame_ids/pairs_count from held-out pool metadata (no decoder). Smoke 9 uses V54-verified replay blocks; fresh 90 uses remaining windows with zero-overlap proof (sorted frame_ids, interval overlap check). Registries stored under workspace/v63_shell_spike/registries/ plus mirrored docs/research_cycles/v63/.
-- **R63-04 DOMAIN_CALIBRATION_REQUIRED**: Domain gate evaluated decoder-free before any shell execution. If H(A|B) drift >0.05 or P(B) chi2 p<0.01, state DOMAIN_CALIBRATION_REQUIRED emitted, execution blocked. Calibration artifacts (P(U1|B), P(U2|B,U1), m_total/m1) must be persisted and reviewed before unlocking. Same-domain smoke bypass needs domain_check PASS but no recalibration.
+- **R63-03 smoke INTEGRATION_REPLAY_SMOKE 90 fresh zero overlap**: As proposal R63-03. Generation reads only frame_ids/pairs_count from held-out pool metadata (no decoder). Smoke 9 uses V54-verified replay blocks; fresh 90 uses remaining windows with zero-overlap proof (sorted frame_ids, interval overlap check). Registries stored under （已移除临时路径，见 V63P0 权威 registry）/registries/ plus mirrored docs/research_cycles/V63P0/.
+- **R63-04 DOMAIN_CALIBRATION_REQUIRED**: new/incompatible session → DOMAIN_CALIBRATION_REQUIRED → 停止，校准属后继 OpenSpec；同域 smoke 仅需域检查 PASS。
 
