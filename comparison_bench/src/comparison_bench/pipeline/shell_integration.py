@@ -2,7 +2,7 @@
 
 Reads NB actual_disclosure_bits per frame by stage_used (three-tier 1064/1094/1104 …),
 rejects Polar leak_EC reuse, tag 64 L2-only single count, PA proxy POLAR_REFERENCE_PROXY.
-DECODE_FORBIDDEN until EXECUTE_AUTH — pipeline in tests requires fake_runner.
+Real decode via frozen V54 when fake_runner is None; fake only when explicitly injected.
 """
 from __future__ import annotations
 
@@ -21,12 +21,14 @@ try:
         NbLdpcShellIRAdapter,
         NbLdpcShellResult,
         LEAK_MAP,
+        ACCEPTED_PLAN_SHA,
     )
 except ModuleNotFoundError:
     from comparison_bench.src.comparison_bench.methods.nbldpc_shell_adapter import (  # type: ignore
         NbLdpcShellIRAdapter,
         NbLdpcShellResult,
         LEAK_MAP,
+        ACCEPTED_PLAN_SHA,
     )
 
 
@@ -40,10 +42,32 @@ def _pa_proxy(reconciled_symbols, actual_disclosure_bits, polar_leak_EC=None):
     return {"pa_input_leak": total, "key_length_proxy": -total, "note": "POLAR_REFERENCE_PROXY"}
 
 
-def domain_check(h_drift_bits: float, p_b_chi2_p: float) -> str:
-    if abs(float(h_drift_bits)) > 0.05 or float(p_b_chi2_p) < 0.01:
-        return "DOMAIN_CALIBRATION_REQUIRED"
-    return "DOMAIN_OK"
+def domain_check(*args, **kwargs) -> str:
+    """New/incompatible session gate — no automatic H drift/χ² thresholds.
+
+    Call with domain_check(is_new_or_incompatible=True) for new session.
+    Legacy positional calls (h_drift, p) are rejected to avoid frozen-rule violation.
+    """
+    # Explicit flag wins
+    if "is_new_or_incompatible" in kwargs:
+        if bool(kwargs["is_new_or_incompatible"]):
+            return "DOMAIN_CALIBRATION_REQUIRED"
+        return "DOMAIN_OK"
+    if "is_new" in kwargs:
+        if bool(kwargs["is_new"]):
+            return "DOMAIN_CALIBRATION_REQUIRED"
+        return "DOMAIN_OK"
+    # Positional single bool
+    if len(args) == 1 and isinstance(args[0], bool):
+        return "DOMAIN_CALIBRATION_REQUIRED" if args[0] else "DOMAIN_OK"
+    # No args -> OK (same-domain)
+    if len(args) == 0 and not kwargs:
+        return "DOMAIN_OK"
+    # Any other legacy drift args -> treat as violation of frozen rule, force explicit flag
+    # For backward compat during transition, if two numeric args passed, we map to DOMAIN_OK only if caller explicitly meant calibration check;
+    # but per task we must delete auto thresholds, so we return DOMAIN_OK only when no threshold breach is implied.
+    # To keep old tests from failing silently, we raise to force migration.
+    raise TypeError("domain_check now requires is_new_or_incompatible flag; H drift/χ² auto thresholds removed per frozen rule")
 
 
 def run_shell_pipeline(
@@ -53,16 +77,18 @@ def run_shell_pipeline(
     fake_runner=None,
     stage_pattern=None,
     polar_leak_EC=None,
+    hard_cap: int | None = None,
 ) -> dict[str, Any]:
-    """TTBin→PA integration (decoder-free when fake_runner supplied)."""
+    """TTBin→PA integration. fake_runner must be explicitly injected for tests; None -> real V54."""
     if polar_leak_EC is not None:
         raise ValueError("REJECT Polar leak_EC: must use actual_disclosure_bits")
-    adapter = NbLdpcShellIRAdapter(source, fake_runner=fake_runner if fake_runner is not None else True)
-    fr = fake_runner if fake_runner is not None else True
-    if fr is True:
-        shell: NbLdpcShellResult = adapter._fake_shell_run(batch, source, stage_pattern)  # type: ignore
+    # No silent fake: if fake_runner is None, go real V54
+    if fake_runner is not None:
+        adapter = NbLdpcShellIRAdapter(source, fake_runner=fake_runner)
+        shell: NbLdpcShellResult = adapter.run_shell(batch, stage_pattern=stage_pattern, fake_runner=fake_runner, hard_cap=hard_cap)
     else:
-        shell = adapter.run_shell(batch, stage_pattern=stage_pattern, fake_runner=fr)
+        adapter = NbLdpcShellIRAdapter(source)
+        shell = adapter.run_shell(batch, stage_pattern=stage_pattern, hard_cap=hard_cap)
     pa = _pa_proxy(shell.reconciled_symbols, shell.actual_disclosure_bits)
     assert np.all(shell.reconciled_symbols == shell.reconciled_symbols // 32 * 32 + shell.reconciled_symbols % 32)
     return {

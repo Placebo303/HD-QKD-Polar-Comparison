@@ -80,9 +80,11 @@ def test_T6_pa_rejects_polar_leak_EC():
 def test_T7_domain_gate_calibration_required():
     from comparison_bench.src.comparison_bench.pipeline.shell_integration import domain_check
 
-    assert domain_check(0.02, 0.5) == "DOMAIN_OK"
-    assert domain_check(0.06, 0.5) == "DOMAIN_CALIBRATION_REQUIRED"
-    assert domain_check(0.01, 0.001) == "DOMAIN_CALIBRATION_REQUIRED"
+    assert domain_check(is_new_or_incompatible=False) == "DOMAIN_OK"
+    assert domain_check(is_new_or_incompatible=True) == "DOMAIN_CALIBRATION_REQUIRED"
+    assert domain_check(False) == "DOMAIN_OK"
+    assert domain_check(True) == "DOMAIN_CALIBRATION_REQUIRED"
+    assert domain_check() == "DOMAIN_OK"
 
 
 def test_T8_irrunresult_signature_frozen():
