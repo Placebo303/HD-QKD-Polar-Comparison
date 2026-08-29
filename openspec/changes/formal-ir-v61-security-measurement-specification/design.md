@@ -1,0 +1,184 @@
+# OpenSpec Design: formal-ir-v61-security-measurement-specification
+
+**Lifecycle**: `PLAN_CANDIDATE / DECODE_FORBIDDEN / MEASUREMENT_SPEC_ONLY` — 仅定义新实验最小采集规范，不改码/不跑 decoder/不进 V62
+**Cycle**: `V61P0` (security-measurement-specification), predecessor `V60` `formal-ir-v60-composable-security-input-readiness` `9f1fb02c` 已固化 `V60_DATA_NOT_READY / ell=null`
+**Branch**: `formal-ir-mainline` HEAD `9f1fb02c` (需 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核) data SHA `84d62779` (200ps legacy_v1 nearest 1024)
+**Feasibility**: `V57/V60` 已披露 `m1 981/1024/1024, m2 424/451/516, leak 7089/7439/7764 bits/block (n=1024, GF32 5bits, tag64 已含)`；仓内 `tools/security_reports/` 的 `DeltaFK/chi/IAB` 与 `round3_build_proof_gap_matrix` 的 `per_point_franson_pe_chain missing / conjugate_basis_stats missing` 为 `V60` 缺口权威；`V61` 不补数值，仅把缺口固化为可勾选的 10 类采集字段与唯一的 decoder-free 验收公式。
+**Key judgement**: **V61 不是密钥计算，也不是数据就绪度重判，而是输入采集规范**：在完全冻结 `V57/V60` 泄漏口径（`leak=5*m_total+64`，tag 不重复）下，定义下一轮物理实验必须同时记录的 10 类字段与如何机械判定三源 `10% H_min` 门槛，仅全部关键项 `ready` 才允另起 `V62` 数值后继；任何 `composable theorem` 或 `decisive PE` 缺失则 `V62 PENDING`，禁旧数据 `shadow` 填充与 decoder，缺口用 `null` 保留。
+
+## 1. 科学问题与关键判断
+
+> 在**完全冻结 V57/V60 方法与泄漏**（`m1/m2/m_total/leak 7089/7439/7764, n1024, GF32 5bits, tag64 L2-only 仅 total 计一次`）与**仓内 V60 缺口**下：**下一轮实验最少需要记录哪些字段，才能使 composable 密钥 `ell =1024*hmin_lower - leak_IR - leak_other - finite` 可被机械计算并逐源判定 `margin≥10%`？**
+
+- **不变量**：`dimension 1024 / block_len 1024 symbols / bin_width 200ps / pairing nearest / legacy_v1 / GF32 poly37 / tag 64` 为名义不变量；`V61` 不改任一码参，仅定义采集。
+- **止损性质**：纯 **decoder-free**，`rg "decode_" 0 hits`，`py_compile PASS`，`git diff -- src/ ==0` 且 `git diff -- openspec/changes/formal-ir-v5[5-9]/ ==0 && git diff -- openspec/changes/formal-ir-v60*/ ==0`（除本变更外零改）；缺 `composable theorem` 或 `decisive PE` 则 `V62 PENDING`，`ell=null`，`optimistic floor` 必给但不冒充 composable 余量。
+- **禁把 H/IAB/MAP/visibility 当 H_min**：`H(A|B)` (`V25/V57` 经验熵) 与 `IAB_est = dary_mutual_info_proxy(d, SER)` 与 `MAP_acc` 与 `visibility=0.95 shadow` 均为**代理/描述**，未被声明为 `H_min^epsilon(A|E)` 下界；新实验若仍仅有代理则 `hmin_lower_authority=proxy/missing → V62` 不可算。
+- **仅新数据 READY 才算 ell**：`V60` 的 `hmin_break_even` 三档为阈值锚点，`V61` 的 `ell` 为新数据就绪后的 composable 余量；二者分离 — 阈值描述永远可给，`ell` 仅新数据 `READY` 时权威可算。
+
+## 2. 冻结语义 — V57/V60 与仓内记录零改
+
+| 项 | 冻结值 | 来源 |
+|---|---|---|
+| n | 1024 symbols/block | V31/V57/V60 |
+| log2 q | 5 (GF32) | GF2mField poly37 |
+| tag | 64 bits/block, L2-only, 仅 total 计一次 | V28/V54/V57/V60 |
+| V57 m1 per source | 981 (1M) 1024 (1p5M) 1024 (2M) | `v57_channel_recharacterization.json` |
+| V57 m2 per source | 424 / 451 / 516 | 同上 |
+| V57/V60 m_total / leak_total | 1405/1475/1540, 7089/7439/7764 (=5*m_total+64) | 同上, per-layer ceil `m_i=min(1024,ceil(1.3*n*H_i/5))` |
+| 候选权威公式（仅作验收，不自创） | `chi_from_visibility(d, vis) = h2((1-vis)/2)+e*log2(d-1)`；`DeltaFK=4*sqrt(log2(2/eps_sec)/n_eff)+2*log2(2/eps_cor)/n_eff`；`dary_mutual_info(d,ser)=log2 d+(1-e)log(1-e)+e log(e/(d-1))`；`ell =1024*hmin - leak_IR - leak_other - finite` | `tools/security_reports/` 只读 |
+| 禁止 | 任何 `decode_* / construct_* / 信道估计器` 改造；改 `m1/m2/leak`；自创 `H_min` 或把 `H/IAB/MAP/visibility` 当 `H_min`；跑 decoder；重跑 `V55`；用旧数据伪造 `PE`；无新数据进 `V62` | 本变更 |
+
+## 3. 最小采集规范 — 10 类字段定义
+
+### 3.1 单位与换算先验
+
+- 每源 `block =1024 symbols`，`GF32 log2q=5`，故 `raw block bits =1024*10=10240` 仅作 `hmin` 上界校验（`hmin ≤10 bits/symbol`）。
+- 单位统一到 **`bits/block`**：`hmin_per_symbol *1024 = bits/block`；`leak_EC` 已是 `bits/block`；`DeltaFK` 在 `_security_calibrated_common.delta_fk_calibrated` 为 **`bits/pair (= bits/symbol)`**，需 `*n_eff` 或 `*1024` 转块时显式记录；`chi_E` 为 `bits/pair`；`post_sel` 为 `bits/pair` 或无量纲分数取决于新实验权威声明；规范阶段必须要求新实验对每项显式声明单位。
+- `GF32 5bits` 校验：`leak_without_tag =5*(m1+m2)` (`1M 7025, 1p5M 7375, 2M 7700`)，`tag=64` 单加；`leak_total 7089/7439/7764` 双校验。
+- **关键新增**：新实验必须提供 `H_min^epsilon(A|E)` 是否被**明确声明为下界**（文件行号+表达式+`eps` 预算+定理绑定），`IAB-chi ≟ H_min` 未声明则 `proxy_missing`，`V62` 不可算。
+
+### 3.2 10 类字段逐项定义（新实验必须记录，缺一则 V62 PENDING）
+
+| # | 采集项 | 字段 `symbol` | 含义 `meaning` | 单位 `unit` | 新实验来源要求 `source` | 缺失后果 |
+|---|---|---|---|---|---|---|
+| 1 | 协议/安全定理及适用假设 | `theorem_id, assumptions[], domain` | composable 定理声明与攻击模型/适用域 | — | 论文/报告段落+行号+表达式+假设链（`Renner/Niu/Lim` 等） | `composable_theorem_missing → V62 PENDING` |
+| 2 | conjugate-basis/phase-error 观测 | `e_ph, conjugate_basis_stats, decoy_chain` | 共轭基实测 + phase-error 率估计链 | 无量纲 | 新实验 `X/Z` 基统计 + `e_ph` 估计原文，若有 decoy-state 则 `decoy_chain` | `decisive_PE_missing → V62 PENDING`，禁 `SER/vis` 代理 |
+| 3 | n_PE 与抽样规则 | `n_PE, sampling_rule (p_Z/p_X, random, seed)` | PE 样本大小与随机抽样规则 | count / 无量纲 | 新实验 `n_PE` 计数值 + `p_Z/p_X` + 无放回/有放回 + PE 帧标记可重放链 | `n_PE` 仅 `shadow` 则 `partial`，需权威 `n_PE` |
+| 4 | visibility 逐源区间 | `[vis_low,vis_high], vis_source, cal_chain` | 每源每 `loss/session` Franson visibility 区间与校准链 | 无量纲 | 新实验每点实测 `vis` 区间（非 `global 0.95 shadow`）+ 校准链来源 | 无实测链则 `proxy/missing` |
+| 5 | eps_sec/eps_cor 分配 | `eps_sec, eps_cor, eps_PE, eps_PA, eps_EC` | secrecy/correctness 总预算及分解 | 无量纲 | 协议固定 + `DeltaFK/EV/auth` 的 `eps` 一致性声明 | 分解不一致则 `EVIDENCE_INVALID` |
+| 6 | verification/authentication 泄漏 | `leak_verif (epsilon_EC, tag_bits), leak_auth` | 验证界与认证开销 | `bits/block` | 新实验 `verification transcript` + `auth bits` 计费，明确 `tag64` 是否已含 | `missing` 则 `V62` 需补 |
+| 7 | finite-size correction | `DeltaFK_formula, n_eff, coeff_authority` | finite-size 惩罚权威系数与有效计数 | `bits/pair`→`bits/block` | 新实验 `n_eff` 实测 + `DeltaFK` 系数权威（与 `eps` 预算一致） | 仅 `shadow` 则 `partial` |
+| 8 | post-selection/有效帧计数 | `accepted_frame_fraction, n_block, post_sel_penalty` | post-selection 策略与有效块计数 | 无量纲/`bits` | 新实验 `accepted/rejected` 计数 + `N_pairs→n_block` 映射 + 弃帧规则 | `shadow surrogate` 则 `partial` |
+| 9 | 单位/时间戳/session/source 绑定 | `unit_map, session_id, source_id, delay_used_ps, block_id, pairing` | 单位换算与时空绑定 | `bits/*` | 新实验每 `block` 的 `session/source/delay/pairing legacy_v1 nearest 200ps` 四元绑定 | 绑定缺失则 `EVIDENCE_INVALID` |
+| 10 | 验收公式输入 | `hmin_lower, leak_other, finite, ell_formula` | `ell` 计算的 `H_min` 下界与 `other/finite` 输入 | `bits/symbol`/`bits/block` | 新实验权威 `hmin_lower` 下界（`bits/symbol`）+ `leak_other/finite` 分解（`bits/block`），`ell` 公式显式 | `hmin_lower` 无 composable 声明则 `null` |
+
+- 新实验每项记录 `authority: composable|shadow|proxy|missing` 与 `readiness: ready|partial|missing|invalid`，`h_min_source = MISSING` 若无权威下界声明，`IAB-chi ≟ H_min` 未声明则 `proxy_missing`。
+- **V60 衔接**：`V60` 已判 `phase-error/conjugate missing + n_PE shadow + visibility proxy + theorem missing`；`V61` 把每项的 `minimal_new_measurement` 固化为上述可勾选字段。
+
+### 3.3 验收公式冻结（decoder-free，三源独立，tag 不重复）
+
+```
+# 对每源 s ∈ {1M,1p5M,2M}:
+m1_s, m2_s, m_total_s = V57 冻值
+leak_without_tag_s = 5*(m1_s+m2_s)  # 7025 / 7375 / 7700
+tag_s = 64
+leak_total_s = leak_without_tag_s + tag_s  # 校验 == 7089/7439/7764
+leak_IR_s = leak_total_s  # bits/block, 已含 tag, 不重复扣除
+
+# 统一验收（仅新数据 READY 可算）
+if V61_NEW_DATA_READY:  # 10类中 theorem + decisive PE + hmin_lower + finite_authority + eps/EV/auth/post_sel 均 ready 且 composable 明确
+    ell_s(hmin_lower) = 1024 * hmin_lower - leak_IR_s - leak_other_s - finite_s
+      where hmin_lower ∈ [0,10] bits/symbol,  search for ell==0 => hmin_break_even_new
+            leak_other_s = PE_penalty_s + EV_s + auth_s + ...  # per source, authoritative
+            finite_s = DeltaFK_new_s + ...  # bits/block, 单位已验
+else:
+    ell_s = null  # 未 READY 时保持 null，不以 floor 冒充
+
+# 阈值锚点（必给，仅门限描述，不升密钥）:
+hmin_break_even_floor_s = leak_total_s / 1024  # 1M 6.9238, 1p5M 7.2637, 2M 7.5820 bits/symbol
+  + margin thresholds (other=0 finite=0 占位):
+    h_0% = leak/1024 = 6.9238 / 7.2637 / 7.5820
+    h_5% = leak/(1024*0.95) = 7.2882 / 7.6460 / 7.9811
+    h_10% = leak/(1024*0.90) = 7.6931 / 8.0707 / 8.4245  # 必给，落盘校验 h*1024==leak/(1-margin)
+
+# 非 READY 时 hmin_break_even_composable = null (JSON null) 而非 0
+hmin_break_even_composable_s = null  if not V61_NEW_DATA_READY else hmin_break_even_new_s
+log2 d =10 上界校验: hmin <10
+```
+
+- `leak_total ==5*m_total+64` 双校验，失败则 `EVIDENCE_INVALID`。
+- 三源分别，不平均；`other/finite` 若权威区间缺失则 `0` 仅作 floor 锚点，但 `composable` 保持 `null` 不填 0。
+
+### 3.4 V62 门禁（first-match，仅新数据 READY 才进数值）
+
+```
+if V61_spec_incomplete or unit_tag_mismatch or IAB/H/MAP/vis_as_Hmin or proxy_upgraded:
+    V61 = SPEC_INVALID  # 规范本身不自洽
+elif composable_theorem_missing_in_new_data or decisive_PE_missing_in_new_data:
+    V62 = PENDING  # 缺决定性输入，需新实验补采集，ell=null，不算数值
+elif not all_decisive_ready_in_new_data or not hmin_lower_composable_in_new_data:
+    V62 = PENDING  # 规范已就绪但新数据仍不足，需清单闭合
+elif new_data_all_critical_ready and hmin_lower_composable and break_even_floor_done:
+    V62 = OPEN  # 唯一允许另起 V62 的 OpenSpec + 独立授权进入数值计算
+else:
+    V62 = PENDING
+# 且：H/IAB/MAP/vis 当 H_min 则 SPEC_INVALID；proxy 升 composable 则 SPEC_INVALID；旧数据伪造 PE 则 EVIDENCE_INVALID
+# 且：非 READY 时 ell_* 保持 null，不以 floor/shadow 填；仅新数据 READY 时逐源 hmin_lower 比 floor/10% 判定 ell>0
+```
+
+- `V61_SPEC_READY` 指本规范 10 类 + 验收公式已落盘可被新实验勾选；`V62 OPEN` 指新实验数据已满足规范且可算 `ell`。
+- **旧数据禁伪造**：若新实验记录的 `e_ph/n_PE/conjugate` 源自旧 `V55` 数据重算而无新物理观测，则 `EVIDENCE_INVALID`，`V62` 保持 `PENDING`。
+
+## 4. 采集 Schema 与模板（预注册）
+
+### 4.1 JSON Schema `v61_measurement_schema.json` 骨架
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "V61 HD-QKD security measurement minimal schema",
+  "type": "object",
+  "required": ["provenance","per_source","acceptance_formula"],
+  "properties": {
+    "provenance": {"head":"9f1fb02c","data_sha":"84d62779","spec_version":"V61P0"},
+    "protocol_theorem": {"theorem_id":"string","assumptions":"array","domain":"string","source":"file:line:expr"},
+    "conjugate_phase_error": {"e_ph":"number [0,1]","conjugate_basis_stats":"object","decoy_chain":"string|null","authority":"composable|shadow|proxy|missing"},
+    "n_PE_sampling": {"n_PE":"integer","p_Z":"number","p_X":"number","sampling_rule":"random_without_replacement|...","seed_or_counter":"string"},
+    "visibility_per_source": {"per_source":[{"source":"1M|1p5M|2M","vis_low":"number","vis_high":"number","vis_source":"string","cal_chain":"string"}]},
+    "eps_allocation": {"eps_sec":"number","eps_cor":"number","eps_PE":"number","eps_PA":"number","eps_EC":"number"},
+    "leak_verif_auth": {"leak_verif_bits_per_block":"number","leak_auth_bits_per_block":"number","tag_included":"bool"},
+    "finite_size": {"DeltaFK_formula":"string","n_eff":"integer","coeff_authority":"string","unit":"bits/pair|bits/block"},
+    "post_selection": {"accepted_frame_fraction":"number","n_block":"integer","post_sel_penalty_bits_per_block":"number|null"},
+    "unit_timestamp_binding": {"unit_map":"object","bindings":[{"session_id":"string","source_id":"string","delay_used_ps":"integer","block_id":"integer","pairing":"legacy_v1 nearest 200ps"}]},
+    "acceptance_formula_inputs": {"hmin_lower_bits_per_symbol":"number|null","leak_other_bits_per_block":"number|null","finite_bits_per_block":"number|null","ell_formula":"string"}
+  }
+}
+```
+
+### 4.2 CSV 模板 `v61_minimal_measurement_template.csv` 列
+
+`source, field, symbol, meaning, unit, required, authority, example_value, source_trace, readiness`
+
+至少 10 类各一行，`required=true` 的 `theorem/e_ph/n_PE/vis/eps/finite/EV/auth/post_sel/binding/hmin` 缺一则 `V62 PENDING`。
+
+### 4.3 清单 `v61_minimal_new_measurement_checklist.csv` 优先级
+
+按 `composable theorem > decisive PE (e_ph/conjugate/n_PE) > visibility chain > eps/finite > EV/auth/post_sel > units/binding` 排序，每行 `priority, item, missing_reason, minimal_new_measurement, required_sample_or_proof, acceptance_criterion, depends_on`。
+
+## 5. 三源阈值与分解表（预注册，与 V60 一致作锚点）
+
+- `1M: floor 6.9238 / 5% 7.2882 / 10% 7.6931`
+- `1p5M: 7.2637 / 7.6460 / 8.0707`
+- `2M: 7.5820 / 7.9811 / 8.4245`
+- `log2 d=10` 上界校验，三源独立不平均；`leak_total ==5*m_total+64` 双校验，`GF32 5bits` 显式，`tag` 不重复。
+
+## 6. 脚本与报告（decoder-free 守卫）
+
+- **脚本 `scripts/v61_measurement_spec_check.py`** (decoder-free, 可选):
+  ```
+  python scripts/v61_measurement_spec_check.py \
+    [--schema docs/research_cycles/V61P0/v61_measurement_schema.json] \
+    [--template docs/research_cycles/V61P0/v61_minimal_measurement_template.csv] \
+    [--thresholds] \
+  → 校验 10类覆盖 + 单位显式 + 三源阈值锚点 h*1024==leak/(1-margin) + tag不重复 + proxy不升级
+  rg "decode_" 0 hits, 仅 numpy/pandas/pyarrow，py_compile PASS，不创建 run_01，不进 V62
+  ```
+
+- **报告 `V61_SECURITY_MEASUREMENT_SPEC_REPORT.md`**：`V60 缺口溯源`、`10类字段定义表`、`单位/时间戳/session/source 绑定`、`验收公式与 break_even 阈值表`（`6.9238/7.2637/7.5820` floor 与 `7.6931/8.0707/8.4245` 10% 锚点）、`V62 门禁`、`最小新增测量优先级清单`，数据与 `json/csv` 一致，显式 `V57-V60 m/leak 冻结` + `tag 已含不重复` + `三源分别不平均` + `proxy 不升级` + `missing→null` + `仅新数据 READY 算 ell` + `V62 PENDING`。
+
+- **守卫**：`git diff -- src/ ==0 && git diff -- experiments/ ==0 && git diff -- tools/ ==0 && git diff -- openspec/changes/formal-ir-v5[5-9]/ ==0 && git diff -- openspec/changes/formal-ir-v60*/ ==0`（除本变更外零改），`rg "decode_" 0 hits`，`rg "import.*decoder" 0 hits`，`py_compile` PASS，`pytest -p no:cacheprovider` 关键测试 PASS，`HEAD==origin` 已验，`run_01` 不存在，`V62` 未触发已验。
+
+## 7. 与 V60 衔接与 V62 边界
+
+- `V60` `V60_DATA_NOT_READY` 已判定现有数据仓无 composable 资格（`theorem missing + decisive PE missing → ell=null`）；`V61` 以 **最小采集规范**把 `V60` 的 `minimal_new_measurement` 可执行化，**未否定 V60 终态**，仅使下一轮实验可被机械验收。
+- `V61_SPEC_READY` 为**规范可勾选**（即使新数据仍缺，清单已闭合）；`V62 OPEN` 为新数据满足规范且 `hmin_lower` 权威可算。`V61` 推送后不自动进入 `V62`，需新 `OpenSpec` 与独立授权，**本次不触发数值计算**。
+
+## 8. 自由裁量 D1-D7
+
+- D1 `leak_without_tag=5*m_total`, `tag=64` 仅整型算术，不引新库；阈值仅除法 `leak/1024` 与 `/(1-margin)`。
+- D2 `H_min` 代理判定：`IAB_est/dary_mutual_info` 与 `H(A|B)` 与 `MAP` 与 `visibility` 均 `proxy/missing`，不自创 `H_min`，`composable:null`。
+- D3 `finite_penalty` 单位以新实验权威声明为准，缺 composable 则 `null`，不假设 `per-block` composable。
+- D4 `other_disclosure` 无权威则 `0` 仅作 floor 锚点占位，但 `V62` 保持 `PENDING` 不算 `ell`。
+- D5 三源分别，不平均，`margin 0/5/10%` 固定阈 `h_m = leak/(1024*(1-margin))`。
+- D6 不产生新矩阵/码参，仅规范与阈值，最简闭环。
+- D7 本变更为 `PLAN_CANDIDATE / DECODE_FORBIDDEN / MEASUREMENT_SPEC_ONLY`，不产生 `run_01`，`V62` 数值后继需 `新 OpenSpec + 独立授权 + 新数据`。
