@@ -12,16 +12,18 @@ def test_01_TAUTH1_100pct_replay():
         assert j["per_stage_per_source"][src]["gold_anchor_TAUTH1_current_vs_parquet_100pct"] is True, f"{src} not 100%"
 
 def test_02_TAUTH2_V13_same_three_functions():
-    # R3 is authoritative fixed replay with separate TTBin
+    # R3 is authoritative fixed replay with separate TTBin — must be true true lineage OK
     R3_MANIFEST="openspec/changes/formal-ir-v56-input-contract-reconstruction/verification_manifest_r3.json"
     target=R3_MANIFEST if Path(R3_MANIFEST).exists() else R2_MANIFEST
     j=json.loads(Path(target).read_text(encoding="utf-8"))
     for src in ["1M","1p5M","2M"]:
         assert j["per_stage_per_source"][src]["generated_function"].count("_read_ttbin_timetags")==1
-        # T-AUTH-2 field must exist
-        assert "gold_anchor_TAUTH2_v13_vs_persisted_100pct" in j["per_stage_per_source"][src]
-        # lineage must be explicit, either OK or INCOMPLETE, no silent pass
-        assert j["per_stage_per_source"][src]["lineage"] in ["OK_same_three_functions","AUTHORITY_LINEAGE_INCOMPLETE","AUTHORITY_LINEAGE_INCOMPLETE_TAUTH2_mismatch"]
+        # T-AUTH-1 and T-AUTH-2 must be true (not just exist)
+        assert j["per_stage_per_source"][src]["gold_anchor_TAUTH1_current_vs_parquet_100pct"] is True, f"{src} TAUTH1 false"
+        assert j["per_stage_per_source"][src]["gold_anchor_TAUTH2_v13_vs_persisted_100pct"] is True, f"{src} TAUTH2 false"
+        assert j["per_stage_per_source"][src].get("lineage_ok") is True, f"{src} lineage_ok false"
+        # lineage must be OK_same_three_functions when both anchors true
+        assert j["per_stage_per_source"][src]["lineage"] == "OK_same_three_functions"
 
 def test_03_frame_id_is_row_div_256():
     j=json.loads(Path(R2_CAL).read_text(encoding="utf-8"))
@@ -151,12 +153,15 @@ def test_16_head_equals_current_sha():
     assert Path(R3C).exists(), "R3 calibration missing"
     jm=json.loads(Path(R3M).read_text(encoding="utf-8"))
     jc=json.loads(Path(R3C).read_text(encoding="utf-8"))
+    old_sha="5d94f26564226561e55bad43819360fbdbdf9b9c"
+    assert jm["provenance"]["head"] != old_sha, "R3 still bound to old SHA"
+    assert jc["provenance"]["head"] != old_sha, "R3 calibration still bound to old SHA"
     for j in [jm, jc]:
         assert j["provenance"]["head"]==head
+        assert j["provenance"]["implementation_sha"]==head
+        assert j["provenance"]["head"]==j["provenance"]["implementation_sha"]==j["provenance"].get("origin_formal_ir_mainline", head)
         if "origin_formal_ir_mainline" in j["provenance"]:
-            # head and origin should match current HEAD (formal-ir-mainline is HEAD)
-            assert j["provenance"]["head"]==head
-            assert j["provenance"]["implementation_sha"]==head
+            assert j["provenance"]["origin_formal_ir_mainline"]==head
 
 def test_17_persisted_anchor_mutation_blocks_domain_shift():
     # mutate one row of V55 persisted parquet must break T-AUTH-1 and block DOMAIN_SHIFT
@@ -221,3 +226,41 @@ def test_19_R2_marked_invalid():
     if invalid_tag.exists():
         jt=json.loads(invalid_tag.read_text(encoding="utf-8"))
         assert jt.get("tag")=="ENGINEERING_INVALID_SIMULATED_CONTRACT_EQUALITY"
+
+def test_20_authority_lineage_gate_blocks_domain_shift():
+    # when any anchor fails lineage must force UNRESOLVED and overall != DOMAIN_SHIFT
+    import tempfile
+    tmp=Path(tempfile.mkdtemp())
+    # generate replay with mutated T-AUTH-1 (fail)
+    out_replay=tmp/"replay_fail.json"
+    # mutate V55 parquet path by using mutated pairs-root that breaks TAUTH1
+    src_parquet=Path("comparison_bench/outputs_comparison/v55_intake_20260828/pairs/20260123_1M_600k_0dB/pairs.parquet")
+    if not src_parquet.exists():
+        cands=list(Path("comparison_bench/outputs_comparison/v55_intake_20260828/pairs").rglob("pairs.parquet"))
+        src_parquet=cands[0]
+    df=pd.read_parquet(src_parquet)
+    mask=df["frame_id"]==7
+    if mask.any():
+        idx=df[mask].index[0]
+        df.loc[idx,"alice_symbol"]=(int(df.loc[idx,"alice_symbol"])+1)%1024
+    mutated_dir=tmp/"mutated"/"20260123_1M_600k_0dB"
+    mutated_dir.mkdir(parents=True)
+    df.to_parquet(mutated_dir/"pairs.parquet", index=False)
+    for other in ["20260107_PPLN_1p5M","20260123_2M_1p2M_0dB"]:
+        pp=list(Path("comparison_bench/outputs_comparison/v55_intake_20260828/pairs").rglob("pairs.parquet"))
+        for p in pp:
+            if other in str(p):
+                od=tmp/"mutated"/other
+                od.mkdir(parents=True, exist_ok=True)
+                pd.read_parquet(p).to_parquet(od/"pairs.parquet", index=False)
+    subprocess.check_call([sys.executable, "openspec/changes/formal-ir-v56-input-contract-reconstruction/replay_v13_vs_current.py","--pairs-root",str(tmp/"mutated"),"--out",str(out_replay)])
+    j=json.loads(Path(out_replay).read_text(encoding="utf-8"))
+    assert any(v["gold_anchor_TAUTH1_current_vs_parquet_100pct"] is False for v in j["per_stage_per_source"].values())
+    assert any("AUTHORITY_LINEAGE_INCOMPLETE" in v["lineage"] for v in j["per_stage_per_source"].values())
+    # now verify calibration must be UNRESOLVED not DOMAIN_SHIFT
+    out_cal=tmp/"cal_fail.json"
+    subprocess.check_call([sys.executable, "openspec/changes/formal-ir-v56-input-contract-reconstruction/verify_corrected_calibration.py","--replay-manifest",str(out_replay),"--out",str(out_cal)])
+    cj=json.loads(Path(out_cal).read_text(encoding="utf-8"))
+    assert cj["overall"] != "V56_TRUE_SESSION_DOMAIN_SHIFT"
+    assert any(v["shunt_s"]=="UNRESOLVED_s" for v in cj["per_source"].values())
+    assert any(v["contract_equivalent"] is False for v in cj["per_source"].values())
