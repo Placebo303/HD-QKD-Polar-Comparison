@@ -1,16 +1,12 @@
 {
   "schema": "v57_manifest_v2",
-  "head": "b7b559eb775c89ba097681db9f1eb176c223168c",
-  "origin_formal_ir_mainline": "b7b559eb775c89ba097681db9f1eb176c223168c",
+  "head": "777338e5a5e347d9e6ab3ed6258b594c3606bbf4",
+  "origin_formal_ir_mainline": "777338e5a5e347d9e6ab3ed6258b594c3606bbf4",
   "data_sha": "84d62779",
   "data_sha_full": "84d62779603e62de50ded5182ed65b65d3dc6084",
-  "lambda_grid": [
-    0.1,
-    1.0,
-    10.0
-  ],
-  "smoothing": "hierarchical P(a|b)=(C_ab+λ P_global(a))/(N_b+λ) λ grid [0.1, 1.0, 10.0] 4-fold Cal内择优 Val单次评估, Q=1024",
-  "leakage_formula": "ceil 0≤m≤1024 Fano校验",
+  "alpha": 1.0,
+  "smoothing": "Laplace P(a|b)=(C_ab+1.0)/(N_b+1.0*Q) Q=1024 alpha=1.0 Cal fixed, per-layer m_i=min(1024,ceil(f N H_i/5)) f=1.3 N=1024 tag=64",
+  "leakage_formula": "per-layer m_i=min(1024,ceil(1.3*1024*H_i/5)) total 0..2048 dual gate",
   "zero_overlap_proofs": {
     "cal_cap_val": true,
     "cal_val_cap_v55": true,
@@ -46,9 +42,8 @@
     }
   },
   "overall_zero_overlap_verified": true,
-  "counts_valid_all": false,
-  "chain_ok_all": false,
-  "fano_ok_all": true,
+  "counts_valid_all": true,
+  "chain_ok_all": true,
   "negative_control_archived": false,
-  "command": "python v57_channel_recharacterization.py --lambda-grid [0.1, 1.0, 10.0]"
+  "command": "python v57_channel_recharacterization.py --alpha 1.0"
 }

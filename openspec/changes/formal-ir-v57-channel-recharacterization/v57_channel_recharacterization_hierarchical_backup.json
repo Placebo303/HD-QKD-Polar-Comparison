@@ -1,18 +1,22 @@
 {
-  "schema": "v57_channel_recharacterization_v2_laplace_per_layer",
+  "schema": "v57_channel_recharacterization_v2_hierarchical",
   "lifecycle": "V57_CHANNEL_RECHARACTERIZATION_PENDING_REVISED",
-  "revision": "REVISED2 Laplace alpha=1.0 per-layer m_i=min(1024,ceil(f N H_i/5)) total 0..2048 FULL_DISCLOSURE dual-gate, PREDICTIVE_MODEL_NOT_STABLE on EG2 all fail, ESTIMATOR_UNDERSAMPLED negative control retained",
-  "head": "777338e5a5e347d9e6ab3ed6258b594c3606bbf4",
-  "origin_formal_ir_mainline": "777338e5a5e347d9e6ab3ed6258b594c3606bbf4",
+  "revision": "REVISED hierarchical λ·P_global 4-fold Cal内择优 Val单次 Fano校验 ceil 0≤m≤1024, ESTIMATOR_UNDERSAMPLED negative control retained",
+  "head": "b7b559eb775c89ba097681db9f1eb176c223168c",
+  "origin_formal_ir_mainline": "b7b559eb775c89ba097681db9f1eb176c223168c",
   "data_sha": "84d62779",
   "data_sha_full": "84d62779603e62de50ded5182ed65b65d3dc6084",
   "branch": "formal-ir-mainline",
   "pairs_root": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\v55_intake_20260828\\pairs",
   "counts_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
   "v55_registry": "D:\\Code\\HD-QKD_Polar_Comparison\\openspec\\changes\\formal-ir-v55-two-stage-rescue-independent-test-qualification-preparation\\v55_authoritative_registry.json",
-  "alpha": 1.0,
-  "smoothing": "Laplace P(a|b)=(C_ab+1.0)/(N_b+1.0*Q) Q=1024 alpha=1.0 Cal fixed, per-layer m_i=min(1024,ceil(f N H_i/5)) f=1.3 N=1024 tag=64",
-  "leakage_formula": "m1=min(1024,ceil(1.3*1024*H1/5)), m2=min(1024,ceil(1.3*1024*H2/5)), m_total=m1+m2 0..2048, FULL_DISCLOSURE if ceil>1024, leak=5*m_total+64, f_eff=leak/(1024*H)",
+  "lambda_grid": [
+    0.1,
+    1.0,
+    10.0
+  ],
+  "smoothing": "hierarchical P(a|b)=(C_ab+λ P_global(a))/(N_b+λ) λ grid [0.1, 1.0, 10.0] 4-fold Cal内择优 Val单次评估, Q=1024",
+  "leakage_formula": "m_total=ceil((1.3*1024*H_hier-64)/5) 0≤m≤1024, m1=ceil(m_total*H1/H), leak=5*m_total+64 tag counted once, Fano H≤h(Pe)+Pe log2(1023)",
   "cal_frames_per_source": {
     "1M": [
       4,
@@ -4243,80 +4247,116 @@
       ],
       "zero_cells_mle": 975130,
       "zero_frac_mle": 0.929956,
-      "H_cal_smooth": 9.762926,
-      "H1_cal_smooth": 4.960033,
-      "H2_cal_smooth": 4.802893,
+      "H_cal_hier": 5.275049,
+      "H1_cal_hier": 3.682639,
+      "H2_cal_hier": 1.59241,
       "H_cal_mle": 4.548541,
       "H1_cal_mle": 3.492864,
       "delta_chain": 0.0,
       "chain_ok": true,
-      "m1_ceil": 1024,
-      "m2_ceil": 1024,
-      "m_total_ceil": 2048,
-      "FULL_DISCLOSURE_LAYER": true,
-      "FULL_DISCLOSURE_LAYERS": [
-        "L1",
-        "L2"
+      "fano_ok_cal": true,
+      "fano_ok_val": true,
+      "fano_bound_cal": 6.824447,
+      "fano_bound_val": 6.824665,
+      "pe_cal": 0.584602,
+      "pe_val": 0.584625,
+      "best_lambda": 10.0,
+      "lambda_grid": [
+        0.1,
+        1.0,
+        10.0
       ],
-      "full1": true,
-      "full2": true,
-      "leak_total": 10304,
-      "f_eff": 1.030685,
-      "delta_m": 1848,
-      "delta_leak": 9240,
+      "lambda_cv": {
+        "0.1": {
+          "fold_nlls": [
+            11.481644,
+            11.596018,
+            11.532524,
+            11.523065
+          ],
+          "avg_nll": 11.533313
+        },
+        "1.0": {
+          "fold_nlls": [
+            9.71844,
+            9.810199,
+            9.760801,
+            9.752035
+          ],
+          "avg_nll": 9.760369
+        },
+        "10.0": {
+          "fold_nlls": [
+            8.070337,
+            8.139429,
+            8.104156,
+            8.095961
+          ],
+          "avg_nll": 8.102471
+        }
+      },
+      "m_total_ceil": 1392,
+      "m1_ceil": 972,
+      "m2": 420,
+      "leak_total": 7024,
+      "f_eff": 1.300343,
+      "delta_m": 1192,
+      "delta_leak": 5960,
       "m_total_V25_ref": 200,
-      "alpha": 1.0,
-      "cal_NLL_self_smooth": 7.144589,
+      "alpha_deprecated": null,
+      "cal_NLL_self_hier": 4.649083,
       "cal_NLL_self_mle_clamp": 4.548541,
-      "cal_acc_smooth_descriptive": 0.415398,
+      "cal_acc_hier_descriptive": 0.415398,
+      "cal_acc_mle_descriptive": 0.415398,
       "V25_NLL_on_Cal": 28.520054,
-      "NLL_val_smooth": 7.712168,
+      "NLL_val_hier": 8.226968,
       "NLL_val_mle_clamp_negative_control": 27.147756,
-      "NLL_val_block_smooth": 7897.26,
+      "NLL_val_block_hier": 8424.416,
       "NLL_V25_on_Val": 28.545622,
       "NLL_V25_on_Val_block": 29230.717,
-      "acc_val_smooth_descriptive": 0.415375,
+      "acc_val_hier_descriptive": 0.415375,
+      "acc_val_mle_descriptive": 0.415375,
       "q_mass_mle_descriptive": 0.526352,
-      "H_val_smooth": 9.762582,
-      "H1_val_smooth": 4.959802,
-      "H2_val_smooth": 4.80278,
+      "H_val_hier": 5.275153,
+      "H1_val_hier": 3.680224,
+      "H2_val_hier": 1.594929,
       "H_val_mle": 4.54882,
-      "NLL_cal_fold1_on_fold2": 8.070282,
-      "NLL_cal_fold2_on_fold1": 8.071273,
+      "NLL_cal_fold1_on_fold2": 7.922996,
+      "NLL_cal_fold2_on_fold1": 7.927291,
       "convergence_series": {
         "32": {
           "frames": 32,
           "pairs": 8192,
-          "H_smooth": 9.991649,
-          "H1_smooth": 4.999516,
-          "NLL_val_smooth": 9.18239,
+          "H_hier": 7.356783,
+          "H1_hier": 4.312422,
+          "NLL_val_hier": 7.533866,
           "NLL_val_mle_clamp": 30.045373,
           "zero_frac_mle": 0.994516
         },
         "128": {
           "frames": 128,
           "pairs": 32768,
-          "H_smooth": 9.954001,
-          "H1_smooth": 4.995683,
-          "NLL_val_smooth": 8.448336,
+          "H_hier": 5.719237,
+          "H1_hier": 3.823383,
+          "NLL_val_hier": 7.648041,
           "NLL_val_mle_clamp": 28.887884,
           "zero_frac_mle": 0.981118
         },
         "256": {
           "frames": 256,
           "pairs": 65536,
-          "H_smooth": 9.893724,
-          "H1_smooth": 4.986571,
-          "NLL_val_smooth": 8.07177,
+          "H_hier": 5.334311,
+          "H1_hier": 3.713932,
+          "NLL_val_hier": 7.928136,
           "NLL_val_mle_clamp": 28.201756,
           "zero_frac_mle": 0.963566
         },
         "512": {
           "frames": 512,
           "pairs": 131072,
-          "H_smooth": 9.762926,
-          "H1_smooth": 4.960033,
-          "NLL_val_smooth": 7.712168,
+          "H_hier": 5.275049,
+          "H1_hier": 3.682639,
+          "NLL_val_hier": 8.226968,
           "NLL_val_mle_clamp": 27.147756,
           "zero_frac_mle": 0.929956
         }
@@ -4325,10 +4365,9 @@
       "EG2_pass": false,
       "EG3_pass": true,
       "zero_overlap_s": true,
-      "counts_valid_s": true,
-      "dual_gate_ok": true,
+      "counts_valid_s": false,
       "PASS_s": false,
-      "note": ""
+      "note": "m_total 1392 out of [0,1024] or H<0.1;"
     },
     "1p5M": {
       "F": 5125,
@@ -5369,80 +5408,116 @@
       ],
       "zero_cells_mle": 970005,
       "zero_frac_mle": 0.925069,
-      "H_cal_smooth": 9.785474,
-      "H1_cal_smooth": 4.96578,
-      "H2_cal_smooth": 4.819694,
+      "H_cal_hier": 5.539611,
+      "H1_cal_hier": 3.845981,
+      "H2_cal_hier": 1.693631,
       "H_cal_mle": 4.837508,
       "H1_cal_mle": 3.679639,
       "delta_chain": 0.0,
       "chain_ok": true,
-      "m1_ceil": 1024,
-      "m2_ceil": 1024,
-      "m_total_ceil": 2048,
-      "FULL_DISCLOSURE_LAYER": true,
-      "FULL_DISCLOSURE_LAYERS": [
-        "L1",
-        "L2"
+      "fano_ok_cal": true,
+      "fano_ok_val": true,
+      "fano_bound_cal": 7.210547,
+      "fano_bound_val": 7.212312,
+      "pe_cal": 0.625755,
+      "pe_val": 0.625946,
+      "best_lambda": 10.0,
+      "lambda_grid": [
+        0.1,
+        1.0,
+        10.0
       ],
-      "full1": true,
-      "full2": true,
-      "leak_total": 10304,
-      "f_eff": 1.02831,
-      "delta_m": 1842,
-      "delta_leak": 9210,
+      "lambda_cv": {
+        "0.1": {
+          "fold_nlls": [
+            12.368545,
+            12.332701,
+            12.310582,
+            12.245653
+          ],
+          "avg_nll": 12.31437
+        },
+        "1.0": {
+          "fold_nlls": [
+            10.459549,
+            10.429895,
+            10.412736,
+            10.360073
+          ],
+          "avg_nll": 10.415563
+        },
+        "10.0": {
+          "fold_nlls": [
+            8.665538,
+            8.642134,
+            8.629873,
+            8.589473
+          ],
+          "avg_nll": 8.631755
+        }
+      },
+      "m_total_ceil": 1463,
+      "m1_ceil": 1016,
+      "m2": 447,
+      "leak_total": 7379,
+      "f_eff": 1.300823,
+      "delta_m": 1257,
+      "delta_leak": 6285,
       "m_total_V25_ref": 206,
-      "alpha": 1.0,
-      "cal_NLL_self_smooth": 7.392556,
+      "alpha_deprecated": null,
+      "cal_NLL_self_hier": 4.937466,
       "cal_NLL_self_mle_clamp": 4.837508,
-      "cal_acc_smooth_descriptive": 0.374245,
+      "cal_acc_hier_descriptive": 0.374245,
+      "cal_acc_mle_descriptive": 0.374245,
       "V25_NLL_on_Cal": 30.649049,
-      "NLL_val_smooth": 7.998174,
+      "NLL_val_hier": 8.758544,
       "NLL_val_mle_clamp_negative_control": 28.971876,
-      "NLL_val_block_smooth": 8190.13,
+      "NLL_val_block_hier": 8968.749,
       "NLL_V25_on_Val": 30.650154,
       "NLL_V25_on_Val_block": 31385.757,
-      "acc_val_smooth_descriptive": 0.374054,
+      "acc_val_hier_descriptive": 0.374054,
+      "acc_val_mle_descriptive": 0.374054,
       "q_mass_mle_descriptive": 0.562088,
-      "H_val_smooth": 9.785109,
-      "H1_val_smooth": 4.965723,
-      "H2_val_smooth": 4.819386,
+      "H_val_hier": 5.541033,
+      "H1_val_hier": 3.847833,
+      "H2_val_hier": 1.6932,
       "H_val_mle": 4.839418,
-      "NLL_cal_fold1_on_fold2": 8.314911,
-      "NLL_cal_fold2_on_fold1": 8.326484,
+      "NLL_cal_fold1_on_fold2": 8.4229,
+      "NLL_cal_fold2_on_fold1": 8.459037,
       "convergence_series": {
         "32": {
           "frames": 32,
           "pairs": 8192,
-          "H_smooth": 9.992181,
-          "H1_smooth": 4.999563,
-          "NLL_val_smooth": 9.323163,
+          "H_hier": 7.413767,
+          "H1_hier": 4.351126,
+          "NLL_val_hier": 8.021825,
           "NLL_val_mle_clamp": 32.611682,
           "zero_frac_mle": 0.994164
         },
         "128": {
           "frames": 128,
           "pairs": 32768,
-          "H_smooth": 9.958589,
-          "H1_smooth": 4.996316,
-          "NLL_val_smooth": 8.662116,
+          "H_hier": 5.896587,
+          "H1_hier": 3.939396,
+          "NLL_val_hier": 8.125176,
           "NLL_val_mle_clamp": 30.839195,
           "zero_frac_mle": 0.979661
         },
         "256": {
           "frames": 256,
           "pairs": 65536,
-          "H_smooth": 9.903773,
-          "H1_smooth": 4.988499,
-          "NLL_val_smooth": 8.321779,
+          "H_hier": 5.55481,
+          "H1_hier": 3.856186,
+          "NLL_val_hier": 8.436858,
           "NLL_val_mle_clamp": 30.128988,
           "zero_frac_mle": 0.960942
         },
         "512": {
           "frames": 512,
           "pairs": 131072,
-          "H_smooth": 9.785474,
-          "H1_smooth": 4.96578,
-          "NLL_val_smooth": 7.998174,
+          "H_hier": 5.539611,
+          "H1_hier": 3.845981,
+          "NLL_val_hier": 8.758544,
           "NLL_val_mle_clamp": 28.971876,
           "zero_frac_mle": 0.925069
         }
@@ -5451,10 +5526,9 @@
       "EG2_pass": false,
       "EG3_pass": true,
       "zero_overlap_s": true,
-      "counts_valid_s": true,
-      "dual_gate_ok": true,
+      "counts_valid_s": false,
       "PASS_s": false,
-      "note": ""
+      "note": "m_total 1463 out of [0,1024] or H<0.1;"
     },
     "2M": {
       "F": 5513,
@@ -6495,80 +6569,116 @@
       ],
       "zero_cells_mle": 957594,
       "zero_frac_mle": 0.913233,
-      "H_cal_smooth": 9.839356,
-      "H1_cal_smooth": 4.979154,
-      "H2_cal_smooth": 4.860202,
+      "H_cal_hier": 6.152108,
+      "H1_cal_hier": 4.216095,
+      "H2_cal_hier": 1.936013,
       "H_cal_mle": 5.50594,
       "H1_cal_mle": 4.100416,
       "delta_chain": 0.0,
       "chain_ok": true,
-      "m1_ceil": 1024,
-      "m2_ceil": 1024,
-      "m_total_ceil": 2048,
-      "FULL_DISCLOSURE_LAYER": true,
-      "FULL_DISCLOSURE_LAYERS": [
-        "L1",
-        "L2"
+      "fano_ok_cal": true,
+      "fano_ok_val": true,
+      "fano_bound_cal": 8.098825,
+      "fano_bound_val": 8.066563,
+      "pe_cal": 0.725151,
+      "pe_val": 0.721405,
+      "best_lambda": 10.0,
+      "lambda_grid": [
+        0.1,
+        1.0,
+        10.0
       ],
-      "full1": true,
-      "full2": true,
-      "leak_total": 10304,
-      "f_eff": 1.022679,
-      "delta_m": 1840,
-      "delta_leak": 9200,
+      "lambda_cv": {
+        "0.1": {
+          "fold_nlls": [
+            14.166953,
+            14.146429,
+            14.145486,
+            14.218184
+          ],
+          "avg_nll": 14.169263
+        },
+        "1.0": {
+          "fold_nlls": [
+            11.964648,
+            11.94798,
+            11.948353,
+            12.005149
+          ],
+          "avg_nll": 11.966532
+        },
+        "10.0": {
+          "fold_nlls": [
+            9.877136,
+            9.864347,
+            9.866013,
+            9.907024
+          ],
+          "avg_nll": 9.87863
+        }
+      },
+      "m_total_ceil": 1626,
+      "m1_ceil": 1115,
+      "m2": 511,
+      "leak_total": 8194,
+      "f_eff": 1.300685,
+      "delta_m": 1418,
+      "delta_leak": 7090,
       "m_total_V25_ref": 208,
-      "alpha": 1.0,
-      "cal_NLL_self_smooth": 7.965668,
+      "alpha_deprecated": null,
+      "cal_NLL_self_hier": 5.604497,
       "cal_NLL_self_mle_clamp": 5.50594,
-      "cal_acc_smooth_descriptive": 0.274849,
+      "cal_acc_hier_descriptive": 0.274849,
+      "cal_acc_mle_descriptive": 0.274849,
       "V25_NLL_on_Cal": 35.592004,
-      "NLL_val_smooth": 8.64987,
+      "NLL_val_hier": 9.99596,
       "NLL_val_mle_clamp_negative_control": 33.335836,
-      "NLL_val_block_smooth": 8857.467,
+      "NLL_val_block_hier": 10235.863,
       "NLL_V25_on_Val": 35.383771,
       "NLL_V25_on_Val_block": 36232.982,
-      "acc_val_smooth_descriptive": 0.278595,
+      "acc_val_hier_descriptive": 0.278595,
+      "acc_val_mle_descriptive": 0.278595,
       "q_mass_mle_descriptive": 0.648491,
-      "H_val_smooth": 9.837494,
-      "H1_val_smooth": 4.978633,
-      "H2_val_smooth": 4.85886,
+      "H_val_hier": 6.129651,
+      "H1_val_hier": 4.199595,
+      "H2_val_hier": 1.930056,
       "H_val_mle": 5.481465,
-      "NLL_cal_fold1_on_fold2": 8.89578,
-      "NLL_cal_fold2_on_fold1": 8.891654,
+      "NLL_cal_fold1_on_fold2": 9.655265,
+      "NLL_cal_fold2_on_fold1": 9.641347,
       "convergence_series": {
         "32": {
           "frames": 32,
           "pairs": 8192,
-          "H_smooth": 9.993464,
-          "H1_smooth": 4.999681,
-          "NLL_val_smooth": 9.591593,
+          "H_hier": 7.530007,
+          "H1_hier": 4.445198,
+          "NLL_val_hier": Infinity,
           "NLL_val_mle_clamp": 37.924692,
           "zero_frac_mle": 0.993444
         },
         "128": {
           "frames": 128,
           "pairs": 32768,
-          "H_smooth": 9.967453,
-          "H1_smooth": 4.997626,
-          "NLL_val_smooth": 9.12175,
+          "H_hier": 6.241595,
+          "H1_hier": 4.188131,
+          "NLL_val_hier": 9.218066,
           "NLL_val_mle_clamp": 35.551932,
           "zero_frac_mle": 0.976679
         },
         "256": {
           "frames": 256,
           "pairs": 65536,
-          "H_smooth": 9.926355,
-          "H1_smooth": 4.992865,
-          "NLL_val_smooth": 8.877416,
+          "H_hier": 6.031617,
+          "H1_hier": 4.176923,
+          "NLL_val_hier": 9.614035,
           "NLL_val_mle_clamp": 34.74744,
           "zero_frac_mle": 0.955001
         },
         "512": {
           "frames": 512,
           "pairs": 131072,
-          "H_smooth": 9.839356,
-          "H1_smooth": 4.979154,
-          "NLL_val_smooth": 8.64987,
+          "H_hier": 6.152108,
+          "H1_hier": 4.216095,
+          "NLL_val_hier": 9.99596,
           "NLL_val_mle_clamp": 33.335836,
           "zero_frac_mle": 0.913233
         }
@@ -6577,48 +6687,40 @@
       "EG2_pass": false,
       "EG3_pass": true,
       "zero_overlap_s": true,
-      "counts_valid_s": true,
-      "dual_gate_ok": true,
+      "counts_valid_s": false,
       "PASS_s": false,
-      "note": ""
+      "note": "m_total 1626 out of [0,1024] or H<0.1;"
     }
   },
   "verdict": {
-    "overall": "V57_CHANNEL_RECHARACTERIZATION_FAIL",
-    "PREDICTIVE_MODEL_NOT_STABLE": true,
-    "lambda_upper_bound_note": "historical hierarchical lambda grid 0.1,1,10 all selected upper bound 10 vs Cal self NLL 4.6-5.5 vs Val 8-10 indicates model not stable; V57 Laplace per-layer retains FAIL/PREDICTIVE_MODEL_NOT_STABLE without expanding lambda",
+    "overall": "V57_EVIDENCE_INVALID",
     "shunt_per_source": {
       "1M": {
         "PASS_s": false,
         "EG1": true,
         "EG2": false,
         "EG3": true,
-        "FULL_DISCLOSURE_LAYER": true,
-        "m1": 1024,
-        "m2": 1024
+        "fano_ok": true
       },
       "1p5M": {
         "PASS_s": false,
         "EG1": true,
         "EG2": false,
         "EG3": true,
-        "FULL_DISCLOSURE_LAYER": true,
-        "m1": 1024,
-        "m2": 1024
+        "fano_ok": true
       },
       "2M": {
         "PASS_s": false,
         "EG1": true,
         "EG2": false,
         "EG3": true,
-        "FULL_DISCLOSURE_LAYER": true,
-        "m1": 1024,
-        "m2": 1024
+        "fano_ok": true
       }
     },
     "overall_zero_overlap_verified": true,
-    "counts_valid_all": true,
-    "chain_ok_all": true
+    "counts_valid_all": false,
+    "chain_ok_all": false,
+    "fano_ok_all": true
   },
   "boundary": {
     "V55_90_permanently_banned": true,
@@ -6626,8 +6728,7 @@
     "only_all_pass_allows_V58": true,
     "freshness": "Cal512/Val512 derived from same 20260123/20260107 pairs.parquet as diagnosis, not claiming fully independent cross-session; fresh within-session confirmation only; 8192 MLE retained as UNDERSAMPLED_MLE_NEGATIVE_CONTROL",
     "estimator_undersampled_negative_control": "v57_channel_recharacterization_undersampled_mle_negative_control.json 8192 MLE 30bits retained",
-    "smoothing_not_tuned_on_Val": "alpha=1.0 Laplace fixed in Cal only, not tuned on Val",
-    "ceil_tag_per_layer": "per-layer m_i=min(1024,ceil(f N H_i/5)) total 0..2048 dual gate FULL_DISCLOSURE",
-    "per_layer_ceiling": "m_i 0..1024 total 0..2048 boundary m1=1024 m2<1024 legal total>1024"
+    "smoothing_not_tuned_on_Val": "lambda grid 0.1,1,10仅Cal内4-fold择优, Val单次评估",
+    "ceil_tag_fano": "m ceil 0≤m≤1024, tag 64 counted once, Fano校验"
   }
 }
