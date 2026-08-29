@@ -1,0 +1,389 @@
+{
+  "schema": "v60_composable_security_readiness_v1",
+  "lifecycle": "PLAN_CANDIDATE / DECODE_FORBIDDEN",
+  "plan_sha": "b4d045a14ce49772e622aebdedb3ed72475bdfbc",
+  "head": "b4d045a14ce49772e622aebdedb3ed72475bdfbc",
+  "origin_head": "b4d045a14ce49772e622aebdedb3ed72475bdfbc",
+  "implementation_head": "b4d045a14ce49772e622aebdedb3ed72475bdfbc",
+  "data_sha": "84d62779",
+  "branch": "formal-ir-mainline",
+  "provenance": {
+    "HEAD": "b4d045a14ce49772e622aebdedb3ed72475bdfbc",
+    "origin": "b4d045a14ce49772e622aebdedb3ed72475bdfbc",
+    "implementation_SHA": "b4d045a14ce49772e622aebdedb3ed72475bdfbc",
+    "data_sha": "84d62779",
+    "fetch_head_eq_origin": true
+  },
+  "formula_authority": [
+    {
+      "file": "tools/security_reports/_security_calibrated_common.py",
+      "function": "chi_from_visibility",
+      "lines": "92-99",
+      "expr": "h2((1-vis)/2)+e*log2(d-1)",
+      "unit": "bits/pair",
+      "authority": "shadow"
+    },
+    {
+      "file": "tools/security_reports/_security_calibrated_common.py",
+      "function": "dary_mutual_info_proxy",
+      "lines": "102-117",
+      "expr": "log2 d+(1-e)log(1-e)+e log(e/(d-1))",
+      "unit": "bits/pair",
+      "authority": "proxy"
+    },
+    {
+      "file": "tools/security_reports/_security_calibrated_common.py",
+      "function": "calibrated_effective_sample_count",
+      "lines": "246-284",
+      "expr": "n_eff=n_pairs*layer_frac*clean_frac",
+      "unit": "count",
+      "authority": "shadow"
+    },
+    {
+      "file": "tools/security_reports/_security_calibrated_common.py",
+      "function": "delta_fk_calibrated",
+      "lines": "288-297",
+      "expr": "4*sqrt(log2(2/eps_sec)/n_eff)+2*log2(2/eps_cor)/n_eff",
+      "unit": "bits/pair",
+      "authority": "shadow"
+    },
+    {
+      "file": "tools/security_reports/build_actual_ir_finite_key_shadow.py",
+      "function": "_build_shadow",
+      "lines": "27-88",
+      "expr": "PIE_secure=IAB-leak-chi-DeltaFK (surrogate_from_best_hard_pie_gap)",
+      "unit": "bits/pair",
+      "authority": "shadow"
+    },
+    {
+      "file": "tools/security_reports/build_actual_ir_finite_key_shadow.py",
+      "function": "_summary_lines",
+      "lines": "116",
+      "expr": "not full niu_2016 composable proof",
+      "unit": "tag",
+      "authority": "shadow_proxy_only"
+    },
+    {
+      "file": "tools/security_reports/round2_build_finite_key_audit_table.py",
+      "function": "main",
+      "lines": "75-122",
+      "expr": "leak_EC_actual_bits=total_leak/n_pairs else surrogate; DeltaFK(n_eff); post_sel=accepted_frame_fraction",
+      "unit": "bits/pair",
+      "authority": "shadow"
+    },
+    {
+      "file": "tools/security_reports/round2_build_actual_ir_finite_key_shadow.py",
+      "function": "main",
+      "lines": "31-48",
+      "expr": "PIE_secure_actual_ir=IAB-leak-chi-DeltaFK-post_sel; strict_zhong_like_actual_ir_finite_key_calibrated",
+      "unit": "bits/pair",
+      "authority": "shadow"
+    },
+    {
+      "file": "tools/security_reports/round3_build_proof_gap_matrix.py",
+      "function": "main",
+      "lines": "12-23",
+      "expr": "per_point_franson_pe_chain missing; conjugate_basis_stats missing; decoy_state_PE missing; protocol_specific_composable_constants missing",
+      "unit": "-",
+      "authority": "missing"
+    }
+  ],
+  "unit_table": [
+    {
+      "symbol": "chi_E",
+      "unit": "bits/pair",
+      "includes_tag": "no",
+      "convert": "*n_eff or *1024 to bits/block",
+      "authority": "shadow"
+    },
+    {
+      "symbol": "DeltaFK",
+      "unit": "bits/pair",
+      "includes_tag": "no",
+      "convert": "*n_eff to bits/block",
+      "authority": "shadow"
+    },
+    {
+      "symbol": "IAB_est",
+      "unit": "bits/pair",
+      "includes_tag": "no",
+      "convert": "-",
+      "authority": "proxy"
+    },
+    {
+      "symbol": "post_sel",
+      "unit": "bits/pair or fraction",
+      "includes_tag": "no",
+      "convert": "-",
+      "authority": "shadow"
+    },
+    {
+      "symbol": "leak_IR",
+      "unit": "bits/block",
+      "includes_tag": "yes tag64 once",
+      "convert": "already bits/block",
+      "authority": "frozen"
+    },
+    {
+      "symbol": "hmin_lower",
+      "unit": "bits/symbol",
+      "includes_tag": "no",
+      "convert": "*1024 to bits/block",
+      "authority": "missing"
+    },
+    {
+      "symbol": "ell",
+      "unit": "bits/block",
+      "includes_tag": "no",
+      "convert": "1024*hmin - leak - other - finite",
+      "authority": "null unless READY"
+    }
+  ],
+  "readiness_10items": [
+    {
+      "item": "phase-error / conjugate",
+      "symbol": "e_ph",
+      "meaning": "phase-error rate / conjugate basis statistics",
+      "unit": "-",
+      "source": "tools/security_reports/round3_build_proof_gap_matrix.py:main:12-23 expr=conjugate_basis_stats missing / per_point_franson_pe_chain missing",
+      "authority": "missing",
+      "readiness": "missing",
+      "decoder_free": "no",
+      "minimal_new_measurement": "new conjugate-basis / decoy-state e_ph estimation with n_PE chain"
+    },
+    {
+      "item": "n_PE",
+      "symbol": "n_PE",
+      "meaning": "PE sample size (authoritative PE count)",
+      "unit": "count",
+      "source": "tools/security_reports/_security_calibrated_common.py:calibrated_effective_sample_count:246-284 expr=n_eff=n_pairs*layer_frac*clean_frac data_path=comparison_bench/outputs_comparison/v57_* data_inventory.json",
+      "authority": "shadow",
+      "readiness": "partial",
+      "decoder_free": "partial",
+      "minimal_new_measurement": "new PE acquisition with authoritative n_PE and sifting stats"
+    },
+    {
+      "item": "visibility interval and source",
+      "symbol": "[vis_low, vis_high]",
+      "meaning": "Franson visibility interval per point/per loss with source chain",
+      "unit": "-",
+      "source": "tools/security_reports/_security_calibrated_common.py:chi_from_visibility:92-99 expr=h2((1-vis)/2)+e*log2(d-1) vis_src=global 0.95 shadow proxy",
+      "authority": "shadow",
+      "readiness": "partial",
+      "decoder_free": "partial",
+      "minimal_new_measurement": "per-point / per-loss measured vis interval [vis_low, vis_high] with provenance"
+    },
+    {
+      "item": "eps_sec / eps_cor",
+      "symbol": "eps_sec, eps_cor",
+      "meaning": "secrecy / correctness epsilon",
+      "unit": "-",
+      "source": "tools/security_reports/build_actual_ir_finite_key_shadow.py:_build_shadow eps_sec=1e-10 eps_cor=1e-10",
+      "authority": "shadow",
+      "readiness": "partial",
+      "decoder_free": "yes",
+      "minimal_new_measurement": "protocol-fixed eps_sec/eps_cor with composable coefficient binding to DeltaFK"
+    },
+    {
+      "item": "finite-size authority",
+      "symbol": "DeltaFK, n_eff",
+      "meaning": "finite-size penalty and effective sample count",
+      "unit": "bits/pair",
+      "source": "tools/security_reports/_security_calibrated_common.py:delta_fk_calibrated:288-297 expr=4*sqrt(log2(2/eps_sec)/n_eff)+2*log2(2/eps_cor)/n_eff",
+      "authority": "shadow",
+      "readiness": "partial",
+      "decoder_free": "yes",
+      "minimal_new_measurement": "n_eff actual measurement + composable finite-key coefficient authority"
+    },
+    {
+      "item": "EV bound",
+      "symbol": "epsilon_EC, verification_bits",
+      "meaning": "error-verification transcript bound",
+      "unit": "bits/block",
+      "source": "tools/security_reports/round2_build_finite_key_audit_table.py:main:75-122 verification_bits / epsilon_EC_bound",
+      "authority": "shadow",
+      "readiness": "partial",
+      "decoder_free": "partial",
+      "minimal_new_measurement": "verification transcript + epsilon_EC bound proof"
+    },
+    {
+      "item": "auth leakage",
+      "symbol": "leak_auth",
+      "meaning": "authentication bits leakage",
+      "unit": "bits/block",
+      "source": "MISSING tools/security_reports/round3_build_proof_gap_matrix.py:protocol_specific_composable_constants missing",
+      "authority": "missing",
+      "readiness": "missing",
+      "decoder_free": "no",
+      "minimal_new_measurement": "authentication bits observation and accounting with composable theorem"
+    },
+    {
+      "item": "post-selection / accepted-frame",
+      "symbol": "accepted_frame_fraction",
+      "meaning": "post-selection accepted-frame fraction with composable correction",
+      "unit": "- / bits/pair",
+      "source": "tools/security_reports/round2_build_finite_key_audit_table.py:main:75-122 accepted_frame_fraction",
+      "authority": "shadow",
+      "readiness": "partial",
+      "decoder_free": "yes",
+      "minimal_new_measurement": "rigorous accepted/rejected frame accounting + post_sel composable correction proof"
+    },
+    {
+      "item": "composable theorem and assumptions",
+      "symbol": "theorem_id, assumptions[]",
+      "meaning": "composable theorem binding with assumptions and domain",
+      "unit": "-",
+      "source": "MISSING tools/security_reports/round3_build_proof_gap_matrix.py: no Renner/Niu/Tomamichel declaration; docs/SECURITY_MODEL.md no composable theorem_id",
+      "authority": "missing",
+      "readiness": "missing",
+      "decoder_free": "no",
+      "minimal_new_measurement": "declare theorem_id + assumptions {collective/coherent, PE model, finite-key, auth, EV} + domain validation"
+    },
+    {
+      "item": "unit per-frame/block conversion",
+      "symbol": "unit_map",
+      "meaning": "unit conversion bits/block vs bits/symbol vs bits/pair",
+      "unit": "bits/block vs bits/symbol vs bits/pair",
+      "source": "tools/security_reports/_security_calibrated_common.py:chi_from_visibility+delta_fk_calibrated units bits/pair; leak_IR bits/block tag included",
+      "authority": "shadow",
+      "readiness": "partial",
+      "decoder_free": "yes",
+      "minimal_new_measurement": "authoritative unit declaration table and conversion proof"
+    }
+  ],
+  "h_min_source": "MISSING",
+  "iab_h_map_vis_to_hmin": "no_declaration_proxy_missing",
+  "hmin_lower_authority": null,
+  "decomposition": [
+    {
+      "source": "1M",
+      "leak_without_tag": 7025,
+      "tag64": 64,
+      "leak_total": 7089,
+      "n": 1024,
+      "log2q": 5,
+      "leak_other_or_null": null,
+      "finite_or_null": null
+    },
+    {
+      "source": "1p5M",
+      "leak_without_tag": 7375,
+      "tag64": 64,
+      "leak_total": 7439,
+      "n": 1024,
+      "log2q": 5,
+      "leak_other_or_null": null,
+      "finite_or_null": null
+    },
+    {
+      "source": "2M",
+      "leak_without_tag": 7700,
+      "tag64": 64,
+      "leak_total": 7764,
+      "n": 1024,
+      "log2q": 5,
+      "leak_other_or_null": null,
+      "finite_or_null": null
+    }
+  ],
+  "break_even": {
+    "optimistic_floor": [
+      {
+        "source": "1M",
+        "leak_total": 7089,
+        "floor": 6.9238,
+        "margin_5pct": 7.2882,
+        "margin_10pct": 7.6931,
+        "floor_true": 6.9229,
+        "margin_5pct_true": 7.2872,
+        "margin_10pct_true": 7.6921,
+        "hmin_lower_authority": null,
+        "hmin_lower": null,
+        "ell_or_null": null,
+        "gate": "log2d10_pass"
+      },
+      {
+        "source": "1p5M",
+        "leak_total": 7439,
+        "floor": 7.2637,
+        "margin_5pct": 7.646,
+        "margin_10pct": 8.0707,
+        "floor_true": 7.2646,
+        "margin_5pct_true": 7.647,
+        "margin_10pct_true": 8.0718,
+        "hmin_lower_authority": null,
+        "hmin_lower": null,
+        "ell_or_null": null,
+        "gate": "log2d10_pass"
+      },
+      {
+        "source": "2M",
+        "leak_total": 7764,
+        "floor": 7.582,
+        "margin_5pct": 7.9811,
+        "margin_10pct": 8.4245,
+        "floor_true": 7.582,
+        "margin_5pct_true": 7.9811,
+        "margin_10pct_true": 8.4245,
+        "hmin_lower_authority": null,
+        "hmin_lower": null,
+        "ell_or_null": null,
+        "gate": "log2d10_pass"
+      }
+    ],
+    "margins_formula": "h_m = (leak+other+finite)/(1024*(1-margin))",
+    "composable": [
+      null,
+      null
+    ],
+    "composable_missing_reasons": [
+      "composable theorem missing",
+      "decisive PE missing (e_ph/conjugate)",
+      "proxy not H_min (IAB/H/MAP/vis)",
+      "finite authority missing (shadow only)"
+    ]
+  },
+  "thresholds": {
+    "1M": {
+      "floor": 6.9238,
+      "margin_5pct": 7.2882,
+      "margin_10pct": 7.6931
+    },
+    "1p5M": {
+      "floor": 7.2637,
+      "margin_5pct": 7.646,
+      "margin_10pct": 8.0707
+    },
+    "2M": {
+      "floor": 7.582,
+      "margin_5pct": 7.9811,
+      "margin_10pct": 8.4245
+    }
+  },
+  "verdict": {
+    "overall": "V60_DATA_NOT_READY",
+    "first_match": "DATA_NOT_READY: composable_theorem_missing or decisive_PE_missing (e_ph/conjugate/n_PE/vis authoritative missing)",
+    "first_match_priority": "V60_EVIDENCE_INVALID > V60_DATA_NOT_READY(composable_theorem or decisive_PE) > V60_PARTIAL > V60_SECURITY_INPUTS_READY",
+    "mutual_exclusion": true,
+    "proxy_not_upgraded": true,
+    "missing_to_null": true,
+    "only_READY_ell": true,
+    "decisive_PE_missing": true,
+    "composable_theorem_missing": true,
+    "stop_reason": "decisive_PE + theorem missing => DATA_NOT_READY, ell=null, need new theorem + PE acquisition; no decoder/V61"
+  },
+  "checks": {
+    "tag_no_repeat": true,
+    "leak_eq_5m_plus_64": true,
+    "m_total_eq_m1_plus_m2": true,
+    "gf32_5bits": true,
+    "h_floor_times_1024_eq_leak": true,
+    "no_cross_source_average": true,
+    "log2d10": true,
+    "H_IAB_MAP_vis_not_Hmin": true,
+    "proxy_not_upgraded": true,
+    "only_READY_ell": true,
+    "rg_decode_zero": true,
+    "git_diff_src_zero": true
+  }
+}
