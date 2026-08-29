@@ -4,7 +4,7 @@
 **Domain**: Formal IR / V56D4 decoder-free 低维分解 (V56D3 唯一后继)
 **Change ID**: `formal-ir-v56d4-low-dim-decomposition`
 **Cycle ID**: `V56D4` (low-dim decomposition), predecessor `V56D3` `formal-ir-v56d3-symbol-decomposition`
-**Predecessor**: `formal-ir-v56d3-symbol-decomposition` (HEAD `b332b8a4a51e94fb905023862b8aed3650bac126`, branch `formal-ir-mainline`, data SHA `84d62779603e62de50ded5182ed65b65d3dc6084` `84d62779` `200ps legacy_v1 nearest 1024` 单点；结论已修订 `V56D3R1` 为 `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT` — 1024 态 `val 1024` plug-in MI 严重正偏 `I≈8.4` 且 `MAP val < identity` 无泛化，已排除全局 `shift/XOR/轴交换/Gray/U1U2` 与固定 `1024` 置换，`V25 prior` 严重失配，但 `pairing/frame anchor` 与真域迁移尚未区分)
+**Predecessor**: `formal-ir-v56d3-symbol-decomposition` (HEAD `b332b8a4a51e94fb905023862b8aed3650bac126`, branch `formal-ir-mainline`, data SHA `84d62779603e62de50ded5182ed65b65d3dc6084` `84d62779` `200ps legacy_v1 nearest 1024` 单点；结论已修订 `V56D3R1` 为 `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT` — 1024 态 `val 1024` plug-in MI 严重正偏 `I≈8.4` 且 `MAP val < identity` 无泛化，未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选），`V25 prior` 严重失配，但 `pairing/frame anchor` 与真域迁移尚未区分)
 **Branch**: `formal-ir-mainline`
 **HEAD**: `b332b8a4a51e94fb905023862b8aed3650bac126` (V56D3R1 降级后最新) — **实际代码状态待 `git diff` 重测，`src/qkd_io` 属冻结基线**
 **Data SHA**: `84d62779603e62de50ded5182ed65b65d3dc6084` (`84d62779`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点不改)
@@ -56,7 +56,7 @@
 
 - 不运行任何 `L1-APP / L2` decoder；不改 `H1-16 / Lane C / H_inc1/2 Δ8+8 / m2 184/190/192 / leak / tag / prior / decoder 90/1.0 poly37` 任一冻结量；不试新 `Δm/degree/seed`
 - 不在原 `V55` authoritative `90-block` 上重跑任何 corrected pipeline / offset-corrected 重译（已揭盲 `0/90`，`base→Δ8→Δ16` 任一变体均禁）；不将低维分解择优值回注为新 pipeline
-- 不做任意 `1024` 置换或 `1024!` 搜索、不训练神经网络映射、不做 `bin_width/dimension/pairing` 网格搜索（`200ps legacy_v1 nearest 1024` 单点锚点；`V13` 合同 vs 当前合同仅两路对比，不网格择优）
+- 不做任意 `1024` 置换或 `1024!` 搜索（已修正为：未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选））、不训练神经网络映射、不做 `bin_width/dimension/pairing` 网格搜索（`200ps legacy_v1 nearest 1024` 单点锚点；`V13` 合同 vs 当前合同仅两路对比，不网格择优）
 - 不以 `1024` plug-in `MI`（`val 1024` `I≈8.4` 已证严重正偏）做三态分流；不宣称 `LDPC` 证伪 / `FER` / 阈值 / `SKR` / 晋升；本诊断仅为 `DIAGNOSIS_PLAN_READY` 的低维分解，不直接进入 qualification
 - 不创建正式 `.../v56d4_*/run_01` decoder 执行；低维分解修复后**另冻全新 `TEST` blocks**再 qualification，需另起 `OpenSpec` 与独立授权
 - 不改写/覆盖 `V38–V56D3R1` 任何已有输出与终态（只读）；不直接修改 `AGENT_PROJECT_MEMORY.md / docs/decision-log.md`
@@ -94,4 +94,13 @@
 
 ## Lifecycle
 
-`V56D3R1` 当前 `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT`（`HEAD b332b8a4`, `V56D3` 已排除 `5` 族 + 固定 `1024` 置换但 `1024` plug-in `MI` 严重正偏）；`V56D4` 本诊断 `DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN`（仅 decoder-free 低维分解，不实现 runner，不执行 decoder，不创建 `run_01`）；诊断后若 `PAIRING_OR_FRAME_ANCHOR_ERROR` 则**另起 successor** 修复契约并冻全新 `TEST` blocks 再走 `QUALIFICATION_PLAN_READY`，若 `TRUE_DOMAIN_SHIFT` 则另规划新 `prior/泄漏`，本诊断不直接进入 qualification。
+`V56D3R1` 当前 `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT`（`HEAD b332b8a4`, 未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选），`1024` plug-in `MI` 严重正偏）；`V56D4` 本诊断 `DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN`（仅 decoder-free 低维分解，不实现 runner，不执行 decoder，不创建 `run_01`）；诊断后若 `PAIRING_OR_FRAME_ANCHOR_ERROR` 则**另起 successor** 修复契约并冻全新 `TEST` blocks 再走 `QUALIFICATION_PLAN_READY`，若 `TRUE_DOMAIN_SHIFT` 则另规划新 `prior/泄漏`，本诊断不直接进入 qualification。
+
+## 判定顺序冻结（V56D4，6条）
+
+1. 交叉验证 CE/accuracy 为主证据
+2. 32态 plug-in MI 仅辅助，需注明有限样本偏差（1024样本/1024格偏置）
+3. 分别报告 U1→U1、U2→U2 及交叉 U1→U2/U2→U1 四项，不合并
+4. V13合同 vs current合同 必须同固定帧 [7-10]fit/[15-18]val、同切分
+5. 首次显著退化阶段决定归因：raw/Δt退化→acquisition/pairing；raw正常 frame-anchor后退化→frame合同；U1/U2关联尚可但 V25 CE/NLL崩溃→统计域/prior失配
+6. 若指标指向不同层级则终态 INCONCLUSIVE_MIXED_SIGNAL，不强制二选一

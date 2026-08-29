@@ -3,11 +3,11 @@
 **Lifecycle**: `DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN` — **decoder-free 低维分解**
 **Cycle**: `V56D4` (low-dim decomposition), predecessor `V56D3R1` `b332b8a4` `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT`
 **Branch**: `formal-ir-mainline` HEAD `b332b8a4a51e94fb905023862b8aed3650bac126` data SHA `84d62779603e62de50ded5182ed65b65d3dc6084` (200ps legacy_v1 nearest 1024)
-**Feasibility**: `V56D3` 已证 `timing` 部分健康（`σ127ps p2bg 708/629/378`）但 `1024` 态 `val 1024` plug-in `I≈8.4` 严重正偏且 `MAP val < identity` 无泛化，已排除 `5` 族 + 固定 `1024` 置换，`V25 prior` 严重失配；`32` 态在 `1024` 样本下 `32×32=1024` 格（均 `1/格`）偏置远小于 `1024×1024=1M` 格（均 `0.001/格`），可用固定 `train/val CE/acc` 与 `V13` 合同两路回放闭环，无需 `1024` plug-in `MI` 分流或网格择优
+**Feasibility**: `V56D3` 已证 `timing` 部分健康（`σ127ps p2bg 708/629/378`）但 `1024` 态 `val 1024` plug-in `I≈8.4` 严重正偏且 `MAP val < identity` 无泛化，未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选），`V25 prior` 严重失配；`32` 态在 `1024` 样本下 `32×32=1024` 格（均 `1/格`）偏置远小于 `1024×1024=1M` 格（均 `0.001/格`），可用固定 `train/val CE/acc` 与 `V13` 合同两路回放闭环，无需 `1024` plug-in `MI` 分流或网格择优
 
 ## 1. 科学问题与关键判断
 
-> V56D3 曾判 `PAIRING_OR_FRAME_ANCHOR_ERROR`，但 `val4=1024` 样本在 `1024×1024` 上 `plug-in H(A|B)` 被严重压低→`I≈8.4` 为伪高，且 `MAP val < identity (Δ≈-0.14)` 说明高 `I` 无泛化。已排除全局 `shift/XOR/轴交换/Gray/U1U2` 与任意 `1024` 单符号置换（`argmax` 上界亦失败），`V25 prior` `q_mass 57-72%` 严重失配，但 `pairing/frame anchor` 与真域迁移尚未区分。V56D4 必须用 **低维（32态）+ 固定 train/val 泛化指标 + 逐阶段 V13 对照** 才能分离。
+> V56D3 曾判 `PAIRING_OR_FRAME_ANCHOR_ERROR`，但 `val4=1024` 样本在 `1024×1024` 上 `plug-in H(A|B)` 被严重压低→`I≈8.4` 为伪高，且 `MAP val < identity (Δ≈-0.14)` 说明高 `I` 无泛化。未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选）（`argmax` 上界亦失败），`V25 prior` `q_mass 57-72%` 严重失配，但 `pairing/frame anchor` 与真域迁移尚未区分。V56D4 必须用 **低维（32态）+ 固定 train/val 泛化指标 + 逐阶段 V13 对照** 才能分离。
 
 - **不变量**：`dimension 1024 / bin_width 200ps / pairing nearest / legacy_v1 / frame_period 204800ps / BLOCK 4×256` 为名义不变量；`V13` 的 `pairing policy/direction/threshold/frame-start/wrap_rule/mapping` 为已知健康合同
 - **去偏原理**：`32` 态 `I` 的 plug-in 偏差 `≈ (K-1)(L-1)/(2N ln2)` 量级，`K=L=32 → 961/(2*1024)≈0.47 bits` 远小于 `1024` 态的 `~1M/(2*1024)≈500 bits` 量级（实际受稀疏截断影响，但相对数量级差异稳健）；`1024` 样本下 `32` 态更可靠，可作健康对照
@@ -108,7 +108,18 @@ else:
 
 - V56D3R1 已排除 `SYMBOL_MAPPING_CONTRACT_ERROR`（`5` 族 + 固定 `1024` 置换失败）但 `1024` plug-in `I` 偏置致 `PAIRING vs DOMAIN` 未分；V56D4 在其上用 `32` 态去偏 + `CE/acc` 泛化 + `V13` 合同回放完成分离；`V13 已验证 channel/delay/peak/gate/frame-start/mapping/pairing` 仍为对照，不重发明。
 
-## 10. 自由裁量 D1-D6
+## 10. 判定顺序冻结（V56D4，6条）
+
+1. 交叉验证 CE/accuracy 为主证据
+2. 32态 plug-in MI 仅辅助，需注明有限样本偏差（1024样本/1024格偏置）
+3. 分别报告 U1→U1、U2→U2 及交叉 U1→U2/U2→U1 四项，不合并
+4. V13合同 vs current合同 必须同固定帧 [7-10]fit/[15-18]val、同切分
+5. 首次显著退化阶段决定归因：raw/Δt退化→acquisition/pairing；raw正常 frame-anchor后退化→frame合同；U1/U2关联尚可但 V25 CE/NLL崩溃→统计域/prior失配
+6. 若指标指向不同层级则终态 INCONCLUSIVE_MIXED_SIGNAL，不强制二选一
+
+> 措辞冻结：凡涉 1024 置换处均表述为"未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选）"，不得写"已排除任意1024置换"。
+
+## 11. 自由裁量 D1-D6
 
 - D1 `I_32/CE` 仅 `numpy` 直算，不引 `scipy`（ponytail: `numpy` 已装）
 - D2 `fit/val` 固定 `[7,8,9,10]/[15,16,17,18]` 不搜索多划分（仅预注册一种）

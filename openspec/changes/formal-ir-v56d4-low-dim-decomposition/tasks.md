@@ -2,7 +2,7 @@
 
 **Lifecycle**: `DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN` — **decoder-free 低维分解，不运行 L1/L2 decoder，不碰 V55 90 块，不调码参**
 **HEAD**: `b332b8a4a51e94fb905023862b8aed3650bac126` (branch `formal-ir-mainline`, V56D3R1 降级后) + data SHA `84d62779603e62de50ded5182ed65b65d3dc6084`
-**Predecessor**: `formal-ir-v56d3-symbol-decomposition` `V56D3R1` `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT` (5 族 + 固定 1024 置换已排除，1024 plug-in MI 严重正偏，MAP val<identity 无泛化，pairing vs 域迁移未分)
+**Predecessor**: `formal-ir-v56d3-symbol-decomposition` `V56D3R1` `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT` (未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选），1024 plug-in MI 严重正偏，MAP val<identity 无泛化，pairing vs 域迁移未分)
 **Revision**: V56D4 — 新增 32 态 I(U1/U2) 分解 + 固定 train/val CE/acc 分流 + 逐阶段 V13 vs 新 session 流水核对 + V13 合同两路回放；方法仍冻结，零 decoder，不以 1024 plug-in MI 分流
 
 ## Phase A — 32 态低维互信息分解（去偏核心，decoder-free）
@@ -37,7 +37,16 @@
 
 ## 本诊断显式禁止
 
-decoder 调用 (`decode_*` / `construct_*` / `sample_uniform_gf32` 等)；在原 V55 90-block 上重跑任何 corrected pipeline（含 offset/mapping-corrected 重译）；调 `H1/Lane C/Δ8/decoder 90/1.0/m2/leak/prior` 任一冻结参数；宣称 LDPC 证伪或 FER/阈值/SKR/晋升；创建正式 `.../v56d4_*/run_01` decoder 执行；任意 `1024` 置换/`1024!` 搜索/神经网络映射；`bin_width/dimension/pairing` 网格（`V13` vs 当前仅两路对比，不网格择优）；`1024` plug-in `MI`（`val 1024 I≈8.4` 已证严重正偏）作分流；将低维分解择优值回注为新 pipeline；**重发明 V13 已验证 channel/delay/peak/gate/frame-start/mapping/pairing 近似物化**；同帧 `fit/val` 评价；覆盖已有输出。
+decoder 调用 (`decode_*` / `construct_*` / `sample_uniform_gf32` 等)；在原 V55 90-block 上重跑任何 corrected pipeline（含 offset/mapping-corrected 重译）；调 `H1/Lane C/Δ8/decoder 90/1.0/m2/leak/prior` 任一冻结参数；宣称 LDPC 证伪或 FER/阈值/SKR/晋升；创建正式 `.../v56d4_*/run_01` decoder 执行；任意 `1024` 置换/`1024!` 搜索/神经网络映射（措辞冻结为：未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选），不得写“已排除任意1024置换”）；`bin_width/dimension/pairing` 网格（`V13` vs 当前仅两路对比，不网格择优）；`1024` plug-in `MI`（`val 1024 I≈8.4` 已证严重正偏）作分流；将低维分解择优值回注为新 pipeline；**重发明 V13 已验证 channel/delay/peak/gate/frame-start/mapping/pairing 近似物化**；同帧 `fit/val` 评价；覆盖已有输出。
+
+## 判定顺序冻结（6条）
+
+1. 交叉验证 CE/accuracy 为主证据
+2. 32态 plug-in MI 仅辅助，需注明有限样本偏差（1024样本/1024格偏置）
+3. 分别报告 U1→U1、U2→U2 及交叉 U1→U2/U2→U1 四项，不合并
+4. V13合同 vs current合同 必须同固定帧 [7-10]fit/[15-18]val、同切分
+5. 首次显著退化阶段决定归因：raw/Δt退化→acquisition/pairing；raw正常 frame-anchor后退化→frame合同；U1/U2关联尚可但 V25 CE/NLL崩溃→统计域/prior失配
+6. 若指标指向不同层级则终态 INCONCLUSIVE_MIXED_SIGNAL，不强制二选一
 
 ## 验收
 

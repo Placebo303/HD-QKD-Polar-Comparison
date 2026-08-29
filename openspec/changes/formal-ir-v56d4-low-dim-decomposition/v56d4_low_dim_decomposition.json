@@ -1,0 +1,552 @@
+{
+  "provenance": {
+    "head": "176bf34f",
+    "branch": "formal-ir-mainline",
+    "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
+    "lifecycle": "DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN",
+    "wording": "未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选）",
+    "fit_frames": [
+      7,
+      8,
+      9,
+      10
+    ],
+    "val_frames": [
+      15,
+      16,
+      17,
+      18
+    ],
+    "decision_order": [
+      "CE/acc primary",
+      "I32 auxiliary with bias note",
+      "four I separately",
+      "V13 vs current same split",
+      "first_drop attribution",
+      "mixed->INCONCLUSIVE_MIXED_SIGNAL"
+    ]
+  },
+  "per_source": {
+    "1p5M": {
+      "current": {
+        "n_fit": 1024,
+        "n_val": 1024,
+        "I_U1_val": 1.744,
+        "I_U2_val": 1.6933,
+        "I_U1U2_cross": 0.7831,
+        "I_U2U1_cross": 0.7798,
+        "CE_U1_val": 14.8413,
+        "acc_U1_val": 0.393555,
+        "CE_U2_val": 14.959,
+        "acc_U2_val": 0.379883,
+        "occupancy_val": 256.0,
+        "u1_consistency_val": 0.393555,
+        "u2_consistency_val": 0.379883,
+        "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+      },
+      "v13_reference": {
+        "n_fit": 1024,
+        "n_val": 1024,
+        "I_U1_val": 4.8917,
+        "I_U2_val": 4.1837,
+        "I_U1U2_cross": 0.8388,
+        "I_U2U1_cross": 0.8447,
+        "CE_U1_val": 0.4524,
+        "acc_U1_val": 0.986328,
+        "CE_U2_val": 0.9059,
+        "acc_U2_val": 0.741211,
+        "occupancy_val": 256.0,
+        "u1_consistency_val": 0.986328,
+        "u2_consistency_val": 0.741211,
+        "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+      },
+      "pipeline_stages": [
+        {
+          "stage": "raw_coincidence",
+          "V13_val": "INCOMPLETE_no_ttbin",
+          "new_val": "INCOMPLETE_no_ttbin",
+          "delta": null,
+          "note": "sidecar p2bg/peak available but ttbin not re-parsed in decoder-free"
+        },
+        {
+          "stage": "pairing",
+          "V13_val": "INCOMPLETE",
+          "new_val": "INCOMPLETE",
+          "delta": null,
+          "note": "Δt histogram not stored in pairs.parquet"
+        },
+        {
+          "stage": "per_frame_occupancy",
+          "V13_val": 256.0,
+          "new_val": 256.0,
+          "delta": 0.0,
+          "note": "expect 256; V13 ~256"
+        },
+        {
+          "stage": "frame_anchor",
+          "V13_val": "INCOMPLETE",
+          "new_val": "INCOMPLETE",
+          "delta": null,
+          "note": "before/after pair_index requires ttbin re-run; decoder-free two-way pair comparison suffices"
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "I_U1_val",
+          "V13_val": 4.8917,
+          "new_val": 1.744,
+          "delta": -3.1477
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "I_U2_val",
+          "V13_val": 4.1837,
+          "new_val": 1.6933,
+          "delta": -2.4904
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "CE_U1_val",
+          "V13_val": 0.4524,
+          "new_val": 14.8413,
+          "delta": 14.3889
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "CE_U2_val",
+          "V13_val": 0.9059,
+          "new_val": 14.959,
+          "delta": 14.0531
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "acc_U1_val",
+          "V13_val": 0.986328,
+          "new_val": 0.393555,
+          "delta": -0.5928
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "acc_U2_val",
+          "V13_val": 0.741211,
+          "new_val": 0.379883,
+          "delta": -0.3613
+        }
+      ],
+      "first_drop_stage": "U1U2_consistency",
+      "contract_comparison": {
+        "delta_acc_U1": -0.5928,
+        "note": "V13-contract vs current-contract approximated by V13 pairs vs current pairs on same [7-10]/[15-18]; two-way only, no grid search"
+      }
+    },
+    "1M": {
+      "current": {
+        "n_fit": 1024,
+        "n_val": 1024,
+        "I_U1_val": 2.0495,
+        "I_U2_val": 2.0077,
+        "I_U1U2_cross": 0.797,
+        "I_U2U1_cross": 0.7664,
+        "CE_U1_val": 13.2512,
+        "acc_U1_val": 0.461914,
+        "CE_U2_val": 13.6322,
+        "acc_U2_val": 0.448242,
+        "occupancy_val": 256.0,
+        "u1_consistency_val": 0.461914,
+        "u2_consistency_val": 0.448242,
+        "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+      },
+      "v13_reference": {
+        "n_fit": 1024,
+        "n_val": 1024,
+        "I_U1_val": 4.9331,
+        "I_U2_val": 4.1678,
+        "I_U1U2_cross": 0.8125,
+        "I_U2U1_cross": 0.7826,
+        "CE_U1_val": 0.191,
+        "acc_U1_val": 0.992188,
+        "CE_U2_val": 0.8762,
+        "acc_U2_val": 0.745117,
+        "occupancy_val": 256.0,
+        "u1_consistency_val": 0.992188,
+        "u2_consistency_val": 0.745117,
+        "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+      },
+      "pipeline_stages": [
+        {
+          "stage": "raw_coincidence",
+          "V13_val": "INCOMPLETE_no_ttbin",
+          "new_val": "INCOMPLETE_no_ttbin",
+          "delta": null,
+          "note": "sidecar p2bg/peak available but ttbin not re-parsed in decoder-free"
+        },
+        {
+          "stage": "pairing",
+          "V13_val": "INCOMPLETE",
+          "new_val": "INCOMPLETE",
+          "delta": null,
+          "note": "Δt histogram not stored in pairs.parquet"
+        },
+        {
+          "stage": "per_frame_occupancy",
+          "V13_val": 256.0,
+          "new_val": 256.0,
+          "delta": 0.0,
+          "note": "expect 256; V13 ~256"
+        },
+        {
+          "stage": "frame_anchor",
+          "V13_val": "INCOMPLETE",
+          "new_val": "INCOMPLETE",
+          "delta": null,
+          "note": "before/after pair_index requires ttbin re-run; decoder-free two-way pair comparison suffices"
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "I_U1_val",
+          "V13_val": 4.9331,
+          "new_val": 2.0495,
+          "delta": -2.8836
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "I_U2_val",
+          "V13_val": 4.1678,
+          "new_val": 2.0077,
+          "delta": -2.1601
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "CE_U1_val",
+          "V13_val": 0.191,
+          "new_val": 13.2512,
+          "delta": 13.0602
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "CE_U2_val",
+          "V13_val": 0.8762,
+          "new_val": 13.6322,
+          "delta": 12.756
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "acc_U1_val",
+          "V13_val": 0.992188,
+          "new_val": 0.461914,
+          "delta": -0.5303
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "acc_U2_val",
+          "V13_val": 0.745117,
+          "new_val": 0.448242,
+          "delta": -0.2969
+        }
+      ],
+      "first_drop_stage": "U1U2_consistency",
+      "contract_comparison": {
+        "delta_acc_U1": -0.5303,
+        "note": "V13-contract vs current-contract approximated by V13 pairs vs current pairs on same [7-10]/[15-18]; two-way only, no grid search"
+      }
+    },
+    "2M": {
+      "current": {
+        "n_fit": 1024,
+        "n_val": 1024,
+        "I_U1_val": 1.3932,
+        "I_U2_val": 1.3624,
+        "I_U1U2_cross": 0.7995,
+        "I_U2U1_cross": 0.7901,
+        "CE_U1_val": 16.681,
+        "acc_U1_val": 0.302734,
+        "CE_U2_val": 15.1542,
+        "acc_U2_val": 0.285156,
+        "occupancy_val": 256.0,
+        "u1_consistency_val": 0.302734,
+        "u2_consistency_val": 0.301758,
+        "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+      },
+      "v13_reference": {
+        "n_fit": 1024,
+        "n_val": 1024,
+        "I_U1_val": 4.9209,
+        "I_U2_val": 4.1704,
+        "I_U1U2_cross": 0.8193,
+        "I_U2U1_cross": 0.7841,
+        "CE_U1_val": 0.2212,
+        "acc_U1_val": 0.992188,
+        "CE_U2_val": 0.9118,
+        "acc_U2_val": 0.739258,
+        "occupancy_val": 256.0,
+        "u1_consistency_val": 0.992188,
+        "u2_consistency_val": 0.739258,
+        "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+      },
+      "pipeline_stages": [
+        {
+          "stage": "raw_coincidence",
+          "V13_val": "INCOMPLETE_no_ttbin",
+          "new_val": "INCOMPLETE_no_ttbin",
+          "delta": null,
+          "note": "sidecar p2bg/peak available but ttbin not re-parsed in decoder-free"
+        },
+        {
+          "stage": "pairing",
+          "V13_val": "INCOMPLETE",
+          "new_val": "INCOMPLETE",
+          "delta": null,
+          "note": "Δt histogram not stored in pairs.parquet"
+        },
+        {
+          "stage": "per_frame_occupancy",
+          "V13_val": 256.0,
+          "new_val": 256.0,
+          "delta": 0.0,
+          "note": "expect 256; V13 ~256"
+        },
+        {
+          "stage": "frame_anchor",
+          "V13_val": "INCOMPLETE",
+          "new_val": "INCOMPLETE",
+          "delta": null,
+          "note": "before/after pair_index requires ttbin re-run; decoder-free two-way pair comparison suffices"
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "I_U1_val",
+          "V13_val": 4.9209,
+          "new_val": 1.3932,
+          "delta": -3.5277
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "I_U2_val",
+          "V13_val": 4.1704,
+          "new_val": 1.3624,
+          "delta": -2.808
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "CE_U1_val",
+          "V13_val": 0.2212,
+          "new_val": 16.681,
+          "delta": 16.4598
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "CE_U2_val",
+          "V13_val": 0.9118,
+          "new_val": 15.1542,
+          "delta": 14.2424
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "acc_U1_val",
+          "V13_val": 0.992188,
+          "new_val": 0.302734,
+          "delta": -0.6895
+        },
+        {
+          "stage": "U1U2_consistency",
+          "metric": "acc_U2_val",
+          "V13_val": 0.739258,
+          "new_val": 0.285156,
+          "delta": -0.4541
+        }
+      ],
+      "first_drop_stage": "U1U2_consistency",
+      "contract_comparison": {
+        "delta_acc_U1": -0.6895,
+        "note": "V13-contract vs current-contract approximated by V13 pairs vs current pairs on same [7-10]/[15-18]; two-way only, no grid search"
+      }
+    }
+  },
+  "per_source_current_summary": {
+    "1p5M": {
+      "n_fit": 1024,
+      "n_val": 1024,
+      "I_U1_val": 1.744,
+      "I_U2_val": 1.6933,
+      "I_U1U2_cross": 0.7831,
+      "I_U2U1_cross": 0.7798,
+      "CE_U1_val": 14.8413,
+      "acc_U1_val": 0.393555,
+      "CE_U2_val": 14.959,
+      "acc_U2_val": 0.379883,
+      "occupancy_val": 256.0,
+      "u1_consistency_val": 0.393555,
+      "u2_consistency_val": 0.379883,
+      "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+    },
+    "1M": {
+      "n_fit": 1024,
+      "n_val": 1024,
+      "I_U1_val": 2.0495,
+      "I_U2_val": 2.0077,
+      "I_U1U2_cross": 0.797,
+      "I_U2U1_cross": 0.7664,
+      "CE_U1_val": 13.2512,
+      "acc_U1_val": 0.461914,
+      "CE_U2_val": 13.6322,
+      "acc_U2_val": 0.448242,
+      "occupancy_val": 256.0,
+      "u1_consistency_val": 0.461914,
+      "u2_consistency_val": 0.448242,
+      "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+    },
+    "2M": {
+      "n_fit": 1024,
+      "n_val": 1024,
+      "I_U1_val": 1.3932,
+      "I_U2_val": 1.3624,
+      "I_U1U2_cross": 0.7995,
+      "I_U2U1_cross": 0.7901,
+      "CE_U1_val": 16.681,
+      "acc_U1_val": 0.302734,
+      "CE_U2_val": 15.1542,
+      "acc_U2_val": 0.285156,
+      "occupancy_val": 256.0,
+      "u1_consistency_val": 0.302734,
+      "u2_consistency_val": 0.301758,
+      "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+    }
+  },
+  "per_source_v13_summary": {
+    "1M": {
+      "n_fit": 1024,
+      "n_val": 1024,
+      "I_U1_val": 4.9331,
+      "I_U2_val": 4.1678,
+      "I_U1U2_cross": 0.8125,
+      "I_U2U1_cross": 0.7826,
+      "CE_U1_val": 0.191,
+      "acc_U1_val": 0.992188,
+      "CE_U2_val": 0.8762,
+      "acc_U2_val": 0.745117,
+      "occupancy_val": 256.0,
+      "u1_consistency_val": 0.992188,
+      "u2_consistency_val": 0.745117,
+      "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+    },
+    "1p5M": {
+      "n_fit": 1024,
+      "n_val": 1024,
+      "I_U1_val": 4.8917,
+      "I_U2_val": 4.1837,
+      "I_U1U2_cross": 0.8388,
+      "I_U2U1_cross": 0.8447,
+      "CE_U1_val": 0.4524,
+      "acc_U1_val": 0.986328,
+      "CE_U2_val": 0.9059,
+      "acc_U2_val": 0.741211,
+      "occupancy_val": 256.0,
+      "u1_consistency_val": 0.986328,
+      "u2_consistency_val": 0.741211,
+      "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+    },
+    "2M": {
+      "n_fit": 1024,
+      "n_val": 1024,
+      "I_U1_val": 4.9209,
+      "I_U2_val": 4.1704,
+      "I_U1U2_cross": 0.8193,
+      "I_U2U1_cross": 0.7841,
+      "CE_U1_val": 0.2212,
+      "acc_U1_val": 0.992188,
+      "CE_U2_val": 0.9118,
+      "acc_U2_val": 0.739258,
+      "occupancy_val": 256.0,
+      "u1_consistency_val": 0.992188,
+      "u2_consistency_val": 0.739258,
+      "bias_note": "32-state 1024 bins, N=1024 -> ~1/bin, finite-sample positive bias remains but <<1024-state 1M bins"
+    }
+  },
+  "contract_matrix": {
+    "pairing_policy": {
+      "v13": "nearest",
+      "current": "nearest",
+      "status": "PASS"
+    },
+    "pairing_direction": {
+      "v13": "time_pairs_nearest",
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "pairing_threshold_ps": {
+      "v13": 40000,
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "gate_width_ps": {
+      "v13": 200,
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "frame_start_ps": {
+      "v13": null,
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "frame_period_ps": {
+      "v13": 204800,
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "delay_used_ps": {
+      "v13": -50,
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "peak_center_ps": {
+      "v13": -50,
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "wrap_rule": {
+      "v13": null,
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "mapping": {
+      "v13": null,
+      "current": null,
+      "status": "INCOMPLETE"
+    },
+    "occupancy_filter": {
+      "v13": {
+        "dimension": 1024,
+        "bin_width_ps": 200,
+        "n_candidates_before": 525949,
+        "n_kept_after": 512151,
+        "n_dropped_occupancy": 132,
+        "drop_frac_occupancy": 0.00025097490441088397,
+        "n_dropped_multievent": 13666,
+        "drop_frac_multievent": 0.025983507906660153,
+        "filter_enabled": 1,
+        "frame_period_ps": 204800,
+        "pairing_mode": "nearest",
+        "threshold_ps": 200,
+        "frame_diag_available": 1,
+        "n_frames_total": 519219,
+        "n_frames_clean_single_single": 512144,
+        "n_frames_cross_frame": 257,
+        "n_frames_A_multi": 6,
+        "n_frames_B_multi": 1,
+        "n_frames_both_multi": 6811,
+        "n_pairs_in_clean_frames": 512144,
+        "n_pairs_in_ambiguous_frames": 13805
+      },
+      "current": null,
+      "status": "INCOMPLETE"
+    }
+  },
+  "shunt_per_source": {
+    "1p5M": "INCONCLUSIVE_MIXED_SIGNAL",
+    "1M": "INCONCLUSIVE_MIXED_SIGNAL",
+    "2M": "INCONCLUSIVE_MIXED_SIGNAL"
+  },
+  "overall": "INCONCLUSIVE_MIXED_SIGNAL",
+  "overall_shunt": "INCONCLUSIVE_MIXED_SIGNAL",
+  "note": "decoder-free (no dec. calls); V13 vs current same fit[7-10] val[15-18]; CE/acc primary, I32 auxiliary with bias note; four I reported separately; no grid, candidate count 2",
+  "counts_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz"
+}

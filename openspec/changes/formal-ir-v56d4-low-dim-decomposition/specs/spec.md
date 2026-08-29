@@ -23,10 +23,16 @@ Otherwise `INCONCLUSIVE_NEED_DEEPER_EVIDENCE` (mixed per-source allowed). The `V
 ### Requirement: V56D4 Decoder-Free Guard
 The diagnostic SHALL remain `DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN`: zero `decode_*` calls (`rg "decode_" 0 hits`), no change to `H1/Lane C/H_inc1/2/Δ8/decoder/m2/leak/prior`, no `.../v56d4_*/run_01` creation, no rerun on the original `90`, `py_compile` PASS, `fit ∩ val == ∅` verified, and `1024` plug-in `MI` explicitly not used for shunt, with no grid search.
 
+### Requirement: V56D4 Wording Freeze (1024 Mapping)
+Any claim about 1024-state permutation SHALL be phrased as "未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选）" and SHALL NOT be phrased as "已排除任意1024置换". This applies to all 6 files (`proposal/design/tasks/specs` + `v56d4_low_dim_decomposition.py` + `LOW_DIM_DECOMPOSITION_REPORT.md`).
+
+### Requirement: V56D4 Decision Order Freeze (6 Rules)
+The shunt SHALL follow fixed order: (1) cross-validated CE/acc as primary evidence; (2) 32-state plug-in MI auxiliary with finite-sample bias note (1024 samples / 1024 bins); (3) report U1→U1, U2→U2 and cross U1→U2/U2→U1 separately, no merging; (4) V13 vs current contracts under identical fixed frames [7-10]fit/[15-18]val same split; (5) first significant degradation stage determines attribution (raw/Δt degraded→acquisition/pairing, raw ok but post frame-anchor degraded→frame contract, U1/U2 association ok but V25 CE/NLL collapsed→statistical domain/prior mismatch); (6) if metrics point to different layers then terminal INCONCLUSIVE_MIXED_SIGNAL, no forced binary choice.
+
 ## MODIFIED Requirements
 
 ### Requirement: V56D3 Terminal Downgrade
-`v56d3_symbol_decomposition.json`'s `overall` / `overall_shunt` and `shunt_per_source` SHALL be amended from `PAIRING_OR_FRAME_ANCHOR_ERROR` to `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT`, with `overall_shunt_original_superseded` preserved and `revision=V56D3R1_20260829_downgrade_bias_correction` recording the reason (1024-state `N=1024` plug-in `MI` severely positively biased and `MAP val < identity` shows no generalization; `V13` contract replay needs low-dim verification).
+`v56d3_symbol_decomposition.json`'s `overall` / `overall_shunt` and `shunt_per_source` SHALL be amended from `PAIRING_OR_FRAME_ANCHOR_ERROR` to `INCONCLUSIVE_PAIRING_FRAME_ANCHOR_OR_DOMAIN_SHIFT`, with `overall_shunt_original_superseded` preserved and `revision=V56D3R1_20260829_downgrade_bias_correction` recording the reason (1024-state `N=1024` plug-in `MI` severely positively biased and `MAP val < identity` shows no generalization; 未发现能由 fit4 学得并在 val4 泛化的1024态经验映射；已排除五类预注册物理映射（2060候选）；`V13` contract replay needs low-dim verification).
 
 ## REMOVED Requirements
 
