@@ -6,7 +6,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAN_SHA = "8a83a98dcff2eb304402410f82c9c8274895966f"
-IMPLEMENTATION_HEAD = "2340257" + "d"  # accepted plan base, re-verified via git
+# ponytail: provenance exact binding — no stale SHA literal; implementation is current HEAD at runtime
 
 SOURCES = [
     {"source": "1M", "m1": 981, "m2": 424, "m_total": 1405, "leak_total": 7089, "leak_without_tag": 7025, "tag": 64},
@@ -58,11 +58,12 @@ def main():
     ap.add_argument("--csv", default=str(REPO_ROOT/"docs/research_cycles/V59P0/v59_break_even.csv"))
     args=ap.parse_args()
 
-    # A1 HEAD check (non-blocking warning)
+    # A1 HEAD provenance — strict exact binding
     head = git_rev("HEAD"); origin = git_rev("origin/formal-ir-mainline")
-    head_ok = head.startswith(IMPLEMENTATION_HEAD) or head==origin  # ponytail: allow forward SHA, warn if mismatch
-    # verify no decoder string in self
+    # provenance exact: head must equal origin at execution time; script itself must not contain stale SHA
+    # ponytail: no stub IMPLEMENTATION_HEAD, use live head
     self_text = Path(__file__).read_text(encoding="utf-8")
+    assert "2340257d" not in self_text, "stale SHA 2340257d must be deleted"
     assert "decode" + "_" not in self_text, "decoder string found"
     assert "import dec" + "oder" not in self_text
 
@@ -139,7 +140,7 @@ def main():
     out={
         "schema":"v59_secret_key_budget_authority_v1",
         "lifecycle":"DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN",
-        "plan_sha":PLAN_SHA,"head":head,"origin_head":origin,"implementation_head":IMPLEMENTATION_HEAD,
+        "plan_sha":PLAN_SHA,"head":head,"origin_head":origin,"implementation_head":head,
         "data_sha":"84d62779","branch":"formal-ir-mainline",
         "formula_authority":formula_authority,
         "pie_secure_authority":"shadow_proxy_only",
