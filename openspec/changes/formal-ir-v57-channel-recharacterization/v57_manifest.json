@@ -1,0 +1,37 @@
+{
+  "schema": "v57_manifest_v1",
+  "head": "ea39a83d844ce60c86418b753cf95576416233f4",
+  "origin_formal_ir_mainline": "ea39a83d844ce60c86418b753cf95576416233f4",
+  "data_sha": "84d62779",
+  "data_sha_full": "84d62779603e62de50ded5182ed65b65d3dc6084",
+  "zero_overlap_proofs": {
+    "cal_cap_val": true,
+    "cal_val_cap_v55": true,
+    "cap_v56": true,
+    "in_range": true
+  },
+  "per_source_zero_overlap": {
+    "1M": {
+      "cal_cap_val": true,
+      "cal_val_cap_v55": true,
+      "cap_v56": true,
+      "in_range": true
+    },
+    "1p5M": {
+      "cal_cap_val": true,
+      "cal_val_cap_v55": true,
+      "cap_v56": true,
+      "in_range": true
+    },
+    "2M": {
+      "cal_cap_val": true,
+      "cal_val_cap_v55": true,
+      "cap_v56": true,
+      "in_range": true
+    }
+  },
+  "overall_zero_overlap_verified": true,
+  "counts_valid_all": true,
+  "chain_ok_all": true,
+  "command": "python v57_channel_recharacterization.py"
+}
