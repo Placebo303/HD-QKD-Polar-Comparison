@@ -1,5 +1,5 @@
 # V61 Security Measurement Specification — V61_SPEC_READY__V62_PENDING
-Plan 1be38e39cd65469b97f395fdee15589510c5f07d HEAD 1be38e39 origin 1be38e39 data 84d62779 lifecycle PLAN_CANDIDATE / DECODE_FORBIDDEN branch formal-ir-mainline
+Plan 1be38e39cd65469b97f395fdee15589510c5f07d HEAD 84b1193c origin 84b1193c data 84d62779 lifecycle PLAN_CANDIDATE / DECODE_FORBIDDEN branch formal-ir-mainline
 Fetch HEAD==origin: True
 ## 1 V60 gap trace
 V60_DATA_NOT_READY: composable theorem missing; decisive PE missing (e_ph/conjugate/n_PE authoritative missing); proxy not H_min; finite authority shadow only. Source tools/security_reports/round3_build_proof_gap_matrix.py:12-23 per_point_franson_pe_chain missing.
