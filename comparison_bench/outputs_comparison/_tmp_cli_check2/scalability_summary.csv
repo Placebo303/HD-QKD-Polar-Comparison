@@ -1,8 +1,0 @@
-dataset_id,data_mode,dimension,bin_width_ps,frame_len_symbols,method,real_ir_success,success_classification,leak_EC_actual_bits,runtime_s
-real_typeii_20db_d16_bw180_blk0,real_data,16,180.0,128,cascade_lite,False,verified_failure,507.0,0.0039720000058878
-real_typeii_20db_d16_bw60_blk0,real_data,16,60.0,128,cascade_lite,False,verified_failure,545.0,0.0023208000056911
-real_typeii_20db_d16_bw100_blk0,real_data,16,100.0,128,cascade_lite,False,verified_failure,517.0,0.0046479000011458
-real_typeii_20db_d8_bw120_blk0,real_data,8,120.0,128,cascade_lite,False,verified_failure,390.0,0.0016019000031519
-real_typeii_20db_d8_bw180_blk0,real_data,8,180.0,128,cascade_lite,True,real_ir_success,364.0,0.0019202000112272
-real_typeii_20db_d8_bw50_blk0,real_data,8,50.0,128,cascade_lite,False,verified_failure,455.0,0.0028247000009287
-synthetic_long_d16_ser003,synthetic,16,,2048,cascade_lite,True,real_ir_success,9496.0,0.0637738000077661

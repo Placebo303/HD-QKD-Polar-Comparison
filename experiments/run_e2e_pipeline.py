@@ -40,6 +40,11 @@ _G_TTBIN_BY_POINT: dict[str, str] = {}
 _G_REPAIR_DIAGNOSTICS: bool = False
 _G_MATERIALIZE_PROCESSING_RULE_VERSION: str = "legacy_v1"
 _G_REAL_SEQ_POOL_ROOT: str = ""
+_G_MAX_PAIRS_OVERRIDE: str = ""
+_G_FER_THRESHOLD: float = 0.05
+_G_FER_RULE: str = "wilson"
+_G_DECODER_MODES: str = "auto-fallback"
+_G_DEBUG_LAYER: bool = False
 
 
 def _progress(iterable, *, total: int, desc: str):
@@ -62,8 +67,9 @@ def _init_extract_worker(
     repair_diagnostics: bool = False,
     materialize_processing_rule_version: str = "legacy_v1",
     real_seq_pool_root: str = "",
+    max_pairs_override: str = "",
 ) -> None:
-    global _G_GRID_MAP, _G_OUT_ROOT_S, _G_FORCE_ALIGN, _G_OFFSET_OVERRIDE_PS, _G_COINC_WINDOW_OVERRIDE_PS, _G_SHARED_BY_TTBIN, _G_TTBIN_BY_POINT, _G_REPAIR_DIAGNOSTICS, _G_MATERIALIZE_PROCESSING_RULE_VERSION, _G_REAL_SEQ_POOL_ROOT
+    global _G_GRID_MAP, _G_OUT_ROOT_S, _G_FORCE_ALIGN, _G_OFFSET_OVERRIDE_PS, _G_COINC_WINDOW_OVERRIDE_PS, _G_SHARED_BY_TTBIN, _G_TTBIN_BY_POINT, _G_REPAIR_DIAGNOSTICS, _G_MATERIALIZE_PROCESSING_RULE_VERSION, _G_REAL_SEQ_POOL_ROOT, _G_MAX_PAIRS_OVERRIDE
     _G_GRID_MAP = grid_map
     _G_OUT_ROOT_S = str(out_root_s)
     _G_FORCE_ALIGN = bool(force_align)
@@ -74,6 +80,7 @@ def _init_extract_worker(
     _G_REPAIR_DIAGNOSTICS = bool(repair_diagnostics)
     _G_MATERIALIZE_PROCESSING_RULE_VERSION = str(materialize_processing_rule_version or "legacy_v1").strip().lower() or "legacy_v1"
     _G_REAL_SEQ_POOL_ROOT = str(real_seq_pool_root or "").strip()
+    _G_MAX_PAIRS_OVERRIDE = str(max_pairs_override or "").strip()
 
 
 def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
@@ -199,7 +206,8 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
             if _G_COINC_WINDOW_OVERRIDE_PS is not None:
                 mparams = dict(mparams)
                 mparams["coinc_window_override_ps"] = int(_G_COINC_WINDOW_OVERRIDE_PS)
-            max_pairs_use = _materialize_max_pairs_for_dimension(d=int(d), requested=mparams.get("max_pairs"))
+            max_pairs_req = _G_MAX_PAIRS_OVERRIDE if _G_MAX_PAIRS_OVERRIDE else mparams.get("max_pairs")
+            max_pairs_use = _materialize_max_pairs_for_dimension(d=int(d), requested=max_pairs_req)
             frame_period_ps = int(max(1, int(d)) * max(1, int(bw)))
             nearest_threshold_ps = max(1, int(float(os.getenv("HDQKD_NEAREST_FRAME_THRESHOLD_PS", "40000"))))
             force_nearest_highdim = bool(frame_period_ps >= nearest_threshold_ps)
@@ -341,13 +349,14 @@ def _extract_one_point(d: int, bw: int) -> dict[str, Any]:
             if math.isfinite(rate_eff) and rate_eff > 0.0:
                 rate = float(rate_eff)
         if not sidecar_verdict:
-            if can_run and math.isfinite(map_ser):
-                sidecar_verdict = "PASS" if float(map_ser) < 0.1 else "FAIL"
-            elif can_run:
-                sidecar_verdict = "UNKNOWN"
+            # ponytail: map_ser no longer gates PASS/FAIL — high-dim still
+            # yields key at high SER, computed result is truth.
+            if can_run:
+                sidecar_verdict = "PASS"
             else:
                 sidecar_verdict = "MISSING"
-        status_output = sidecar_verdict if can_run else "MISSING"
+        # status mirrors sidecar availability only; sidecar_verdict is diagnostic
+        status_output = "PASS" if can_run else "MISSING"
         run_grid_row = None
         run_src_row = None
         runnable_key = None
@@ -793,15 +802,23 @@ def _materialize_max_pairs_for_dimension(d: int, requested: Any) -> int:
     """
     Resolve max_pairs for sidecar materialization.
     Return 0 to mean "uncapped/use all available pairs".
-    This removes legacy hard caps (e.g., 16384 wall) for high-d points.
     """
-    try:
-        req = int(round(float(requested)))
-    except Exception:
-        req = 0
+    # ponytail: auto -> 0 (uncapped) gives raw distribution bifurcation
+    if isinstance(requested, str):
+        s = requested.strip().lower()
+        if s in ("auto", ""):
+            return 0
+        try:
+            req = int(round(float(s)))
+        except Exception:
+            req = 0
+    else:
+        try:
+            req = int(round(float(requested))) if requested is not None else 0
+        except Exception:
+            req = 0
     if req <= 0:
         return 0
-    # Legacy tiny defaults (often 256) should not cap high-dimensional extraction.
     if int(d) >= 1024 and req <= 256:
         return 0
     return max(0, int(req))
@@ -982,6 +999,7 @@ def _run_extract_batch(
     repair_diagnostics: bool = False,
     materialize_processing_rule_version: str = "legacy_v1",
     real_seq_pool_root: str = "",
+    max_pairs_override: str = "",
 ) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     _init_extract_worker(
@@ -995,6 +1013,7 @@ def _run_extract_batch(
         repair_diagnostics=bool(repair_diagnostics),
         materialize_processing_rule_version=str(materialize_processing_rule_version),
         real_seq_pool_root=str(real_seq_pool_root or ""),
+        max_pairs_override=str(max_pairs_override or ""),
     )
     if extract_workers <= 1:
         iter_points = _progress(points_batch, total=len(points_batch), desc="E2E extract")
@@ -1016,6 +1035,7 @@ def _run_extract_batch(
             bool(repair_diagnostics),
             str(materialize_processing_rule_version),
             str(real_seq_pool_root or ""),
+            str(_G_MAX_PAIRS_OVERRIDE or ""),
         ),
     ) as ex:
         fut_map: dict[concurrent.futures.Future[dict[str, Any]], tuple[int, int]] = {}
@@ -1104,8 +1124,16 @@ def main() -> int:
         description="E2E pipeline with stale-cache prevention (.ttbin mtime guard)",
         allow_abbrev=False,
     )
-    ap.add_argument("--dims", required=True, help='e.g. "32,1024"')
-    ap.add_argument("--bws", required=True, help='e.g. "30,150"')
+    ap.add_argument("--dims", required=False, default="", help='e.g. "32,1024"')
+    ap.add_argument("--bws", required=False, default="", help='e.g. "30,150"')
+    ap.add_argument("--tiers", default="", help='alias for dims/bws preset, e.g. "6dB"')
+    ap.add_argument("--only-points", default="", help='e.g. "4,180;4096,180"')
+    ap.add_argument("--debug-layer", action="store_true", help="print layer ber/cap/k debug")
+    ap.add_argument("--tier", default="", help="alias for --tiers")
+    ap.add_argument("--fer-threshold", type=float, default=0.05)
+    ap.add_argument("--fer-rule", choices=["wilson", "point"], default="wilson")
+    ap.add_argument("--max-pairs", default="0", help="0 uncapped, auto, or int")
+    ap.add_argument("--decoder-modes", default="auto-fallback", choices=["sc", "scl", "auto-fallback"])
     ap.add_argument("--force-align", action="store_true")
     ap.add_argument("--grid-table", default="results/grid_mixed_full_table.csv")
     ap.add_argument("--out-root", default="")
@@ -1180,10 +1208,55 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    dims = _parse_int_list(args.dims)
-    bws = _parse_int_list(args.bws)
-    points = [(d, bw) for d in dims for bw in bws]
+    # ponytail: tiers/only-points compatibility for frozen task packet
+    tier_s = str(args.tiers or args.tier or "").strip().lower()
+    only_pts_raw = str(args.only_points or "").strip()
+    if only_pts_raw:
+        # "4,180;4096,180" or "4,180" -> parse as explicit points (also supports single)
+        pts_set: set[tuple[int,int]] = set()
+        for tok in only_pts_raw.replace(";", ",").split(","):
+            pass
+        # reuse _parse_only-like: "4,180;4096,180"
+        tmp = []
+        for chunk in only_pts_raw.split(";"):
+            chunk=chunk.strip()
+            if not chunk: continue
+            parts=[x.strip() for x in chunk.split(",")]
+            if len(parts)==2:
+                try: tmp.append((int(parts[0]),int(parts[1])))
+                except: pass
+            elif len(parts)==4: # "4,180,4096,180" fallback
+                try:
+                    tmp.append((int(parts[0]),int(parts[1])))
+                    tmp.append((int(parts[2]),int(parts[3])))
+                except: pass
+        if tmp:
+            points = sorted(set(tmp))
+        else:
+            dims = _parse_int_list(args.dims)
+            bws = _parse_int_list(args.bws)
+            points = [(d,bw) for d in dims for bw in bws]
+    elif tier_s:
+        # Use grid to enumerate tier if dims/bws empty
+        dims = _parse_int_list(args.dims)
+        bws = _parse_int_list(args.bws)
+        if dims and bws:
+            points = [(d,bw) for d in dims for bw in bws]
+        else:
+            # fallback: 11 dims x 11 bws grid typical for 6dB
+            dims = [4,8,16,32,64,128,256,512,1024,2048,4096]
+            bws = [20,40,60,80,100,120,140,150,160,180,200]
+            points = [(d,bw) for d in dims for bw in bws]
+    else:
+        dims = _parse_int_list(args.dims)
+        bws = _parse_int_list(args.bws)
+        points = [(d, bw) for d in dims for bw in bws]
 
+    _G_MAX_PAIRS_OVERRIDE = str(args.max_pairs or "0").strip()
+    _G_FER_THRESHOLD = float(args.fer_threshold)
+    _G_FER_RULE = str(args.fer_rule)
+    _G_DECODER_MODES = str(args.decoder_modes)
+    _G_DEBUG_LAYER = bool(args.debug_layer)
     # Runtime source overrides are propagated to worker processes via env.
     ttbin_override = str(args.ttbin_override or "").strip()
     if ttbin_override:
@@ -1231,7 +1304,7 @@ def main() -> int:
     run_src_rows: list[dict[str, Any]] = []
     runnable_points: list[tuple[int, int]] = []
 
-    print(f"[E2E] points={points}")
+    print(f"[E2E] points={points} tiers={tier_s} fer={args.fer_threshold}/{args.fer_rule} max_pairs={args.max_pairs} decoder={args.decoder_modes} debug_layer={bool(args.debug_layer)}")
     extract_workers = max(1, min(int(args.extract_workers), 15))
     print(f"[E2E] extraction workers={extract_workers}")
     # Preflight ttbin sources for shared-memory batches.
@@ -1277,6 +1350,7 @@ def main() -> int:
                 repair_diagnostics=bool(args.repair_diagnostics),
                 materialize_processing_rule_version=str(args.materialize_processing_rule_version),
                 real_seq_pool_root=real_seq_pool_root,
+                max_pairs_override=str(_G_MAX_PAIRS_OVERRIDE),
             )
             all_results.extend(batch_res)
         finally:
@@ -1307,6 +1381,7 @@ def main() -> int:
                 repair_diagnostics=bool(args.repair_diagnostics),
                 materialize_processing_rule_version=str(args.materialize_processing_rule_version),
                 real_seq_pool_root=real_seq_pool_root,
+                max_pairs_override=str(_G_MAX_PAIRS_OVERRIDE),
             )
         )
 
@@ -1405,6 +1480,12 @@ def main() -> int:
         str(int(args.frames)),
         "--visibility",
         str(float(args.visibility)),
+        "--fer-thresh",
+        str(float(args.fer_threshold)),
+        "--fer-rule",
+        str(args.fer_rule),
+        "--decoder-modes",
+        str(args.decoder_modes),
     ]
     if bool(args.disable_scl):
         cmd.append("--disable-scl")

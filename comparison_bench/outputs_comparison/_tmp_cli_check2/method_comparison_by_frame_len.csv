@@ -1,5 +1,0 @@
-frame_len_symbols,method,n_points_success,mean_leak_EC_actual_bits,mean_runtime_s
-4,cascade_lite,37,742.972972972973,0.08370125946050783
-4,layered_ldpc_lite,51,979.1372549019608,0.4203580431394763
-128,cascade_lite,1,364.0,0.0019202000112272
-2048,cascade_lite,1,9496.0,0.0637738000077661

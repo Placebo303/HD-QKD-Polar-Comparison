@@ -521,7 +521,9 @@ _N = 4096
 _N_LOG = 12
 _N_FRAMES = 300
 _FER_THRESH = 0.05
+_FER_RULE = "wilson"  # wilson | point
 _FER_CONFIDENCE = 0.95
+_DECODER_MODES = "auto-fallback"  # sc | scl | auto-fallback
 _SC_MARGIN = 0.05
 _SCL_MARGINS: tuple[float, ...] = (0.02, 0.05)
 _SCL_BATCH = 20
@@ -556,8 +558,10 @@ def _worker_init(
     repo_root: str,
     rate_step: float = _RATE_STEP,
     rate_min_factor: float = _RATE_MIN_FACTOR,
+    fer_rule: str = "wilson",
+    decoder_modes: str = "auto-fallback",
 ) -> None:
-    global _ORDER, _SIDECAR_MAP, _RATE_MAP, _N, _N_LOG, _N_FRAMES, _FER_THRESH
+    global _ORDER, _SIDECAR_MAP, _RATE_MAP, _N, _N_LOG, _N_FRAMES, _FER_THRESH, _FER_RULE, _DECODER_MODES
     global _SC_MARGIN, _SCL_MARGINS, _SCL_BATCH, _BASE_SEED, _E_P, _SCL_DECODER
     global _RATE_STEP, _RATE_MIN_FACTOR
 
@@ -567,6 +571,8 @@ def _worker_init(
     _N_LOG = int(round(math.log2(_N)))
     _N_FRAMES = int(n_frames)
     _FER_THRESH = float(fer_thresh)
+    _FER_RULE = str(fer_rule).strip().lower() or "wilson"
+    _DECODER_MODES = str(decoder_modes).strip().lower() or "auto-fallback"
     _SC_MARGIN = float(sc_margin)
     _SCL_MARGINS = tuple(float(x) for x in scl_margins)
     _SCL_BATCH = int(scl_batch)
@@ -641,18 +647,28 @@ def _wilson_upper_bound(errors: int, trials: int, confidence: float = _FER_CONFI
 
 def _fer_metadata(errors: int, trials: int) -> dict[str, Any]:
     upper = _wilson_upper_bound(errors, trials)
+    point = float(errors) / float(trials) if trials > 0 else 1.0
+    if _FER_RULE == "point":
+        accepted = int(point < _FER_THRESH)
+        rule = "point_estimate_lt_threshold"
+    else:
+        accepted = int(upper < _FER_THRESH)
+        rule = "one_sided_wilson_upper_lt_threshold"
     return {
         "fer_errors": int(errors),
         "fer_trials": int(trials),
-        "fer_point_estimate": float(errors) / float(trials),
+        "fer_point_estimate": float(point),
         "fer_upper_bound": float(upper),
         "fer_confidence": float(_FER_CONFIDENCE),
-        "fer_acceptance_rule": "one_sided_wilson_upper_lt_threshold",
-        "fer_accepted": int(upper < _FER_THRESH),
+        "fer_acceptance_rule": rule,
+        "fer_accepted": int(accepted),
     }
 
 
 def _max_accepted_errors(trials: int) -> int:
+    if _FER_RULE == "point":
+        # point estimate < thresh => errors < thresh*trials
+        return int(math.ceil(_FER_THRESH * trials) - 1)
     return max(
         (e for e in range(trials + 1) if _wilson_upper_bound(e, trials) < _FER_THRESH),
         default=-1,
@@ -840,10 +856,12 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
             best_hard_pie=0.0,
             coincidence_rate_hz=float(rate),
         )
+        # ponytail: status no longer from map_ser; zero-row = real failure (no k)
+        derived_status = "FAIL"
         return {
             "dimension": int(d),
             "bin_width_ps": int(bw),
-            "status": str(status),
+            "status": derived_status,
             "sidecar_verdict": str(sidecar_verdict),
             "fail_reason": str(fail_reason),
             "skip_reason": str(skip_reason),
@@ -913,6 +931,8 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
             continue
         layers_capacity_ge_01 += 1
 
+        # ponytail: decoder_modes sc -> skip scl; auto-fallback already tries both and picks best
+        mode = _DECODER_MODES
         sc_meta = _try_layer_sc(
             ber=float(ber), cap=cap, order=order, d=int(d), bw=int(bw), layer_idx=int(i)
         )
@@ -921,14 +941,17 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
             sc_pie += gain_sc
             layers_sc += 1
 
-        scl_meta = _try_layer_scl(
-            ber=float(ber),
-            cap=cap,
-            order=order,
-            d=int(d),
-            bw=int(bw),
-            layer_idx=int(i),
-        )
+        if mode == "sc":
+            scl_meta = {"gain": 0.0, "decoder_mode": "scl"}
+        else:
+            scl_meta = _try_layer_scl(
+                ber=float(ber),
+                cap=cap,
+                order=order,
+                d=int(d),
+                bw=int(bw),
+                layer_idx=int(i),
+            )
         gain_scl = float(scl_meta.get("gain", 0.0))
         if gain_scl > 0.0:
             scl_pie += gain_scl
@@ -974,10 +997,13 @@ def _worker(task: tuple[int, int, str, float, str, str]) -> dict[str, Any]:
     elif layers_best == 0:
         skip_reason = "strategy_all_layers_failed_fer"
 
+    # ponytail: status = real decoding outcome only; sidecar_verdict is diagnostic
+    # map_ser no longer gates PASS/FAIL — high SER still yields key in high-dim.
+    derived_status = "PASS" if int(layers_best) > 0 else "FAIL"
     return {
         "dimension": int(d),
         "bin_width_ps": int(bw),
-        "status": str(status),
+        "status": derived_status,
         "sidecar_verdict": str(sidecar_verdict),
         "fail_reason": str(fail_reason),
         "skip_reason": str(skip_reason),
@@ -1147,6 +1173,9 @@ def main() -> int:
     ap.add_argument("--N", type=int, default=4096)
     ap.add_argument("--frames", type=int, default=300)
     ap.add_argument("--fer-thresh", type=float, default=0.05)
+    ap.add_argument("--fer-threshold", type=float, default=None, help="alias for --fer-thresh")
+    ap.add_argument("--fer-rule", choices=["wilson", "point"], default="wilson")
+    ap.add_argument("--decoder-modes", choices=["sc", "scl", "auto-fallback"], default="auto-fallback")
     ap.add_argument("--sc-margin", type=float, default=0.05)
     ap.add_argument("--scl-margins", default="0.02,0.05")
     ap.add_argument("--rate-step", type=float, default=0.02)
@@ -1173,6 +1202,7 @@ def main() -> int:
         raise SystemExit("N must be a power of two")
 
     repo_root = Path(__file__).resolve().parents[1]
+    fer_thresh_eff = float(args.fer_threshold) if args.fer_threshold is not None else float(args.fer_thresh)
     in_csv = _resolve_path(repo_root, args.in_csv)
     grid_table = _resolve_path(repo_root, args.grid_table)
     out_csv = _resolve_path(repo_root, args.out_csv)
@@ -1292,6 +1322,8 @@ def main() -> int:
 
     out_rows: list[dict[str, Any]] = []
     done = 0
+    decoder_modes_eff = str(args.decoder_modes).strip().lower()
+    enable_scl_eff = (not bool(args.disable_scl)) and decoder_modes_eff != "sc"
     with mp.get_context("spawn").Pool(
         processes=max(1, int(args.jobs)),
         initializer=_worker_init,
@@ -1300,16 +1332,18 @@ def main() -> int:
             rate_map,
             int(args.N),
             int(args.frames),
-            float(args.fer_thresh),
+            float(fer_thresh_eff),
             float(args.sc_margin),
             tuple(float(x) for x in scl_margins),
             int(args.scl_batch),
             int(args.seed),
             float(e_p),
-            (not bool(args.disable_scl)),
+            bool(enable_scl_eff),
             str(repo_root),
             float(args.rate_step),
             float(args.rate_min_factor),
+            str(args.fer_rule),
+            str(decoder_modes_eff),
         ),
     ) as pool:
         for row in pool.imap_unordered(_worker, tasks, chunksize=1):

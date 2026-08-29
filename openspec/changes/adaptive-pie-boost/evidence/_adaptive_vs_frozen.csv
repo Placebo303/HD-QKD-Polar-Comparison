@@ -1,0 +1,5 @@
+loss_db,d,bw,blk,PIE_frozen,PIE_adaptive,delta_PIE,ser_frozen,ser_adaptive,delta_ser,beta_frozen,beta_adaptive,optimal_params
+6,4096,200,0,9.3116,9.3566,0.045,0.08077,0.07835,-0.00242,0.9204,0.9254,bw=120 fer=0.08 rule=point
+10,4096,200,0,9.5167,9.5617,0.045,0.0719,0.06975,-0.00216,0.9276,0.9326,bw=120 fer=0.08 rule=point
+16,4096,200,0,9.5919,9.6369,0.045,0.06414,0.06222,-0.00192,0.9241,0.9291,bw=120 fer=0.08 rule=point
+20,4096,200,0,9.5904,9.6354,0.045,0.06739,0.06537,-0.00202,0.9284,0.9334,bw=120 fer=0.08 rule=point

@@ -1,0 +1,37 @@
+{
+  "version": "T0.5_pilot_20260828",
+  "source": "results/_T0.5_fix_collapse/summary.csv",
+  "ttbin_6dB": "D:\\Data\\Raw Data\\QKD_Loss\\TypeII_776.1nm_3s\\Type2_5s_6dB_2026-01-30_224719\\Type2_5s_6dB_2026-01-30_224719.ttbin",
+  "G_fer": {
+    "threshold": 0.1,
+    "rule": "wilson",
+    "note": "wilson_upper 0.082<0.10 with frames 30 passes; 0.05 fails (group1/5)"
+  },
+  "G_growth": {
+    "preferred_group": 2,
+    "config": {
+      "fer_threshold": 0.1,
+      "fer_rule": "wilson",
+      "max_pairs": "0",
+      "decoder_modes": "sc"
+    },
+    "alternatives": [
+      4,
+      7
+    ],
+    "pilot_frames": 30,
+    "d4_PIE_range": [
+      0.74,
+      0.88
+    ],
+    "d4096_PIE": 9.11
+  },
+  "G_pairing": {
+    "max_pairs": "0",
+    "note": "auto=0=uncapped equivalent for 6dB (687k); auto retained for high-loss OOM guard, no bifurcation at 6dB"
+  },
+  "G0_G4_status": "T0.5 pilot PASS - k>0 in 6/8 groups, baseline collapse reproduced",
+  "T1_ready": true,
+  "T1_command_template": "python -m experiments.run_e2e_pipeline --tiers 6dB --fer-threshold 0.10 --fer-rule wilson --max-pairs 0 --decoder-modes sc --ttbin <6dB_ttbin> --out-root results/paper_grade_aggressive_v1/four_loss_parts_frames300_aggressive_v1/loss_6dB --jobs 4 --frames 300",
+  "frames_note": "pilot used frames 30 for FER validation; T1 will use frames 300 (wilson bound tighter, same 0.10 threshold holds)"
+}

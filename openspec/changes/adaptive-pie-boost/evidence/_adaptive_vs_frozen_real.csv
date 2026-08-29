@@ -1,0 +1,5 @@
+loss_db,d,bw,blk,PIE_frozen,PIE_adaptive_real,delta_real,optimal_params
+6,4096,200,0,9.3116,9.329,0.0174,bw=120 fer=0.08 point
+10,4096,200,0,9.5167,9.4286,-0.0881,bw=120 fer=0.08 point
+16,4096,200,0,9.5918,9.5235,-0.0683,bw=120 fer=0.08 point
+20,4096,200,0,9.5904,9.6495,0.0591,bw=120 fer=0.08 point
