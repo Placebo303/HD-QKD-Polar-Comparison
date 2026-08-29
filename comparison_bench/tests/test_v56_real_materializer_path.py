@@ -15,12 +15,14 @@ def load_replay():
 def test_real_three_paths_and_first_fork():
     mod=load_replay()
     from src.qkd_io.ttbin_pipeline import TTBinEvents
-    # miniature deterministic fixture: 4 frames [7,8,9,10] period 204800 bin 200
+    # miniature deterministic fixture: fixed frames [0,1,2,3] with frame-0 anchor ensuring global framing non-empty
     PERIOD=204800; BIN=200
     base=1_000_000_000
     times=[]; chans=[]
-    # create 3 pairs per frame with known bins
-    for fid in [7,8,9,10]:
+    # frame-0 anchor ensures tmin at frame 0 so filtering [0,1,2,3] non-empty (distinct bin from loop)
+    t_anchor=base + 0*PERIOD + 700*BIN
+    times.append(t_anchor); chans.append(1); times.append(t_anchor+5); chans.append(5)
+    for fid in [0,1,2,3]:
         for b in [10, 100, 500]:
             t = base + fid*PERIOD + b*BIN
             times.append(t); chans.append(1)
@@ -33,7 +35,7 @@ def test_real_three_paths_and_first_fork():
     cur_params={"delay_used_ps": 50, "bin_width_ps":200, "frame_bins":1024, "coin_window_ps":40000, "ch_a":1, "ch_b":5}
     v13_cfg=mod.build_cfg_from_params(v13_params)
     cur_cfg=mod.build_cfg_from_params(cur_params)
-    v13_st, cur_st, corr_st, first, corr_cfg = mod._recompute_stage_array(events, v13_cfg, cur_cfg, fixed_frames=[7,8,9,10])
+    v13_st, cur_st, corr_st, first, corr_cfg = mod._recompute_stage_array(events, v13_cfg, cur_cfg, fixed_frames=[0,1,2,3])
     # must have 7 stages each
     assert set(v13_st.keys())==set(mod.STAGES)
     assert set(cur_st.keys())==set(mod.STAGES)
@@ -50,5 +52,8 @@ def test_real_three_paths_and_first_fork():
     va=v13_st[first]["array"]; ca=cur_st[first]["array"]
     assert not np.array_equal(va, ca)
     # bin not proxied: bin array distinct object from symbol array and computed via floor_div
-    assert not np.array_equal(v13_st["bin_index"]["array"], v13_st["symbol_1024"]["array"]) or v13_st["bin_index"]["array"].size==0 or np.all(v13_st["bin_index"]["array"]>=1024) or True # just ensure distinct calc note
+    assert not np.array_equal(v13_st["bin_index"]["array"], v13_st["symbol_1024"]["array"]) or v13_st["bin_index"]["array"].size==0 or np.all(v13_st["bin_index"]["array"]>=1024)
     assert "floor_div" in v13_st["bin_index"]["note"] or "bin via" in v13_st["bin_index"]["note"]
+    # downstream must be non-empty when using fixed frames [0,1,2,3] with anchor
+    assert v13_st["symbol_1024"]["array"].size > 0
+    assert v13_st["U1U2"]["array"].size > 0

@@ -159,18 +159,20 @@ def _recompute_stage_array(events: TTBinEvents | None, v13_cfg: dict, cur_cfg: d
     # corrected: copy cur_cfg and replace single V13 param for first fork
     corrected_cfg = dict(cur_cfg)
     if first is not None:
+        # pairing dt includes offset effect, so map pairing to offset as well
         stage_key = {
-            "pairing_index_dt":"coin_window_ps",
+            "pairing_index_dt":"offset_ps",
             "delay_sign_position":"offset_ps",
             "frame_start_period_floor_div":"bin_width_ps",
             "bin_index":"bin_width_ps",
             "symbol_1024":"frame_bins",
             "U1U2":"frame_bins",
         }.get(first)
-        if stage_key and stage_key in v13_cfg:
+        # if mapped key not differing, fall back to first differing param (fail-closed single fix)
+        need = stage_key and stage_key in v13_cfg and v13_cfg.get(stage_key)!=cur_cfg.get(stage_key)
+        if need:
             corrected_cfg[stage_key]=v13_cfg[stage_key]
         else:
-            # fallback: first differing key
             for k in v13_cfg:
                 if v13_cfg.get(k)!=cur_cfg.get(k):
                     corrected_cfg[k]=v13_cfg[k]
@@ -231,14 +233,52 @@ def compare_stage(v13_arr, cur_arr):
     delta=float(np.mean(np.abs(v13_arr.astype(np.float64)-cur_arr.astype(np.float64)))) if v13_arr.size>0 else 0.0
     return eq, delta
 
-def try_load_ttbin_events(ttbin_root: Path, fixed_frames=None):
+def resolve_ttbin_for_source(source_label: str, intake_report_path: Path = Path("comparison_bench/outputs_comparison/v55_intake_20260828/intake_report.json")) -> list[Path]:
+    """Authoritative registry resolver: unique TTBin per source via intake_report provenance, session-filtered."""
+    try:
+        if not intake_report_path.exists():
+            return []
+        j=json.loads(intake_report_path.read_text(encoding="utf-8"))
+        per_source=j.get("per_source",{})
+        name_map={"1M":"20260123_1M_600k_0dB","1p5M":"20260107_PPLN_1p5M","2M":"20260123_2M_1p2M_0dB"}
+        key=name_map.get(source_label, source_label)
+        rec=per_source.get(key,{})
+        prov=rec.get("provenance",[])
+        paths=[]
+        for p in prov:
+            pp=p.get("path") if isinstance(p,dict) else None
+            if pp and Path(pp).suffix==".ttbin":
+                paths.append(Path(pp))
+        # also consider .1.ttbin sibling already in provenance
+        return [p for p in paths if p.exists()]
+    except Exception:
+        return []
+
+def try_load_ttbin_events(ttbin_root: Path, fixed_frames=None, source_label: str | None = None):
+    # authoritative registry first: per-source unique TTBin
+    if source_label is not None:
+        reg_files=resolve_ttbin_for_source(source_label)
+        if reg_files:
+            # filter by registry path contains source/session, pick first unique
+            for f in reg_files:
+                try:
+                    from src.qkd_io.ttbin_pipeline import read_ttbin_events
+                    ev=read_ttbin_events(f)
+                    if ev is not None and ev.time_ps.size>0:
+                        return ev
+                except Exception:
+                    continue
     if not ttbin_root.exists():
         return None
-    # try find .ttbin files
+    # fallback: find .ttbin files filtered by source label if present
     files=list(ttbin_root.rglob("*.ttbin")) if ttbin_root.is_dir() else [ttbin_root] if ttbin_root.suffix==".ttbin" else []
+    if source_label is not None and files:
+        # filter files where path contains source hint
+        filtered=[f for f in files if source_label.lower() in f.name.lower() or source_label.lower() in str(f.parent).lower()]
+        if filtered:
+            files=filtered
     if not files:
         return None
-    # use first file for fixed frames demo (real pipeline would aggregate)
     try:
         from src.qkd_io.ttbin_pipeline import read_ttbin_events
         ev=read_ttbin_events(files[0])
@@ -365,19 +405,23 @@ def main():
     per_source={}
     overall_first=None
     for src_label in ["1M","1p5M","2M"]:
-        # try load TTBin events first
-        ttbin_ev=try_load_ttbin_events(Path(args.ttbin_root)/src_label, frames)
+        # authoritative per-source TTBin via registry, filtered by source/session/registry path
+        ttbin_ev=try_load_ttbin_events(Path(args.ttbin_root)/src_label, frames, source_label=src_label)
         if ttbin_ev is None:
-            # fallback try generic ttbin-root
-            ttbin_ev=try_load_ttbin_events(Path(args.ttbin_root), frames)
+            ttbin_ev=try_load_ttbin_events(Path(args.ttbin_root), frames, source_label=src_label)
         events=ttbin_ev
         # synthetic test injection only
         if events is None:
             if args.allow_synthetic_for_test:
                 rng=np.random.default_rng(hash(src_label)%2**32)
-                # generate raw events for each frame in FIXED frames: 20 pairs per frame
+                # generate raw events for each frame in FIXED frames: 20 pairs per frame, plus frame-0 anchor to ensure global framing non-empty for frames 7..10
                 times=[]; chans=[]
                 base_t = 1_000_000_000 # offset to avoid 0
+                # ponytail: frame-0 anchor ensures tmin corresponds to frame 0, so filtering [7,8,9,10] maps correctly
+                anchor_bin=int(rng.integers(0,1024))
+                t_anchor=base_t + 0*PERIOD_PS + anchor_bin*BIN_WIDTH_PS
+                times.append(t_anchor); chans.append(1)
+                times.append(t_anchor+5); chans.append(5)
                 for fid in frames:
                     for k in range(20):
                         bin_idx = int(rng.integers(0,1024))
