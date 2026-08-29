@@ -180,23 +180,29 @@ def main():
         thr_u1=min(0.5*CE_CURRENT[src]["U1"], CE_V13REF[src]["U1"]+1.0)
         thr_u2=min(0.5*CE_CURRENT[src]["U2"], CE_V13REF[src]["U2"]+1.0)
         pre[src]={"CE_current_U1":CE_CURRENT[src]["U1"],"CE_current_U2":CE_CURRENT[src]["U2"],"CE_V13ref_U1":CE_V13REF[src]["U1"],"CE_V13ref_U2":CE_V13REF[src]["U2"],"CE_thresh_U1":round(thr_u1,4),"CE_thresh_U2":round(thr_u2,4)}
-    # load replay lineage: lineage_ok = T_AUTH1 && T_AUTH2 && sidecar_lineage_ok, any fail => contract_equivalent false, UNRESOLVED, ban DOMAIN_SHIFT
+    # load replay lineage: strict fail-closed, no fallback
+    # manifest must exist, parse ok, exactly 3 sources, each lineage_ok && T_AUTH1 && T_AUTH2 else UNRESOLVED
     replay_lineage={}
+    replay_manifest_ok=False
     try:
         rm = Path(args.replay_manifest)
-        # try R3 then R2
         if not rm.exists():
-            alt = Path("openspec/changes/formal-ir-v56-input-contract-reconstruction/verification_manifest_r3.json")
-            if alt.exists(): rm = alt
-        if rm.exists():
+            replay_manifest_ok=False
+            replay_lineage={}
+        else:
             rj=json.loads(rm.read_text(encoding="utf-8"))
-            for k,v in rj.get("per_stage_per_source",{}).items():
-                replay_lineage[k]= bool(v.get("lineage_ok") and v.get("gold_anchor_TAUTH1_current_vs_parquet_100pct") is True and v.get("gold_anchor_TAUTH2_v13_vs_persisted_100pct") is True)
-            # if manifest missing lineage_ok field (old), fallback to lineage string check
-            if not replay_lineage:
-                for k,v in rj.get("per_stage_per_source",{}).items():
-                    replay_lineage[k]= (v.get("lineage")=="OK_same_three_functions")
-    except: replay_lineage={}
+            per=rj.get("per_stage_per_source",{})
+            # ponytail: strict 3-source check, fail-closed
+            if not isinstance(per, dict) or set(per.keys()) != {"1M","1p5M","2M"}:
+                replay_manifest_ok=False
+                replay_lineage={}
+            else:
+                for k,v in per.items():
+                    replay_lineage[k]= bool(v.get("lineage_ok") is True and v.get("gold_anchor_TAUTH1_current_vs_parquet_100pct") is True and v.get("gold_anchor_TAUTH2_v13_vs_persisted_100pct") is True)
+                replay_manifest_ok=True
+    except:
+        replay_lineage={}
+        replay_manifest_ok=False
     per_source={}
     for src in ["1M","1p5M","2M"]:
         ttbin_path=_resolve_ttbin(src, Path(args.ttbin_root))
@@ -275,13 +281,14 @@ def main():
             else:
                 per_stage={s:{"array_equal":False,"note":"EVIDENCE_INVALID_TTBin_unavailable"} for s in STAGES}; contract_equivalent=False; rate_eq=0; ce_u1=ce_u2=acc_u1=acc_u2=float('nan'); n_pairs_new=0; per_frame_ok=False; df=None
         thr=pre[src]
-        # authority lineage gate: if replay lineage not ok, force contract false, UNRESOLVED_s, ban DOMAIN_SHIFT
-        auth_lineage_ok = replay_lineage.get(src, True) if replay_lineage else True
-        # if manifest exists and indicates failure, enforce
-        if src in replay_lineage and not replay_lineage[src]:
+        # authority lineage gate: fail-closed default False, missing/parse fail/source incomplete => UNRESOLVED_s, ban DOMAIN_SHIFT
+        auth_lineage_ok = replay_lineage.get(src, False)
+        if not replay_manifest_ok or src not in replay_lineage:
+            auth_lineage_ok=False
+        # if manifest indicates failure, enforce contract false
+        if not auth_lineage_ok:
             contract_equivalent=False
             per_stage={s:{"array_equal":False,"note":per_stage[s]["note"]+" | AUTHORITY_LINEAGE_INCOMPLETE"} for s in STAGES}
-            auth_lineage_ok=False
         try: dist_ok=(rate_eq>0.60 and acc_u1>=0.60 and acc_u2>=0.60 and ce_u1<=thr["CE_thresh_U1"] and ce_u2<=thr["CE_thresh_U2"])
         except: dist_ok=False
         timing_ok=True if args.allow_synthetic_for_test and ttbin_path is None else (corr_status=="OK")
@@ -292,8 +299,8 @@ def main():
         elif contract_equivalent and dist_ok: shunt="RECOVERED_s"
         else: shunt="DOMAIN_SHIFT_s"
         per_source[src]={"contract_equivalent":bool(contract_equivalent),"per_stage_contract":per_stage,"A_eq_rate":round(float(rate_eq),4) if not math.isnan(rate_eq) else None,"acc_U1":round(float(acc_u1),4) if not math.isnan(acc_u1) else None,"acc_U2":round(float(acc_u2),4) if not math.isnan(acc_u2) else None,"CE_U1":round(float(ce_u1),4) if not math.isnan(ce_u1) else None,"CE_U2":round(float(ce_u2),4) if not math.isnan(ce_u2) else None,"CE_thresh_U1":thr["CE_thresh_U1"],"CE_thresh_U2":thr["CE_thresh_U2"],"distribution_compatible":bool(dist_ok),"timing_complete":bool(timing_ok),"routing_complete":bool(routing_ok),"pass_s":pass_s,"shunt_s":shunt,"n_pairs_new":n_pairs_new,"per_frame_256_ok": bool(per_frame_ok), "provenance":{"ttbin_abs_path":str(ttbin_path.resolve()) if ttbin_path and Path(ttbin_path).exists() else None,"sidecar_abs_path":str((_resolve_sidecar(Path(args.corrected_sidecars),src)[0].resolve())) if _resolve_sidecar(Path(args.corrected_sidecars),src)[0] else None}}
-    # overall must respect authority lineage: if any source UNRESOLVED due to authority, overall cannot be DOMAIN_SHIFT or RECOVERED
-    any_authority_fail = any(not replay_lineage.get(s, True) for s in ["1M","1p5M","2M"]) if replay_lineage else False
+    # overall must respect authority lineage: fail-closed, any missing/parse fail/source incomplete => authority fail
+    any_authority_fail = (not replay_manifest_ok) or any(not replay_lineage.get(s, False) for s in ["1M","1p5M","2M"])
     uniq=set(v["shunt_s"] for v in per_source.values())
     if len(set(new_frames)&v55_frames)!=0 or len(set(new_frames)&set([7,8,9,10,15,16,17,18]))!=0:
         overall="V56_EVIDENCE_INVALID"
