@@ -3,7 +3,6 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import numpy as np
-import tempfile
 import json
 import time
 from comparison_bench.formal_ir.v64_full_symbol_verification import (
@@ -274,28 +273,27 @@ def test_summary_terminal_states():
     assert payload3["terminal"] == "V64_PAUSE_TAG_CANONICAL_INVESTIGATION"
 
 
-def test_partial_retention_on_interrupt():
-    # simulate interrupt writing partial records, no summary
-    with tempfile.TemporaryDirectory() as td:
-        out = Path(td) / "run_01"
-        out.mkdir()
-        acct = V64CallAccounting()
-        # create 10 fake records then simulate interrupt
-        recs = []
-        for i in range(10):
-            acct.register_start("l1"); acct.register_complete("l1")
-            acct.register_start("base"); acct.register_complete("base")
-            s_true = np.arange(1024, dtype=np.int64) % 1024
-            u1_t, u2_t = decompose_symbols(s_true)
-            rec = build_instrumented_record(f"b{i}", "1M", [1600+i*4, 1601+i*4, 1602+i*4, 1603+i*4], u1_t, u2_t, u1_t, u2_t, True, True, "base", 2)
-            recs.append(rec)
-        # emulate except block: write partial + interrupted notice, no summary
-        (out / "v64_records.json").write_text(json.dumps(recs, indent=2), encoding="utf-8")
-        (out / "v64_interrupted.json").write_text(json.dumps({"interrupted": True, "error": "KeyboardInterrupt", "total_calls": acct.completed, "records_written": len(recs)}, indent=2), encoding="utf-8")
-        assert (out / "v64_records.json").is_file()
-        data = json.loads((out / "v64_records.json").read_text(encoding="utf-8"))
-        assert len(data) == 10  # partial retained, not []
-        assert not (out / "v64_summary.json").exists()
-        assert (out / "v64_interrupted.json").is_file()
-        intr = json.loads((out / "v64_interrupted.json").read_text(encoding="utf-8"))
-        assert intr["interrupted"] is True and intr["records_written"] == 10
+def test_partial_retention_on_interrupt(tmp_path):
+    # ponytail: tmp_path avoids Windows ACL on TemporaryDirectory
+    out = tmp_path / "run_01"
+    out.mkdir()
+    acct = V64CallAccounting()
+    # create 10 fake records then simulate interrupt
+    recs = []
+    for i in range(10):
+        acct.register_start("l1"); acct.register_complete("l1")
+        acct.register_start("base"); acct.register_complete("base")
+        s_true = np.arange(1024, dtype=np.int64) % 1024
+        u1_t, u2_t = decompose_symbols(s_true)
+        rec = build_instrumented_record(f"b{i}", "1M", [1600+i*4, 1601+i*4, 1602+i*4, 1603+i*4], u1_t, u2_t, u1_t, u2_t, True, True, "base", 2)
+        recs.append(rec)
+    # emulate except block: write partial + interrupted notice, no summary
+    (out / "v64_records.json").write_text(json.dumps(recs, indent=2), encoding="utf-8")
+    (out / "v64_interrupted.json").write_text(json.dumps({"interrupted": True, "error": "KeyboardInterrupt", "total_calls": acct.completed, "records_written": len(recs)}, indent=2), encoding="utf-8")
+    assert (out / "v64_records.json").is_file()
+    data = json.loads((out / "v64_records.json").read_text(encoding="utf-8"))
+    assert len(data) == 10  # partial retained, not []
+    assert not (out / "v64_summary.json").exists()
+    assert (out / "v64_interrupted.json").is_file()
+    intr = json.loads((out / "v64_interrupted.json").read_text(encoding="utf-8"))
+    assert intr["interrupted"] is True and intr["records_written"] == 10
