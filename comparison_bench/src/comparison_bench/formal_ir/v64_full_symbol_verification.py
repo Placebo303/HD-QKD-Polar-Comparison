@@ -394,3 +394,105 @@ class V64CallAccounting:
         if self.completed_l2 < 24 or self.completed_l2 > 72:
             errs.append(f"l2 {self.completed_l2} not in 24-72")
         return errs
+
+
+def build_v64_summary_payload(records: list[dict[str, Any]], registry: list[dict[str, Any]], acct: V64CallAccounting, t0: float, head_sha: str) -> dict[str, Any]:
+    import time
+    elapsed = time.time() - t0
+    # overall counts
+    def _cnt(key: str) -> int:
+        return sum(1 for r in records if r.get(key))
+    total = len(records)
+    exact_u1 = _cnt("exact_u1")
+    exact_l2 = _cnt("exact_l2")
+    exact_full = _cnt("exact_full")
+    accepted_l2 = _cnt("accepted_l2")
+    accepted_full = _cnt("accepted_full")
+    undetected_l2 = _cnt("undetected_l2")
+    undetected_full = _cnt("undetected_full")
+    intercepted = _cnt("intercepted_u1_only")
+    # per-source
+    per_source: dict[str, Any] = {}
+    for src in SOURCE_ORDER:
+        recs = [r for r in records if r.get("source") == src]
+        per_source[src] = {
+            "blocks": len(recs),
+            "exact_u1": sum(1 for r in recs if r.get("exact_u1")),
+            "exact_l2": sum(1 for r in recs if r.get("exact_l2")),
+            "exact_full": sum(1 for r in recs if r.get("exact_full")),
+            "accepted_l2": sum(1 for r in recs if r.get("accepted_l2")),
+            "accepted_full": sum(1 for r in recs if r.get("accepted_full")),
+            "undetected_l2": sum(1 for r in recs if r.get("undetected_l2")),
+            "undetected_full": sum(1 for r in recs if r.get("undetected_full")),
+            "intercepted_u1_only": sum(1 for r in recs if r.get("intercepted_u1_only")),
+        }
+        per_source[src]["exact_full_gate_6_8"] = per_source[src]["exact_full"] >= 6
+        per_source[src]["undetected_full_gate_0"] = per_source[src]["undetected_full"] == 0
+    # gates
+    gate_overall_exact = exact_full >= 19
+    gate_per_source = all(per_source[s]["exact_full"] >= 6 for s in SOURCE_ORDER) if total == 24 else False
+    gate_undetected = undetected_full == 0
+    all_exact_tag_ok = all(r.get("tag_ok_full") for r in records if r.get("exact_full"))
+    gates_pass = gate_overall_exact and gate_per_source and gate_undetected and all_exact_tag_ok and not acct.validate()
+    # five-state terminal
+    has_u2_wrong_tag_ok = any((not r.get("exact_l2")) and r.get("tag_ok_full") for r in records)
+    if acct.validate():
+        terminal = "V64_EVIDENCE_INVALID"
+    elif has_u2_wrong_tag_ok:
+        terminal = "V64_PAUSE_TAG_CANONICAL_INVESTIGATION"
+    elif gates_pass:
+        terminal = "V64_FULL_SYMBOL_VERIFICATION_PASS"
+    elif exact_full > 0 and (not gate_undetected or not all_exact_tag_ok):
+        terminal = "V64_CORRECTION_WORKS_VERIFICATION_STILL_FAILS"
+    elif not gate_overall_exact or not gate_per_source:
+        terminal = "V64_CORRECTION_PERFORMANCE_FAIL"
+    else:
+        terminal = "V64_EVIDENCE_INVALID"
+    # stage / leak / runtime
+    from collections import Counter
+    stage_cnt = Counter(r.get("stage_used") for r in records)
+    leak_total = sum(r.get("leak_total", 0) for r in records)
+    per_src_leak = {s: sum(r.get("leak_total", 0) for r in records if r.get("source") == s) for s in SOURCE_ORDER}
+    # L2 vs full diff
+    l2_vs_full = {
+        "delta_accepted": accepted_l2 - accepted_full,
+        "delta_undetected": undetected_l2 - undetected_full,
+        "delta_tag_ok": sum(1 for r in records if r.get("tag_ok_l2")) - sum(1 for r in records if r.get("tag_ok_full")),
+        "per_source": {s: {
+            "delta_accepted": per_source[s]["accepted_l2"] - per_source[s]["accepted_full"],
+            "delta_undetected": per_source[s]["undetected_l2"] - per_source[s]["undetected_full"],
+        } for s in SOURCE_ORDER},
+    }
+    return {
+        "accepted_plan_sha": ACCEPTED_PLAN_SHA,
+        "head_sha": head_sha,
+        "total_blocks": len(registry),
+        "total_calls": acct.completed,
+        "hard_cap": HARD_CAP,
+        "elapsed_s": elapsed,
+        "exact_u1": exact_u1,
+        "exact_l2": exact_l2,
+        "exact_full": exact_full,
+        "exact_u1_str": f"{exact_u1}/{total}" if total else "0/0",
+        "exact_l2_str": f"{exact_l2}/{total}" if total else "0/0",
+        "exact_full_str": f"{exact_full}/{total}" if total else "0/0",
+        "accepted_l2": accepted_l2,
+        "accepted_full": accepted_full,
+        "undetected_l2": undetected_l2,
+        "undetected_full": undetected_full,
+        "intercepted_u1_only": intercepted,
+        "per_source": per_source,
+        "gates": {
+            "exact_full_19_24": gate_overall_exact,
+            "per_source_6_8": gate_per_source,
+            "undetected_full_0": gate_undetected,
+            "all_exact_tag_ok_full": bool(all_exact_tag_ok),
+            "overall_pass": bool(gates_pass),
+        },
+        "terminal": terminal,
+        "stage_used": dict(stage_cnt),
+        "calls": {"total": acct.completed, "l2": acct.completed_l2, "l1": acct.completed_l1, "base": acct.completed_base, "stage1": acct.completed_stage1, "stage2": acct.completed_stage2},
+        "leak": {"total": leak_total, "per_source": per_src_leak},
+        "l2_vs_full": l2_vs_full,
+        "registry": registry,
+    }
