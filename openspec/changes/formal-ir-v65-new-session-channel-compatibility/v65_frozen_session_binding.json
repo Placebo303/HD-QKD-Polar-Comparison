@@ -1,0 +1,11 @@
+{
+  "schema": "v65_frozen_binding_v1",
+  "note": "FROZEN explicit CAL/TEST session binding per source - must exactly match new session directory names; missing/multi/drift => DATA_NOT_READY; prevents sess[0]/sess[1] auto-pick silent swap",
+  "per_source": {
+    "1M": {"CAL_session_id": "CAL_1M_2026_PENDING", "TEST_session_id": "TEST_1M_2026_PENDING"},
+    "1p5M": {"CAL_session_id": "CAL_1p5M_2026_PENDING", "TEST_session_id": "TEST_1p5M_2026_PENDING"},
+    "2M": {"CAL_session_id": "CAL_2M_2026_PENDING", "TEST_session_id": "TEST_2M_2026_PENDING"}
+  },
+  "created_at": "2026-08-31",
+  "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / FROZEN"
+}

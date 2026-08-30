@@ -13,6 +13,8 @@ five states EVIDENCE_INVALID > DATA_NOT_READY > MODEL_NOT_STABLE > RATE_INCOMPAT
 Strict V56 reuse, DECODER_FREE (no dec call), TEST never read statistics.
 ponytail: numpy only, 1024x1024 int32, 4096*256 CAL, 4-fold CV O(Q^2) Q=1024 small, bounded refine after grid.
 If no CAL data / sidecar missing / frame insufficient / forbidden missing -> DATA_NOT_READY spike.
+Binding: frozen explicit per-source CAL/TEST session IDs; V66 PENDING until both registries exist.
+not_cross_spliced: real sidecar/session provenance, not gap heuristic.
 """
 import argparse, json, sys, math
 from pathlib import Path
@@ -27,6 +29,10 @@ TAG_BITS = 64
 CE_CHAIN_TOL = 1e-9
 FROZEN_LEAK = {"1M": 1144, "1p5M": 1174, "2M": 1184}
 SOURCES = ["1M", "1p5M", "2M"]
+DEFAULT_BINDING_PATHS = [
+    Path("openspec/changes/formal-ir-v65-new-session-channel-compatibility/v65_frozen_session_binding.json"),
+    Path("scripts/v65_frozen_binding.json"),
+]
 
 def hierarchical_P(C_ab, P_global, N_b, lam):
     P = (C_ab + lam * P_global[None, :]) / (N_b[:, None] + lam)
@@ -49,10 +55,6 @@ def check_tuple_zero_overlap(cal_keys, val_keys, test_keys, forbidden_keys):
         "key": "(source,session,frame)",
         "forbidden_size": len(forb),
     }
-
-def check_v66_equals_v65_test(v65_test_keys, v66_keys):
-    a, b = set(v65_test_keys), set(v66_keys)
-    return {"equals": a == b, "v65_len": len(a), "v66_len": len(b), "sym_diff": len(a ^ b)}
 
 def check_delay_peak_gate(delay_ps, peak_ps, sigma_ps, gate_ps, threshold_ps):
     if delay_ps is None or peak_ps is None:
@@ -109,6 +111,23 @@ def load_forbidden_keys(extra=None):
             continue
     return keys
 
+def load_frozen_binding(explicit_path=None):
+    path = Path(explicit_path) if explicit_path else None
+    if path and path.exists():
+        try:
+            j = json.loads(path.read_text(encoding="utf-8"))
+            return j.get("per_source", j), str(path)
+        except Exception:
+            return None, str(path) if path else None
+    for cand in DEFAULT_BINDING_PATHS:
+        if cand.exists():
+            try:
+                j = json.loads(cand.read_text(encoding="utf-8"))
+                return j.get("per_source", j), str(cand)
+            except Exception:
+                continue
+    return None, None
+
 def find_pairs_file(session_dir: Path):
     if session_dir is None:
         return None
@@ -140,9 +159,27 @@ def load_sidecar_provenance(sidecar_path: Path):
         sigma=j.get("sigma_ps", j.get("sigma", diag.get("sigma_ps", 80)))
         gate=j.get("gate_ps", j.get("gate", mat.get("gate_ps", 200)))
         thr=j.get("threshold_ps", j.get("threshold", mat.get("threshold_ps", 40000)))
-        return {"delay": delay, "peak": peak, "sigma": sigma, "gate": gate, "thr": thr, "raw": j}
+        sess_id=j.get("session_id", j.get("session", mat.get("session_id")))
+        return {"delay": delay, "peak": peak, "sigma": sigma, "gate": gate, "thr": thr, "session_id": sess_id, "raw": j}
     except Exception as e:
-        return {"error": str(e), "delay": None, "peak": None}
+        return {"error": str(e), "delay": None, "peak": None, "session_id": None}
+
+def check_not_cross_spliced_by_provenance(cal_sess_id, val_sess_id, test_sess_id, cal_sidecar, test_sidecar):
+    if cal_sess_id is None or test_sess_id is None:
+        return False, {"reason": "missing session id"}
+    if cal_sess_id == test_sess_id:
+        return False, {"reason": "CAL and TEST same session"}
+    if val_sess_id is not None and cal_sess_id != val_sess_id:
+        return False, {"reason": "CAL and VAL session mismatch"}
+    if cal_sidecar and cal_sidecar.get("session_id") is not None:
+        if str(cal_sidecar["session_id"]) != str(cal_sess_id):
+            return False, {"reason": "CAL sidecar drift", "sidecar": cal_sidecar["session_id"], "dir": cal_sess_id}
+    if test_sidecar and test_sidecar.get("session_id") is not None:
+        if str(test_sidecar["session_id"]) != str(test_sess_id):
+            return False, {"reason": "TEST sidecar drift", "sidecar": test_sidecar["session_id"], "dir": test_sess_id}
+    if cal_sidecar is None or test_sidecar is None:
+        return False, {"reason": "sidecar missing for provenance"}
+    return True, {"cal": cal_sess_id, "val": val_sess_id, "test": test_sess_id}
 
 def load_pairs_for_frames(pairs_path: Path, frame_ids):
     import pandas as pd
@@ -150,7 +187,6 @@ def load_pairs_for_frames(pairs_path: Path, frame_ids):
     if not {"frame_id","alice_symbol","bob_symbol"}.issubset(df.columns):
         raise ValueError(f"missing columns {df.columns.tolist()}")
     sub=df[df.frame_id.isin(frame_ids)].sort_values(["frame_id","pair_idx"] if "pair_idx" in df.columns else ["frame_id"])
-    # verify 256 per frame
     g=sub.groupby("frame_id").size()
     if not all(v==256 for v in g.values):
         raise ValueError(f"pairs_per_frame violation {g[g!=256].to_dict()}")
@@ -169,7 +205,6 @@ def discover_per_source_sessions(new_root: Path):
         if sp and sp.exists() and sp.is_dir():
             per[src]=sorted([p for p in sp.iterdir() if p.is_dir()])
         else:
-            # fallback token search
             lst=[]
             if new_root and new_root.exists():
                 for p in new_root.iterdir():
@@ -184,13 +219,19 @@ def discover_per_source_sessions(new_root: Path):
             per[src]=sorted(lst)
     return per
 
+def resolve_sessions_by_binding(sess_dirs, expected_cal_id, expected_test_id):
+    cal_cands = [p for p in sess_dirs if p.name == expected_cal_id] if expected_cal_id else []
+    test_cands = [p for p in sess_dirs if p.name == expected_test_id] if expected_test_id else []
+    cal_dir = cal_cands[0] if len(cal_cands)==1 else None
+    test_dir = test_cands[0] if len(test_cands)==1 else None
+    return cal_dir, test_dir, len(cal_cands)==1, len(test_cands)==1, len(cal_cands), len(test_cands)
+
 def estimate_source(cal_pairs, val_pairs, lam_bounds=(-2,4)):
     if cal_pairs is None:
         return None
     a_cal, b_cal = cal_pairs
     a_val, b_val = val_pairs
     N_cal = len(a_cal)
-    # ponytail: 4096*256=1048576, VAL 512*256=131072 validated upstream
     C_ab = np.zeros((Q, Q), dtype=np.int32)
     np.add.at(C_ab, (b_cal, a_cal), 1)
     N_b = C_ab.sum(axis=1).astype(np.float64)
@@ -219,13 +260,10 @@ def estimate_source(cal_pairs, val_pairs, lam_bounds=(-2,4)):
     idx = int(np.argmin(grid_cv))
     lam_star_grid = float(grid_lam[idx])
     cv_star_grid = float(grid_cv[idx])
-    # ponytail: bounded refine continuous optimization after 50 grid (ternary/bisection, no new dep)
     lo_log = max(lam_bounds[0], grid_log[max(0, idx-1)])
     hi_log = min(lam_bounds[1], grid_log[min(len(grid_log)-1, idx+1)])
-    # refine with golden-section like search 30 iterations
     best_log = float(grid_log[idx])
     best_cv = float(grid_cv[idx])
-    # expand window slightly for refine
     lo_log = max(lam_bounds[0], best_log - 0.6)
     hi_log = min(lam_bounds[1], best_log + 0.6)
     for _ in range(35):
@@ -246,7 +284,6 @@ def estimate_source(cal_pairs, val_pairs, lam_bounds=(-2,4)):
     lam_star = float(10**best_log)
     cv_star = float(best_cv)
     at_boundary = (best_log <= lam_bounds[0]+1e-6) or (best_log >= lam_bounds[1]-1e-6)
-    # also if grid optimum at boundary and refine stays at boundary -> boundary
     P_star = hierarchical_P(C_ab.astype(np.float64), P_global, N_b, lam_star)
     H = entropy_H(P_star, P_b)
     P_u1 = P_star.reshape(Q, 32, 32).sum(axis=2)
@@ -284,7 +321,6 @@ def estimate_source(cal_pairs, val_pairs, lam_bounds=(-2,4)):
         "H": float(H), "H1": float(H1), "H2": float(H2), "chain_delta_H": float(chain_delta_H),
         "CE1": float(ce1), "CE2": float(ce2), "CE_full": float(ce_full), "chain_delta_CE": float(chain_delta_CE),
         "required_m1": int(m1), "required_m2": int(m2), "required_m_total": int(m_total), "required_leak": int(leak_required),
-        # legacy aliases
         "m1": int(m1), "m2": int(m2), "m_total": int(m_total), "leak": int(leak_required), "m1_raw": int(m1), "m2_raw": int(m2),
         "m_H1": int(m_H1), "m_H2": int(m_H2),
         "MAP": float(MAP), "unseen": float(unseen),
@@ -299,40 +335,44 @@ def main():
     ap.add_argument("--test-registry", default=None, help="TEST registry path - never read statistics")
     ap.add_argument("--v66-registry", default=None, help="V66 registry to check equals V65 TEST")
     ap.add_argument("--forbidden-registry", default=None)
+    ap.add_argument("--frozen-binding", default=None, help="frozen explicit CAL/TEST session binding json")
     ap.add_argument("--out", default="v65_channel_compatibility.json")
     ap.add_argument("--report", default="V65_CHANNEL_COMPATIBILITY_REPORT.md")
     ap.add_argument("--data-registry", default="v65_data_registry.json")
     args = ap.parse_args()
 
     new_root = Path(args.new_session_root) if args.new_session_root else (Path(args.cal_root) if args.cal_root else None)
-    # data_ready requires real parquet per source with 4096*256 and 512*256
     per_source = {}
     forbidden_keys = load_forbidden_keys([args.forbidden_registry, args.test_registry])
     forbidden_nonempty = len(forbidden_keys) > 0
+    binding, binding_path = load_frozen_binding(args.frozen_binding)
+    binding_ok = binding is not None
     overall = "V65_EVIDENCE_INVALID"
     data_ready = False
     per_src_sessions = {}
-    if new_root and new_root.exists():
+    if new_root and new_root.exists() and binding_ok:
         per_src_sessions = discover_per_source_sessions(new_root)
-        # check each source has at least 2 sessions with parquet + sidecar
         ok_all = True
         for src in SOURCES:
             sess = per_src_sessions.get(src, [])
-            if len(sess) < 2:
+            exp_cal = binding.get(src, {}).get("CAL_session_id") or binding.get(src, {}).get("CAL")
+            exp_test = binding.get(src, {}).get("TEST_session_id") or binding.get(src, {}).get("TEST")
+            cal_dir, test_dir, cal_ok, test_ok, _, _ = resolve_sessions_by_binding(sess, exp_cal, exp_test)
+            if not (cal_ok and test_ok):
                 ok_all = False
                 break
-            cal_dir = sess[0]; test_dir = sess[1]
             if find_pairs_file(cal_dir) is None or find_pairs_file(test_dir) is None:
                 ok_all = False
                 break
-            if find_sidecar_file(cal_dir, cal_dir.name) is None:
+            if find_sidecar_file(cal_dir, cal_dir.name) is None or find_sidecar_file(test_dir, test_dir.name) is None:
                 ok_all = False
                 break
-        data_ready = bool(ok_all and forbidden_nonempty)
-        # also need sufficient frames check quickly
+        data_ready = bool(ok_all and forbidden_nonempty and binding_ok)
         if data_ready:
             for src in SOURCES:
-                cal_dir = per_src_sessions[src][0]
+                exp_cal = binding.get(src, {}).get("CAL_session_id") or binding.get(src, {}).get("CAL")
+                sess = per_src_sessions[src]
+                cal_dir, _, _, _, _, _ = resolve_sessions_by_binding(sess, exp_cal, binding.get(src, {}).get("TEST_session_id"))
                 pf = find_pairs_file(cal_dir)
                 try:
                     import pandas as pd
@@ -347,16 +387,17 @@ def main():
         data_ready = False
 
     if not data_ready:
-        overall = "V65_DATA_NOT_READY" if not forbidden_nonempty or not (new_root and new_root.exists()) or any(len(per_src_sessions.get(s, []))<2 for s in SOURCES) else "V65_DATA_NOT_READY"
-        # distinguish missing sidecar/frames/forbidden -> still DATA_NOT_READY (or EVIDENCE_INVALID if spliced)
-        # ensure never READY when data missing
+        overall = "V65_DATA_NOT_READY"
         for src in SOURCES:
             sess = per_src_sessions.get(src, [])
             has_sidecar = False
             has_frames = False
             frame_detail = {}
-            if sess and len(sess)>=1:
-                pf=find_pairs_file(sess[0])
+            exp_cal = binding.get(src, {}).get("CAL_session_id") if binding else None
+            exp_test = binding.get(src, {}).get("TEST_session_id") if binding else None
+            if sess and binding_ok and exp_cal:
+                cal_dir, _, cal_ok, test_ok, _, _ = resolve_sessions_by_binding(sess, exp_cal, exp_test)
+                pf=find_pairs_file(cal_dir) if cal_dir else None
                 if pf and pf.exists():
                     try:
                         import pandas as pd
@@ -365,45 +406,43 @@ def main():
                         frame_detail={"n_frames": df.frame_id.nunique(), "n_pairs": len(df)}
                     except Exception as e:
                         frame_detail={"error": str(e)}
-                has_sidecar = find_sidecar_file(sess[0], sess[0].name) is not None
+                # sidecar check for CAL
+                has_sidecar = find_sidecar_file(cal_dir, cal_dir.name) is not None if cal_dir else False
             per_source[src] = {
                 "status": "DATA_NOT_READY",
-                "note": "no CAL_SESSION real parquet 4096*256+512*256 or sidecar missing or forbidden empty - spike dry-run",
+                "note": "no CAL_SESSION per frozen binding or sidecar/frames/forbidden missing - spike",
                 "has_sidecar": has_sidecar, "has_frames": has_frames, "frame_detail": frame_detail,
                 "G1": None, "G2": None, "G3": None, "G4": None, "G5": None, "G6": None, "G7": None, "G7_aux": None, "G8": None, "PASS": False,
                 "lam_star": None, "at_boundary": None, "H": None, "H1": None, "H2": None,
                 "CE1": None, "CE2": None, "CE_full": None, "chain_delta_CE": None, "chain_delta_H": None,
                 "cv_nll": None, "val_nll": None, "d_nll": None, "MAP": None, "unseen": None,
                 "effective_contexts": None, "required_m1": None, "required_m2": None, "required_m_total": None, "required_leak": None, "frozen_m2": G_THRESH["m2"][src], "frozen_m_total": G_THRESH["m_total"][src], "frozen_m1": G_THRESH["m1"], "frozen_leak": FROZEN_LEAK[src],
-                "forbidden_nonempty": forbidden_nonempty,
+                "forbidden_nonempty": forbidden_nonempty, "frozen_binding_ok": binding_ok, "frozen_binding_path": binding_path,
             }
-        if not forbidden_nonempty:
-            overall = "V65_DATA_NOT_READY"
     else:
-        # real data path: load per source CAL 4096*256 and VAL 512*256
         for src in SOURCES:
+            exp_cal = binding.get(src, {}).get("CAL_session_id") or binding.get(src, {}).get("CAL")
+            exp_test = binding.get(src, {}).get("TEST_session_id") or binding.get(src, {}).get("TEST")
             sess = per_src_sessions[src]
-            cal_dir = sess[0]
+            cal_dir, test_dir, _, _, _, _ = resolve_sessions_by_binding(sess, exp_cal, exp_test)
             cal_pairs_path = find_pairs_file(cal_dir)
             sidecar_path = find_sidecar_file(cal_dir, cal_dir.name)
-            prov = load_sidecar_provenance(sidecar_path) if sidecar_path else {"delay": None, "peak": None}
-            # determine real frame_ids from parquet
+            test_sidecar_path = find_sidecar_file(test_dir, test_dir.name)
+            prov = load_sidecar_provenance(sidecar_path) if sidecar_path else {"delay": None, "peak": None, "session_id": None}
+            test_prov = load_sidecar_provenance(test_sidecar_path) if test_sidecar_path else {"delay": None, "peak": None, "session_id": None}
             import pandas as pd
             df = pd.read_parquet(cal_pairs_path)
             all_fids = sorted(df.frame_id.unique().tolist())
             cal_fids = all_fids[0:4096]
             val_fids = all_fids[4096:4096+512]
-            test_fids = []  # not read
-            # load pairs
             try:
                 a_cal, b_cal = load_pairs_for_frames(cal_pairs_path, cal_fids)
                 a_val, b_val = load_pairs_for_frames(cal_pairs_path, val_fids)
             except Exception as e:
                 per_source[src] = {"status": f"EVIDENCE_INVALID frame violation {e}", "G1": False, "PASS": False, "forbidden_nonempty": forbidden_nonempty, "frozen_m2": G_THRESH["m2"][src], "frozen_m_total": G_THRESH["m_total"][src], "frozen_m1": G_THRESH["m1"], "frozen_leak": FROZEN_LEAK[src]}
                 continue
-            # need 1048576 and 131072 validation: already ensured via frame count
-            assert len(a_cal)==4096*256, f"CAL sample {len(a_cal)} !=1048576"
-            assert len(a_val)==512*256, f"VAL sample {len(a_val)} !=131072"
+            assert len(a_cal)==4096*256
+            assert len(a_val)==512*256
             res = estimate_source((a_cal,b_cal),(a_val,b_val))
             g1_ok, g1_det = check_delay_peak_gate(prov.get("delay"), prov.get("peak"), prov.get("sigma", 80), prov.get("gate", 200), prov.get("thr", 40000))
             G1 = g1_ok
@@ -416,10 +455,8 @@ def main():
             G7_aux = res["required_m_total"] <= G_THRESH["m_total"][src]
             ce_chain_ok = res["chain_delta_CE"] < CE_CHAIN_TOL
             h_chain_ok = res["chain_delta_H"] < 1e-9
-            # tuple zero overlap per source using real keys
             cal_keys = [(src, cal_dir.name, fid) for fid in cal_fids]
             val_keys = [(src, cal_dir.name, fid) for fid in val_fids]
-            test_dir = sess[1]
             tp = find_pairs_file(test_dir)
             test_all_fids = []
             if tp and tp.exists():
@@ -430,16 +467,15 @@ def main():
                     test_all_fids = []
             test_keys = [(src, test_dir.name, fid) for fid in test_all_fids]
             tuple_ok = check_tuple_zero_overlap(cal_keys, val_keys, test_keys, forbidden_keys)
-            G8 = ce_chain_ok and h_chain_ok and tuple_ok["cal∩val_empty"] and tuple_ok["cal∪val∩test_empty"] and tuple_ok["cal∪val∪test∩forbidden_empty"] and (cal_dir.name != test_dir.name)
+            not_cross, _ = check_not_cross_spliced_by_provenance(cal_dir.name, cal_dir.name, test_dir.name, prov, test_prov)
+            G8 = ce_chain_ok and h_chain_ok and tuple_ok["cal∩val_empty"] and tuple_ok["cal∪val∩test_empty"] and tuple_ok["cal∪val∪test∩forbidden_empty"] and not_cross
             PASS = all([G1,G2,G3,G4,G5,G6,G7,G7_aux,G8])
-            # split required vs frozen explicitly
             per_source[src] = {**res, "G1":G1,"G1_detail": g1_det, "G2":G2,"G3":G3,"G4":G4,"G5":G5,"G6":G6,"G7":G7,"G7_aux":G7_aux,"G8":G8,"PASS":PASS,
                                "frozen_m1": G_THRESH["m1"], "frozen_m2": G_THRESH["m2"][src], "frozen_m_total": G_THRESH["m_total"][src], "frozen_leak": FROZEN_LEAK[src],
                                "delta_m1": res["required_m1"]-G_THRESH["m1"], "delta_m2": res["required_m2"]-G_THRESH["m2"][src], "delta_m_total": res["required_m_total"]-G_THRESH["m_total"][src], "delta_leak": res["required_leak"]-FROZEN_LEAK[src],
                                "forbidden_nonempty": forbidden_nonempty, "tuple_overlap": tuple_ok, "session_ids": [p.name for p in sess],
-                               "sidecar_path": str(sidecar_path) if sidecar_path else None}
+                               "not_cross_spliced": not_cross, "sidecar_path": str(sidecar_path) if sidecar_path else None}
 
-        # overall five-state priority
         if any(per_source[s].get("G1") is False for s in SOURCES):
             overall = "V65_EVIDENCE_INVALID"
         elif any(per_source[s].get("chain_delta_CE", 0) >= CE_CHAIN_TOL for s in SOURCES if "chain_delta_CE" in per_source[s] and per_source[s]["chain_delta_CE"] is not None):
@@ -455,7 +491,7 @@ def main():
         else:
             overall = "V65_EVIDENCE_INVALID"
 
-    v66_check = None
+    # V66 equality: pending unless both registries exist and mechanically compared
     if args.test_registry and args.v66_registry and Path(args.test_registry).exists() and Path(args.v66_registry).exists():
         try:
             t = json.loads(Path(args.test_registry).read_text(encoding="utf-8"))
@@ -469,11 +505,14 @@ def main():
                     for fid in frames:
                         keys.append((src, sess, int(fid)))
                 return keys
-            v66_check = check_v66_equals_v65_test(extract_keys(t), extract_keys(v))
+            a=set(extract_keys(t)); b=set(extract_keys(v))
+            v66_check = {"status": "READY", "equals": a==b and len(a)>0, "v65_len": len(a), "v66_len": len(b), "sym_diff": len(a ^ b), "key": "(source,session,frame)"}
+            if not v66_check["equals"]:
+                v66_check["equals"] = False
         except Exception as e:
-            v66_check = {"error": str(e), "equals": False}
+            v66_check = {"status": "ERROR", "equals": False, "error": str(e), "key": "(source,session,frame)"}
     else:
-        v66_check = {"equals": True, "note": "spike dry-run v66_registry exactly equals v65 TEST registry (tuple keys)", "key": "(source,session,frame)"}
+        v66_check = {"status": "PENDING", "equals": False, "reason": "V66 registry not yet generated (=V65 TEST pending)", "key": "(source,session,frame)"}
 
     out = {
         "schema": "v65_channel_compatibility_v1",
@@ -489,7 +528,8 @@ def main():
         "zero_overlap_key": "(source,session,frame)",
         "forbidden_nonempty": forbidden_nonempty, "forbidden_keys": len(forbidden_keys),
         "v66_equals_v65_test": v66_check,
-        "test_note": "TEST 120 frames identity sealed - never used in estimation/threshold, V66 registry exactly equals V65 TEST (tuple keys)",
+        "frozen_binding_ok": binding_ok, "frozen_binding_path": binding_path,
+        "test_note": "TEST 120 frames identity sealed - never used in estimation/threshold, V66 registry exactly equals V65 TEST when both generated (tuple keys) else PENDING",
         "v66_prefreeze": {"blocks": 90, "per_source": 30, "gate_overall": "70/90", "gate_per": "20/30", "undetected_full": 0, "leak_frozen": "1144/1174/1184", "leak_required_vs_frozen_split": True},
     }
     Path(args.out).write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -497,11 +537,11 @@ def main():
     for src in SOURCES:
         r = per_source[src]
         rep.append(f"| {src} | {r.get('lam_star')} | {r.get('at_boundary')} | {r.get('H1')} | {r.get('H2')} | {r.get('H')} | {r.get('CE1')} | {r.get('CE2')} | {r.get('CE_full')} | {r.get('chain_delta_CE')} | {r.get('cv_nll')} | {r.get('val_nll')} | {r.get('d_nll')} | {r.get('MAP')} | {r.get('unseen')} | {r.get('required_m1')} | {r.get('required_m2')} | {r.get('required_m_total')} | {r.get('required_leak')} | {r.get('frozen_m2')} | {r.get('frozen_leak')} | {r.get('delta_leak')} | {r.get('G1')},{r.get('G2')},{r.get('G3')},{r.get('G4')},{r.get('G5')},{r.get('G6')},{r.get('G7')},{r.get('G7_aux')},{r.get('G8')} | {r.get('PASS')} |")
-    rep += ["", f"Frozen: m1<={G_THRESH['m1']} m2 {G_THRESH['m2']} m_total {G_THRESH['m_total']} frozen_leak {FROZEN_LEAK} vs required_leak=5*required_m_total+64", f"CE chain |CE_full-CE1-CE2|<{CE_CHAIN_TOL} H chain <1e-9, delay sign/50ps sigma[50,150] gate200 thr40000", f"zero_overlap_key=(source,session,frame) forbidden_nonempty={forbidden_nonempty} v66_equals_v65_test={v66_check.get('equals')}", f"Sample: CAL 4096*256=1048576 VAL 512*256=131072 real parquet, TEST identity sealed 120 frames/source", f"TEST: not read - v66 prefreeze 90 blocks 30/src 70/90 & 20/30 undetected 0", ""]
+    rep += ["", f"Frozen: m1<={G_THRESH['m1']} m2 {G_THRESH['m2']} m_total {G_THRESH['m_total']} frozen_leak {FROZEN_LEAK} vs required_leak=5*required_m_total+64", f"CE chain |CE_full-CE1-CE2|<{CE_CHAIN_TOL} H chain <1e-9, delay sign/50ps sigma[50,150] gate200 thr40000", f"zero_overlap_key=(source,session,frame) forbidden_nonempty={forbidden_nonempty} v66={v66_check} binding_ok={binding_ok}", f"Sample: CAL 4096*256=1048576 VAL 512*256=131072 real parquet, TEST identity sealed 120 frames/source", f"TEST: not read - v66 prefreeze 90 blocks 30/src 70/90 & 20/30 undetected 0", ""]
     Path(args.report).write_text("\n".join(rep), encoding="utf-8")
-    print(f"[v65_channel_compatibility] overall={overall} required vs frozen split leak 5*required_m_total+64 vs {FROZEN_LEAK} forbidden_nonempty={forbidden_nonempty}")
+    print(f"[v65_channel_compatibility] overall={overall} required vs frozen split leak 5*required_m_total+64 vs {FROZEN_LEAK} forbidden_nonempty={forbidden_nonempty} v66_status={v66_check.get('status')} binding_ok={binding_ok}")
     if not Path(args.data_registry).exists():
-        Path(args.data_registry).write_text(json.dumps({"overall": overall, "note": "spike placeholder", "zero_overlap_key": "(source,session,frame)", "v66_equals_v65_test": v66_check, "forbidden_nonempty": forbidden_nonempty}, indent=2), encoding="utf-8")
+        Path(args.data_registry).write_text(json.dumps({"overall": overall, "note": "spike placeholder", "zero_overlap_key": "(source,session,frame)", "v66_equals_v65_test": v66_check, "forbidden_nonempty": forbidden_nonempty, "frozen_binding_ok": binding_ok}, indent=2), encoding="utf-8")
     return 0
 
 if __name__ == "__main__":
