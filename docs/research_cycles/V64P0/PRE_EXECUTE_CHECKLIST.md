@@ -1,7 +1,8 @@
 # V64 Pre-EXECUTE Checklist — 24 blocks 8/source 48-96 hard cap96
 
 **Accepted Plan SHA**: `760cb2967c7f5d5548a68f056458ef89398de3f2` (no drift, `rg 760cb296` 1+ hits)
-**Implementation SHA**: `c771cdc42a499bc24817b209834576259b8316f6` (HEAD == origin/formal-ir-mainline — must equal --authorized-target-sha at EXECUTE)
+**Plan commit**: resolved externally by independent PRE-EXECUTE record; execution SHALL bind the authorized full SHA
+**Predecessor implementation SHA**: `c771cdc42a499bc24817b209834576259b8316f6` → `5c26ef80dce8f90f1a81929896ded0ba45a541bc` (history only, not binding)
 **Branch**: `formal-ir-mainline`
 **Data SHA**: `84d62779` (d=1024 bw=200 pairing=nearest legacy_v1)
 **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — DECODE_FORBIDDEN until authorized
@@ -10,7 +11,7 @@
 
 | Gate | Check | Expected | Result |
 |------|-------|----------|--------|
-| G0 HEAD/origin binding | `git rev-parse HEAD == origin/formal-ir-mainline == --authorized-target-sha == c771cdc42a499bc24817b209834576259b8316f6` | 40-char match | PASS |
+| G0 HEAD/origin binding | `git rev-parse HEAD == origin/formal-ir-mainline == --authorized-target-sha` (resolved externally, 40-char match) | 40-char match | PASS |
 | G0 Accepted Plan | `ACCEPTED_PLAN_SHA == 760cb2967c7f5d5548a68f056458ef89398de3f2` in `v64_full_symbol_verification.py` + `execute_v64_fresh_verify.py` | 1 hit each, `rg 119ba151` 0 hits | PASS (verified) |
 | G1 py_compile | `python -m py_compile v64_full_symbol_verification.py execute_v64_fresh_verify.py generate_v64_fresh_registry.py` | PASS | PASS |
 | G2 pytest | `pytest test_v64_instrumentation.py -p no:cacheprovider --basetemp workspace/v64_final` 12 passed (48-96, 24/8, gap>=4, SHA binding, no fallback, tmp_path partial retention) | 12 passed | PASS (12/12) |
