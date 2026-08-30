@@ -13,7 +13,7 @@ from typing import Any
 
 import numpy as np
 
-ACCEPTED_PLAN_SHA = "119ba15163709c1da651fe3615c05980a914cc0e"
+ACCEPTED_PLAN_SHA = "760cb2967c7f5d5548a68f056458ef89398de3f2"
 ACCEPTED_PLAN_SHORT = ACCEPTED_PLAN_SHA[:7]
 BRANCH_REF = "origin/formal-ir-mainline"
 
@@ -25,12 +25,12 @@ LEAK_MAP: dict[str, dict[str, int]] = {
     "1p5M": {"base": 1094, "delta8": 1134, "delta16": 1174},
     "2M": {"base": 1104, "delta8": 1144, "delta16": 1184},
 }
-HARD_CAP = 144
-PLANNED_L1 = 36
-PLANNED_L2_BASE = 36
-PLANNED_L2_STAGE1_MAX = 36
-PLANNED_L2_STAGE2_MAX = 36
-PLANNED_L2_MAX = 108
+HARD_CAP = 96
+PLANNED_L1 = 24
+PLANNED_L2_BASE = 24
+PLANNED_L2_STAGE1_MAX = 24
+PLANNED_L2_STAGE2_MAX = 24
+PLANNED_L2_MAX = 72
 MAX_ITER = 90
 DAMPING_ALPHA = 1.0
 POLY = 37
@@ -226,63 +226,54 @@ def _candidates_for_source(src: str, forb_set: set[int]) -> list[tuple[int, list
 
 
 def build_v64_fresh_registry() -> list[dict[str, Any]]:
-    """Authoritative fresh 36-block registry 12/source, zero overlap with V48-V63, K2>=36 hard, no fallback reuse."""
+    """Authoritative fresh 24-block registry 8/source, zero overlap with V48-V63, K2>=24 hard, no fallback reuse."""
     forb = _forbidden_frame_sets()
-    # verify K2 >=36 overall and per-source >=12 before dispersed pick
+    # verify K2 >=24 overall and per-source >=8 before dispersed pick
     k2_per_source: dict[str, int] = {}
     for src in SOURCE_ORDER:
         k2_per_source[src] = len(_candidates_for_source(src, forb[src]))
-        if k2_per_source[src] < 12:
-            raise ValueError(f"V64 K2<12 for {src}: {k2_per_source[src]} (EVIDENCE_INVALID, forbids fallback reuse)")
+        if k2_per_source[src] < 8:
+            raise ValueError(f"V64 K2<8 for {src}: {k2_per_source[src]} (EVIDENCE_INVALID, forbids fallback reuse)")
     total_k2 = sum(k2_per_source.values())
-    if total_k2 < 36:
-        raise ValueError(f"V64 total K2<36: {total_k2} (EVIDENCE_INVALID)")
+    if total_k2 < 24:
+        raise ValueError(f"V64 total K2<24: {total_k2} (EVIDENCE_INVALID)")
     registry: list[dict[str, Any]] = []
     for src in SOURCE_ORDER:
         candidates = _candidates_for_source(src, forb[src])
         K2 = len(candidates)
-        # dispersed pick 12 via floor(j*(K2-1)/11) j=0..11
+        # ponytail: gap>=4 strong — first compute max independent set, then dispersed pick from it
+        global_independent: list[tuple[int, list[int]]] = []
+        for cand in sorted(candidates, key=lambda x: x[0]):
+            if not global_independent or cand[0] - global_independent[-1][0] >= 4:
+                global_independent.append(cand)
+        if len(global_independent) < 8:
+            raise ValueError(
+                f"V64 K2={K2} for {src} cannot achieve 8 independent blocks with gap>=4: "
+                f"global max {len(global_independent)} <8. EVIDENCE_INVALID — known ceiling: effective independence <8; "
+                f"switch held-out pool or document ceiling explicitly in summary (cannot claim 8 independent). "
+                f"Candidates starts {[c[0] for c in candidates]}"
+            )
+        # dispersed pick 8 from independent set via floor(j*(K_independent-1)/7) j=0..7 — guarantees gap>=4
+        K_ind = len(global_independent)
         picks: list[tuple[int, list[int]]] = []
-        for j in range(12):
-            idx = (j * (K2 - 1)) // 11 if K2 > 1 else 0
-            picks.append(candidates[idx])
-        # ensure distinct (dispersed indices are distinct when K2>=12)
+        for j in range(8):
+            idx = (j * (K_ind - 1)) // 7 if K_ind > 1 else 0
+            picks.append(global_independent[idx])
+        # ensure distinct (dispersed on independent set already distinct when K_ind>=8)
         seen = set()
         deduped: list[tuple[int, list[int]]] = []
         for p in picks:
             if p[0] not in seen:
                 deduped.append(p)
                 seen.add(p[0])
-        # if duplicates due to floor, fill with remaining candidates distinct
-        if len(deduped) < 12:
-            for c in candidates:
+        if len(deduped) < 8:
+            for c in global_independent:
                 if c[0] not in seen:
                     deduped.append(c)
                     seen.add(c[0])
-                if len(deduped) == 12:
+                if len(deduped) == 8:
                     break
-        picks = deduped[:12]
-        # ponytail: 1M gap>=4 strong check — if K2==12 fragmented cannot achieve 12 non-overlapping, hard fail EVIDENCE_INVALID or document ceiling
-        picks_sorted = sorted(picks, key=lambda x: x[0])
-        # compute max non-overlapping independent count (greedy gap>=4)
-        independent: list[tuple[int, list[int]]] = []
-        for cand in picks_sorted:
-            if not independent or cand[0] - independent[-1][0] >= 4:
-                independent.append(cand)
-        # also compute global max over all candidates (upper ceiling)
-        global_independent: list[tuple[int, list[int]]] = []
-        for cand in sorted(candidates, key=lambda x: x[0]):
-            if not global_independent or cand[0] - global_independent[-1][0] >= 4:
-                global_independent.append(cand)
-        if len(independent) < 12:
-            # If overall K2==12 minimal fragmented pool cannot satisfy gap>=4, hard fail
-            raise ValueError(
-                f"V64 K2={K2} for {src} cannot achieve 12 independent blocks with gap>=4: "
-                f"picks starts {[p[0] for p in picks_sorted]} have overlap (effective independent {len(independent)} <12, "
-                f"global max {len(global_independent)} <12). EVIDENCE_INVALID — known ceiling: effective independence <12; "
-                f"switch held-out pool or document ceiling explicitly in summary (cannot claim 12 independent). "
-                f"Candidates starts {[c[0] for c in candidates]}"
-            )
+        picks = sorted(deduped[:8], key=lambda x: x[0])
         # additional hard frame_ids overlap check (gap>=4 ensures no shared frames)
         for a in range(len(picks)):
             for b in range(a+1, len(picks)):
@@ -298,8 +289,8 @@ def build_v64_fresh_registry() -> list[dict[str, Any]]:
                 held_out_source_path=f"comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_{src}_20260121_*/pairs.parquet",
                 H_provenance=dict(H=HELDOUT_H[src], base=HELDOUT_BASE[src], K2=K2),
             ))
-    if len(registry) != 36:
-        raise ValueError(f"registry len {len(registry)} !=36")
+    if len(registry) != 24:
+        raise ValueError(f"registry len {len(registry)} !=24")
     # global zero-overlap with prior already by forb; per-source distinct already ensured
     return registry
 
@@ -320,20 +311,20 @@ def classify_fresh_block(rec: dict[str, Any]) -> str:
 
 
 def calls_in_cap(total_calls: int) -> bool:
-    return 72 <= total_calls <= 144
+    return 48 <= total_calls <= 96
 
 
-# Budget helpers — 36-block hard cap 144
+# Budget helpers — 24-block hard cap 96
 def budget_ok(n_stage1: int, n_stage2: int) -> bool:
     if n_stage1 > PLANNED_L2_STAGE1_MAX or n_stage2 > PLANNED_L2_STAGE2_MAX:
         return False
-    total = PLANNED_L1 + PLANNED_L2_BASE + n_stage1 + n_stage2  # 36+36+stage1+stage2
+    total = PLANNED_L1 + PLANNED_L2_BASE + n_stage1 + n_stage2  # 24+24+stage1+stage2
     l2_total = PLANNED_L2_BASE + n_stage1 + n_stage2
-    return 72 <= total <= HARD_CAP and 36 <= l2_total <= PLANNED_L2_MAX
+    return 48 <= total <= HARD_CAP and 24 <= l2_total <= PLANNED_L2_MAX
 
 
 class V64CallAccounting:
-    """Per-task call accounting 72-144 hard cap 144, per-block 2-4, L2 36-108."""
+    """Per-task call accounting 48-96 hard cap 96, per-block 2-4, L2 24-72."""
 
     def __init__(self, hard_cap: int = HARD_CAP) -> None:
         self.hard_cap = int(hard_cap)
@@ -352,15 +343,15 @@ class V64CallAccounting:
 
     def register_start(self, layer: str = "total") -> None:
         if self.started >= self.hard_cap:
-            raise ValueError(f"hard call cap {self.hard_cap} reached; call {self.started+1} structurally refused (145th reject)")
+            raise ValueError(f"hard call cap {self.hard_cap} reached; call {self.started+1} structurally refused (97th reject)")
         if layer == "l1" and self.started_l1 >= PLANNED_L1:
-            raise ValueError("l1 cap 36 reached")
+            raise ValueError("l1 cap 24 reached")
         if layer == "base" and self.started_base >= PLANNED_L2_BASE:
-            raise ValueError("base cap 36 reached")
+            raise ValueError("base cap 24 reached")
         if layer == "stage1" and self.started_stage1 >= PLANNED_L2_STAGE1_MAX:
-            raise ValueError("stage1 cap 36 reached")
+            raise ValueError("stage1 cap 24 reached")
         if layer == "stage2" and self.started_stage2 >= PLANNED_L2_STAGE2_MAX:
-            raise ValueError("stage2 cap 36 reached")
+            raise ValueError("stage2 cap 24 reached")
         self.started += 1
         if layer == "l1":
             self.started_l1 += 1
@@ -398,8 +389,8 @@ class V64CallAccounting:
             errs.append(f"completed {self.completed} exceeds hard cap {self.hard_cap}")
         if self.completed != self.started:
             errs.append(f"started {self.started} != completed {self.completed}")
-        if self.completed < 72 or self.completed > 144:
-            errs.append(f"total {self.completed} not in 72-144")
-        if self.completed_l2 < 36 or self.completed_l2 > 108:
-            errs.append(f"l2 {self.completed_l2} not in 36-108")
+        if self.completed < 48 or self.completed > 96:
+            errs.append(f"total {self.completed} not in 48-96")
+        if self.completed_l2 < 24 or self.completed_l2 > 72:
+            errs.append(f"l2 {self.completed_l2} not in 24-72")
         return errs

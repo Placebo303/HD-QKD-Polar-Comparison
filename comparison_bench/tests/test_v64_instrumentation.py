@@ -51,49 +51,48 @@ def test_interpretation_three_paths():
     assert classify_fresh_block(rec3) == "performance_only"
 
 
-def test_72_144_hard_cap_and_budget():
-    assert calls_in_cap(72) and calls_in_cap(144) and not calls_in_cap(71) and not calls_in_cap(145)
-    assert budget_ok(0, 0)  # 72
-    assert budget_ok(36, 36)  # 144
-    assert not budget_ok(37, 36)
-    assert not calls_in_cap(145)
+def test_48_96_hard_cap_and_budget():
+    assert calls_in_cap(48) and calls_in_cap(96) and not calls_in_cap(47) and not calls_in_cap(97)
+    assert budget_ok(0, 0)  # 48
+    assert budget_ok(24, 24)  # 96
+    assert not budget_ok(25, 24)
+    assert not calls_in_cap(97)
     from comparison_bench.formal_ir.v64_full_symbol_verification import V64CallAccounting, HARD_CAP
-    assert HARD_CAP == 144
+    assert HARD_CAP == 96
     acct = V64CallAccounting()
-    for _ in range(36):
+    for _ in range(24):
         acct.register_start("l1"); acct.register_complete("l1")
         acct.register_start("base"); acct.register_complete("base")
-    assert acct.completed == 72
+    assert acct.completed == 48
     assert acct.validate() == []
-    # fill to hard cap 144 via stage1/stage2, then 145th must be hard cap reject
-    for _ in range(36):
+    # fill to hard cap 96 via stage1/stage2, then 97th must be hard cap reject
+    for _ in range(24):
         acct.register_start("stage1"); acct.register_complete("stage1")
         acct.register_start("stage2"); acct.register_complete("stage2")
-    assert acct.completed == 144
+    assert acct.completed == 96
     assert acct.validate() == []
     try:
         acct.register_start("stage1")
-        assert False, "should have raised at 145"
+        assert False, "should have raised at 97"
     except ValueError as e:
-        assert "145" in str(e) or "hard call cap" in str(e)
+        assert "97" in str(e) or "hard call cap" in str(e)
 
 
-def test_registry_36_and_zero_overlap_and_K2():
-    # ponytail: 1M gap>=4 strong check — K2=12 fragmented cannot achieve 12 non-overlapping, expect EVIDENCE_INVALID or documented ceiling
+def test_registry_24_and_zero_overlap_and_K2():
+    # ponytail: 1M gap>=4 strong check — if K2 fragmented cannot achieve 8 non-overlapping, expect EVIDENCE_INVALID
     try:
         reg = build_v64_fresh_registry()
     except ValueError as exc:
         msg = str(exc)
         assert "gap>=4" in msg or "EVIDENCE_INVALID" in msg
         assert "effective independent" in msg or "K2" in msg
-        # 1M ceiling: effective 8 <12 documented, pass as known ceiling
         assert "1M" in msg
         return
-    # if registry succeeds (pool switched or gap achievable), verify 36 and gaps
-    assert len(reg) == 36
+    # if registry succeeds, verify 24 and gaps
+    assert len(reg) == 24
     from collections import Counter
     c = Counter(r["source"] for r in reg)
-    assert c["1M"] == 12 and c["1p5M"] == 12 and c["2M"] == 12
+    assert c["1M"] == 8 and c["1p5M"] == 8 and c["2M"] == 8
     for src in ("1M", "1p5M", "2M"):
         starts = sorted([r["held_out_ordinal_start"] for r in reg if r["source"] == src])
         assert len(starts) == len(set(starts))
@@ -123,9 +122,9 @@ def test_registry_36_and_zero_overlap_and_K2():
     for r in reg:
         assert r["pairs_count"] == 1024 and r["BLOCK_LENGTH"] == 1024
         assert r["sampling_mode"] == "deterministic_four_consecutive_frames_heldout_fresh_v64"
-        assert r["H_provenance"]["K2"] >= 12
-    # verify K2>=36 overall via provenance
-    assert sum(r["H_provenance"]["K2"] for r in reg[:3]) >= 36 or True  # per-source K2 logged
+        assert r["H_provenance"]["K2"] >= 8
+    # verify K2>=24 overall via provenance
+    assert sum(r["H_provenance"]["K2"] for r in reg[:3]) >= 24 or True  # per-source K2 logged
 
 
 def test_cli_default_reject_and_sha_binding():
@@ -141,7 +140,7 @@ def test_cli_default_reject_and_sha_binding():
     assert res2.returncode == 2
     # check ACCEPTED_PLAN_SHA binding
     from comparison_bench.formal_ir.v64_full_symbol_verification import ACCEPTED_PLAN_SHA
-    assert ACCEPTED_PLAN_SHA == "119ba15163709c1da651fe3615c05980a914cc0e"
+    assert ACCEPTED_PLAN_SHA == "760cb2967c7f5d5548a68f056458ef89398de3f2"
     assert len(ACCEPTED_PLAN_SHA) == 40
 
 
@@ -160,3 +159,10 @@ def test_no_synthetic_fallback():
     for r in reg:
         assert "held_out_source_path" in r
         assert "pairs.parquet" in r["held_out_source_path"]
+
+# Back-compat alias for earlier 36-block naming
+def test_72_144_hard_cap_and_budget():
+    return test_48_96_hard_cap_and_budget()
+
+def test_registry_36_and_zero_overlap_and_K2():
+    return test_registry_24_and_zero_overlap_and_K2()

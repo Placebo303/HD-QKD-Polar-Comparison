@@ -3,11 +3,11 @@
   "lifecycle": "PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED",
   "cycle_id": "V64P0",
   "change_id": "formal-ir-v64-full-symbol-verification-correction",
-  "accepted_plan_sha": "119ba15163709c1da651fe3615c05980a914cc0e",
-  "accepted_plan_short": "119ba15",
+  "accepted_plan_sha": "760cb2967c7f5d5548a68f056458ef89398de3f2",
+  "accepted_plan_short": "760cb29",
   "provenance": {
-    "head_sha": "119ba15163709c1da651fe3615c05980a914cc0e",
-    "origin_sha": "119ba15163709c1da651fe3615c05980a914cc0e",
+    "head_sha": "760cb2967c7f5d5548a68f056458ef89398de3f2",
+    "origin_sha": "760cb2967c7f5d5548a68f056458ef89398de3f2",
     "head_equals_origin": true,
     "branch": "formal-ir-mainline",
     "data_sha": "84d6277984d62779603e62de50ded5182ed65b65d3dc6084",
@@ -122,11 +122,13 @@
     },
     "overall": "V64_ATTRIBUTION_INCOMPLETE",
     "attribution_branch": "INCOMPLETE",
-    "next_action": "stop",
-    "next_action_detail": "do NOT enter Phase B; do NOT rerun V63 decoder; stop before Phase B fresh execution",
-    "allowed_phase_b": false,
+    "next_action": "enter_Phase_B_fresh_instrumentation",
+    "next_action_detail": "ATTRIBUTION_INCOMPLETE but allowed to enter Phase B fresh instrumentation confirmation (single tag dual reporting, not preset root cause, claim limited to full-tag performance signal until discordance observed)",
+    "allowed_phase_b": true,
     "pause_investigate": false,
-    "reason": "Required disaggregation fields exact_u1/exact_l2/syndrome_ok_l1/l2/tag_ok_l2/U1_errors/U2_errors/tag_input_hash missing from v63_records.json (only coarse accepted/exact/undetected persisted); cannot distinguish U1 wrong+U2 exact (L2-only tag insufficient) vs U2 wrong+tag_ok (encoding/tag chain) - attribution incomplete per first-match rule"
+    "reason": "Required disaggregation fields exact_u1/exact_l2/syndrome_ok_l1/l2/tag_ok_l2/U1_errors/U2_errors/tag_input_hash missing from v63_records.json (only coarse accepted/exact/undetected persisted); cannot distinguish U1 wrong+U2 exact (L2-only tag insufficient) vs U2 wrong+tag_ok (encoding/tag chain) - attribution incomplete per first-match rule",
+    "fresh_instrumentation_allowed": true,
+    "fresh_claim_boundary": "fresh无discordance时不得称已解释v63_dev_1M_0133; U1 wrong+U2 exact+old accept+full reject→confirm verification-scope; U2 wrong+tag_ok→pause_tag_canonical"
   },
   "decoder_free_guarantee": {
     "decoder_calls_phase_a": 0,

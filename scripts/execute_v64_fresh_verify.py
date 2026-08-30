@@ -1,4 +1,4 @@
-"""V64 fresh 36-block guarded runner — 72-144 calls hard cap 144, single 64-bit dual-tag, additive run_01."""
+"""V64 fresh 24-block guarded runner — 48-96 calls hard cap 96, single 64-bit dual-tag, additive run_01."""
 from __future__ import annotations
 import argparse
 import json
@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = REPO_ROOT / "comparison_bench/outputs_comparison/formal_ir_methods/v64_full_symbol_verification/v64_fresh_registry.json"
 
 def _parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Run V64 fresh 36-block verification (72-144 calls hard cap 144, dual-tag single 64b).")
+    p = argparse.ArgumentParser(description="Run V64 fresh 24-block verification (48-96 calls hard cap 96, dual-tag single 64b).")
     p.add_argument("--execution-authorized", action="store_true", help="Required explicit authorization flag")
     p.add_argument("--authorized-target-sha", default=None, help="Full 40-char implementation SHA (must equal HEAD, origin, ACCEPTED_PLAN_SHA)")
     p.add_argument("--output-root", default=None, help="Override output root (tests only)")
@@ -41,8 +41,8 @@ def _check_git(authorized: str) -> None:
     if len(authorized) != 40:
         print("BLOCKED: --authorized-target-sha must be 40-char", file=sys.stderr)
         sys.exit(2)
-    if ACCEPTED_PLAN_SHA != "119ba15163709c1da651fe3615c05980a914cc0e":
-        print(f"WARNING: ACCEPTED_PLAN_SHA drift {ACCEPTED_PLAN_SHA} != 119ba15163709c1da651fe3615c05980a914cc0e (not blocking)", file=sys.stderr)
+    if ACCEPTED_PLAN_SHA != "760cb2967c7f5d5548a68f056458ef89398de3f2":
+        print(f"WARNING: ACCEPTED_PLAN_SHA drift {ACCEPTED_PLAN_SHA} != 760cb2967c7f5d5548a68f056458ef89398de3f2 (not blocking)", file=sys.stderr)
     try:
         head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
         origin = subprocess.check_output(["git", "rev-parse", "origin/formal-ir-mainline"], text=True).strip()
@@ -66,13 +66,13 @@ def _check_git(authorized: str) -> None:
         sys.exit(2)
 
 def _preflight(output_root: Path, fake_runner: bool) -> list[dict]:
-    # G1-G5 checks: registry K2>=36, matrices, held-out parquet reachable, no synthetic fallback
+    # G1-G5 checks: registry K2>=24, matrices, held-out parquet reachable, no synthetic fallback
     try:
         reg = build_v64_fresh_registry()
     except ValueError as exc:
         raise RuntimeError(f"EVIDENCE_INVALID registry: {exc}") from exc
-    if len(reg) != 36:
-        raise RuntimeError(f"EVIDENCE_INVALID registry len {len(reg)} !=36")
+    if len(reg) != 24:
+        raise RuntimeError(f"EVIDENCE_INVALID registry len {len(reg)} !=24")
     # matrix frozen check (decoder-free)
     try:
         reconstruct_v64_matrices()
@@ -119,7 +119,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     t0 = time.time()
     try:
         if args.fake_runner:
-            # fake: 36 blocks, each 2 calls (L1+base) deterministic fake records, stay within 72
+            # fake: 24 blocks, each 2 calls (L1+base) deterministic fake records, stay within 48
             for ent in registry:
                 acct.register_start("l1"); acct.register_complete("l1")
                 acct.register_start("base"); acct.register_complete("base")
@@ -254,8 +254,8 @@ def main(argv: Iterable[str] | None = None) -> int:
         errs = acct.validate()
         if errs:
             raise RuntimeError(f"budget validate failed {errs}")
-        if acct.completed < 72 or acct.completed > 144:
-            raise RuntimeError(f"budget total {acct.completed} not in 72-144")
+        if acct.completed < 48 or acct.completed > 96:
+            raise RuntimeError(f"budget total {acct.completed} not in 48-96")
         # write records
         (output_root / "v64_records.json").write_text(json.dumps(records, indent=2), encoding="utf-8")
         import csv
