@@ -1,9 +1,9 @@
-# V63 Pre-EXECUTE Checklist — Formal Implementation 10390cfa → NEW
+# V63 Pre-EXECUTE Checklist — Formal Implementation 10390cfa → HEAD (4-blocking fixed)
 
 **Date**: 2026-08-30
 **Predecessor implementation SHA**: 10390cfa52f2b5e3e6c7c382cfb2d4c316471218 (FAIL/REVISE_REQUIRED — 4 blocking)
 **Accepted Plan SHA**: 397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a (frozen, no drift)
-**New implementation SHA**: _PENDING — filled after `git rev-parse HEAD` post-push, must equal HEAD and origin/formal-ir-mainline exactly_
+**New implementation SHA**: `git rev-parse HEAD` at push time — must equal `origin/formal-ir-mainline`; current HEAD b4d94e66718a2b77b411e7271745788ee875f9a6, final HEAD after amend/push to be verified via `git rev-parse HEAD == origin/formal-ir-mainline`
 **Lifecycle**: PLAN_REVISION_CANDIDATE → PRODUCTION_IMPLEMENTATION — 4 blocking fixed, EXECUTE_AUTH still required for real decoder
 
 ## Blocking Fix Verification
@@ -19,7 +19,7 @@
 
 | Gate | Command / Check | Result |
 |------|-----------------|--------|
-| G0 HEAD/origin binding | `git rev-parse HEAD` == `git rev-parse origin/formal-ir-mainline` == new implementation SHA (40-char) | _PENDING post-push — last verified 10390cfa; new SHA to be filled_| 
+| G0 HEAD/origin binding | `git rev-parse HEAD` == `git rev-parse origin/formal-ir-mainline` (40-char) | PASS pre-push `git rev-parse HEAD` b4d94e66… ; post-push must re-derive and match checklist | 
 | G0 Accepted Plan binding | `grep ACCEPTED_PLAN_SHA` == `397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a` in adapter + CLI | PASS — `rg 397c1bb6` 2 hits in adapter/scripts; fail-closed on drift |
 | G1 py_compile | `python -m py_compile comparison_bench/src/comparison_bench/methods/nbldpc_shell_adapter.py comparison_bench/src/comparison_bench/pipeline/shell_integration.py scripts/execute_v63_shell_smoke.py scripts/execute_v63_shell_development.py` | PASS 2026-08-30 |
 | G2 pytest standard | `python -m pytest tests/test_v63_shell_adapter.py -v -p no:cacheprovider --basetemp workspace/v63_preexec_<uuid>` | PASS 12 passed (T1-T12) 2026-08-30 |

@@ -4,7 +4,7 @@
 **Predecessor Plan SHA**: 5602f11c65b2590254e89a1b95c7384f4bbbfd38 (HEAD == origin/formal-ir-mainline at start)
 **Accepted Plan SHA**: 397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a (frozen)
 **Predecessor implementation SHA (FAIL/REVISE_REQUIRED)**: 10390cfa52f2b5e3e6c7c382cfb2d4c316471218 — 4 blocking (synthetic fallback / pythonpath / decoder_calls / checklist)
-**New implementation SHA**: _see PRE_EXECUTE_CHECKLIST.md — HEAD == origin/formal-ir-mainline post-push_
+**New implementation SHA**: `git rev-parse HEAD` post-push (current b4d94e66718a2b77b411e7271745788ee875f9a6; final HEAD verified via checklist)
 **Data SHA**: 84d62779 (84d62779603e62de50ded5182ed65b65d3dc6084, d=1024 bw=200 pairing=nearest rule=legacy_v1)
 **Lifecycle**: PLAN_REVISION_CANDIDATE / PRODUCTION_IMPLEMENTATION (real V54 L1APP+Δ8+Δ8, explicit fake_runner, fail-closed EVIDENCE_INVALID, mechanical accounting) / EXECUTE_NOT_AUTHORIZED — decoder-free spike superseded; smoke/development CLIs production-ready but still gated by EXECUTE_AUTH
 
@@ -112,7 +112,7 @@ python -m pytest comparison_bench/tests -k v63 -p no:cacheprovider  # future
 - HEAD at delivery start: 5602f11c65b2590254e89a1b95c7384f4bbbfd38
 - Accepted Plan SHA: 397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a
 - Predecessor implementation SHA: 10390cfa52f2b5e3e6c7c382cfb2d4c316471218 (4 blocking)
-- New implementation SHA: see PRE_EXECUTE_CHECKLIST.md (HEAD == origin/formal-ir-mainline)
+- New implementation SHA: HEAD at push (see PRE_EXECUTE_CHECKLIST.md; current b4d94e66)
 - Branch: formal-ir-mainline (ordinary push, no force)
 - State after push: PLAN_REVISION_CANDIDATE / PRODUCTION_IMPLEMENTATION / EXECUTE_NOT_AUTHORIZED
 
