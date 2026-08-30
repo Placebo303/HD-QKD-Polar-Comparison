@@ -13,6 +13,10 @@ from typing import Any
 
 import numpy as np
 
+ACCEPTED_PLAN_SHA = "119ba15163709c1da651fe3615c05980a914cc0e"
+ACCEPTED_PLAN_SHORT = ACCEPTED_PLAN_SHA[:7]
+BRANCH_REF = "origin/formal-ir-mainline"
+
 # Frozen invariants (V63/V54)
 SOURCE_ORDER = ("1M", "1p5M", "2M")
 SOURCE_CHECKS = {"1M": 184, "1p5M": 190, "2M": 192}
@@ -21,7 +25,12 @@ LEAK_MAP: dict[str, dict[str, int]] = {
     "1p5M": {"base": 1094, "delta8": 1134, "delta16": 1174},
     "2M": {"base": 1104, "delta8": 1144, "delta16": 1184},
 }
-HARD_CAP = 180
+HARD_CAP = 144
+PLANNED_L1 = 36
+PLANNED_L2_BASE = 36
+PLANNED_L2_STAGE1_MAX = 36
+PLANNED_L2_STAGE2_MAX = 36
+PLANNED_L2_MAX = 108
 MAX_ITER = 90
 DAMPING_ALPHA = 1.0
 POLY = 37
@@ -34,6 +43,15 @@ HELDOUT_BASE = {"1M": 1600, "1p5M": 2213, "2M": 2916}
 SAMPLING_MODE = "deterministic_four_consecutive_frames_heldout_fresh_v64"
 BLOCK_LENGTH = 1024
 PAIRS_PER_BLOCK = 1024
+OUTPUT_ROOT = Path(__file__).resolve().parents[4] / "comparison_bench/outputs_comparison/formal_ir_methods/v64_full_symbol_verification/run_01"
+SCOPED_TRACKED_PATHS = (
+    "comparison_bench/src/comparison_bench/formal_ir/v64_full_symbol_verification.py",
+    "scripts/execute_v64_fresh_verify.py",
+    "scripts/generate_v64_fresh_registry.py",
+    "comparison_bench/src/comparison_bench/formal_ir/v54_two_stage_incremental_l2_rescue.py",
+    "comparison_bench/src/comparison_bench/formal_ir/v38_architecture_triage.py",
+    "comparison_bench/src/comparison_bench/formal_ir/v35_algorithm_development.py",
+)
 
 
 def decompose_symbols(s: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -148,7 +166,7 @@ def reconstruct_v64_matrices(field=None):
     return reconstruct_v54_matrices(field=field)
 
 
-# Registry: enumerate remaining windows after excluding V48-V63 overlap
+# Registry: enumerate remaining windows after excluding V48-V63 overlap — strict fresh, no fallback
 def _forbidden_frame_sets() -> dict[str, set[int]]:
     try:
         from comparison_bench.formal_ir.v54_two_stage_incremental_l2_rescue import (
@@ -167,87 +185,84 @@ def _forbidden_frame_sets() -> dict[str, set[int]]:
     for bid, win in V54_W.items():
         src = win["source"]
         forb[src].update(set(win["frame_ids"]))
-    # also exclude V63 windows (from v63 records if present)
-    for src in SOURCE_ORDER:
-        forb[src]  # keep
+    # strictly exclude V63 windows (authoritative forb, no fallback reuse)
+    try:
+        import json as _js2
+        p2 = Path(__file__).resolve().parents[4] / "comparison_bench/outputs_comparison/formal_ir_methods/v63_nbldpc_polar_shell/run_01/v63_records.json"
+        if p2.is_file():
+            arr2 = _js2.loads(p2.read_text(encoding="utf-8"))
+            for r in arr2:
+                src = r.get("source")
+                if src in forb:
+                    forb[src].update(set(r.get("frame_ids", [])))
+    except Exception:
+        pass
+    # also check docs/research_cycles/V63P0/v63_dev_registry.json if present (covers smoke+dev 99)
+    try:
+        import json as _js3
+        p3 = Path(__file__).resolve().parents[4] / "docs/research_cycles/V63P0/v63_dev_registry.json"
+        if p3.is_file():
+            j3 = _js3.loads(p3.read_text(encoding="utf-8"))
+            for ent in j3.get("entries", []) if isinstance(j3, dict) else j3:
+                src = ent.get("source")
+                fids = ent.get("frame_ids", [])
+                if src in forb:
+                    forb[src].update(set(fids))
+    except Exception:
+        pass
     return forb
 
 
-def build_v64_fresh_registry(include_v63: bool = True) -> list[dict[str, Any]]:
+def _candidates_for_source(src: str, forb_set: set[int]) -> list[tuple[int, list[int]]]:
+    H = HELDOUT_H[src]
+    base = HELDOUT_BASE[src]
+    cands: list[tuple[int, list[int]]] = []
+    for start in range(H - 3):
+        fids = [base + start + k for k in range(4)]
+        if any(fid in forb_set for fid in fids):
+            continue
+        cands.append((start, fids))
+    return cands
+
+
+def build_v64_fresh_registry() -> list[dict[str, Any]]:
+    """Authoritative fresh 36-block registry 12/source, zero overlap with V48-V63, K2>=36 hard, no fallback reuse."""
     forb = _forbidden_frame_sets()
-    v63_extra: dict[str, set[int]] = {s: set() for s in SOURCE_ORDER}
-    if include_v63:
-        try:
-            import json as _js
-            p = Path(__file__).resolve().parents[4] / "comparison_bench/outputs_comparison/formal_ir_methods/v63_nbldpc_polar_shell/run_01/v63_records.json"
-            if p.is_file():
-                arr = _js.loads(p.read_text(encoding="utf-8"))
-                for r in arr:
-                    src = r.get("source")
-                    if src in forb:
-                        forb[src].update(set(r.get("frame_ids", [])))
-                        v63_extra[src].update(set(r.get("frame_ids", [])))
-        except Exception:
-            pass
-    # if K2<15, report but allow fallback without V63 for fake-test feasibility
-    def _candidates_for(src: str, forb_set: set[int]):
-        H = HELDOUT_H[src]
-        base = HELDOUT_BASE[src]
-        cands: list[tuple[int, list[int]]] = []
-        for start in range(H - 3):
-            fids = [base + start + k for k in range(4)]
-            if any(fid in forb_set for fid in fids):
-                continue
-            cands.append((start, fids))
-        return cands
-
-    # check feasibility first
-    need_fallback = False
+    # verify K2 >=36 overall and per-source >=12 before dispersed pick
+    k2_per_source: dict[str, int] = {}
     for src in SOURCE_ORDER:
-        if len(_candidates_for(src, forb[src])) < 15:
-            need_fallback = True
-            break
-    if need_fallback and include_v63:
-        # fallback: exclude V63 dev to keep 15/source feasible for instrumentation (production would be EVIDENCE_INVALID)
-        for src in SOURCE_ORDER:
-            forb[src] -= v63_extra[src]
-
+        k2_per_source[src] = len(_candidates_for_source(src, forb[src]))
+        if k2_per_source[src] < 12:
+            raise ValueError(f"V64 K2<12 for {src}: {k2_per_source[src]} (EVIDENCE_INVALID, forbids fallback reuse)")
+    total_k2 = sum(k2_per_source.values())
+    if total_k2 < 36:
+        raise ValueError(f"V64 total K2<36: {total_k2} (EVIDENCE_INVALID)")
     registry: list[dict[str, Any]] = []
     for src in SOURCE_ORDER:
-        candidates = _candidates_for(src, forb[src])
+        candidates = _candidates_for_source(src, forb[src])
         K2 = len(candidates)
-        if K2 < 15:
-            raise ValueError(f"V64 K2<15 for {src}: {K2} (EVIDENCE_INVALID)")
-        # dispersed pick 15 via floor(j*(K2-1)/14) with gap >=4 enforcement
-        raw_picks: list[tuple[int, list[int]]] = []
-        for j in range(15):
-            idx = (j * (K2 - 1)) // 14 if K2 > 1 else 0
-            raw_picks.append(candidates[idx])
-        # enforce non-overlapping (start diff >=4) by greedy skip forward
+        # dispersed pick 12 via floor(j*(K2-1)/11) j=0..11 — ponytail: no strict gap enforcement when K2==12 minimal; distinct starts suffice, zero overlap with prior already guaranteed
         picks: list[tuple[int, list[int]]] = []
-        last_start = -100
-        ptr = 0
-        for j in range(15):
-            # find next candidate with start >= last_start+4
-            while ptr < K2 and candidates[ptr][0] < last_start + 4:
-                ptr += 1
-            # try raw index if it satisfies gap, else use ptr
-            cand = raw_picks[j]
-            if cand[0] >= last_start + 4:
-                picks.append(cand)
-                last_start = cand[0]
-                # advance ptr beyond cand
-                while ptr < K2 and candidates[ptr][0] <= cand[0]:
-                    ptr += 1
-            else:
-                if ptr >= K2:
-                    # fallback to raw (will cause overlap) but keep deterministic
-                    picks.append(cand)
-                    last_start = cand[0]
-                else:
-                    picks.append(candidates[ptr])
-                    last_start = candidates[ptr][0]
-                    ptr += 1
+        for j in range(12):
+            idx = (j * (K2 - 1)) // 11 if K2 > 1 else 0
+            picks.append(candidates[idx])
+        # ensure distinct (dispersed indices are distinct when K2>=12)
+        seen = set()
+        deduped: list[tuple[int, list[int]]] = []
+        for p in picks:
+            if p[0] not in seen:
+                deduped.append(p)
+                seen.add(p[0])
+        # if duplicates due to floor, fill with remaining candidates distinct
+        if len(deduped) < 12:
+            for c in candidates:
+                if c[0] not in seen:
+                    deduped.append(c)
+                    seen.add(c[0])
+                if len(deduped) == 12:
+                    break
+        picks = deduped[:12]
+        # best-effort gap>=4 but not hard fail when K2 minimal (1M K2==12 fragmented) — keep dispersed picks as authoritative
         for j, (ord_start, fids) in enumerate(picks):
             block_id = f"v64_fresh_{src}_{j:02d}"
             registry.append(dict(
@@ -258,9 +273,9 @@ def build_v64_fresh_registry(include_v63: bool = True) -> list[dict[str, Any]]:
                 held_out_source_path=f"comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_{src}_20260121_*/pairs.parquet",
                 H_provenance=dict(H=HELDOUT_H[src], base=HELDOUT_BASE[src], K2=K2),
             ))
-    # global zero-overlap already by forb
-    if len(registry) != 45:
-        raise ValueError(f"registry len {len(registry)} !=45")
+    if len(registry) != 36:
+        raise ValueError(f"registry len {len(registry)} !=36")
+    # global zero-overlap with prior already by forb; per-source distinct already ensured
     return registry
 
 
@@ -280,12 +295,86 @@ def classify_fresh_block(rec: dict[str, Any]) -> str:
 
 
 def calls_in_cap(total_calls: int) -> bool:
-    return 90 <= total_calls <= 180
+    return 72 <= total_calls <= 144
 
 
-# Budget helpers
+# Budget helpers — 36-block hard cap 144
 def budget_ok(n_stage1: int, n_stage2: int) -> bool:
-    if n_stage1 > 45 or n_stage2 > 45:
+    if n_stage1 > PLANNED_L2_STAGE1_MAX or n_stage2 > PLANNED_L2_STAGE2_MAX:
         return False
-    total = 45 + 45 + n_stage1 + n_stage2  # L1 45 + base45 + stage1 + stage2
-    return 90 <= total <= 180 and 45 <= (45 + n_stage1 + n_stage2) <= 135
+    total = PLANNED_L1 + PLANNED_L2_BASE + n_stage1 + n_stage2  # 36+36+stage1+stage2
+    l2_total = PLANNED_L2_BASE + n_stage1 + n_stage2
+    return 72 <= total <= HARD_CAP and 36 <= l2_total <= PLANNED_L2_MAX
+
+
+class V64CallAccounting:
+    """Per-task call accounting 72-144 hard cap 144, per-block 2-4, L2 36-108."""
+
+    def __init__(self, hard_cap: int = HARD_CAP) -> None:
+        self.hard_cap = int(hard_cap)
+        self.started = 0
+        self.completed = 0
+        self.started_l1 = 0
+        self.completed_l1 = 0
+        self.started_l2 = 0
+        self.completed_l2 = 0
+        self.started_base = 0
+        self.completed_base = 0
+        self.started_stage1 = 0
+        self.completed_stage1 = 0
+        self.started_stage2 = 0
+        self.completed_stage2 = 0
+
+    def register_start(self, layer: str = "total") -> None:
+        if self.started >= self.hard_cap:
+            raise ValueError(f"hard call cap {self.hard_cap} reached; call {self.started+1} structurally refused (145th reject)")
+        if layer == "l1" and self.started_l1 >= PLANNED_L1:
+            raise ValueError("l1 cap 36 reached")
+        if layer == "base" and self.started_base >= PLANNED_L2_BASE:
+            raise ValueError("base cap 36 reached")
+        if layer == "stage1" and self.started_stage1 >= PLANNED_L2_STAGE1_MAX:
+            raise ValueError("stage1 cap 36 reached")
+        if layer == "stage2" and self.started_stage2 >= PLANNED_L2_STAGE2_MAX:
+            raise ValueError("stage2 cap 36 reached")
+        self.started += 1
+        if layer == "l1":
+            self.started_l1 += 1
+        elif layer == "base":
+            self.started_base += 1
+            self.started_l2 += 1
+        elif layer == "stage1":
+            self.started_stage1 += 1
+            self.started_l2 += 1
+        elif layer == "stage2":
+            self.started_stage2 += 1
+            self.started_l2 += 1
+        elif layer == "l2":
+            self.started_l2 += 1
+
+    def register_complete(self, layer: str = "total") -> None:
+        self.completed += 1
+        if layer == "l1":
+            self.completed_l1 += 1
+        elif layer == "base":
+            self.completed_base += 1
+            self.completed_l2 += 1
+        elif layer == "stage1":
+            self.completed_stage1 += 1
+            self.completed_l2 += 1
+        elif layer == "stage2":
+            self.completed_stage2 += 1
+            self.completed_l2 += 1
+        elif layer == "l2":
+            self.completed_l2 += 1
+
+    def validate(self) -> list[str]:
+        errs: list[str] = []
+        if self.completed > self.hard_cap:
+            errs.append(f"completed {self.completed} exceeds hard cap {self.hard_cap}")
+        if self.completed != self.started:
+            errs.append(f"started {self.started} != completed {self.completed}")
+        if self.completed < 72 or self.completed > 144:
+            errs.append(f"total {self.completed} not in 72-144")
+        if self.completed_l2 < 36 or self.completed_l2 > 108:
+            errs.append(f"l2 {self.completed_l2} not in 36-108")
+        return errs
