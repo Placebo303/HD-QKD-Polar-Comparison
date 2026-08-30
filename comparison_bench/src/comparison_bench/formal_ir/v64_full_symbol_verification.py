@@ -241,7 +241,7 @@ def build_v64_fresh_registry() -> list[dict[str, Any]]:
     for src in SOURCE_ORDER:
         candidates = _candidates_for_source(src, forb[src])
         K2 = len(candidates)
-        # dispersed pick 12 via floor(j*(K2-1)/11) j=0..11 — ponytail: no strict gap enforcement when K2==12 minimal; distinct starts suffice, zero overlap with prior already guaranteed
+        # dispersed pick 12 via floor(j*(K2-1)/11) j=0..11
         picks: list[tuple[int, list[int]]] = []
         for j in range(12):
             idx = (j * (K2 - 1)) // 11 if K2 > 1 else 0
@@ -262,7 +262,32 @@ def build_v64_fresh_registry() -> list[dict[str, Any]]:
                 if len(deduped) == 12:
                     break
         picks = deduped[:12]
-        # best-effort gap>=4 but not hard fail when K2 minimal (1M K2==12 fragmented) — keep dispersed picks as authoritative
+        # ponytail: 1M gap>=4 strong check — if K2==12 fragmented cannot achieve 12 non-overlapping, hard fail EVIDENCE_INVALID or document ceiling
+        picks_sorted = sorted(picks, key=lambda x: x[0])
+        # compute max non-overlapping independent count (greedy gap>=4)
+        independent: list[tuple[int, list[int]]] = []
+        for cand in picks_sorted:
+            if not independent or cand[0] - independent[-1][0] >= 4:
+                independent.append(cand)
+        # also compute global max over all candidates (upper ceiling)
+        global_independent: list[tuple[int, list[int]]] = []
+        for cand in sorted(candidates, key=lambda x: x[0]):
+            if not global_independent or cand[0] - global_independent[-1][0] >= 4:
+                global_independent.append(cand)
+        if len(independent) < 12:
+            # If overall K2==12 minimal fragmented pool cannot satisfy gap>=4, hard fail
+            raise ValueError(
+                f"V64 K2={K2} for {src} cannot achieve 12 independent blocks with gap>=4: "
+                f"picks starts {[p[0] for p in picks_sorted]} have overlap (effective independent {len(independent)} <12, "
+                f"global max {len(global_independent)} <12). EVIDENCE_INVALID — known ceiling: effective independence <12; "
+                f"switch held-out pool or document ceiling explicitly in summary (cannot claim 12 independent). "
+                f"Candidates starts {[c[0] for c in candidates]}"
+            )
+        # additional hard frame_ids overlap check (gap>=4 ensures no shared frames)
+        for a in range(len(picks)):
+            for b in range(a+1, len(picks)):
+                if set(picks[a][1]) & set(picks[b][1]):
+                    raise ValueError(f"V64 frame_ids overlap {picks[a]} vs {picks[b]} for {src} — gap>=4 violated EVIDENCE_INVALID")
         for j, (ord_start, fids) in enumerate(picks):
             block_id = f"v64_fresh_{src}_{j:02d}"
             registry.append(dict(
