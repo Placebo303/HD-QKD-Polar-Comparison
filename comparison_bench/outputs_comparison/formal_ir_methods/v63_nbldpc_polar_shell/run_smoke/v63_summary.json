@@ -1,0 +1,27 @@
+{
+  "registry_type": "INTEGRATION_REPLAY_SMOKE",
+  "total_blocks": 9,
+  "total_calls": 25,
+  "hard_cap": 36,
+  "budget": "9 L1 + 9 base + \u22649 stage1 + \u22649 stage2 = 18-36, got 25",
+  "total_disclosed_bits": 10066,
+  "overall_avg": 1118.4444444444443,
+  "per_source_avg": {
+    "1M": 1077.3333333333333,
+    "1p5M": 1147.3333333333333,
+    "2M": 1130.6666666666667
+  },
+  "per_source_total": {
+    "1M": 3232,
+    "1p5M": 3442,
+    "2M": 3392
+  },
+  "stage_used": {
+    "base": 4,
+    "delta8": 3,
+    "delta16": 2
+  },
+  "elapsed_s": 92.78837823867798,
+  "accepted_plan_sha": "397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a",
+  "head_sha": "36c24c38d0ce7dac4a76580d175f2d3dfdc1e3d5"
+}
