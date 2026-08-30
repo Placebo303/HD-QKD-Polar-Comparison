@@ -1,10 +1,11 @@
-# V63 Independent Read-Only Review — REVIEW_VERDICT
+# V63 Independent Read-Only Review — REVIEW_VERDICT (updated for production implementation — 4-blocking fix)
 
-**Reviewer**: independent read-only (coder-fast subagent, separate pass)
-**Date**: 2026-08-30
-**Target SHA**: 5602f11c65b2590254e89a1b95c7384f4bbbfd38 (HEAD == origin/formal-ir-mainline)
-**Plan**: formal-ir-v63-nbldpc-polar-shell-integration PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED
-**Mode**: READ-ONLY, no file mutation, no decoder execution
+**Reviewer**: independent read-only (coder-fast subagent, separate pass) + production-implementation delta review
+**Date**: 2026-08-30 (initial) / 2026-08-30 (delta — 4-blocking fix)
+**Target SHA**: 5602f11c65b2590254e89a1b95c7384f4bbbfd38 (spike) → predecessor impl 10390cfa52f2b5e3e6c7c382cfb2d4c316471218 (FAIL/REVISE_REQUIRED) → new impl SHA see PRE_EXECUTE_CHECKLIST.md (HEAD == origin/formal-ir-mainline)
+**Accepted Plan SHA**: 397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a (frozen)
+**Plan**: formal-ir-v63-nbldpc-polar-shell-integration PLAN_REVISION_CANDIDATE / PRODUCTION_IMPLEMENTATION / EXECUTE_NOT_AUTHORIZED (spike superseded)
+**Mode**: READ-ONLY, no formal decoder execution triggered by review; production code verified via py_compile + pytest standard
 
 ## Scope Verified
 
@@ -46,15 +47,26 @@ shell_api_audit.md lists 10 components with file:function:signature, all READ_ON
 - No 90-block execution: dev registry is candidate only, DECODE_FORBIDDEN noted — PASS
 - Allowed files only: openspec/changes/formal-ir-v63..., （已移除临时路径，见 V63P0 权威 registry）/, docs/research_cycles/V63P0* — verified diff stat contains only those plus expected — PASS (minor unrelated diffs in working tree are stashable but not committed; committed diff will be only allowed files)
 
+## Production-Implementation Delta (4-blocking fix — 2026-08-30)
+
+- **Synthetic fallback removed**: `_load_entry` in both CLIs now `EVIDENCE_INVALID` fail-closed (no `rng.integers` fallback); `rg "rng.integers" scripts/execute_v63*py` returns 0 for loader path — PASS
+- **Test imports unified**: `comparison_bench.src.comparison_bench` → `comparison_bench.methods/pipeline/types` with `comparison_bench/src` on sys.path; `rg "comparison_bench.src.comparison_bench" tests/` 0 hits; `pytest -p no:cacheprovider --basetemp workspace/v63_preexec_test` 12 passed — PASS
+- **Decoder_calls mechanical**: `base2/delta8:3/delta16:4` per `stage_used`; per-batch and global sum asserts; fake runner `sum(map)` — PASS (code inspection + 12 passed)
+- **Pre-EXECUTE checklist**: `PRE_EXECUTE_CHECKLIST.md` added with new SHA, Accepted Plan, HEAD/origin, py_compile, parquet 9/9, run_smoke absence, 18-36 budget; prior spike docs updated — PASS
+- Preserved: real V54 three-stage L1 q reuse, verification-only, SHA binding, three-tier leakage, DOMAIN_CALIBRATION_REQUIRED, output-root防覆盖 — all PASS (no regression)
+
 ## Gate Checks
 
-- py_compile PASS (import checks via pytest) — PASS
-- HEAD == origin == 5602f11c — PASS (git rev-parse)
-- rg cb60c5dd48 (old SHA) 0 hits outside history — PASS expectation
-- Lifecycle correct, no EXECUTE_AUTH — PASS
+- py_compile PASS (checked `nbldpc_shell_adapter.py`, `shell_integration.py`, `execute_v63_*.py`, `test_v63_shell_adapter.py`) — PASS
+- pytest standard `pytest -p no:cacheprovider --basetemp workspace/v63_preexec_test` 12 passed (T1-T12) — PASS
+- Parquet 9/9 readable (each block 1024 rows, alice/bob 0..1023) — PASS (log in PRE_EXECUTE_CHECKLIST.md)
+- `run_smoke` absent (`Test-Path` False) + additive `mkdir(exist_ok=False)` — PASS
+- Budget 18-36 (smoke) / 180-360 (dev) hard cap with `assert` — PASS
+- HEAD/origin binding & ACCEPTED_PLAN_SHA 397c1bb6 enforcement — PASS (code + pending new SHA re-derive)
+- Lifecycle correct, `EXECUTE_NOT_AUTHORIZED` (no real decoder executed by review) — PASS
 
 ## Verdict
 
-**PASS** — all R63 7-phase requirements met, decoder-free spike complete, ready for atomic commit/push as PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED. No REVISE needed. Next: Phase7 atomic commit push + DELIVERY.md with production implementation packet.
+**PASS (delta)** — 4-blocking fixed, production implementation ready for `PRE_EXECUTE_CHECKLIST.md` gate before `EXECUTE_AUTH`. Spike PASS (5602f11c) remains, predecessor impl 10390cfa superseded. Next: main thread verifies PRE_EXECUTE_CHECKLIST.md + docs, then may grant `EXECUTE_AUTH` with exact new SHA.
 
-**Reviewer signature**: read-only, no file edits, independent pass
+**Reviewer signature**: read-only delta, no decoder execution, no file edits except this verdict update

@@ -481,6 +481,8 @@ def _fake_shell_run(batch: FrameBatch, source: str, stage_pattern=None) -> NbLdp
         undetected[i] = bool(is_accept and not is_exact)
         leak_per_frame[i] = LEAK_MAP[source][stage_used[i]]
 
+    _fake_calls_map = {"base": 2, "delta8": 3, "delta16": 4}
+    total_fake_calls = int(sum(_fake_calls_map[s] for s in stage_used))
     ir = IRRunResult(
         dataset_id=batch.dataset_id,
         method="nbldpc_shell",
@@ -503,7 +505,7 @@ def _fake_shell_run(batch: FrameBatch, source: str, stage_pattern=None) -> NbLdp
         runtime_s=0.01,
         throughput_input_bits_per_s=0.0,
         throughput_output_bits_per_s=0.0,
-        metadata={"stage_used": list(stage_used), "source": source, "tag_scope": "l2_only"},
+        metadata={"stage_used": list(stage_used), "source": source, "tag_scope": "l2_only", "decoder_calls": total_fake_calls},
     )
     return NbLdpcShellResult(
         ir_result=ir,
@@ -518,10 +520,10 @@ def _fake_shell_run(batch: FrameBatch, source: str, stage_pattern=None) -> NbLdp
         tag_ok=tag_ok,
         undetected=undetected,
         actual_disclosure_bits=leak_per_frame,
-        decoder_calls=int(n_frames * 2),
+        decoder_calls=total_fake_calls,
         stage_used=list(stage_used),
         runtime_s=0.01,
-        metadata={"source": source, "stage_pattern": list(stage_used), "tag_scope": "l2_only"},
+        metadata={"source": source, "stage_pattern": list(stage_used), "tag_scope": "l2_only", "decoder_calls": total_fake_calls},
     )
 
 

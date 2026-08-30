@@ -118,27 +118,25 @@ def main(argv: Iterable[str] | None = None) -> int:
     def _load_entry(entry):
         src = entry["source"]
         fids = entry["frame_ids"]
+        import numpy as np  # noqa: F401
+        import pandas as pd
+        parquet_map = {
+            "1M": REPO_ROOT / "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_184040/pairs.parquet",
+            "1p5M": REPO_ROOT / "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_183806/pairs.parquet",
+            "2M": REPO_ROOT / "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_183657/pairs.parquet",
+        }
+        path = parquet_map[src]
+        if not path.is_file():
+            raise RuntimeError(f"EVIDENCE_INVALID: parquet missing {path} for {src}")
         try:
-            import pandas as pd
-            parquet_map = {
-                "1M": REPO_ROOT / "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_184040/pairs.parquet",
-                "1p5M": REPO_ROOT / "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_183806/pairs.parquet",
-                "2M": REPO_ROOT / "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_183657/pairs.parquet",
-            }
-            path = parquet_map[src]
-            if path.is_file():
-                df = pd.read_parquet(path)
-                filt = df[df["frame_id"].isin(fids)].sort_values(["frame_id", "pair_idx"])
-                alice = filt["alice_symbol"].to_numpy(dtype=np.int64)
-                bob = filt["bob_symbol"].to_numpy(dtype=np.int64)
-                if alice.size == 1024 and bob.size == 1024:
-                    return alice, bob
-        except Exception:
-            pass
-        import numpy as np
-        rng = np.random.default_rng(int(entry["held_out_ordinal_start"] * 1000 + 321))
-        alice = rng.integers(0, 1024, size=1024, dtype=np.int64)
-        bob = rng.integers(0, 1024, size=1024, dtype=np.int64)
+            df = pd.read_parquet(path)
+        except Exception as exc:
+            raise RuntimeError(f"EVIDENCE_INVALID: parquet read failed {path}: {exc}") from exc
+        filt = df[df["frame_id"].isin(fids)].sort_values(["frame_id", "pair_idx"])
+        alice = filt["alice_symbol"].to_numpy(dtype=np.int64)
+        bob = filt["bob_symbol"].to_numpy(dtype=np.int64)
+        if alice.size != 1024 or bob.size != 1024:
+            raise RuntimeError(f"EVIDENCE_INVALID: row count {alice.size}/{bob.size} !=1024 for {entry['block_id']} {src} {fids}")
         return alice, bob
 
     try:
@@ -164,6 +162,9 @@ def main(argv: Iterable[str] | None = None) -> int:
             per_source_n[src] = per_source_n.get(src, 0) + len(ents)
             for st in shell.stage_used:
                 stage_counts[st] = stage_counts.get(st, 0) + 1
+            _calls_map = {"base": 2, "delta8": 3, "delta16": 4}
+            per_block_calls = [_calls_map[shell.stage_used[idx]] for idx in range(len(ents))]
+            assert sum(per_block_calls) == int(shell.decoder_calls), f"EVIDENCE_INVALID decoder_calls sum {sum(per_block_calls)} != shell {shell.decoder_calls} stage_used {shell.stage_used}"
             for idx, e in enumerate(ents):
                 records.append({
                     "block_id": e["block_id"],
@@ -174,7 +175,9 @@ def main(argv: Iterable[str] | None = None) -> int:
                     "accepted": bool(shell.accepted[idx]),
                     "exact": bool(shell.exact[idx]),
                     "undetected": bool(shell.undetected[idx]),
+                    "decoder_calls": int(per_block_calls[idx]),
                 })
+        assert sum(r["decoder_calls"] for r in records) == total_calls, f"EVIDENCE_INVALID global sum {sum(r['decoder_calls'] for r in records)} != total {total_calls}"
         if not (180 <= total_calls <= DEV_HARD_CAP):
             raise RuntimeError(f"budget violated: total_calls {total_calls} not in 180-360")
         elapsed = time.time() - t0

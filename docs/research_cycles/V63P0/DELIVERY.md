@@ -1,9 +1,12 @@
-# V63 Delivery — PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED
+# V63 Delivery — PLAN_REVISION_CANDIDATE / PRODUCTION_IMPLEMENTATION — 4-blocking fixed / EXECUTE_NOT_AUTHORIZED (awaiting EXECUTE_AUTH)
 
 **Date**: 2026-08-30
 **Predecessor Plan SHA**: 5602f11c65b2590254e89a1b95c7384f4bbbfd38 (HEAD == origin/formal-ir-mainline at start)
+**Accepted Plan SHA**: 397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a (frozen)
+**Predecessor implementation SHA (FAIL/REVISE_REQUIRED)**: 10390cfa52f2b5e3e6c7c382cfb2d4c316471218 — 4 blocking (synthetic fallback / pythonpath / decoder_calls / checklist)
+**New implementation SHA**: _see PRE_EXECUTE_CHECKLIST.md — HEAD == origin/formal-ir-mainline post-push_
 **Data SHA**: 84d62779 (84d62779603e62de50ded5182ed65b65d3dc6084, d=1024 bw=200 pairing=nearest rule=legacy_v1)
-**Lifecycle**: PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED — decoder-free spike only, no real decoder/run_01/formal PA/90-block execution
+**Lifecycle**: PLAN_REVISION_CANDIDATE / PRODUCTION_IMPLEMENTATION (real V54 L1APP+Δ8+Δ8, explicit fake_runner, fail-closed EVIDENCE_INVALID, mechanical accounting) / EXECUTE_NOT_AUTHORIZED — decoder-free spike superseded; smoke/development CLIs production-ready but still gated by EXECUTE_AUTH
 
 ## R63 7-Phase Completion
 
@@ -107,13 +110,24 @@ python -m pytest comparison_bench/tests -k v63 -p no:cacheprovider  # future
 ### 9. Provenance
 
 - HEAD at delivery start: 5602f11c65b2590254e89a1b95c7384f4bbbfd38
-- New Plan SHA: (printed after push, 40-char)
+- Accepted Plan SHA: 397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a
+- Predecessor implementation SHA: 10390cfa52f2b5e3e6c7c382cfb2d4c316471218 (4 blocking)
+- New implementation SHA: see PRE_EXECUTE_CHECKLIST.md (HEAD == origin/formal-ir-mainline)
 - Branch: formal-ir-mainline (ordinary push, no force)
-- State after push: PLAN_REVISION_CANDIDATE / DECODER_FREE_INTEGRATION_SPIKE_COMPLETE / EXECUTE_NOT_AUTHORIZED
+- State after push: PLAN_REVISION_CANDIDATE / PRODUCTION_IMPLEMENTATION / EXECUTE_NOT_AUTHORIZED
+
+### 10. Pre-EXECUTE Checklist (formal, added 2026-08-30 — 4-blocking fix)
+
+See `PRE_EXECUTE_CHECKLIST.md` for full gate matrix. Summary:
+
+- `py_compile` PASS; `pytest -p no:cacheprovider --basetemp workspace/v63_preexec_*` 12 passed (imports unified to `comparison_bench.methods...`)
+- `_load_entry` synthetic fallback removed → EVIDENCE_INVALID fail-closed; `decoder_calls` mechanical `base2/delta8:3/delta16:4` with per-batch and global sum asserts
+- Parquet 9/9 readable (1024 rows/block); `run_smoke` absent; budget 18-36 (smoke) / 180-360 (dev) hard cap
+- `ACCEPTED_PLAN_SHA` 397c1bb6 binding, HEAD/origin binding, SCOPED dirty check, domain gate, leakage three-tier preserved
 
 ## Next Actions
 
-1. Main thread verifies this DELIVERY and REVIEW_VERDICT, then decides ACCEPT
-2. Only after ACCEPT, operator may grant EXECUTE_AUTH for smoke 9 (not 90) with exact SHA binding
-3. 90-block dev remains candidate until smoke PASS
+1. Main thread verifies this DELIVERY, REVIEW_VERDICT and PRE_EXECUTE_CHECKLIST, then decides ACCEPT
+2. Only after ACCEPT, operator may grant EXECUTE_AUTH for smoke 9 (not 90) with exact new implementation SHA binding (`--execution-authorized --authorized-target-sha <new_Sha>`)
+3. 90-block dev remains candidate until smoke PASS; any EXECUTE without checklist PASS is BLOCKED
 

@@ -2,13 +2,19 @@
 import pathlib
 import json
 import sys
+from pathlib import Path as _P
+
+# Ensure comparison_bench/src on path for `from comparison_bench.methods...` (fail-closed, no src. prefix)
+for _cand in [_P(__file__).resolve().parents[1] / "comparison_bench/src", _P(__file__).resolve().parents[1] / "src"]:
+    if str(_cand) not in sys.path and _cand.is_dir():
+        sys.path.insert(0, str(_cand))
 
 import numpy as np
 import pytest
 
 
 def test_T1_factorization_32_u1_u2():
-    from comparison_bench.src.comparison_bench.methods.nbldpc_shell_adapter import (
+    from comparison_bench.methods.nbldpc_shell_adapter import (
         decompose_symbols,
         recompose_symbols,
     )
@@ -33,8 +39,8 @@ def test_T2_exact_full_is_u1_and_u2():
 
 
 def test_T3_reconciled_full_range_1023():
-    from comparison_bench.src.comparison_bench.types import FrameBatch
-    from comparison_bench.src.comparison_bench.methods.nbldpc_shell_adapter import NbLdpcShellIRAdapter
+    from comparison_bench.types import FrameBatch
+    from comparison_bench.methods.nbldpc_shell_adapter import NbLdpcShellIRAdapter
 
     rng = np.random.default_rng(1)
     alice = rng.integers(0, 1024, size=(2, 1024), dtype=np.int64)
@@ -48,7 +54,7 @@ def test_T3_reconciled_full_range_1023():
 
 
 def test_T4_leakage_three_tier_tag_single():
-    from comparison_bench.src.comparison_bench.methods.nbldpc_shell_adapter import leak_for_stage
+    from comparison_bench.methods.nbldpc_shell_adapter import leak_for_stage
 
     for src in ["1M", "1p5M", "2M"]:
         b = leak_for_stage(src, "base")
@@ -60,7 +66,7 @@ def test_T4_leakage_three_tier_tag_single():
 
 
 def test_T5_pa_proxy_uses_actual_disclosure():
-    from comparison_bench.src.comparison_bench.pipeline.shell_integration import _pa_proxy
+    from comparison_bench.pipeline.shell_integration import _pa_proxy
 
     out = _pa_proxy([0], [1064, 1104])
     assert out["pa_input_leak"] == 2168
@@ -68,7 +74,7 @@ def test_T5_pa_proxy_uses_actual_disclosure():
 
 
 def test_T6_pa_rejects_polar_leak_EC():
-    from comparison_bench.src.comparison_bench.pipeline.shell_integration import _pa_proxy
+    from comparison_bench.pipeline.shell_integration import _pa_proxy
 
     try:
         _pa_proxy([0], [1064], polar_leak_EC=999)
@@ -78,7 +84,7 @@ def test_T6_pa_rejects_polar_leak_EC():
 
 
 def test_T7_domain_gate_calibration_required():
-    from comparison_bench.src.comparison_bench.pipeline.shell_integration import domain_check
+    from comparison_bench.pipeline.shell_integration import domain_check
 
     assert domain_check(is_new_or_incompatible=False) == "DOMAIN_OK"
     assert domain_check(is_new_or_incompatible=True) == "DOMAIN_CALIBRATION_REQUIRED"
@@ -88,7 +94,7 @@ def test_T7_domain_gate_calibration_required():
 
 
 def test_T8_irrunresult_signature_frozen():
-    from comparison_bench.src.comparison_bench.types import IRRunResult
+    from comparison_bench.types import IRRunResult
     import inspect
 
     sig = inspect.signature(IRRunResult.__init__)
@@ -124,8 +130,8 @@ def test_T10_fresh_90_zero_overlap_smoke():
 
 
 def test_T11_shell_wraps_irrunresult_not_mutate():
-    from comparison_bench.src.comparison_bench.types import FrameBatch
-    from comparison_bench.src.comparison_bench.methods.nbldpc_shell_adapter import NbLdpcShellIRAdapter
+    from comparison_bench.types import FrameBatch
+    from comparison_bench.methods.nbldpc_shell_adapter import NbLdpcShellIRAdapter
 
     rng = np.random.default_rng(2)
     alice = rng.integers(0, 1024, size=(1, 1024))
@@ -142,8 +148,8 @@ def test_T11_shell_wraps_irrunresult_not_mutate():
 
 
 def test_T12_e2e_fake_pipeline_ttbin_to_pa_no_decoder():
-    from comparison_bench.src.comparison_bench.types import FrameBatch
-    from comparison_bench.src.comparison_bench.pipeline.shell_integration import run_shell_pipeline
+    from comparison_bench.types import FrameBatch
+    from comparison_bench.pipeline.shell_integration import run_shell_pipeline
 
     rng = np.random.default_rng(3)
     alice = rng.integers(0, 1024, size=(3, 1024))
