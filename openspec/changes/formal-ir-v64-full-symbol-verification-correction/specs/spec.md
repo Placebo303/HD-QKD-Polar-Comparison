@@ -6,10 +6,10 @@
 
 ## 1. 变更类型与生命周期
 
-- **Type**: `VERIFICATION_CORRECTION` — NB-LDPC verification 语义修正（L2-only `tag(U2)` → full-symbol `tag(32*U1+U2)`），Phase A 只读归因 0 calls + Phase B 45 fresh 15/source 一次 decode 双口径仪器化对照（同次保存、不增 calls/泄漏），非 formal qualification/promotion/安全证明。
+- **Type**: `VERIFICATION_CORRECTION` — NB-LDPC verification 语义修正（L2-only `tag(U2)` → full-symbol `tag(32*U1+U2)`），Phase A 只读归因 0 calls + Phase B 36 fresh 12/source 一次 decode 双口径仪器化对照（同次保存、不增 calls/泄漏），非 formal qualification/promotion/安全证明。
 - **Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件，**Phase A 归因记录完成（含 ATTRIBUTION_INCOMPLETE 的 fresh instrumentation 声明）后方可实现**，`DECODE_FORBIDDEN` 直至实现后授权前保持；正式 `run_01` 创建需独立 plan ACCEPT + EXECUTE_AUTH。
 - **Branch**: `formal-ir-mainline`；`HEAD` `TBD` 实施前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞；本次推送新 Plan SHA 后停止。
-- **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200 pairing=nearest rule=legacy_v1`) — 同域单点；fresh 45 仍该处理点零重叠。
+- **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200 pairing=nearest rule=legacy_v1`) — 同域单点；fresh 36 仍该处理点零重叠。
 
 ## 2. 冻结方法（纠错完全冻结，仅 verification 输入修正）
 
@@ -72,7 +72,7 @@ else:
 
 - `L2_TAG_INSUFFICIENT` 与 `ATTRIBUTION_INCOMPLETE（fresh instrumentation）` 均允许进入 Phase B fresh instrumentation，但**后者不预设根因**且 `DECODE_FORBIDDEN` 保持至授权；`PAUSE_INVESTIGATE` 停止不进 Phase B；`ATTRIBUTION_INCOMPLETE` 不重跑 v63_dev_1M_0133、不猜测其根因；**直接继续沿用 U1 wrong+U2 exact 假设而不经 fresh 仪器化则违冻结分流**。
 
-## 4. Phase B — 45 fresh blocks 15/source 一次 decode 双口径仪器化报告（2–4 calls/block 总 90–180，不预设根因，单 tag）
+## 4. Phase B — 36 fresh blocks 12/source 一次 decode 双口径仪器化报告（2–4 calls/block 总 72–144，不预设根因，单 tag）
 
 ### 4.1 处理点单点冻结
 
@@ -80,17 +80,17 @@ else:
 
 ### 4.2 规模与注册表
 
-- `S=3, B=15, total 45`, 每块 `1024 symbols`；若 held-out 超集 `K>45` 则 `index_j=floor(j*(K-1)/14) j=0..14` 分散选 `15/source`，否则 `EVIDENCE_INVALID`。
+- `S=3, B=12, total 36`, 每块 `1024 symbols`；若 held-out 超集 `K>36` 则 `index_j=floor(j*(K-1)/11) j=0..11` 分散选 `12/source`，否则 `EVIDENCE_INVALID`。
 - `v64_fresh_registry.json` (authoritative): `block_id, source(1M/1p5M/2M), frame_ids[4], held_out_ordinal_start/end, pairs_count 1024, BLOCK_LENGTH 1024, sampling_mode=deterministic_four_consecutive_frames_heldout_fresh_v64, held-out source_path, H provenance`。
 - `frame_ids exact` 零重叠：`fresh ∩ V48–V63 ==∅` (含 `v63_smoke 9 + v63_dev 90`)，`fresh ∩ smoke ==∅`，`git diff` 可验；禁换块。
-- `K2≥45` 且 `per-source≥15` 才合法，否则 `EVIDENCE_INVALID`。
+- `K2≥36` 且 `per-source≥12` 才合法，否则 `EVIDENCE_INVALID`。
 
-### 4.3 三阶段协议（硬帽180, verification-only, 仅 full 口径触发，不预设根因，单 tag 仪器化）
+### 4.3 三阶段协议（硬帽144, verification-only, 仅 full 口径触发，不预设根因，单 tag 仪器化）
 
 ```
-per block (45 blocks, 15/source):
+per block (36 blocks, 12/source):
   prior = TRAIN prior (shared)
-  L1: H1 s1 → BP → q → P(U2)  // 45 次总计，per block 1 (L1)
+  L1: H1 s1 → BP → q → P(U2)  // 36 次总计，per block 1 (L1)
   base: decode_L2(H_base(m2), P(U2), s_base) → 同次保存 exact_u1/l2/full、syndrome_ok_l1/l2、tag_ok_l2+tag_ok_full双算、errors_u1/u2、old/new accepted、stage/calls/leak → verify_full_base = syndrome_ok && tag_ok_full ; verify_l2_base = syndrome_ok && tag_ok_l2 (双算仍单 64b tag 不增 calls/泄漏)
          if verify_full_base: final = base, leak = leak_base, stage=base
          else:
@@ -102,7 +102,7 @@ per block (45 blocks, 15/source):
              stage2: decode_L2(H_total, P(U2), s_total) → 同次保存 exact_u1/l2/full、syndrome_ok_l1/l2、tag_ok_l2+tag_ok_full双算、errors_u1/u2、old/new accepted、stage/calls/leak → verify_full_stage2
              final = stage2, leak = leak_stage2
   record: exact_u1/l2/full, syndrome_ok_l1/l2, tag_ok_l2/tag_ok_full, errors_u1/u2, old/new accepted, stage/calls/leak, delta_tag_ok, intercepted_u1_only, same_decode_single_tag (不增开销断言)
-budget: L1 45 + base45 + stage1≤45 + stage2≤45 =90–180 硬帽180 (L2 45–135)
+budget: L1 36 + base36 + stage1≤36 + stage2≤36 =72–144 硬帽144 (L2 36–108)
 leak: leak_base 1064/1094/1104, stage1 1104/1134/1144, stage2 1144/1174/1184 (tag 已含，不重复，双算不增泄漏)
 fresh interpretation: U1 wrong+U2 exact+old accept+full reject → 确认 verification-scope；U2 wrong+tag_ok → 转 tag/canonical investigation；无 discordance → 仅 full-tag performance signal
 ```
@@ -112,13 +112,13 @@ fresh interpretation: U1 wrong+U2 exact+old accept+full reject → 确认 verifi
 
 ### 4.4 预算
 
-- `L1 45 + base45 + stage1≤45 + stage2≤45 =90–180 硬帽180 (L2 45–135)`，`per block 2–4 calls`。
+- `L1 36 + base36 + stage1≤36 + stage2≤36 =72–144 硬帽144 (L2 36–108)`，`per block 2–4 calls`。
 
 ## 5. Phase C — 门禁与终态（first-match，五选一，full 口径）
 
 ### 5.1 计数与分层（同次保存，单 tag 仪器化）
 
-- `exact_full = exact_u1&&exact_l2` 与 `accepted_full = syndrome_ok&&tag_ok_full` 分别计数（overall 45 + per-source 15）；每 block **同次 decode 同时保存** `exact_u1/l2/full、syndrome_ok_l1/l2、tag_ok_l2/tag_ok_full、errors_u1/u2、old/new accepted、stage/calls/leak`；`undetected_full = syndrome_ok&&tag_ok_full&&!exact_full` 单独表；`undetected_l2` 仅对照；`disclosure` 三档按实际 `stage_used` (以 full verification 触发计)；`calls/rescue` 按 `!verify_full_base` / `!verify_full_base&&!verify_full_stage1` 分母（以 full 口径计）；`被拦截U1-only wrong` 单独计数；**双算仍单 64b tag 不增 calls/泄漏**。
+- `exact_full = exact_u1&&exact_l2` 与 `accepted_full = syndrome_ok&&tag_ok_full` 分别计数（overall 36 与 per-source 12）；每 block **同次 decode 同时保存** `exact_u1/l2/full、syndrome_ok_l1/l2、tag_ok_l2/tag_ok_full、errors_u1/u2、old/new accepted、stage/calls/leak`；`undetected_full = syndrome_ok&&tag_ok_full&&!exact_full` 单独表；`undetected_l2` 仅对照；`disclosure` 三档按实际 `stage_used` (以 full verification 触发计)；`calls/rescue` 按 `!verify_full_base` / `!verify_full_base&&!verify_full_stage1` 分母（以 full 口径计）；`被拦截U1-only wrong` 单独计数；**双算仍单 64b tag 不增 calls/泄漏**。
 - 各源各自 `base/stage1/final (accepted_full vs exact_full 分别 + L2-vs-full Δ + 同次保存字段)` 与 `leakage/rescue_rate/runtime/stage_used/被拦截U1-only` 分别报告；`base/stage1` 仅分层报告不作主判；门禁仅 `final` full 口径。
 
 ### 5.2 预注册终态（first-match，互斥，ATTRIBUTION_INCOMPLETE fresh 仪器化修订）
@@ -128,21 +128,21 @@ if rank/nested/verification/记账/域/重叠/预算/泄漏/all_exact_tag_ok_ful
     overall = V64_EVIDENCE_INVALID  # 优先（不因 attribution 绕过）
 elif attribution_result == ATTRIBUTION_INCOMPLETE and fresh_instrumentation_not_yet_executed:
     overall = V64_PLAN_CANDIDATE__ATTRIBUTION_INCOMPLETE_FRESH_INSTRUMENTATION_DESIGN_DONE  # 仅 plan，允许 fresh 仪器化（DECODE_FORBIDDEN）
-elif exact_full >=35/45 ∧ per_source exact_full >=10/15 ∧ undetected_full_tag==0 ∧ all exact frames tag_ok_full==True ∧ rank/nested/预算/泄漏通过
+elif exact_full >=28/36 ∧ per_source exact_full >=8/12 ∧ undetected_full_tag==0 ∧ all exact frames tag_ok_full==True ∧ rank/nested/预算/泄漏通过
        → V64_FULL_SYMBOL_VERIFICATION_PASS  # 若 attribution==INCOMPLETE 且 fresh 无 old vs new discordance，则 claim 限为 full-tag performance signal，不得称已解释 v63_dev_1M_0133
 elif fresh shows U2_wrong && tag_ok_full (exact_l2==False && tag_ok_full==True):
        → V64_PAUSE_TAG_CANONICAL_INVESTIGATION  # 停止转 tag/canonical investigation，不判 PASS
 elif exact_full >0 and (undetected_full_tag!=0 or not all_exact_tag_ok_full):
        → V64_CORRECTION_WORKS_VERIFICATION_STILL_FAILS  # 纠错有信号但 full verification 仍有 undetected/漏拦截
-elif exact_full <35/45 or per_source <10/15:
+elif exact_full <28/36 or per_source <8/12:
        → V64_CORRECTION_PERFORMANCE_FAIL
 else → V64_EVIDENCE_INVALID
 ```
 
-- `PASS` 需 `overall exact_full≥35/45 (77.78%)` 且 `per-source ≥10/15 (66.7%)` 且 `undetected_full_tag==0` 且 `所有 exact_full 帧 tag_ok_full==True` 且 `rank/nested/verification/记账/域/预算/泄漏` 通过；`exact_full` 与 `accepted_full` 分别达标（禁相等假定）；**ATTRIBUTION_INCOMPLETE 下的 fresh PASS 若无 discordance 仅为 performance signal**。
+- `PASS` 需 `overall exact_full≥28/36 (77.78%)` 且 `per-source ≥8/12 (66.7%)` 且 `undetected_full_tag==0` 且 `所有 exact_full 帧 tag_ok_full==True` 且 `rank/nested/verification/记账/域/预算/泄漏` 通过；`exact_full` 与 `accepted_full` 分别达标（禁相等假定）；**ATTRIBUTION_INCOMPLETE 下的 fresh PASS 若无 discordance 仅为 performance signal**。
 - `PAUSE_TAG_CANONICAL_INVESTIGATION`: fresh 出现 `U2 wrong+tag_ok`（含 `tag_ok_full`）时进入，不判 PASS/FAIL，转 tag/canonical 调查。
 - `CORRECTION_WORKS_VERIFICATION_STILL_FAILS`: `exact_full>0` 但 `undetected_full!=0` 或 `exact tag 未全过`。
-- `CORRECTION_PERFORMANCE_FAIL`: `exact_full<35/45` 或 `per-source<10/15`。
+- `CORRECTION_PERFORMANCE_FAIL`: `exact_full<28/36` 或 `per-source<8/12`。
 - `ATTRIBUTION_INCOMPLETE`: Phase A 无法拆解/字段缺失/口径矛盾，不重跑 v63_dev_1M_0133；**但允许 fresh instrumentation confirmation（不预设根因，同次保存、单 tag）**。
 - `EVIDENCE_INVALID` 优先于所有性能终态。
 
@@ -160,5 +160,5 @@ else → V64_EVIDENCE_INVALID
 
 ## 7. 证据写出（预冻结，未来执行）
 
-- 固定增量根（decoder 前建，fail-closed）：`comparison_bench/outputs_comparison/formal_ir_methods/v64_full_symbol_verification/run_attribution/` (Phase A 0 calls) 与 `/run_fresh_45/` (Phase B 45-block)。
-- 文件：`v64_attribution.json` (Phase A, 0 calls) + `v64_records.json/.csv` (Phase B `45–135` L2行；总 calls `90–180` 硬帽180)、`v64_summary.json`（分层含双口径对照与 U1-only 拦截）、`v64_fresh_registry.json` (authoritative 45)、`v64_invalid_notice.json` (失败时)、`v64_data_readiness.json` (G1-G5)。CSV/JSON 行对等；禁写 NPZ。本轮仅冻结计划，不创建输出。
+- 固定增量根（decoder 前建，fail-closed）：`comparison_bench/outputs_comparison/formal_ir_methods/v64_full_symbol_verification/run_attribution/` (Phase A 0 calls) 与 `/run_fresh_36/` (Phase B 36-block)。
+- 文件：`v64_attribution.json` (Phase A, 0 calls) + `v64_records.json/.csv` (Phase B `36–108` L2行；总 calls `72–144` 硬帽144)、`v64_summary.json`（分层含双口径对照与 U1-only 拦截）、`v64_fresh_registry.json` (authoritative 36)、`v64_invalid_notice.json` (失败时)、`v64_data_readiness.json` (G1-G5)。CSV/JSON 行对等；禁写 NPZ。本轮仅冻结计划，不创建输出。
