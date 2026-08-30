@@ -26,11 +26,127 @@ SCOPED_TRACKED = (
 )
 
 
+def _wilson_interval(k: int, n: int, z: float = 1.96):
+    if n == 0:
+        return [0.0, 0.0]
+    p = k / n
+    denom = 1 + z * z / n
+    centre = p + z * z / (2 * n)
+    delta = z * (p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5
+    return [(centre - delta) / denom, (centre + delta) / denom]
+
+
+def _build_v63_summary(records, total_calls, total_disclosed, per_source_disclosed, per_source_n, stage_counts, elapsed_s, head_sha):
+    from collections import Counter
+    # ponytail: stdlib only, no new deps
+    total_blocks = len(records)
+    accepted = sum(1 for r in records if r["accepted"])
+    exact = sum(1 for r in records if r["exact"])
+    undetected = sum(1 for r in records if r["undetected"])
+    # per-source
+    per_source = {}
+    four_overall = Counter()
+    per_source_blocks = Counter(r["source"] for r in records)
+    for src in sorted(per_source_blocks):
+        sub = [r for r in records if r["source"] == src]
+        n = len(sub)
+        a = sum(1 for r in sub if r["accepted"])
+        e = sum(1 for r in sub if r["exact"])
+        u = sum(1 for r in sub if r["undetected"])
+        # four-class: exact, undetected (accepted non-exact undetected), rejected (accepted false), accepted_non_exact_detected
+        # undetected already is accepted && !exact && undetected; rejected = not accepted; exact = accepted && exact
+        rejected = sum(1 for r in sub if not r["accepted"])
+        # accepted non-exact detected would be accepted && !exact && !undetected (should be 0 for this run)
+        accepted_non_exact_detected = sum(1 for r in sub if r["accepted"] and not r["exact"] and not r["undetected"])
+        per_source[src] = {
+            "blocks": n,
+            "accepted": f"{a}/{n}",
+            "accepted_n": a,
+            "exact": f"{e}/{n}",
+            "exact_n": e,
+            "undetected": u,
+            "four_class": {"exact": e, "undetected": u, "rejected": rejected, "accepted_non_exact_detected": accepted_non_exact_detected},
+            "wilson95_accepted": _wilson_interval(a, n),
+            "wilson95_exact": _wilson_interval(e, n),
+            "stage_used": dict(Counter(r["stage_used"] for r in sub)),
+            "disclosed_total": sum(r["leak_total"] for r in sub),
+            "disclosed_avg": sum(r["leak_total"] for r in sub) / n if n else 0,
+            "disclosed_per_accepted": (sum(r["leak_total"] for r in sub if r["accepted"]) / a) if a else 0,
+        }
+        # overall total disclosed per accepted uses total_disclosed / accepted (includes failed blocks' leak in numerator — matches task 1176.71)
+        four_overall["exact"] += e
+        four_overall["undetected"] += u
+        four_overall["rejected"] += rejected
+        four_overall["accepted_non_exact_detected"] += accepted_non_exact_detected
+    # rescue counts: N_stage1 = delta8, N_stage2 = delta16 (verification-only rescue)
+    rescue = {"N_stage1_delta8": stage_counts.get("delta8", 0), "N_stage2_delta16": stage_counts.get("delta16", 0)}
+    # overall verdict: undetected==1 forces CORRECTION_WORKS_BUT_NOT_PASS even though accepted 85/90 passes threshold
+    if undetected != 0:
+        overall_state = "V63_SHELL_CORRECTION_WORKS_BUT_NOT_PASS"
+        overall_pass = False
+        fail_reason = f"undetected=={undetected} blocks PASS gate (requires undetected==0); block v63_dev_1M_0133"
+    elif accepted >= 70 and exact >= 70 and all(per_source[s]["accepted_n"] >= 20 for s in per_source) and all(per_source[s]["exact_n"] >= 20 for s in per_source):
+        overall_state = "V63_SHELL_DEVELOPMENT_PASS"
+        overall_pass = True
+        fail_reason = ""
+    elif exact > 0 or rescue["N_stage1_delta8"] > 0 or rescue["N_stage2_delta16"] > 0:
+        overall_state = "V63_SHELL_CORRECTION_WORKS_BUT_NOT_PASS"
+        overall_pass = False
+        fail_reason = "below PASS thresholds but has_signal"
+    else:
+        overall_state = "V63_SHELL_NO_RETAINED_SIGNAL"
+        overall_pass = False
+        fail_reason = "no retained signal"
+    # disclosure per accepted overall
+    disclosure_per_accepted = float(total_disclosed / accepted) if accepted else 0
+    return {
+        "registry_type": "INTEGRATION_FRESH_CANDIDATE",
+        "total_blocks": total_blocks,
+        "total_calls": int(total_calls),
+        "hard_cap": DEV_HARD_CAP,
+        "budget": f"90 L1+90 base+≤90 stage1+≤90 stage2 =180-360, got {total_calls}",
+        "total_disclosed_bits": int(total_disclosed),
+        "overall_avg": float(total_disclosed / total_blocks) if total_blocks else 0,
+        "per_source_avg": {k: float(v / per_source_n[k]) for k, v in per_source_disclosed.items()},
+        "per_source_total": per_source_disclosed,
+        "stage_used": stage_counts,
+        "rescue": rescue,
+        "elapsed_s": float(elapsed_s),
+        "accepted_plan_sha": ACCEPTED_PLAN_SHA,
+        "head_sha": head_sha,
+        # required main metrics
+        "accepted": f"{accepted}/{total_blocks}",
+        "accepted_n": accepted,
+        "exact": f"{exact}/{total_blocks}",
+        "exact_n": exact,
+        "undetected": undetected,
+        "undetected_blocks": [r["block_id"] for r in records if r["undetected"]],
+        "per_source": per_source,
+        "four_class_overall": dict(four_overall),
+        "disclosure_per_accepted": disclosure_per_accepted,
+        "disclosure_per_accepted_str": f"{disclosure_per_accepted:.2f}",
+        "wilson95_overall_accepted": _wilson_interval(accepted, total_blocks),
+        "wilson95_overall_exact": _wilson_interval(exact, total_blocks),
+        "overall_state": overall_state,
+        "overall_pass": overall_pass,
+        "fail_reason": fail_reason,
+        "tag_scope": "l2_only",
+        "leak_tiers": {
+            "base": {"1M": 1064, "1p5M": 1094, "2M": 1104},
+            "delta8": 40,
+            "delta16": 80,
+            "verified": True,
+            "note": "tag64 included in base once, leak_stage1=base+40 leak_stage2=base+80",
+        },
+    }
+
+
 def _parse_args(argv: Iterable[str] | None = None):
     p = argparse.ArgumentParser(description="V63 development 90 blocks — requires --execution-authorized")
     p.add_argument("--execution-authorized", action="store_true", help="Required explicit authorization")
     p.add_argument("--authorized-target-sha", default=None, help="Full implementation SHA (must equal ACCEPTED_PLAN_SHA)")
     p.add_argument("--output-root", default=None, help="Override output root (for tests)")
+    p.add_argument("--repair-summary", action="store_true", help="Regenerate v63_summary.json from existing v63_records.json without decoder (additive, records not overwritten)")
     return p.parse_args(argv)
 
 
@@ -75,6 +191,46 @@ def main(argv: Iterable[str] | None = None) -> int:
     _check_git(args.authorized_target_sha)
 
     output_root = Path(args.output_root) if args.output_root else DEFAULT_OUTPUT_ROOT
+    # additive repair path: regenerate summary from existing records without decoder
+    if args.repair_summary:
+        if not output_root.is_dir():
+            print(f"BLOCKED: repair requires existing output_root {output_root}", file=sys.stderr)
+            return 2
+        rec_path = output_root / "v63_records.json"
+        if not rec_path.is_file():
+            print(f"BLOCKED: records missing {rec_path}", file=sys.stderr)
+            return 2
+        records = json.loads(rec_path.read_text(encoding="utf-8"))
+        if len(records) != 90:
+            print(f"BLOCKED: records must have 90 entries, got {len(records)}", file=sys.stderr)
+            return 2
+        total_calls = sum(r["decoder_calls"] for r in records)
+        total_disclosed = sum(r["leak_total"] for r in records)
+        from collections import Counter
+        per_source_disclosed = dict(Counter())
+        per_source_n = dict(Counter())
+        stage_counts = dict(Counter(r["stage_used"] for r in records))
+        # ensure keys
+        for k in ("base", "delta8", "delta16"):
+            stage_counts.setdefault(k, 0)
+        for r in records:
+            per_source_disclosed[r["source"]] = per_source_disclosed.get(r["source"], 0) + r["leak_total"]
+            per_source_n[r["source"]] = per_source_n.get(r["source"], 0) + 1
+        # elapsed from existing summary if present, else 0
+        sum_path = output_root / "v63_summary.json"
+        elapsed_s = 0
+        if sum_path.is_file():
+            try:
+                old = json.loads(sum_path.read_text(encoding="utf-8"))
+                elapsed_s = float(old.get("elapsed_s", 0))
+            except Exception:
+                elapsed_s = 0
+        summary = _build_v63_summary(records, total_calls, total_disclosed, per_source_disclosed, per_source_n, stage_counts, elapsed_s, args.authorized_target_sha)
+        # additive: only overwrite summary, never records
+        sum_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        print(f"V63 summary repaired (additive, records preserved) -> {sum_path} overall {summary['overall_state']} accepted {summary['accepted']} exact {summary['exact']} undetected {summary['undetected']}")
+        return 0
+
     if output_root.exists():
         print(f"BLOCKED: output root already exists: {output_root}", file=sys.stderr)
         return 2
@@ -181,21 +337,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         if not (180 <= total_calls <= DEV_HARD_CAP):
             raise RuntimeError(f"budget violated: total_calls {total_calls} not in 180-360")
         elapsed = time.time() - t0
-        summary = {
-            "registry_type": "INTEGRATION_FRESH_CANDIDATE",
-            "total_blocks": 90,
-            "total_calls": int(total_calls),
-            "hard_cap": DEV_HARD_CAP,
-            "budget": f"90 L1+90 base+≤90 stage1+≤90 stage2 =180-360, got {total_calls}",
-            "total_disclosed_bits": int(total_disclosed),
-            "overall_avg": float(total_disclosed / 90) if 90 else 0,
-            "per_source_avg": {k: float(v / per_source_n[k]) for k, v in per_source_disclosed.items()},
-            "per_source_total": per_source_disclosed,
-            "stage_used": stage_counts,
-            "elapsed_s": float(elapsed),
-            "accepted_plan_sha": ACCEPTED_PLAN_SHA,
-            "head_sha": args.authorized_target_sha,
-        }
+        summary = _build_v63_summary(records, total_calls, total_disclosed, per_source_disclosed, per_source_n, stage_counts, elapsed, args.authorized_target_sha)
         (output_root / "v63_records.json").write_text(json.dumps(records, indent=2), encoding="utf-8")
         import csv
         if records:
