@@ -371,63 +371,46 @@ def _test_fake_estimate(cal_pairs, val_pairs, fake_ce): # pragma: no cover
     return fake_ce
 
 def run_stage0(candidate_order, raw_root_map: dict, contract_map: dict, forbidden_keys=None):
+    # ponytail: Stage0 is materialization-only gate, no estimator/CE/lambda/m calls
     per_candidate={}
     selected=None; selected_item=None
     all_triples=[]
+    forb_set=set(forbidden_keys) if forbidden_keys else set()
     for cid in candidate_order:
         rr=Path(raw_root_map[cid]) if cid in raw_root_map else None
         cp=Path(contract_map[cid]) if cid in contract_map else None
-        # Phase R first
         pr=phase_r(cid, raw_root=str(rr) if rr else None, contract=str(cp) if cp else None)
         if pr.get("status")!="PASS":
             per_candidate[cid]={"phase_r":pr,"stage0":{"status":"UNREACHABLE_R","reason":pr.get("reason")}}
             continue
-        # materialize 8 frames
         try:
             contract_entry=_load_contract(cp, cid)
+            if contract_entry is None:
+                raise ValueError("contract missing")
             pairs=_materialize_pairs(rr, contract_entry, cid)
-            if len(pairs) < 8*256: raise ValueError("insufficient frames for Stage0 need 8")
+            if len(pairs) < 8*256:
+                raise ValueError(f"insufficient frames for Stage0 need 8 have {len(pairs)//256}")
             pairs8=pairs[:8*256]
+            # ponytail: 8 frames each 256 pairs, symbols 0..1023, mapping/anchor provenance
             frames, triples, nf = _frames_from_pairs(pairs8, cid, rr.name if rr else cid)
-            # must be exactly 8 frames each 256 verified already
-            overlap=check_frame_overlap(triples[:4], triples[4:8], None, forbidden_keys)
-            if not overlap["cal∩val_empty"]: raise ValueError("overlap")
-            # estimate CAL 4 vs VAL 4
-            cal_a=pairs8[:4*256,0]; cal_b=pairs8[:4*256,1]
-            val_a=pairs8[4*256:8*256,0]; val_b=pairs8[4*256:8*256,1]
-            est=hierarchical_estimate(cal_a, cal_b, val_a, val_b)
-            # gates G1 from phase_r + others
-            g1=True # phase_r already pass
-            g2=not est["at_boundary"]
-            g3=est["d_nll"]<=0.5 if math.isfinite(est["d_nll"]) else False
-            g4=est["val_nll"]<=est["H"]+1.0 if math.isfinite(est["val_nll"]) else False
-            g5=est["unseen"]<=0.01
-            g6=est["m1_req"]<=16
-            g7=est["m2_req"]<= {"162148":184,"2500K":190,"160254":192}.get(cid,192)
-            g8=est["chain_delta_CE"]<1e-9 and est["chain_delta_H"]<1e-9 and overlap["cal∩val_empty"]
-            # also check provenance not cross spliced: session derived from raw dir name
-            PASS = all([g1,g2,g3,g4,g5,g6,g7,g8])
-            # For Stage0, if rate exceeds frozen => FAIL (no branch)
-            per_candidate[cid]={"phase_r":pr,"stage0":{"est":est,"gates":{"G1":g1,"G2":g2,"G3":g3,"G4":g4,"G5":g5,"G6":g6,"G7":g7,"G8":g8,"PASS":PASS},"status":"PASS" if PASS else "FAIL","triples":triples}}
+            if len(triples)!=8:
+                raise ValueError(f"Stage0 frame count {len(triples)} !=8")
+            # forbidden overlap check (provenance)
+            overlap=check_frame_overlap(triples, [], None, forb_set)
+            if overlap["forbidden_overlap"]:
+                raise ValueError(f"forbidden overlap {overlap}")
+            # materialization PASS: Phase R PASS && 8x256 && symbols range && mapping/anchor && provenance && no forbidden overlap
+            per_candidate[cid]={"phase_r":pr,"stage0":{"status":"PASS","triples":triples,"n_pairs":int(len(pairs8)),"n_frames":8,"overlap":overlap,"provenance":"materialization_ok"}}
             all_triples.extend(triples)
-            if PASS and selected is None:
+            if selected is None:
                 selected=cid; selected_item=per_candidate[cid]
-                # first-match stop: do not materialize later candidates for Stage0
-                # but we already loop; break after first pass
                 break
         except Exception as e:
             per_candidate[cid]={"phase_r":pr,"stage0":{"status":"FAIL","reason":str(e)}}
-    # mark later candidates UNREACHABLE_FIRST_MATCH
     if selected is not None:
-        si=CANDIDATE_ORDER.index(selected) if selected in CANDIDATE_ORDER else -1
         for cid in candidate_order:
             if cid not in per_candidate:
                 per_candidate[cid]={"stage0":{"status":"UNREACHABLE_FIRST_MATCH","reason":f"first-match selected {selected}"}}
-            elif per_candidate[cid]["stage0"].get("status") not in ("PASS","FAIL"):
-                per_candidate[cid]["stage0"]={"status":"UNREACHABLE_FIRST_MATCH","reason":f"first-match selected {selected}"}
-    else:
-        # no candidate passed
-        pass
     return {"per_candidate":per_candidate,"selected":selected,"selected_item":selected_item,"all_triples":all_triples}
 
 def run_stage1(selected: str, raw_root: Path, contract: Path, forbidden_keys=None, cal_frames=256, val_frames=64):

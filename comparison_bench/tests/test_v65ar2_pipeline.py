@@ -232,3 +232,89 @@ def test_15_cli_no_dryrun_fake_additive_no_overwrite(tmp_path, monkeypatch):
     # binding structure
     b=m.verify_head_origin_binding()
     assert "binding_ok" in b and "accepted_plan" in b
+
+# --- V65AR2 fix: Stage0 must be estimator-free, Stage1 runs CE/lambda ---
+
+def test_16_stage0_estimator_monkeypatch_no_call(tmp_path, monkeypatch):
+    monkeypatch.setenv("V65AR2_ALLOW_UNBOUND","1")
+    raw=tmp_path/"raw"; raw.mkdir(); (raw/"a.ttbin").write_bytes(b"\x00")
+    contract=tmp_path/"c.json"; contract.write_text(json.dumps({"channel_pair":"1/5","delay_used_ps":0,"sigma_ps":100}),encoding="utf-8")
+    pairs=np.random.randint(0,1024,size=(2048,2))
+    def _boom(*a,**kw): raise RuntimeError("estimate_stage must not be called in Stage0")
+    with patch.object(m,"hierarchical_estimate", side_effect=_boom), \
+         patch.object(m,"_materialize_pairs", return_value=pairs), \
+         patch.object(m,"phase_r", return_value={"status":"PASS","sidecar_additive":{"channel_pair":"1/5"}}):
+        res=m.run_stage0(["162148"], {"162148": str(raw)}, {"162148": str(contract)})
+        assert res["selected"]=="162148"
+        assert res["per_candidate"]["162148"]["stage0"]["status"]=="PASS"
+
+def test_17_stage0_extreme_ce_not_affect(tmp_path, monkeypatch):
+    monkeypatch.setenv("V65AR2_ALLOW_UNBOUND","1")
+    raw=tmp_path/"raw"; raw.mkdir(); (raw/"a.ttbin").write_bytes(b"\x00")
+    contract=tmp_path/"c.json"; contract.write_text(json.dumps({"channel_pair":"1/5","delay_used_ps":0,"sigma_ps":100}),encoding="utf-8")
+    # pairs that would give huge CE if estimated (uniform random large entropy)
+    pairs=np.random.randint(0,1024,size=(2048,2))
+    # inject fake hierarchical_estimate returning extreme m/CE but Stage0 must ignore
+    fake_extreme={"at_boundary":False,"d_nll":10.0,"val_nll":10.0,"H":0.5,"unseen":0.99,"m1_req":999,"m2_req":999,"chain_delta_CE":10.0}
+    with patch.object(m,"_materialize_pairs", return_value=pairs), \
+         patch.object(m,"phase_r", return_value={"status":"PASS"}), \
+         patch.object(m,"hierarchical_estimate", return_value=fake_extreme):
+        res=m.run_stage0(["162148"], {"162148": str(raw)}, {"162148": str(contract)})
+        assert res["selected"]=="162148"
+        assert res["per_candidate"]["162148"]["stage0"]["status"]=="PASS"
+
+def test_18_stage0_bad_frame_fails(tmp_path, monkeypatch):
+    monkeypatch.setenv("V65AR2_ALLOW_UNBOUND","1")
+    raw=tmp_path/"raw"; raw.mkdir(); (raw/"a.ttbin").write_bytes(b"\x00")
+    contract=tmp_path/"c.json"; contract.write_text(json.dumps({"channel_pair":"1/5"}),encoding="utf-8")
+    # insufficient pairs (<8*256)
+    pairs_bad=np.random.randint(0,1024,size=(1000,2))
+    with patch.object(m,"_materialize_pairs", return_value=pairs_bad), \
+         patch.object(m,"phase_r", return_value={"status":"PASS"}):
+        res=m.run_stage0(["162148"], {"162148": str(raw)}, {"162148": str(contract)})
+        assert res["selected"] is None
+        assert res["per_candidate"]["162148"]["stage0"]["status"]=="FAIL"
+    # symbol out of range (1025) should fail via _frames_from_pairs
+    pairs_oob=np.random.randint(0,1024,size=(2048,2)); pairs_oob[0,0]=5000
+    with patch.object(m,"_materialize_pairs", return_value=pairs_oob), \
+         patch.object(m,"phase_r", return_value={"status":"PASS"}):
+        res2=m.run_stage0(["162148"], {"162148": str(raw)}, {"162148": str(contract)})
+        assert res2["per_candidate"]["162148"]["stage0"]["status"]=="FAIL"
+
+def test_19_stage0_first_match_unreachable(tmp_path, monkeypatch):
+    monkeypatch.setenv("V65AR2_ALLOW_UNBOUND","1")
+    raw=tmp_path/"raw"; raw.mkdir(); (raw/"a.ttbin").write_bytes(b"\x00")
+    contract=tmp_path/"c.json"; contract.write_text(json.dumps({"channel_pair":"1/5","delay_used_ps":0,"sigma_ps":100}),encoding="utf-8")
+    pairs=np.random.randint(0,1024,size=(2048,2))
+    with patch.object(m,"_materialize_pairs", return_value=pairs), \
+         patch.object(m,"phase_r", return_value={"status":"PASS"}):
+        res=m.run_stage0(["162148","2500K","160254"],
+                         {"162148":str(raw),"2500K":str(raw),"160254":str(raw)},
+                         {"162148":str(contract),"2500K":str(contract),"160254":str(contract)})
+        assert res["selected"]=="162148"
+        assert res["per_candidate"]["2500K"]["stage0"]["status"]=="UNREACHABLE_FIRST_MATCH"
+        assert res["per_candidate"]["160254"]["stage0"]["status"]=="UNREACHABLE_FIRST_MATCH"
+
+def test_20_stage1_runs_ce_lambda_rate(tmp_path, monkeypatch):
+    monkeypatch.setenv("V65AR2_ALLOW_UNBOUND","1")
+    raw=tmp_path/"raw"; raw.mkdir(); (raw/"a.ttbin").write_bytes(b"\x00")
+    contract=tmp_path/"c.json"; contract.write_text(json.dumps({"channel_pair":"1/5"}),encoding="utf-8")
+    pairs=np.random.randint(0,1024,size=(90000,2))
+    with patch.object(m,"_materialize_pairs", return_value=pairs):
+        res=m.run_stage1("162148", Path(raw), Path(contract))
+        assert "est" in res
+        assert "CE1" in res["est"] and "CE2" in res["est"]
+        assert "lam_star" in res["est"] and "at_boundary" in res["est"]
+        assert "m1_req" in res["est"] and "m2_req" in res["est"]
+        assert "rate_branch" in res
+        # call count: Stage1 must have invoked hierarchical_estimate
+        call_cnt={"n":0}
+        orig=m.hierarchical_estimate
+        def _wrap(*a,**kw):
+            call_cnt["n"]+=1
+            return orig(*a,**kw)
+        with patch.object(m,"hierarchical_estimate", side_effect=_wrap):
+            res2=m.run_stage1("162148", Path(raw), Path(contract))
+            assert call_cnt["n"]>=1
+            assert res2["est"]["m1_req"]==m.ceil_rate(res2["est"]["CE1"])
+            assert res2["rate_branch"] in ("WITHIN_FROZEN_BUDGET","RATE_ADAPTATION_REQUIRED","FULL_DISCLOSURE_LAYER")
