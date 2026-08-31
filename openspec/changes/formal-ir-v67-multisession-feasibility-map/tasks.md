@@ -2,9 +2,9 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **acquisition 去重预注册 ≤9（每类≤3 机械不按 CE 替换），Stage0 8frames 物化 → Stage1 CAL256 VAL128 分类 → Stage2 CAL1024 VAL256 confirmation 不重叠重新独立估计 TEST不读，冻结 U=32*U1+U2 5+5 不GE V68表示，码率 m1_raw=ceil(1.3*1024*CE1/5) m2_raw同 raw_disclosure不cap，五分流 EVIDENCE_INCOMPLETE/MODEL_NOT_STABLE/CURRENT_CANDIDATE_COMPATIBLE(≤16/≤LaneC+8+8)/RATE_ADAPTATION/NEAR_FULL_DISCLOSURE(≥1024或≈10240) 总体 V67_FEASIBILITY_MAP_COMPLETE，四工件 registry+spike.py+report+表(含 session/CE/lambda/gap/unseen/m/raw/classification/successor)，守卫 R67-01~10 不创run_01 rg decoder 0 py_compile 小测试，禁止调V68码**
 
-**HEAD**: `1172b8b78b4c712d70a517b4c10565e80b7101e2 → 新 Plan SHA (本次四工件+registry+spike+报告表单独提交推送后 40 位)` + data `84d62779`
+**HEAD**: `b7e3417ff026409fbb4aa4be0347be4a8fdb0d27 → 新 Plan SHA (本次清理推送后 40 位)` + data `84d62779`
 
-**Predecessor**: `formal-ir-v66-single-segment-adaptive-nbldpc` `f4040fc1` + `formal-ir-v64` `22/24 PASS` → `V67-MAP`
+**Predecessor**: `formal-ir-v66-single-segment-adaptive-nbldpc` `832e5394` + `formal-ir-v64` `22/24 PASS` → `V67-MAP`
 
 **Method frozen**: `n1024 q1024 GF32 poly37 H1 16×1024 rank16 80b U=32*U1+U2 F03 5+5 natural (不GE) Lane C ordinal-2 s38310x m2 184/190/192 per source H_inc Δ8 家族 decoder 90/1.0 full-tag canonical 32*U1+U2 leak 5*(m1+m2)+64` 零改；处理点 `84d62779` 单点；多 session ≤9
 
@@ -31,13 +31,13 @@
 
 - [x] **D1 读 S1 CAL256 切片（256 frames 65536 pairs per session）**：按 `Stage1_CAL[256]` 切 `alice_symbol/bob_symbol` 65536 rows，`F03 U1=>>5, U2=&31` 分解，校验每帧 256。
 - [x] **D2 算 S1 C_ab/P_global/P(U1|B)/P(U2|U1,B) λ 择优（仅 CAL 内 4-fold，不扩网格）**：`C_ab = bincount2d(a_cal,b_cal) 1024×1024 int32 sum 65536` → `N_b, P_global(a)=Σ_b C_ab/N_cal` → 构造 `P(a|b)=(C_ab+λ P_global)/(N_b+λ)`（`N_b==0→P_global`），`λ ∈[1e-2,1e4] log10 连续` 按 `CAL 内 4-fold`（每 fold 64 frames 16384 pairs）计 `CV NLL` 最小择优，同时生成 `P(U1|B) 32×1024` 与 `P(U2|U1B) 32×32×1024`，落盘 `S1 λ, λ_at_boundary, S1 H_cal, S1 CalCV NLL`。
-- [x] **D3 S1 VAL128 CE 链式与 raw m（VAL 门禁，TEST隔离）**：对 `VAL128 (32768 pairs)` 计 `CE_full=-E_VAL log2 P(A|B), CE1=-E_VAL log2 P(U1|B), CE2=-E_VAL log2 P(U2|U1,B)`，校验 `|CE_full-CE1-CE2|<1e-9` 否则 `EVIDENCE_INCOMPLETE`，落盘 `S1 CE1,CE2,CE_full,chain_delta`；随后 `m1_raw=ceil(1.3*1024*CE1/5), m2_raw=ceil(1.3*1024*CE2/5), m_total_raw=m1_raw+m2_raw, raw_disclosure=5*(m1_raw+m2_raw)+64` 显式 **不 cap**，校验 `m_raw` 未 `min(1024, ...)` 截断；落盘 `S1 m1_raw,m2_raw,raw_disclosure, H_cal, ValNLL, ΔNLL, val_b_context_unseen, joint_cell_unseen, capacity_warning×3, effective_contexts`。
+- [x] **D3 S1 VAL128 CE 链式与 raw m（VAL 门禁，TEST隔离）**：对 `VAL128 (32768 pairs)` 计 `CE_full=-E_VAL log2 P(A|B), CE1=-E_VAL log2 P(U1|B), CE2=-E_VAL log2 P(U2|U1,B)`，校验 `|CE_full-CE1-CE2|<1e-9` 否则 `EVIDENCE_INCOMPLETE`，落盘 `S1 CE1,CE2,CE_full,chain_delta`；随后 `m1_raw=ceil(1.3*1024*CE1/5), m2_raw=ceil(1.3*1024*CE2/5), m_total_raw=m1_raw+m2_raw, raw_disclosure=5*(m1_raw+m2_raw)+64` 显式 **不 cap**，校验 `m_raw` 未 `min(1024, ...)` 截断；落盘 `S1 m1_raw,m2_raw,raw_disclosure, H_cal, ValNLL, ΔNLL, val_b_context_unseen, joint_cell_unseen, q_mass_unseen (descriptive), descriptive_diagnostics×3 (ValNLL>Hcal+1/0.5/joint_cell_unseen>1%), capacity_warning_m1/m2/disclosure (≥1024/≥1024/≥5120 正交), effective_contexts`。
 - [x] **D4 S1 初分类（五分流，不以 TEST）**：按 `EVIDENCE_INCOMPLETE > MODEL_NOT_STABLE(λ触边/ΔNLL>0.5/val_b_context_unseen>1%/非有限) > CURRENT_CANDIDATE_COMPATIBLE(≤16/≤LaneC+8+8) > RATE_ADAPTATION > NEAR_FULL_DISCLOSURE(≥1024或≈10240)` 初判 `S1_classification`，落盘 `S1_classification + S1_successor`，`TEST 未读` 已校验 `used_test==False`。
 
 ## Phase E — Stage2 CAL1024 VAL256 confirmation 不重叠重新独立估计（per session，TEST不读）
 
 - [x] **E1 零重叠校验（S1∩S2==∅）**：校验 `S1_CAL256+VAL128 的 frame_ids ∩ S2_CAL1024+VAL256 ==∅`（键 `(source,session,frame)`），失败则 `EVIDENCE_INCOMPLETE`。
-- [x] **E2 重新独立估计 S2 C_ab/P_global/λ/CE/m_raw（不复用 S1）**：对 `S2 CAL1024 (262144 pairs)` 独立重算 `C_ab 1024×1024 sum 262144 → N_b/P_global → P(a|b) λ(仅新 CAL 内 4-fold 每 fold 256 frames 65536 pairs) → P(U1|B)/P(U2|U1B)`，校验 `S2 λ 独立择优 (not reuse S1 λ)`；对 `S2 VAL256 (65536 pairs)` 计 `CE_full/CE1/CE2` 链式 `|CE_full-CE1-CE2|<1e-9` → `m1_raw2=ceil(1.3*1024*CE1_2/5), m2_raw2=ceil(1.3*1024*CE2_2/5), raw_disclosure2=5*(m1_raw2+m2_raw2)+64` 不 cap；落盘 `S2 λ2, CE1_2/CE2_2/CE_full_2, m1_raw2/m2_raw2, raw_disclosure2, ΔNLL2, val_b_context_unseen2, joint_cell_unseen2, capacity_warning2`。
+- [x] **E2 重新独立估计 S2 C_ab/P_global/λ/CE/m_raw（不复用 S1）**：对 `S2 CAL1024 (262144 pairs)` 独立重算 `C_ab 1024×1024 sum 262144 → N_b/P_global → P(a|b) λ(仅新 CAL 内 4-fold 每 fold 256 frames 65536 pairs) → P(U1|B)/P(U2|U1B)`，校验 `S2 λ 独立择优 (not reuse S1 λ)`；对 `S2 VAL256 (65536 pairs)` 计 `CE_full/CE1/CE2` 链式 `|CE_full-CE1-CE2|<1e-9` → `m1_raw2=ceil(1.3*1024*CE1_2/5), m2_raw2=ceil(1.3*1024*CE2_2/5), raw_disclosure2=5*(m1_raw2+m2_raw2)+64` 不 cap；落盘 `S2 λ2, CE1_2/CE2_2/CE_full_2, m1_raw2/m2_raw2, raw_disclosure2, ΔNLL2, val_b_context_unseen2, joint_cell_unseen2, q_mass_unseen2 (descriptive), descriptive_diagnostics2, capacity_warning_m1/m2/disclosure2 正交`。
 - [x] **E3 确认分类与 stage 一致性**：按同五分流阈对 `S2 CE/m_raw2` 得 `S2_classification`（`CURRENT_CANDIDATE_COMPATIBLE` 仍 `m1_raw2≤16 && m2_raw2≤LaneC+8+8`），落盘 `S2_classification` 与 `stage_consistency = (S1_classification==S2_classification)`（不一致以 `S2` 为准），`used_test==False` 已验，禁第二 estimator。
 
 ## Phase F — 码率 raw 不 cap + 五分流 + 总体 complete（per session + overall）
@@ -76,11 +76,11 @@ decoder 调用 (`decode_*` / `construct_*` 等)；读密封 `TEST` 的 `H/CE/NLL
 
 ## 验收
 
-- proposal/design/tasks/specs 一致 `1172b8b78b4c712d70a517b4c10565e80b7101e2→新 Plan SHA` `84d62779` lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` 五分流按优先级互斥明确，显式 acquisition 去重 ≤9 每类≤3 机械不按 CE 替换、Stage0 8 → Stage1 256/128 → Stage2 1024/256 不重叠重新独立估计 TEST不读、冻结 `U=32*U1+U2 5+5 不GE`、码率 `m_raw ceil 不 cap raw_disclosure`、总体 `V67_FEASIBILITY_MAP_COMPLETE`，严格复用 V56 materialization 算法，冻结分段/熵-CE 与 m 公式/五分流阈，**无 1172b8b78b4c712d70a517b4c10565e80b7101e2**
+- proposal/design/tasks/specs 一致 `b7e3417f→新 Plan SHA` `84d62779` lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` 五分流按优先级互斥明确，显式 acquisition 去重 ≤9 每类≤3 机械不按 CE 替换、Stage0 8 → Stage1 256/128 → Stage2 1024/256 不重叠重新独立估计 TEST不读、冻结 `U=32*U1+U2 5+5 不GE`、码率 `m_raw ceil 不 cap raw_disclosure`、总体 `V67_FEASIBILITY_MAP_COMPLETE`，严格复用 V56 materialization 算法，冻结分段/熵-CE 与 m 公式/五分流阈
 - acquisition 去重 ≤9 每类≤3 机械，不按 CE 替换，`Stage0 8 / S1 256/128 / S2 1024/256` 不重叠重新独立估计可验（键 `(source,session,frame)`，`S1∩S2==∅ && ∩V13..V66==∅` + `S2 重算` + `TEST 未读`），`U 5+5不GE` 每帧已验，少 3 则 `EVIDENCE_INCOMPLETE` 地图，注册表已落盘（≤9），`TEST 未读` 已验，**新 Plan SHA 已推送**
 - 合同 `U=32*U1+U2 / dimension 1024 / bin200 / nearest legacy_v1 / channels/frame anchor/mapping 每帧256` 算法一致已验，偏则 `EVIDENCE_INCOMPLETE` 已验，`V68/Gray` 0 hits 已验
 - 每 session `S1/S2 各自 C_ab 1024×1024 → P(U1|B)/P(U2|U1B) λ(仅 CAL 内 4-fold) → VAL CE1/CE2/CE_full 链式 |CE_full-CE1-CE2|<1e-9 → m1_raw/m2_raw ceil → raw_disclosure 不 cap` 已重算且 `S2 独立重算` 已验，`m_raw` 未 cap，`m_family +8` 辅助显式，`TEST` 未参与，不扩，禁第二 estimator 已验，`stage_consistency` 已报告
 - 每 session `五分流 final_classification + successor` 已落盘，总体 `V67_FEASIBILITY_MAP_COMPLETE` 且 `counts_per_classification` 已统计，`candidate_session_list` 已显式
-- `Stage0/CE/λ/gap/unseen/m/raw/classification/successor` 已回填无 1172b8b78b4c712d70a517b4c10565e80b7101e2，`报告表 CSV行对等 JSON` 已验，`overall complete` 已验
+- `Stage0/CE/λ/gap/unseen/m/raw/classification/successor/capacity_warning_m1/m2/disclosure/descriptive_diagnostics` 已回填，`报告表 CSV行对等 JSON` 已验，`overall complete` 已验
 - 守卫 `R67-01~10` 已验（acquisition/Stage0/零重叠/重估/TEST隔离/U 5+5不GE/m_raw不cap/链式λ/五分流/decoder-free/V68隔离/不创 run_01/py_compile/小测试）
-- 双脚本 `rg "decode_" 0 hits` `rg -i "v68|gray" 0 hits` `py_compile` PASS `pytest 小测试` PASS `m_raw` 未 cap `TEST 未读` `acquisition 去重` 已验 报告与 json/csv 一致 **无 1172b8b78b4c712d70a517b4c10565e80b7101e2** 未建 `run_01` 已停留 `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` 仅改本目录 + `scripts/`（`src/` 零改），未启动 decoder/V68，**四工件+registry+spike+报告表已单独提交推送，新 Plan SHA + 候选列表 + 各分流数已返回**，推送后等待独立审核
+- 双脚本 `rg "decode_" 0 hits` `rg -i "v68|gray" 0 hits` `py_compile` PASS `pytest 小测试` PASS `m_raw` 未 cap `TEST 未读` `acquisition 去重` 已验 `capacity_warning_m1/m2/disclosure` 正交与 `descriptive_diagnostics` 已落盘 报告与 json/csv 一致 未建 `run_01` 已停留 `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` 仅改本目录 + `scripts/`（`src/` 零改），未启动 decoder/V68，**四工件+registry+spike+报告表已单独提交推送，新 Plan SHA + 候选列表 + 各分流数已返回**，推送后等待独立审核

@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **多 session (≤9) decoder-free 可行域地图，acquisition 去重预注册每类≤3机械，Stage0 8 → Stage1 256/128 → Stage2 1024/256 不重叠重估 TEST不读，U=32*U1+U2 5+5 不GE，m_raw 不 cap，五分流，总体 V67_FEASIBILITY_MAP_COMPLETE**
 
-**Cycle**: `V67-MAP` (multisession-feasibility-map), predecessor `V66-ADAPT (f4040fc1 / 832e5394 72 single-source)` + `V64 22/24 full-tag PASS (80c35647/6c7b00a9)` + `V65`，HEAD `1172b8b78b4c712d70a517b4c10565e80b7101e2` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
+**Cycle**: `V67-MAP` (multisession-feasibility-map), predecessor `V66-ADAPT (832e5394 72 single-source)` + `V64 22/24 full-tag PASS (80c35647/6c7b00a9)` + `V65`，HEAD `b7e3417ff026409fbb4aa4be0347be4a8fdb0d27 → 新 Plan SHA` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
 
 **Feasibility**: `V54 43/45` 在 `2026-01-23` 域已证 `H1-16+L1APP+Lane C Δ8+full-tag` 在单 session 可行；`V55 0/90` 跨 session 不兼容提示需多 session 地图；`V66` 单 session 自适应 `m1_raw 1054/904 → MATRIX_NOT_CONSTRUCTIBLE` 提示单点不足；`V67` 以 decoder-free 多 session 分阶段独立重估作分流地图，不触 decoder。
 
@@ -143,7 +143,7 @@ else: # m1_raw≥1024 or m2_raw≥1024 or raw_disclosure≈10240 (≥5120)
 ```
 
 - **LaneC_base+8+8**：`LaneC_base` 按 `source_label` 映射 `1M→184, 1p5M→190, 2M→192`，`+8+8` 为已冻结 `H_inc Δ8` 的两级家族扩展（`H_total 200/206/208`），`CURRENT_CANDIDATE_COMPATIBLE` 表示 `m_raw` 在现有两级 `Δ8` 内可覆盖，无需新码。
-- **阈值冻结**：`MODEL_NOT_STABLE` 的 `ΔNLL = ValNLL - CalCV_NLL ≤0.50` 且 `val_b_context_unseen ≤1%` 且 `q_mass_unseen ≤1%` 且 `λ∈(1e-2,1e4)` 开区间；`NEAR_FULL_DISCLOSURE` 的 `≥1024` 为单 plane 行数满秩阈，`≈10240` 为 `10*1024` 全符号披露（`raw_disclosure 5*1024+64≈5184` 单层满，`10*1024=10240` 双层近满），`5120` 为近半阈，已验 `raw_disclosure` 不 cap。
+- **阈值冻结**：`MODEL_NOT_STABLE` 的 `ΔNLL = ValNLL - CalCV_NLL ≤0.50` 且 `val_b_context_unseen ≤1%` 且 `λ∈(1e-2,1e4)` 开区间（`q_mass_unseen / joint_cell_unseen / H_cal` 仅描述性，不入稳定性门禁）；`NEAR_FULL_DISCLOSURE` 的 `≥1024` 为单 plane 行数满秩阈，`≈10240` 为 `10*1024` 全符号披露（`raw_disclosure 5*1024+64≈5184` 单层满，`10*1024=10240` 双层近满），`5120` 为近半阈，已验 `raw_disclosure` 不 cap。`capacity_warning_m1/m2/disclosure`（`m1_raw≥1024 / m2_raw≥1024 / raw_disclosure≥5120`）为正交旗标，仅描述不过门禁；旧三项（`ValNLL>H_cal+1 / ValNLL>H_cal+0.5 / joint_cell_unseen>1%`）改归 `descriptive_diagnostics` 逐 session 落 `CSV/JSON/report`。
 - **successor**：`EVIDENCE_INCOMPLETE → recollect`，`MODEL_NOT_STABLE → recollect_or_new_prior`，`CURRENT_CANDIDATE_COMPATIBLE → none (v68 reuse)`，`RATE_ADAPTATION → v68_rate_adaptive`，`NEAR_FULL_DISCLOSURE → v68_new_representation`。
 - **优先级**：`EVIDENCE_INCOMPLETE > MODEL_NOT_STABLE > CURRENT_CANDIDATE_COMPATIBLE > RATE_ADAPTATION > NEAR_FULL_DISCLOSURE` 严格先到先得，`CURRENT_CANDIDATE_COMPATIBLE` 仅当 `MODEL_NOT_STABLE` 未触发时可达。
 
