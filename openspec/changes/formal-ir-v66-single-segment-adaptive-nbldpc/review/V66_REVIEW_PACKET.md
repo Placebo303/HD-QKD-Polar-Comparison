@@ -1,8 +1,8 @@
 # V66 Independent Review Packet — Pre-RESULT (PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK) — revised single-source 20260123_1M_600k_0dB
 
 **Change**: `formal-ir-v66-single-segment-adaptive-nbldpc`  
-**HEAD**: `e2167fea7bbf4610e745e3499bdb28551b15c66d` (`formal-ir-mainline`, 推送后新 40位 Plan SHA — 需 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，40位全量)  
-**ACCEPTED_PLAN_SHA**: `832e5394bb366927c779414ee5a08427bd740a2d` (本次修订后单独提交推送的新 Plan SHA；独立线程需 `rg 832e5394bb366927c779414ee5a08427bd740a2d` 0 hits 在旧 SHA 残留检查 + `rg cabc928f` 0 hits 旧 SHA 已清除；当前 HEAD `e2167fea` 为 spike 同步修订)  
+**HEAD**: `51ed3c2505106f5bb46d7da11872afca0d079d2b` (`formal-ir-mainline`, 推送后新 40位 Plan SHA — 需 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，40位全量)  
+**ACCEPTED_PLAN_SHA**: `832e5394bb366927c779414ee5a08427bd740a2d` (本次修订后单独提交推送的新 Plan SHA；独立线程需 `rg 832e5394bb366927c779414ee5a08427bd740a2d` 0 hits 在旧 SHA 残留检查 + `rg cabc928f` 0 hits 旧 SHA 已清除；当前 HEAD `51ed3c25` 为 spike 同步修订)  
 **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`)  
 **Lifecycle**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED`  
 **Single-source**: `20260123_1M_600k_0dB` 72 overall (CAL24 VAL24 EVAL24)  
@@ -75,12 +75,12 @@
 
 ## 7. 四工件+registry+spike+脚本单独提交推送 (F, new)
 
-- [ ] `proposal.md/design.md/tasks.md/specs/spec.md` 一致 HEAD `e2167fea7bbf4610e745e3499bdb28551b15c66d` (ACCEPTED_PLAN 832e5394)  
+- [ ] `proposal.md/design.md/tasks.md/specs/spec.md` 一致 HEAD `51ed3c2505106f5bb46d7da11872afca0d079d2b` (ACCEPTED_PLAN 832e5394)  
 - [ ] `v66_data_registry.json` single-source 72 已落盘  
 - [ ] `v66_spike_summary.json` 已回填 CE1 3.9552/CE2 3.3933/raw 1054/904/aligned 1056/192 rank nested disclosure null proxy 6304 raw 9854 constructibility false 无 TBD — overall V66_RATE_NOT_FEASIBLE  
 - [ ] `scripts/v66_data_readiness.py` + `scripts/v66_spike.py` 已创建 `rg decode 0 hits` `py_compile PASS`  
 - [ ] `V66_ADAPTIVE_REPORT.md` 已回填无 TBD (CE1 3.9552 CE2 3.3933 m1 1056 m2 192 proxy 6304 raw 9854)  
-- [ ] `git log --oneline -1` 显示 `e2167fea7bbf4610e745e3499bdb28551b15c66d` 且 `git rev-parse HEAD == origin/formal-ir-mainline` (推送后)  
+- [ ] `git log --oneline -1` 显示 `51ed3c2505106f5bb46d7da11872afca0d079d2b` 且 `git rev-parse HEAD == origin/formal-ir-mainline` (推送后)  
 - [ ] 未创建 `run_01`  
 
 ## 8. 结论
@@ -90,5 +90,5 @@
 - [ ] **不自行 ACCEPT** — 本 packet 仅建议，主线程/用户裁决  
 
 **Reviewer 签名**: _________________  
-**实现线程 SHA 重核**: `git rev-parse HEAD` = `e2167fea7bbf4610e745e3499bdb28551b15c66d` (需 40位全量, 推送后)  
+**实现线程 SHA 重核**: `git rev-parse HEAD` = `51ed3c2505106f5bb46d7da11872afca0d079d2b` (需 40位全量, 推送后)  
 **独立复核命令**: `rg "decode_" scripts/v66_*.py` → 0 hits ; `rg "TBD" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits (除 HEAD 占位); `rg "per-source" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits (except history); `rg "m_total<1024" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits ; `python -m py_compile scripts/v66_*.py` → PASS ; `ls comparison_bench/outputs_comparison/**/v66_*/run_01` → not found ; `python scripts/v66_spike.py --registry v66_data_registry.json` → CE1 3.9552 CE2 3.3933 m1 1056 m2 192 proxy 6304 raw 9854 overall V66_RATE_NOT_FEASIBLE MATRIX_NOT_CONSTRUCTIBLE
