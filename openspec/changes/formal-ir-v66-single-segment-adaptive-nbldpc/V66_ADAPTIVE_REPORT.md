@@ -1,7 +1,7 @@
 # V66 Single-Segment Adaptive Report (PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK) — single-source 20260123_1M_600k_0dB
 
 **Status**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED` — 预冻结，decoder-free 真实 parquet 重算，无 TBD，不含 EVAL decoder 执行  
-**HEAD**: `99511e62043cf3af04f08aee2569d1291af0101e` (ACCEPTED_PLAN_SHA `832e5394bb366927c779414ee5a08427bd740a2d`，`git rev-parse HEAD == origin/formal-ir-mainline` 重核)  
+**HEAD**: `fffe077026ef3ffe98ae6cb8b757be308a0a0cb3` (ACCEPTED_PLAN_SHA `832e5394bb366927c779414ee5a08427bd740a2d` / `832e5394`，`git rev-parse HEAD == origin/formal-ir-mainline` 重核)  
 **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`)  
 **Predecessor**: `V64 22/24 full-tag PASS` + `V65 new-session`  
 **Registry**: `v66_data_registry.json` authoritative (CAL24+VAL24+EVAL24 =72 overall 单源 20260123_1M_600k_0dB, development_replay=true)  
@@ -64,7 +64,7 @@ else DEVELOPMENT_BENCHMARK_READY (EVAL 未执行但前三态已过)
 
 ## 8. 独立 Review Packet
 
-- `review/V66_REVIEW_PACKET.md` 需更新新 SHA、真实 CE/λ/H rank/nested/disclosure、`MATRIX_NOT_CONSTRUCTIBLE`、`development_replay` 机械审计、fail-closed 证据，需独立线程复核 `HEAD/99511e62043cf3af04f08aee2569d1291af0101e (plan 832e5394bb366927c779414ee5a08427bd740a2d), data 84d62779, 单 session 72 24/段, development_replay+历史键审计, CAL-only λ 20.0, CE1/CE2 真实 parquet, m_raw 1054/904 -> 1056/192 +8 capped, H1-16/112 rank 16/112 contains False, H2 184/192 rank, disclosure_capped 6304 / disclosure_raw_required 9854, MATRIX_NOT_CONSTRUCTIBLE, 五态 RATE_NOT_FEASIBLE` 后方可 `PLAN_ACCEPT` 或 `revise-required`，**不自行 ACCEPT**。
+- `review/V66_REVIEW_PACKET.md` 需更新新 SHA、真实 CE/λ/H rank/nested/disclosure、`MATRIX_NOT_CONSTRUCTIBLE`、`development_replay` 机械审计、fail-closed 证据，需独立线程复核 `HEAD/fffe077026ef3ffe98ae6cb8b757be308a0a0cb3 (ACCEPTED_PLAN 832e5394 / 832e5394bb366927c779414ee5a08427bd740a2d), data 84d62779, 单 session 72 24/段, development_replay+历史键审计, CAL-only λ 20.0, CE1/CE2 真实 parquet, m_raw 1054/904 -> 1056/192 +8 capped, H1-16/112 rank 16/112 contains False, H2 184/192 rank, disclosure_capped 6304 / disclosure_raw_required 9854, MATRIX_NOT_CONSTRUCTIBLE, 五态 RATE_NOT_FEASIBLE` 后方可 `PLAN_ACCEPT` 或 `revise-required`，**不自行 ACCEPT**。
 
 ## 9. 下一步
 
