@@ -6,7 +6,8 @@
 **Branch**: `formal-ir-mainline`
 **Lifecycle state**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`
 **Accepted Plan SHA**: `70f9ed8ece53704374d37810a163a519e57be6e9` (frozen; `git cat-file -e 70f9ed8` PASS, `rg 70f9ed8` 1 hit in script, no drift)
-**Implementation SHA (corrected)**: `3a6c4fac` (old, ENGINEERING_INVALID per `INVALID_RESULT_NOTE.md`) → **new SHA after this commit** (must satisfy `HEAD == origin/formal-ir-mainline`, 40-char)
+**Implementation SHA (reviewed)**: `ffe40e6643e2a1a4edc4a99063e8555d5670bc4d` (DECODER_FREE, corrected Stage0, 20/20) — old `3a6c4fac255c7094a357468140129c8149f6fa9d` permanently `ENGINEERING_INVALID` per `INVALID_RESULT_NOTE.md` (no retroactive signing, no elimination effect)
+**Implementation SHA (post-verdict)**: `git rev-parse HEAD` after verdict commit — must equal `origin/formal-ir-mainline` (40-char), new SHA to be re-derived post-push; reviewed binding `ffe40e66 == ffe40e66` PASS
 **Predecessor**: `formal-ir-v65-new-session-channel-compatibility` `V65` `9625afb4 PLAN_REVISE_REQUIRED`
 **Data SHA**: `84d62779` (d=1024 bw=200 pairing=nearest legacy_v1 period 204800 gate 200 thr 40000)
 **Decoder status**: `DECODER_FREE` — `rg "decode_" scripts/v65ar2_pipeline.py` 0 hits, no `run_01` created

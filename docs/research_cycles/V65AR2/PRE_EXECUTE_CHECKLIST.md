@@ -2,8 +2,9 @@
 
 **Date**: 2026-08-31
 **Accepted Plan SHA**: `70f9ed8ece53704374d37810a163a519e57be6e9` (frozen, no drift)
-**Implementation SHA (old invalid)**: `3a6c4fac255c7094a357468140129c8149f6fa9d` (Stage0 misapplication, ENGINEERING_INVALID per INVALID_RESULT_NOTE.md)
-**New implementation SHA**: `git rev-parse HEAD` after this commit — must equal `origin/formal-ir-mainline` (40-char), `git cat-file -e 70f9ed8` PASS
+**Implementation SHA (old invalid)**: `3a6c4fac255c7094a357468140129c8149f6fa9d` (Stage0 misapplication, permanently `ENGINEERING_INVALID` per INVALID_RESULT_NOTE.md — no retroactive signing)
+**Implementation SHA (reviewed)**: `ffe40e6643e2a1a4edc4a99063e8555d5670bc4d` (DECODER_FREE, corrected Stage0, 20/20) — independent rerun 15/15 PASS, complete 20/20 PASS
+**New implementation SHA (post-verdict)**: `git rev-parse HEAD` after verdict commit — must equal `origin/formal-ir-mainline` (40-char), `git cat-file -e 70f9ed8` PASS; only `HEAD == origin` after re-derive authorizes EXECUTE_AUTH
 **Branch**: `formal-ir-mainline`
 **Data SHA**: `84d62779` (d=1024 bw=200 pairing=nearest legacy_v1 period 204800 gate 200 thr 40000)
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — no decoder, no run_01
@@ -12,7 +13,7 @@
 
 | Gate | Check | Expected | Result |
 |------|-------|----------|--------|
-| G0 HEAD/origin binding | `git rev-parse HEAD == git rev-parse origin/formal-ir-mainline` (40-char, `git fetch` re-derived) | match | PASS — `3a6c4fac == 3a6c4fac` pre-push; new SHA to be re-derived post-push |
+| G0 HEAD/origin binding | `git rev-parse HEAD == git rev-parse origin/formal-ir-mainline` (40-char, `git fetch` re-derived) | match | PASS — `ffe40e66 == ffe40e66` reviewed; post-verdict new SHA to be re-derived (`git rev-parse HEAD == origin/formal-ir-mainline`) before EXECUTE_AUTH |
 | G0 Accepted Plan reachable | `git cat-file -e 70f9ed8ece53704374d37810a163a519e57be6e9` | 0 exit | PASS — plan commit exists |
 | G0 Plan binding | `rg "70f9ed8" scripts/v65ar2_pipeline.py` == 2 hits (`ACCEPTED_PLAN_SHA` + header) | 2 hits | PASS |
 | G0 Stale SHA | `rg "efd34ef"` (V55 stale constant) `scripts/ comparison_bench/tests/ docs/` == 0 hits; `rg "3a6c4fa"` as ACCEPTED_PLAN == 0 hits | 0 hits | PASS — only 70f9ed8 is accepted plan |
