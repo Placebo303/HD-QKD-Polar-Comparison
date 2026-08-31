@@ -1,0 +1,211 @@
+{
+  "derived_from": "fea852ba",
+  "frozen_maps": {
+    "raw_root_map": "workspace/v65ar2_raw_root_map_3a6c4fa.json",
+    "contract_map": "workspace/v65ar2_contract_map_3a6c4fa.json"
+  },
+  "recomputed_candidates": [
+    "2500K",
+    "160254"
+  ],
+  "phase_r": {
+    "2500K": {
+      "candidate_id": "2500K",
+      "candidate": "2500K",
+      "tier": "B",
+      "status": "PASS",
+      "contract_hash": "284132dd6ca63df2",
+      "raw_hash": "a5ac56f7ef2a6901",
+      "sidecar_additive": {
+        "candidate_id": "2500K",
+        "tier": "B",
+        "contract_hash": "284132dd6ca63df2",
+        "raw_hash": "a5ac56f7ef2a6901",
+        "delay_used_ps": 0,
+        "peak_center": -2.0,
+        "sigma": 100.0,
+        "gate": 200,
+        "threshold": 40000,
+        "frame_anchor": {
+          "period_ps": 204800,
+          "mapping": "legacy_v1"
+        },
+        "mapping": "legacy_v1",
+        "channel_pair": "1/5",
+        "reconstruction_rule": "additive_only",
+        "reused_conflicting_sidecar": false,
+        "raw_untouched": true,
+        "searched_channel_pair": false,
+        "reused": false,
+        "n_pairs": 2785791,
+        "event_inventory": {
+          "1": 7612289,
+          "5": 6097034,
+          "1002": 1024560
+        }
+      },
+      "provenance_additive": {
+        "contract_hash": "284132dd6ca63df2",
+        "raw_hash": "a5ac56f7ef2a6901"
+      },
+      "guards": {
+        "reused": false,
+        "modified_raw": false,
+        "searched_pair": false,
+        "decoded": false
+      },
+      "reused_conflicting_sidecar": false,
+      "raw_untouched": true,
+      "searched_channel_pair": false,
+      "inventory": {
+        "1": 7612289,
+        "5": 6097034,
+        "1002": 1024560
+      },
+      "g1_detail": {
+        "sign_ok": true,
+        "abs_ok": true,
+        "sigma_ok": true,
+        "gate_ok": true,
+        "thr_ok": true
+      }
+    },
+    "160254": {
+      "candidate_id": "160254",
+      "candidate": "160254",
+      "tier": "C",
+      "status": "PASS",
+      "contract_hash": "f4ae99310db40e86",
+      "raw_hash": "a07ed49795d24161",
+      "sidecar_additive": {
+        "candidate_id": "160254",
+        "tier": "C",
+        "contract_hash": "f4ae99310db40e86",
+        "raw_hash": "a07ed49795d24161",
+        "delay_used_ps": 0,
+        "peak_center": 1.0,
+        "sigma": 100.0,
+        "gate": 200,
+        "threshold": 40000,
+        "frame_anchor": {
+          "period_ps": 204800,
+          "mapping": "legacy_v1"
+        },
+        "mapping": "legacy_v1",
+        "channel_pair": "1/5",
+        "reconstruction_rule": "additive_only",
+        "reused_conflicting_sidecar": false,
+        "raw_untouched": true,
+        "searched_channel_pair": false,
+        "reused": false,
+        "n_pairs": 2003945,
+        "event_inventory": {
+          "1": 5926804,
+          "5": 5327355,
+          "1001": 667339
+        }
+      },
+      "provenance_additive": {
+        "contract_hash": "f4ae99310db40e86",
+        "raw_hash": "a07ed49795d24161"
+      },
+      "guards": {
+        "reused": false,
+        "modified_raw": false,
+        "searched_pair": false,
+        "decoded": false
+      },
+      "reused_conflicting_sidecar": false,
+      "raw_untouched": true,
+      "searched_channel_pair": false,
+      "inventory": {
+        "1": 5926804,
+        "5": 5327355,
+        "1001": 667339
+      },
+      "g1_detail": {
+        "sign_ok": true,
+        "abs_ok": true,
+        "sigma_ok": true,
+        "gate_ok": true,
+        "thr_ok": true
+      }
+    }
+  },
+  "stage0_check": {
+    "selected": "162148",
+    "per_candidate_stage0": {
+      "162148": {
+        "status": "PASS",
+        "triples": [
+          [
+            "162148",
+            "162148",
+            0
+          ],
+          [
+            "162148",
+            "162148",
+            1
+          ],
+          [
+            "162148",
+            "162148",
+            2
+          ],
+          [
+            "162148",
+            "162148",
+            3
+          ],
+          [
+            "162148",
+            "162148",
+            4
+          ],
+          [
+            "162148",
+            "162148",
+            5
+          ],
+          [
+            "162148",
+            "162148",
+            6
+          ],
+          [
+            "162148",
+            "162148",
+            7
+          ]
+        ],
+        "n_pairs": 2048,
+        "n_frames": 8,
+        "overlap": {
+          "cal\u2229val_empty": true,
+          "cal\u222aval\u2229test_empty": true,
+          "cal\u222aval\u222atest\u2229forbidden_empty": true,
+          "overlap": false,
+          "forbidden_overlap": false
+        },
+        "provenance": "materialization_ok"
+      },
+      "2500K": {
+        "status": "UNREACHABLE_FIRST_MATCH",
+        "reason": "first-match selected 162148"
+      },
+      "160254": {
+        "status": "UNREACHABLE_FIRST_MATCH",
+        "reason": "first-match selected 162148"
+      }
+    }
+  },
+  "guarantees": {
+    "hashes_independent": true,
+    "inventory_nonempty": true,
+    "peak_gates_landed": true,
+    "stage0_unreachable": true,
+    "decoder_free": true
+  },
+  "note": "r2 does not overwrite original completion; old completion is ENGINEERING_INVALID_CANDIDATE_BINDING"
+}

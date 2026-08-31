@@ -1,0 +1,245 @@
+{
+  "schema": "v65ar2_phase_r_completion_v1",
+  "binding": {
+    "head": "fea852baf16522be78627146bbb4b1e4887f223a",
+    "origin": "fea852baf16522be78627146bbb4b1e4887f223a",
+    "binding_ok": true,
+    "plan_exists": true,
+    "accepted_plan": "70f9ed8ece53704374d37810a163a519e57be6e9"
+  },
+  "candidate_order": [
+    "162148",
+    "2500K",
+    "160254"
+  ],
+  "note": "原 v65ar2_pipeline_result.json 内嵌仅 162148 的 Phase R + Stage0 PASS；2500K/160254 的 Phase R 来自本 additive completion，decoder-free 复用 V56 真直方图（centered bins + median refine, peak not forced == delay），Stage0 仍 UNREACHABLE_FIRST_MATCH，不改原文件。",
+  "original_file": "comparison_bench/outputs_comparison/formal_ir_methods/v65ar2_pipeline/run_02/v65ar2_pipeline_result.json",
+  "original_file_sha256": "46a24989148e40c2",
+  "original_inline_only": [
+    "162148"
+  ],
+  "completion_candidates": [
+    "2500K",
+    "160254"
+  ],
+  "decoder_free": true,
+  "v56_true_histogram_reused": true,
+  "histogram_properties": {
+    "centered_bins": true,
+    "median_refine": true,
+    "not_forced_peak_eq_delay": true,
+    "product_sign_check": true,
+    "code_ref": "scripts/v65ar2_pipeline.py::_estimate_peak_histogram + V56 authority _read_ttbin_timetags/_bin_indices_sorted_for_binwidth/_pairs_from_sorted_bins"
+  },
+  "guards": {
+    "reused_conflicting_sidecar": false,
+    "raw_untouched": true,
+    "searched_channel_pair": false,
+    "decoded": false,
+    "rg_decode_hits": 0
+  },
+  "phase_r_completion": {
+    "2500K": {
+      "candidate_id": "2500K",
+      "status": "PHASE_R_FAIL",
+      "reason": "contract_channel_not_unique_ambiguity",
+      "contract_hash": "d8f20344c63d6b32",
+      "raw_hash": "fd4e2b1052f06610",
+      "sidecar_additive": null,
+      "guards": {},
+      "reused_conflicting_sidecar": false,
+      "raw_untouched": true,
+      "searched_channel_pair": false,
+      "inventory": {}
+    },
+    "160254": {
+      "candidate_id": "160254",
+      "status": "PHASE_R_FAIL",
+      "reason": "contract_channel_not_unique_ambiguity",
+      "contract_hash": "d8f20344c63d6b32",
+      "raw_hash": "fd4e2b1052f06610",
+      "sidecar_additive": null,
+      "guards": {},
+      "reused_conflicting_sidecar": false,
+      "raw_untouched": true,
+      "searched_channel_pair": false,
+      "inventory": {}
+    }
+  },
+  "merged_three_candidate_view": {
+    "per_candidate": {
+      "162148": {
+        "source": "original_inline",
+        "file": "v65ar2_pipeline_result.json",
+        "phase_r": {
+          "candidate_id": "162148",
+          "candidate": "162148",
+          "tier": "A",
+          "status": "PASS",
+          "contract_hash": "4412796e31400eb7",
+          "raw_hash": "35bdef29fb0bb50d",
+          "sidecar_additive": {
+            "candidate_id": "162148",
+            "tier": "A",
+            "contract_hash": "4412796e31400eb7",
+            "raw_hash": "35bdef29fb0bb50d",
+            "delay_used_ps": 0,
+            "peak_center": -2.0,
+            "sigma": 100.0,
+            "gate": 200,
+            "threshold": 40000,
+            "frame_anchor": {
+              "period_ps": 204800,
+              "mapping": "legacy_v1"
+            },
+            "mapping": "legacy_v1",
+            "channel_pair": "1/5",
+            "reconstruction_rule": "additive_only",
+            "reused_conflicting_sidecar": false,
+            "raw_untouched": true,
+            "searched_channel_pair": false,
+            "reused": false,
+            "n_pairs": 3282064,
+            "event_inventory": {
+              "1": 6986832,
+              "5": 8054971,
+              "1001": 1302974
+            }
+          },
+          "provenance_additive": {
+            "contract_hash": "4412796e31400eb7",
+            "raw_hash": "35bdef29fb0bb50d"
+          },
+          "guards": {
+            "reused": false,
+            "modified_raw": false,
+            "searched_pair": false,
+            "decoded": false
+          },
+          "reused_conflicting_sidecar": false,
+          "raw_untouched": true,
+          "searched_channel_pair": false,
+          "inventory": {
+            "1": 6986832,
+            "5": 8054971,
+            "1001": 1302974
+          },
+          "g1_detail": {
+            "sign_ok": true,
+            "abs_ok": true,
+            "sigma_ok": true,
+            "gate_ok": true,
+            "thr_ok": true
+          }
+        },
+        "stage0": {
+          "status": "PASS",
+          "triples": [
+            [
+              "162148",
+              "162148",
+              0
+            ],
+            [
+              "162148",
+              "162148",
+              1
+            ],
+            [
+              "162148",
+              "162148",
+              2
+            ],
+            [
+              "162148",
+              "162148",
+              3
+            ],
+            [
+              "162148",
+              "162148",
+              4
+            ],
+            [
+              "162148",
+              "162148",
+              5
+            ],
+            [
+              "162148",
+              "162148",
+              6
+            ],
+            [
+              "162148",
+              "162148",
+              7
+            ]
+          ],
+          "n_pairs": 2048,
+          "n_frames": 8,
+          "overlap": {
+            "cal∩val_empty": true,
+            "cal∪val∩test_empty": true,
+            "cal∪val∪test∩forbidden_empty": true,
+            "overlap": false,
+            "forbidden_overlap": false
+          },
+          "provenance": "materialization_ok"
+        }
+      },
+      "2500K": {
+        "source": "completion_additive",
+        "file": "v65ar2_phase_r_completion.json",
+        "phase_r": {
+          "candidate_id": "2500K",
+          "status": "PHASE_R_FAIL",
+          "reason": "contract_channel_not_unique_ambiguity",
+          "contract_hash": "d8f20344c63d6b32",
+          "raw_hash": "fd4e2b1052f06610",
+          "sidecar_additive": null,
+          "guards": {},
+          "reused_conflicting_sidecar": false,
+          "raw_untouched": true,
+          "searched_channel_pair": false,
+          "inventory": {}
+        },
+        "stage0": {
+          "status": "UNREACHABLE_FIRST_MATCH",
+          "reason": "first-match selected 162148 (Stage0 still UNREACHABLE, completion does not change selection)"
+        }
+      },
+      "160254": {
+        "source": "completion_additive",
+        "file": "v65ar2_phase_r_completion.json",
+        "phase_r": {
+          "candidate_id": "160254",
+          "status": "PHASE_R_FAIL",
+          "reason": "contract_channel_not_unique_ambiguity",
+          "contract_hash": "d8f20344c63d6b32",
+          "raw_hash": "fd4e2b1052f06610",
+          "sidecar_additive": null,
+          "guards": {},
+          "reused_conflicting_sidecar": false,
+          "raw_untouched": true,
+          "searched_channel_pair": false,
+          "inventory": {}
+        },
+        "stage0": {
+          "status": "UNREACHABLE_FIRST_MATCH",
+          "reason": "first-match selected 162148 (Stage0 still UNREACHABLE, completion does not change selection)"
+        }
+      }
+    },
+    "selected": "162148",
+    "stage0_unreachable_assert": true,
+    "stage0_still_unreachable": true,
+    "overall": "V65AR2_FULL_DISCLOSURE_LAYER",
+    "declaration": "三候选合并视图：162148 来自原内嵌；2500K/160254 来自本 completion 的 decoder-free Phase R；Stage0 对后两者仍为 UNREACHABLE_FIRST_MATCH，first-match 定序不变，原 v65ar2_pipeline_result.json 未修改。"
+  },
+  "additive_only": true,
+  "original_not_modified": true,
+  "awaiting_independent_review": true,
+  "implementation_sha": "fea852baf16522be78627146bbb4b1e4887f223a",
+  "accepted_plan_sha": "70f9ed8ece53704374d37810a163a519e57be6e9"
+}
