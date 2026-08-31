@@ -1,9 +1,9 @@
 {
   "schema": "v67_spike_v1",
   "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
-  "head": "3fb2fc6ee623aab45dd9951953aad9cc0271af61",
+  "head": "b9f29173",
   "data_sha": "84d62779",
-  "registry": "v67_data_registry.json",
+  "registry": "openspec/changes/formal-ir-v67-multisession-feasibility-map/v67_data_registry.json",
   "total_sessions": 3,
   "per_category_counts": {
     "1M": 1,
@@ -84,7 +84,14 @@
         "H_cal": 4.82129863964855,
         "ValNLL": 7.229650653899435,
         "DeltaNLL": -0.03203540292406615,
+        "val_b_context_unseen": 0.0,
+        "joint_cell_unseen": 0.54852294921875,
         "q_mass_unseen": 0.54852294921875,
+        "capacity_warning": {
+          "ValNLL_gt_Hcal_plus_1": true,
+          "ValNLL_gt_Hcal_plus_0_5": true,
+          "joint_cell_unseen_gt_1pct": true
+        },
         "effective_contexts": 1024,
         "CE1": 3.85736382744345,
         "CE2": 3.3722868264559853,
@@ -140,7 +147,14 @@
         "H_cal": 5.82245194202593,
         "ValNLL": 7.150000879558332,
         "DeltaNLL": 0.0149957067556592,
+        "val_b_context_unseen": 0.0,
+        "joint_cell_unseen": 0.4911346435546875,
         "q_mass_unseen": 0.4911346435546875,
+        "capacity_warning": {
+          "ValNLL_gt_Hcal_plus_1": true,
+          "ValNLL_gt_Hcal_plus_0_5": true,
+          "joint_cell_unseen_gt_1pct": true
+        },
         "effective_contexts": 1024,
         "CE1": 3.843472766473038,
         "CE2": 3.306528113085294,
@@ -154,10 +168,10 @@
         "m1_family": 1024,
         "m2_family": 888
       },
-      "S1_classification": "V67_MODEL_NOT_STABLE",
-      "S2_classification": "V67_MODEL_NOT_STABLE",
-      "final_classification": "V67_MODEL_NOT_STABLE",
-      "successor": "recollect_or_new_prior",
+      "S1_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "S2_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "final_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "successor": "v68_new_representation",
       "stage_consistency": true
     },
     "20260107_PPLN_1p5M": {
@@ -208,7 +222,14 @@
         "H_cal": 5.374518375489454,
         "ValNLL": 7.63631680050527,
         "DeltaNLL": 0.00634629034757328,
+        "val_b_context_unseen": 0.0,
+        "joint_cell_unseen": 0.592987060546875,
         "q_mass_unseen": 0.592987060546875,
+        "capacity_warning": {
+          "ValNLL_gt_Hcal_plus_1": true,
+          "ValNLL_gt_Hcal_plus_0_5": true,
+          "joint_cell_unseen_gt_1pct": true
+        },
         "effective_contexts": 1024,
         "CE1": 4.095215852157226,
         "CE2": 3.5411009483480447,
@@ -264,7 +285,14 @@
         "H_cal": 6.134462881982744,
         "ValNLL": 7.547197377709444,
         "DeltaNLL": 0.023953680440750524,
+        "val_b_context_unseen": 0.0,
+        "joint_cell_unseen": 0.521240234375,
         "q_mass_unseen": 0.521240234375,
+        "capacity_warning": {
+          "ValNLL_gt_Hcal_plus_1": true,
+          "ValNLL_gt_Hcal_plus_0_5": true,
+          "joint_cell_unseen_gt_1pct": true
+        },
         "effective_contexts": 1024,
         "CE1": 4.0154266254139985,
         "CE2": 3.5317707522954445,
@@ -278,10 +306,10 @@
         "m1_family": 1072,
         "m2_family": 944
       },
-      "S1_classification": "V67_MODEL_NOT_STABLE",
-      "S2_classification": "V67_MODEL_NOT_STABLE",
-      "final_classification": "V67_MODEL_NOT_STABLE",
-      "successor": "recollect_or_new_prior",
+      "S1_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "S2_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "final_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "successor": "v68_new_representation",
       "stage_consistency": true
     },
     "20260123_2M_1p2M_0dB": {
@@ -332,7 +360,14 @@
         "H_cal": 6.340887105051856,
         "ValNLL": 8.496690606856014,
         "DeltaNLL": -0.047177893242025704,
+        "val_b_context_unseen": 0.0,
+        "joint_cell_unseen": 0.684600830078125,
         "q_mass_unseen": 0.684600830078125,
+        "capacity_warning": {
+          "ValNLL_gt_Hcal_plus_1": true,
+          "ValNLL_gt_Hcal_plus_0_5": true,
+          "joint_cell_unseen_gt_1pct": true
+        },
         "effective_contexts": 1024,
         "CE1": 4.501746076547999,
         "CE2": 3.994944530308014,
@@ -388,7 +423,14 @@
         "H_cal": 7.110277844458679,
         "ValNLL": 8.390139443334444,
         "DeltaNLL": 0.004515582244398075,
+        "val_b_context_unseen": 0.0,
+        "joint_cell_unseen": 0.595001220703125,
         "q_mass_unseen": 0.595001220703125,
+        "capacity_warning": {
+          "ValNLL_gt_Hcal_plus_1": true,
+          "ValNLL_gt_Hcal_plus_0_5": true,
+          "joint_cell_unseen_gt_1pct": true
+        },
         "effective_contexts": 1024,
         "CE1": 4.422641415982875,
         "CE2": 3.967498027351568,
@@ -402,10 +444,10 @@
         "m1_family": 1184,
         "m2_family": 1064
       },
-      "S1_classification": "V67_MODEL_NOT_STABLE",
-      "S2_classification": "V67_MODEL_NOT_STABLE",
-      "final_classification": "V67_MODEL_NOT_STABLE",
-      "successor": "recollect_or_new_prior",
+      "S1_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "S2_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "final_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "successor": "v68_new_representation",
       "stage_consistency": true
     }
   },
@@ -424,7 +466,12 @@
       "S1_DeltaNLL": -0.03203540292406615,
       "S1_ValNLL": 7.229650653899435,
       "S1_H_cal": 4.82129863964855,
+      "S1_val_b_context_unseen": 0.0,
+      "S1_joint_cell_unseen": 0.54852294921875,
       "S1_q_mass_unseen": 0.54852294921875,
+      "S1_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
+      "S1_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
+      "S1_capacity_warning_joint_cell_unseen_gt_1pct": true,
       "S1_effective_contexts": 1024,
       "S1_m1_raw": 1027,
       "S1_m2_raw": 898,
@@ -440,7 +487,12 @@
       "S2_DeltaNLL": 0.0149957067556592,
       "S2_ValNLL": 7.150000879558332,
       "S2_H_cal": 5.82245194202593,
+      "S2_val_b_context_unseen": 0.0,
+      "S2_joint_cell_unseen": 0.4911346435546875,
       "S2_q_mass_unseen": 0.4911346435546875,
+      "S2_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
+      "S2_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
+      "S2_capacity_warning_joint_cell_unseen_gt_1pct": true,
       "S2_m1_raw": 1024,
       "S2_m2_raw": 881,
       "S2_raw_disclosure": 9589,
@@ -450,8 +502,8 @@
       "final_m2_raw": 881,
       "final_raw_disclosure": 9589,
       "stage_consistency": true,
-      "final_classification": "V67_MODEL_NOT_STABLE",
-      "successor": "recollect_or_new_prior"
+      "final_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "successor": "v68_new_representation"
     },
     {
       "session_id": "20260107_PPLN_1p5M",
@@ -467,7 +519,12 @@
       "S1_DeltaNLL": 0.00634629034757328,
       "S1_ValNLL": 7.63631680050527,
       "S1_H_cal": 5.374518375489454,
+      "S1_val_b_context_unseen": 0.0,
+      "S1_joint_cell_unseen": 0.592987060546875,
       "S1_q_mass_unseen": 0.592987060546875,
+      "S1_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
+      "S1_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
+      "S1_capacity_warning_joint_cell_unseen_gt_1pct": true,
       "S1_effective_contexts": 1024,
       "S1_m1_raw": 1091,
       "S1_m2_raw": 943,
@@ -483,7 +540,12 @@
       "S2_DeltaNLL": 0.023953680440750524,
       "S2_ValNLL": 7.547197377709444,
       "S2_H_cal": 6.134462881982744,
+      "S2_val_b_context_unseen": 0.0,
+      "S2_joint_cell_unseen": 0.521240234375,
       "S2_q_mass_unseen": 0.521240234375,
+      "S2_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
+      "S2_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
+      "S2_capacity_warning_joint_cell_unseen_gt_1pct": true,
       "S2_m1_raw": 1070,
       "S2_m2_raw": 941,
       "S2_raw_disclosure": 10119,
@@ -493,8 +555,8 @@
       "final_m2_raw": 941,
       "final_raw_disclosure": 10119,
       "stage_consistency": true,
-      "final_classification": "V67_MODEL_NOT_STABLE",
-      "successor": "recollect_or_new_prior"
+      "final_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "successor": "v68_new_representation"
     },
     {
       "session_id": "20260123_2M_1p2M_0dB",
@@ -510,7 +572,12 @@
       "S1_DeltaNLL": -0.047177893242025704,
       "S1_ValNLL": 8.496690606856014,
       "S1_H_cal": 6.340887105051856,
+      "S1_val_b_context_unseen": 0.0,
+      "S1_joint_cell_unseen": 0.684600830078125,
       "S1_q_mass_unseen": 0.684600830078125,
+      "S1_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
+      "S1_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
+      "S1_capacity_warning_joint_cell_unseen_gt_1pct": true,
       "S1_effective_contexts": 1024,
       "S1_m1_raw": 1199,
       "S1_m2_raw": 1064,
@@ -526,7 +593,12 @@
       "S2_DeltaNLL": 0.004515582244398075,
       "S2_ValNLL": 8.390139443334444,
       "S2_H_cal": 7.110277844458679,
+      "S2_val_b_context_unseen": 0.0,
+      "S2_joint_cell_unseen": 0.595001220703125,
       "S2_q_mass_unseen": 0.595001220703125,
+      "S2_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
+      "S2_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
+      "S2_capacity_warning_joint_cell_unseen_gt_1pct": true,
       "S2_m1_raw": 1178,
       "S2_m2_raw": 1057,
       "S2_raw_disclosure": 11239,
@@ -536,16 +608,16 @@
       "final_m2_raw": 1057,
       "final_raw_disclosure": 11239,
       "stage_consistency": true,
-      "final_classification": "V67_MODEL_NOT_STABLE",
-      "successor": "recollect_or_new_prior"
+      "final_classification": "V67_NEAR_FULL_DISCLOSURE",
+      "successor": "v68_new_representation"
     }
   ],
   "counts_per_classification": {
     "V67_EVIDENCE_INCOMPLETE": 0,
-    "V67_MODEL_NOT_STABLE": 3,
+    "V67_MODEL_NOT_STABLE": 0,
     "V67_CURRENT_CANDIDATE_COMPATIBLE": 0,
     "V67_RATE_ADAPTATION": 0,
-    "V67_NEAR_FULL_DISCLOSURE": 0
+    "V67_NEAR_FULL_DISCLOSURE": 3
   },
   "candidate_session_list": [],
   "overall": "V67_FEASIBILITY_MAP_COMPLETE",

@@ -1,7 +1,7 @@
 {
   "schema": "v67_manifest_v1",
   "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
-  "head": "3fb2fc6ee623aab45dd9951953aad9cc0271af61",
+  "head": "b9f29173",
   "data_sha": "84d62779",
   "frozen_body": {
     "n": 1024,
@@ -42,10 +42,10 @@
   "overall": "V67_FEASIBILITY_MAP_COMPLETE",
   "counts_per_classification": {
     "V67_EVIDENCE_INCOMPLETE": 0,
-    "V67_MODEL_NOT_STABLE": 3,
+    "V67_MODEL_NOT_STABLE": 0,
     "V67_CURRENT_CANDIDATE_COMPATIBLE": 0,
     "V67_RATE_ADAPTATION": 0,
-    "V67_NEAR_FULL_DISCLOSURE": 0
+    "V67_NEAR_FULL_DISCLOSURE": 3
   },
   "candidate_session_list": [],
   "used_test": false,

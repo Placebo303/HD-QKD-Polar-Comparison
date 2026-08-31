@@ -107,11 +107,17 @@ def estimate_stage(a_cal, b_cal, a_val, b_val):
     H_cal = float(-np.log2(p_cal).mean())
     ValNLL = ce_full  # same as VAL CE full
     DeltaNLL = float(ValNLL - cv_ce) if math.isfinite(cv_ce) else float("inf")
-    # unseen: fraction of VAL pairs where C_ab[b,a]==0 and N_b==0 context
-    # q_mass_unseen approx mass of unseen b contexts or zero-count a|b
-    unseen_mask = C_ab[b_val, a_val] == 0
-    q_mass_unseen = float(unseen_mask.mean())
+    # unseen metrics: val_b_context_unseen = mean(N_b[b_val]==0) is stability gate; joint_cell_unseen = mean(C_ab[b_val,a_val]==0) descriptive only
+    val_b_context_unseen = float(np.mean(N_b[b_val] == 0))
+    joint_cell_unseen = float(np.mean(C_ab[b_val, a_val] == 0))
+    q_mass_unseen = float(joint_cell_unseen)  # alias for backward compat, descriptive only
     effective_contexts = int(np.sum(N_b > 0))
+    # ponytail: orthogonal capacity_warning three items, not gating stability
+    capacity_warning = {
+        "ValNLL_gt_Hcal_plus_1": bool(ValNLL > H_cal + 1.0),
+        "ValNLL_gt_Hcal_plus_0_5": bool(ValNLL > H_cal + 0.5),
+        "joint_cell_unseen_gt_1pct": bool(joint_cell_unseen > 0.01),
+    }
     return {
         "C_ab_sum": int(C_ab.sum()),
         "N_cal": int(N_cal),
@@ -123,7 +129,10 @@ def estimate_stage(a_cal, b_cal, a_val, b_val):
         "H_cal": float(H_cal),
         "ValNLL": float(ValNLL),
         "DeltaNLL": float(DeltaNLL),
+        "val_b_context_unseen": float(val_b_context_unseen),
+        "joint_cell_unseen": float(joint_cell_unseen),
         "q_mass_unseen": float(q_mass_unseen),
+        "capacity_warning": capacity_warning,
         "effective_contexts": int(effective_contexts),
         "CE1": float(ce1),
         "CE2": float(ce2),
@@ -146,7 +155,8 @@ def classify_session(S1, S2, source_label, stage0_ok):
             return "V67_EVIDENCE_INCOMPLETE", "recollect"
         if not est["chain_ok"]:
             return "V67_EVIDENCE_INCOMPLETE", "recollect"
-        if est["lambda_at_boundary"] or est["DeltaNLL"] > 0.50 or est["ValNLL"] > est["H_cal"] + 1.0 or est["q_mass_unseen"] > 0.01 or not math.isfinite(est["ValNLL"]):
+        # ponytail: stability = lambda触边 OR ValNLL-CAL_CV_NLL>0.5 OR val_b_context_unseen>1% OR 非有限; joint_cell_unseen仅描述; 已删 ValNLL>H_cal+1
+        if est["lambda_at_boundary"] or est["DeltaNLL"] > 0.50 or est["val_b_context_unseen"] > 0.01 or not math.isfinite(est["ValNLL"]) or not math.isfinite(est["DeltaNLL"]):
             return "V67_MODEL_NOT_STABLE", "recollect_or_new_prior"
         if est["m1_raw"] <= 16 and est["m2_raw"] <= lane_thr:
             return "V67_CURRENT_CANDIDATE_COMPATIBLE", "none"
@@ -263,7 +273,7 @@ def main():
                     return "V67_EVIDENCE_INCOMPLETE", "recollect"
                 if not est["chain_ok"] or not stage0_ok:
                     return "V67_EVIDENCE_INCOMPLETE", "recollect"
-                if est["lambda_at_boundary"] or est["DeltaNLL"] > 0.50 or est["ValNLL"] > est["H_cal"] + 1.0 or est["q_mass_unseen"] > 0.01 or not math.isfinite(est["ValNLL"]):
+                if est["lambda_at_boundary"] or est["DeltaNLL"] > 0.50 or est["val_b_context_unseen"] > 0.01 or not math.isfinite(est["ValNLL"]) or not math.isfinite(est["DeltaNLL"]):
                     return "V67_MODEL_NOT_STABLE", "recollect_or_new_prior"
                 if est["m1_raw"] <= 16 and est["m2_raw"] <= lane_thr:
                     return "V67_CURRENT_CANDIDATE_COMPATIBLE", "none"
@@ -284,7 +294,7 @@ def main():
                 final_cls = "V67_EVIDENCE_INCOMPLETE"
                 successor = "recollect"
                 s1_cls = final_cls
-            elif S1["lambda_at_boundary"] or S1["DeltaNLL"] > 0.50 or S1["ValNLL"] > S1["H_cal"] + 1.0 or S1["q_mass_unseen"] > 0.01:
+            elif S1["lambda_at_boundary"] or S1["DeltaNLL"] > 0.50 or S1["val_b_context_unseen"] > 0.01 or not math.isfinite(S1["ValNLL"]) or not math.isfinite(S1["DeltaNLL"]):
                 final_cls = "V67_MODEL_NOT_STABLE"
                 successor = "recollect_or_new_prior"
                 s1_cls = final_cls
@@ -321,6 +331,9 @@ def main():
         # row for table
         def get(est, key, default=""):
             return est.get(key, default) if est is not None else default
+        def get_cw(est, k):
+            cw = est.get("capacity_warning", {}) if est is not None else {}
+            return cw.get(k, "")
         row = {
             "session_id": sid,
             "acquisition_id": sess["acquisition_id"],
@@ -335,7 +348,12 @@ def main():
             "S1_DeltaNLL": get(S1, "DeltaNLL"),
             "S1_ValNLL": get(S1, "ValNLL"),
             "S1_H_cal": get(S1, "H_cal"),
+            "S1_val_b_context_unseen": get(S1, "val_b_context_unseen"),
+            "S1_joint_cell_unseen": get(S1, "joint_cell_unseen"),
             "S1_q_mass_unseen": get(S1, "q_mass_unseen"),
+            "S1_capacity_warning_ValNLL_gt_Hcal_plus_1": get_cw(S1, "ValNLL_gt_Hcal_plus_1"),
+            "S1_capacity_warning_ValNLL_gt_Hcal_plus_0_5": get_cw(S1, "ValNLL_gt_Hcal_plus_0_5"),
+            "S1_capacity_warning_joint_cell_unseen_gt_1pct": get_cw(S1, "joint_cell_unseen_gt_1pct"),
             "S1_effective_contexts": get(S1, "effective_contexts"),
             "S1_m1_raw": get(S1, "m1_raw"),
             "S1_m2_raw": get(S1, "m2_raw"),
@@ -351,7 +369,12 @@ def main():
             "S2_DeltaNLL": get(S2, "DeltaNLL"),
             "S2_ValNLL": get(S2, "ValNLL"),
             "S2_H_cal": get(S2, "H_cal"),
+            "S2_val_b_context_unseen": get(S2, "val_b_context_unseen"),
+            "S2_joint_cell_unseen": get(S2, "joint_cell_unseen"),
             "S2_q_mass_unseen": get(S2, "q_mass_unseen"),
+            "S2_capacity_warning_ValNLL_gt_Hcal_plus_1": get_cw(S2, "ValNLL_gt_Hcal_plus_1"),
+            "S2_capacity_warning_ValNLL_gt_Hcal_plus_0_5": get_cw(S2, "ValNLL_gt_Hcal_plus_0_5"),
+            "S2_capacity_warning_joint_cell_unseen_gt_1pct": get_cw(S2, "joint_cell_unseen_gt_1pct"),
             "S2_m1_raw": get(S2, "m1_raw"),
             "S2_m2_raw": get(S2, "m2_raw"),
             "S2_raw_disclosure": get(S2, "raw_disclosure"),
