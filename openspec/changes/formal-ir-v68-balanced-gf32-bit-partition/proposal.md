@@ -6,11 +6,11 @@
 
 **Change ID**: `formal-ir-v68-balanced-gf32-bit-partition`
 
-**Cycle ID**: `V68-BAL` (balanced-gf32-bit-partition), predecessor `formal-ir-v67-multisession-feasibility-map` (`b7e3417f` `V67_FEASIBILITY_MAP_ACCEPTED` 3 sessions 均 `NEAR_FULL_DISCLOSURE`) + `formal-ir-v66-single-segment-adaptive-nbldpc` (`832e5394`) + `formal-ir-v64` (`22/24 PASS`)
+**Cycle ID**: `V68-BAL` (balanced-gf32-bit-partition), predecessor `formal-ir-v67-multisession-feasibility-map` (`fcf3e457ecf45c58e23f91d750acd5267d541795` `V67_FEASIBILITY_MAP_ACCEPTED` 3 sessions 均 `NEAR_FULL_DISCLOSURE`) + `formal-ir-v66-single-segment-adaptive-nbldpc` (`832e5394`) + `formal-ir-v64` (`22/24 PASS`)
 
 **Branch**: `formal-ir-mainline`
 
-**HEAD**: `b7e3417f` (V67 清理后冻结 HEAD，本变更基于此；推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核)
+**HEAD**: `fcf3e457ecf45c58e23f91d750acd5267d541795` (V67 清理后冻结 HEAD，本变更基于此；推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核)
 
 **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点；V68 复用 V67 三 session 的 `Stage2 CAL1024+VAL256`，不换点，不换 bin/mapping，不新增 acquisition)
 
@@ -82,7 +82,7 @@
 
 ## Acceptance Criteria
 
-- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD b7e3417f` + `data 84d62779` + `predecessor V67 b7e3417f V67_FEASIBILITY_MAP_ACCEPTED / V64 22/24 PASS` 已绑定，显式声明 decoder-free、零 decoder/矩阵、1024维符号 GF32两层验证冻结仅重划分10 bits、枚举252子集升序唯一词典序 `max→sum→abs→lex` 选 `S*`、`Phase A CAL-only Phase B VAL确认` 报告 natural 参照、session 复用 V67 三预注册 Stage2、per-session 4分流 + 总体3态 + common审计、四工件产出已声明，**新 Plan SHA 已推送**。
+- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD fcf3e457ecf45c58e23f91d750acd5267d541795` + `data 84d62779` + `predecessor V67 fcf3e457ecf45c58e23f91d750acd5267d541795 V67_FEASIBILITY_MAP_ACCEPTED / V64 22/24 PASS` 已绑定，显式声明 decoder-free、零 decoder/矩阵、1024维符号 GF32两层验证冻结仅重划分10 bits、枚举252子集升序唯一词典序 `max→sum→abs→lex` 选 `S*`、`Phase A CAL-only Phase B VAL确认` 报告 natural 参照、session 复用 V67 三预注册 Stage2、per-session 4分流 + 总体3态 + common审计、四工件产出已声明，**新 Plan SHA 已推送**。
 - [ ] **冻结主体零改已验**：`git diff -- src/ ==0 && git diff -- experiments/ ==0 && git diff -- tools/ ==0`，`n1024 q1024 GF32 poly37 H1 16×1024 rank16 80b U=32*U1+U2 F03 5+5 natural（仅新增 permuted U1'/U2' 重标记） Lane C 184/190/192 H_inc Δ8 decoder 90/1.0 full-tag canonical leak 5*(m1+m2)+64` 全只读，处理点 `84d62779 legacy_v1` 单点，`rg -i "gray|met|protograph|sc_coupling" scripts/v68_spike.py` 0 hits（除 `S` 纯比特重划分注释），`rg "decode_|construct_|gf_rank|nested" 0 hits` 已验。
 - [ ] **枚举252按升序唯一词典序目标已验**：`C(10,5)=252` 子集 `S` 由 `itertools.combinations(range(10),5)` 升序生成，每 `S` 独立 `C_ab 1024×1024 → P_global → P(U1'|B)/P(U2'|U1',B) λ(CAL 4-fold [1e-2,1e4]) → VAL CE1/CE2/CE_full chain |CE_full-CE1-CE2|<1e-9 → m1_raw=ceil(1.3*1024*CE1/5), m2_raw=ceil(1.3*1024*CE2/5) raw_disclosure 5*(m1+m2)+64 不 cap`，`T(S)=(max,sum,abs,S_lex)` 升序选 `S*_per_session`，`T_common(S)=(max_{sess} max, max_{sess} sum, max_{sess} abs, S_lex)` 选 `S*_common`，`natural S_nat={5,6,7,8,9}` 恒参照，三者均落盘且唯一性已验（`252` 行每 session，排序稳定）。
 - [ ] **Phase A CAL-only Phase B VAL确认已验**：`S*` 择优仅 `CAL1024` 内 `4-fold CV NLL` 最小 `λ`，脚本内 `used_val_in_selection==False && used_test==False` 已验；`VAL256` 上对 `S*` 与 `S_nat` 双计 `CE1/CE2/CE_full/λ/ΔNLL/val_b_unseen/m_raw/raw_disclosure/chain_delta/H_cal`，报告 `natural_vs_balanced ΔCE/Δm/Δmax` 已披露，不以 `VAL`/`TEST` 重选 `S*`。

@@ -34,7 +34,7 @@
 
 - common_feasible_count = 0/3，per_session_feasible_count = 0/3。
 - overall = V68_OVERALL_STILL_HEAVY (0 feasible；即便均衡重划分亦仍 heavy，需更深表示如 Gray/2+8)。
-- cal_val_consistency per session：1M False, 1p5M True, 2M False (VAL argmin S* vs CAL S*)，以 CAL 为准，VAL不重选。
+- cal_val_consistency per session：1M False, 1p5M False, 2M True (VAL argmin S* vs CAL S*)，以 CAL 为准，VAL不重选。
 
 ## Per-session 4分流 + 总体3态 (优先级 EVIDENCE_INCOMPLETE > MODEL_NOT_STABLE > BALANCED_FEASIBLE > STILL_HEAVY)
 
