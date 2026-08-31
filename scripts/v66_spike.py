@@ -179,7 +179,7 @@ def main():
     out={
         "schema":"v66_spike_v1",
         "lifecycle":"PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED",
-        "head":reg.get("head","TBD_NEW_PLAN_SHA"),
+        "head":reg.get("head","832e5394bb366927c779414ee5a08427bd740a2d"),
         "data_sha":reg.get("data_sha","84d62779"),
         "registry":args.registry,
         "single_source":SESSION,
