@@ -1,8 +1,8 @@
 # V66 Independent Review Packet — Pre-RESULT (PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK) — revised single-source 20260123_1M_600k_0dB
 
 **Change**: `formal-ir-v66-single-segment-adaptive-nbldpc`  
-**HEAD**: `832e5394bb366927c779414ee5a08427bd740a2d` (`formal-ir-mainline`, 推送后新 40位 Plan SHA — 需 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，40位全量)  
-**ACCEPTED_PLAN_SHA**: `832e5394bb366927c779414ee5a08427bd740a2d` (本次修订后单独提交推送的新 Plan SHA；独立线程需 `rg 832e5394bb366927c779414ee5a08427bd740a2d` 0 hits 在旧 SHA 残留检查 + `rg cabc928f` 0 hits 旧 SHA 已清除)  
+**HEAD**: `e2167fea7bbf4610e745e3499bdb28551b15c66d` (`formal-ir-mainline`, 推送后新 40位 Plan SHA — 需 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，40位全量)  
+**ACCEPTED_PLAN_SHA**: `832e5394bb366927c779414ee5a08427bd740a2d` (本次修订后单独提交推送的新 Plan SHA；独立线程需 `rg 832e5394bb366927c779414ee5a08427bd740a2d` 0 hits 在旧 SHA 残留检查 + `rg cabc928f` 0 hits 旧 SHA 已清除；当前 HEAD `e2167fea` 为 spike 同步修订)  
 **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`)  
 **Lifecycle**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED`  
 **Single-source**: `20260123_1M_600k_0dB` 72 overall (CAL24 VAL24 EVAL24)  
@@ -47,16 +47,16 @@
 
 - [ ] `C_ab 1024×1024 sum 24576` (CAL-only single-source)  
 - [ ] `P(U1|B) 32×1024 + P(U2|U1B) 32x32x1024` 已生成  
-- [ ] `CE1=-E_VAL log P(U1|B)=0.4207, CE2=0.3907, CE_full=0.8114` 且 `|CE_full-CE1-CE2|=2.3e-12 <1e-9`  
-- [ ] `m1_raw = ceil(1.3*1024*CE1/5)=112, m2_raw=104` 未 `min(1024, ...)` cap (`grep "min(" 0 hits` 为伪装)  
-- [ ] `m1_family = ceil_to_+8(m1_raw)=112, m2_family=104` 显式 `+8` 档，不依 `EVAL` (`used_eval==False`)  
-- [ ] `m1<1024 && m2<1024` true (已改，不用 m_total)  
-- [ ] `gf_rank(H1(m1))==m1` (112) true, `gf_rank(H2(m2))==m2` (104) true (满秩, GF32 poly37)  
-- [ ] `nested(H_base, H_inc)` true  
-- [ ] `disclosure==5*(m1+m2)+64 =1144` true  
-- [ ] `constructible true` (Δ8 family 覆盖 112/104), `MATRIX_NOT_CONSTRUCTIBLE false`  
-- [ ] 若族不能覆盖则 `MATRIX_NOT_CONSTRUCTIBLE` 已显式 (本 spike 覆盖)  
-- [ ] 若任一失败 → `RATE_NOT_FEASIBLE` (含 `MATRIX_NOT_CONSTRUCTIBLE`) 已显式  
+- [ ] `CE1=-E_VAL log P(U1|B)=3.9552, CE2=3.3933, CE_full=7.3485` 且 `|CE_full-CE1-CE2|=0.0 <1e-9` (真实 parquet, spike 3.955244 / 3.393301)  
+- [ ] `m1_raw = ceil(1.3*1024*CE1/5)=1054, m2_raw=904` 未 `min(1024, ...)` cap (`grep "min(" 0 hits` 为伪装)  
+- [ ] `m1_family = ceil_to_+8(m1_raw)=1056 (capped), m2_family=192 (184 base +8 single-step)` 显式 `+8` 档，不依 `EVAL` (`used_eval==False`)  
+- [ ] `m1<1024 && m2<1024` false (m1 1056>=1024, m2 192<1024; 已改，不用 m_total)  
+- [ ] `gf_rank(H1(m1))==m1` false (m1 1056 not constructible/ rank 1056!=112 true rank but m1>=1024), `gf_rank(H2(m2))==m2` true (192) 但 `h2_184_in_h2_192 false`  
+- [ ] `nested(H_base, H_inc)` false (`h1_contains_frozen false, h2_184_in_h2_192 false, overall_nested false`)  
+- [ ] `disclosure==5*(m1+m2)+64` null when infeasible; `infeasible_family_proxy_disclosure=6304=5*1248+64`, `disclosure_raw_required=9854=5*1958+64`  
+- [ ] `constructible false` (Δ8 family 单步+8不能覆盖 m1_raw 1054 / m2_raw 904), `MATRIX_NOT_CONSTRUCTIBLE true`  
+- [ ] 若族不能覆盖则 `MATRIX_NOT_CONSTRUCTIBLE` 已显式 (本 spike 未覆盖 → true)  
+- [ ] 若任一失败 → `RATE_NOT_FEASIBLE` (含 `MATRIX_NOT_CONSTRUCTIBLE`) 已显式 → `overall V66_RATE_NOT_FEASIBLE`  
 - [ ] `TBD` 0 hits, `constructibility` 已回填  
 
 ## 5. EVAL 密封门禁 (D, revised 已删 per-source)
@@ -64,23 +64,23 @@
 - [ ] `EVAL 24 blocks overall single-source` 仅 `identity` (`used_eval==False` 在估计侧)  
 - [ ] 门禁 `exact_full ≥19/24 overall && undetected==0 && all exact→tag_ok_full && disclosure==5*(m1+m2)+64` 已冻结 (**无 per-source 6/8**)  
 - [ ] `per-source` 0 hits in gate (已删)  
-- [ ] `efficiency = disclosure/(1024*CE_full)` 报告占位  
+- [ ] `efficiency = disclosure/(1024*CE_full)` 报告占位 — infeasible 时 `efficiency null`, `eff_raw_required 1.31=9854/(1024*7.3485)`, `proxy 6304` 不作效率结论  
 
 ## 6. 终态机 (E, revised)
 
 - [ ] 优先级 `EVIDENCE_INVALID > DATA_NOT_READY > RATE_NOT_FEASIBLE/MATRIX_NOT_CONSTRUCTIBLE > ADAPTIVE_EVAL_FAIL > ADAPTIVE_EVAL_PASS` (未执行时 `READY`) 已显式, **已删 per-source**  
 - [ ] `RATE_NOT_FEASIBLE` 含 `MATRIX_NOT_CONSTRUCTIBLE` 子类, `m1<1024 && m2<1024` (not m_total)  
 - [ ] `ADAPTIVE_EVAL_PASS` 需 `EVAL` 执行后 `19/24 overall undetected0` (**无 per-source**)  
-- [ ] 当前终态 `DEVELOPMENT_BENCHMARK_READY` (m1 112 m2 104 <1024 constructible)  
+- [ ] 当前终态 `V66_RATE_NOT_FEASIBLE` (m1 1056>=1024, m2 192, constructible false, proxy 6304 raw 9854)  
 
 ## 7. 四工件+registry+spike+脚本单独提交推送 (F, new)
 
-- [ ] `proposal.md/design.md/tasks.md/specs/spec.md` 一致 HEAD `832e5394bb366927c779414ee5a08427bd740a2d`  
+- [ ] `proposal.md/design.md/tasks.md/specs/spec.md` 一致 HEAD `e2167fea7bbf4610e745e3499bdb28551b15c66d` (ACCEPTED_PLAN 832e5394)  
 - [ ] `v66_data_registry.json` single-source 72 已落盘  
-- [ ] `v66_spike_summary.json` 已回填 CE1/CE2/raw/aligned m1/m2 rank nested disclosure constructibility 无 TBD  
+- [ ] `v66_spike_summary.json` 已回填 CE1 3.9552/CE2 3.3933/raw 1054/904/aligned 1056/192 rank nested disclosure null proxy 6304 raw 9854 constructibility false 无 TBD — overall V66_RATE_NOT_FEASIBLE  
 - [ ] `scripts/v66_data_readiness.py` + `scripts/v66_spike.py` 已创建 `rg decode 0 hits` `py_compile PASS`  
-- [ ] `V66_ADAPTIVE_REPORT.md` 已回填无 TBD  
-- [ ] `git log --oneline -1` 显示 `832e5394bb366927c779414ee5a08427bd740a2d` 且 `git rev-parse HEAD == origin/formal-ir-mainline` (推送后)  
+- [ ] `V66_ADAPTIVE_REPORT.md` 已回填无 TBD (CE1 3.9552 CE2 3.3933 m1 1056 m2 192 proxy 6304 raw 9854)  
+- [ ] `git log --oneline -1` 显示 `e2167fea7bbf4610e745e3499bdb28551b15c66d` 且 `git rev-parse HEAD == origin/formal-ir-mainline` (推送后)  
 - [ ] 未创建 `run_01`  
 
 ## 8. 结论
@@ -90,5 +90,5 @@
 - [ ] **不自行 ACCEPT** — 本 packet 仅建议，主线程/用户裁决  
 
 **Reviewer 签名**: _________________  
-**实现线程 SHA 重核**: `git rev-parse HEAD` = `832e5394bb366927c779414ee5a08427bd740a2d` (需 40位全量, 推送后)  
-**独立复核命令**: `rg "decode_" scripts/v66_*.py` → 0 hits ; `rg "TBD" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits (除 HEAD 占位); `rg "per-source" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits (except history); `rg "m_total<1024" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits ; `python -m py_compile scripts/v66_*.py` → PASS ; `ls comparison_bench/outputs_comparison/**/v66_*/run_01` → not found ; `python scripts/v66_spike.py --registry v66_data_registry.json` → CE1 0.4207 CE2 0.3907 m1 112 m2 104 constructible true
+**实现线程 SHA 重核**: `git rev-parse HEAD` = `e2167fea7bbf4610e745e3499bdb28551b15c66d` (需 40位全量, 推送后)  
+**独立复核命令**: `rg "decode_" scripts/v66_*.py` → 0 hits ; `rg "TBD" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits (除 HEAD 占位); `rg "per-source" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits (except history); `rg "m_total<1024" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits ; `python -m py_compile scripts/v66_*.py` → PASS ; `ls comparison_bench/outputs_comparison/**/v66_*/run_01` → not found ; `python scripts/v66_spike.py --registry v66_data_registry.json` → CE1 3.9552 CE2 3.3933 m1 1056 m2 192 proxy 6304 raw 9854 overall V66_RATE_NOT_FEASIBLE MATRIX_NOT_CONSTRUCTIBLE
