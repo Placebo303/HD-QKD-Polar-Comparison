@@ -191,6 +191,7 @@ def estimate(pairs_path: Path, cal_fids, val_fids):
     else:
         MATRIX_NOT_CONSTRUCTIBLE= not constructible
     disclosure=5*m_total+TAG_BITS
+    disclosure_raw_required=5*m_total_raw+TAG_BITS
     disclosure_ok=True
     feasible = bool(m1<1024 and m2<1024 and rank_m1_ok and rank_m2_ok and nested_ok and disclosure_ok and constructible and not MATRIX_NOT_CONSTRUCTIBLE)
     eff=float(disclosure/(1024*ce_full)) if ce_full>0 else float("inf")
@@ -202,7 +203,7 @@ def estimate(pairs_path: Path, cal_fids, val_fids):
         "m1_lt_1024":bool(m1<1024),"m2_lt_1024":bool(m2<1024),"constructible":bool(constructible),"MATRIX_NOT_CONSTRUCTIBLE":bool(MATRIX_NOT_CONSTRUCTIBLE),
         "rank_m1":int(rank_m1),"rank_m2":int(rank_m2),"rank_m1_ok":bool(rank_m1_ok),"rank_m2_ok":bool(rank_m2_ok),
         "h1_16_rank":h1_16_rank,"h1_112_rank":h1_112_rank,"h2_base_rank":h2_base_rank,"h2_family_rank":h2_family_rank,
-        "h1_contains_frozen":bool(h1_contains),"nested_ok":bool(nested_ok),"disclosure":int(disclosure),"disclosure_ok":bool(disclosure_ok),
+        "h1_contains_frozen":bool(h1_contains),"nested_ok":bool(nested_ok),"disclosure":int(disclosure),"disclosure_raw_required":int(disclosure_raw_required),"disclosure_ok":bool(disclosure_ok),
         "efficiency":float(eff),"feasible":bool(feasible),
         "lam":lam,"lam_cv_per":per_lam,"lam_best_cv_ce":best_cv_ce,"P_U1_B_shape":"32x1024","P_U2_U1B_shape":"32x32x1024"
     }
@@ -239,7 +240,7 @@ def main():
                 "m1_lt_1024":True,"m2_lt_1024":True,"constructible":True,"MATRIX_NOT_CONSTRUCTIBLE":False,
                 "rank_m1":112,"rank_m2":184,"rank_m1_ok":True,"rank_m2_ok":True,
                 "h1_16_rank":16,"h1_112_rank":112,"h2_base_rank":184,"h2_family_rank":184,
-                "h1_contains_frozen":True,"nested_ok":True,"disclosure":1544,"disclosure_ok":True,
+                "h1_contains_frozen":True,"nested_ok":True,"disclosure":1544,"disclosure_raw_required":1144,"disclosure_ok":True,
                 "efficiency":1.376,"feasible":True,
                 "lam":1.0,"lam_cv_per":{},"lam_best_cv_ce":0.0,"P_U1_B_shape":"32x1024","P_U2_U1B_shape":"32x32x1024"
             }
@@ -288,7 +289,7 @@ def main():
             "h1_16_rank":res["h1_16_rank"],"h1_112_rank":res["h1_112_rank"],"h2_base_rank":res["h2_base_rank"],"h2_family_rank":res["h2_family_rank"],
             "h1_contains_frozen":res["h1_contains_frozen"],
             "nested_m1":res["nested_ok"],"nested_m2":res["nested_ok"],"nested_ok":res["nested_ok"],
-            "disclosure":res["disclosure"],"disclosure_formula":"5*(m1+m2)+64","disclosure_ok":res["disclosure_ok"],
+            "disclosure":res["disclosure"],"disclosure_formula":"5*(m1+m2)+64","disclosure_raw_required":res["disclosure_raw_required"],"disclosure_raw_formula":"5*(m1_raw+m2_raw)+64","disclosure_ok":res["disclosure_ok"],
             "efficiency_VAL":res["efficiency"],"feasible":res["feasible"],"used_eval":used_eval
         }},
         "code_feasibility":{"m1_lt_1024":res["m1_lt_1024"],"m2_lt_1024":res["m2_lt_1024"],"rank_ok":res["rank_m1_ok"] and res["rank_m2_ok"],"nested_ok":res["nested_ok"],"disclosure_ok":res["disclosure_ok"],"constructible":res["constructible"],"MATRIX_NOT_CONSTRUCTIBLE":res["MATRIX_NOT_CONSTRUCTIBLE"],"feasible":res["feasible"],"gate":"m1<1024 && m2<1024 (not m_total)"},
@@ -308,7 +309,7 @@ def main():
         "no_TBD":True,"TBD_cleared":True
     }
     Path(args.out).write_text(json.dumps(out,indent=2,ensure_ascii=False),encoding="utf-8")
-    print(f"[v66_spike] CE1={res['CE1']:.4f} CE2={res['CE2']:.4f} CE_full={res['CE_full']:.4f} lam={res['lam']} chain {res['chain_delta']:.2e} m1_raw {res['m1_raw']}->{res['m1']} m2_raw {res['m2_raw']}->{res['m2']} H1-16 {res['h1_16_rank']} H1-112 {res['h1_112_rank']} contains {res['h1_contains_frozen']} disclosure {res['disclosure']} overall {overall}")
+    print(f"[v66_spike] CE1={res['CE1']:.4f} CE2={res['CE2']:.4f} CE_full={res['CE_full']:.4f} lam={res['lam']} chain {res['chain_delta']:.2e} m1_raw {res['m1_raw']}->{res['m1']} m2_raw {res['m2_raw']}->{res['m2']} H1-16 {res['h1_16_rank']} H1-112 {res['h1_112_rank']} contains {res['h1_contains_frozen']} disclosure {res['disclosure']} disclosure_raw_required {res['disclosure_raw_required']} overall {overall}")
     return 0
 
 if __name__=="__main__":

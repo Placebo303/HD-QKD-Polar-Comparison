@@ -91,6 +91,8 @@
       "nested_ok": false,
       "disclosure": 6304,
       "disclosure_formula": "5*(m1+m2)+64",
+      "disclosure_raw_required": 9854,
+      "disclosure_raw_formula": "5*(m1_raw+m2_raw)+64",
       "disclosure_ok": true,
       "efficiency_VAL": 0.8377508192338032,
       "feasible": false,
