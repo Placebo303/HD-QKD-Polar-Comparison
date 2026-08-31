@@ -10,7 +10,7 @@
 
 **Branch**: `formal-ir-mainline`
 
-**HEAD**: `b9f29173 (本次 proposal/design/tasks/specs 四工件 + registry + spike + report 落盘后单独提交推送产生的新 40 位 Plan SHA，实施前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 40 位重核，不一致阻塞；归档前重核)`
+**HEAD**: `1172b8b78b4c712d70a517b4c10565e80b7101e2 (本次 proposal/design/tasks/specs 四工件 + registry + spike + report 落盘后单独提交推送产生的新 40 位 Plan SHA，实施前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 40 位重核，不一致阻塞；归档前重核)`
 
 **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点；V67 多 session 复用该处理点，不换点，不换 bin/mapping)
 
@@ -89,7 +89,7 @@
 - [ ] **码率 raw 不 cap 已验**：每 session Stage1/Stage2 均 `m1_raw=ceil(1.3*1024*CE1/5), m2_raw=ceil(1.3*1024*CE2/5), raw_disclosure=5*(m1_raw+m2_raw)+64` 显式，不 `min(1024, ...)` 截断，`grep "min(1024" 0 hits` 已验，`CE 链式 |CE_full-CE1-CE2|<1e-9` 已验，`λ` 仅 `CAL 内 4-fold` 搜索 `[1e-2,1e4] log10` 最小 `CV NLL` 已落盘。
 - [ ] **五分流机械分类可复现（per session，优先级互斥）**：每 session `classification ∈ {EVIDENCE_INCOMPLETE, MODEL_NOT_STABLE, CURRENT_CANDIDATE_COMPATIBLE, RATE_ADAPTATION, NEAR_FULL_DISCLOSURE}` 按 `EVIDENCE_INCOMPLETE > MODEL_NOT_STABLE > CURRENT_CANDIDATE_COMPATIBLE(≤16/≤LaneC+8+8) > RATE_ADAPTATION > NEAR_FULL_DISCLOSURE(≥1024或≈10240)` 已判定，`CURRENT_CANDIDATE_COMPATIBLE` 需 `m1_raw≤16 && m2_raw≤LaneC_base+16 (184→200,190→206,192→208)`，`NEAR_FULL_DISCLOSURE` 需 `m1_raw≥1024 || m2_raw≥1024 || raw_disclosure≥5120 (≈10240/2)`，`successor` 已显式（`none / rate_adaptation / new_representation / recollect`），不以总体平均。
 - [ ] **总体 complete 已验**：`overall = V67_FEASIBILITY_MAP_COMPLETE` 当且仅当全部已注册 `≤9` session 均已得出 `classification`（含 `EVIDENCE_INCOMPLETE` 亦计完成），落盘 `overall_feasibility_map_complete: true`，五态之外无隐藏总体。
-- [ ] **四工件 + 地图报告表完整（不读 TEST）**：`v67_data_registry.json` + `v67_spike_summary.json` + `v67_feasibility_table.csv/.json`（表含 `session/CE/lambda/gap/unseen/m/raw/classification/successor` 且与 json 一致）+ `V67_FEASIBILITY_REPORT.md` 已齐，`session/CE/λ/gap/unseen/m/raw/classification/successor` 每列已回填无 b9f29173，`Stage0/Stage1/Stage2` 双组 `CE/m/raw` 已披露。
+- [ ] **四工件 + 地图报告表完整（不读 TEST）**：`v67_data_registry.json` + `v67_spike_summary.json` + `v67_feasibility_table.csv/.json`（表含 `session/CE/lambda/gap/unseen/m/raw/classification/successor` 且与 json 一致）+ `V67_FEASIBILITY_REPORT.md` 已齐，`session/CE/λ/gap/unseen/m/raw/classification/successor` 每列已回填无 1172b8b78b4c712d70a517b4c10565e80b7101e2，`Stage0/Stage1/Stage2` 双组 `CE/m/raw` 已披露。
 - [ ] `scripts/v67_spike.py` 为 decoder-free 可运行脚本（`rg "decode_" 0 hits`、`rg "import.*decoder" 0 hits`、`rg -i "v68|gray" 0 hits`，仅 `numpy/pandas/pyarrow`，`py_compile` PASS，`pytest -p no:cacheprovider -q` 小测试 PASS），输出 `registry + summary + table + report` + 控制台摘要，**未创建 run_01，未读 TEST 统计，λ 触界不扩搜索，m_raw 不 cap，acquisition 去重已验**。
 - [ ] 已停留在 `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，未创建任何 `.../v67_*/run_01`（`ls` 不存在已验），不比较，不碰 `V48-V66` 块外，未转 qualification，**四工件+registry+spike+报告表已单独提交推送，返回新 Plan SHA + 候选列表（≤9 session ids）+ 各分流计数**，等待独立审核（`Pre-RESULT` 独立线程复核 `HEAD/ACCEPTED_PLAN_SHA/rg 0 hits/run_01不存在/py_compile/TEST 未读/m_raw 显式/五分流/≤9 每类≤3/acquisition 去重/U 5+5不GE/V68隔离`）。
 

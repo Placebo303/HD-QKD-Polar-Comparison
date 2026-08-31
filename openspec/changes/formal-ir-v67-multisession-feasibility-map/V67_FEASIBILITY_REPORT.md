@@ -1,7 +1,7 @@
 # V67 Multisession Feasibility Map Report — PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — decoder-free map only, no `run_01`, no V68 code, TEST isolated.
-**HEAD**: `b9f29173` **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) **Branch**: `formal-ir-mainline`
+**HEAD**: `1172b8b78b4c712d70a517b4c10565e80b7101e2` **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) **Branch**: `formal-ir-mainline`
 **Predecessor**: V66 `f4040fc1` + V64 `22/24 PASS` → V67-MAP
 
 ## 1. Acquisition Dedup ≤9 Per-Category ≤3 Mechanical Not Sorted By CE
