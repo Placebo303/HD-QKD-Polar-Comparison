@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **acquisition 去重预注册 ≤9（每类≤3 机械不按 CE 替换），Stage0 8frames 物化 → Stage1 CAL256 VAL128 分类 → Stage2 CAL1024 VAL256 confirmation 不重叠重新独立估计 TEST不读，冻结 U=32*U1+U2 5+5 不GE V68表示，码率 m1_raw=ceil(1.3*1024*CE1/5) m2_raw同 raw_disclosure不cap，五分流 EVIDENCE_INCOMPLETE/MODEL_NOT_STABLE/CURRENT_CANDIDATE_COMPATIBLE(≤16/≤LaneC+8+8)/RATE_ADAPTATION/NEAR_FULL_DISCLOSURE(≥1024或≈10240) 总体 V67_FEASIBILITY_MAP_COMPLETE，四工件 registry+spike.py+report+表(含 session/CE/lambda/gap/unseen/m/raw/classification/successor)，守卫 R67-01~10 不创run_01 rg decoder 0 py_compile 小测试，禁止调V68码**
 
-**HEAD**: `b7e3417ff026409fbb4aa4be0347be4a8fdb0d27 → 新 Plan SHA (本次清理推送后 40 位)` + data `84d62779`
+**HEAD**: `520b51c46e6b427f19225f69dc87602d6f0cbfb5` + data `84d62779`
 
 **Predecessor**: `formal-ir-v66-single-segment-adaptive-nbldpc` `832e5394` + `formal-ir-v64` `22/24 PASS` → `V67-MAP`
 

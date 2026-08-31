@@ -1,7 +1,7 @@
 {
   "schema": "v67_spike_v1",
   "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
-  "head": "1172b8b78b4c712d70a517b4c10565e80b7101e2",
+  "head": "520b51c46e6b427f19225f69dc87602d6f0cbfb5",
   "data_sha": "84d62779",
   "registry": "openspec/changes/formal-ir-v67-multisession-feasibility-map/v67_data_registry.json",
   "total_sessions": 3,
@@ -87,10 +87,15 @@
         "val_b_context_unseen": 0.0,
         "joint_cell_unseen": 0.54852294921875,
         "q_mass_unseen": 0.54852294921875,
-        "capacity_warning": {
+        "descriptive_diagnostics": {
           "ValNLL_gt_Hcal_plus_1": true,
           "ValNLL_gt_Hcal_plus_0_5": true,
           "joint_cell_unseen_gt_1pct": true
+        },
+        "capacity_warning": {
+          "m1_ge_1024": true,
+          "m2_ge_1024": false,
+          "disclosure_ge_5120": true
         },
         "effective_contexts": 1024,
         "CE1": 3.85736382744345,
@@ -150,10 +155,15 @@
         "val_b_context_unseen": 0.0,
         "joint_cell_unseen": 0.4911346435546875,
         "q_mass_unseen": 0.4911346435546875,
-        "capacity_warning": {
+        "descriptive_diagnostics": {
           "ValNLL_gt_Hcal_plus_1": true,
           "ValNLL_gt_Hcal_plus_0_5": true,
           "joint_cell_unseen_gt_1pct": true
+        },
+        "capacity_warning": {
+          "m1_ge_1024": true,
+          "m2_ge_1024": false,
+          "disclosure_ge_5120": true
         },
         "effective_contexts": 1024,
         "CE1": 3.843472766473038,
@@ -225,10 +235,15 @@
         "val_b_context_unseen": 0.0,
         "joint_cell_unseen": 0.592987060546875,
         "q_mass_unseen": 0.592987060546875,
-        "capacity_warning": {
+        "descriptive_diagnostics": {
           "ValNLL_gt_Hcal_plus_1": true,
           "ValNLL_gt_Hcal_plus_0_5": true,
           "joint_cell_unseen_gt_1pct": true
+        },
+        "capacity_warning": {
+          "m1_ge_1024": true,
+          "m2_ge_1024": false,
+          "disclosure_ge_5120": true
         },
         "effective_contexts": 1024,
         "CE1": 4.095215852157226,
@@ -288,10 +303,15 @@
         "val_b_context_unseen": 0.0,
         "joint_cell_unseen": 0.521240234375,
         "q_mass_unseen": 0.521240234375,
-        "capacity_warning": {
+        "descriptive_diagnostics": {
           "ValNLL_gt_Hcal_plus_1": true,
           "ValNLL_gt_Hcal_plus_0_5": true,
           "joint_cell_unseen_gt_1pct": true
+        },
+        "capacity_warning": {
+          "m1_ge_1024": true,
+          "m2_ge_1024": false,
+          "disclosure_ge_5120": true
         },
         "effective_contexts": 1024,
         "CE1": 4.0154266254139985,
@@ -363,10 +383,15 @@
         "val_b_context_unseen": 0.0,
         "joint_cell_unseen": 0.684600830078125,
         "q_mass_unseen": 0.684600830078125,
-        "capacity_warning": {
+        "descriptive_diagnostics": {
           "ValNLL_gt_Hcal_plus_1": true,
           "ValNLL_gt_Hcal_plus_0_5": true,
           "joint_cell_unseen_gt_1pct": true
+        },
+        "capacity_warning": {
+          "m1_ge_1024": true,
+          "m2_ge_1024": true,
+          "disclosure_ge_5120": true
         },
         "effective_contexts": 1024,
         "CE1": 4.501746076547999,
@@ -426,10 +451,15 @@
         "val_b_context_unseen": 0.0,
         "joint_cell_unseen": 0.595001220703125,
         "q_mass_unseen": 0.595001220703125,
-        "capacity_warning": {
+        "descriptive_diagnostics": {
           "ValNLL_gt_Hcal_plus_1": true,
           "ValNLL_gt_Hcal_plus_0_5": true,
           "joint_cell_unseen_gt_1pct": true
+        },
+        "capacity_warning": {
+          "m1_ge_1024": true,
+          "m2_ge_1024": true,
+          "disclosure_ge_5120": true
         },
         "effective_contexts": 1024,
         "CE1": 4.422641415982875,
@@ -469,9 +499,12 @@
       "S1_val_b_context_unseen": 0.0,
       "S1_joint_cell_unseen": 0.54852294921875,
       "S1_q_mass_unseen": 0.54852294921875,
-      "S1_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
-      "S1_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
-      "S1_capacity_warning_joint_cell_unseen_gt_1pct": true,
+      "S1_descriptive_diagnostics_ValNLL_gt_Hcal_plus_1": true,
+      "S1_descriptive_diagnostics_ValNLL_gt_Hcal_plus_0_5": true,
+      "S1_descriptive_diagnostics_joint_cell_unseen_gt_1pct": true,
+      "S1_capacity_warning_m1": true,
+      "S1_capacity_warning_m2": false,
+      "S1_capacity_warning_disclosure": true,
       "S1_effective_contexts": 1024,
       "S1_m1_raw": 1027,
       "S1_m2_raw": 898,
@@ -490,9 +523,12 @@
       "S2_val_b_context_unseen": 0.0,
       "S2_joint_cell_unseen": 0.4911346435546875,
       "S2_q_mass_unseen": 0.4911346435546875,
-      "S2_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
-      "S2_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
-      "S2_capacity_warning_joint_cell_unseen_gt_1pct": true,
+      "S2_descriptive_diagnostics_ValNLL_gt_Hcal_plus_1": true,
+      "S2_descriptive_diagnostics_ValNLL_gt_Hcal_plus_0_5": true,
+      "S2_descriptive_diagnostics_joint_cell_unseen_gt_1pct": true,
+      "S2_capacity_warning_m1": true,
+      "S2_capacity_warning_m2": false,
+      "S2_capacity_warning_disclosure": true,
       "S2_m1_raw": 1024,
       "S2_m2_raw": 881,
       "S2_raw_disclosure": 9589,
@@ -522,9 +558,12 @@
       "S1_val_b_context_unseen": 0.0,
       "S1_joint_cell_unseen": 0.592987060546875,
       "S1_q_mass_unseen": 0.592987060546875,
-      "S1_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
-      "S1_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
-      "S1_capacity_warning_joint_cell_unseen_gt_1pct": true,
+      "S1_descriptive_diagnostics_ValNLL_gt_Hcal_plus_1": true,
+      "S1_descriptive_diagnostics_ValNLL_gt_Hcal_plus_0_5": true,
+      "S1_descriptive_diagnostics_joint_cell_unseen_gt_1pct": true,
+      "S1_capacity_warning_m1": true,
+      "S1_capacity_warning_m2": false,
+      "S1_capacity_warning_disclosure": true,
       "S1_effective_contexts": 1024,
       "S1_m1_raw": 1091,
       "S1_m2_raw": 943,
@@ -543,9 +582,12 @@
       "S2_val_b_context_unseen": 0.0,
       "S2_joint_cell_unseen": 0.521240234375,
       "S2_q_mass_unseen": 0.521240234375,
-      "S2_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
-      "S2_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
-      "S2_capacity_warning_joint_cell_unseen_gt_1pct": true,
+      "S2_descriptive_diagnostics_ValNLL_gt_Hcal_plus_1": true,
+      "S2_descriptive_diagnostics_ValNLL_gt_Hcal_plus_0_5": true,
+      "S2_descriptive_diagnostics_joint_cell_unseen_gt_1pct": true,
+      "S2_capacity_warning_m1": true,
+      "S2_capacity_warning_m2": false,
+      "S2_capacity_warning_disclosure": true,
       "S2_m1_raw": 1070,
       "S2_m2_raw": 941,
       "S2_raw_disclosure": 10119,
@@ -575,9 +617,12 @@
       "S1_val_b_context_unseen": 0.0,
       "S1_joint_cell_unseen": 0.684600830078125,
       "S1_q_mass_unseen": 0.684600830078125,
-      "S1_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
-      "S1_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
-      "S1_capacity_warning_joint_cell_unseen_gt_1pct": true,
+      "S1_descriptive_diagnostics_ValNLL_gt_Hcal_plus_1": true,
+      "S1_descriptive_diagnostics_ValNLL_gt_Hcal_plus_0_5": true,
+      "S1_descriptive_diagnostics_joint_cell_unseen_gt_1pct": true,
+      "S1_capacity_warning_m1": true,
+      "S1_capacity_warning_m2": true,
+      "S1_capacity_warning_disclosure": true,
       "S1_effective_contexts": 1024,
       "S1_m1_raw": 1199,
       "S1_m2_raw": 1064,
@@ -596,9 +641,12 @@
       "S2_val_b_context_unseen": 0.0,
       "S2_joint_cell_unseen": 0.595001220703125,
       "S2_q_mass_unseen": 0.595001220703125,
-      "S2_capacity_warning_ValNLL_gt_Hcal_plus_1": true,
-      "S2_capacity_warning_ValNLL_gt_Hcal_plus_0_5": true,
-      "S2_capacity_warning_joint_cell_unseen_gt_1pct": true,
+      "S2_descriptive_diagnostics_ValNLL_gt_Hcal_plus_1": true,
+      "S2_descriptive_diagnostics_ValNLL_gt_Hcal_plus_0_5": true,
+      "S2_descriptive_diagnostics_joint_cell_unseen_gt_1pct": true,
+      "S2_capacity_warning_m1": true,
+      "S2_capacity_warning_m2": true,
+      "S2_capacity_warning_disclosure": true,
       "S2_m1_raw": 1178,
       "S2_m2_raw": 1057,
       "S2_raw_disclosure": 11239,

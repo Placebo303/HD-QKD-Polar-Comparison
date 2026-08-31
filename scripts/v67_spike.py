@@ -112,11 +112,16 @@ def estimate_stage(a_cal, b_cal, a_val, b_val):
     joint_cell_unseen = float(np.mean(C_ab[b_val, a_val] == 0))
     q_mass_unseen = float(joint_cell_unseen)  # alias for backward compat, descriptive only
     effective_contexts = int(np.sum(N_b > 0))
-    # ponytail: orthogonal capacity_warning three items, not gating stability
-    capacity_warning = {
+    # ponytail: descriptive_diagnostics (ValNLL>Hcal+1/0.5, joint>1%) + orthogonal capacity_warning m1/m2/disclosure 5120, neither gates stability
+    descriptive_diagnostics = {
         "ValNLL_gt_Hcal_plus_1": bool(ValNLL > H_cal + 1.0),
         "ValNLL_gt_Hcal_plus_0_5": bool(ValNLL > H_cal + 0.5),
         "joint_cell_unseen_gt_1pct": bool(joint_cell_unseen > 0.01),
+    }
+    capacity_warning = {
+        "m1_ge_1024": bool(m1_raw >= 1024),
+        "m2_ge_1024": bool(m2_raw >= 1024),
+        "disclosure_ge_5120": bool(raw_disclosure >= 5120),
     }
     return {
         "C_ab_sum": int(C_ab.sum()),
@@ -132,6 +137,7 @@ def estimate_stage(a_cal, b_cal, a_val, b_val):
         "val_b_context_unseen": float(val_b_context_unseen),
         "joint_cell_unseen": float(joint_cell_unseen),
         "q_mass_unseen": float(q_mass_unseen),
+        "descriptive_diagnostics": descriptive_diagnostics,
         "capacity_warning": capacity_warning,
         "effective_contexts": int(effective_contexts),
         "CE1": float(ce1),
@@ -334,6 +340,9 @@ def main():
         def get_cw(est, k):
             cw = est.get("capacity_warning", {}) if est is not None else {}
             return cw.get(k, "")
+        def get_dd(est, k):
+            dd = est.get("descriptive_diagnostics", {}) if est is not None else {}
+            return dd.get(k, "")
         row = {
             "session_id": sid,
             "acquisition_id": sess["acquisition_id"],
@@ -351,9 +360,12 @@ def main():
             "S1_val_b_context_unseen": get(S1, "val_b_context_unseen"),
             "S1_joint_cell_unseen": get(S1, "joint_cell_unseen"),
             "S1_q_mass_unseen": get(S1, "q_mass_unseen"),
-            "S1_capacity_warning_ValNLL_gt_Hcal_plus_1": get_cw(S1, "ValNLL_gt_Hcal_plus_1"),
-            "S1_capacity_warning_ValNLL_gt_Hcal_plus_0_5": get_cw(S1, "ValNLL_gt_Hcal_plus_0_5"),
-            "S1_capacity_warning_joint_cell_unseen_gt_1pct": get_cw(S1, "joint_cell_unseen_gt_1pct"),
+            "S1_descriptive_diagnostics_ValNLL_gt_Hcal_plus_1": get_dd(S1, "ValNLL_gt_Hcal_plus_1"),
+            "S1_descriptive_diagnostics_ValNLL_gt_Hcal_plus_0_5": get_dd(S1, "ValNLL_gt_Hcal_plus_0_5"),
+            "S1_descriptive_diagnostics_joint_cell_unseen_gt_1pct": get_dd(S1, "joint_cell_unseen_gt_1pct"),
+            "S1_capacity_warning_m1": get_cw(S1, "m1_ge_1024"),
+            "S1_capacity_warning_m2": get_cw(S1, "m2_ge_1024"),
+            "S1_capacity_warning_disclosure": get_cw(S1, "disclosure_ge_5120"),
             "S1_effective_contexts": get(S1, "effective_contexts"),
             "S1_m1_raw": get(S1, "m1_raw"),
             "S1_m2_raw": get(S1, "m2_raw"),
@@ -372,9 +384,12 @@ def main():
             "S2_val_b_context_unseen": get(S2, "val_b_context_unseen"),
             "S2_joint_cell_unseen": get(S2, "joint_cell_unseen"),
             "S2_q_mass_unseen": get(S2, "q_mass_unseen"),
-            "S2_capacity_warning_ValNLL_gt_Hcal_plus_1": get_cw(S2, "ValNLL_gt_Hcal_plus_1"),
-            "S2_capacity_warning_ValNLL_gt_Hcal_plus_0_5": get_cw(S2, "ValNLL_gt_Hcal_plus_0_5"),
-            "S2_capacity_warning_joint_cell_unseen_gt_1pct": get_cw(S2, "joint_cell_unseen_gt_1pct"),
+            "S2_descriptive_diagnostics_ValNLL_gt_Hcal_plus_1": get_dd(S2, "ValNLL_gt_Hcal_plus_1"),
+            "S2_descriptive_diagnostics_ValNLL_gt_Hcal_plus_0_5": get_dd(S2, "ValNLL_gt_Hcal_plus_0_5"),
+            "S2_descriptive_diagnostics_joint_cell_unseen_gt_1pct": get_dd(S2, "joint_cell_unseen_gt_1pct"),
+            "S2_capacity_warning_m1": get_cw(S2, "m1_ge_1024"),
+            "S2_capacity_warning_m2": get_cw(S2, "m2_ge_1024"),
+            "S2_capacity_warning_disclosure": get_cw(S2, "disclosure_ge_5120"),
             "S2_m1_raw": get(S2, "m1_raw"),
             "S2_m2_raw": get(S2, "m2_raw"),
             "S2_raw_disclosure": get(S2, "raw_disclosure"),

@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **多 session (≤9) decoder-free 可行域地图，acquisition 去重预注册每类≤3机械，Stage0 8 → Stage1 256/128 → Stage2 1024/256 不重叠重估 TEST不读，U=32*U1+U2 5+5 不GE，m_raw 不 cap，五分流，总体 V67_FEASIBILITY_MAP_COMPLETE**
 
-**Cycle**: `V67-MAP` (multisession-feasibility-map), predecessor `V66-ADAPT (832e5394 72 single-source)` + `V64 22/24 full-tag PASS (80c35647/6c7b00a9)` + `V65`，HEAD `b7e3417ff026409fbb4aa4be0347be4a8fdb0d27 → 新 Plan SHA` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
+**Cycle**: `V67-MAP` (multisession-feasibility-map), predecessor `V66-ADAPT (832e5394 72 single-source)` + `V64 22/24 full-tag PASS (80c35647/6c7b00a9)` + `V65`，HEAD `520b51c46e6b427f19225f69dc87602d6f0cbfb5` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
 
 **Feasibility**: `V54 43/45` 在 `2026-01-23` 域已证 `H1-16+L1APP+Lane C Δ8+full-tag` 在单 session 可行；`V55 0/90` 跨 session 不兼容提示需多 session 地图；`V66` 单 session 自适应 `m1_raw 1054/904 → MATRIX_NOT_CONSTRUCTIBLE` 提示单点不足；`V67` 以 decoder-free 多 session 分阶段独立重估作分流地图，不触 decoder。
 
@@ -54,7 +54,7 @@
 - **acquisition 去重**：`registry.sessions` 由 `v55_intake_20260828/pairs/*` 目录枚举 → 按 `(source_label, acquisition_id)` 去重（`acquisition_id` 取 `ttbin` 头 `acquisition_counter` 或 `session_id` 的 `acquisition` 段，缺失则 `session_id` 本身），同 `acquisition_id` 多份导出仅首份保留；随后按 `source_label` 分桶（`1M / 1p5M / 2M` 由 `session_id` 前缀或 `channel_counts.npz` provenance），每桶按 `acquisition_time`（`session_id` 中时间戳 `20260121_184040` 等）升序取前 3，机械截断，不按 `CE/m` 排序替换；`total ≤9`（`3*3`）已验，超 9 则截断至 9，多余 `acquisition` 不计入地图。
 - **零重叠**：`Stage0_key ∩ Stage1_CAL_key ==∅ && Stage1_CAL∩Stage1_VAL==∅ && (Stage0∪Stage1)_key ∩ Stage2_key ==∅` 且 ` (Stage0∪Stage1∪Stage2)_key ∩ (V13..V66)_key ==∅`（键 `(source, session_id, frame_id)`），每 session 内连续 Furnace 导出，单 `session_id` provenance，不跨 session 拼接。
 - **不足与稀疏**：若某 `source_label` 可用去重后 session `<3` 则该类稀疏（`1..2`），若 `total<3` 则 `overall = V67_EVIDENCE_INCOMPLETE` 子类 `map_sparse_insufficient`（<3 即 incomplete）；`3≤total≤9` 稀疏地图仍 `V67_FEASIBILITY_MAP_COMPLETE` 但 `report` 显式 `map_sparse=true`。
-- **注册表**：`v67_data_registry.json` (`schema v67_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head 1172b8b78b4c712d70a517b4c10565e80b7101e2`) 含 `sessions[≤9] {session_id, acquisition_id, source_label, provenance, frames_total, stage0_frame_ids[8], stage1_CAL[256], stage1_VAL[128], stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`。
+- **注册表**：`v67_data_registry.json` (`schema v67_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head 520b51c46e6b427f19225f69dc87602d6f0cbfb5`) 含 `sessions[≤9] {session_id, acquisition_id, source_label, provenance, frames_total, stage0_frame_ids[8], stage1_CAL[256], stage1_VAL[128], stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`。
 
 ### 3.2 数据就绪门（decoder-free，Stage0 8 校验）
 

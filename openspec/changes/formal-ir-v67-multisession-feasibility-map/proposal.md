@@ -10,7 +10,7 @@
 
 **Branch**: `formal-ir-mainline`
 
-**HEAD**: `b7e3417ff026409fbb4aa4be0347be4a8fdb0d27 → 新 Plan SHA (本次清理推送后 40 位，实施前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 40 位重核，不一致阻塞；归档前重核)`
+**HEAD**: `520b51c46e6b427f19225f69dc87602d6f0cbfb5` (本次清理推送后 40 位，已与 `git rev-parse HEAD == origin/formal-ir-mainline` 重核一致)
 
 **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点；V67 多 session 复用该处理点，不换点，不换 bin/mapping)
 

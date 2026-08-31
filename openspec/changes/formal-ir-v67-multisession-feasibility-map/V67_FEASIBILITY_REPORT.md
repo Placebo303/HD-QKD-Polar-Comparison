@@ -1,7 +1,7 @@
 # V67 Multisession Feasibility Map Report — PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — decoder-free map only, no `run_01`, no V68 code, TEST isolated.
-**HEAD**: `1172b8b78b4c712d70a517b4c10565e80b7101e2` **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) **Branch**: `formal-ir-mainline`
+**HEAD**: `520b51c46e6b427f19225f69dc87602d6f0cbfb5` **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) **Branch**: `formal-ir-mainline`
 **Predecessor**: V66 `f4040fc1` + V64 `22/24 PASS` → V67-MAP
 
 ## 1. Acquisition Dedup ≤9 Per-Category ≤3 Mechanical Not Sorted By CE
@@ -39,7 +39,15 @@ All 3 sessions `stage0_ok true` `materialization_contract_consistent frame 256 a
 | 20260123_2M_1p2M_0dB | 4.502 | 3.995 | 8.497 | 4.4e-16 | 137.38 | False | 6.341 | 8.497 | -0.047 | 0.000/0.685 | 1199 | 1064 | 11379 | 4.423 | 3.967 | 8.390 | 356.22 | 0.005 | 0.000/0.595 | 1178 | 1057 | 11239 |
 
 
-- `val_b_context_unseen = mean(N_b[b_val]==0)` stability gate (≤1%), `joint_cell_unseen = mean(C_ab[b_val,a_val]==0)` descriptive only, `capacity_warning` orthogonal: `ValNLL>H_cal+1`, `ValNLL>H_cal+0.5`, `joint_cell_unseen>1%`.
+- `val_b_context_unseen = mean(N_b[b_val]==0)` stability gate (≤1%), `joint_cell_unseen = mean(C_ab[b_val,a_val]==0)` descriptive only.
+- `descriptive_diagnostics` orthogonal per session: `ValNLL>H_cal+1`, `ValNLL>H_cal+0.5`, `joint_cell_unseen>1%` (all True, 仅描述不过门禁).
+- `capacity_warning_m1/m2/disclosure` orthogonal per session: `m1_raw≥1024 / m2_raw≥1024 / raw_disclosure≥5120` (见下表, 仅描述不过门禁).
+
+| session_id | S1 descriptive (ValNLL>H+1 / >H+0.5 / joint>1%) | S1 capacity m1/m2/disclosure (≥1024/≥1024/≥5120) | S2 descriptive (ValNLL>H+1 / >H+0.5 / joint>1%) | S2 capacity m1/m2/disclosure |
+|---|---|---|---|---|
+| 20260123_1M_600k_0dB | True/True/True | True/False/True (1027/898/9689) | True/True/True | True/False/True (1024/881/9589) |
+| 20260107_PPLN_1p5M | True/True/True | True/False/True (1091/943/10234) | True/True/True | True/False/True (1070/941/10119) |
+| 20260123_2M_1p2M_0dB | True/True/True | True/True/True (1199/1064/11379) | True/True/True | True/True/True (1178/1057/11239) |
 ### Five-Way Classification Per Session (priority EVIDENCE_INCOMPLETE > MODEL_NOT_STABLE > CURRENT_CANDIDATE_COMPATIBLE ≤16/≤LaneC+16 > RATE_ADAPTATION > NEAR_FULL_DISCLOSURE ≥1024 or ≥5120)
 
 | session_id | source | final_m1_raw | final_m2_raw | LaneC+16 | final_raw | S1 cls | S2 cls | final cls | successor | stage_consistency |
@@ -55,7 +63,7 @@ All 3 sessions `stage0_ok true` `materialization_contract_consistent frame 256 a
 
 - `total 3 ∈[3,9] && acquisition_dedup_verified && per session classification assigned` → `overall V67_FEASIBILITY_MAP_COMPLETE true`
 - `counts_per_classification`: `EVIDENCE_INCOMPLETE 0 MODEL_NOT_STABLE 0 CURRENT_CANDIDATE_COMPATIBLE 0 RATE_ADAPTATION 0 NEAR_FULL_DISCLOSURE 3`
-- `candidate_session_list`: `[]` (no COMPATIBLE, all NEAR_FULL, val_b_context_unseen 0, capacity_warning orthogonal)
+- `candidate_session_list`: `[]` (no COMPATIBLE, all NEAR_FULL, val_b_context_unseen 0, descriptive_diagnostics True×3, capacity_warning_m1/m2/disclosure orthogonal per session shown above)
 - `map_sparse false`, `overall_feasibility_map_complete true`
 
 ## 6. Guards R67-01~10

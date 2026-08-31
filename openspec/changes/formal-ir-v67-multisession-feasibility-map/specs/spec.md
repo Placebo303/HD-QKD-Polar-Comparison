@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 仅 plan 四工件 + decoder-free 多 session 可行域地图，不改主体/V64/src，不启动 decoder，不创 run_01，U=32*U1+U2 5+5 不GE，acquisition 去重 ≤9 每类≤3，五分流，总体 V67_FEASIBILITY_MAP_COMPLETE
 
-**Change**: `formal-ir-v67-multisession-feasibility-map` (`V67-MAP`, branch `formal-ir-mainline`, HEAD `b7e3417ff026409fbb4aa4be0347be4a8fdb0d27 → 新 Plan SHA`, data `84d62779`, ≤9 sessions)
+**Change**: `formal-ir-v67-multisession-feasibility-map` (`V67-MAP`, branch `formal-ir-mainline`, HEAD `520b51c46e6b427f19225f69dc87602d6f0cbfb5`, data `84d62779`, ≤9 sessions)
 
 **Predecessor**: `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) + `formal-ir-v65-new-session-channel-compatibility` + `formal-ir-v66-single-segment-adaptive-nbldpc (832e5394)` — V67 新增多 session 解耦地图，A-H 全约束，decoder-free
 
@@ -10,7 +10,7 @@
 
 - **Type**: `MULTISESSION_FEASIBILITY_MAP` — 按 acquisition 去重预注册 ≤9 session（每类≤3 机械不按 CE 替换）上，每 session `Stage0 8 物化 → Stage1 CAL256 VAL128 分类 (C_ab/P/λ/CE/m_raw 不 cap) → Stage2 CAL1024 VAL256 confirmation (重算不复用) → TEST不读` → 五分流 `EVIDENCE_INCOMPLETE / MODEL_NOT_STABLE / CURRENT_CANDIDATE_COMPATIBLE(≤16/≤LaneC+8+8) / RATE_ADAPTATION / NEAR_FULL_DISCLOSURE(≥1024或≈10240)` 之一，全部 session 完成后 `overall = V67_FEASIBILITY_MAP_COMPLETE`，为 V68 提供 `candidate_session_list` 与 `counts_per_classification`。
 - **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件 + decoder-free 地图（`v67_data_registry.json + v67_spike.py + v67_spike_summary.json + v67_feasibility_table.(csv|json) + V67_FEASIBILITY_REPORT.md`），**不实现 runner，不执行 decoder，不创建 `run_01`，不读 TEST 统计，不改主体/V64/src，不调 V68 码**；正式 `run_01` 或 `V68` decoder 需独立 `PLAN_ACCEPT` + `EXECUTE_AUTH`；`DECODER_FREE` 表示零 `decode_*` 调用（`rg 0 hits`）。
-- **Branch**: `formal-ir-mainline`；`HEAD` `b7e3417ff026409fbb4aa4be0347be4a8fdb0d27 → 新 Plan SHA` 重核，不一致阻塞；本次推送新 SHA 后停止。
+- **Branch**: `formal-ir-mainline`；`HEAD` `520b51c46e6b427f19225f69dc87602d6f0cbfb5` 重核，不一致阻塞；已与 `git rev-parse HEAD` 一致。
 - **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) — 多 session 复用该处理点；每 session `Stage0 8 + Stage1 256/128 + Stage2 1024/256`，`acquisition 去重`。
 - **Session bound**: `total ≤9`, `per_category ≤3`（`1M / 1p5M / 2M` 各≤3，机械 `acquisition_time` 前 3，不按 `CE/m` 替换）。
 - **Rate feasibility**: **m1_raw=ceil(1.3*1024*CE1/5), m2_raw=ceil(1.3*1024*CE2/5), raw_disclosure=5*(m1_raw+m2_raw)+64 不 cap**，五分流阈 `≤16 / ≤LaneC+8+8 / <1024 / ≥1024或≈10240`。
