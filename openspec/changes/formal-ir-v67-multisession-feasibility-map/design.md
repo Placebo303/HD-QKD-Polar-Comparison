@@ -132,7 +132,7 @@ m2_family = ceil_to_family(m2_raw, +8) if m2_raw<1024 else None
 ```
 if not materialization_ok or frame_256_violation or CE_chain_not_closed or provenance_fabricated or acquisition_dup_unresolved:
     classification = V67_EVIDENCE_INCOMPLETE
-elif λ_at_boundary or ΔNLL>0.50 or val_b_context_unseen>0.01 or not isfinite(ValNLL):
+elif λ_at_boundary or ΔNLL>0.50 or val_b_context_unseen>0.01 or not isfinite(ValNLL) or not isfinite(DeltaNLL):
     classification = V67_MODEL_NOT_STABLE
 elif m1_raw ≤16 && m2_raw ≤ (LaneC_base +8+8)   # 1M 184→200, 1p5M 190→206, 2M 192→208
     classification = V67_CURRENT_CANDIDATE_COMPATIBLE  # 现候选可复用

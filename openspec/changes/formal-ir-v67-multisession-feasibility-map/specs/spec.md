@@ -104,7 +104,7 @@ raw_disclosure = 5*(m1_raw+m2_raw)+64  # 不 cap
 ```
 if not materialization_ok or frame_256_violation or CE_chain_not_closed or provenance_fabricated or acquisition_dup_unresolved:
     classification = V67_EVIDENCE_INCOMPLETE; successor = recollect
-elif λ_at_boundary or ΔNLL>0.50 or val_b_context_unseen>0.01 or not isfinite(ValNLL):
+elif λ_at_boundary or ΔNLL>0.50 or val_b_context_unseen>0.01 or not isfinite(ValNLL) or not isfinite(DeltaNLL):
     classification = V67_MODEL_NOT_STABLE; successor = recollect_or_new_prior
 elif m1_raw ≤16 && m2_raw ≤ (LaneC_base +8+8)  # 184→200,190→206,192→208
     classification = V67_CURRENT_CANDIDATE_COMPATIBLE; successor = none
