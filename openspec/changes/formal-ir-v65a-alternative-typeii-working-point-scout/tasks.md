@@ -1,10 +1,10 @@
-# OpenSpec Tasks: formal-ir-v65a-alternative-typeii-working-point-scout — V65A 备用 Type-II 工作点勘探（DECODER_FREE）
+# OpenSpec Tasks: formal-ir-v65a-alternative-typeii-working-point-scout — V65AR1 备用 Type-II 工作点勘探（DECODER_FREE 同家族码率适配）
 
-**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **固定顺序 162148→2500K→160254，4+4首个通过即停，256/64粗筛仅淘汰，1024/256正式+32 TEST规划，V65不动；真实 Stage0/Stage1 未运行**
-**Branch**: `formal-ir-mainline` HEAD `TBD→新 Plan SHA` data SHA `84d62779` (d1024 bw200 nearest legacy_v1 单点)
-**Predecessor**: `formal-ir-v65-new-session-channel-compatibility` `DATA_NOT_READY` 保持不动
-**Method frozen**: `H1-16/Lane C m2 184/190/192→m_total 216/222/224/Δ8+Δ8/full-tag` 零改；V65A 仅 decoder-free 勘探，不调码
-**Boundary**: 固定三候选顺序首个通过即停；Batch 禁止（8帧逐一）；Stage0 4+4 materialization/provenance；Stage1 256/64 coarse 仅淘汰不能 READY；Stage2 1024/256 formal+32 TEST 仅规划；V65 零改；DECODE_FREE；旧 outcome 禁读。真实 Stage0/Stage1 本轮不运行。
+**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **固定顺序 162148→2500K→160254，4+4首个通过即停，256/64粗筛仅淘汰(永不READY)，1024/256正式+32 TEST规划，V65不动且V65AR1同家族码率适配；真实 Stage0/Stage1 未运行**
+**Branch**: `formal-ir-mainline` HEAD `0131313177a6f2a52319b6354cc62477f4685b49` 已核 `HEAD==origin/formal-ir-mainline` data SHA `84d62779` (d1024 bw200 nearest legacy_v1 单点)
+**Predecessor**: `formal-ir-v65-new-session-channel-compatibility` `DATA_NOT_READY` 非模型/码率失败 保持不动
+**Method frozen**: `H1-16/Lane C m2 184/190/192→m_total 216/222/224/Δ8+Δ8/full-tag` 主方向冻结；V65AR1 仅允许同家族内 `P(U1|B)/P(U2|U1B)` 重估计调 `m1/m2` (`ceil(1.3*1024*CE/5)` 无 cap)，增量仅未来预注册相邻档位，本轮不创后继 change
+**Boundary**: 固定三候选顺序首个通过即停；Batch 禁止（8帧逐一）；Stage0 4+4 materialization/provenance fail-closed；Stage1 256/64 coarse 仅淘汰不能 READY/RATE_READY；Stage2 1024/256 formal+32 TEST 仅规划(正式至少CAL1024/VAL256/TEST32才判FROZEN/ADAPTATION)；V65 零改；DECODE_FREE；旧 outcome 禁读；`m` 禁 cap/floor；MODEL_NOT_STABLE 优先。真实 Stage0/Stage1 本轮不运行。
 
 ## Phase A — 固定顺序与 4+4 最小验证（decoder-free，逐一，首个通过即停，Batch 禁止）
 
@@ -14,15 +14,15 @@
 - [ ] **A4 落盘 Stage0 明细与 V65 不动校验**：`v65a_scout.json: stage0 {per_candidate[3] {verify_pass, provenance逐项, delay_peak_sign_ok, delay_peak_abs_ps, sigma, gate, threshold, frame256_ok}, selected, none_passed}` + `v65a_manifest.json: guards {batch_materialization==false, v65_unchanged==true}`，校验 `git diff -- openspec/changes/formal-ir-v65-new-session-channel-compatibility/ ==0` 且 `v65_frozen_session_binding.json` 未改且 `V65 overall` 仍 `DATA_NOT_READY`（只读校验，不修改）
 - [ ] **A5 记录 provenance tier**：三候选分别写入 `provisional_tier`、`tier_basis`、`tier_uncertainty`；当前仓库未发现 V36–V64 NB-LDPC 注册表引用，暂列 B-provisional，`162148` 的 `D:\SPDC源测试` 路径冲突在 Stage0 阻断；后续账本发现当前 NB-LDPC 影响则改 C，A 需显式无影响证据。
 
-## Phase B — 256/64 粗筛（selected only，decoder-free，仅淘汰不能 READY）
+## Phase B — 256/64 粗筛（selected only，decoder-free，仅淘汰不能 READY/RATE_READY，R65A-04/05）
 
 - [ ] **B1 读 selected 256/64 切片（selected only）**：`--stage coarse` 仅对 `selected` 候选物化 `256 frames CAL (65536 pairs) +64 frames VAL (16384 pairs)`，`F03 5+5 natural U1=>>5, U2=&31` 分解，校验 `alice/bob ∈[0,1023]` 且每帧256连续，落盘 `per_selected {N_cal 65536/256, N_val 16384/64}`，`TEST 未参与` 已验，非 selected 候选零物化已验
 - [ ] **B2 算 C_ab/P_global/Hierarchical 与 λ 粗筛**：`C_ab = bincount2d(a_cal,b_cal) 1024×1024 sum 65536 → N_b, P_global → P_λ(a|b)=(C_ab+λ P_global)/(N_b+λ)`，同时生成 `P_λ(U1|B) 32×1024` 与 `P_λ(U2|U1B)`，对 `log10 λ ∈ [-2,4]` 粗筛（`50-point log grid + Brent refine` 或 `2-fold CV` 粗筛），记录 `search_trace {logλ_grid, CV_NLL_grid, λ*, CV_NLL*}`，校验 `λ ∈ (1e-2,1e4)` 开区间 else `λ_at_boundary=True → REJECT`，触界不扩网格，不以 VAL 择优，单 hierarchical 一路
 - [ ] **B3 算熵/CE 与 VAL 泛化（链式校验）**：`H_cal(A|B), H_cal(U1|B), H_cal(U2|U1B)=H-H1` 校验 `|H-H1-H2|<1e-9` 描述性，否则 `EVIDENCE_INVALID`；另算 `CE1=-E_VAL log P_λ*(U1|B), CE2=-E_VAL log P_λ*(U2|U1B), CE_full=-E_VAL log P_λ*(A|B)` 校验 `|CE_full-CE1-CE2|<1e-9` 门禁性，否则 `EVIDENCE_INVALID`，落盘 `per_selected {H, H1, H2, chain_delta_H, CE1, CE2, CE_full, chain_delta_CE, CV_NLL*, λ*, at_boundary}`
-- [ ] **B4 泄漏与粗筛门禁（仅淘汰）**：`f_target=1.3, n=1024, tag=64, log2q=5 → m1=ceil(1.3*1024*CE1/5), m2=ceil(1.3*1024*CE2/5), m_total=m1+m2, leak=5*m_total+64` 不 cap，显式 `m_raw`，粗筛门禁 `G2 λ不触界, G3 ΔNLL≤0.75, G4 Val NLL≤H_cal+1.5, G5 unseen≤0.02, G6 m1≤16(CE), G7 m2≤200(CE), G7-aux m_total≤216, G8 provenance+CE链式`，任一 FAIL → `overall= V65A_COARSE_REJECTED` 停止，不进 Stage2；全过 → `overall= V65A_ELIGIBLE_FOR_FORMAL` 仅放行规划，绝不为 `READY`，落盘 `per_selected {Val NLL, ΔNLL, MAP, q_mass_unseen, effective_contexts, m1/m2/m_total Δm/Δleak, gates G1..G8 coarse, overall}`
-- [ ] **B5 粗筛仅淘汰守卫**：脚本内 `assert coarse_cannot_ready == true`（`coarse overall != READY/FORMAL_READY`），`m_i CE-based ceil` 不 cap 已验（`rg "min(16" 0 hits`），Stage1 样本量不足时只能 `DATA_NOT_READY/COARSE_REJECTED`，`used_test_in_estimation==false` 已验，`rg "decode_" 0 hits` 已验
+- [ ] **B4 泄漏与粗筛门禁（仅淘汰，R65A-05 禁 cap/floor/handfill 四分流）**：`f_target=1.3, n=1024, tag=64, log2q=5 → m1=ceil(1.3*1024*CE1/5), m2=ceil(1.3*1024*CE2/5), m_total=m1+m2, leak=5*m_total+64` 不 cap/floor/handfill，显式 `m_raw`，粗筛门禁 `G2 λ不触界, G3 ΔNLL≤0.75, G4 Val NLL≤H_cal+1.5, G5 unseen≤0.02, G6 m1≤16(CE), G7 m2≤200(CE), G7-aux m_total≤216, G8 provenance+CE链式`，任一 FAIL → `overall= V65A_COARSE_REJECTED` 停止，不进 Stage2；全过 → `overall= V65A_ELIGIBLE_FOR_FORMAL` 仅放行规划，绝不为 `READY/RATE_READY`，落盘 `per_selected {Val NLL, ΔNLL, MAP, q_mass_unseen, effective_contexts, m1/m2/m_total Δm/Δleak, required_rate_classification{MODEL_NOT_STABLE/FROZEN_RATE_COMPATIBLE/RATE_ADAPTATION_REQUIRED/FULL_DISCLOSURE_LAYER}, gates G1..G8 coarse, overall}`。`m` 计算禁 cap/floor/handfill，超容量且<1024→RATE_ADAPTATION_REQUIRED，≥1024→FULL_DISCLOSURE_LAYER，MODEL_NOT_STABLE 优先于率分流
+- [ ] **B5 粗筛仅淘汰守卫（R65A-04 永不 READY）**：脚本内 `assert coarse_cannot_ready == true`（`coarse overall != READY/FORMAL_READY/RATE_READY`），`m_i CE-based ceil` 不 cap 已验（`rg "min(16" 0 hits` 且 `rg "floor" 0 hits` 对 m），Stage1 样本量不足时只能 `DATA_NOT_READY/COARSE_REJECTED`，`used_test_in_estimation==false` 已验，`rg "decode_" 0 hits` 已验
 
-## Phase C — 1024/256 正式重表征与 32 TEST 密封规划（本轮仅规划，不执行全量至 READY）
+## Phase C — 1024/256 正式重表征与 32 TEST 密封规划（本轮仅规划，不执行全量至 READY，R65A-06/07）
 
 - [ ] **C1 规划 1024/256 正式切片（planned）**：写入 `v65a_registry.json: formal_plan {CAL: 1024 frames 262144 pairs, VAL: 256 frames 65536 pairs, TEST: 32 frames 8192 pairs 8 blocks, session_id==selected session_id, frame_ids 互斥零重叠 per candidate (CAL 1024 + VAL 256 + TEST 32 互斥, 且与 Stage0/Stage1 已用帧零重叠), provenance 同 Stage0/Stage1 算法}`，本轮不物化 `1312 frames` 全量至 READY，仅 freeze 计划，正式执行需 `PLAN_ACCEPT` 后 `materialize_frames(selected, n=1312)`
 - [ ] **C2 规划正式 hierarchical 与 λ 搜索（planned）**：`C_ab 1024×1024 sum 262144 → P_global → P_λ` 同 V65 算法，`λ` `Cal内4-fold log10[-2,4] 连续` 择优，正式阈 `G2 λ不触界, G3 ΔNLL≤0.50, G4 Val NLL≤H_cal+1.0, G5 unseen≤0.01, G6 m1≤16, G7 m2≤200, G7-aux m_total≤216, G8 provenance+CE链式<1e-9` 全过才 `FORMAL_READY`（本轮仅声明阈，执行后判定），触界不扩网格，禁第二 estimator，落盘 `formal_plan: {λ_domain [-2,4], folds 4, thresholds {G3 0.50, G4 H+1.0, G5 0.01, G6 16, G7 200, G7-aux 216, CE_chain 1e-9}, hierarchical_formula}`

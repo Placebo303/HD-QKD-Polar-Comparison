@@ -1,13 +1,14 @@
-# OpenSpec Proposal: formal-ir-v65a-alternative-typeii-working-point-scout
+# OpenSpec Proposal: formal-ir-v65a-alternative-typeii-working-point-scout — V65AR1 revise (intra-family rate adaptation, NB-LDPC main direction frozen)
 
-**Status**: `PLAN_CANDIDATE / IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 四工件、decoder-free scout 与 focused tests 已完成；未运行真实 Stage0/Stage1，不实现 decoder，不创建 run_01，不读旧 outcome
+**Status**: `PLAN_CANDIDATE / IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 四工件、decoder-free scout 与 focused tests 已完成；未运行真实 Stage0/Stage1，不实现 decoder，不创建 run_01，不读旧 outcome；V65AR1 仅允许同家族内码率适配
 **Domain**: Formal IR / V65A alternative Type-II working-point scout (V65 前置，V65 DATA_NOT_READY 保持不变)
 **Change ID**: `formal-ir-v65a-alternative-typeii-working-point-scout`
-**Cycle ID**: `V65A` (alternative-typeii-working-point-scout), predecessor `formal-ir-v65-new-session-channel-compatibility` (DATA_NOT_READY 保持，不修改其三源 qualification 语义)
+**Cycle ID**: `V65A` / `V65AR1` (alternative-typeii-working-point-scout R1 intra-family rate adaptation), predecessor `formal-ir-v65-new-session-channel-compatibility` (DATA_NOT_READY 保持，不修改其三源 qualification 语义)
 **Branch**: `formal-ir-mainline`
-**HEAD**: `TBD Plan SHA` (推送前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核)
+**HEAD**: `0131313177a6f2a52319b6354cc62477f4685b49` (已核 `HEAD==origin/formal-ir-mainline==0131313`; 推送前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞；不一致不得 force)
 **Data SHA**: `84d62779` (d=1024 bw=200ps pairing=nearest rule=legacy_v1 单点，V65A 复用同一处理点，仅换候选 session，不换处理点)
-**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 本轮止于四工件、decoder-free scout 脚本、focused tests 与推送；不运行真实 Stage0/Stage1 或 decoder
+**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 本轮止于四工件、decoder-free scout 脚本、focused tests 与推送；不运行真实 Stage0/Stage1 或 decoder；V65AR1 同步：V65 保持 DATA_NOT_READY(非模型/码率失败)、V65A 保持 PLAN_CANDIDATE/DECODER_FREE/EXECUTE_NOT_AUTHORIZED
+**R65AR1 Scope**: 同算法家族内码率适配仅允许重估计 `P(U1|B)/P(U2|U1,B)` 依据 `CE1/CE2` 调 `m1/m2` (`m1=ceil(1.3*1024*CE1/5) m2 同` 无 cap/floor/handfill)，保持 Lane C 家族/L1APP/条件增量/full-tag；增量仅未来预注册相邻档位，本轮不创建后继 change/V65B/V66/run_01
 
 > ponytail lite: 本变更仅 4 OpenSpec 工件 + 1 decoder-free scout 脚本 (`v65a_scout.py`) + 1 注册表 + 1 报告 + 控制台摘要；无 decoder、无矩阵、无新依赖（`numpy/pandas/pyarrow` 已装）。laziest alternative: `numpy` 直算 `C_ab` + 链式熵，不引 `scipy/sklearn`。
 
@@ -15,17 +16,17 @@
 
 为 **Type-II 工作点**在 V65 三源 qualification 保持 `DATA_NOT_READY` 不动的前提下，提供一条**仅 decoder-free** 的备用工作点勘探路径，按**固定顺序**逐一检查三候选 session（1:`2026-01-13 162148` → 2:`2026-01-07 2500K` → 3:`2026-01-07 160254`），每候选先用 **4+4 帧**做 materialization/provenance 最小物化验证（dimension 1024 / bin200 / nearest / legacy_v1 / 候选自带 channels / 候选自带 delay / peak / sigma / gate / threshold / frame anchor 等逐项显式，`sign(delay)==sign(peak) && |delay-peak|<50ps && sigma∈[50,150] && gate==200 && threshold==40000`），**首个通过即停止**，绝不批量物化三候选。首选通过后再做 **256/64 粗筛**（粗筛只能淘汰不能 READY），通过后才规划 **1024/256 正式重表征**并密封 **32 TEST frames**。全程**不得批量物化、不得运行 decoder、不得读取旧结果文件**，保持 `DECODE_FREE` 至推送。
 
-### Provenance tier（候选均为 provisional）
+### Provenance tier 冻结 A/B/C（R65A-02，候选均为 B-provisional）
 
-历史使用不再一律排除：
+冻结三级（仓库外不明需披露，不可默认 A）：
 
 - **Tier A**：未影响当前 V36–V64 NB-LDPC 的 prior、矩阵、标签、码率、门禁或解释；仅在完成外部使用账本核对后，才可作为未来独立 TEST。
 - **Tier B**：早期用于 Polar、Cascade 或无关分析，但没有影响当前 NB-LDPC；可作 development/generalization，不能直接作为独立 TEST。
 - **Tier C**：参与 V36–V64 当前 NB-LDPC 决策；只可作回归/机制检查。
 
-只读仓库盘点未发现三候选进入 V36–V64 NB-LDPC 注册表，因此三者暂列 **B-provisional**，不是最终 Tier A 结论。`162148` 的本地 PIESKR 元数据还指向外部 `D:\SPDC源测试`，该 provenance 冲突在 Stage0 未闭合前必须阻断；若后续账本发现任一候选影响 V36–V64，则改列 Tier C。
+只读仓库盘点未发现三候选进入 V36–V64 NB-LDPC 注册表，因此三者暂列 **B-provisional**，不是最终 Tier A 结论。`162148` 的本地 PIESKR 元数据还指向外部 `D:\SPDC源测试`，该 provenance 冲突在 Stage0 未闭合前必须阻断 fail-closed；若后续账本发现任一候选影响 V36–V64，则改列 Tier C。仓库外不明 provenance 必须披露，不得默认 Tier A。
 
-### 固定顺序与停止规则
+### 固定顺序与停止规则（R65A-03）
 
 ```
 candidates_ordered = ["2026-01-13 162148", "2026-01-07 2500K", "2026-01-07 160254"]  # 固定，不可重排
@@ -36,14 +37,16 @@ for idx, cand in enumerate(candidates_ordered):
     else: continue to next cand (不保留失败候选的中间物化产物作后续用)
 if none PASS: overall = V65A_NO_CANDIDATE_PASSED_VERIFICATION
 ```
+仅数据/格式/provenance 失败可切换候选；`2026-01-13` sidecar 指向 `D:\SPDC源测试` 属冲突需 fail-closed 不可放行；`channels/delay/peak/sigma` 必须 candidate-specific 禁用默认 A1/B5 等兜底。
 
-### 阶段递进
+### 阶段递进（R65A-04/07）
 
 ```
 Stage 0: 4+4 verification per candidate (sequential, stop-on-first-PASS, 8 frames only)
-  → Stage 1: 256/64 coarse screen on selected only (coarse can REJECT, cannot READY)
-    → Stage 2: 1024/256 formal re-characterization + seal 32 TEST frames (planned, 本轮仅 freeze 计划，不在本轮密封后读统计)
+  → Stage 1: 256/64 coarse screen on selected only (coarse can REJECT or ELIGIBLE_FOR_FORMAL, cannot READY/ RATE_READY)
+    → Stage 2: 1024/256 formal re-characterization + seal 32 TEST frames (planned, 本轮仅 freeze 计划，不在本轮密封后读统计；正式至少 CAL1024 VAL256 sealed TEST32 才能判 FROZEN/ADAPTATION)
 ```
+Stage1 仍 256 CAL+64 VAL 只能淘汰或放行进正式重表征，不能授予 RATE_READY/FROZEN_READY 等；Stage2 仍仅规划。
 
 - **V65 不动**：`formal-ir-v65-new-session-channel-compatibility` 的 `proposal/design/tasks/specs/v65_frozen_session_binding.json` 保持 `DATA_NOT_READY`，不修改其三源 qualification 语义（`CAL 4096+VAL512+TEST120 per source` 门禁仍以 V65 原绑定为准）。V65A 为独立 `alternative` 勘探，不覆盖、不复用 V65 的 outcome 作先验/阈值。
 - **Batch 禁止**：`8 frames/candidate` 逐候选物化，禁止一次性物化三候选全部帧或预加载三候选 `pairs.parquet` 全量；优先复用候选本地已有 pairs/sidecar，raw TTBin 仅在当前候选合同闭合后按需读取。脚本内 `assert materialized_frames_total <= 8 + (selected? 256+64 :0) + (formal? 1024+256+32 :0)` 可机械校验（本轮 Stage 2 仅规划，实物化上限为 `8 + 320 =328 frames` 若 Stage1 执行）。
@@ -65,8 +68,8 @@ Stage 0: 4+4 verification per candidate (sequential, stop-on-first-PASS, 8 frame
 
 1. **候选冻结**：三候选按固定顺序 `2026-01-13 162148` → `2026-01-07 2500K` → `2026-01-07 160254`，逐一检查，首个通过即停。顺序与数量冻结，不以数据可用性重排。
 2. **4+4 最小验证（每候选，sequential）**：每候选仅物化 `4+4 frames = 8 frames = 2048 pairs`，验证 `dimension 1024 / bin200 / pairing nearest double-pointer bin//1024 / rule legacy_v1 / channels(cand-specific) / delay_used_ps vs peak_center sign+50ps / sigma 50-150 / gate 200 / threshold 40000 / frame anchor period 204800 floor_div / mapping legacy_v1 A=32U1+U2 B=32V1+V2 每帧256` 逐项显式落盘，三源改为**单候选单 session**（候选即单源单 session，不跨源），`provenance` 完整且 `frame 256` 校验通过才 `VERIFY_PASS`，否则 `VERIFY_FAIL` 进入下一候选。
-3. **256/64 粗筛（selected only，淘汰权）**：对 Stage0 选中的首个 `VERIFY_PASS` 候选，独立物化 `256 frames CAL (65536 pairs) + 64 frames VAL (16384 pairs)`，做 `hierarchical P(a|b)=(C_ab+λ P_global)/(N_b+λ)` 的 `λ` 仅 `Cal 内 2-fold 或 4-fold` 粗筛（域 `[1e-2,1e4]` log10），校验 `λ不触界、ΔNLL、unseen、m(CE)` 等但**阈放宽或仅作淘汰**，粗筛 `FAIL → REJECT` 停止，不进入 Stage2；粗筛 `PASS → 仅允许进入 Stage2 规划`，绝不宣称 `READY`。
-4. **1024/256 正式重表征 + 32 TEST 密封（planned，本轮仅规划）**：对粗筛通过的候选，规划 `1024 frames CAL (262144 pairs) + 256 frames VAL (65536 pairs)` 正式重表征（与 V65 同 hierarchical 估计器，`λ` `Cal 内 4-fold` `[1e-2,1e4]` 连续，`CE1/CE2/CE_full` VAL 门禁 `m=ceil(1.3*1024*CE/5)`，链式闭合 `|CE_full-CE1-CE2|<1e-9`），并密封 `32 TEST frames (8192 pairs)` 仅 identity（不读统计），注册表落盘 `v65a_registry.json`。本轮**仅 freeze 计划**，不执行正式重表征全量计算至 `READY`（执行需新 `PLAN_ACCEPT`，可复用同一脚本带 `--stage formal`）。
+3. **256/64 粗筛（selected only，淘汰权，R65A-04/05）**：对 Stage0 选中的首个 `VERIFY_PASS` 候选，独立物化 `256 frames CAL (65536 pairs) + 64 frames VAL (16384 pairs)`，做 `hierarchical P(a|b)=(C_ab+λ P_global)/(N_b+λ)` 的 `λ` 仅 `Cal 内 2-fold 或 4-fold` 粗筛（域 `[1e-2,1e4]` log10），校验 `λ不触界、ΔNLL、unseen、m(CE)` 等但**阈放宽或仅作淘汰**，粗筛 `FAIL → REJECT` 停止，不进入 Stage2；粗筛 `PASS → 仅允许进入 Stage2 规划`，绝不宣称 `READY/RATE_READY`。`m1=ceil(1.3*1024*CE1/5) m2 同` 禁止 cap/floor/handfill，分流 `MODEL_NOT_STABLE / FROZEN_RATE_COMPATIBLE / RATE_ADAPTATION_REQUIRED(稳定但超旧容量且<1024) / FULL_DISCLOSURE_LAYER(≥1024)`，Stage1 仅淘汰/放行不授 READY（R65A-05/06）。
+4. **1024/256 正式重表征 + 32 TEST 密封（planned，本轮仅规划，R65A-06/07）**：对粗筛通过的候选，规划 `1024 frames CAL (262144 pairs) + 256 frames VAL (65536 pairs)` 正式重表征（与 V65 同 hierarchical 估计器，`λ` `Cal 内 4-fold` `[1e-2,1e4]` 连续，`CE1/CE2/CE_full` VAL 门禁 `m=ceil(1.3*1024*CE/5)`，链式闭合 `|CE_full-CE1-CE2|<1e-9`），并密封 `32 TEST frames (8192 pairs)` 仅 identity（不读统计），注册表落盘 `v65a_registry.json`。本轮**仅 freeze 计划**，不执行正式重表征全量计算至 `READY`（执行需新 `PLAN_ACCEPT`，可复用同一脚本带 `--stage formal`）。后继仅允许重估计 `P(U1|B)/P(U2|U1B)` 依据 CE 调 `m1/m2` 保持 Lane C 家族/L1APP/条件增量/full-tag，增量仅未来预注册相邻档位，本轮不创建后继 change（R65A-06）；Stage2 仍仅规划：正式至少 CAL1024 VAL256 sealed TEST32 frames 才能判断 FROZEN/ADAPTATION（R65A-07）。
 5. **V65 隔离**：`openspec/changes/formal-ir-v65-new-session-channel-compatibility/**` 零修改；V65A 产物独立目录 `formal-ir-v65a-alternative-typeii-working-point-scout/`；`v65_frozen_session_binding.json` 不动。
 6. **脚本与报告（DECODE_FREE）**：`scripts/v65a_scout.py` 单脚本分 `--stage verify|coarse|formal|all`，`rg decode 0 hits`，`py_compile PASS`，输出 `v65a_scout.json + V65A_SCOUT_REPORT.md + v65a_registry.json + v65a_manifest.json` + 控制台摘要；本轮至推送，不创建 `run_01`。
 

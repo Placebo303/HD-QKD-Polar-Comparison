@@ -1,9 +1,9 @@
-# OpenSpec Design: formal-ir-v65a-alternative-typeii-working-point-scout
+# OpenSpec Design: formal-ir-v65a-alternative-typeii-working-point-scout — V65AR1 (intra-family rate-adaptive, NB-LDPC main frozen)
 
-**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **仅 decoder-free 勘探，固定顺序 162148→2500K→160254，4+4首个通过即停，256/64粗筛仅淘汰，1024/256正式+32 TEST规划，V65不动；真实 Stage0/Stage1 尚未运行**
-**Cycle**: `V65A` (alternative-typeii-working-point-scout), predecessor `V65` `DATA_NOT_READY` (三源 qualification 不动)
-**Branch**: `formal-ir-mainline` HEAD `TBD→新 Plan SHA` data SHA `84d62779` (d1024 bw200 nearest legacy_v1 单点)
-**Feasibility**: V65 仅因冻结 CAL/TEST session 仍为 `PENDING` 而停在 `DATA_NOT_READY`；当时 `λ/CE/m` 均为 null，未证明模型或码率失败。V65A 转向**单候选单 session Type-II 备用点**，以最小物化代价逐一验证 materialization 合同，若首候选 `4+4` 即通过则进入 `256/64` 粗筛淘汰明显不兼容者，最后以 `1024/256` 重表征密封 `32 TEST`。零 decoder 闭环。
+**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **仅 decoder-free 勘探，固定顺序 162148→2500K→160254，4+4首个通过即停，256/64粗筛仅淘汰(不授RATE_READY)，1024/256正式+32 TEST规划，V65不动；真实 Stage0/Stage1 尚未运行；V65AR1 允许同家族内 `P(U1|B)/P(U2|U1B)` 重估计调 m1/m2**
+**Cycle**: `V65A` / `V65AR1` (alternative-typeii-working-point-scout R1 intra-family rate adaptation), predecessor `V65` `DATA_NOT_READY` (非模型/码率失败，纯 session 未就绪；三源 qualification 不动)
+**Branch**: `formal-ir-mainline` HEAD `0131313177a6f2a52319b6354cc62477f4685b49` (已核 `HEAD==origin/formal-ir-mainline`；推送前重核) data SHA `84d62779` (d1024 bw200 nearest legacy_v1 单点)
+**Feasibility**: V65 仅因冻结 CAL/TEST session 仍为 `PENDING` 而停在 `DATA_NOT_READY`；当时 `λ/CE/m` 均为 null，未证明模型或码率失败。V65A 转向**单候选单 session Type-II 备用点**，以最小物化代价逐一验证 materialization 合同，若首候选 `4+4` 即通过则进入 `256/64` 粗筛淘汰明显不兼容者，最后以 `1024/256` 重表征密封 `32 TEST`。零 decoder 闭环。V65AR1 保持 NB-LDPC 主方向，仅同家族内码率适配：`m1=ceil(1.3*1024*CE1/5) m2 同` 无 cap/floor，分流 `MODEL_NOT_STABLE/FROZEN_RATE_COMPATIBLE/RATE_ADAPTATION_REQUIRED(<1024)/FULL_DISCLOSURE(≥1024)`，Stage1 永不 READY，Stage2 仍仅规划。
 
 ## 1. 科学问题与关键判断
 
@@ -97,7 +97,7 @@ Stage1: N_cal=256*256=65536, N_val=64*256=16384
 Stage2: N_cal=1024*256=262144, N_val=256*256=65536, N_test=32*256=8192 (identity only)
 ```
 
-### 5.2 分层条件分布与熵/CE（链式双校验）
+### 5.2 分层条件分布与熵/CE（链式双校验，R65A-05/06）
 
 ```
 P_λ(a|b) = (C_ab + λ P_global(a)) / (N_b + λ)  if N_b>0 else P_global(a)
@@ -106,8 +106,14 @@ CE1(λ*) = -E_VAL[ log2 P_λ*(U1|B) ]  (门禁性, VAL上)
 CE2(λ*) = -E_VAL[ log2 P_λ*(U2|U1,B)]
 CE_full(λ*) = -E_VAL[ log2 P_λ*(A|B)]
 CE 链式: |CE_full - CE1 - CE2| < 1e-9 else EVIDENCE_INVALID
-m1 = ceil(1.3*1024*CE1/5), m2 = ceil(1.3*1024*CE2/5), m_total=m1+m2  (不 cap)
+m1 = ceil(1.3*1024*CE1/5), m2 = ceil(1.3*1024*CE2/5), m_total=m1+m2  (不 cap/floor/handfill, 禁 min(16,..) 伪装)
 H_cal 描述性仅报告，不入粗筛硬门；CE 门禁性。
+required rate 分流(与 Stage1/Stage2 阈正交，MODEL_NOT_STABLE 优先):
+  MODEL_NOT_STABLE: λ触界或 ΔNLL/unseen 失败等模型失稳
+  FROZEN_RATE_COMPATIBLE: 稳定且 m1≤16 && m2≤200 && m_total≤216 (冻结构内)
+  RATE_ADAPTATION_REQUIRED: 稳定但超旧容量且 m1<1024 && m2<1024 && m_total<1024 (同家族内预注册相邻档位可调)
+  FULL_DISCLOSURE_LAYER: 任一 m≥1024 (≥n, 需 full disclosure 层, 非 Lane C 家族内)
+V65AR1 保持 Lane C 家族/L1APP/条件增量/full-tag 仅调 m1/m2，增量仅未来预注册相邻档位，本轮不创建后继 change。
 ```
 
 ### 5.3 λ 搜索协议
@@ -121,8 +127,8 @@ chosen λ* = argmin via 50-point log grid + Brent refine
 单 hierarchical 一路为门禁，禁第二 estimator
 ```
 
-- **粗筛阈**：`G2 λ不触界, G3 ΔNLL≤0.75(放宽 vs V65 0.50), G4 Val NLL≤H_cal+1.5(放宽), G5 unseen≤2%, G6 m1≤16, G7 m2≤200(按 Type-II 单点, 三档收敛为单阈), G8 provenance+CE链式` — 粗筛任一 FAIL → `REJECT`；粗筛全过 → `ELIGIBLE_FOR_FORMAL`（不为 READY）。
-- **正式阈**：`G2 λ不触界, G3 ΔNLL≤0.50, G4 Val NLL≤H_cal+1.0, G5 unseen≤1%, G6 m1≤16, G7 m2≤200, G7-aux m_total≤216, G8 provenance+CE链式` 全过才 `FORMAL_READY`（本轮仅规划，执行后判定）。
+- **粗筛阈（R65A-04/05，仅淘汰不授 READY/RATE_READY）**：`G2 λ不触界, G3 ΔNLL≤0.75(放宽 vs V65 0.50), G4 Val NLL≤H_cal+1.5(放宽), G5 unseen≤2%, G6 m1≤16, G7 m2≤200(按 Type-II 单点, 三档收敛为单阈), G7-aux m_total≤216, G8 provenance+CE链式` — 粗筛任一 FAIL → `REJECT`；粗筛全过 → `ELIGIBLE_FOR_FORMAL`（不为 READY/RATE_READY）；Stage1 永不 READY。
+- **正式阈（R65A-07 仍仅规划，正式至少 CAL1024 VAL256 sealed TEST32 才判 FROZEN/ADAPTATION）**：`G2 λ不触界, G3 ΔNLL≤0.50, G4 Val NLL≤H_cal+1.0, G5 unseen≤1%, G6 m1≤16, G7 m2≤200, G7-aux m_total≤216, G8 provenance+CE链式` 全过才 `FORMAL_READY`（本轮仅规划，执行后判定）；`RATE_ADAPTATION_REQUIRED/FULL_DISCLOSURE` 仅正式判且 MODEL_NOT_STABLE 优先。
 
 ## 6. 每源报告与泄漏预算（Stage1 字段定义，Stage2 规划）
 

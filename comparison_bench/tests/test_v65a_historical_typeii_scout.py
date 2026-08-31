@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import math
 import shutil
 import sys
 import uuid
@@ -209,3 +210,63 @@ def test_metadata_missing_fields_fails_closed(workspace_case):
     checked = V.validate_candidate_metadata(candidate, discovery, {})
     assert not checked["verify_pass"]
     assert checked["status"] == "V65A_INCOMPATIBLE"
+
+
+def test_required_m_no_cap_no_floor_handfill():
+    # R65A-05: m=ceil(1.3*1024*CE/5) no cap/floor/handfill
+    assert V.required_m_from_ce(5.0) == int(math.ceil(1.3 * 1024 * 5.0 / 5.0))
+    assert V.required_m_from_ce(0.0) == 0
+    text = SCRIPT.read_text(encoding="utf-8")
+    # ensure no cap pseudo like min(16, ceil) or min/max wrapping for m1/m2
+    lower = text.lower()
+    assert "min(16" not in lower and "min( 16" not in lower
+    assert "max(" not in lower or "maximum" in lower  # allow np.maximum for prob clamping only
+
+
+def test_rate_branch_over_capacity_maps_to_adaptation_and_full_disclosure():
+    # R65A-05: stable but exceeds frozen and <1024 => RATE_ADAPTATION_REQUIRED; >=1024 => FULL_DISCLOSURE_LAYER
+    assert V.classify_required_rate(17, 10, lambda_at_boundary=False, model_stable=True) == "RATE_ADAPTATION_REQUIRED"
+    assert V.classify_required_rate(10, 201, lambda_at_boundary=False, model_stable=True) == "RATE_ADAPTATION_REQUIRED"
+    assert V.classify_required_rate(500, 500, lambda_at_boundary=False, model_stable=True) == "RATE_ADAPTATION_REQUIRED"
+    assert V.classify_required_rate(1024, 10, lambda_at_boundary=False, model_stable=True) == "FULL_DISCLOSURE_LAYER"
+    assert V.classify_required_rate(10, 1024, lambda_at_boundary=False, model_stable=True) == "FULL_DISCLOSURE_LAYER"
+    assert V.classify_required_rate(600, 600, lambda_at_boundary=False, model_stable=True) == "FULL_DISCLOSURE_LAYER"
+    # frozen compatible stays compatible
+    assert V.classify_required_rate(16, 200, lambda_at_boundary=False, model_stable=True) == "FROZEN_RATE_COMPATIBLE"
+    assert V.classify_required_rate(10, 10, lambda_at_boundary=False, model_stable=True) == "FROZEN_RATE_COMPATIBLE"
+
+
+def test_model_not_stable_priority_over_rate():
+    # R65A-05: MODEL_NOT_STABLE has priority even if rate would be FULL_DISCLOSURE
+    assert V.classify_required_rate(1024, 1024, lambda_at_boundary=True, model_stable=True) == "MODEL_NOT_STABLE"
+    assert V.classify_required_rate(10, 10, lambda_at_boundary=True, model_stable=True) == "MODEL_NOT_STABLE"
+    assert V.classify_required_rate(10, 10, lambda_at_boundary=False, model_stable=False) == "MODEL_NOT_STABLE"
+
+
+def test_stage1_never_grants_rate_ready_even_when_rate_adaptation():
+    # R65A-04: Stage1 256/64 never grants READY/RATE_READY, only REJECT or ELIGIBLE_FOR_FORMAL
+    result = V.coarse_screen(_pairs(320), excluded_frame_ids=[])
+    assert result["coarse_cannot_ready"] is True
+    assert "READY" not in result["overall"] or result["overall"] == "V65A_COARSE_REJECTED" or result["overall"] == "V65A_ELIGIBLE_FOR_FORMAL"
+    assert result["overall"] in ("V65A_COARSE_REJECTED", "V65A_ELIGIBLE_FOR_FORMAL")
+    # rate branch is informative but overall stays ELIGIBLE/REJECT
+    assert result["required_rate_classification"] in ("MODEL_NOT_STABLE", "FROZEN_RATE_COMPATIBLE", "RATE_ADAPTATION_REQUIRED", "FULL_DISCLOSURE_LAYER")
+
+
+def test_missing_data_returns_data_not_ready(workspace_case):
+    # R65A-08 / R65A-03: sidecar missing or ambiguous => DATA_NOT_READY not crash, no raw read fallback
+    candidate = V.CANDIDATE_SPECS[1]
+    missing_root = workspace_case / "missing_root"
+    result = V.probe_candidate(candidate, missing_root)
+    assert result["status"] == "V65A_DATA_NOT_READY"
+    assert result["materialized_frames"] == 0
+
+
+def test_workspace_uuid_basetemp_no_tempfile_usage():
+    text = SCRIPT.read_text(encoding="utf-8")
+    assert "TemporaryDirectory" not in text
+    assert "tempfile" not in text.lower()
+    # formal plan must declare Stage2 still plan-only with at least CAL1024/VAL256/TEST32
+    plan = V.formal_plan("2026-01-13 162148", [])
+    assert plan["CAL"]["frames"] == 1024 and plan["VAL"]["frames"] == 256 and plan["TEST"]["frames"] == 32
+    assert plan["planned_only"] is True

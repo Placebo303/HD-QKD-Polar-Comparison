@@ -1,8 +1,8 @@
-# OpenSpec Spec: formal-ir-v65a-alternative-typeii-working-point-scout
+# OpenSpec Spec: formal-ir-v65a-alternative-typeii-working-point-scout — V65AR1 (intra-family rate adaptation, NB-LDPC main frozen)
 
-**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 四工件 + decoder-free scout 已实现并通过 focused tests；真实 Stage0/Stage1 未运行，不改 V65/主候选/src，不启动正式执行
-**Change**: `formal-ir-v65a-alternative-typeii-working-point-scout` (`V65A`, branch `formal-ir-mainline`, HEAD `TBD→新SHA`, data SHA `84d62779`)
-**Predecessor**: `formal-ir-v65-new-session-channel-compatibility` (`V65` `DATA_NOT_READY` 三源 qualification 保持不动)
+**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 四工件 + decoder-free scout 已实现并通过 focused tests；真实 Stage0/Stage1 未运行，不改 V65/主候选/src，不启动正式执行；V65AR1 允许同家族内码率适配不改 NB-LDPC 主方向
+**Change**: `formal-ir-v65a-alternative-typeii-working-point-scout` (`V65A`/`V65AR1`, branch `formal-ir-mainline`, HEAD `0131313177a6f2a52319b6354cc62477f4685b49` 已核 `HEAD==origin/formal-ir-mainline`, data SHA `84d62779`)
+**Predecessor**: `formal-ir-v65-new-session-channel-compatibility` (`V65` `DATA_NOT_READY` 非模型/码率失败，纯 session 未就绪，三源 qualification 保持不动)
 
 ## 1. 变更类型与生命周期
 
@@ -26,13 +26,13 @@
 
 - `84d62779` 语义：`dimension 1024, bin_width 200ps, pairing nearest double-pointer bin//1024消歧, rule legacy_v1, frame_len 256 pairs, BLOCK 1024, period 204800ps floor_div, threshold 40000ps, gate 200ps` — 单点，V65A 三候选复用同一处理点；channels、delay、peak、sigma 必须由各候选真实 sidecar/raw 显式给出并独立重算，禁止默认通道值。
 
-### Provenance tiers
+### Provenance tiers 冻结 A/B/C（R65A-02）
 
 - **A**：未影响 V36–V64 NB-LDPC 的 prior、矩阵、标签、码率、门禁或解释；完成外部使用账本后可作未来独立 TEST。
 - **B**：早期用于 Polar、Cascade 或无关分析，但未影响当前 NB-LDPC；仅作 development/generalization。
 - **C**：参与 V36–V64 当前 NB-LDPC 决策；仅作回归/机制检查。
 
-仓库检索未发现三候选进入 V36–V64 NB-LDPC 注册表，当前均列 **B-provisional**，并保留 basis/uncertainty；这不是最终 A 结论。`162148` 的两个本地 meta 文件指向 `D:\SPDC源测试`，属于 Stage0 provenance blocker，不能通过。
+仓库检索未发现三候选进入 V36–V64 NB-LDPC 注册表，当前均列 **B-provisional**，并保留 basis/uncertainty；这不是最终 A 结论。`162148` 的两个本地 meta 文件指向 `D:\SPDC源测试`，属于 Stage0 provenance blocker fail-closed 不能通过。仓库外不明 provenance 必须披露，不得默认 Tier A。
 - `TEST 32` 密封：`32 frames 8192 pairs 8 blocks` 仅 `session_id/frame_ids/blocks` identity，不计任何 `H/CE/NLL` 统计；`C_ab/P_global/λ` 均 `CAL`-only；旧 outcome 禁读。
 
 ### 2.3 禁止
@@ -61,12 +61,12 @@
 - **G-verify**：`VERIFY_PASS_cand = (dimension==1024 && bin==200 && pairing==nearest && assignment==double_pointer_bin_div_dimension && channels显式且不同 && provenance匹配候选 && rule==legacy_v1 && sign(delay)==sign(peak) && |delay-peak|<50ps && sigma∈[50,150] && gate==200 && threshold==40000 && period==204800 && 每帧256 A/B映射)`，否则 `VERIFY_FAIL` 进入下一候选；缺字段或冲突只报 `DATA_NOT_READY/INCOMPATIBLE`。
 - **注册表**：`v65a_registry.json` per candidate `VERIFY_PASS/FAIL` + `provenance逐项 {session_id, delay_used_ps, peak_center, sigma, gate, threshold, frame_anchor, mapping, channels_used, provenance_path, fail_reason}` + `materialized_frames 8`。
 
-## 4. Phase B — 256/64 粗筛（selected only，仅淘汰不能 READY）
+## 4. Phase B — 256/64 粗筛（selected only，仅淘汰不能 READY/RATE_READY，R65A-04/05）
 
 ### 4.1 粗筛切片（selected only）
 
 - **输入**：`selected` 候选单 session 的 `256 frames CAL (65536 pairs) +64 frames VAL (16384 pairs)`，与 Stage0 8帧零重叠（`CAL 256 ∩ VAL 64 ∩ Stage0 8 ==∅` per candidate），不跨 candidate 拼接。
-- **Stage1 阈（放宽，仅淘汰）**：`G2 λ不触界, G3 ΔNLL≤0.75, G4 Val NLL≤H_cal+1.5, G5 unseen≤0.02, G6 m1≤16, G7 m2≤200, G7-aux m_total≤216, G8 provenance+CE链式<1e-9`，任一 FAIL 或 CAL/VAL 样本不足 → `V65A_COARSE_REJECTED/DATA_NOT_READY` 终态，不进 Stage2；全过 → `V65A_ELIGIBLE_FOR_FORMAL` 仅放行规划，绝不为 READY。
+- **Stage1 阈（放宽，仅淘汰，R65A-04 永不 READY）**：`G2 λ不触界, G3 ΔNLL≤0.75, G4 Val NLL≤H_cal+1.5, G5 unseen≤0.02, G6 m1≤16, G7 m2≤200, G7-aux m_total≤216, G8 provenance+CE链式<1e-9`，任一 FAIL 或 CAL/VAL 样本不足 → `V65A_COARSE_REJECTED/DATA_NOT_READY` 终态，不进 Stage2；全过 → `V65A_ELIGIBLE_FOR_FORMAL` 仅放行规划，绝不为 READY/RATE_READY。`m1=ceil(1.3*1024*CE1/5) m2 同` 禁止 cap/floor/handfill。
 
 ### 4.2 估计器（Stage1 粗筛，同 Stage2 算法，粗筛阈放宽）
 
@@ -76,19 +76,21 @@ P_global(a) = Σ_b C_ab / N_cal
 P_λ(a|b) = (C_ab + λ P_global)/(N_b+λ) (N_b>0) else P_global
 P_λ(u1|b) 32×1024, CE1=-E_VAL log P_λ(U1|B), CE2=-E_VAL log P_λ(U2|U1B), CE_full=-E_VAL log P_λ(A|B)
 CE链式: |CE_full-CE1-CE2|<1e-9 else EVIDENCE_INVALID
-m1=ceil(1.3*1024*CE1/5), m2=ceil(1.3*1024*CE2/5), m_total=m1+m2 (不 cap)
+m1=ceil(1.3*1024*CE1/5), m2=ceil(1.3*1024*CE2/5), m_total=m1+m2 (不 cap/floor/handfill, 禁 cap 伪装)
+required rate 分流(MODEL_NOT_STABLE 优先): MODEL_NOT_STABLE / FROZEN_RATE_COMPATIBLE(m≤冻结构) / RATE_ADAPTATION_REQUIRED(稳定但超旧容量且<1024) / FULL_DISCLOSURE_LAYER(任一m≥1024)
 λ域 log10 [-2,4] (λ∈[1e-2,1e4]), Stage1 粗筛 50-point grid + Brent 或 2-fold CV 粗筛
+后继仅允许重估计 P(U1|B)/P(U2|U1B) 依据 CE 调 m1/m2 保持 Lane C 家族/L1APP/条件增量/full-tag，增量仅未来预注册相邻档位，本轮不创建后继 change (R65A-06)
 ```
 
 - **λ 触界**：`λ_at_boundary → REJECT`（Stage1）/ `MODEL_NOT_STABLE`（Stage2），不扩网格；禁第二 estimator。
 - **报告**：`per_selected {λ*, at_boundary, CV_NLL*, Val NLL=CE_full, ΔNLL, H_cal/H1/H2 chain_delta_H, CE1/CE2/CE_full chain_delta_CE, MAP, q_mass_unseen, effective_contexts, m1/m2/m_total Δm/Δleak, gates G1..G8 coarse, overall}`，`coarse_cannot_ready==true` 已验（`overall != READY`）。
 
-## 5. Phase C — 1024/256 正式重表征与 32 TEST 密封（本轮仅规划）
+## 5. Phase C — 1024/256 正式重表征与 32 TEST 密封（本轮仅规划，R65A-07）
 
-### 5.1 正式切片（planned）
+### 5.1 正式切片（planned, R65A-07 仍仅规划）
 
-- **规模**：`CAL 1024 frames 262144 pairs + VAL 256 frames 65536 pairs + TEST 32 frames 8192 pairs 8 blocks`，同一 `selected` session 内互斥零重叠（`CAL 1024 ∩ VAL 256 ∩ TEST 32 ==∅`，且与 Stage0 8 / Stage1 320 已用帧零重叠），`session_id` 同一。
-- **正式阈（与 V65 一致，仅规划）**：`G2 λ不触界, G3 ΔNLL≤0.50, G4 Val NLL≤H_cal+1.0, G5 unseen≤0.01, G6 m1≤16, G7 m2≤200, G7-aux m_total≤216, G8 provenance+CE链式<1e-9` 全过才 `FORMAL_READY`（本轮仅声明阈，执行后判定）。
+- **规模**：`CAL 1024 frames 262144 pairs + VAL 256 frames 65536 pairs + TEST 32 frames 8192 pairs 8 blocks`，同一 `selected` session 内互斥零重叠（`CAL 1024 ∩ VAL 256 ∩ TEST 32 ==∅`，且与 Stage0 8 / Stage1 320 已用帧零重叠），`session_id` 同一。正式至少 CAL1024 VAL256 sealed TEST32 frames 才能判断 FROZEN/ADAPTATION。
+- **正式阈（与 V65 一致，仅规划）**：`G2 λ不触界, G3 ΔNLL≤0.50, G4 Val NLL≤H_cal+1.0, G5 unseen≤0.01, G6 m1≤16, G7 m2≤200, G7-aux m_total≤216, G8 provenance+CE链式<1e-9` 全过才 `FORMAL_READY`（本轮仅声明阈，执行后判定）；`RATE_ADAPTATION_REQUIRED / FULL_DISCLOSURE_LAYER` 仅正式判且 MODEL_NOT_STABLE 优先。
 
 ### 5.2 TEST 密封（planned, 仅 identity）
 

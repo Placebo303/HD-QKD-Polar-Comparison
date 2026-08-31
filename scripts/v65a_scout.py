@@ -696,6 +696,23 @@ def _ce_parts(model: np.ndarray, alice: np.ndarray, bob: np.ndarray) -> dict[str
     return {"CE1": ce1, "CE2": ce2, "CE_full": full, "chain_delta": abs(full - ce1 - ce2)}
 
 
+def required_m_from_ce(ce: float) -> int:
+    # ponytail: ceil without cap/floor/handfill; no min/max wrapping
+    return int(math.ceil(1.3 * 1024.0 * float(ce) / 5.0))
+
+
+def classify_required_rate(m1: int, m2: int, *, lambda_at_boundary: bool, model_stable: bool) -> str:
+    # priority: MODEL_NOT_STABLE > FULL_DISCLOSURE_LAYER(>=1024) > RATE_ADAPTATION_REQUIRED(>frozen but <1024) > FROZEN_RATE_COMPATIBLE
+    if lambda_at_boundary or not model_stable:
+        return "MODEL_NOT_STABLE"
+    total = int(m1) + int(m2)
+    if m1 >= 1024 or m2 >= 1024 or total >= 1024:
+        return "FULL_DISCLOSURE_LAYER"
+    if m1 <= 16 and m2 <= 200 and total <= 216:
+        return "FROZEN_RATE_COMPATIBLE"
+    return "RATE_ADAPTATION_REQUIRED"
+
+
 def coarse_screen(observation: Observation, *, excluded_frame_ids: Sequence[int] = ()) -> dict[str, Any]:
     excluded = {int(x) for x in excluded_frame_ids}
     all_frames = [fid for fid in sorted({int(x) for x in observation.frame_id}) if fid not in excluded]
@@ -721,8 +738,8 @@ def coarse_screen(observation: Observation, *, excluded_frame_ids: Sequence[int]
     unseen = float(np.mean(cal_counts[val.alice, val.bob] == 0))
     map_acc = float(np.mean(np.argmax(model[:, val.bob], axis=0) == val.alice))
     p_u2_emp = cal_counts / np.maximum(cal_counts.sum(axis=0, keepdims=True), 1e-300)
-    m1 = int(math.ceil(1.3 * 1024.0 * ce["CE1"] / 5.0))
-    m2 = int(math.ceil(1.3 * 1024.0 * ce["CE2"] / 5.0))
+    m1 = required_m_from_ce(ce["CE1"])
+    m2 = required_m_from_ce(ce["CE2"])
     val_nll = ce["CE_full"]
     delta_nll = val_nll - h_cal
     gates = {
@@ -737,6 +754,9 @@ def coarse_screen(observation: Observation, *, excluded_frame_ids: Sequence[int]
         "entropy_chain": abs(h_cal - h1 - h2) < 1e-9,
         "frame_contract": True,
     }
+    model_stable = bool(gates["lambda_not_boundary"] and gates["delta_nll_le_0_75"] and gates["val_nll_le_h_plus_1_5"] and gates["unseen_le_0_02"] and gates["ce_chain"] and gates["entropy_chain"])
+    rate_class = classify_required_rate(m1, m2, lambda_at_boundary=bool(search["lambda_at_boundary"]), model_stable=model_stable)
+    # Stage1 never grants RATE_READY/FROZEN_READY; it only REJECTs or marks ELIGIBLE_FOR_FORMAL
     return {
         "status": "V65A_COARSE_SCREENED",
         "overall": "V65A_ELIGIBLE_FOR_FORMAL" if all(gates.values()) else "V65A_COARSE_REJECTED",
@@ -764,6 +784,8 @@ def coarse_screen(observation: Observation, *, excluded_frame_ids: Sequence[int]
         "m_total_raw": m1 + m2,
         "leak_bits": 5 * (m1 + m2) + 64,
         "gates": gates,
+        "required_rate_classification": rate_class,
+        "rate_branch": rate_class,
         "test_statistics_used": False,
         "TEST_used": False,
         "reported_empirical_p_u2": bool(p_u2_emp.size),
@@ -779,6 +801,10 @@ def formal_plan(selected: str | None, excluded_frame_ids: Sequence[int] = ()) ->
         "TEST": {"frames": STAGE2_PLAN["test_frames"], "pairs": STAGE2_PLAN["test_frames"] * 256, "identity_only": True, "statistics_used": False},
         "lambda": {"log10_bounds": list(LAMBDA_LOG10_BOUNDS), "folds": 4, "cal_only": True},
         "ce_chain_tolerance": 1e-9,
+        "required_rate_formula": "m1=ceil(1.3*1024*CE1/5) m2=ceil(1.3*1024*CE2/5) no cap/floor/handfill",
+        "rate_branches": ["MODEL_NOT_STABLE", "FROZEN_RATE_COMPATIBLE", "RATE_ADAPTATION_REQUIRED", "FULL_DISCLOSURE_LAYER"],
+        "rate_note": "MODEL_NOT_STABLE priority; RATE_ADAPTATION_REQUIRED is stable but exceeds frozen capacity and <1024; FULL_DISCLOSURE_LAYER is any m>=1024; same-family only P(U1|B)/P(U2|U1B) re-estimation keeps Lane C family/L1APP/conditional increment/full-tag, adjacent preregistered increments only, no successor change this turn",
+        "stage2_min_frames": "CAL1024 VAL256 sealed TEST32 required before FROZEN/ADAPTATION judgment",
         "excluded_stage0_frame_ids": [int(x) for x in excluded_frame_ids],
         "sealed_test_identity": {"frames": None, "blocks": 8, "to_be_frozen_after_new_plan_accept": True},
     }
