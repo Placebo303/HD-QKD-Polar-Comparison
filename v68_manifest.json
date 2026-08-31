@@ -1,0 +1,80 @@
+{
+  "schema": "v68_manifest_v1",
+  "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
+  "head": "fcf3e457ecf45c58e23f91d750acd5267d541795",
+  "data_sha": "84d62779",
+  "frozen_body": {
+    "n": 1024,
+    "q": 1024,
+    "GF": "GF32 poly37",
+    "H1": "16x1024 rank16 80b",
+    "U_natural": "32*U1+U2 F03 5+5",
+    "U_permuted": "bits_S(S) 252",
+    "per_frame": 256,
+    "Lane_C_base": {
+      "1M": 184,
+      "1p5M": 190,
+      "2M": 192
+    },
+    "H_inc": "Delta8",
+    "decoder": "90/1.0 poly37 disabled",
+    "verification": "full-tag canonical 32*U1+U2 tag 64",
+    "leak": "5*(m1+m2)+64",
+    "materialization": "legacy_v1 dimension 1024 bin200 nearest channels A1/B5 period 204800",
+    "not_extra": true
+  },
+  "guards": {
+    "R68-01": true,
+    "R68-02": true,
+    "R68-03": true,
+    "R68-04": true,
+    "R68-05": true,
+    "R68-06": true,
+    "R68-07": true,
+    "R68-08": true,
+    "R68-09": true,
+    "R68-10": true
+  },
+  "overall": "V68_OVERALL_STILL_HEAVY",
+  "counts": {
+    "V68_EVIDENCE_INCOMPLETE": 0,
+    "V68_MODEL_NOT_STABLE": 0,
+    "V68_BALANCED_FEASIBLE": 0,
+    "V68_STILL_HEAVY": 3
+  },
+  "S_star_per_session": {
+    "20260123_1M_600k_0dB": [
+      4,
+      5,
+      7,
+      8,
+      9
+    ],
+    "20260107_PPLN_1p5M": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "20260123_2M_1p2M_0dB": [
+      4,
+      5,
+      6,
+      8,
+      9
+    ]
+  },
+  "S_star_common": [
+    4,
+    5,
+    7,
+    8,
+    9
+  ],
+  "common_feasible_count": 0,
+  "per_session_feasible_count": 0,
+  "used_val_in_selection": false,
+  "used_test": false,
+  "no_run_01": true
+}
