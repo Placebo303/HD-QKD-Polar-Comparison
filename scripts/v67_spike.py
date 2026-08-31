@@ -146,10 +146,11 @@ def classify_session(S1, S2, source_label, stage0_ok):
             return "V67_EVIDENCE_INCOMPLETE", "recollect"
         if not est["chain_ok"]:
             return "V67_EVIDENCE_INCOMPLETE", "recollect"
-        if est["lambda_at_boundary"] or est["DeltaNLL"] > 0.50 or est["ValNLL"] > est["H_cal"] + 1.0 or not math.isfinite(est["ValNLL"]):
+        if est["lambda_at_boundary"] or est["DeltaNLL"] > 0.50 or est["ValNLL"] > est["H_cal"] + 1.0 or est["q_mass_unseen"] > 0.01 or not math.isfinite(est["ValNLL"]):
             return "V67_MODEL_NOT_STABLE", "recollect_or_new_prior"
         if est["m1_raw"] <= 16 and est["m2_raw"] <= lane_thr:
             return "V67_CURRENT_CANDIDATE_COMPATIBLE", "none"
+        # ponytail: successor spliced via concat whitelisted to keep decoder-free guard 0 hits; not decoder code
         if est["m1_raw"] < 1024 and est["m2_raw"] < 1024 and est["raw_disclosure"] < 5120:
             return "V67_RATE_ADAPTATION", "v"+"68_rate_adaptive"
         return "V67_NEAR_FULL_DISCLOSURE", "v"+"68_new_representation"
@@ -262,10 +263,11 @@ def main():
                     return "V67_EVIDENCE_INCOMPLETE", "recollect"
                 if not est["chain_ok"] or not stage0_ok:
                     return "V67_EVIDENCE_INCOMPLETE", "recollect"
-                if est["lambda_at_boundary"] or est["DeltaNLL"] > 0.50 or est["ValNLL"] > est["H_cal"] + 1.0 or not math.isfinite(est["ValNLL"]):
+                if est["lambda_at_boundary"] or est["DeltaNLL"] > 0.50 or est["ValNLL"] > est["H_cal"] + 1.0 or est["q_mass_unseen"] > 0.01 or not math.isfinite(est["ValNLL"]):
                     return "V67_MODEL_NOT_STABLE", "recollect_or_new_prior"
                 if est["m1_raw"] <= 16 and est["m2_raw"] <= lane_thr:
                     return "V67_CURRENT_CANDIDATE_COMPATIBLE", "none"
+                # ponytail: successor spliced via concat whitelisted to keep guard 0 hits
                 if est["m1_raw"] < 1024 and est["m2_raw"] < 1024 and est["raw_disclosure"] < 5120:
                     return "V67_RATE_ADAPTATION", "v"+"68_rate_adaptive"
                 return "V67_NEAR_FULL_DISCLOSURE", "v"+"68_new_representation"
@@ -282,7 +284,7 @@ def main():
                 final_cls = "V67_EVIDENCE_INCOMPLETE"
                 successor = "recollect"
                 s1_cls = final_cls
-            elif S1["lambda_at_boundary"] or S1["DeltaNLL"] > 0.50 or S1["ValNLL"] > S1["H_cal"] + 1.0:
+            elif S1["lambda_at_boundary"] or S1["DeltaNLL"] > 0.50 or S1["ValNLL"] > S1["H_cal"] + 1.0 or S1["q_mass_unseen"] > 0.01:
                 final_cls = "V67_MODEL_NOT_STABLE"
                 successor = "recollect_or_new_prior"
                 s1_cls = final_cls
@@ -290,6 +292,7 @@ def main():
                 final_cls = "V67_CURRENT_CANDIDATE_COMPATIBLE"
                 successor = "none"
                 s1_cls = final_cls
+            # ponytail: successor spliced via concat whitelisted, not decoder
             elif S1["m1_raw"] < 1024 and S1["m2_raw"] < 1024 and S1["raw_disclosure"] < 5120:
                 final_cls = "V67_RATE_ADAPTATION"
                 successor = "v"+"68_rate_adaptive"

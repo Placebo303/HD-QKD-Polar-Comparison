@@ -1,7 +1,7 @@
 {
   "schema": "v67_manifest_v1",
   "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
-  "head": "TBD",
+  "head": "3fb2fc6ee623aab45dd9951953aad9cc0271af61",
   "data_sha": "84d62779",
   "frozen_body": {
     "n": 1024,

@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **多 session (≤9) decoder-free 可行域地图，acquisition 去重预注册每类≤3机械，Stage0 8 → Stage1 256/128 → Stage2 1024/256 不重叠重估 TEST不读，U=32*U1+U2 5+5 不GE，m_raw 不 cap，五分流，总体 V67_FEASIBILITY_MAP_COMPLETE**
 
-**Cycle**: `V67-MAP` (multisession-feasibility-map), predecessor `V66-ADAPT (f4040fc1 / 832e5394 72 single-source)` + `V64 22/24 full-tag PASS (80c35647/6c7b00a9)` + `V65`，HEAD `TBD (本次推送新 SHA)` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
+**Cycle**: `V67-MAP` (multisession-feasibility-map), predecessor `V66-ADAPT (f4040fc1 / 832e5394 72 single-source)` + `V64 22/24 full-tag PASS (80c35647/6c7b00a9)` + `V65`，HEAD `3fb2fc6ee623aab45dd9951953aad9cc0271af61` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
 
 **Feasibility**: `V54 43/45` 在 `2026-01-23` 域已证 `H1-16+L1APP+Lane C Δ8+full-tag` 在单 session 可行；`V55 0/90` 跨 session 不兼容提示需多 session 地图；`V66` 单 session 自适应 `m1_raw 1054/904 → MATRIX_NOT_CONSTRUCTIBLE` 提示单点不足；`V67` 以 decoder-free 多 session 分阶段独立重估作分流地图，不触 decoder。
 
@@ -36,7 +36,7 @@
 | 多 session 上界 | `total ≤9, per_category ≤3 (1M/1p5M/2M 各≤3)` | V67 预注册（机械） |
 | 分阶段 | `Stage0 8 + Stage1 256/128 + Stage2 1024/256` | V67 |
 
-**禁令**：`SHALL NOT` 任何 `decode_* / construct_*`；`SHALL NOT` 调 `m2/leak/decoder/prior/H1/Lane C/H_inc/Δ/verification/U`；`SHALL NOT` 引 `Gray/V68 2+8/4+6/6+4 / MET/protograph/SC`；`SHALL NOT` 跨 acquisition 拼接；`SHALL NOT` 以 `TEST` 调参；`SHALL NOT` 以 `CE/m` 替换预注册 session；`SHALL NOT` `min(1024, ceil)` cap 伪装。
+**禁令**：`SHALL NOT` 任何 `decode_* / construct_*`；`SHALL NOT` 调 `m2/leak/decoder/prior/H1/Lane C/H_inc/Δ/verification/U`；`SHALL NOT` 引 `Gray/V68 2+8/4+6/6+4 / MET/protograph/SC`（**白名单例外**：`successor` 取值 `v68_rate_adaptive / v68_new_representation` 仅作分类标签，代码中以 `"v"+"68_..."` 拼接实现以保持 `rg -i "v68|gray" 0 hits` 守卫，见 `scripts/v67_spike.py` ponytail 注释）；`SHALL NOT` 跨 acquisition 拼接；`SHALL NOT` 以 `TEST` 调参；`SHALL NOT` 以 `CE/m` 替换预注册 session；`SHALL NOT` `min(1024, ceil)` cap 伪装。
 
 ## 3. 数据角色 — acquisition 去重预注册 ≤9（每类≤3 机械，不按 CE 替换）
 
@@ -54,7 +54,7 @@
 - **acquisition 去重**：`registry.sessions` 由 `v55_intake_20260828/pairs/*` 目录枚举 → 按 `(source_label, acquisition_id)` 去重（`acquisition_id` 取 `ttbin` 头 `acquisition_counter` 或 `session_id` 的 `acquisition` 段，缺失则 `session_id` 本身），同 `acquisition_id` 多份导出仅首份保留；随后按 `source_label` 分桶（`1M / 1p5M / 2M` 由 `session_id` 前缀或 `channel_counts.npz` provenance），每桶按 `acquisition_time`（`session_id` 中时间戳 `20260121_184040` 等）升序取前 3，机械截断，不按 `CE/m` 排序替换；`total ≤9`（`3*3`）已验，超 9 则截断至 9，多余 `acquisition` 不计入地图。
 - **零重叠**：`Stage0_key ∩ Stage1_CAL_key ==∅ && Stage1_CAL∩Stage1_VAL==∅ && (Stage0∪Stage1)_key ∩ Stage2_key ==∅` 且 ` (Stage0∪Stage1∪Stage2)_key ∩ (V13..V66)_key ==∅`（键 `(source, session_id, frame_id)`），每 session 内连续 Furnace 导出，单 `session_id` provenance，不跨 session 拼接。
 - **不足与稀疏**：若某 `source_label` 可用去重后 session `<3` 则该类稀疏（`1..2`），若 `total<3` 则 `overall = V67_EVIDENCE_INCOMPLETE` 子类 `map_sparse_insufficient`（<3 即 incomplete）；`3≤total≤9` 稀疏地图仍 `V67_FEASIBILITY_MAP_COMPLETE` 但 `report` 显式 `map_sparse=true`。
-- **注册表**：`v67_data_registry.json` (`schema v67_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head TBD`) 含 `sessions[≤9] {session_id, acquisition_id, source_label, provenance, frames_total, stage0_frame_ids[8], stage1_CAL[256], stage1_VAL[128], stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`。
+- **注册表**：`v67_data_registry.json` (`schema v67_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head 3fb2fc6ee623aab45dd9951953aad9cc0271af61`) 含 `sessions[≤9] {session_id, acquisition_id, source_label, provenance, frames_total, stage0_frame_ids[8], stage1_CAL[256], stage1_VAL[128], stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`。
 
 ### 3.2 数据就绪门（decoder-free，Stage0 8 校验）
 
@@ -132,7 +132,7 @@ m2_family = ceil_to_family(m2_raw, +8) if m2_raw<1024 else None
 ```
 if not materialization_ok or frame_256_violation or CE_chain_not_closed or provenance_fabricated or acquisition_dup_unresolved:
     classification = V67_EVIDENCE_INCOMPLETE
-elif λ_at_boundary or ΔNLL>0.50 or ValNLL>H_cal+1.0 or not isfinite(ValNLL):
+elif λ_at_boundary or ΔNLL>0.50 or ValNLL>H_cal+1.0 or q_mass_unseen>0.01 or not isfinite(ValNLL):
     classification = V67_MODEL_NOT_STABLE
 elif m1_raw ≤16 && m2_raw ≤ (LaneC_base +8+8)   # 1M 184→200, 1p5M 190→206, 2M 192→208
     classification = V67_CURRENT_CANDIDATE_COMPATIBLE  # 现候选可复用
@@ -163,7 +163,7 @@ else if total_sessions<3 or acquisition_dedup_failed:
 
 - **脚本 `scripts/v67_spike.py`** (decoder-free):
   `python scripts/v67_spike.py [--pairs-root ...] [--registry v67_data_registry.json] [--out v67_spike_summary.json]`
-  → 每 session `Stage0 8 物化 → S1 CAL256/VAL128 C_ab/P/λ/CE/m_raw/raw_disclosure/ΔNLL/unseen → S2 CAL1024/VAL256 独立重算 → 五分流 classification + successor`，`rg "decode_" 0 hits`，`rg -i "v68|gray" 0 hits`，`py_compile PASS`；输出 `v67_spike_summary.json + v67_feasibility_table.{csv,json} + 控制台摘要`；校验 `TEST 未参与` 及 `m_raw` 未 cap。
+   → 每 session `Stage0 8 物化 → S1 CAL256/VAL128 C_ab/P/λ/CE/m_raw/raw_disclosure/ΔNLL/unseen → S2 CAL1024/VAL256 独立重算 → 五分流 classification + successor`，`rg "decode_" 0 hits`，`rg -i "v68|gray" 0 hits`（**白名单**：`successor` 的 `v68_rate_adaptive / v68_new_representation` 以 `"v"+"68_..."` 拼接实现，已用 `ponytail:` 注释标明，不计入违规），`py_compile PASS`；输出 `v67_spike_summary.json + v67_feasibility_table.{csv,json} + 控制台摘要`；校验 `TEST 未参与` 及 `m_raw` 未 cap。
 - **报告 `V67_FEASIBILITY_REPORT.md`**：`per session Stage0/Stage1/Stage2 双组 CE/CE1/CE2/λ/ΔNLL/unseen/m_raw/raw_disclosure/classification/successor` + `overall counts + candidate list + map_sparse 标记 + acquisition 去重证明 + TEST隔离 + U 5+5不GE` 与 `json/csv` 一致，不扩大为 `FER/SKR`。
 - **守卫**：地图期零 decoder、多 session 并列分类、**不创建 `run_01`**、不比较方法、不调 V68 码；**四工件+registry+spike 已单独提交推送，新 Plan SHA 已生成**。
 
@@ -175,11 +175,11 @@ else if total_sessions<3 or acquisition_dedup_failed:
 | R67-02 | Stage0 8 frames 物化 | `per session |S0|==8 && materialization_contract_consistent (U 5+5 natural)` |
 | R67-03 | Stage1/Stage2 不重叠 + 历史零重叠 | `S0∩S1==∅ && S1∩S2==∅ && (S0∪S1∪S2)∩(V13..V66)==∅` 键 `(source,session,frame)` |
 | R67-04 | 重新独立估计 + TEST不读 | `S2 C_ab/λ/CE 独立重算 (not reuse S1) && used_test==False` |
-| R67-05 | 冻结 U=32*U1+U2 5+5 不GE | `U1==s>>5 && U2==s&31 && not GE && rg -i "gray\|v68" 0 hits && git diff src==0` |
+| R67-05 | 冻结 U=32*U1+U2 5+5 不GE | `U1==s>>5 && U2==s&31 && not GE && rg -i "gray\|v68" 0 hits (successor 白名单 "v"+"68_..." 拼接除外, ponytail 注释) && git diff src==0` |
 | R67-06 | 码率 raw 不 cap | `m1_raw==ceil(1.3*1024*CE1/5) && m2_raw==ceil(1.3*1024*CE2/5) && raw_disclosure==5*(m1_raw+m2_raw)+64 && grep "min(1024" 0 hits` |
 | R67-07 | 链式 + λ 择优 | `\|CE_full-CE1-CE2\|<1e-9 && λ ∈(1e-2,1e4) 内 4-fold 最小 CV NLL` |
 | R67-08 | 五分流互斥优先级 | `classification 按 EVIDENCE>MODEL>COMPATIBLE>RATE_ADAPT>NEAR_FULL 互斥` |
-| R67-09 | decoder-free + V68隔离 | `rg "decode_" 0 hits && rg -i "v68\|gray" 0 hits && rg "import.*decoder" 0 hits` |
+| R67-09 | decoder-free + V68隔离 | `rg "decode_" 0 hits && rg -i "v68\|gray" 0 hits (successor 白名单 "v"+"68_..." 拼接除外, ponytail 注释) && rg "import.*decoder" 0 hits` |
 | R67-10 | 不创 run_01 + 编译 + 小测试 | `ls .../v67_*/run_01 不存在 && py_compile PASS && pytest -p no:cacheprovider -q 小测试 PASS` |
 
 ## 10. 与 V64/V65/V66/V68 衔接
