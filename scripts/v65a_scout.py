@@ -831,7 +831,9 @@ def run_scout(stage: str, root: Path | None) -> dict[str, Any]:
             "guards": {"decoder_calls": 0, "test_statistics_used": False, "batch_materialization": False},
         }
     stage0 = run_stage0(root)
-    result: dict[str, Any] = {"stage": stage, "stage0": stage0, "stage1": None, "formal_plan": formal_plan(stage0["selected"], stage0.get("selected_item", {}).get("frame_split", {}).get("calibration", []) + stage0.get("selected_item", {}).get("frame_split", {}).get("validation", []))}
+    _sel = stage0.get("selected_item") or {}
+    _split = _sel.get("frame_split", {}) if isinstance(_sel, dict) else {}
+    result: dict[str, Any] = {"stage": stage, "stage0": stage0, "stage1": None, "formal_plan": formal_plan(stage0["selected"], _split.get("calibration", []) + _split.get("validation", []))}
     if stage in {"coarse", "all"} and stage0.get("selected_item") is not None:
         selected = stage0["selected_item"]
         selected_candidate = selected["discovery"]
