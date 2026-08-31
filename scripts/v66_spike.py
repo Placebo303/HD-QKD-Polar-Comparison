@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 V66 spike - decoder-free single-source CE/m/rank/nested/disclosure/constructibility.
-Real parquet only, fail-closed. Synthetic only with --allow-synthetic.
+Real parquet only, fail-closed. No synthetic fallback; pure functions tested separately.
 
 ponytail: numpy + v31 H construction, GF32 poly37, CAL-only lambda CV, +8 family alignment, m2>=184.
 """
@@ -169,7 +169,8 @@ def estimate(pairs_path: Path, cal_fids, val_fids):
         h2_base_rank=gf_rank_nb(h2_base_mat, field)
         if m2==H2_BASE:
             rank_m2=h2_base_rank; rank_m2_ok=(rank_m2==m2)
-            nested_ok = bool(h1_contains)
+            nested_h2=False  # no +8 expansion, h2_184_in_h2_192 false when m2==184 (no family check)
+            nested_ok = False  # ponytail: overall_nested requires both h1 and h2 family, so false
         else:
             h2_mat, _=v31.build_layer(m2, n=1024, family=v31.FAMILY_QC)
             h2_family_rank=gf_rank_nb(h2_mat, field)
@@ -190,11 +191,23 @@ def estimate(pairs_path: Path, cal_fids, val_fids):
         constructible=False
     else:
         MATRIX_NOT_CONSTRUCTIBLE= not constructible
-    disclosure=5*m_total+TAG_BITS
+    # disclosure: proxy when infeasible must not be used for efficiency conclusion
     disclosure_raw_required=5*m_total_raw+TAG_BITS
+    infeasible_family_proxy_disclosure=5*m_total+TAG_BITS  # ponytail: 6304 proxy capped to +8 family, not feasible
     disclosure_ok=True
     feasible = bool(m1<1024 and m2<1024 and rank_m1_ok and rank_m2_ok and nested_ok and disclosure_ok and constructible and not MATRIX_NOT_CONSTRUCTIBLE)
-    eff=float(disclosure/(1024*ce_full)) if ce_full>0 else float("inf")
+    eff_raw=float(disclosure_raw_required/(1024*ce_full)) if ce_full>0 else float("inf")
+    if feasible:
+        disclosure = int(infeasible_family_proxy_disclosure)
+        eff=float(disclosure/(1024*ce_full)) if ce_full>0 else float("inf")
+        eff_val=eff
+    else:
+        disclosure=None  # infeasible: no valid disclosure, use proxy separately
+        eff_val=None
+    # split nested: ponytail: explicit h1/h2/overall
+    h2_184_in_h2_192 = bool(nested_h2) if 'nested_h2' in locals() else False
+    # if m2==184 case, h2_184_in_h2_192 is vacuous (no 192 built) -> False per instruction
+    overall_nested = bool(h1_contains and h2_184_in_h2_192)
     return {
         "C_shape":[Q,Q],"N_cal":int(N_cal),"N_val":int(N_val),"effective_contexts":int(np.sum(N_b>0)),
         "CE1":ce1,"CE2":ce2,"CE_full":ce_full,"chain_delta":float(chain_delta),"chain_ok":bool(chain_delta<CE_TOL),
@@ -203,8 +216,9 @@ def estimate(pairs_path: Path, cal_fids, val_fids):
         "m1_lt_1024":bool(m1<1024),"m2_lt_1024":bool(m2<1024),"constructible":bool(constructible),"MATRIX_NOT_CONSTRUCTIBLE":bool(MATRIX_NOT_CONSTRUCTIBLE),
         "rank_m1":int(rank_m1),"rank_m2":int(rank_m2),"rank_m1_ok":bool(rank_m1_ok),"rank_m2_ok":bool(rank_m2_ok),
         "h1_16_rank":h1_16_rank,"h1_112_rank":h1_112_rank,"h2_base_rank":h2_base_rank,"h2_family_rank":h2_family_rank,
-        "h1_contains_frozen":bool(h1_contains),"nested_ok":bool(nested_ok),"disclosure":int(disclosure),"disclosure_raw_required":int(disclosure_raw_required),"disclosure_ok":bool(disclosure_ok),
-        "efficiency":float(eff),"feasible":bool(feasible),
+        "h1_contains_frozen":bool(h1_contains),"h2_184_in_h2_192":bool(h2_184_in_h2_192),"overall_nested":bool(overall_nested),"nested_ok":bool(overall_nested),
+        "disclosure":disclosure,"infeasible_family_proxy_disclosure":int(infeasible_family_proxy_disclosure),"disclosure_raw_required":int(disclosure_raw_required),"disclosure_ok":bool(disclosure_ok),
+        "efficiency":eff_val,"efficiency_raw_required":float(eff_raw),"feasible":bool(feasible),
         "lam":lam,"lam_cv_per":per_lam,"lam_best_cv_ce":best_cv_ce,"P_U1_B_shape":"32x1024","P_U2_U1B_shape":"32x32x1024"
     }
 
@@ -214,7 +228,6 @@ def main():
     ap.add_argument("--pairs-root", default="comparison_bench/outputs_comparison/v55_intake_20260828/pairs/20260123_1M_600k_0dB/pairs.parquet")
     ap.add_argument("--out", default="openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/v66_spike_summary.json")
     ap.add_argument("--report", default="openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/V66_ADAPTIVE_REPORT.md")
-    ap.add_argument("--allow-synthetic", action="store_true", help="Allow synthetic fallback for test only (explicit)")
     args=ap.parse_args()
     reg=json.loads(Path(args.registry).read_text(encoding="utf-8"))
     single=reg["per_source"][SESSION]
@@ -226,27 +239,12 @@ def main():
     cal_fids=flat(single["CAL_frame_ids"])
     val_fids=flat(single["VAL_frame_ids"])
     pairs_path=Path(args.pairs_root)
-    # fail-closed: no alt fallback in production; synthetic only via --allow-synthetic (handled in estimate fail-closed)
+    # fail-closed: no synthetic fallback; pure functions tested separately
     try:
         res=estimate(pairs_path, cal_fids, val_fids)
     except Exception as e:
-        if args.allow_synthetic:
-            print(f"[v66_spike] synthetic allowed fallback {e}", file=sys.stderr)
-            res={
-                "C_shape":[1024,1024],"N_cal":24576,"N_val":24576,"effective_contexts":978,
-                "CE1":0.4207,"CE2":0.3907,"CE_full":0.8114,"chain_delta":2.3e-12,"chain_ok":True,
-                "m1_raw":112,"m2_raw":104,"m_total_raw":216,
-                "m1":112,"m2":184,"m_total":296,"delta_m1":0,"delta_m2":80,
-                "m1_lt_1024":True,"m2_lt_1024":True,"constructible":True,"MATRIX_NOT_CONSTRUCTIBLE":False,
-                "rank_m1":112,"rank_m2":184,"rank_m1_ok":True,"rank_m2_ok":True,
-                "h1_16_rank":16,"h1_112_rank":112,"h2_base_rank":184,"h2_family_rank":184,
-                "h1_contains_frozen":True,"nested_ok":True,"disclosure":1544,"disclosure_raw_required":1144,"disclosure_ok":True,
-                "efficiency":1.376,"feasible":True,
-                "lam":1.0,"lam_cv_per":{},"lam_best_cv_ce":0.0,"P_U1_B_shape":"32x1024","P_U2_U1B_shape":"32x32x1024"
-            }
-        else:
-            print(f"[v66_spike] FAIL-CLOSED {e}", file=sys.stderr)
-            raise SystemExit(2)
+        print(f"[v66_spike] FAIL-CLOSED {e}", file=sys.stderr)
+        raise SystemExit(2)
     if not res["chain_ok"]:
         overall="V66_EVIDENCE_INVALID"
     elif not (res["m1_lt_1024"] and res["m2_lt_1024"]):
@@ -287,12 +285,12 @@ def main():
             "constructibility_note":"H1-112 rank/nested + H2>=184 +8 family; "+("feasible" if res["constructible"] else "family cannot cover -> MATRIX_NOT_CONSTRUCTIBLE"),
             "rank_m1":res["rank_m1"],"rank_m2":res["rank_m2"],"rank_m1_ok":res["rank_m1_ok"],"rank_m2_ok":res["rank_m2_ok"],
             "h1_16_rank":res["h1_16_rank"],"h1_112_rank":res["h1_112_rank"],"h2_base_rank":res["h2_base_rank"],"h2_family_rank":res["h2_family_rank"],
-            "h1_contains_frozen":res["h1_contains_frozen"],
-            "nested_m1":res["nested_ok"],"nested_m2":res["nested_ok"],"nested_ok":res["nested_ok"],
-            "disclosure":res["disclosure"],"disclosure_formula":"5*(m1+m2)+64","disclosure_raw_required":res["disclosure_raw_required"],"disclosure_raw_formula":"5*(m1_raw+m2_raw)+64","disclosure_ok":res["disclosure_ok"],
-            "efficiency_VAL":res["efficiency"],"feasible":res["feasible"],"used_eval":used_eval
+            "h1_contains_frozen":res["h1_contains_frozen"],"h2_184_in_h2_192":res["h2_184_in_h2_192"],"overall_nested":res["overall_nested"],
+            "nested_m1":res["overall_nested"],"nested_m2":res["overall_nested"],"nested_ok":res["overall_nested"],
+            "disclosure":res["disclosure"],"disclosure_formula":"5*(m1+m2)+64 (null when infeasible)","infeasible_family_proxy_disclosure":res["infeasible_family_proxy_disclosure"],"disclosure_raw_required":res["disclosure_raw_required"],"disclosure_raw_formula":"5*(m1_raw+m2_raw)+64","disclosure_ok":res["disclosure_ok"],
+            "efficiency_VAL":res["efficiency"],"efficiency_raw_required":res["efficiency_raw_required"],"feasible":res["feasible"],"used_eval":used_eval
         }},
-        "code_feasibility":{"m1_lt_1024":res["m1_lt_1024"],"m2_lt_1024":res["m2_lt_1024"],"rank_ok":res["rank_m1_ok"] and res["rank_m2_ok"],"nested_ok":res["nested_ok"],"disclosure_ok":res["disclosure_ok"],"constructible":res["constructible"],"MATRIX_NOT_CONSTRUCTIBLE":res["MATRIX_NOT_CONSTRUCTIBLE"],"feasible":res["feasible"],"gate":"m1<1024 && m2<1024 (not m_total)"},
+        "code_feasibility":{"m1_lt_1024":res["m1_lt_1024"],"m2_lt_1024":res["m2_lt_1024"],"rank_ok":res["rank_m1_ok"] and res["rank_m2_ok"],"h1_contains_frozen":res["h1_contains_frozen"],"h2_184_in_h2_192":res["h2_184_in_h2_192"],"overall_nested":res["overall_nested"],"nested_ok":res["overall_nested"],"disclosure_ok":res["disclosure_ok"],"constructible":res["constructible"],"MATRIX_NOT_CONSTRUCTIBLE":res["MATRIX_NOT_CONSTRUCTIBLE"],"feasible":res["feasible"],"gate":"m1<1024 && m2<1024 (not m_total)"},
         "state_machine":{
             "EVIDENCE_INVALID":"materialization/frame256/CE_chain/provenance fabricated -> highest",
             "DATA_NOT_READY":"K<72 or segment !=24 -> second",
@@ -303,13 +301,13 @@ def main():
             "DEVELOPMENT_BENCHMARK_READY":"EVAL not executed && first three passed"
         },
         "overall":overall,
-        "overall_note":f"Single-source {SESSION}: m1={res['m1']} m2={res['m2']} <1024={res['m1_lt_1024'] and res['m2_lt_1024']} constructible={res['constructible']} rank ok={res['rank_m1_ok'] and res['rank_m2_ok']} nested={res['nested_ok']} disclosure={res['disclosure']} lambda={res['lam']} -> {overall}",
+        "overall_note":f"Single-source {SESSION}: m1={res['m1']} m2={res['m2']} <1024={res['m1_lt_1024'] and res['m2_lt_1024']} constructible={res['constructible']} rank ok={res['rank_m1_ok'] and res['rank_m2_ok']} h1_contains {res['h1_contains_frozen']} h2_184 {res['h2_184_in_h2_192']} overall_nested {res['overall_nested']} disclosure={res['disclosure']} proxy={res['infeasible_family_proxy_disclosure']} lambda={res['lam']} -> {overall}",
         "next_step":"Await independent review packet (Pre-RESULT) then PLAN_ACCEPT + EXECUTE_AUTH for EVAL 24 decoder measurement 19/24 undetected0 (if READY) else revise-required",
-        "spike_console_summary":f"CAL 24 (24576 pairs) -> C_ab 1024x1024 -> lambda {res['lam']} CAL-only CV -> VAL CE1={res['CE1']:.4f} CE2={res['CE2']:.4f} CE_full={res['CE_full']:.4f} chain {res['chain_delta']:.2e} -> m1_raw {res['m1_raw']} m2_raw {res['m2_raw']} -> aligned m1 {res['m1']} m2 {res['m2']} (+8, H1-112 nested {res['h1_contains_frozen']} rank {res['h1_112_rank']}/{res['h1_16_rank']}) disclosure {res['disclosure']} -> overall {overall}",
+        "spike_console_summary":f"CAL 24 (24576 pairs) -> C_ab 1024x1024 -> lambda {res['lam']} CAL-only CV -> VAL CE1={res['CE1']:.4f} CE2={res['CE2']:.4f} CE_full={res['CE_full']:.4f} chain {res['chain_delta']:.2e} -> m1_raw {res['m1_raw']} m2_raw {res['m2_raw']} -> aligned m1 {res['m1']} m2 {res['m2']} (+8, h1_contains {res['h1_contains_frozen']} h2_184 {res['h2_184_in_h2_192']} overall_nested {res['overall_nested']} rank {res['h1_112_rank']}/{res['h1_16_rank']}) proxy {res['infeasible_family_proxy_disclosure']} raw {res['disclosure_raw_required']} eff_raw {res['efficiency_raw_required']:.3f} eff {res['efficiency']} -> overall {overall}",
         "no_TBD":True,"TBD_cleared":True
     }
     Path(args.out).write_text(json.dumps(out,indent=2,ensure_ascii=False),encoding="utf-8")
-    print(f"[v66_spike] CE1={res['CE1']:.4f} CE2={res['CE2']:.4f} CE_full={res['CE_full']:.4f} lam={res['lam']} chain {res['chain_delta']:.2e} m1_raw {res['m1_raw']}->{res['m1']} m2_raw {res['m2_raw']}->{res['m2']} H1-16 {res['h1_16_rank']} H1-112 {res['h1_112_rank']} contains {res['h1_contains_frozen']} disclosure {res['disclosure']} disclosure_raw_required {res['disclosure_raw_required']} overall {overall}")
+    print(f"[v66_spike] CE1={res['CE1']:.4f} CE2={res['CE2']:.4f} CE_full={res['CE_full']:.4f} lam={res['lam']} chain {res['chain_delta']:.2e} m1_raw {res['m1_raw']}->{res['m1']} m2_raw {res['m2_raw']}->{res['m2']} H1-16 {res['h1_16_rank']} H1-112 {res['h1_112_rank']} contains {res['h1_contains_frozen']} h2_184 {res['h2_184_in_h2_192']} overall {res['overall_nested']} proxy {res['infeasible_family_proxy_disclosure']} raw {res['disclosure_raw_required']} eff_raw {res['efficiency_raw_required']:.3f} eff {res['efficiency']} overall {overall}")
     return 0
 
 if __name__=="__main__":
