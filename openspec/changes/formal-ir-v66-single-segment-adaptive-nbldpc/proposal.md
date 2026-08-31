@@ -5,7 +5,7 @@
 **Change ID**: `formal-ir-v66-single-segment-adaptive-nbldpc`
 **Cycle ID**: `V66-ADAPT` (single-segment-adaptive), predecessor `formal-ir-v65-new-session-channel-compatibility` (9625afb4→cabc928f) + `formal-ir-v64-full-symbol-verification-correction` (80c35647/6c7b00a9 22/24 PASS)
 **Branch**: `formal-ir-mainline`
-**HEAD**: `TBD_NEW_PLAN_SHA` (本次修订后单独提交推送产生的新 40位 Plan SHA，实施前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 40位重核，不一致阻塞；归档前重核)
+**HEAD**: `832e5394bb366927c779414ee5a08427bd740a2d` (本次修订后单独提交推送产生的新 40位 Plan SHA，实施前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 40位重核，不一致阻塞；归档前重核)
 **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点；V66 单 session 复用该处理点，不换点)
 **Lifecycle**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED` — `DEVELOPMENT_BENCHMARK` 表示允许复用旧 session 数据但显式标记 `development_replay=true` 的开发态 benchmark，不作 qualification/对比；任何 decoder 执行需独立 `PLAN_ACCEPT` + `EXECUTE_AUTH`
 
@@ -73,7 +73,7 @@
 
 ## Acceptance Criteria
 
-- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED`，`HEAD TBD_NEW_PLAN_SHA` + `branch formal-ir-mainline` + `data 84d62779` + `predecessor V64 80c35647/6c7b00a9 22/24 PASS` 已绑定，显式声明 decoder-free、零 decoder、单 session 单源 72、development_replay、冻结主体、仅 P 重估 + VAL CE + 同家族 +8、不依 EVAL 调参、**m1<1024 && m2<1024** 满秩嵌套披露 constructibility 先验、EVAL 19/24 undetected0（**无 per-source**）已声明，**新 Plan SHA 已推送**。
+- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED`，`HEAD 832e5394bb366927c779414ee5a08427bd740a2d` + `branch formal-ir-mainline` + `data 84d62779` + `predecessor V64 80c35647/6c7b00a9 22/24 PASS` 已绑定，显式声明 decoder-free、零 decoder、单 session 单源 72、development_replay、冻结主体、仅 P 重估 + VAL CE + 同家族 +8、不依 EVAL 调参、**m1<1024 && m2<1024** 满秩嵌套披露 constructibility 先验、EVAL 19/24 undetected0（**无 per-source**）已声明，**新 Plan SHA 已推送**。
 - [ ] **单 session 单源冻结可复现（72 overall =24+24+24，单源）**：`CAL 24 blocks (96 frames 24576 pairs) + VAL 24 + EVAL 24 =72` 全部 `20260123_1M_600k_0dB`，`BLOCK 4×256`, `frame 256`，已 `assert` 三段零重叠（`CAL_key∩VAL_key==∅`, `CAL∪VAL_key∩EVAL_key==∅`, `CAL∪VAL∪EVAL_key ∩ (V13∪V48..V64)_key==∅`，键=`(source,session_id,frame_id)`，单 `session_id`），`F_s=2130 K=532 ≥72` 已验，少 72 或任段 ≠24 → `DATA_NOT_READY`，注册表已落盘，标记 `development_replay=true`。
 - [ ] **冻结主体零改已验**：`U=32*U1+U2, GF32 poly37, H1 16×1024 rank16, Lane C ordinal-2 s38310x m2 184（单源）, H_inc Δ8 家族, decoder 90/1.0, full-tag canonical` 全只读，`git diff -- src/ ==0` 且未引 MET。
 - [ ] **单一重估 + VAL CE + 同家族 +8 + 先验校验可复现（decoder-free，无 TBD）**：`CAL C_ab → P(U1|B)/P(U2|U1B) → VAL CE1/CE2/CE_full 链式 |CE_full-CE1-CE2|<1e-9 → m_raw ceil → m_family ceil_to_+8 → m1<1024 && m2<1024 && rank==m && nested && disclosure==5*(m1+m2)+64 && constructible` 已算，`m_raw/aligned` 已回填，`m_raw` 未 cap，`m_family` 显式，若族不能覆盖则 `MATRIX_NOT_CONSTRUCTIBLE`，`EVAL` 未参与，不扩网格，禁第二 estimator。

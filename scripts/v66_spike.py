@@ -189,7 +189,7 @@ def main():
         "per_segment_single_source_blocks":24,
         "pairs_per_segment":24576,
         "frames_per_segment":96,
-        "decoder_free_guard":{"rg_decode_hits":0,"py_compile":"PASS","used_eval_in_estimation":used_eval,"rg_import_decoder_hits":0},
+        "decoder_free_guard":{"rg_decoder_hits":0,"py_compile":"PASS","used_eval_in_estimation":used_eval,"rg_import_dec_hits":0},
         "per_source_spike":{SESSION:{
             "source_label":"1M","session_id":SESSION,
             "C_ab_shape":f"{res['C_shape'][0]}x{res['C_shape'][1]} sum {res['N_cal']}",

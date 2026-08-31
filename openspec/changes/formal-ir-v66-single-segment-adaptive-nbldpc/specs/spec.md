@@ -1,14 +1,14 @@
 # OpenSpec Spec: formal-ir-v66-single-segment-adaptive-nbldpc
 
 **Lifecycle**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED` — 仅 plan 四工件 + decoder-free spike，不改主体/V64/src，不启动 EVAL decoder，已收缩为单 session 单源 72，m1<1024&&m2<1024，已删 per-source 6/8
-**Change**: `formal-ir-v66-single-segment-adaptive-nbldpc` (`V66-ADAPT`, branch `formal-ir-mainline`, HEAD `TBD_NEW_PLAN_SHA`, data `84d62779`, 单 session `20260123_1M_600k_0dB`)
+**Change**: `formal-ir-v66-single-segment-adaptive-nbldpc` (`V66-ADAPT`, branch `formal-ir-mainline`, HEAD `832e5394bb366927c779414ee5a08427bd740a2d`, data `84d62779`, 单 session `20260123_1M_600k_0dB`)
 **Predecessor**: `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) + `formal-ir-v65-new-session-channel-compatibility` — V66 新增单 session 单源自适应门，A-E 全约束，spike 已回填无 TBD
 
 ## 1. 变更类型与生命周期
 
 - **Type**: `SINGLE_SEGMENT_ADAPTIVE_VERIFICATION` — 单连续数据段单源内 `CAL 重估 P + VAL CE自适应冗余 (+8 家族, m1/m2 分别) → 密封 EVAL 19/24 overall verified exact` 闭环，为后续独立授权的 EVAL decoder 度量放行门，一次 `CAL24+VAL24+EVAL24=72 overall` 单 session 单源验证（不跨 session 拼接，少 72→DATA_NOT_READY，可复用旧数据但标记 `development_replay`，VAL CE 门禁，**m1<1024 && m2<1024** 满秩嵌套披露 constructibility 先验，EVAL 密封 **19/24 overall 无 per-source**）。
 - **Lifecycle**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件 + decoder-free spike（`v66_data_readiness.py` + `v66_spike.py` 已回填无 TBD），**不实现 runner，不执行 decoder，不创建 `run_01`，不读 EVAL 统计，不改主体/V64/src**；正式 `run_01` 需独立 `PLAN_ACCEPT` + `EXECUTE_AUTH`；`DEVELOPMENT_BENCHMARK` 表示可复用旧单 session 但显式标记且不作 qualification，**m1/m2 分别判，不用 m_total**。
-- **Branch**: `formal-ir-mainline`；`HEAD` `TBD_NEW_PLAN_SHA` 重核，不一致阻塞；本次推送新 Plan SHA 后停止。
+- **Branch**: `formal-ir-mainline`；`HEAD` `832e5394bb366927c779414ee5a08427bd740a2d` 重核，不一致阻塞；本次推送新 Plan SHA 后停止。
 - **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) — 单 session 单源复用该处理点；`CAL/VAL/EVAL` 各 24 overall 单源；可复用 `v55_intake_20260828` 单 session `20260123_1M_600k_0dB` 但 `development_replay=true`。
 - **Single-source**: 仅 `20260123_1M_600k_0dB`，**已删其余两源**。
 - **Rate feasibility**: **m1<1024 && m2<1024**，不用 `m_total<1024`。
@@ -176,4 +176,4 @@ comparison_bench/outputs_comparison/formal_ir_methods/v66_adaptive/  # 未来 EV
 ## 10. 守卫与验收
 
 - **本轮 plan 自检 gate（A-E 已闭合，已回填）**：`py_compile PASS` 双脚本，`rg "decode_" 0 hits` 双脚本，`git diff -- src/ ==0 && git diff -- experiments/ ==0 && git diff -- tools/ ==0 && git diff -- openspec/changes/formal-ir-v6[0-5]/ ==0` (除本变更+scripts 外零改)，`EVAL` 未读统计已验 (`used_eval_in_estimation==False`)，`m_raw` 未 cap 伪装已验 (`grep "min(1024" 0 hits` 且 `m_family +8` 显式)，**`m1<1024 && m2<1024 && rank_m1==m1 && rank_m2==m2 && nested && disclosure && constructible`** 已验否则 `RATE_NOT_FEASIBLE`/`MATRIX_NOT_CONSTRUCTIBLE`，`G_data 24/段 72 overall 单 session 单源零重叠 (source,session,frame)` 已验，`development_replay` 已标记，`EVAL 19/24 overall undetected0` 预冻结已声明（**无 per-source**），`DECODE_FORBIDDEN` 保持已验，`run_01` 不存在已验，**无 TBD**。
-- **本轮仅 plan 四工件+registry+spike 已回填**，任何 EVAL 实度量需 `Plan SHA TBD_NEW_PLAN_SHA` + `v66_data_registry.json` 实表 + `m1<1024 && m2<1024 rank/nested constructible` 已验后、且独立 `PLAN_ACCEPT` + `EXECUTE_AUTH` 后才允许创建正式实现并执行；`DECODE_FORBIDDEN` 保持至授权。
+- **本轮仅 plan 四工件+registry+spike 已回填**，任何 EVAL 实度量需 `Plan SHA 832e5394bb366927c779414ee5a08427bd740a2d` + `v66_data_registry.json` 实表 + `m1<1024 && m2<1024 rank/nested constructible` 已验后、且独立 `PLAN_ACCEPT` + `EXECUTE_AUTH` 后才允许创建正式实现并执行；`DECODE_FORBIDDEN` 保持至授权。

@@ -1,7 +1,7 @@
 {
   "schema": "v66_data_v1",
   "lifecycle": "PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED",
-  "head": "TBD_NEW_PLAN_SHA",
+  "head": "832e5394bb366927c779414ee5a08427bd740a2d",
   "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
   "processing_rule": "legacy_v1",
   "dimension": 1024,

@@ -1,7 +1,7 @@
 # V66 Single-Segment Adaptive Report (PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK) — single-source 20260123_1M_600k_0dB
 
 **Status**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED` — 预冻结，decoder-free 已回填无 TBD，不含 EVAL decoder 执行  
-**HEAD**: `TBD_NEW_PLAN_SHA` (`formal-ir-mainline`, 推送后新 Plan SHA)  
+**HEAD**: `832e5394bb366927c779414ee5a08427bd740a2d` (`formal-ir-mainline`, 推送后新 Plan SHA)  
 **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`)  
 **Predecessor**: `V64 22/24 full-tag PASS` + `V65 new-session`  
 **Registry**: `v66_data_registry.json` authoritative (CAL24+VAL24+EVAL24 =72 overall 单源 20260123_1M_600k_0dB, development_replay=true)  
@@ -60,7 +60,7 @@ else DEVELOPMENT_BENCHMARK_READY (EVAL 未执行但前三态已过)
 
 ## 8. 独立 Review Packet
 
-- `review/V66_REVIEW_PACKET.md` 已更新单源 72、新 Plan SHA、`m1<1024&&m2<1024`、`MATRIX_NOT_CONSTRUCTIBLE`、无 per-source、无 TBD，需独立线程复核 `HEAD/TBD_NEW_PLAN_SHA, data 84d62779, 单 session 72 24/段, development_replay, zero_overlap (source,session,frame), CAL→VAL CE→m_raw→+8→m1<1024&&m2<1024 rank nested disclosure constructibility, EVAL 未读, 19/24 overall undetected0, 五态` 后方可 `PLAN_ACCEPT`，**不自行 ACCEPT**。
+- `review/V66_REVIEW_PACKET.md` 已更新单源 72、新 Plan SHA、`m1<1024&&m2<1024`、`MATRIX_NOT_CONSTRUCTIBLE`、无 per-source、无 TBD，需独立线程复核 `HEAD/832e5394bb366927c779414ee5a08427bd740a2d, data 84d62779, 单 session 72 24/段, development_replay, zero_overlap (source,session,frame), CAL→VAL CE→m_raw→+8→m1<1024&&m2<1024 rank nested disclosure constructibility, EVAL 未读, 19/24 overall undetected0, 五态` 后方可 `PLAN_ACCEPT`，**不自行 ACCEPT**。
 
 ## 9. 下一步
 
@@ -68,7 +68,7 @@ else DEVELOPMENT_BENCHMARK_READY (EVAL 未执行但前三态已过)
 2. 已执行 `scripts/v66_spike.py` 得 `CE1/CE2/m_raw/m_family/rank/constructibility` 判定 `RATE_NOT_FEASIBLE`/`MATRIX_NOT_CONSTRUCTIBLE` 或 `READY` — **已 READY**。
 3. 独立 review 线程 `Pre-RESULT` 复核后，主线程判 `PLAN_ACCEPT` 或 `revise-required`。
 4. 仅 `READY` 后另起 `EXECUTE_AUTH` 授权 `EVAL 24` decoder 度量 `19/24 overall undetected0`，本轮不创建 `run_01`。
-5. **四工件+registry+spike+脚本已单独提交推送，返回新 Plan SHA `TBD_NEW_PLAN_SHA`（推送后替换）**。
+5. **四工件+registry+spike+脚本已单独提交推送，返回新 Plan SHA `832e5394bb366927c779414ee5a08427bd740a2d`（推送后替换）**。
 
 ## 10. 边界声明
 

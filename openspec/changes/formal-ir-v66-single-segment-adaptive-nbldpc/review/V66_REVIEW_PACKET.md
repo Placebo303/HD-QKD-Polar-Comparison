@@ -1,8 +1,8 @@
 # V66 Independent Review Packet — Pre-RESULT (PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK) — revised single-source 20260123_1M_600k_0dB
 
 **Change**: `formal-ir-v66-single-segment-adaptive-nbldpc`  
-**HEAD**: `TBD_NEW_PLAN_SHA` (`formal-ir-mainline`, 推送后新 40位 Plan SHA — 需 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，40位全量)  
-**ACCEPTED_PLAN_SHA**: `TBD_NEW_PLAN_SHA` (本次修订后单独提交推送的新 Plan SHA；独立线程需 `rg TBD_NEW_PLAN_SHA` 0 hits 在旧 SHA 残留检查 + `rg cabc928f` 0 hits 旧 SHA 已清除)  
+**HEAD**: `832e5394bb366927c779414ee5a08427bd740a2d` (`formal-ir-mainline`, 推送后新 40位 Plan SHA — 需 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，40位全量)  
+**ACCEPTED_PLAN_SHA**: `832e5394bb366927c779414ee5a08427bd740a2d` (本次修订后单独提交推送的新 Plan SHA；独立线程需 `rg 832e5394bb366927c779414ee5a08427bd740a2d` 0 hits 在旧 SHA 残留检查 + `rg cabc928f` 0 hits 旧 SHA 已清除)  
 **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`)  
 **Lifecycle**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED`  
 **Single-source**: `20260123_1M_600k_0dB` 72 overall (CAL24 VAL24 EVAL24)  
@@ -75,12 +75,12 @@
 
 ## 7. 四工件+registry+spike+脚本单独提交推送 (F, new)
 
-- [ ] `proposal.md/design.md/tasks.md/specs/spec.md` 一致 HEAD `TBD_NEW_PLAN_SHA`  
+- [ ] `proposal.md/design.md/tasks.md/specs/spec.md` 一致 HEAD `832e5394bb366927c779414ee5a08427bd740a2d`  
 - [ ] `v66_data_registry.json` single-source 72 已落盘  
 - [ ] `v66_spike_summary.json` 已回填 CE1/CE2/raw/aligned m1/m2 rank nested disclosure constructibility 无 TBD  
 - [ ] `scripts/v66_data_readiness.py` + `scripts/v66_spike.py` 已创建 `rg decode 0 hits` `py_compile PASS`  
 - [ ] `V66_ADAPTIVE_REPORT.md` 已回填无 TBD  
-- [ ] `git log --oneline -1` 显示 `TBD_NEW_PLAN_SHA` 且 `git rev-parse HEAD == origin/formal-ir-mainline` (推送后)  
+- [ ] `git log --oneline -1` 显示 `832e5394bb366927c779414ee5a08427bd740a2d` 且 `git rev-parse HEAD == origin/formal-ir-mainline` (推送后)  
 - [ ] 未创建 `run_01`  
 
 ## 8. 结论
@@ -90,5 +90,5 @@
 - [ ] **不自行 ACCEPT** — 本 packet 仅建议，主线程/用户裁决  
 
 **Reviewer 签名**: _________________  
-**实现线程 SHA 重核**: `git rev-parse HEAD` = `TBD_NEW_PLAN_SHA` (需 40位全量, 推送后)  
+**实现线程 SHA 重核**: `git rev-parse HEAD` = `832e5394bb366927c779414ee5a08427bd740a2d` (需 40位全量, 推送后)  
 **独立复核命令**: `rg "decode_" scripts/v66_*.py` → 0 hits ; `rg "TBD" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits (除 HEAD 占位); `rg "per-source" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits (except history); `rg "m_total<1024" openspec/changes/formal-ir-v66-single-segment-adaptive-nbldpc/` → 0 hits ; `python -m py_compile scripts/v66_*.py` → PASS ; `ls comparison_bench/outputs_comparison/**/v66_*/run_01` → not found ; `python scripts/v66_spike.py --registry v66_data_registry.json` → CE1 0.4207 CE2 0.3907 m1 112 m2 104 constructible true

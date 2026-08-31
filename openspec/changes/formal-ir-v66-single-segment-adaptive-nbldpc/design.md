@@ -1,7 +1,7 @@
 # OpenSpec Design: formal-ir-v66-single-segment-adaptive-nbldpc
 
 **Lifecycle**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED` — **单 session 单源自适应 decoder-free 预冻结，m1<1024&&m2<1024 满秩嵌套 constructibility 先验，未执行 EVAL，已删 per-source 6/8**
-**Cycle**: `V66-ADAPT` (single-segment-adaptive), predecessor `V65 new-session` + `V64 22/24 full-tag PASS (80c35647/6c7b00a9)`，HEAD `TBD_NEW_PLAN_SHA` data `84d62779` 单 session `20260123_1M_600k_0dB`
+**Cycle**: `V66-ADAPT` (single-segment-adaptive), predecessor `V65 new-session` + `V64 22/24 full-tag PASS (80c35647/6c7b00a9)`，HEAD `832e5394bb366927c779414ee5a08427bd740a2d` data `84d62779` 单 session `20260123_1M_600k_0dB`
 **Feasibility**: `V54 43/45` 在 `2026-01-23` 域已证 `H1-16+L1APP+Lane C Δ8+Δ8+full-tag` 有效；`V55 0/90` 已定位跨 session 不兼容提示单段内自适应价值；`V65` 以新 session 两会话验证兼容性；`V66` 反向探索**同 session 内单源 CAL/VAL 自适应冗余**是否可在密封 `EVAL` 获 `19/24 undetected0`（overall），零 `decode_*` 调用闭环。
 **Key judgement**: **单 session 单源内 `VAL CE` 估计的 `m1_raw/m2_raw` 经同家族 `+8` 调整后能否既满足 `m1<1024 && m2<1024 满秩嵌套披露 constructibility` 又满足 `EVAL 19/24 undetected0 overall`**；若 `m` 超限或不可构造则 `RATE_NOT_FEASIBLE`/`MATRIX_NOT_CONSTRUCTIBLE`，若不足 blocks 则 `DATA_NOT_READY`，均不进入 decoder。
 
@@ -59,7 +59,7 @@ assert development_replay==true && replay_source=="v55_intake_20260828"
 ```
 
 - **不足 72 或任段 !=24**：`overall=V66_DATA_NOT_READY` 写 `v66_data_readiness.json` 后零估计停止，不伪造。
-- **注册表**：`v66_data_registry.json` (`schema v66_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head TBD_NEW_PLAN_SHA`) 含 `per_source {20260123_1M_600k_0dB: {CAL_blocks[24], VAL_blocks[24], EVAL_blocks[24], session_id, F_s, K, development_replay, replay_source}, zero_overlap_verified}`。
+- **注册表**：`v66_data_registry.json` (`schema v66_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head 832e5394bb366927c779414ee5a08427bd740a2d`) 含 `per_source {20260123_1M_600k_0dB: {CAL_blocks[24], VAL_blocks[24], EVAL_blocks[24], session_id, F_s, K, development_replay, replay_source}, zero_overlap_verified}`。
 
 ### 3.3 选取理由
 
