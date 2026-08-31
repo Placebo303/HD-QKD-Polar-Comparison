@@ -1,7 +1,7 @@
 # V66 Single-Segment Adaptive Report (PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK) — single-source 20260123_1M_600k_0dB
 
 **Status**: `PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED` — 预冻结，decoder-free 真实 parquet 重算，无 TBD，不含 EVAL decoder 执行  
-**HEAD**: `f458ea03` (本次重做后待推送新 SHA，`git rev-parse HEAD == origin/formal-ir-mainline` 重核)  
+**HEAD**: `99511e62043cf3af04f08aee2569d1291af0101e` (ACCEPTED_PLAN_SHA `832e5394bb366927c779414ee5a08427bd740a2d`，`git rev-parse HEAD == origin/formal-ir-mainline` 重核)  
 **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`)  
 **Predecessor**: `V64 22/24 full-tag PASS` + `V65 new-session`  
 **Registry**: `v66_data_registry.json` authoritative (CAL24+VAL24+EVAL24 =72 overall 单源 20260123_1M_600k_0dB, development_replay=true)  
@@ -21,27 +21,27 @@
 
 ## 3. P 重估 + VAL CE + raw m + 同家族 +8 + 先验校验 (真实 parquet, CAL-only λ, 不依 EVAL, m1<1024&&m2<1024)
 
-| source | λ (CAL-only) | CE1 (VAL) | CE2 (VAL) | CE_full | chain_delta | m1_raw | m2_raw | m_total_raw | m1 (+8) | m2 (+8, ≥184 仅+8) | m_total | disclosure 5*(m1+m2)+64 | eff | rank_m1==m1 | rank_m2==m2 | nested | constructible | feasible |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 20260123_1M_600k_0dB (1M) | 20.0 (CAL 4-fold CV 最优) | 3.9552 | 3.3933 | 7.3485 | 0.0 <1e-9 | 1054 | 904 | 1958 | 1056 | 192 | 1248 | 6304 | 0.838 | false | true | false | false | false |
+| source | λ (CAL-only) | CE1 (VAL) | CE2 (VAL) | CE_full | chain_delta | m1_raw | m2_raw | m_total_raw | m1 (+8) | m2 (+8, ≥184 仅+8) | m_total | disclosure_capped 5*(m1+m2)+64 | disclosure_raw_required 5*(m1_raw+m2_raw)+64 | eff (capped) | rank_m1==m1 | rank_m2==m2 | nested | constructible | feasible |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 20260123_1M_600k_0dB (1M) | 20.0 (CAL 4-fold CV 最优) | 3.9552 | 3.3933 | 7.3485 | 0.0 <1e-9 | 1054 | 904 | 1958 | 1056 | 192 | 1248 | 6304 | 9854 | 0.838 | false | true | false | false | false |
 
 - **λ 冻结 (CAL-only)**: `LAMBDA_CANDIDATES [0.1,0.5,1,2,5,10,20,50]` 在 CAL 24 blocks 内 4-fold CV (每 fold 24 frames 6144 pairs) 计 `CE_full` 平均，最优 `λ=20.0` CV CE 7.3431，最差 0.1 10.621，**仅 CAL 选择，未用 VAL/EVAL**。
 - **公式**: `m1_raw = ceil(1.3*1024*CE1/5)`, `m2_raw = ceil(1.3*1024*CE2/5)`, `m1 = ceil_to_family(m1_raw,+8)`, `m2 = (m2_raw<=184?184 : 184+8)` 仅单步 +8 (指令要求 H2 至少 184 仅+8)，`CE` 为 `VAL` 上 `P(CAL,λ)` 的交叉熵，`EVAL` 未参与。
-- **守卫**: `m_raw` 未 cap，`CE_chain 0.0<1e-9` 已验，`m1 1056>=1024` 与 `m2_raw 904 >192` 单步覆盖不足 → `MATRIX_NOT_CONSTRUCTIBLE true`，`disclosure 6304=5*1248+64` 用实际行数重算，`efficiency 6304/(1024*7.3485)=0.838` 报告。
+- **守卫**: `m_raw` 未 cap，`CE_chain 0.0<1e-9` 已验，`m1 1056>=1024` 与 `m2_raw 904 >192` 单步覆盖不足 → `MATRIX_NOT_CONSTRUCTIBLE true`，`disclosure_capped 6304=5*1248+64` 用实际行数重算，`disclosure_raw_required 9854=5*1958+64` 为未截断理论需求，`efficiency 6304/(1024*7.3485)=0.838` 按 capped 报告（raw 则 9854/7524.9=1.31 已超限）。
 - **H 实际构造**: `H1 16×1024 QC rank16==16 true`, `H1 112×1024 QC rank112==112 true` 但 `H1-16` 非 `H1-112` 前缀 (`contains False`, QC 家族非嵌套)，`H2 184 rank184 true`, `H2 192 rank192 true` 但 `184` 非 `192` 前缀 (`nested False`)，故 `nested_ok false`, `rank_m1_ok false (m1>=1024)` → `RATE_NOT_FEASIBLE`。
 - **先验**: `m1 1056 >=1024` 已触发 `RATE_NOT_FEASIBLE`，`MATRIX_NOT_CONSTRUCTIBLE true`，不启动 decoder。
 
 ## 4. 满秩嵌套披露先验 (进 EVAL 前, m1/m2 分别, 实际 GF32 rank)
 
-- `m1<1024 && m2<1024 && gf_rank(H1(m1))==m1 && gf_rank(H2(m2))==m2 && nested(H) && disclosure==5*(m1+m2)+64 && constructible` — decoder-free 实际 QC 构造+GF32 rank 校验，**未通过** (`m1 1056>=1024, rank_m1 false, nested false, constructible false`) → `overall=V66_RATE_NOT_FEASIBLE` (含 `MATRIX_NOT_CONSTRUCTIBLE` 子类) 不启动 decoder，`disclosure 6304` 已用实际行数重算。**无 TBD**。
+- `m1<1024 && m2<1024 && gf_rank(H1(m1))==m1 && gf_rank(H2(m2))==m2 && nested(H) && disclosure_capped==5*(m1+m2)+64 && constructible` — decoder-free 实际 QC 构造+GF32 rank 校验，**未通过** (`m1 1056>=1024, rank_m1 false, nested false, constructible false`) → `overall=V66_RATE_NOT_FEASIBLE` (含 `MATRIX_NOT_CONSTRUCTIBLE` 子类) 不启动 decoder，`disclosure_capped 6304` 已用实际行数重算（`disclosure_raw_required 9854` 供对照）。**无 TBD**。
 - **H1-112 验证**: `H1-16` 16×1024 rank16，`H1-112` 112×1024 rank112，`contains False` (QC 不嵌套；ponytail: PEG 家族可得 true 嵌套，若吞吐重要可切 PEG，但当前 m1 已超限，嵌套不影响终态)。
 - **H2 验证**: `m2` 至少 184，仅 +8 至 192 单步，`H2-184 rank184 true`, `H2-192 rank192 true`, `nested False` (QC)，且 `m2_raw 904` 需 904 行，单步 192 无法覆盖 → `MATRIX_NOT_CONSTRUCTIBLE`。
 
 ## 5. EVAL 密封门禁 (19/24 overall undetected0, 已删 per-source, 未执行预冻结)
 
 - **规模**: `EVAL 24 blocks (96 frames 24576 pairs)` 单源 20260123_1M_600k_0dB 密封，仅一度量，不回灌 `P/m/λ`。
-- **门禁**: `exact_full ≥19/24 overall (79.17%) && undetected_full_tag==0 && all exact→tag_ok_full && disclosure==5*(m1+m2)+64 && efficiency=disclosure/(1024*CE_full)` 报告。**已删 per-source 6/8，仅 overall**。
-- **本轮**: 未执行（`RATE_NOT_FEASIBLE` 阻断），门禁仅框架冻结，`used_eval==False` 已守卫，`m1/m2` 已冻结 1056/192，`disclosure 6304` 待验但已因先验失败不进入 EVAL。
+- **门禁**: `exact_full ≥19/24 overall (79.17%) && undetected_full_tag==0 && all exact→tag_ok_full && disclosure_capped==5*(m1+m2)+64 (6304) && disclosure_raw_required==5*(m1_raw+m2_raw)+64 (9854) && efficiency=disclosure_capped/(1024*CE_full)` 报告。**已删 per-source 6/8，仅 overall**。
+- **本轮**: 未执行（`RATE_NOT_FEASIBLE` 阻断），门禁仅框架冻结，`used_eval==False` 已守卫，`m1/m2` 已冻结 1056/192，`disclosure_capped 6304 / raw_required 9854` 待验但已因先验失败不进入 EVAL。
 
 ## 6. 五态终态机 (优先级, 已删 per-source, 已改 m1/m2)
 
@@ -64,7 +64,7 @@ else DEVELOPMENT_BENCHMARK_READY (EVAL 未执行但前三态已过)
 
 ## 8. 独立 Review Packet
 
-- `review/V66_REVIEW_PACKET.md` 需更新新 SHA、真实 CE/λ/H rank/nested/disclosure、`MATRIX_NOT_CONSTRUCTIBLE`、`development_replay` 机械审计、fail-closed 证据，需独立线程复核 `HEAD/f458ea03, data 84d62779, 单 session 72 24/段, development_replay+历史键审计, CAL-only λ 20.0, CE1/CE2 真实 parquet, m_raw 1054/904 -> 1056/192 +8 capped, H1-16/112 rank 16/112 contains False, H2 184/192 rank, disclosure 6304, MATRIX_NOT_CONSTRUCTIBLE, 五态 RATE_NOT_FEASIBLE` 后方可 `PLAN_ACCEPT` 或 `revise-required`，**不自行 ACCEPT**。
+- `review/V66_REVIEW_PACKET.md` 需更新新 SHA、真实 CE/λ/H rank/nested/disclosure、`MATRIX_NOT_CONSTRUCTIBLE`、`development_replay` 机械审计、fail-closed 证据，需独立线程复核 `HEAD/99511e62043cf3af04f08aee2569d1291af0101e (plan 832e5394bb366927c779414ee5a08427bd740a2d), data 84d62779, 单 session 72 24/段, development_replay+历史键审计, CAL-only λ 20.0, CE1/CE2 真实 parquet, m_raw 1054/904 -> 1056/192 +8 capped, H1-16/112 rank 16/112 contains False, H2 184/192 rank, disclosure_capped 6304 / disclosure_raw_required 9854, MATRIX_NOT_CONSTRUCTIBLE, 五态 RATE_NOT_FEASIBLE` 后方可 `PLAN_ACCEPT` 或 `revise-required`，**不自行 ACCEPT**。
 
 ## 9. 下一步
 
@@ -76,4 +76,4 @@ else DEVELOPMENT_BENCHMARK_READY (EVAL 未执行但前三态已过)
 
 ## 10. 边界声明
 
-- 本报告不宣称 `FER/SKR/晋升/安全证明`，不比较方法，不转 qualification，`DEVELOPMENT_BENCHMARK` 可复用旧数据但已显式机械审计标记 `development_replay`，与 fresh 区分。**真实 parquet 无手填 JSON**；**CAL-only λ**；**H1-112/H2-184→192 实际 GF32 rank 嵌套已验**；**disclosure 6304 用实际行数重算**；**fail-closed 生产路径，无硬编码 fallback**。
+- 本报告不宣称 `FER/SKR/晋升/安全证明`，不比较方法，不转 qualification，`DEVELOPMENT_BENCHMARK` 可复用旧数据但已显式机械审计标记 `development_replay`，与 fresh 区分。**真实 parquet 无手填 JSON**；**CAL-only λ**；**H1-112/H2-184→192 实际 GF32 rank 嵌套已验**；**disclosure_capped 6304 用实际行数重算，disclosure_raw_required 9854 供对照**；**fail-closed 生产路径，无硬编码 fallback**。
