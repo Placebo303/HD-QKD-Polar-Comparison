@@ -1,9 +1,9 @@
 # OpenSpec Design: formal-ir-v65a-alternative-typeii-working-point-scout
 
-**Lifecycle**: `DRAFT → PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **仅 decoder-free 勘探，固定顺序 162148→2500K→160254，4+4首个通过即停，256/64粗筛仅淘汰，1024/256正式+32 TEST规划，V65不动**
+**Lifecycle**: `PLAN_CANDIDATE → IMPLEMENTATION_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **仅 decoder-free 勘探，固定顺序 162148→2500K→160254，4+4首个通过即停，256/64粗筛仅淘汰，1024/256正式+32 TEST规划，V65不动；真实 Stage0/Stage1 尚未运行**
 **Cycle**: `V65A` (alternative-typeii-working-point-scout), predecessor `V65` `DATA_NOT_READY` (三源 qualification 不动)
 **Branch**: `formal-ir-mainline` HEAD `TBD→新 Plan SHA` data SHA `84d62779` (d1024 bw200 nearest legacy_v1 单点)
-**Feasibility**: V65 DATA_NOT_READY 已证三源新鲜域在 `4096+512` hierarchical 先验下未达 `m≤16/200` 门禁；V65A 转向**单候选单 session Type-II 备用点**，以最小物化代价逐一验证 materialization 合同，若首候选 `4+4` 即通过则进入 `256/64` 粗筛淘汰明显不兼容者，最后以 `1024/256` 重表征密封 `32 TEST`。零 decoder 闭环。
+**Feasibility**: V65 仅因冻结 CAL/TEST session 仍为 `PENDING` 而停在 `DATA_NOT_READY`；当时 `λ/CE/m` 均为 null，未证明模型或码率失败。V65A 转向**单候选单 session Type-II 备用点**，以最小物化代价逐一验证 materialization 合同，若首候选 `4+4` 即通过则进入 `256/64` 粗筛淘汰明显不兼容者，最后以 `1024/256` 重表征密封 `32 TEST`。零 decoder 闭环。
 
 ## 1. 科学问题与关键判断
 
@@ -21,7 +21,7 @@
 | m2 per source (frozen) | 184/190/192 (L2) → m_total 216/222/224 (full 16+m2) | Lane C ordinal-2 |
 | m1 | 16 | V31-H1-QC 16×1024 |
 | leak | `5*(16+m2)+64 =5*m_total+64 =1144/1174/1184` | V64/V65 |
-| 处理点 | `d1024 bw200 nearest legacy_v1 A1/B5 200ps` 单点 `84d62779` | V55/V56/V65 |
+| 处理点 | `d1024 bw200 nearest legacy_v1 200ps` 单点 `84d62779` | V55/V56/V65；通道与 timing 参数必须由候选 sidecar/raw 显式提供 |
 | V56 contract | `dimension 1024 / bin200 / nearest legacy_v1 / channels/frame anchor/mapping per frame 256 A=32U1+U2 B=32V1+V2 + 峰/延时算法` | V56 权威 |
 | V65 终态 | `DATA_NOT_READY` 三源 `4096+512+120` | V65 保持不动 |
 | V65A 候选 | 固定三候选 `162148 → 2500K → 160254`，首个 `VERIFY_PASS` 即停 | 本变更冻结 |
@@ -34,23 +34,33 @@
 
 | 序 | 候选 session | 期望路径片段 (PROJECT_DATA_ROOT 下) | 备注 |
 |---|---|---|---|
-| 1 | `2026-01-13 162148` | `.../2026-01-13/162148/` (或 `20260113_162148`) | 首选 |
-| 2 | `2026-01-07 2500K` | `.../2026-01-07/2500K/` | 次选 |
-| 3 | `2026-01-07 160254` | `.../2026-01-07/160254/` | 末选 |
+| 1 | `2026-01-13 162148` | `.../2026.1.13/SHG_Type2PPLN_3s_2_2026-01-13_162148/` | 首选；本地双 meta 的外部 provenance 冲突必须阻断 |
+| 2 | `2026-01-07 2500K` | `.../2026.1.7/Type2PPLN_2500K_3s_2026-01-07_174324.1.ttbin` | 次选；本地 raw 已盘点，sidecar 待候选自带 |
+| 3 | `2026-01-07 160254` | `.../2026.1.7/Type2PPLN_3s_2026-01-07_160254.1.ttbin` | 末选；本地 raw 已盘点，sidecar 待候选自带 |
 
 - **顺序冻结**：`candidates_ordered[0] > [1] > [2]` 优先级高→低，不以数据可用性、历史性能、文件大小重排。脚本启动即 `assert candidates_ordered == frozen_order`。
 - **停止规则**：`for cand in candidates_ordered: verify 8 frames; if PASS: selected=cand; break`。`selected` 后不再物化后续候选，`materialized_candidates_count == index(selected)+1`。
-- **Batch 禁止**：脚本内仅对当前 `cand` 调用 `materialize_frames(cand, n=8)`，禁止循环外一次性 `for cand in candidates: load_all`。守卫 `materialized_frames_total <= 8 * checked` 在 Stage0。
+- **Batch 禁止**：脚本内仅对当前 `cand` 调用 `materialize_frames(cand, n=8)`，禁止循环外一次性 `for cand in candidates: load_all`。优先读取候选本地已有 pairs/sidecar；缺 path/sidecar 时不读 raw 补齐。守卫 `materialized_frames_total <= 8 * checked` 在 Stage0。
+
+### 3.2 Provenance tier 与当前候选的 provisional 分类
+
+| Tier | 定义 | 允许用途 |
+|---|---|---|
+| A | 未影响 V36–V64 NB-LDPC 的 prior、矩阵、标签、码率、门禁或解释 | 完成外部使用账本后可作未来独立 TEST |
+| B | 早期用于 Polar、Cascade 或无关分析，但未影响当前 NB-LDPC | development/generalization，不直接作独立 TEST |
+| C | 参与 V36–V64 当前 NB-LDPC 决策 | 仅回归/机制检查 |
+
+仓库只读检索未发现三候选进入 V36–V64 NB-LDPC 注册表，因此当前均记为 **B-provisional**：`162148` 有早期 PIESKR 元数据，`2500K` 与 `160254` 有早期 Type-II raw inventory。该分类不是最终 A 资格；外部使用账本尚不完整，若发现当前 NB-LDPC 影响则立即改为 C，只有完成“不影响当前决策”的显式核对后才可改为 A。`162148` 的本地两个 meta 文件还指向 `D:\SPDC源测试`，与实际候选目录冲突，必须在 Stage0 阻断。
 
 ### 3.2 阶段递进（含物化预算）
 
 | 阶段 | 输入 | 物化帧 | pairs | 产出 | 门禁性质 | 本轮是否执行 |
 |---|---|---|---|---|---|---|
-| Stage0 verify | 每候选单 session | 4+4 =8 | 2048 | `VERIFY_PASS/FAIL` per candidate | 硬门 (G-verify) | ✅ 执行（逐一至首个 PASS） |
-| Stage1 coarse | selected only | 256 CAL +64 VAL =320 | 81920 | `REJECT / ELIGIBLE_FOR_FORMAL` | 仅淘汰，不能 READY | ✅ 执行（仅 selected） |
+| Stage0 verify | 每候选单 session | 4+4 =8 | 2048 | `VERIFY_PASS/FAIL` per candidate | 硬门 (G-verify) | 🔒 脚本已实现，本轮未运行真实数据 |
+| Stage1 coarse | selected only | 256 CAL +64 VAL =320 | 81920 | `REJECT / ELIGIBLE_FOR_FORMAL` | 仅淘汰，不能 READY | 🔒 脚本已实现，本轮未运行真实数据 |
 | Stage2 formal | selected only | 1024 CAL +256 VAL +32 TEST =1312 | 335872 | `FORMAL_READY / RATE_INCOMPATIBLE / MODEL_NOT_STABLE` | 正式门禁 | 🔒 仅规划，本轮不执行全量计算 |
 
-- **本轮物化上限**：若 Stage0 在候选1即 PASS，则本轮执行 `8 + 320 =328 frames (83968 pairs)`；若候选1 FAIL 候选2 PASS，则 `16 +320=336 frames`；最差三候选均 FAIL 则 `24 frames` 即停。Stage2 `1312 frames` 仅规划，不在本轮物化至 `READY`（需新 PLAN_ACCEPT）。
+- **后续执行物化上限**：若 Stage0 在候选1即 PASS，则 Stage0+Stage1 最多 `8 + 320 =328 frames (83968 pairs)`；若候选1 FAIL 候选2 PASS，则 `16 +320=336 frames`；最差三候选均 FAIL 则 `24 frames` 即停。本轮只做编译与 focused fake 测试，不物化真实候选；Stage2 `1312 frames` 仅规划，不在本轮物化至 `READY`（需新 PLAN_ACCEPT）。
 - **Frame 定义**：`FRAME=256 pairs`, `frame_id∈[0,F_s-1]` 连续，`BLOCK 4×256=1024 symbols`，`pairs_per_frame 256` 校验，`A=32U1+U2 B=32V1+V2` 每帧。
 
 ## 4. 输入合同 — 严格复用 V56 权威算法（逐项显式，sign/50ps 门禁）
@@ -63,16 +73,16 @@
 | 2 | bin_width | 200 ps | global，算法一致 |
 | 3 | pairing | `nearest`, double-pointer `bin//1024` 消歧 | `pair_sequence a=binA%1024,b=binB%1024` 算法一致 |
 | 4 | rule/mapping | `legacy_v1` | `sym → U1/U2` 算法一致 |
-| 5 | channels | `A:1 , B:5` (type2) 或 cand-specific 显式 | `counts per channel` 算法一致，落盘 `channels_used` |
+| 5 | channels | 候选 sidecar/raw 显式给出一对 distinct channels；不预设数值 | `counts per channel` 算法一致，落盘 `channels_used` |
 | 6 | delay | `delay_used_ps` 候选独立重算 peak 后 `sign(delay)==sign(peak) && |delay-peak|<50ps` | `delay_used_ps` per candidate |
 | 7 | peak/sigma/gate/threshold | `peak_center` 独立重算, `sigma 50-150ps, gate 200ps, threshold 40000ps` | 每 candidate 实测 |
 | 8 | frame anchor | `frame_start_ps / period 204800ps / floor_div` | `204800=1024×200` 配对尺度 |
 | 9 | mapping | `legacy_v1` symbol `0..1023` | `alice/bob symbols` |
 | 10 | U1/U2 | `A=32U1+U2, B=32V1+V2, U1=sym>>5, U2=sym&31, 每帧256` | per pair |
 
-- **只读复用**：直接复用 `src.reconciliation.run_nbldpc_demo_point._read_ttbin_timetags/_bin_indices_sorted_for_binwidth/_pairs_from_sorted_bins` + `legacy_v1` mapping 的 V56 验证版算法，不重写近似版；候选 `peak` 独立重算，`sidecar/build_manifest` 追溯失败则 `VERIFY_FAIL → EVIDENCE_INVALID`。
+- **只读复用**：优先读取候选目录内已有 pairs/sidecar；只有当前候选 provenance、channels、timing 与处理参数闭合后，才按需复用 `src.reconciliation.run_nbldpc_demo_point._read_ttbin_timetags/_bin_indices_sorted_for_binwidth/_pairs_from_sorted_bins` + `legacy_v1` mapping 的 V56 验证版算法，不重写近似版。sidecar 缺失、多个冲突、路径指向外部位置或 candidate-specific 参数缺失时，先报 `DATA_NOT_READY/INCOMPATIBLE`，不以默认值补齐。
 - **8帧校验**：对 `4+4` 的 8 帧输出 `alice_symbols[8×256], bob_symbols[8×256]`，校验 `A/B ∈[0,1023]` 且 `F03 U1>>5 &31` 可分解，缺失/非 `256` 则 `VERIFY_FAIL`。
-- **G-verify**：`VERIFY_PASS_s = (dimension==1024 && bin==200 && pairing==nearest && rule==legacy_v1 && channels⊇{1,5} && sign(delay)==sign(peak) && |delay-peak|<50ps && sigma∈[50,150] && gate==200 && threshold==40000 && period==204800 && 每帧256 A/B映射)`，任一 False 则 `VERIFY_FAIL` 进入下一候选。
+- **G-verify**：`VERIFY_PASS_s = (dimension==1024 && bin==200 && pairing==nearest && assignment==double_pointer_bin_div_dimension && rule==legacy_v1 && channels_explicit_and_distinct && provenance_matches_candidate && sign(delay)==sign(peak) && |delay-peak|<50ps && sigma∈[50,150] && gate==200 && threshold==40000 && period==204800 && 每帧256 A/B映射)`，任一 False 则 `VERIFY_FAIL` 进入下一候选；缺证据与显式冲突不能当作 PASS。
 
 ## 5. 估计器 — 单一 hierarchical（Stage1 粗筛与 Stage2 正式同算法，Stage2 仅规划）
 
@@ -114,7 +124,7 @@ chosen λ* = argmin via 50-point log grid + Brent refine
 - **粗筛阈**：`G2 λ不触界, G3 ΔNLL≤0.75(放宽 vs V65 0.50), G4 Val NLL≤H_cal+1.5(放宽), G5 unseen≤2%, G6 m1≤16, G7 m2≤200(按 Type-II 单点, 三档收敛为单阈), G8 provenance+CE链式` — 粗筛任一 FAIL → `REJECT`；粗筛全过 → `ELIGIBLE_FOR_FORMAL`（不为 READY）。
 - **正式阈**：`G2 λ不触界, G3 ΔNLL≤0.50, G4 Val NLL≤H_cal+1.0, G5 unseen≤1%, G6 m1≤16, G7 m2≤200, G7-aux m_total≤216, G8 provenance+CE链式` 全过才 `FORMAL_READY`（本轮仅规划，执行后判定）。
 
-## 6. 每源报告与泄漏预算（Stage1 实报，Stage2 规划）
+## 6. 每源报告与泄漏预算（Stage1 字段定义，Stage2 规划）
 
 ### 6.1 报告量（per selected candidate, Stage1 实测 + Stage2 规划）
 
