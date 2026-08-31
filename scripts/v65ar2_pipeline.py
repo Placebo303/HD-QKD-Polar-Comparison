@@ -158,40 +158,71 @@ def phase_r(candidate: str, raw_root: str | None = None, contract: str | None = 
         b0,b1,meta_bin = _bin_indices_sorted_for_binwidth(tt, BIN_WIDTH_PS)
         pairs, pmeta = _pairs_from_sorted_bins(b0, b1, Q)
         n_pairs = int(pairs.shape[0]) if pairs.size else 0
-        # quick timing metrics: histogram of delta bins
+        # real histogram peak from t-delta (ponytail: histogram, not forced == delay)
         import numpy as np
-        # compute peak from delta bin distribution (b0-b1 for paired? use sorted pairing already matched by frame)
-        # Use simple stats on pairs: symbol correlation not timing; for timing use tt deltas
-        # Compute p2bg etc via rough: peak_center ~ median of (b0 matched bin diff) * bw
-        # For paired pairs, b0%Q and b1%Q are symbols; timing peak derived from b0//Q vs b1//Q matching already.
-        # Derive peak_center as 0 if pairing succeeded (since matched frames), else difference
-        # Real peak: compute histogram of t differences for nearest pairs within window via b0,b1 raw indices not frame-matched
-        # Simplified: use meta
-        peak_center = 0  # matched frames => zero offset; real sigma from pair symbol QBER?
-        # compute sigma as std of symbol delta
+        def _estimate_peak_histogram(tt_obj, bw_ps=BIN_WIDTH_PS, window_ps=50000):
+            try:
+                t0 = np.asarray(tt_obj.TimeTag[tt_obj.Ch==0], dtype=np.int64)
+                t1 = np.asarray(tt_obj.TimeTag[tt_obj.Ch==1], dtype=np.int64)
+                if t0.size==0 or t1.size==0:
+                    return None
+                t1_sorted = np.sort(t1)
+                # nearest delta for each t0 via searchsorted
+                idx = np.searchsorted(t1_sorted, t0)
+                # clip idx
+                deltas=[]
+                for i, tv in enumerate(t0):
+                    j = int(idx[i])
+                    best=None
+                    best_abs=None
+                    for cand in (j-1, j):
+                        if 0 <= cand < t1_sorted.size:
+                            d = int(tv) - int(t1_sorted[cand])
+                            if abs(d) <= window_ps:
+                                if best_abs is None or abs(d) < best_abs:
+                                    best=d; best_abs=abs(d)
+                    if best is not None:
+                        deltas.append(best)
+                if not deltas:
+                    return None
+                deltas=np.array(deltas, dtype=np.int64)
+                # bins centered at 0 (so delta ~0 maps to center 0, not 100)
+                bins = np.arange(-window_ps - bw_ps/2, window_ps + bw_ps/2 + 1, bw_ps)
+                hist, edges = np.histogram(deltas, bins=bins)
+                if hist.size==0 or hist.max()==0:
+                    return None
+                peak_bin = int(np.argmax(hist))
+                # refine peak as mean of deltas inside peak bin (sub-bin accuracy)
+                lo, hi = edges[peak_bin], edges[peak_bin+1]
+                in_bin = deltas[(deltas>=lo)&(deltas<hi)]
+                if in_bin.size:
+                    peak_center = float(np.median(in_bin))
+                else:
+                    peak_center = float((lo+hi)/2.0)
+                return peak_center
+            except Exception:
+                return None
+        peak_hist = _estimate_peak_histogram(tt, BIN_WIDTH_PS, THR_PS+10000)
+        # fallback to 0 if insufficient data (will cause FAIL unless delay also 0)
+        peak_center = float(peak_hist) if peak_hist is not None else 0.0
+        # sigma from symbol delta spread + histogram width fallback
         if n_pairs:
             delta = (pairs[:,0].astype(int) - pairs[:,1].astype(int)) % Q
-            sigma = float(delta.std()) * BIN_WIDTH_PS / 10  # rough scaling
+            sigma = float(delta.std()) * BIN_WIDTH_PS / 10
             sigma = max(50, min(150, sigma))
         else:
             sigma = 100
-        # frame anchor from pairs grouping
         frame_anchor = {"period_ps": 204800, "mapping":"legacy_v1"}
-        # enforce per-candidate timing differing: include candidate hash in peak for test candidate-specific check
-        # (don't hardcode 50/45; real derived above)
         delay_used = int(contract_entry.get("delay_used_ps", 0))
-        # if delay not in contract, estimate as peak_center
-        if delay_used==0: delay_used=int(peak_center)
-        # bind peak to delay for PHASE_R_PASS: ensure sign match and |delay-peak|<50
-        # adjust peak to satisfy if needed? No, must fail if not satisfy -> realistic
-        # For test, we set peak_center = delay_used (makes pass)
-        peak_center = float(delay_used)
-        if peak_center==0 and delay_used==0: peak_center=0
+        if delay_used==0 and peak_hist is None:
+            # no delay in contract and no histogram -> keep 0
+            delay_used=0
+        # do NOT force peak_center = delay_used; keep true histogram peak (mismatch -> FAIL per G1)
         sigma = float(contract_entry.get("sigma_ps", sigma))
         gate = int(contract_entry.get("gate_ps", GATE_PS))
         thr = int(contract_entry.get("threshold_ps", THR_PS))
-        # G1 pre-check
-        sign_ok = (math.copysign(1, delay_used) == math.copysign(1, peak_center)) or (delay_used==0 and peak_center==0)
+        # G1 pre-check (ponytail: product>=0 allows delay 0 vs small jitter)
+        sign_ok = bool(delay_used * peak_center >= 0)
         abs_ok = abs(delay_used - peak_center) < 50
         sigma_ok = 50 <= sigma <= 150
         gate_ok = gate==200
@@ -402,38 +433,65 @@ def run_stage0(candidate_order, raw_root_map: dict, contract_map: dict, forbidde
 def run_stage1(selected: str, raw_root: Path, contract: Path, forbidden_keys=None, cal_frames=256, val_frames=64):
     contract_entry=_load_contract(contract, selected)
     pairs=_materialize_pairs(raw_root, contract_entry, selected)
-    need=(cal_frames+val_frames)*256
+    # offset start_frame to avoid overlap with forbidden_keys (ponytail: max frame_id+1)
+    forb_set=set(forbidden_keys) if forbidden_keys else set()
+    start_frame=0
+    if forb_set:
+        same=[t for t in forb_set if isinstance(t,tuple) and len(t)==3 and t[0]==selected and t[1]==raw_root.name]
+        if same:
+            try: start_frame=max(t[2] for t in same)+1
+            except: start_frame=0
+    need=(start_frame+cal_frames+val_frames)*256
     if len(pairs) < need:
         return {"status":"FAIL","reason":"insufficient frames Stage1"}
-    cal_a=pairs[:cal_frames*256,0]; cal_b=pairs[:cal_frames*256,1]
-    val_a=pairs[cal_frames*256:(cal_frames+val_frames)*256,0]; val_b=pairs[cal_frames*256:(cal_frames+val_frames)*256,1]
-    est=hierarchical_estimate(cal_a, cal_b, val_a, val_b)
-    g1=True; g2=not est["at_boundary"]; g3=est["d_nll"]<=0.5; g4=est["val_nll"]<=est["H"]+1.0; g5=est["unseen"]<=0.01
-    g8=est["chain_delta_CE"]<1e-9
-    PASS = all([g1,g2,g3,g4,g5,g8]) # G6/G7 not gate for fail, only rate branch
-    branch=rate_branch(est["m1_req"], est["m2_req"], selected)
-    return {"est":est,"gates":{"G1":g1,"G2":g2,"G3":g3,"G4":g4,"G5":g5,"G8":g8,"PASS":PASS},"status":"PASS" if PASS else "FAIL","rate_branch":branch}
-
-def run_stage2(selected: str, raw_root: Path, contract: Path, forbidden_keys=None, cal_frames=1024, val_frames=256):
-    contract_entry=_load_contract(contract, selected)
-    pairs=_materialize_pairs(raw_root, contract_entry, selected)
-    need=(cal_frames+val_frames+32)*256
-    if len(pairs) < need:
-        return {"status":"DATA_NOT_READY","reason":f"need {need} pairs have {len(pairs)}"}
-    cal_a=pairs[:cal_frames*256,0]; cal_b=pairs[:cal_frames*256,1]
-    val_a=pairs[cal_frames*256:(cal_frames+val_frames)*256,0]; val_b=pairs[cal_frames*256:(cal_frames+val_frames)*256,1]
+    off=start_frame*256
+    cal_a=pairs[off:off+cal_frames*256,0]; cal_b=pairs[off:off+cal_frames*256,1]
+    val_a=pairs[off+cal_frames*256:off+(cal_frames+val_frames)*256,0]; val_b=pairs[off+cal_frames*256:off+(cal_frames+val_frames)*256,1]
+    # triples for overlap check
+    cal_triples=[(selected, raw_root.name, start_frame+i) for i in range(cal_frames)]
+    val_triples=[(selected, raw_root.name, start_frame+cal_frames+i) for i in range(val_frames)]
+    ov=check_frame_overlap(cal_triples, val_triples, None, forb_set)
+    if not ov["cal∩val_empty"] or ov["forbidden_overlap"]:
+        return {"status":"FAIL","reason":"frame_overlap_forbidden","overlap":ov, "cal_triples":cal_triples, "val_triples":val_triples}
     est=hierarchical_estimate(cal_a, cal_b, val_a, val_b)
     g1=True; g2=not est["at_boundary"]; g3=est["d_nll"]<=0.5; g4=est["val_nll"]<=est["H"]+1.0; g5=est["unseen"]<=0.01
     g8=est["chain_delta_CE"]<1e-9
     PASS = all([g1,g2,g3,g4,g5,g8])
     branch=rate_branch(est["m1_req"], est["m2_req"], selected)
-    # TEST32 seal from remaining frames (not using loader)
-    test_pairs=pairs[(cal_frames+val_frames)*256:(cal_frames+val_frames+32)*256]
-    # identity seal: derive frame ids from remaining
-    test_start=cal_frames+val_frames
+    all_triples=cal_triples+val_triples
+    return {"est":est,"gates":{"G1":g1,"G2":g2,"G3":g3,"G4":g4,"G5":g5,"G8":g8,"PASS":PASS},"status":"PASS" if PASS else "FAIL","rate_branch":branch, "cal_triples":cal_triples, "val_triples":val_triples, "all_triples":all_triples, "start_frame":start_frame, "overlap":ov}
+
+def run_stage2(selected: str, raw_root: Path, contract: Path, forbidden_keys=None, cal_frames=1024, val_frames=256):
+    contract_entry=_load_contract(contract, selected)
+    pairs=_materialize_pairs(raw_root, contract_entry, selected)
+    forb_set=set(forbidden_keys) if forbidden_keys else set()
+    start_frame=0
+    if forb_set:
+        same=[t for t in forb_set if isinstance(t,tuple) and len(t)==3 and t[0]==selected and t[1]==raw_root.name]
+        if same:
+            try: start_frame=max(t[2] for t in same)+1
+            except: start_frame=0
+    need=(start_frame+cal_frames+val_frames+32)*256
+    if len(pairs) < need:
+        return {"status":"DATA_NOT_READY","reason":f"need {need} pairs have {len(pairs)}"}
+    off=start_frame*256
+    cal_a=pairs[off:off+cal_frames*256,0]; cal_b=pairs[off:off+cal_frames*256,1]
+    val_a=pairs[off+cal_frames*256:off+(cal_frames+val_frames)*256,0]; val_b=pairs[off+cal_frames*256:off+(cal_frames+val_frames)*256,1]
+    est=hierarchical_estimate(cal_a, cal_b, val_a, val_b)
+    g1=True; g2=not est["at_boundary"]; g3=est["d_nll"]<=0.5; g4=est["val_nll"]<=est["H"]+1.0; g5=est["unseen"]<=0.01
+    g8=est["chain_delta_CE"]<1e-9
+    PASS = all([g1,g2,g3,g4,g5,g8])
+    branch=rate_branch(est["m1_req"], est["m2_req"], selected)
+    cal_triples=[(selected, raw_root.name, start_frame+i) for i in range(cal_frames)]
+    val_triples=[(selected, raw_root.name, start_frame+cal_frames+i) for i in range(val_frames)]
+    test_start=start_frame+cal_frames+val_frames
     test_triples=[(selected, raw_root.name, test_start+i) for i in range(32)]
     if len(test_triples)!=32: return {"status":"DATA_NOT_READY"}
-    return {"est":est,"gates":{"G1":g1,"G2":g2,"G3":g3,"G4":g4,"G5":g5,"G8":g8,"PASS":PASS},"status":"PASS" if PASS else "FAIL","rate_branch":branch,"test32":{"session_id":raw_root.name,"frames":test_triples,"blocks":8,"pairs":8192,"identity_only":True,"used_test_in_estimation":False}}
+    ov=check_frame_overlap(cal_triples, val_triples, test_triples, forb_set)
+    if not ov["cal∩val_empty"] or not ov["cal∪val∩test_empty"] or ov["forbidden_overlap"]:
+        return {"status":"FAIL","reason":"frame_overlap_forbidden","overlap":ov}
+    if len(test_triples)!=32: return {"status":"DATA_NOT_READY"}
+    return {"est":est,"gates":{"G1":g1,"G2":g2,"G3":g3,"G4":g4,"G5":g5,"G8":g8,"PASS":PASS},"status":"PASS" if PASS else "FAIL","rate_branch":branch,"test32":{"session_id":raw_root.name,"frames":test_triples,"blocks":8,"pairs":8192,"identity_only":True,"used_test_in_estimation":False}, "cal_triples":cal_triples, "val_triples":val_triples, "all_triples":cal_triples+val_triples+test_triples, "start_frame":start_frame, "overlap":ov}
 
 def run_pipeline(candidate_order=None, raw_root_map=None, contract_map=None, forbidden_keys=None, out_dir: str | None=None, **kwargs):
     candidate_order=candidate_order or CANDIDATE_ORDER
@@ -449,7 +507,6 @@ def run_pipeline(candidate_order=None, raw_root_map=None, contract_map=None, for
     s0=run_stage0(candidate_order, raw_root_map, contract_map, forbidden_keys)
     selected=s0["selected"]
     if selected is None:
-        # check if any phase_r pass else PHASE_R_FAIL
         any_pr_pass=any(v.get("phase_r",{}).get("status")=="PASS" for v in s0["per_candidate"].values())
         overall="V65AR2_PHASE_R_FAIL" if not any_pr_pass else "V65AR2_STAGE0_NO_CANDIDATE"
         res={"candidate_order":candidate_order,"binding":bind,"per_candidate":s0["per_candidate"],"selected":None,"overall":overall,"zero_overlap_verified":True}
@@ -458,9 +515,12 @@ def run_pipeline(candidate_order=None, raw_root_map=None, contract_map=None, for
             if op.exists(): raise FileExistsError(f"additive exists {op}")
             op.write_text(json.dumps(res, indent=2, default=str), encoding="utf-8")
         return res
-    # Stage1
+    # Stage1 with accumulated forbidden (s0 triples) to ensure cross-stage zero overlap
     rr=Path(raw_root_map[selected]); cp=Path(contract_map[selected])
-    s1=run_stage1(selected, rr, cp, forbidden_keys)
+    s0_triples=set(s0.get("all_triples",[]))
+    forb_s1=set(forbidden_keys) if forbidden_keys else set()
+    forb_s1 = forb_s1 | s0_triples
+    s1=run_stage1(selected, rr, cp, forb_s1)
     if s1.get("status")!="PASS":
         overall="V65AR2_STAGE1_FAIL" if s1.get("status")=="FAIL" else s1.get("status")
         res={"candidate_order":candidate_order,"binding":bind,"per_candidate":s0["per_candidate"],"selected":selected,"stage1":s1,"overall":overall}
@@ -469,7 +529,9 @@ def run_pipeline(candidate_order=None, raw_root_map=None, contract_map=None, for
             if op.exists(): raise FileExistsError(f"additive exists {op}")
             op.write_text(json.dumps(res, indent=2, default=str), encoding="utf-8")
         return res
-    s2=run_stage2(selected, rr, cp, forbidden_keys)
+    s1_triples=set(s1.get("all_triples",[]))
+    forb_s2=forb_s1 | s1_triples
+    s2=run_stage2(selected, rr, cp, forb_s2)
     if s2.get("status")=="DATA_NOT_READY":
         res={"candidate_order":candidate_order,"binding":bind,"per_candidate":s0["per_candidate"],"selected":selected,"stage1":s1,"stage2":s2,"overall":"V65AR2_DATA_NOT_READY"}
         if out_dir:
@@ -484,11 +546,18 @@ def run_pipeline(candidate_order=None, raw_root_map=None, contract_map=None, for
             if op.exists(): raise FileExistsError(f"additive exists {op}")
             op.write_text(json.dumps(res, indent=2, default=str), encoding="utf-8")
         return res
+    # cross-stage zero-overlap assertion (CAL∪VAL∪TEST mutually exclusive and disjoint from V13..V65 forbidden)
+    s0_set=set(s0.get("all_triples",[])); s1_set=set(s1.get("all_triples",[])); s2_set=set(s2.get("all_triples",[]))
+    forbidden_base=set(forbidden_keys) if forbidden_keys else set()
+    cross_ok = len(s0_set & s1_set)==0 and len(s0_set & s2_set)==0 and len(s1_set & s2_set)==0 and len((s0_set|s1_set|s2_set) & forbidden_base)==0
+    # if overlap detected, downgrade to FAIL (enforces reviewer requirement)
+    if not cross_ok:
+        return {"candidate_order":candidate_order,"binding":bind,"per_candidate":s0["per_candidate"],"selected":selected,"stage1":s1,"stage2":s2,"overall":"V65AR2_STAGE2_FAIL","reason":"cross_stage_overlap","cross_stage_overlap":{"s0∩s1":len(s0_set & s1_set),"s0∩s2":len(s0_set & s2_set),"s1∩s2":len(s1_set & s2_set),"forbidden∩all":len((s0_set|s1_set|s2_set) & forbidden_base)}}
     branch=s2.get("rate_branch","WITHIN_FROZEN_BUDGET")
     if branch=="FULL_DISCLOSURE_LAYER": overall="V65AR2_FULL_DISCLOSURE_LAYER"
     elif branch=="RATE_ADAPTATION_REQUIRED": overall="V65AR2_RATE_ADAPTATION_REQUIRED"
     else: overall="V65AR2_READY"
-    res={"candidate_order":candidate_order,"binding":bind,"per_candidate":s0["per_candidate"],"selected":selected,"stage1":s1,"stage2":s2,"overall":overall,"rate_branch":branch}
+    res={"candidate_order":candidate_order,"binding":bind,"per_candidate":s0["per_candidate"],"selected":selected,"stage1":s1,"stage2":s2,"overall":overall,"rate_branch":branch,"zero_overlap_verified":True, "cross_stage_overlap":{"s0∩s1":0,"s0∩s2":0,"s1∩s2":0}}
     if out_dir:
         op=Path(out_dir)/"v65ar2_pipeline_result.json"
         if op.exists(): raise FileExistsError(f"additive exists {op}")
