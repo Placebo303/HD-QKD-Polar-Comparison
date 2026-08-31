@@ -1,0 +1,30 @@
+{
+  "schema": "v65a_manifest_v1",
+  "guards": {
+    "decoder_calls": 0,
+    "test_statistics_used": false,
+    "historical_result_files_read": false,
+    "batch_materialization": false,
+    "stage2_executed": false,
+    "coarse_cannot_ready": true
+  },
+  "fixed_contract": {
+    "dimension": 1024,
+    "bin_width_ps": 200,
+    "pairing": "nearest",
+    "pair_assignment": "double_pointer_bin_div_dimension",
+    "processing_rule": "legacy_v1",
+    "frame_period_ps": 204800,
+    "frame_division": "floor_div",
+    "frame_bins": 1024,
+    "pairs_per_frame": 256,
+    "threshold_ps": 40000,
+    "gate_ps": 200
+  },
+  "materialized_frames_total": 0,
+  "candidate_order": [
+    "2026-01-13 162148",
+    "2026-01-07 2500K",
+    "2026-01-07 160254"
+  ]
+}

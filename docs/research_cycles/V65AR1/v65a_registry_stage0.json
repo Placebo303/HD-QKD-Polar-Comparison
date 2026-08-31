@@ -1,0 +1,198 @@
+{
+  "schema": "v65a_v1",
+  "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
+  "candidates_ordered": [
+    {
+      "candidate_id": "2026-01-13 162148",
+      "path_parts": [
+        "2026.1.13",
+        "SHG_Type2PPLN_3s_2_2026-01-13_162148"
+      ],
+      "raw_name": "SHG_Type2PPLN_3s_2_2026-01-13_162148.1.ttbin",
+      "provisional_tier": "B",
+      "tier_basis": "Early Type-II/PIE-SKR-era material; no V36-V64 NB-LDPC reference found in the repository scan.",
+      "tier_uncertainty": "External-use ledger is incomplete; keep provisional B, reclassify C if a current NB-LDPC dependency is found, and A only after an explicit no-influence record."
+    },
+    {
+      "candidate_id": "2026-01-07 2500K",
+      "path_parts": [
+        "2026.1.7"
+      ],
+      "raw_name": "Type2PPLN_2500K_3s_2026-01-07_174324.1.ttbin",
+      "provisional_tier": "B",
+      "tier_basis": "Early Type-II raw session outside the V36-V64 candidate registries; retained as a historical generalization candidate.",
+      "tier_uncertainty": "The repository cannot prove every early Polar/Cascade use; do not promote to A without an external-use ledger and reclassify C if current NB-LDPC influence is discovered."
+    },
+    {
+      "candidate_id": "2026-01-07 160254",
+      "path_parts": [
+        "2026.1.7"
+      ],
+      "raw_name": "Type2PPLN_3s_2026-01-07_160254.1.ttbin",
+      "provisional_tier": "B",
+      "tier_basis": "Early Type-II raw session outside the V36-V64 candidate registries; retained as a historical generalization candidate.",
+      "tier_uncertainty": "The repository cannot prove every early Polar/Cascade use; do not promote to A without an external-use ledger and reclassify C if current NB-LDPC influence is discovered."
+    }
+  ],
+  "stage0": {
+    "checked_candidates": [
+      "2026-01-13 162148",
+      "2026-01-07 2500K",
+      "2026-01-07 160254"
+    ],
+    "per_candidate": [
+      {
+        "candidate_id": "2026-01-13 162148",
+        "provisional_tier": "B",
+        "tier_basis": "Early Type-II/PIE-SKR-era material; no V36-V64 NB-LDPC reference found in the repository scan.",
+        "tier_uncertainty": "External-use ledger is incomplete; keep provisional B, reclassify C if a current NB-LDPC dependency is found, and A only after an explicit no-influence record.",
+        "status": "V65A_INCOMPATIBLE",
+        "source_path": "D:\\Data\\Raw Data\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148\\SHG_Type2PPLN_3s_2_2026-01-13_162148.1.ttbin",
+        "sidecar_paths": [
+          "D:\\Data\\Raw Data\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148\\pie_skr_scan_ch1_5.meta.json",
+          "D:\\Data\\Raw Data\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148\\pie_skr_scan_ch1_5_new.meta.json"
+        ],
+        "materialized_frames": 0,
+        "materialized_pairs": 0,
+        "sidecar_details": [
+          {
+            "path": "D:\\Data\\Raw Data\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148\\pie_skr_scan_ch1_5.meta.json",
+            "session_id": null,
+            "provenance_source_dir": "D:\\SPDC源测试\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148",
+            "provenance_raw_path": "D:\\SPDC源测试\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148\\SHG_Type2PPLN_3s_2_2026-01-13_162148.ttbin",
+            "source_dir_matches_candidate": false,
+            "raw_path_matches_candidate": false
+          },
+          {
+            "path": "D:\\Data\\Raw Data\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148\\pie_skr_scan_ch1_5_new.meta.json",
+            "session_id": null,
+            "provenance_source_dir": "D:\\SPDC源测试\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148",
+            "provenance_raw_path": "D:\\SPDC源测试\\2026.1.13\\SHG_Type2PPLN_3s_2_2026-01-13_162148\\SHG_Type2PPLN_3s_2_2026-01-13_162148.ttbin",
+            "source_dir_matches_candidate": false,
+            "raw_path_matches_candidate": false
+          }
+        ],
+        "provenance_conflict": true,
+        "fail_reason": "sidecar_ambiguous_provenance_conflict",
+        "checked_index": 0
+      },
+      {
+        "candidate_id": "2026-01-07 2500K",
+        "provisional_tier": "B",
+        "tier_basis": "Early Type-II raw session outside the V36-V64 candidate registries; retained as a historical generalization candidate.",
+        "tier_uncertainty": "The repository cannot prove every early Polar/Cascade use; do not promote to A without an external-use ledger and reclassify C if current NB-LDPC influence is discovered.",
+        "status": "V65A_DATA_NOT_READY",
+        "source_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_2500K_3s_2026-01-07_174324.1.ttbin",
+        "sidecar_paths": [],
+        "materialized_frames": 0,
+        "materialized_pairs": 0,
+        "metadata": null,
+        "metadata_checks": {
+          "source_exists": true,
+          "sidecar_present": false,
+          "sidecar_unique": false,
+          "provenance": false,
+          "session": false,
+          "dimension": false,
+          "bin_width": false,
+          "pairing": false,
+          "assignment": false,
+          "processing_rule": false,
+          "channels": false,
+          "timing": false,
+          "sigma": false,
+          "gate": false,
+          "threshold": false,
+          "frame_anchor": false,
+          "mapping": false
+        },
+        "fail_reason": "sidecar_missing_or_ambiguous",
+        "checked_index": 1
+      },
+      {
+        "candidate_id": "2026-01-07 160254",
+        "provisional_tier": "B",
+        "tier_basis": "Early Type-II raw session outside the V36-V64 candidate registries; retained as a historical generalization candidate.",
+        "tier_uncertainty": "The repository cannot prove every early Polar/Cascade use; do not promote to A without an external-use ledger and reclassify C if current NB-LDPC influence is discovered.",
+        "status": "V65A_DATA_NOT_READY",
+        "source_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_3s_2026-01-07_160254.1.ttbin",
+        "sidecar_paths": [],
+        "materialized_frames": 0,
+        "materialized_pairs": 0,
+        "metadata": null,
+        "metadata_checks": {
+          "source_exists": true,
+          "sidecar_present": false,
+          "sidecar_unique": false,
+          "provenance": false,
+          "session": false,
+          "dimension": false,
+          "bin_width": false,
+          "pairing": false,
+          "assignment": false,
+          "processing_rule": false,
+          "channels": false,
+          "timing": false,
+          "sigma": false,
+          "gate": false,
+          "threshold": false,
+          "frame_anchor": false,
+          "mapping": false
+        },
+        "fail_reason": "sidecar_missing_or_ambiguous",
+        "checked_index": 2
+      }
+    ],
+    "selected": null,
+    "selected_index": null,
+    "not_materialized_later_candidates": [],
+    "materialized_candidates_count": 0,
+    "materialized_frames_total": 0,
+    "batch_guard_pass": true,
+    "order_guard_pass": true,
+    "none_passed": true
+  },
+  "stage1": null,
+  "formal_plan": {
+    "planned_only": true,
+    "selected_candidate": null,
+    "CAL": {
+      "frames": 1024,
+      "pairs": 262144
+    },
+    "VAL": {
+      "frames": 256,
+      "pairs": 65536
+    },
+    "TEST": {
+      "frames": 32,
+      "pairs": 8192,
+      "identity_only": true,
+      "statistics_used": false
+    },
+    "lambda": {
+      "log10_bounds": [
+        -2.0,
+        4.0
+      ],
+      "folds": 4,
+      "cal_only": true
+    },
+    "ce_chain_tolerance": 1e-09,
+    "required_rate_formula": "m1=ceil(1.3*1024*CE1/5) m2=ceil(1.3*1024*CE2/5) no cap/floor/handfill",
+    "rate_branches": [
+      "MODEL_NOT_STABLE",
+      "FROZEN_RATE_COMPATIBLE",
+      "RATE_ADAPTATION_REQUIRED",
+      "FULL_DISCLOSURE_LAYER"
+    ],
+    "rate_note": "MODEL_NOT_STABLE priority; RATE_ADAPTATION_REQUIRED is stable but exceeds frozen capacity and <1024; FULL_DISCLOSURE_LAYER is any m>=1024; same-family only P(U1|B)/P(U2|U1B) re-estimation keeps Lane C family/L1APP/conditional increment/full-tag, adjacent preregistered increments only, no successor change this turn",
+    "stage2_min_frames": "CAL1024 VAL256 sealed TEST32 required before FROZEN/ADAPTATION judgment",
+    "excluded_stage0_frame_ids": [],
+    "sealed_test_identity": {
+      "frames": null,
+      "blocks": 8,
+      "to_be_frozen_after_new_plan_accept": true
+    }
+  }
+}
