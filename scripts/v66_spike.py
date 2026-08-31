@@ -73,7 +73,7 @@ def select_lambda_cal_only(a_cal,b_cal):
 def estimate(pairs_path: Path, cal_fids, val_fids):
     import pandas as pd
     if not pairs_path.exists():
-        raise FileNotFoundError(f"pairs parquet not found: {pairs_path} (fail-closed, use --allow-synthetic for test)")
+        raise FileNotFoundError(f"pairs parquet not found: {pairs_path} (fail-closed)")
     df=pd.read_parquet(pairs_path)
     def load(fids):
         sub=df[df.frame_id.isin(fids)].sort_values(["frame_id","pair_idx"])
