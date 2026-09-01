@@ -1,7 +1,7 @@
 # Tasks: V70R1 Parametric Channel Model Check
 
-**Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED`
-**HEAD**: `74c5ba6e3db715230dc0ba25972502a77fff76d5` **Data SHA**: `84d62779`
+**Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
+**HEAD**: `487be11387a5a68c275c43ccb5528ec700bfd3d3` **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113`
 
 ## Phase A — 绑定与复用（无新数据）
 
@@ -49,7 +49,7 @@
 
 ## 验收
 
-- `proposal/design/tasks/specs` 一致，HEAD `74c5ba6e`，Data `84d62779`，lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V72_NOT_STARTED`。
+- `proposal/design/tasks/specs` 一致，HEAD `487be113`（`6bc06d4d..487be113` 区间 latest accepted，独立 Plan commit 将同步 HEAD/Plan SHA 至新 commit），Data `84d62779`，lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V72_NOT_STARTED=true`，V70 数值不变。
 - 三模型预注册（M0 表 / M1 circulant / M2 wrapped Gaussian-或-Laplace + 背景），M2 族由 CAL 4-fold CV 二选一已实现，VAL 只确认一次。
 - CAL/VAL 帧复用 V70 已实现并断言；M0 复现 V70 `CE_full_VAL` 作为 `EVIDENCE_INVALID` 前置已实现。
 - `required` 显式 ceil 不 cap、`gap` 显式、三分流阈与 V70 一致、`f_max` 与规划 `1.3` 分离已实现。

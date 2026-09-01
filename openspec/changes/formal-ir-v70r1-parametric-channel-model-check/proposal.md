@@ -3,9 +3,9 @@
 **Change ID**: `formal-ir-v70r1-parametric-channel-model-check`
 **Cycle ID**: `V70R1` (parametric-channel-model-check)
 **Branch**: `formal-ir-mainline`
-**HEAD**: `74c5ba6e3db715230dc0ba25972502a77fff76d5` (`HEAD == origin/formal-ir-mainline` 已核；推送前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞，不 force)
+**HEAD**: `487be11387a5a68c275c43ccb5528ec700bfd3d3` (`HEAD == origin/formal-ir-mainline` 已核；推送前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞，不 force)
 **Data SHA**: `84d62779` (`d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点，不换处理点)
-**Predecessor**: `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be6` implementation，`V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE`) + `formal-ir-v71-soft-joint-factor-kernel` (`74c5ba6e`，`V71_KERNEL_READY_FEASIBLE`)
+**Predecessor**: `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be6` implementation，`V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE`) + `formal-ir-v71-soft-joint-factor-kernel` (`6bc06d4d..487be113` 区间 latest accepted `487be113`，`V71_KERNEL_READY_FEASIBLE`)
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — `V72_NOT_STARTED`
 
 > ponytail lite: 1 个 decoder-free 脚本 + 4 工件 + 1 小测试；复用 `v70_data_registry.json` 与 V70 的 `hierarchical_P`；仅 `numpy/pandas/pyarrow`（已装）。M1/M2 的 CAL 拟合与 VAL 评估只消费 1024 格的 δ 直方图，不需重扫全量 pairs。
@@ -18,7 +18,7 @@
 
 `required = ceil(1.3·N·CE_VAL)` 直接由该估计器的 VAL 交叉熵决定，因此估计器的选择会直接改变 V70 的三分流。已有诊断给出可检验的先验：[`diagnosis_v55_domain.json`](../formal-ir-v56-input-domain-diagnosis/diagnosis_v55_domain.json) 的 `δ=(a−b) mod 1024` 质量分布显示三源 `mass_0 = 0.4149/0.3755/0.2749`、`mass_±1 ≈ 0.010–0.013`、`other = 0.560/0.601/0.706`、`direction_asym ≈ 0`——形态是**尖峰 + 近平背景**，而不是宽核。若该形态在 V70 的 Stage2 帧上成立，低维核模型有可能以三个数量级更少的参数达到相近或更低的 VAL CE。
 
-V71 已 `KERNEL_READY_FEASIBLE`，successor 为 `v71_ldpc_v5_integration`。**V72 的 mother code 码率将由 `required` 导出**，所以估计器口径必须在 V72 冻结码率之前判定，否则估计误差会被固化进码里。
+V71 已 `KERNEL_READY_FEASIBLE`（`6bc06d4d..487be113` latest `487be113`），successor 为 `v71_ldpc_v5_integration`。**V72 的 mother code 码率将由 `required` 导出**，所以估计器口径必须在 V72 冻结码率之前判定，否则估计误差会被固化进码里。`V72_NOT_STARTED=true`，V70 数值不变。
 
 ## Scope
 

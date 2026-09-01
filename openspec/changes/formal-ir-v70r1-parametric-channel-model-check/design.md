@@ -1,7 +1,7 @@
 # Design: V70R1 Parametric Channel Model Check
 
-**Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED`
-**HEAD**: `74c5ba6e3db715230dc0ba25972502a77fff76d5` **Data SHA**: `84d62779`
+**Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
+**HEAD**: `487be11387a5a68c275c43ccb5528ec700bfd3d3` **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113`
 **Script**: `scripts/v70r1_parametric_channel_model_check.py` **Test**: `test_v70r1_parametric_channel_model_small.py`
 
 ## 1. 唯一被改变的量：估计器
@@ -102,4 +102,4 @@ CAL 拟合和 VAL 评估都只消费 1024 格直方图，不重扫 pairs。M0 �
 
 ## 8. 与 V71/V72 的关系
 
-V71 已 `KERNEL_READY_FEASIBLE`（`74c5ba6e`），successor `v71_ldpc_v5_integration`。V70R1 与 V71 正交：V71 验的是 factor kernel 的数值正确性与复杂度，V70R1 验的是 `required` 的口径。**V72 的 mother code 码率由 `required` 导出**，所以 V70R1 必须在 V72 冻结码率之前判定：若终态为 3，V72 应直接按更低的 `required` 设计；若为 5，V72 按 V70 现值推进。
+V71 已 `KERNEL_READY_FEASIBLE`（`6bc06d4d..487be113` latest `487be113`），successor `v71_ldpc_v5_integration`。V70R1 与 V71 正交：V71 验的是 factor kernel 的数值正确性与复杂度，V70R1 验的是 `required` 的口径。**V72 的 mother code 码率由 `required` 导出**，所以 V70R1 必须在 V72 冻结码率之前判定：若终态为 3，V72 应直接按更低的 `required` 设计；若为 5，V72 按 V70 现值推进。`V72_NOT_STARTED=true`，V70 数值不变，不运行解码。
