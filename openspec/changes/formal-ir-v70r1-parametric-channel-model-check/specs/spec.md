@@ -1,7 +1,7 @@
 # Spec: V70R1 Parametric Channel Model Check
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
-**HEAD**: `13b38b7930be67465c03744491b86e31406a1669` **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113`
+**HEAD**: `13b38b7930be67465c03744491b86e31406a1669` (`accepted_plan_sha` frozen `13b38b79`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`
 
 ## 1. 冻结常量
 
@@ -75,17 +75,16 @@ fano_ub    = h₂(1−acc) + (1−acc)·log2(Q−1)                     # 上界
 | 1 | `V70R1_EVIDENCE_INVALID` | M0 未复现 V70 `CE_full_VAL` `<1e−9`，或 CE 非有限，或 λ/λ_K 落边界，或选择隔离被破坏 |
 | 2 | `V70R1_TRANSLATION_INVARIANCE_REJECTED` | `CE_circulant > CE_table + 0.05` **且** `CE_parametric > CE_table + 0.05` |
 | 3 | `V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE` | `classification(best_parametric) != classification(table)` |
-| 4 | `V70R1_PARAMETRIC_MODEL_REDUCES_ESTIMATION_COST` | 64 帧探针：`drift(best_parametric) ≤ 0.10` **且** `drift(table) ≥ 0.50` |
-| 5 | `V70R1_PARAMETRIC_MODEL_NO_VALUE` | 以上均不成立（含 `ΔCE < 0.10` 且无路线变化） |
+| 4 | `V70R1_PARAMETRIC_MODEL_NO_VALUE` | 以上均不成立（含 `ΔCE < 0.10` 且无路线变化；`sample_curve` 仅 descriptive-only，不触发终态） |
 
 `best_parametric = argmin(CE_circulant_VAL, CE_parametric_VAL)`。Overall 按同序在三 session 聚合：取第一个计数非零的终态。
 
-**后继绑定**：终态 3 或 4 → 参数化 estimator 进入 V77 自动适配器候选，且 V72 的 mother code 码率按新 `required` 设计；终态 2 或 5 → 保持 M0，直接进 `v71_ldpc_v5_integration`；终态 1 → 阻塞，不进 V72。
+**后继绑定**：终态 3 → 参数化 estimator 进入 V77 自动适配器候选，且 V72 的 mother code 码率按新 `required` 设计；终态 2 或 4 → 保持 M0，直接进 `v71_kernel_adapter_design`；终态 1 → 阻塞，不进 V72。
 
 ## 8. 产出
 
 ```
-v70r1_results.json     per_session[3] + terminal_counts[5] + overall + 非声称字段
+v70r1_results.json     per_session[3] + terminal_counts[4] + overall + 非声称字段
 v70r1_table.csv/.json  行对等，每 session 一行，三模型的 CE/acc/fano/required/gap/class/params
 V70R1_PARAMETRIC_CHANNEL_REPORT.md
 v70r1_manifest.json    guards R70R1-01..10

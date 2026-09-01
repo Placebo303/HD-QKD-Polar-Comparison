@@ -1,7 +1,7 @@
 # Design: V70R1 Parametric Channel Model Check
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
-**HEAD**: `13b38b7930be67465c03744491b86e31406a1669` **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113`
+**HEAD**: `13b38b7930be67465c03744491b86e31406a1669` (`accepted_plan_sha` frozen `13b38b79`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`
 **Script**: `scripts/v70r1_parametric_channel_model_check.py` **Test**: `test_v70r1_parametric_channel_model_small.py`
 
 ## 1. 唯一被改变的量：估计器
@@ -73,7 +73,7 @@ CAL 拟合和 VAL 评估都只消费 1024 格直方图，不重扫 pairs。M0 �
 | `required` | `ceil(1.3·1024·CE_VAL)`，不 cap | 路线 |
 | `f_max_channel_ceiling` | `(10240−64)/(1024·CE_VAL)` | 与规划 f 分离 |
 | `n_parameters` | `1024²+1 / 1024+1 / 4` | 估计代价 |
-| `sample_curve` | CAL 前缀 32/64/128/256/512/1024 帧各自仅重拟合 μ/s/ε（λ/λ_K/M2族固用全量1024帧CAL选出值，不做每前缀4-fold重选）→ 同一 VAL 的 CE <!-- ponytail: 固参版sample_curve，每前缀仅重拟合μ/s/ε，λ固用全量CAL值；不做每前缀4-fold重选以避免小样本高方差与O(6×4)成本，待大样本再考虑每前缀重选 --> | 终态 4 证据 |
+| `sample_curve` | CAL 前缀 32/64/128/256/512/1024 帧各自仅重拟合 μ/s/ε（λ/λ_K/M2族固用全量1024帧CAL选出值，不做每前缀4-fold重选）→ 同一 VAL 的 CE <!-- ponytail: 固参版sample_curve，每前缀仅重拟合μ/s/ε，λ固用全量CAL值；不做每前缀4-fold重选以避免小样本高方差与O(6×4)成本，待大样本再考虑每前缀重选 --> | descriptive-only，不触发终态 |
 
 **显式非声称**：脚本落盘 `ce_decomposition_claimed: false`。报告中不得出现"模型 KL = CE − H_true"一类分解；只写 observed CE、模型间 CE 差、Fano 上界。
 
@@ -102,4 +102,4 @@ CAL 拟合和 VAL 评估都只消费 1024 格直方图，不重扫 pairs。M0 �
 
 ## 8. 与 V71/V72 的关系
 
-V71 已 `KERNEL_READY_FEASIBLE`（`6bc06d4d..487be113` latest `487be113`），successor `v71_ldpc_v5_integration`。V70R1 与 V71 正交：V71 验的是 factor kernel 的数值正确性与复杂度，V70R1 验的是 `required` 的口径。**V72 的 mother code 码率由 `required` 导出**，所以 V70R1 必须在 V72 冻结码率之前判定：若终态为 3，V72 应直接按更低的 `required` 设计；若为 5，V72 按 V70 现值推进。`V72_NOT_STARTED=true`，V70 数值不变，不运行解码。
+V71 已 `KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED`（`6bc06d4d..487be113` latest `487be113`），successor `v71_kernel_adapter_design`。V70R1 与 V71 正交：V71 验的是 factor kernel 的数值正确性与复杂度，V70R1 验的是 `required` 的口径。**V72 的 mother code 码率由 `required` 导出**，所以 V70R1 必须在 V72 冻结码率之前判定：若终态为 3，V72 应直接按更低的 `required` 设计；若为 4（`NO_VALUE`），V72 按 V70 现值推进并进入 `v71_kernel_adapter_design`。`V72_NOT_STARTED=true`，V70 数值不变，不运行解码。
