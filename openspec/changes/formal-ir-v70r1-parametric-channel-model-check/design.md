@@ -1,7 +1,7 @@
 # Design: V70R1 Parametric Channel Model Check
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
-**HEAD**: `13b38b7930be67465c03744491b86e31406a1669` (`accepted_plan_sha` frozen `13b38b79`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`
+**HEAD**: `179916f7cfec0ea469683bb78083c3752700193d` (`HEAD == origin/formal-ir-mainline == 179916f7` 已核；`accepted_plan_sha` frozen `13b38b79`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`
 **Script**: `scripts/v70r1_parametric_channel_model_check.py` **Test**: `test_v70r1_parametric_channel_model_small.py`
 
 ## 1. 唯一被改变的量：估计器
