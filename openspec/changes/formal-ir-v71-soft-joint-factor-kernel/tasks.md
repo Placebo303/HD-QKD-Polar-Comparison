@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024-state 纯因子核校验完整 posterior 保留 + extrinsic 冻结 5函数纯枚举 log-domain + D1-D10 十不变量 + 只读 ldpc_v5* A1-A6 READY/ADAPTER/NOT_COMPATIBLE + 1M CAL/VAL benchmark 1/9/1024 block 30s/2GiB 路由阈 + f1.3 freeze f_actual NOT_MEASURED + per-session 6终端总体4态，四工件双报告 + test，守卫R71-01~11，不跑decoder不构业务矩阵不读TEST不启V72**
 
-**HEAD**: `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` (implementation TBD, provenance deviation 9825d0b vs predecessor 9bc34be6) + data `84d62779`
+**HEAD**: `4afc4eec2a3adfca88a8f79bc9c051e3819405ac` (implementation TBD, provenance deviation dc18fd2f vs predecessor 9bc34be6) + data `84d62779` — **rev A1 1/9/1024 各1024次 deterministic / A2 去self比较需真接口否则 ADAPTER / A3 三状态分离 2M NO_INFORMATION_MARGIN**
 
 **Predecessor**: `formal-ir-v70-binary-soft-joint-feasibility` `9bc34be64a2822c8babb4320efb47fc7e335a21a` + `formal-ir-v67-multisession-feasibility-map` `V67_FEASIBILITY_MAP_ACCEPTED` (3 sessions均`NEAR_FULL`) → `V71-SJK`
 

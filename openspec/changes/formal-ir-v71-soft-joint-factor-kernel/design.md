@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024-state 纯因子核校验完整 posterior 保留，extrinsic 冻结 `ext=log_post-log_prior` log域差分，5函数纯枚举 log-domain，D1-D10 十不变量正交，ldpc_v5* 只读 A1-A6 分流 READY/ADAPTER/NOT_COMPATIBLE，1M CAL/VAL benchmark 1/9/1024 block 30s/2GiB 路由阈，f1.3 freeze `f_actual NOT_MEASURED`，per-session 6终端总体4态，不跑 decoder 不构业务矩阵不启 V72**
 
-**Cycle**: `V71-SJK` (soft-joint-factor-kernel), predecessor `V70-BSJ (9bc34be64a2822c8babb4320efb47fc7e335a21a)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS` + `binary-ldpc-v5 ldpc_v5*` (read-only audit 对象), HEAD `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` (provenance deviation registry head `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` vs predecessor `9bc34be6`) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
+**Cycle**: `V71-SJK` (soft-joint-factor-kernel), predecessor `V70-BSJ (9bc34be64a2822c8babb4320efb47fc7e335a21a)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS` + `binary-ldpc-v5 ldpc_v5*` (read-only audit 对象), HEAD `4afc4eec2a3adfca88a8f79bc9c051e3819405ac` (provenance deviation registry head `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` vs predecessor `9bc34be6`) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` — **rev A1 1/9/1024 各 1024次 deterministic seed0 / A2 去 self 比较需真接口否则 ADAPTER / A3 kernel/backend/capacity 分离 2M NO_INFORMATION_MARGIN**
 
 **Feasibility**: `V70` 在 3 sessions 上验证 `D_bits≥0` 且 `soft_joint_factor_update` 纯函数双极 `1e-12`，证二进制 soft-joint 因子保留 1024-ary posterior；`V71` 假设 **1024-state 纯因子核以 log-domain 5 函数纯枚举可完整保留 posterior**（`extrinsic` 冻结分离，且 `D1-D10` 全 PASS 且 `ldpc_v5*` A1-A6 至少 `ADAPTER` 且 `1M benchmark 30s/2GiB` 内），则核可零改对接 `ldpc_v5` 仅需适配层，需 decoder-free 验证 `D1-D10` 与 `A1-A6` 与 `E benchmark` 三重守卫。
 

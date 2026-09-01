@@ -10,7 +10,7 @@
 
 **Branch**: `formal-ir-mainline`
 
-**HEAD**: `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` (implementation TBD; provenance deviation: registry/report head `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` vs predecessor `9bc34be6` 将在推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核，不一致阻塞)
+**HEAD**: `4afc4eec2a3adfca88a8f79bc9c051e3819405ac` (implementation TBD; provenance deviation: registry/report head `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` vs predecessor `9bc34be6` → `4afc4eec`; 将在推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核，不一致阻塞; **rev A1 bench 1/9/1024 各 1024次 deterministic seed0 / A2 去 self 比较需真 extrinsic+10240 接口否则 ADAPTER / A3 三状态 kernel/backend/capacity 分离 2M NO_INFORMATION_MARGIN**)
 
 **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点；V71 复用 V67/V69 三 session 的 `Stage2 CAL1024+VAL256` 作 AUDIT/KERNEL 完整性锚点，但 **Phase E benchmark 仅在 1M session 的 CAL1024+VAL256 上执行 1/9/1024 block 实测**，不换点，不换 bin/mapping，不新增 acquisition，不读 TEST)
 
@@ -63,7 +63,7 @@
 
 ### 5. Phase E 仅 1M CAL/VAL benchmark 1/9/1024 block 30s/2GiB 路由阈
 - **范围**：仅 `1M` session 的 `stage2_CAL[1024] (262144 pairs) + stage2_VAL[256] (65536 pairs)` 原样（复用 V69/V70 注册表，不新增 acquisition），不测 `1p5M/2M` 的因子核时延，仅作 audit 分流输入。
-- **benchmark**：对主核 `soft_joint_factor_kernel` 在 `1M CAL/VAL` 上分 `block ∈ {1, 9, 1024}` 符号块批量（`1` = per-symbol, `9` = per-plane-batch, `1024` = per-frame）各计 `wall_s` 与 `peak_MiB` (tracemalloc 或 `resource` 估)，`log_prior` 固定为 `1M CAL` 上 `λ*` 的 `P(a|b)` 对应值，`llr_10` 取 `0` 与随机 `N(0,1)` 两档。
+- **benchmark**：对主核 `soft_joint_factor_kernel` 在 `1M CAL/VAL` 上分 `block ∈ {1, 9, 1024}` 符号块批量（`1` = per-symbol, `9` = per-plane-batch, `1024` = per-frame）各计 `wall_s` 与 `peak_MiB` (tracemalloc 或 `resource` 估)，`log_prior` 固定为 `1M CAL` 上 `λ*` 的 `P(a|b)` 对应值，`llr_10` 取 `0` 与 `seed0 deterministic N(0,1)` 两档，**每档固定 1024 次 `soft_joint_factor_kernel` 调用（`n_inv=1024`），`wall` 取两次 llr 档的 median**。
 - **路由阈**：`wall_s ≤30s` 且 `peak ≤2048MiB` 对 `1024 block` 在 `1M VAL256` 全量 (`256*1024` 符号) 上测一次；任一 block  size 超限则 `E_PERF_BLOCKED`，报告三档明细与 `per invocation ns`。
 
 ### 6. Phase F f1.3 冻结 f_actual NOT_MEASURED
@@ -103,7 +103,7 @@
 ## Scope
 
 1. **冻结主体与处理点零改（1024维符号纯因子核扩展，仅核验证）**：`n1024, q1024 (10-bit s), GF32 poly37, H1 16×1024 rank16 80b U=32*U1+U2, Lane C ordinal-2 s38310x m2 184/190/192, H_inc Δ8, decoder 90/1.0 poly37 early-stop (禁用), full-tag canonical, leak Σw_i·m_i+64` 全只读；`84d62779 legacy_v1` 单点；不引 V71 新码本以外的表示。
-2. **只读 `ldpc_v5*` A1-A6 audit 得 READY/ADAPTER/NOT_COMPATIBLE**：`ldpc_v5*.py` 只读 AST/import 探针，`A1 interface / A2 policy_manifest_schema / A3 channel_binding / A4 extrinsic_interface / A5 runtime_caps / A6 disclosure_accounting` 六项每 session 独立判定，输出 `READY/ADAPTER/NOT_COMPATIBLE` 分流，最坏取整，不执行 `run_ldpc_formal_v5`。
+2. **只读 `ldpc_v5*` A1-A6 audit 得 READY/ADAPTER/NOT_COMPATIBLE**：`ldpc_v5*.py` 只读 AST/import 探针，`A1 interface / A2 policy_manifest_schema(去 self 比较，需真 extrinsic+10240 接口否则 ADAPTER) / A3 channel_binding / A4 extrinsic_interface / A5 runtime_caps / A6 disclosure_accounting` 六项每 session 独立判定，输出 `READY/ADAPTER/NOT_COMPATIBLE` 分流，最坏取整，不执行 `run_ldpc_formal_v5`，**A3 三状态分离 kernel_status/backend_status/capacity_status，2M 固定 `NO_INFORMATION_MARGIN`**。
 3. **冻结 extrinsic 定义 Phase C 实现 5 函数纯枚举 log-domain**：`extrinsic = log_post - log_prior` 冻结，5 函数 `log_prior_from_posterior / bit_factor_from_llr / soft_joint_factor_kernel / extrinsic_from_logs / validate_kernel` 枚举 1024 态，全零得 marginal、delta 得确定值与 brute-force 对照 `|Δ|<1e-12`，log域 `logsumexp` 归一，纯函数无 I/O/随机/全局。
 4. **Phase D D1-D10 不变量**：`D1 completeness / D2 normalization / D3 marginal_preservation / D4 delta_concentration / D5 extrinsic_consistency / D6 log_domain_stability / D7 determinism / D8 chain_closure / D9 test_isolation / D10 orthogonality` 逐项 `PASS/FAIL`，任一 FAIL 触发 `MODEL_NOT_STABLE` 或 `NOT_COMPATIBLE`（D1/D2 抬至 `NOT_COMPATIBLE`）。
 5. **Phase E 仅 1M CAL/VAL benchmark 1/9/1024 block 30s/2GiB 路由阈**：仅 `1M` session 的 `CAL1024 (262144 pairs)+VAL256 (65536 pairs)` 上对主核 `soft_joint_factor_kernel` 分 `block 1/9/1024` 测 `wall_s/peak_MiB`，`wall≤30s && peak≤2048MiB` 对 `1024-block` 在 `1M VAL` 全量上判 `PASS`，超限 `E_PERF_BLOCKED`，三档明细报告 `per invocation ns`。

@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 仅plan四工件 + decoder-free 1024-state 纯因子核校验完整 posterior 保留 + 只读 ldpc_v5* A1-A6 分流 READY/ADAPTER/NOT_COMPATIBLE，不改1024维符号GF32两层验证，仅验证5函数纯枚举 log-domain 因子核，不跑decoder不构业务矩阵不读TEST不启V72
 
-**Change**: `formal-ir-v71-soft-joint-factor-kernel` (`V71-SJK`, branch `formal-ir-mainline`, HEAD `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` implementation TBD, provenance deviation dc18fd2fc17a606fb3a05713efdd9f05ed6472a4 vs predecessor 9bc34be6, data `84d62779`, 3 sessions复用V69 Stage2 (E benchmark仅1M 1/9/1024), 5函数 log-domain 1024枚举, D1-D10 十不变量, A1-A6 audit, f1.3 NOT_MEASURED)
+**Change**: `formal-ir-v71-soft-joint-factor-kernel` (`V71-SJK`, branch `formal-ir-mainline`, HEAD `4afc4eec2a3adfca88a8f79bc9c051e3819405ac` implementation TBD, provenance deviation dc18fd2f vs predecessor 9bc34be6, data `84d62779`, 3 sessions复用V69 Stage2 (E benchmark仅1M 1/9/1024 各1024次 deterministic seed0), 5函数 log-domain 1024枚举, D1-D10 十不变量, A1-A6 audit 去self比较需真接口否则 ADAPTER, A3 三状态 kernel/backend/capacity 2M NO_INFORMATION_MARGIN, f1.3 NOT_MEASURED)
 
 **Predecessor**: `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be64a2822c8babb4320efb47fc7e335a21a` `PLAN_CANDIDATE`) + `formal-ir-v67-multisession-feasibility-map` (`V67_FEASIBILITY_MAP_ACCEPTED`) + `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) + `binary-ldpc-v5` (`ldpc_v5*` read-only) — V71新增1024-state纯因子核 + ldpc_v5*兼容地图，5函数D1-D10 E benchmark f1.3，decoder-free，不启V72
 
