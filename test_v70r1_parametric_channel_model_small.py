@@ -287,3 +287,92 @@ def test_no_value_threshold_and_cost_not_trigger():
     manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
     assert manifest["terminal_counts"]["V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE"] == 2
     assert manifest["guards"]["R70R1-08"] is True
+
+
+# ---------------------------------------------------------------- DEVELOPMENT_RESULT_CANDIDATE补齐 (6项)
+
+def test_lifecycle_is_development_result_candidate_decoder_free_execution_complete():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
+    for obj in (data, manifest):
+        assert obj["lifecycle"] == "DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE"
+    # report must mention lifecycle
+    rpt = (Path(__file__).parent / "V70R1_PARAMETRIC_CHANNEL_REPORT.md").read_text(encoding="utf-8")
+    assert "DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE" in rpt
+    # spec/proposal/design/tasks must mention lifecycle
+    base = Path(__file__).parent / "openspec" / "changes" / "formal-ir-v70r1-parametric-channel-model-check"
+    for p in [base / "proposal.md", base / "design.md", base / "tasks.md", base / "specs" / "spec.md"]:
+        assert "DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE" in p.read_text(encoding="utf-8")
+
+
+def test_three_sha_f_actual_decoder0_used_test_false_v72_true():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
+    # 3SHA
+    assert data["accepted_plan_sha"] == "0509d10ba78902b36f6bcf447f1ebfe289e03fc89b"
+    assert data["initial_implementation"] == "179916f7cfec0ea469683bb78083c3752700193d"
+    assert data["execution_sha"] == "36d493d8"
+    assert manifest["accepted_plan_sha"] == data["accepted_plan_sha"]
+    # f_actual NOT_MEASURED decoder 0 used_test false V72 true
+    assert data["f_actual"] == "NOT_MEASURED"
+    assert data["decoder_calls"] == 0
+    assert data["used_test"] is False
+    assert data["V72_not_started"] is True
+    assert manifest["f_actual"] == "NOT_MEASURED"
+    assert manifest["decoder_calls"] == 0
+    assert manifest["used_test"] is False
+    assert manifest["V72_not_started"] is True
+    # report must state 3SHA and fields
+    rpt = (Path(__file__).parent / "V70R1_PARAMETRIC_CHANNEL_REPORT.md").read_text(encoding="utf-8")
+    assert "0509d10b" in rpt and "179916f7" in rpt and "36d493d8" in rpt
+    assert "f_actual=NOT_MEASURED" in rpt and "decoder_calls=0" in rpt and "used_test=false" in rpt
+
+
+def test_report_nine_field_complete_table_per_source_three_model():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    rpt = (Path(__file__).parent / "V70R1_PARAMETRIC_CHANNEL_REPORT.md").read_text(encoding="utf-8")
+    # 9 fields per model must appear as table header
+    assert "CE_VAL" in rpt and "CE_CAL" in rpt and "cal_val_gap" in rpt and "MAP_acc" in rpt
+    assert "Fano_ub" in rpt and "required" in rpt and "gap" in rpt and "f_max" in rpt and "classification" in rpt
+    # per-source x three-model rows: 3 sources *3 models =9 rows, check at least 9 data rows with M0/M1/M2 markers
+    assert rpt.count("M0 table") >= 3 and rpt.count("M1 circulant") >= 3 and rpt.count("M2 parametric") >= 3
+    # verify numeric sync with json for one session
+    s = next(x for x in data["per_session"] if x["source_label"] == "1M")
+    assert "7.1500" in rpt and "6.7890" in rpt
+
+
+def test_pre_result_ordering_deviation_recorded():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
+    rpt = (Path(__file__).parent / "V70R1_PARAMETRIC_CHANNEL_REPORT.md").read_text(encoding="utf-8")
+    assert "PRE_RESULT_ORDERING_DEVIATION" in data
+    assert "PRE_RESULT_ORDERING_DEVIATION" in manifest
+    assert "PRE_RESULT_ORDERING_DEVIATION" in rpt
+    assert "CHANGES(1) precedes REDUCES(2)" in data["PRE_RESULT_ORDERING_DEVIATION"]
+    # overall is first non-zero, not majority
+    assert data["overall"] == "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE"
+    assert data["terminal_counts"]["V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE"] == 2
+    assert data["terminal_counts"]["V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE"] == 1
+
+
+def test_m0_cost_descriptive_only_and_r2_rerun_false():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
+    rpt = (Path(__file__).parent / "V70R1_PARAMETRIC_CHANNEL_REPORT.md").read_text(encoding="utf-8")
+    # cost descriptive-only, R2 rerun false
+    assert data["rerun"] is False
+    assert manifest["rerun"] is False
+    assert "rerun=false" in rpt.lower() or "rerun=false" in rpt
+    assert "descriptive-only" in rpt
+    assert "M0" in rpt and "cost" in rpt.lower()
+    # M0 estimation_cost_win is false in sense not triggering; but per-session cost_win true for parametric descriptive
+    for s in data["per_session"]:
+        assert "estimation_cost_win" in s  # descriptive field exists
+
+
+def test_manifest_results_sync_lifecycle_and_deviation_and_tasks_g_phase():
+    tasks = (Path(__file__).parent / "openspec" / "changes" / "formal-ir-v70r1-parametric-channel-model-check" / "tasks.md").read_text(encoding="utf-8")
+    assert "DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE" in tasks
+    assert "3SHA" in tasks and "f_actual=NOT_MEASURED" in tasks
+    assert "PRE_RESULT_ORDERING_DEVIATION" in tasks
+    assert "G1" in tasks and "G2" in tasks and "G3" in tasks

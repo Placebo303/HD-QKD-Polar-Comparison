@@ -1,6 +1,6 @@
 # Tasks: V70R1 Parametric Channel Model Check
 
-**Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
+**Lifecycle**: `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE` / `V72_NOT_STARTED=true` — `f_actual=NOT_MEASURED` `decoder_calls=0` `used_test=false` — `3SHA 0509d10b/179916f7/36d493d8`
 **HEAD**: `EXTERNALLY_BOUND_AT_PRE_EXECUTE` — 非自引用（`current_parent` `082fa89a`，不自引用未来 SHA；占位已删） **accepted_plan_sha** `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan) **initial_implementation** `179916f7cfec0ea469683bb78083c3752700193d` **execution** `EXTERNALLY_BOUND_AT_PRE_EXECUTE` (`HEAD == origin/formal-ir-mainline` 推送后由 Pre-EXECUTE 外部核对) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` (`487be11387a5a68c275c43ccb5528ec700bfd3d3`) **Predecessor V70**: `9bc34be64a2822c8babb4320efb47fc7e335a21a`
 
 ## Phase A — 绑定与复用（无新数据）
@@ -41,7 +41,13 @@
 ## Phase F — 提交与等待复核
 
 - [x] **F1 单独提交推送**四工件 + 脚本 + 小测试，返回新 Plan SHA，替换 `proposal/design/tasks/specs` 的 HEAD 占位。（`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` 已写入四文件；`current_docs_head` 为本提交）
-- [ ] **F2 停留** `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，未创建 `run_01`，未启 V72，等待独立复核与 `PLAN_ACCEPT`。
+- [x] **F2 补齐** `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE`：写入 `3SHA` `f_actual=NOT_MEASURED` `decoder_calls=0` `used_test=false` `V72_NOT_STARTED=true`，REPORT 扩逐源×三模型 9字段完整表 + `PRE_RESULT_ORDERING_DEVIATION`，新增6项测试，推送。
+
+## Phase G — 补齐（R2 descriptive-only 固化）
+
+- [x] **G1** REPORT 逐源×三模型 9字段完整表（CE_VAL/CE_CAL/cal_val_gap/MAP/fano/required/gap/margin/f_max/classification/params 中取9字段），明确 M0 cost descriptive-only 不触发终态，`R2 rerun=false`
+- [x] **G2** `PRE_RESULT_ORDERING_DEVIATION`：记录 overall 首个非零终态 ordering vs 计数最多者 deviation（CHANGES 1 vs REDUCES 2）
+- [x] **G3** 6项新增测试覆盖 lifecycle/3SHA/f_actual/decoder0/used_test/V72/9字段/ordering deviation
 
 ## 本变更显式禁止
 

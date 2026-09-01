@@ -1,6 +1,6 @@
 {
   "schema": "v70r1_manifest_v1",
-  "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
+  "lifecycle": "DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE",
   "V72_not_started": true,
   "no_run_01": true,
   "data_sha": "84d62779",
@@ -38,5 +38,10 @@
   "ce_decomposition_claimed": false,
   "planning_f_is_not_achieved_f": true,
   "used_val_in_selection": false,
-  "used_test": false
+  "used_test": false,
+  "f_actual": "NOT_MEASURED",
+  "decoder_calls": 0,
+  "execution_sha": "36d493d8",
+  "rerun": false,
+  "PRE_RESULT_ORDERING_DEVIATION": "CHANGES(1) precedes REDUCES(2): overall is first non-zero terminal, not majority count"
 }

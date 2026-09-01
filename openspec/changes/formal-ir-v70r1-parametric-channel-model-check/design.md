@@ -1,6 +1,6 @@
 # Design: V70R1 Parametric Channel Model Check
 
-**Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
+**Lifecycle**: `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE` / `V72_NOT_STARTED=true` — `f_actual=NOT_MEASURED` `decoder_calls=0` `used_test=false` — `3SHA 0509d10b/179916f7/36d493d8`
 **HEAD**: `EXTERNALLY_BOUND_AT_PRE_EXECUTE` — 非自引用（`current_parent` `082fa89a`，不自引用未来 SHA） **accepted_plan_sha** `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan) **initial_implementation** `179916f7cfec0ea469683bb78083c3752700193d` **execution** `EXTERNALLY_BOUND_AT_PRE_EXECUTE` (`HEAD == origin/formal-ir-mainline` 推送后由 Pre-EXECUTE 外部核对) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` (`487be11387a5a68c275c43ccb5528ec700bfd3d3`) `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design` **Predecessor V70**: `9bc34be64a2822c8babb4320efb47fc7e335a21a`
 **Script**: `scripts/v70r1_parametric_channel_model_check.py` **Test**: `test_v70r1_parametric_channel_model_small.py`
 
@@ -102,4 +102,8 @@ CAL 拟合和 VAL 评估都只消费 1024 格直方图，不重扫 pairs。M0 �
 
 ## 8. 与 V71/V72 的关系
 
-V71 已 `KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED`（`6bc06d4d..487be113` latest `487be113`），successor `v71_kernel_adapter_design`。V70R1 与 V71 正交：V71 验的是 factor kernel 的数值正确性与复杂度，V70R1 验的是 `required` 的口径。**V72 的 mother code 码率由 `required` 导出**，所以 V70R1 必须在 V72 冻结码率之前判定：若终态为 3，V72 应直接按更低的 `required` 设计；若为 4（`REDUCES_VAL_CE`）记录 CE 降低但不改路线，若为 5（`NO_VALUE`）则 V72 按 V70 现值推进并进入 `v71_kernel_adapter_design`。`V72_NOT_STARTED=true`，V70 数值不变，不重跑，机械重分类使用既有 `v70r1_results` 数值（1M REDUCES / 1p5M CHANGES / 2M REDUCES / overall CHANGES）。
+V71 已 `KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED`（`6bc06d4d..487be113` latest `487be113`），successor `v71_kernel_adapter_design`。V70R1 与 V71 正交：V71 验的是 factor kernel 的数值正确性与复杂度，V70R1 验的是 `required` 的口径。**V72 的 mother code 码率由 `required` 导出**，所以 V70R1 必须在 V72 冻结码率之前判定：若终态为 3，V72 应直接按更低的 `required` 设计；若为 4（`REDUCES_VAL_CE`）记录 CE 降低但不改路线，若为 5（`NO_VALUE`）则 V72 按 V70 现值推进并进入 `v71_kernel_adapter_design`。`V72_NOT_STARTED=true`，V70 数值不变，不重跑，机械重分类使用既有 `v70r1_results` 数值（1M REDUCES / 1p5M CHANGES / 2M REDUCES / overall CHANGES）。`DECODER_FREE_EXECUTION_COMPLETE`：本轮 decoder_calls=0, f_actual=NOT_MEASURED, used_test=false, R2 rerun=false。
+
+## 9. PRE_RESULT_ORDERING_DEVIATION
+
+first-match 顺序 `EVIDENCE_INVALID(1) > REJECTED(2) > CHANGES(3) > REDUCES(4) > NO_VALUE(5)` 决定 overall：取首个 `terminal_counts>0` 的终态，而非计数最多者。本次 `CHANGES=1, REDUCES=2`，按计数最多应为 `REDUCES`，但按 ordering 为 `CHANGES` — 该 ordering deviation 需在 REPORT 与 manifest 中显式记录（`PRE_RESULT_ORDERING_DEVIATION: CHANGES(1) precedes REDUCES(2)`），避免将 overall 误读为多数票。
