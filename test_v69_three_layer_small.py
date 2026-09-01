@@ -76,8 +76,17 @@ def test_cal_only_and_guards():
         val=info["val"]
         assert abs(val["CE_full"] - val["CE1"] - val["CE2"] - val["CE3"]) < 1e-9
         assert val["val_b_unseen"] <= 0.01 + 1e-9
-    # common same assignment
-    assert j["P_star_common"]==j["P_star_per_session"]["20260123_1M_600k_0dB"]
+    # common valid assignment (may differ from per_session P* — true CAL 4-fold gives per-session optima)
+    common=tuple(j["P_star_common"])
+    assert len(common)==10 and all(v in (1,2,3) for v in common)
+    for v in [1,2,3]:
+        assert 2 <= sum(1 for x in common if x==v) <=5
+    # per_session P* also valid
+    for sid, p in j["P_star_per_session"].items():
+        pt=tuple(p)
+        assert len(pt)==10 and all(v in (1,2,3) for v in pt)
+        for v in [1,2,3]:
+            assert 2 <= sum(1 for x in pt if x==v) <=5
 
 def test_no_decoder_and_chain():
     import re

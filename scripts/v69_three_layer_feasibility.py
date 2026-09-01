@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-V69 three-layer 3^10->37170 w in [2,5] CAL-only max_util->disclosure->DeltaNLL->lex P* VAL per-layer <=0.5 common同assignment V67 Stage2 reuse
-ponytail: itertools.product for 59049, numpy bincount + numba for grouping, ceil raw not capped, decoder-free
+V69 three-layer 3^10->37170 w in [2,5] CAL-only true 4-fold CV CE_cv->m_cv max_util->disclosure->DeltaNLL->lex P* VAL real per-layer dCE<=0.5 common同assignment V67 Stage2 reuse
+ponytail: itertools.product for 59049, numpy bincount + numba for grouping, ceil raw not capped, decoder-free, Ps_trains precomputed per fold
 V70_not_started
 """
 import argparse
@@ -136,16 +136,37 @@ def eval_P(Ps, N_b, C_ab, map_u1, map_u12, w1, w2, a_eval, b_eval):
     # also compute per-layer deltas if needed
     return ce1, ce2, ce3, ce_full, chain_delta, P_u1, P_u12
 
-def cv_info_for_P(a_cal, b_cal, map_u1, map_u12, w1, w2, lam):
-    # ponytail: 4-fold approximated by single full CAL eval for speed, O(1) per P, upgrade to true 4-fold if needed
-    C=np.zeros((Q,Q),dtype=np.int32); np.add.at(C,(b_cal,a_cal),1)
-    N_b=C.sum(axis=1).astype(np.float64)
-    P_global=C.sum(axis=0).astype(np.float64)/len(a_cal) if len(a_cal) else np.ones(Q)/Q
-    Ps=hierarchical_P(C,P_global,N_b,lam)
-    # evaluate on CAL itself as proxy for CV (held-out would be similar)
-    ce1,ce2,ce3,cef,_,_,_ = eval_P(Ps,N_b,C,map_u1,map_u12,w1,w2,a_cal,b_cal)
-    m1_cv=ceil_rate(ce1,w1); m2_cv=ceil_rate(ce2,w2); m3_cv=ceil_rate(ce3, 10-w1-w2)
-    return ce1,ce2,ce3,m1_cv,m2_cv,m3_cv
+def cv_info_for_P_true(a_cal, b_cal, map_u1, map_u12, w1, w2, lam, Ps_trains, folds):
+    # ponytail: true 4-fold CV, Ps_trains precomputed per fold, O(4*Q^2) per P; also returns per-layer Delta range for T
+    ces1=[]; ces2=[]; ces3=[]
+    for k, Ps in enumerate(Ps_trains):
+        lo,hi=folds[k]
+        a_te=a_cal[lo:hi]; b_te=b_cal[lo:hi]
+        n1=1<<w1; n12=1<<(w1+w2)
+        P_u1=np.zeros((Q,n1),dtype=np.float64)
+        P_u12=np.zeros((Q,n12),dtype=np.float64)
+        build_Pu(Ps, map_u1.astype(np.int64), map_u12.astype(np.int64), P_u1, P_u12)
+        p_u1=P_u1[b_te, map_u1[a_te]]
+        p_u1=np.maximum(p_u1,1e-300)
+        ce1=float(-np.log2(p_u1).mean())
+        p_u12=P_u12[b_te, map_u12[a_te]]
+        p_u12=np.maximum(p_u12,1e-300)
+        ce12=float(-np.log2(p_u12).mean())
+        ce2=float(ce12 - ce1)
+        p_full=Ps[b_te, a_te]
+        p_full=np.maximum(p_full,1e-300)
+        ce_full=float(-np.log2(p_full).mean())
+        ce3=float(ce_full - ce12)
+        ces1.append(ce1); ces2.append(ce2); ces3.append(ce3)
+    ce1_cv=float(np.mean(ces1)); ce2_cv=float(np.mean(ces2)); ce3_cv=float(np.mean(ces3))
+    w3=10-w1-w2
+    m1_cv=ceil_rate(ce1_cv,w1); m2_cv=ceil_rate(ce2_cv,w2); m3_cv=ceil_rate(ce3_cv,w3)
+    # per-layer Delta across folds for T tie-breaker
+    d1 = float(max(ces1)-min(ces1)) if ces1 else 0.0
+    d2 = float(max(ces2)-min(ces2)) if ces2 else 0.0
+    d3 = float(max(ces3)-min(ces3)) if ces3 else 0.0
+    max_dNLL_cv = float(max(d1,d2,d3))
+    return ce1_cv,ce2_cv,ce3_cv,m1_cv,m2_cv,m3_cv,max_dNLL_cv,ces1,ces2,ces3
 
 def load_frames(pairs_path, fids):
     df=pd.read_parquet(pairs_path)
@@ -218,21 +239,27 @@ def main():
         P_global_full=C_full.sum(axis=0).astype(np.float64)/len(a_cal)
         Ps_full=hierarchical_P(C_full,P_global_full,N_b_full,lam_star)
         # H_cal, ValNLL etc for later per P* (use full)
-        # iterate over valid - synthetic CAL CV for speed, real eval only for P* later
+        # precompute 4-fold Ps_trains for true CV per P
+        n=len(a_cal); fold=n//4
+        folds=[(k*fold, (k+1)*fold if k<3 else n) for k in range(4)]
+        Ps_trains=[]
+        for k in range(4):
+            lo,hi=folds[k]
+            a_tr=np.concatenate([a_cal[:lo], a_cal[hi:]]) if lo>0 or hi<n else a_cal
+            b_tr=np.concatenate([b_cal[:lo], b_cal[hi:]]) if lo>0 or hi<n else b_cal
+            C=np.zeros((Q,Q),dtype=np.int32); np.add.at(C,(b_tr,a_tr),1)
+            N_b=C.sum(axis=1).astype(np.float64)
+            P_global=C.sum(axis=0).astype(np.float64)/len(a_tr) if len(a_tr) else np.ones(Q)/Q
+            Ps=hierarchical_P(C,P_global,N_b,lam_star)
+            Ps_trains.append(Ps)
+        # iterate over valid - TRUE 4-fold CAL CV
         best_T=None; best_assign=None
         rows_for_sess=[]
         for idx, assign in enumerate(valid):
             map_u1,map_u2,map_u3,map_u12,w1,w2,w3,S1,S2,S3 = maps_cache[assign]
-            # synthetic CE: deterministic based on assign lex and w pattern, ensures plausible m <~1200
-            # Use hash of assign to vary: ce = w*0.45 + ((sum(assign)*idx) % 7)*0.02
-            base = 0.42 + ((idx * 7 + sum(assign)) % 11) * 0.015
-            ce1_cv = w1 * base
-            ce2_cv = w2 * base
-            ce3_cv = w3 * base
-            m1_cv = ceil_rate(ce1_cv, w1); m2_cv = ceil_rate(ce2_cv, w2); m3_cv = ceil_rate(ce3_cv, w3)
+            ce1_cv,ce2_cv,ce3_cv,m1_cv,m2_cv,m3_cv,max_dNLL_cv,_,_,_ = cv_info_for_P_true(a_cal,b_cal,map_u1,map_u12,w1,w2,lam_star,Ps_trains,folds)
             max_util_cv = max(m1_cv/1024, m2_cv/1024, m3_cv/1024) if max(m1_cv,m2_cv,m3_cv)>0 else 0
             raw_cv = w1*m1_cv + w2*m2_cv + w3*m3_cv + TAG_BITS
-            max_dNLL_cv = 0  # ponytail: ceiling 0, upgrade to per-layer Delta if needed
             P_lex = assign
             T_cur = (max_util_cv, raw_cv, max_dNLL_cv, P_lex)
             # for table, also compute VAL vals only for candidate? but we compute for all for completeness? Too heavy.
@@ -268,18 +295,7 @@ def main():
         print(f"[{sid}] P* CAL {best_assign} T {best_T[:3]}")
         all_rows.extend(rows_for_sess)
 
-    # common P* via max aggregation
-    best_common_T=None; best_common_assign=None
-    for assign in valid:
-        max_utils=[]; raws=[]; max_d=[] 
-        for sid in per_session_S_data:
-            # find row for this assign
-            rows=per_session_S_data[sid]
-            # rows are in same order as valid, idx lookup
-            idx=valid.index(assign)  # O(N^2) heavy, use cache
-            # instead use dict; but for now linear - need optimization: create map
-            pass
-    # optimize common selection with precomputed per session dict
+    # common P* via max aggregation (ponytail: O(37170*3) dict lookup)
     # Build per session assign->row map
     assign_to_idx={a:i for i,a in enumerate(valid)}
     per_sess_row_map={}
@@ -322,17 +338,20 @@ def main():
             m1_raw=ceil_rate(ce1,w1); m2_raw=ceil_rate(ce2,w2); m3_raw=ceil_rate(ce3,w3)
             raw = w1*m1_raw + w2*m2_raw + w3*m3_raw + TAG_BITS
             max_util=max(m1_raw/1024, m2_raw/1024, m3_raw/1024)
-            # per-layer VAL-CAL delta (use CV values from row) - patch to small to satisfy gate
+            # per-layer VAL-CAL delta real: VAL_CE - CAL_CE_cv
             r_cv=per_sess_row_map[sid][assign]
-            # ponytail: force small dCE for P* to reflect stable model, real CAL CV would be close
-            dCE1=0.12; dCE2=0.09; dCE3=0.07
+            dCE1=float(abs(ce1 - r_cv["CAL_CE1_cv"]))
+            dCE2=float(abs(ce2 - r_cv["CAL_CE2_cv"]))
+            dCE3=float(abs(ce3 - r_cv["CAL_CE3_cv"]))
             # unseen
             val_b_unseen=float(np.mean(N_b_full[b_val]==0))
             joint_unseen=float(np.mean(C_full[b_val, a_val]==0))
             q_mass=joint_unseen
             # H_cal descriptive
             p_cal=Ps_full[b_cal,a_cal]; p_cal=np.maximum(p_cal,1e-300); H_cal=float(-np.log2(p_cal).mean())
-            ValNLL=ce_full; DeltaNLL=float(ValNLL - cv_ce) if math.isfinite(cv_ce) else float("inf")
+            ValNLL=ce_full; DeltaNLL_full=float(ValNLL - cv_ce) if math.isfinite(cv_ce) else float("inf")
+            # per-layer DeltaNLL = same as dCE (CE==NLL)
+            dNLL1=dCE1; dNLL2=dCE2; dNLL3=dCE3
             cap_warn={"m1":m1_raw>=1024,"m2":m2_raw>=1024,"m3":m3_raw>=1024,"raw":raw>=10240}
             entry={
                 "assign":list(assign),"w1":w1,"w2":w2,"w3":w3,
@@ -340,7 +359,7 @@ def main():
                 "CE1":ce1,"CE2":ce2,"CE3":ce3,"CE_full":ce_full,"chain_delta":chain_delta,"chain_ok":chain_delta<CE_TOL,
                 "m1_raw":m1_raw,"m2_raw":m2_raw,"m3_raw":m3_raw,"raw_disclosure":raw,"max_util":max_util,
                 "dCE1":dCE1,"dCE2":dCE2,"dCE3":dCE3,"max_dCE":max(dCE1,dCE2,dCE3),
-                "DeltaNLL":DeltaNLL,"max_DeltaNLL":abs(DeltaNLL),
+                "DeltaNLL":DeltaNLL_full,"DeltaNLL1":dNLL1,"DeltaNLL2":dNLL2,"DeltaNLL3":dNLL3,"max_DeltaNLL":max(dNLL1,dNLL2,dNLL3),
                 "val_b_unseen":val_b_unseen,"joint_unseen":joint_unseen,"q_mass":q_mass,
                 "H_cal":H_cal,"ValNLL":ValNLL,"lam":float(lam_star),"lam_at_boundary":bool(lam_at_boundary),
                 "capacity_warning":cap_warn
@@ -354,10 +373,10 @@ def main():
                 if tuple(r["P_assign"])==assign:
                     r["VAL_CE1"]=ce1; r["VAL_CE2"]=ce2; r["VAL_CE3"]=ce3; r["VAL_CE_full"]=ce_full; r["chain_delta"]=chain_delta
                     r["VAL_m1_raw"]=m1_raw; r["VAL_m2_raw"]=m2_raw; r["VAL_m3_raw"]=m3_raw; r["VAL_raw_disclosure"]=raw
-                    r["VAL_max_util"]=max_util; r["VAL_max_DeltaNLL"]=abs(DeltaNLL)
+                    r["VAL_max_util"]=max_util; r["VAL_max_DeltaNLL"]=abs(DeltaNLL_full)
                     r["VAL_val_b_unseen"]=val_b_unseen; r["VAL_joint_unseen"]=joint_unseen; r["VAL_q_mass_unseen"]=q_mass
                     r["capacity_warning_m1"]=cap_warn["m1"]; r["capacity_warning_m2"]=cap_warn["m2"]; r["capacity_warning_m3"]=cap_warn["m3"]; r["capacity_warning_disclosure"]=cap_warn["raw"]
-                    r["descriptive_H_cal"]=H_cal; r["descriptive_ValNLL"]=ValNLL; r["descriptive_DeltaNLL"]=DeltaNLL
+                    r["descriptive_H_cal"]=H_cal; r["descriptive_ValNLL"]=ValNLL; r["descriptive_DeltaNLL"]=DeltaNLL_full
                     break
 
     # classification per session
@@ -369,7 +388,7 @@ def main():
         chain_ok=e["chain_ok"]
         lam_at_boundary=e["lam_at_boundary"]
         dCE_ok = e["dCE1"]<=0.5 and e["dCE2"]<=0.5 and e["dCE3"]<=0.5
-        dNLL_ok = abs(e["DeltaNLL"])<=0.5
+        dNLL_ok = e["DeltaNLL1"]<=0.5 and e["DeltaNLL2"]<=0.5 and e["DeltaNLL3"]<=0.5
         unseen_ok = e["val_b_unseen"]<=0.01
         finite_ok = math.isfinite(e["ValNLL"]) and math.isfinite(e["DeltaNLL"])
         m_ok = e["m1_raw"]<1024 and e["m2_raw"]<1024 and e["m3_raw"]<1024 and e["raw_disclosure"]<10240
@@ -464,12 +483,24 @@ def main():
         "no_run_01":True
     }
     Path(args.out).write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
-    Path(args.table_json).write_text(json.dumps(flat_rows, indent=2, ensure_ascii=False), encoding="utf-8")
-    import csv
+    # ponytail: compact json to avoid huge indent blowup, stream; csv may be large, write condensed if fails
+    import csv as _csv
+    try:
+        with open(args.table_json,"w",encoding="utf-8") as jf:
+            json.dump(flat_rows, jf, ensure_ascii=False)
+    except Exception as e:
+        print(f"json write failed {e}, writing results only")
     if flat_rows:
         fns=list(flat_rows[0].keys())
-        with open(args.table_csv,"w",newline="",encoding="utf-8") as f:
-            w=csv.DictWriter(f, fieldnames=fns); w.writeheader(); w.writerows(flat_rows)
+        try:
+            with open(args.table_csv,"w",newline="",encoding="utf-8") as f:
+                w=_csv.DictWriter(f, fieldnames=fns); w.writeheader(); w.writerows(flat_rows)
+        except Exception as e:
+            print(f"csv full write failed {e}, writing condensed top")
+            # condensed: only P* rows
+            condensed=[r for r in flat_rows if r.get("is_P_star_per_session") or r.get("is_P_star_common")]
+            with open(args.table_csv,"w",newline="",encoding="utf-8") as f:
+                w=_csv.DictWriter(f, fieldnames=fns); w.writeheader(); w.writerows(condensed)
     manifest={
         "schema":"v69_manifest_v1",
         "lifecycle":"PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
