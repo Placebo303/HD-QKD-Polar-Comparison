@@ -2,7 +2,7 @@
 
 **Lifecycle**: PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED — 1024维符号三层有序 w∈[2,5] 重划分，枚举 3^10=59049→37170 去重统计，按升序唯一词典序 max_util→disclosure→ΔNLL→lex 选 P*，Phase A CAL-only 真实4-fold CV Phase B VAL确认 per-layer VAL-CAL≤0.5 + unseen≤1% + chain 1e-9 + m<1024，V67三Session Stage2复用，per-session 5分流 + 总体5态 + common三 session 同 assignment 审计，不跑decoder不构矩阵不启V70
 
-**HEAD**: fcf3e457ecf45c58e23f91d750acd5267d541795  **Data SHA**: 84d62779 (d1024 bw200 nearest legacy_v1)
+**HEAD (plan/implementation/result)**: d6f590ac6f30deaa8b0bf6cf5c419593fc037720  **Data SHA**: 84d62779 (d1024 bw200 nearest legacy_v1) — plan SHA = implementation SHA = result SHA (HEAD==origin/formal-ir-mainline, no separate result commit; fcf3e457 predecessor retired)
 **Method frozen**: n1024 q1024 GF32 poly37 H1 16×1024 rank16 80b U natural 5+5 参照 + U three-layer bits_P(P) 37170种仅重标记 w∈[2,5] Σw=10 有序非空 per frame 256 Lane C 184/190/192 H_inc Δ8 decoder 90/1.0 poly37 disabled full-tag canonical leak Σw_i·m_i+64  V70_not_started — **真实CAL 4-fold CV重做，删合成CE/硬编码dCE**
 
 ## Enumerate 3^10→37170 去重统计

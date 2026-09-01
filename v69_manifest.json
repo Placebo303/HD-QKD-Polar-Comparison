@@ -1,7 +1,10 @@
 {
   "schema": "v69_manifest_v1",
   "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
-  "head": "fcf3e457ecf45c58e23f91d750acd5267d541795",
+  "head": "d6f590ac6f30deaa8b0bf6cf5c419593fc037720",
+  "plan_head": "d6f590ac6f30deaa8b0bf6cf5c419593fc037720",
+  "implementation_head": "d6f590ac6f30deaa8b0bf6cf5c419593fc037720",
+  "result_head": "d6f590ac6f30deaa8b0bf6cf5c419593fc037720",
   "data_sha": "84d62779",
   "V70_not_started": true,
   "frozen_body": {
