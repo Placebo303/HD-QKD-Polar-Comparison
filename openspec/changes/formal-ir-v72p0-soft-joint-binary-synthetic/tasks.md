@@ -4,11 +4,11 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — **Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止，T_LF01-08 去 self 8测试 + backend Q1-Q6 三态 enum 非字符串 READY + P0A tiny total_bits≤9 k2/3 n6/9 exhaustive symbols exhaustive + P0B 9036×10240 nested rank C1-C6 + 8终态 wall first-match + T0-T3 矩阵，四工件双报告，不跑 decoder 不改 V70/V70R1/V71**
 
-**HEAD**: `5591e16bf35b03c3df30a003bee12011a796d73e` (动态绑定 `git rev-parse HEAD`; 2M禁止, mother 仅合成, V70/V71 零改) + data `84d62779` + `synthetic_v72p0`
+**HEAD**: `9b7f27a25cdd74e0924ecfd05187339e7f11e165` (动态绑定 `git rev-parse HEAD`; 2M禁止, mother 仅合成, V70/V71 零改) + data `84d62779` + `synthetic_v72p0`
 
 **Predecessor**: `formal-ir-v71-soft-joint-factor-kernel` `487be113` + `formal-ir-v70-binary-soft-joint-feasibility` `9bc34be6` + `formal-ir-v70r1-parametric-channel-model-check` `0509d10b (CHANGES)` → `V72P0-SYN`
 
-**Method frozen**: `Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止 tag 64b exact` 零改；处理点 `84d62779` 合成锚点；`去 self local factor Σ_{j≠i} bits_j·llr_j` + `T_LF01-08` + `Q1-Q6 enum` + `P0A tiny 2/3/4` + `P0B mother 9036×10240`
+**Method frozen**: `Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止 tag 64b exact` 零改；处理点 `84d62779` 合成锚点；`去 self local factor Σ_{j≠i} bits_j·llr_j` + `T_LF01-08` + `Q1-Q6 enum` + `P0A tiny k2/3 n6/9` + `P0B mother 9036×10240`
 
 **Boundary**: 仅验证合成链条 correctness，不改主体；去 self 冻结 `Σ_{j≠i}`，8测试 brute `1e-12`，Q1-Q6 READY 非字符串，P0A tiny exact，P0B nested rank，8终态 wall first-match，T0-T3，不跑 decoder 不启 V72
 
@@ -55,7 +55,7 @@
 
 ## Phase H — 四工件 + 双报告交付（PLAN_CANDIDATE / SYNTHETIC_ONLY，不启 V72）+ T0-T3 矩阵
 
-- [ ] **H1 编写 `scripts/v72p0_soft_joint_binary_synthetic.py`** (SYNTHETIC_ONLY, 本变更目录下): `python scripts/v72p0_soft_joint_binary_synthetic.py [--registry v72p0_data_registry_synthetic.json] [--out v72p0_results.json]` → `T_LF01-08 去 self → P0A tiny 2/3/4 exhaustive 8 trials → P0B mother 9036×10240 C1-C6 → wall/peak + f1.3 NOT_MEASURED`，`rg "decode_" 0 hits` `rg '"READY"' 0 hits` `rg -i "met|protograph|v72.*run_01" 0 hits`（除 `V72_not_started` 注释）仅 `numpy/pandas/pyarrow`，`py_compile PASS`，输出 `v72p0_results.json + v72p0_table.(csv|json) + V72P0_SYN_REPORT.md` + 控制台 8终态摘要。
+- [ ] **H1 编写 `scripts/v72p0_soft_joint_binary_synthetic.py`** (SYNTHETIC_ONLY, 本变更目录下): `python scripts/v72p0_soft_joint_binary_synthetic.py [--registry v72p0_data_registry_synthetic.json] [--out v72p0_results.json]` → `T_LF01-08 去 self → P0A tiny k2/3 n6/9 exhaustive 8 trials → P0B mother 9036×10240 C1-C6 → wall/peak + f1.3 NOT_MEASURED`，`rg "decode_" 0 hits` `rg '"READY"' 0 hits` `rg -i "met|protograph|v72.*run_01" 0 hits`（除 `V72_not_started` 注释）仅 `numpy/pandas/pyarrow`，`py_compile PASS`，输出 `v72p0_results.json + v72p0_table.(csv|json) + V72P0_SYN_REPORT.md` + 控制台 8终态摘要。
 - [ ] **H2 编写 `scripts/v72p0_backend_audit.py`** (read-only Q1-Q6 三态 enum): `python scripts/v72p0_backend_audit.py [--out v72p0_backend_audit_report.json]` → `Q1-Q6` 三态 `PASS/FAIL/NOT_APPLICABLE` enum（`IntEnum BackendState`）`READY/ADAPTER/NOT_COMPATIBLE` per synthetic + overall 2态，`rg "decode_" 0 hits` `rg '"READY"' 0 hits` `rg "run_ldpc_formal_v5\(" 0 hits`（仅 AST 探针）仅 `ast/importlib/enum`，`py_compile PASS`，输出 `v72p0_backend_audit_report.json + V72P0_BACKEND_AUDIT_REPORT.md` + 控制台摘要。
 - [ ] **H3 T0-T3 矩阵执行与落盘**：
   - **T0** compile/import/structural/tiny-math: `py_compile` 双脚本 PASS, `import` 无 `decode_`，`T_LF01-03` 小矩阵 `|Δ|<1e-12`，`git diff -- src/ ==0` 未改码
@@ -64,7 +64,7 @@
   - **T3** cross-version / broad regression: `rg "decode_" 0 hits` + `git diff -- openspec/changes/formal-ir-v70* 0 hits` + `git diff -- openspec/changes/formal-ir-v71* 0 hits`（除本目录）+ `used_2m==false` 回归 + `V70/V71` 冻结值对照未漂移
   均落盘 `v72p0_manifest.json: T0-T3 {pass/fail}`，`V72P0_SYN_REPORT.md` 一致。
 - [ ] **H4 撰写双报告**：`V72P0_SYN_REPORT.md`（`T_LF01-08/P0A k2/3 n6/9/P0B C1-C6/wall/peak/per_invocation/f1.3 NOT_MEASURED + overall 2态 + 2M未读 + Q1024冻结 + V72_not_started`）与 `V72P0_BACKEND_AUDIT_REPORT.md`（`Q1-Q6 per synthetic 三态 enum / READY/ADAPTER/NOT_COMPATIBLE + wall + overall`）与 `json/csv` 一致，不扩大为 `FER/SKR`，显式 `去 self 8测试 + Q1-Q6 enum + P0A tiny + P0B 9036×10240 + wall 30s/2GiB + f1.3 NOT_MEASURED`。
-- [ ] **H5 自检（8终态+overall+T0-T3+守卫 R72-01~09，不启 V72）**：`py_compile` 双脚本 PASS, `rg "decode_" 0 hits`, `rg '"READY"' 0 hits`, `rg -i "met|protograph" 0 hits`, `rg -i "v72.*run_01|qualification.*run" 0 hits`（除 `V72_not_started` 注释），`git diff -- src/ ==0` 未改码, 合成注册表 `Q1024 N1024 M9036 used_2m false` 已验, `T_LF01-08` 已验, `Q1-Q6 enum` 已验, `P0A tiny 2/3/4 0 mismatch` 已验, `P0B C1-C6` 已验, `8终态优先级互斥` 已验, `overall 2态` 已验, `wall 30s/2GiB` 已验, `f1.3 NOT_MEASURED` 已验, `2M未读` 已验, `V72_not_started` 已验, `T0-T3` 已验, 报告与 `json/csv` 一致 **无 TBD**, **A-H 已闭合**。
+- [ ] **H5 自检（8终态+overall+T0-T3+守卫 R72-01~09，不启 V72）**：`py_compile` 双脚本 PASS, `rg "decode_" 0 hits`, `rg '"READY"' 0 hits`, `rg -i "met|protograph" 0 hits`, `rg -i "v72.*run_01|qualification.*run" 0 hits`（除 `V72_not_started` 注释），`git diff -- src/ ==0` 未改码, 合成注册表 `Q1024 N1024 M9036 used_2m false` 已验, `T_LF01-08` 已验, `Q1-Q6 enum` 已验, `P0A tiny k2/3 n6/9 0 mismatch` 已验, `P0B C1-C6` 已验, `8终态优先级互斥` 已验, `overall 2态` 已验, `wall 30s/2GiB` 已验, `f1.3 NOT_MEASURED` 已验, `2M未读` 已验, `V72_not_started` 已验, `T0-T3` 已验, 报告与 `json/csv` 一致 **无 TBD**, **A-H 已闭合**。
 - [ ] **H6 小测试**：`pytest -p no:cacheprovider -q` 小测试（`test_v72p0_soft_joint_binary_synthetic_small.py`）验证 `bit展开 / T_LF01-08 小矩阵 / 去 self 1e-12 / Q1-Q6 enum mock 非字符串 / P0A 前K秩 / wall gate + 2M隔离 + V72_not_started`，`py_compile` 双 PASS。
   - ponytail: `local_factor_excl` 为 10-bit 纯移位/掩码 + `logsumexp`，不引 `numba`；`T_LF01-08` 小矩阵为 `tuple` 校验 `O(1024)` 足够；`P0B` 小秩仅前 `3` 行前缀以控成本；`Q1-Q6` mock 用临时 `ldpc_v5*.py` 片段 `IntEnum`。
 

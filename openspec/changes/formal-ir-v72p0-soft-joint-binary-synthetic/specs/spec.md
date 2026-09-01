@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — 仅 plan 四工件 + 合成链条 correctness（1024→10bit local factor 去 self ↔ mother 9036×10240 incremental syndrome ↔ exact 64b tag），`Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止`，`T_LF01-08` 去 self 8测试 + `Q1-Q6` 三态 enum 非字符串 READY + `P0A` tiny 2-4 exhaustive + `P0B` nested rank `C1-C6`，8终态 wall first-match + `T0-T3`，不跑 decoder 不改 V70/V71
 
-**Change**: `formal-ir-v72p0-soft-joint-binary-synthetic` (`V72P0-SYN`, branch `formal-ir-mainline`, HEAD `5591e16bf35b03c3df30a003bee12011a796d73e` 动态绑定 `git rev-parse HEAD`; 2M禁止 `used_2m false`, data `84d62779 + synthetic_v72p0`, `Q1024 N1024 Nbit10240 M9036`, 去 self `Σ_{j≠i}`, `T_LF01-08` 8测试, `Q1-Q6` enum 非 `== "READY"`, `P0A k2/3 n6/9 8trials 7cover 1024` + `P0B 9036×10240 r0 160 Δ8`, `8term wall`, `T0-T3`)
+**Change**: `formal-ir-v72p0-soft-joint-binary-synthetic` (`V72P0-SYN`, branch `formal-ir-mainline`, HEAD `9b7f27a25cdd74e0924ecfd05187339e7f11e165` 动态绑定 `git rev-parse HEAD`; 2M禁止 `used_2m false`, data `84d62779 + synthetic_v72p0`, `Q1024 N1024 Nbit10240 M9036`, 去 self `Σ_{j≠i}`, `T_LF01-08` 8测试, `Q1-Q6` enum 非 `== "READY"`, `P0A k2/3 n6/9 8trials 7cover 1024` + `P0B 9036×10240 r0 160 Δ8`, `8term wall`, `T0-T3`)
 
 **Predecessor**: `formal-ir-v71-soft-joint-factor-kernel` (`487be113` `ADAPTER_REQUIRED`) + `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be6` `PARTIAL`) + `formal-ir-v70r1-parametric-channel-model-check` (`0509d10b` `CHANGES`) — V72P0 新增合成 P0 壁垒，去 self LF + mother incremental + tag exact，synthetic-only，不启 V72
 
@@ -10,7 +10,7 @@
 
 - **Type**: `SYNTHETIC_CHAIN_CORRECTNESS_P0` — 于合成域 `P0A tiny total_bits≤9 k2/3 n6/9 exhaustive + P0B mother 9036×10240` 上验证链条 correctness：`去 self local factor Σ_{j≠i} bits_j·llr_j` 枚举1024态 `T_LF01-08` 正交（去 self `1e-12`）+ `Q1-Q6` 三态 enum 非字符串 READY + `P0A` `2/3/4` symbols exhaustive `0 mismatch` + `P0B` `9036×10240` `r0 160 Δ8→9036` 前缀确切 GF2 秩 `C1-C6` + `wall≤30s/peak≤2048MiB` + `f1.3 NOT_MEASURED` + 8终态 wall first-match + `T0-T3`。
 - **Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件 + 合成审计（`v72p0_data_registry_synthetic.json + v72p0_soft_joint_binary_synthetic.py + v72p0_backend_audit.py + v72p0_results.json + v72p0_table.{csv,json} + V72P0_SYN_REPORT.md + V72P0_BACKEND_AUDIT_REPORT.md + test_v72p0_*.py + v72p0_manifest.json`），**不实现 runner，不执行 decoder，不读 2M real，不构业务 disclosure，不创建 `run_01`，不改 Q/N/Nbit/M/tag/V70/V71/src，不启动 V72**；正式 `run_01` 需独立 `PLAN_ACCEPT` + `EXECUTE_AUTH`；`SYNTHETIC_ONLY` 表示零 `decode_*` 业务调用（`rg 0 hits`）且 `used_2m==false`（`rg -i "2M" synthetic 0 hits` 除禁止声明），`V72_NOT_STARTED` 表示零 `V72_*/run_01` 且 `rg -i "v72.*run_01|qualification.*run" 0 hits`（除 `V72_not_started` 注释）。
-- **Branch**: `formal-ir-mainline`；`HEAD` `5591e16bf35b03c3df30a003bee12011a796d73e` (动态绑定 `git rev-parse HEAD`; `git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞) 已与 `git rev-parse HEAD` 一致。`TBD` 0 hits。
+- **Branch**: `formal-ir-mainline`；`HEAD` `9b7f27a25cdd74e0924ecfd05187339e7f11e165` (动态绑定 `git rev-parse HEAD`; `git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞) 已与 `git rev-parse HEAD` 一致。`TBD` 0 hits。
 - **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) real provenance + `synthetic_v72p0` 合成独立（P0 仅合成，不读 real `CAL/VAL/TEST`，`2M` 禁止）。
 - **Synthetic bound**: `P0A total_bits≤9 k2/3 n6/9 各 8 trials (7cover 1024 exhaustive)` + `P0B mother 9036×10240  r0 160 Δ8` 合成；`2M` real 不参与。
 - **Rate feasibility**: **f=1.3 frozen, required_ref≈1065（`ceil(1.3·N·CE_synth)` 近似，与 9036 上限 gap 正交），f_actual NOT_MEASURED**，仅合规参照，不入合成门禁。
@@ -46,21 +46,20 @@
 
 | 集合 | 规模 | 说明 |
 |---|---|---|
-| P0A tiny N_small=2 | 8 trials ×2 symbols | exhaustive 部分采样 + `H_small` 增量 tag exact |
-| P0A tiny N_small=3 | 8 trials ×3 symbols | 同上 |
-| P0A tiny N_small=4 | 8 trials ×4 symbols | 采样 + 小秩 brute |
+| P0A tiny k=2 n=6 total_bits=6 | 8 trials ×6 bits 7cover 1024 | exhaustive 部分采样 + `H_small` 增量 tag exact |
+| P0A tiny k=3 n=9 total_bits=9 | 8 trials ×9 bits 7cover 1024 | 同上 |
 | P0B mother full N=1024 | 9036×10240 | nested rank C1-C6，增量 tag |
 | 2M real | **密封不读** | `used_2m==false`，V72P0 不启 |
 | ldpc_v5* | 只读探针 | `Q1-Q6` audit 对象 |
 
-- **合成注册表**：`v72p0_data_registry_synthetic.json` (`schema v72p0_synthetic_v1`) 含 `synthetic_seed V72P0-SYN, P0A {2/3/4 各64} P0B {mother 9036×10240 r0 160 Δ8 Rs, col sym*10+bit, successor_v72_not_started}`，禁止事后换 seed 或读 2M。
+- **合成注册表**：`v72p0_data_registry_synthetic.json` (`schema v72p0_synthetic_v1`) 含 `synthetic_seed V72P0-SYN, P0A {k2/3 n6/9 各8 trials 7cover} P0B {mother 9036×10240 r0 160 Δ8 Rs, col sym*10+bit, successor_v72_not_started}`，禁止事后换 seed 或读 2M。
 - **零重叠**：`synthetic` 键与 `(V13..V71)` real `(source,session,frame)` 零重叠。
 - **位展开**：`bit_i(s)=(s>>i)&1, i=0..9` 已验双射；列序 `sym*10+bit` 已验。
 
 ### 3.2 数据就绪门
 
 - `Q==1024 && N==1024 && Nbit==10240 && M==9036 && f==1.3 && f_actual=="NOT_MEASURED" && used_2m==false && successor_v72_not_started` 否则 `EVIDENCE_INCOMPLETE`。
-- `P0A_N2==64 && P0A_N3==64 && P0A_N4==64 && mother_shape==[9036,10240] && Rs[0]==160 && Rs[-1]==9036` 否则 `EVIDENCE_INCOMPLETE`。
+- `P0A_k2_n6_trials==8 && P0A_k3_n9_trials==8 && mother_shape==[9036,10240] && Rs[0]==160 && Rs[-1]==9036` 否则 `EVIDENCE_INCOMPLETE`。
 - `col_order sym*10+bit LSB→MSB` 已验，否则 `EVIDENCE_INCOMPLETE`。
 - `ldpc_v5* files exist && git diff ldpc_v5* ==0` 否则 `EVIDENCE_INCOMPLETE`。
 
@@ -136,9 +135,9 @@ guard: rg '"READY"' 0 hits; backend_state == BackendState.READY (enum)
 
 ```
 for k in [2,3] n in [6,9] (7cover 1024, 8trials):
-  wall_s, peak_MiB = benchmark(tiny_exhaustive, N_small, 8 trials)
+  wall_s, peak_MiB = benchmark(tiny_exhaustive, k*n, 8 trials)
 P0A_PASS = (0 mismatch) ∧ T_LF01-08 PASS ∧ wall≤30s ∧ peak≤2048MiB
-report: per N_small {wall_s, peak_MiB, mismatch, tag_mismatch, exhaustive_coverage}
+report: per k*n {wall_s, peak_MiB, mismatch, tag_mismatch, exhaustive_coverage}
 ```
 
 ### 5.6 P0B mother 9036×10240 nested rank C1-C6
@@ -200,10 +199,10 @@ audit = {per_synthetic_classification, overall, 8 counts, T_LF01-08, Q1-Q6 enum,
 
 - **表schema** (`v72p0_table.csv/.json` 行对等, per synthetic 1+2 行：tiny aggregated + mother + overall):
 ```
-synthetic_case, N_small/M, registry_synthetic_sha, Q/N/Nbit/M/f1.3,
+synthetic_case, k*n/M, registry_synthetic_sha, Q/N/Nbit/M/f1.3,
 T_LF01..T_LF08 per synthetic (PASS/FAIL, maxΔ, K),
 Q1..Q6 per synthetic (PASS/FAIL/NOT_APPLICABLE enum, backend_classification READY/ADAPTER/NOT_COMPATIBLE),
-P0A_N2 {trials 64 mismatch wall peak coverage}, P0A_N3 {...}, P0A_N4 {...}, P0A_PASS,
+P0A_k2_n6 {trials 8 mismatch wall peak coverage}, P0A_k3_n9 {...}, P0A_PASS,
 P0B {mother_shape 9036x10240 r0 160 Rs wall peak C1..C6 PASS/FAIL P0B_PASS},
 wall_s, peak_MiB, per_invocation_ns, f1.3 NOT_MEASURED,
 classification (8终态), successor, overall 2态

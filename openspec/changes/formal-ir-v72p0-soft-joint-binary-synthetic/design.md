@@ -4,7 +4,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — **1024→10bit local factor 去 self-message LLR ↔ binary LDPC mother 9036×10240 BP incremental syndrome ↔ exact 64-bit tag 链条合成 correctness 合成校验，Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止，T_LF01-08 8测试正交，backend 6问三态 enum 非字符串 READY，P0A tiny total_bits≤9 k2/3 n6/9 exhaustive symbols exhaustive + P0B synthetic mother nested rank C1-C6，8终态 wall first-match，T0-T3 矩阵，不跑 decoder 不改 V70/V70R1/V71**
 
-**Cycle**: `V72P0-SYN` (soft-joint-binary-synthetic P0), predecessor `V71-SJK (487be113)` + `V70-BSJ (9bc34be6)` + `V70R1 (0509d10b CHANGES)`，HEAD `5591e16bf35b03c3df30a003bee12011a796d73e` (动态绑定 `git rev-parse HEAD`; 2M 禁止, 9036×10240 mother 仅合成, V70/V71 零改) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` + `synthetic_v72p0`
+**Cycle**: `V72P0-SYN` (soft-joint-binary-synthetic P0), predecessor `V71-SJK (487be113)` + `V70-BSJ (9bc34be6)` + `V70R1 (0509d10b CHANGES)`，HEAD `9b7f27a25cdd74e0924ecfd05187339e7f11e165` (动态绑定 `git rev-parse HEAD`; 2M 禁止, 9036×10240 mother 仅合成, V70/V71 零改) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` + `synthetic_v72p0`
 
 **Feasibility**: `V70` `PARTIAL` 证 `D_bits≥0` 且 `soft_joint_factor_update` 纯函数双极 `1e-12`，`V71` `ADAPTER_REQUIRED` 证纯因子核 `D1-D10` 全 PASS 但需适配层，母亲码 `9036×10240` 未验增量嵌套与 tag exact。`V72P0` 假设 **local factor 去 self + mother incremental syndrome + exact tag 在合成域可零构造正确**（`T_LF01-08` 全 PASS 且 `Q1-Q6` 至多 `ADAPTER` 且 `P0A` tiny exhaustive `0 mismatch` 且 `P0B` `C1-C6` 全 PASS 且 `wall≤30s/peak≤2GiB`），则该链条可进入 `V72` real mother 设计，否则 `TINY/RANK/NESTED` 失败需重构。
 
@@ -46,13 +46,12 @@
 
 ## 3. 数据角色 — SYNTHETIC_ONLY（P0A tiny + P0B full 合成，2M real 禁止）
 
-### 3.1 合成与零重叠（键 `(synthetic, N_small, trial)` + `synthetic_v72p0`）
+### 3.1 合成与零重叠（键 `(synthetic, k,n, trial)` + `synthetic_v72p0`）
 
 | 集合 | 规模 | 来源 | 说明 |
 |---|---|---|---|
-| P0A tiny `N_small=2` | `8 trials × 2 symbols =128` | `synthetic_v72p0: P0A_N2` | exhaustive `Q^2` 部分采样 + `H_small` 增量 tag exact |
-| P0A tiny `N_small=3` | `8 trials × 3 =192` | `synthetic_v72p0: P0A_N3` | 同上，部分采样 |
-| P0A tiny `N_small=4` | `8 trials × 4 =256` | `synthetic_v72p0: P0A_N4` | 采样 + 小秩 brute |
+| P0A tiny `k=2 n=6 total_bits=6` | `8 trials × 6 bits 7cover 1024` | `synthetic_v72p0: P0A_k2_n6` | exhaustive `Q^k` 部分采样 + `H_small` 增量 tag exact |
+| P0A tiny `k=3 n=9 total_bits=9` | `8 trials × 9 bits 7cover 1024` | `synthetic_v72p0: P0A_k3_n9` | 同上，部分采样 |
 | P0B full `N=1024` | `synthetic_v72p0: P0B_MOTHER` | `synthetic_v72p0: mother 9036×10240` | nested rank C1-C6，增量 tag |
 | Real 2M | **密封不读** | `84d62779` 2M session | `used_2m==False`，V72P0 不启 |
 | ldpc_v5* | 只读探针 | `formal_ir/ldpc_v5*.py` | Q1-Q6 三态 audit |
@@ -65,7 +64,7 @@
 ```
 assert Q==1024 && N==1024 && Nbit==10240 && M==9036
 assert f==1.3 && f_actual=="NOT_MEASURED" && used_2m==false
-assert P0A_N2==64 && P0A_N3==64 && P0A_N4==64 && P0B_mother_shape==[9036,10240]
+assert P0A_k2_n6_trials==8 && P0A_k3_n9_trials==8 && P0B_mother_shape==[9036,10240]
 assert r0==160 && Rs[0]==160 && Rs[-1]==9036 && prefix_nested_verified
 assert successor_v72_not_started == true
 assert ldpc_v5*_files exist && git diff -- .../formal_ir/ldpc_v5* ==0
@@ -169,8 +168,8 @@ guard: rg '"READY"' audit脚本 0 hits (除注释); assert backend_state == Back
 # 合成 tiny 域
 for k in [2,3] n in [6,9] (7cover 1024, 8trials):
   for trial in 0..63:
-    bits_small = random_bits(N_small*10, seed V72P0-SYN-P0A-{N_small}-{trial})
-    H_small = generate_H_small(N_small)  # m_small = ceil(1.3*N_small*CE_synth) ≈?
+    bits_small = random_bits(k*n, seed V72P0-SYN-P0A-{N_small}-{trial})
+    H_small = generate_H_small(k*n)  # m_small = ceil(1.3*k*n*CE_synth) ≈?
     syndrome = H_small @ bits_small (GF2)
     tag = SHA256(bits_small)[:8B]
     tag_from_s = SHA256(s_hat_bytes)[:8B]  # s_hat = Σ bit<<j per symbol
