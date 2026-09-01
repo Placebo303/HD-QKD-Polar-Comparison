@@ -33,10 +33,10 @@
 ## Phase E — 工件与自检
 
 - [x] **E1 脚本**：`scripts/v70r1_parametric_channel_model_check.py`，`py_compile` PASS，`rg "decode_"` 0 hits，仅 `numpy/pandas/pyarrow`。
-- [x] **E2 小测试**：`test_v70r1_parametric_channel_model_small.py`，20 项纯函数/合成数据测试，`pytest -q` **20 passed**（核归一化、平移不变核 CE 恒等、两点模型闭式、planted 参数回收 `μ≤0.25 / ε≤0.05`、`required` ceil 不 cap、`f_max` 恒等、三分流边界、V70 三行分类复现、Fano 单调与 `acc=0.4149→6.830`、`hierarchical_P` 公式与空行回退、终端有序唯一、网格冻结、decoder-free 源码检查）。
-- [ ] **E3 执行回填**（需 `EXECUTE_AUTH`）：运行脚本得 `v70r1_results.json` + `v70r1_table.csv/.json`，回填本节与报告。
-- [ ] **E4 报告**：`V70R1_PARAMETRIC_CHANNEL_REPORT.md`，per-session 三模型对照表 + 样本曲线（descriptive-only） + 四终端 + overall，与 json/csv 行对等，无 TBD。
-- [ ] **E5 守卫 R70R1-01~10 落盘**：`v70r1_manifest.json:guards` 逐项 `true`（见 Design §7）。
+- [x] **E2 小测试**：`test_v70r1_parametric_channel_model_small.py`，32 项纯函数/合成数据测试，`pytest -q` **32 passed**（核归一化、平移不变核 CE 恒等、两点模型闭式、planted 参数回收 `μ≤0.25 / ε≤0.05`、`required` ceil 不 cap、`f_max` 恒等、三分流边界、V70 三行分类复现、Fano 单调与 `acc=0.4149→6.830`、`hierarchical_P` 公式与空行回退、终端有序唯一、网格冻结、decoder-free 源码检查 + 3SHA/f_actual/9字段/ordering 6项新增）。
+- [x] **E3 执行回填**（需 `EXECUTE_AUTH`）：运行脚本得 `v70r1_results.json` + `v70r1_table.csv/.json`，回填本节与报告。
+- [x] **E4 报告**：`V70R1_PARAMETRIC_CHANNEL_REPORT.md`，per-session 三模型对照表 + 样本曲线（descriptive-only） + 四终端 + overall，与 json/csv 行对等，无 TBD。
+- [x] **E5 守卫 R70R1-01~10 落盘**：`v70r1_manifest.json:guards` 逐项 `true`（见 Design §7）。
 
 ## Phase F — 提交与等待复核
 
@@ -55,12 +55,12 @@
 
 ## 验收
 
-- `proposal/design/tasks/specs` 一致，HEAD `EXTERNALLY_BOUND_AT_PRE_EXECUTE` 非自引用（`current_parent` `082fa89a`，`accepted` `0509d10b` revised_plan / `initial` `179916f7`，`execution` `EXTERNALLY_BOUND_AT_PRE_EXECUTE` 由 Pre-EXECUTE 外部核对 `HEAD == origin/formal-ir-mainline` 推送后重核），`6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`，Data `84d62779`，lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V72_NOT_STARTED=true`，V70 数值不变；仅四文件为 `179916f7` 后继，四终态一致。
+- `proposal/design/tasks/specs` 一致，HEAD `EXTERNALLY_BOUND_AT_PRE_EXECUTE` 非自引用（`current_parent` `082fa89a`，`accepted` `0509d10b` revised_plan / `initial` `179916f7`，`execution` `EXTERNALLY_BOUND_AT_PRE_EXECUTE` 由 Pre-EXECUTE 外部核对 `HEAD == origin/formal-ir-mainline` 推送后重核），`6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`，Data `84d62779`，lifecycle `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE` + `V72_NOT_STARTED=true`，V70 数值不变；仅四文件为 `179916f7` 后继，四终态一致。
 - 三模型预注册（M0 表 / M1 circulant / M2 wrapped Gaussian-或-Laplace + 背景），M2 族由 CAL 4-fold CV 二选一已实现，VAL 只确认一次。
 - CAL/VAL 帧复用 V70 已实现并断言；M0 复现 V70 `CE_full_VAL` 作为 `EVIDENCE_INVALID` 前置已实现。
 - `required` 显式 ceil 不 cap、`gap` 显式、三分流阈与 V70 一致、`f_max` 与规划 `1.3` 分离已实现。
 - 四终端 first-match 互斥完备、overall 同序聚合已实现。
 - 样本需求曲线 `32..1024` 帧同一 VAL 已实现（descriptive-only，不触发终态）。
 - 非声称字段 `ce_decomposition_claimed=false` / `planning_f_is_not_achieved_f=true` 已落盘。
-- `py_compile` PASS，`pytest` 20 passed，`git diff -- src/ == 0`，`rg "decode_"` 0 hits，未建 `run_01`，未启 V72。
-- **E3–F2 待 `EXECUTE_AUTH` / 推送后独立复核。**
+- `py_compile` PASS，`pytest` 32 passed，`git diff -- src/ == 0`，`rg "decode_"` 0 hits，未建 `run_01`，未启 V72。
+- **E3–E5 已完成，F2 推送后独立复核。**
