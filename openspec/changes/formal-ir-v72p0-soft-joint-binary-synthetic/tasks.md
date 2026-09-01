@@ -4,7 +4,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — **Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止，T_LF01-08 去 self 8测试 + backend Q1-Q6 三态 enum 非字符串 READY + P0A tiny 2-4 symbols exhaustive + P0B 9036×10240 nested rank C1-C6 + 8终态 wall first-match + T0-T3 矩阵，四工件双报告，不跑 decoder 不改 V70/V70R1/V71**
 
-**HEAD**: `8fce6550588d458870ef2d268209fc1c826d6077` (动态绑定 `git rev-parse HEAD`; 2M禁止, mother 仅合成, V70/V71 零改) + data `84d62779` + `synthetic_v72p0`
+**HEAD**: `01b4493f8c78f5033b9259efdd4a0e4e99f8189e` (动态绑定 `git rev-parse HEAD`; 2M禁止, mother 仅合成, V70/V71 零改) + data `84d62779` + `synthetic_v72p0`
 
 **Predecessor**: `formal-ir-v71-soft-joint-factor-kernel` `487be113` + `formal-ir-v70-binary-soft-joint-feasibility` `9bc34be6` + `formal-ir-v70r1-parametric-channel-model-check` `0509d10b (CHANGES)` → `V72P0-SYN`
 

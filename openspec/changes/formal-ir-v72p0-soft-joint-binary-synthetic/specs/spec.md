@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — 仅 plan 四工件 + 合成链条 correctness（1024→10bit local factor 去 self ↔ mother 9036×10240 incremental syndrome ↔ exact 64b tag），`Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止`，`T_LF01-08` 去 self 8测试 + `Q1-Q6` 三态 enum 非字符串 READY + `P0A` tiny 2-4 exhaustive + `P0B` nested rank `C1-C6`，8终态 wall first-match + `T0-T3`，不跑 decoder 不改 V70/V71
 
-**Change**: `formal-ir-v72p0-soft-joint-binary-synthetic` (`V72P0-SYN`, branch `formal-ir-mainline`, HEAD `8fce6550588d458870ef2d268209fc1c826d6077` 动态绑定 `git rev-parse HEAD`; 2M禁止 `used_2m false`, data `84d62779 + synthetic_v72p0`, `Q1024 N1024 Nbit10240 M9036`, 去 self `Σ_{j≠i}`, `T_LF01-08` 8测试, `Q1-Q6` enum 非 `== "READY"`, `P0A 2/3/4` + `P0B 9036×10240 r0 160 Δ8`, `8term wall`, `T0-T3`)
+**Change**: `formal-ir-v72p0-soft-joint-binary-synthetic` (`V72P0-SYN`, branch `formal-ir-mainline`, HEAD `01b4493f8c78f5033b9259efdd4a0e4e99f8189e` 动态绑定 `git rev-parse HEAD`; 2M禁止 `used_2m false`, data `84d62779 + synthetic_v72p0`, `Q1024 N1024 Nbit10240 M9036`, 去 self `Σ_{j≠i}`, `T_LF01-08` 8测试, `Q1-Q6` enum 非 `== "READY"`, `P0A 2/3/4` + `P0B 9036×10240 r0 160 Δ8`, `8term wall`, `T0-T3`)
 
 **Predecessor**: `formal-ir-v71-soft-joint-factor-kernel` (`487be113` `ADAPTER_REQUIRED`) + `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be6` `PARTIAL`) + `formal-ir-v70r1-parametric-channel-model-check` (`0509d10b` `CHANGES`) — V72P0 新增合成 P0 壁垒，去 self LF + mother incremental + tag exact，synthetic-only，不启 V72
 
@@ -10,7 +10,7 @@
 
 - **Type**: `SYNTHETIC_CHAIN_CORRECTNESS_P0` — 于合成域 `P0A tiny 2-4 + P0B mother 9036×10240` 上验证链条 correctness：`去 self local factor Σ_{j≠i} bits_j·llr_j` 枚举1024态 `T_LF01-08` 正交（去 self `1e-12`）+ `Q1-Q6` 三态 enum 非字符串 READY + `P0A` `2/3/4` symbols exhaustive `0 mismatch` + `P0B` `9036×10240` `r0 160 Δ8→9036` 前缀确切 GF2 秩 `C1-C6` + `wall≤30s/peak≤2048MiB` + `f1.3 NOT_MEASURED` + 8终态 wall first-match + `T0-T3`。
 - **Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件 + 合成审计（`v72p0_data_registry_synthetic.json + v72p0_soft_joint_binary_synthetic.py + v72p0_backend_audit.py + v72p0_results.json + v72p0_table.{csv,json} + V72P0_SYN_REPORT.md + V72P0_BACKEND_AUDIT_REPORT.md + test_v72p0_*.py + v72p0_manifest.json`），**不实现 runner，不执行 decoder，不读 2M real，不构业务 disclosure，不创建 `run_01`，不改 Q/N/Nbit/M/tag/V70/V71/src，不启动 V72**；正式 `run_01` 需独立 `PLAN_ACCEPT` + `EXECUTE_AUTH`；`SYNTHETIC_ONLY` 表示零 `decode_*` 业务调用（`rg 0 hits`）且 `used_2m==false`（`rg -i "2M" synthetic 0 hits` 除禁止声明），`V72_NOT_STARTED` 表示零 `V72_*/run_01` 且 `rg -i "v72.*run_01|qualification.*run" 0 hits`（除 `V72_not_started` 注释）。
-- **Branch**: `formal-ir-mainline`；`HEAD` `8fce6550588d458870ef2d268209fc1c826d6077` (动态绑定 `git rev-parse HEAD`; `git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞) 已与 `git rev-parse HEAD` 一致。`TBD` 0 hits。
+- **Branch**: `formal-ir-mainline`；`HEAD` `01b4493f8c78f5033b9259efdd4a0e4e99f8189e` (动态绑定 `git rev-parse HEAD`; `git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞) 已与 `git rev-parse HEAD` 一致。`TBD` 0 hits。
 - **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) real provenance + `synthetic_v72p0` 合成独立（P0 仅合成，不读 real `CAL/VAL/TEST`，`2M` 禁止）。
 - **Synthetic bound**: `P0A N_small 2/3/4 各 64 trials` + `P0B mother 9036×10240  r0 160 Δ8` 合成；`2M` real 不参与。
 - **Rate feasibility**: **f=1.3 frozen, required_ref≈1065（`ceil(1.3·N·CE_synth)` 近似，与 9036 上限 gap 正交），f_actual NOT_MEASURED**，仅合规参照，不入合成门禁。
