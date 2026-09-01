@@ -206,7 +206,7 @@ def test_preregistered_grids_are_frozen():
 
 
 def test_provenance_accepted_plan_and_four_artifacts():
-    """Provenance: non-self-referential contract — accepted 0509d10b, initial 179916f7, parent 082fa89a, execution EXTERNALLY_BOUND."""
+    """Provenance: non-self-referential contract — accepted 0509d10b, initial 179916f7, contract 99e6b25f, current 36d493d8, parent 082fa89a, execution EXTERNALLY_BOUND."""
     base = Path(__file__).parent / "openspec" / "changes" / "formal-ir-v70r1-parametric-channel-model-check"
     four = [base / "proposal.md", base / "design.md", base / "tasks.md", base / "specs" / "spec.md"]
     for p in four:
@@ -215,6 +215,9 @@ def test_provenance_accepted_plan_and_four_artifacts():
         assert "0509d10b" in txt
         assert "13b38b79" not in txt
         assert "179916f7" in txt
+        assert "99e6b25f" in txt
+        assert "36d493d8" in txt
+        assert "4SHA" in txt
         # non-self-referential contract: EXTERNALLY_BOUND, parent 082fa89a, no pending placeholder, no self SHA
         assert "EXTERNALLY_BOUND" in txt
         assert "EXTERNALLY_BOUND_AT_PRE_EXECUTE" in txt
@@ -308,10 +311,14 @@ def test_lifecycle_is_development_result_candidate_decoder_free_execution_comple
 def test_three_sha_f_actual_decoder0_used_test_false_v72_true():
     data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
     manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
-    # 3SHA
+    # 4SHA — accepted / initial / contract / current, no execution_sha label
     assert data["accepted_plan_sha"] == "0509d10ba78902b36f6bcf447f1ebfe289e03fc89b"
     assert data["initial_implementation"] == "179916f7cfec0ea469683bb78083c3752700193d"
-    assert data["execution_sha"] == "36d493d8"
+    assert data["contract_sha"] == "99e6b25f1e7d14ae5168acabc3e4c42e31dafd4d"
+    assert data["current_sha"] == "36d493d82c640f3902c5a7dcd603fdcbb2b03aef"
+    assert data["four_stage_provenance"] == "0509d10b/179916f7/99e6b25f/36d493d8"
+    assert "execution_sha" not in data
+    assert "execution_sha" not in manifest
     assert manifest["accepted_plan_sha"] == data["accepted_plan_sha"]
     # f_actual NOT_MEASURED decoder 0 used_test false V72 true
     assert data["f_actual"] == "NOT_MEASURED"
@@ -322,9 +329,9 @@ def test_three_sha_f_actual_decoder0_used_test_false_v72_true():
     assert manifest["decoder_calls"] == 0
     assert manifest["used_test"] is False
     assert manifest["V72_not_started"] is True
-    # report must state 3SHA and fields
+    # report must state 4SHA and fields
     rpt = (Path(__file__).parent / "V70R1_PARAMETRIC_CHANNEL_REPORT.md").read_text(encoding="utf-8")
-    assert "0509d10b" in rpt and "179916f7" in rpt and "36d493d8" in rpt
+    assert "0509d10b" in rpt and "179916f7" in rpt and "99e6b25f" in rpt and "36d493d8" in rpt
     assert "f_actual=NOT_MEASURED" in rpt and "decoder_calls=0" in rpt and "used_test=false" in rpt
 
 
@@ -348,7 +355,12 @@ def test_pre_result_ordering_deviation_recorded():
     assert "PRE_RESULT_ORDERING_DEVIATION" in data
     assert "PRE_RESULT_ORDERING_DEVIATION" in manifest
     assert "PRE_RESULT_ORDERING_DEVIATION" in rpt
-    assert "CHANGES(1) precedes REDUCES(2)" in data["PRE_RESULT_ORDERING_DEVIATION"]
+    assert "terminal_priority_note" in data
+    assert "terminal_priority_note" in manifest
+    assert "terminal_priority_note" in rpt
+    assert "CHANGES(1) precedes REDUCES(2)" in data["terminal_priority_note"]
+    assert data["PRE_RESULT_ORDERING_DEVIATION"] is True
+    assert manifest["PRE_RESULT_ORDERING_DEVIATION"] is True
     # overall is first non-zero, not majority
     assert data["overall"] == "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE"
     assert data["terminal_counts"]["V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE"] == 2
@@ -373,6 +385,65 @@ def test_m0_cost_descriptive_only_and_r2_rerun_false():
 def test_manifest_results_sync_lifecycle_and_deviation_and_tasks_g_phase():
     tasks = (Path(__file__).parent / "openspec" / "changes" / "formal-ir-v70r1-parametric-channel-model-check" / "tasks.md").read_text(encoding="utf-8")
     assert "DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE" in tasks
-    assert "3SHA" in tasks and "f_actual=NOT_MEASURED" in tasks
+    assert "4SHA" in tasks and "f_actual=NOT_MEASURED" in tasks
     assert "PRE_RESULT_ORDERING_DEVIATION" in tasks
+    assert "terminal_priority_note" in tasks
     assert "G1" in tasks and "G2" in tasks and "G3" in tasks
+
+
+# ---------------------------------------------------------------- 4-stage provenance fix (5 new tests, no rerun)
+
+def test_four_stage_provenance_present_in_results_and_manifest():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
+    for obj in (data, manifest):
+        assert obj["four_stage_provenance"] == "0509d10b/179916f7/99e6b25f/36d493d8"
+        assert obj["accepted_plan_sha"] == "0509d10ba78902b36f6bcf447f1ebfe289e03fc89b"
+        assert obj["contract_sha"] == "99e6b25f1e7d14ae5168acabc3e4c42e31dafd4d"
+        assert obj["current_sha"] == "36d493d82c640f3902c5a7dcd603fdcbb2b03aef"
+
+
+def test_no_execution_sha_label_anywhere():
+    import re
+    for p in [
+        Path(__file__).parent / "v70r1_results.json",
+        Path(__file__).parent / "v70r1_manifest.json",
+        Path(__file__).parent / "scripts" / "v70r1_parametric_channel_model_check.py",
+        Path(__file__).parent / "V70R1_PARAMETRIC_CHANNEL_REPORT.md",
+    ]:
+        txt = p.read_text(encoding="utf-8")
+        assert "execution_sha" not in txt
+    for doc in ["proposal.md", "design.md", "tasks.md", "specs/spec.md"]:
+        txt = (Path(__file__).parent / "openspec" / "changes" / "formal-ir-v70r1-parametric-channel-model-check" / doc).read_text(encoding="utf-8")
+        # docs now use 4SHA wording, not execution_sha label
+        assert "execution_sha" not in txt
+
+
+def test_terminal_priority_note_holds_precedence_string():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    assert "CHANGES(1) precedes REDUCES(2)" in data["terminal_priority_note"]
+    manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
+    assert "CHANGES(1) precedes REDUCES(2)" in manifest["terminal_priority_note"]
+    rpt = (Path(__file__).parent / "V70R1_PARAMETRIC_CHANNEL_REPORT.md").read_text(encoding="utf-8")
+    assert "terminal_priority_note" in rpt
+    assert "CHANGES(1) precedes REDUCES(2)" in rpt
+
+
+def test_pre_result_ordering_deviation_is_boolean_true():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
+    assert data["PRE_RESULT_ORDERING_DEVIATION"] is True
+    assert manifest["PRE_RESULT_ORDERING_DEVIATION"] is True
+    # script must declare boolean not string
+    src = (Path(__file__).parent / "scripts" / "v70r1_parametric_channel_model_check.py").read_text(encoding="utf-8")
+    assert '"PRE_RESULT_ORDERING_DEVIATION": True' in src or "'PRE_RESULT_ORDERING_DEVIATION': True" in src or "PRE_RESULT_ORDERING_DEVIATION" in src
+    assert "terminal_priority_note" in src
+
+
+def test_script_four_stage_provenance_no_execution_sha():
+    src = (Path(__file__).parent / "scripts" / "v70r1_parametric_channel_model_check.py").read_text(encoding="utf-8")
+    assert "99e6b25f1e7d14ae5168acabc3e4c42e31dafd4d" in src
+    assert "36d493d82c640f3902c5a7dcd603fdcbb2b03aef" in src
+    assert "four_stage_provenance" in src
+    assert "execution_sha" not in src
+    assert "0509d10b/179916f7/99e6b25f/36d493d8" in src

@@ -3,7 +3,7 @@
 **Lifecycle**: `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE` / `V72_NOT_STARTED=true`
 **Plan revision**: R2 mechanical — insert `REDUCES_VAL_CE` (`route==false && ΔCE>=0.10`), cost descriptive-only, **rerun=false**, values reused from `v70r1_results.json`
 **Data**: `v70_data_registry.json` Stage2 `CAL1024/VAL256` frames, `Q=1024`, `N=1024`, `COLS=10240`, `TARGET_F_PLANNING=1.3`
-**3SHA**: `accepted 0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` / `initial 179916f7cfec0ea469683bb78083c3752700193d` / `execution 36d493d8` | **Data SHA** `84d62779`
+**4SHA**: `accepted 0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` / `initial 179916f7cfec0ea469683bb78083c3752700193d` / `contract 99e6b25f1e7d14ae5168acabc3e4c42e31dafd4d` / `current 36d493d82c640f3902c5a7dcd603fdcbb2b03aef` | **Data SHA** `84d62779`
 **Execution**: `f_actual=NOT_MEASURED` `decoder_calls=0` `used_test=false` `used_val_in_selection=false` `ce_decomposition_claimed=false` `planning_f_is_not_achieved_f=true`
 
 ## Terminals (first-match, 5)
@@ -51,9 +51,9 @@ Formulas: `required=ceil(1.3·1024·CE_VAL)` not capped; `gap=10240-required`; `
 
 `sample_curve` at CAL prefixes 32/64/128/256/512/1024 frames → same VAL CE; descriptive-only, not terminal. M0 drift 0.95/0.81/0.67 at 64 frames vs parametric ≈0, but not used for decision (M0 cost descriptive-only).
 
-## PRE_RESULT_ORDERING_DEVIATION
+## terminal_priority_note / PRE_RESULT_ORDERING_DEVIATION
 
-first-match ordering `EVIDENCE_INVALID(1) > REJECTED(2) > CHANGES(3) > REDUCES(4) > NO_VALUE(5)` determines overall as first `terminal_counts>0`, not majority count. This run: `CHANGES=1, REDUCES=2, NO_VALUE=0` — majority would be `REDUCES`, but ordering gives `overall=CHANGES`. Recorded as `PRE_RESULT_ORDERING_DEVIATION: CHANGES(1) precedes REDUCES(2)` in `v70r1_results.json` and `v70r1_manifest.json`. Guard R70R1-08 enforces this ordering.
+first-match ordering `EVIDENCE_INVALID(1) > REJECTED(2) > CHANGES(3) > REDUCES(4) > NO_VALUE(5)` determines overall as first `terminal_counts>0`, not majority count. This run: `CHANGES=1, REDUCES=2, NO_VALUE=0` — majority would be `REDUCES`, but ordering gives `overall=CHANGES`. Recorded as `terminal_priority_note: CHANGES(1) precedes REDUCES(2)` and `PRE_RESULT_ORDERING_DEVIATION: true` in `v70r1_results.json` and `v70r1_manifest.json`. Guard R70R1-08 enforces this ordering.
 
 ## Aggregate
 
@@ -62,7 +62,7 @@ first-match ordering `EVIDENCE_INVALID(1) > REJECTED(2) > CHANGES(3) > REDUCES(4
 
 ## Sync
 
-- `v70r1_results.json` lifecycle `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE`, `f_actual=NOT_MEASURED`, `decoder_calls=0`, `used_test=false`, `V72_NOT_STARTED=true`, `3SHA 0509d10b/179916f7/36d493d8`, `rerun=false`, `PRE_RESULT_ORDERING_DEVIATION` recorded, 5 terminals + `plan_revision` R2
+- `v70r1_results.json` lifecycle `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE`, `f_actual=NOT_MEASURED`, `decoder_calls=0`, `used_test=false`, `V72_NOT_STARTED=true`, `4SHA 0509d10b/179916f7/99e6b25f/36d493d8`, `rerun=false`, `terminal_priority_note` + `PRE_RESULT_ORDERING_DEVIATION=true` recorded, 5 terminals + `plan_revision` R2
 - `v70r1_table.csv/.json` rows sync'd (mechanical, 9-field table above is expanded view)
-- `v70r1_manifest.json` guards R70R1-01..10 all true, counts 5, `f_actual=NOT_MEASURED`, `decoder_calls=0`, `PRE_RESULT_ORDERING_DEVIATION`
+- `v70r1_manifest.json` guards R70R1-01..10 all true, counts 5, `f_actual=NOT_MEASURED`, `decoder_calls=0`, `terminal_priority_note` + `PRE_RESULT_ORDERING_DEVIATION`
 - No new decoder, no `run_01`, no `src/` change, no pairs rescan (`rg decode_ == 0`, `py_compile PASS`)

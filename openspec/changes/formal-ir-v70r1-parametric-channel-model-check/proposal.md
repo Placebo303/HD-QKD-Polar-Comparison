@@ -6,7 +6,7 @@
 **HEAD**: `EXTERNALLY_BOUND_AT_PRE_EXECUTE` — 非自引用（文档不内嵌自身未来 SHA；`current_parent` `082fa89a`，占位已删）；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan)；`initial_implementation` `179916f7cfec0ea469683bb78083c3752700193d`；`predecessor_v71` `487be11387a5a68c275c43ccb5528ec700bfd3d3`；`predecessor_v70` `9bc34be64a2822c8babb4320efb47fc7e335a21a`；`execution` `EXTERNALLY_BOUND_AT_PRE_EXECUTE`，`HEAD == origin/formal-ir-mainline` 由 Pre-EXECUTE 外部核对，推送后重核，不 force
 **Data SHA**: `84d62779` (`d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点，不换处理点)
 **Predecessor**: `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be6` implementation，`V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE`) + `formal-ir-v71-soft-joint-factor-kernel` (`6bc06d4d..487be113` 区间 latest accepted `487be113`，`V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`)
-**Lifecycle**: `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE` — `V72_NOT_STARTED=true` — `f_actual=NOT_MEASURED` `decoder_calls=0` `used_test=false` — `3SHA: accepted 0509d10ba78902b36f6bcf447f1ebfe289e03fc89b / initial 179916f7cfec0ea469683bb78083c3752700193d / execution 36d493d8`
+**Lifecycle**: `DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE` — `V72_NOT_STARTED=true` — `f_actual=NOT_MEASURED` `decoder_calls=0` `used_test=false` — `4SHA: accepted 0509d10ba78902b36f6bcf447f1ebfe289e03fc89b / initial 179916f7cfec0ea469683bb78083c3752700193d / contract 99e6b25f1e7d14ae5168acabc3e4c42e31dafd4d / current 36d493d82c640f3902c5a7dcd603fdcbb2b03aef`
 
 > ponytail lite: 1 个 decoder-free 脚本 + 4 工件 + 1 小测试；复用 `v70_data_registry.json` 与 V70 的 `hierarchical_P`；仅 `numpy/pandas/pyarrow`（已装）。M1/M2 的 CAL 拟合与 VAL 评估只消费 1024 格的 δ 直方图，不需重扫全量 pairs。
 
@@ -63,7 +63,8 @@ Overall 按同一 first-match 顺序在三 session 上聚合（本次以既有 `
 ## Execution result (R2, decoder-free, no rerun)
 
 - `lifecycle=DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE`, `f_actual=NOT_MEASURED`, `decoder_calls=0`, `used_test=false`, `V72_NOT_STARTED=true`
-- `3SHA: 0509d10b / 179916f7 / 36d493d8` (accepted / initial / execution); `Data SHA 84d62779`
+- `4SHA: 0509d10b / 179916f7 / 99e6b25f / 36d493d8` (accepted / initial / contract / current); `Data SHA 84d62779`
 - `R2 rerun=false` (mechanical reclassification, values reused, no new pairs scan)
 - `cost descriptive-only`: `sample_curve`/`estimation_cost_win` 不触发终态；M0 的 `estimation_cost_win` 恒为 false（descriptive-only，`COST_TABLE_MIN=0.50` descriptive threshold, M0 drift ≈0.95/0.81/0.67 but terminal guarded）
-- `PRE_RESULT_ORDERING_DEVIATION`: 终态 first-match 顺序为 `EVIDENCE_INVALID > REJECTED > CHANGES > REDUCES > NO_VALUE`; overall 为首个非零计数终态，本次 `CHANGES(1) > REDUCES(2)` 故 overall=`CHANGES`，与 `REDUCES` 计数多寡无关（ordering deviation 需显式记录）
+- `terminal_priority_note`: 终态 first-match 顺序为 `EVIDENCE_INVALID > REJECTED > CHANGES > REDUCES > NO_VALUE`; overall 为首个非零计数终态，本次 `CHANGES(1) > REDUCES(2)` 故 overall=`CHANGES`，与 `REDUCES` 计数多寡无关
+- `PRE_RESULT_ORDERING_DEVIATION`: true (ordering deviation 显式记录，见 `terminal_priority_note`)
