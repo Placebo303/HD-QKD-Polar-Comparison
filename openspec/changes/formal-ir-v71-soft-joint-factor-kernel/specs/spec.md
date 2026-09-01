@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 仅plan四工件 + decoder-free 1024-state 纯因子核校验完整 posterior 保留 + 只读 ldpc_v5* A1-A6 分流 READY/ADAPTER/NOT_COMPATIBLE，不改1024维符号GF32两层验证，仅验证5函数纯枚举 log-domain 因子核，不跑decoder不构业务矩阵不读TEST不启V72
 
-**Change**: `formal-ir-v71-soft-joint-factor-kernel` (`V71-SJK`, branch `formal-ir-mainline`, HEAD `e8c44e6eeb2343e00f78f15a3d551f8d9793088e` 动态绑定 `git rev-parse HEAD`; 已修正历史静态偏差 `历史三头` vs predecessor 9bc34be6, data `84d62779`, 3 sessions复用V69 Stage2 (E benchmark仅1M 1/9/1024 各1024次 deterministic seed0), 5函数 log-domain 1024枚举, D1-D10 十不变量, A1-A6 audit 去self比较需真接口否则 ADAPTER, A3 三状态 kernel/backend/capacity 2M NO_INFORMATION_MARGIN, f1.3 NOT_MEASURED)
+**Change**: `formal-ir-v71-soft-joint-factor-kernel` (`V71-SJK`, branch `formal-ir-mainline`, HEAD `6bc06d4d271b2418c5bfa6160f7840b58fc66b60` 动态绑定 `git rev-parse HEAD`; 已修正历史静态偏差 `历史三头` vs predecessor 9bc34be6, data `84d62779`, 3 sessions复用V69 Stage2 (E benchmark仅1M 1/9/1024 各1024次 deterministic seed0), 5函数 log-domain 1024枚举, D1-D10 十不变量, A1-A6 audit 去self比较需真接口否则 ADAPTER, A3 三状态 kernel/backend/capacity 2M NO_INFORMATION (capacity FEASIBLE/MARGINAL/NO_INFORMATION), f1.3 NOT_MEASURED)
 
 **Predecessor**: `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be64a2822c8babb4320efb47fc7e335a21a` `PLAN_CANDIDATE`) + `formal-ir-v67-multisession-feasibility-map` (`V67_FEASIBILITY_MAP_ACCEPTED`) + `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) + `binary-ldpc-v5` (`ldpc_v5*` read-only) — V71新增1024-state纯因子核 + ldpc_v5*兼容地图，5函数D1-D10 E benchmark f1.3，decoder-free，不启V72
 
@@ -10,7 +10,7 @@
 
 - **Type**: `PURE_FACTOR_KERNEL_COMPATIBILITY_MAP` — 于V67/V69三预注册Session的`Stage2 CAL1024+VAL256`上（E benchmark仅1M实测），验证1024-state纯因子核完整性 + ldpc_v5*兼容性：extrinsic冻结`ext=log_post-log_prior` log域差分，5函数纯枚举`log_prior/bit_factor/kernel/extrinsic/validate` log-domain 全零得marginal delta得确定值与brute-force对照`|Δ|<1e-12`，D1-D10 十不变量正交完备，A1-A6 READY/ADAPTER/NOT_COMPATIBLE，`1M`上`1/9/1024 block` `wall≤30s/peak≤2GiB`路由阈，`f1.3 freeze f_actual NOT_MEASURED`，每session 6终端总体4态。
 - **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 本轮止于plan四工件 + decoder-free地图（`v71_data_registry.json + v71_soft_joint_factor.py + v71_ldpc_v5_audit.py + v71_results.json + v71_audit_report.json + v71_table.{csv,json} + V71_KERNEL_REPORT.md + V71_AUDIT_REPORT.md + test_v71_soft_joint_factor_kernel_small.py + v71_manifest.json`），**不实现runner，不执行decoder，不构业务矩阵，不创建`run_01`，不读VAL/TEST择优，不改1024维主体/V67/V69/src，不启动V72**；正式`run_01`需独立`PLAN_ACCEPT` + `EXECUTE_AUTH`；`DECODER_FREE`表示零`decode_*`业务调用（`rg 0 hits`），`V72_NOT_STARTED`表示零`V72_*/run_01`且`rg -i "v72|qualification" 0 hits`（除successor注释）。
-- **Branch**: `formal-ir-mainline`；`HEAD` `e8c44e6eeb2343e00f78f15a3d551f8d9793088e` (动态绑定 `git rev-parse HEAD`; 已修正历史三头偏差 `历史三头` vs predecessor `9bc34be6`，`git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞) 已与 `git rev-parse HEAD` 一致。`TBD` 0 hits。
+- **Branch**: `formal-ir-mainline`；`HEAD` `6bc06d4d271b2418c5bfa6160f7840b58fc66b60` (动态绑定 `git rev-parse HEAD`; 已修正历史三头偏差 `历史三头` vs predecessor `9bc34be6`，`git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞) 已与 `git rev-parse HEAD` 一致。`TBD` 0 hits。
 - **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) — V71复用V69三session Stage2 (`CAL1024+VAL256`)，但E benchmark仅1M实测，不换点，不启V72。
 - **Session bound**: `total 3 (=V69 3)`复用，`per_category 1,1,1`，E benchmark仅`1M`实测，不新增acquisition。
 - **Rate feasibility**: **f=1.3 freeze, required=ceil(1.3·N·CE_full^{VAL_1M}), f_actual NOT_MEASURED**，仅作A6 disclosure参照，不入核门禁。
