@@ -49,7 +49,7 @@
 
 - **复用**：`v70_data_registry.json`由`v69_data_registry.json`的3 sessions（`20260123_1M_600k_0dB 1M, 20260107_PPLN_1p5M 1p5M, 20260123_2M_1p2M_0dB 2M`）的`stage2_CAL[1024]+stage2_VAL[256]`原样拷贝（`total 3, per_category 1,1,1, acquisition_dedup_verified, frozen, not_sorted_by_CE`），`zero_overlap_verified`与`V13..V69`零重叠已验，禁止事后换session或按`CE/required`替换，`successor_v71_not_started true`。
 - **不重估计V67/V69**：V67/V69的`CE/m`仅引用对照，不在V70上重算`natural CE`；V70仅在二进制soft-joint维度上重估`CE_full/CE_bit/D/required`。
-- **注册表**：`v70_data_registry.json` (`schema v70_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head d6f590ac6f30deaa8b0bf6cf5c419593fc037720, reused_from v69, successor_v71_not_started true, sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`)。
+- **注册表**：`v70_data_registry.json` (`schema v70_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head 9825d0b336042ad4bf2b26ed31b7fa09a04de620 (provenance deviation: registry head 9825d0b vs implementation 9bc34be6, predecessor V69 d6f590ac, data_sha 84d62779 unchanged), reused_from v69, successor_v71_not_started true, sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`)。
 
 ### 3.2 数据就绪门（decoder-free）
 
