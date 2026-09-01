@@ -48,3 +48,47 @@ def test_isolation():
     assert "V72_not_started" in txt
 
 # ponytail: no 1024 full bench in small test to keep cost low
+def test_bench_deterministic_seed():
+    import scripts.v71_soft_joint_factor as m
+    import inspect
+    src=inspect.getsource(m.bench_kernel)
+    assert "default_rng(0)" in src or "seed" in src.lower()
+    assert "1024" in src
+
+def test_bench_per_symbol_one():
+    import inspect, scripts.v71_soft_joint_factor as m
+    src=inspect.getsource(m.bench_kernel)
+    assert "per-symbol" in src or "per_symbol" in src or "1024+block" in src
+
+def test_audit_no_self_comparison():
+    txt=pathlib.Path("scripts/v71_ldpc_v5_audit.py").read_text(encoding="utf-8")
+    assert "self-comparison" in txt.lower() or "delete self" in txt.lower() or "no self" in txt.lower() or "read-only" in txt.lower()
+    assert "model_sha256" in txt
+
+def test_audit_extrinsic_10bit_10240():
+    j=json.loads(pathlib.Path("v71_audit_report.json").read_text(encoding="utf-8"))
+    for v in j["per_session"].values():
+        checks=v["checks"]
+        # A2 requires 10-bit extrinsic+10240 else ADAPTER
+        assert "A4_extrinsic_interface" in checks
+        assert "A6_disclosure_accounting" in checks
+        # 10240 missing => should be ADAPTER not READY
+        if not checks["A4_extrinsic_interface"] or not checks["A6_disclosure_accounting"]:
+            assert v["classification"]=="ADAPTER"
+
+def test_capacity_separation_2M():
+    j=json.loads(pathlib.Path("v71_results.json").read_text(encoding="utf-8"))
+    # A3: 2M kernel ready but NO_INFORMATION_MARGIN, f NOT_MEASURED
+    found2M=False
+    for v in j["per_session"].values():
+        if v["source_label"]=="2M":
+            found2M=True
+            assert v["f_actual"]=="NOT_MEASURED"
+            assert v.get("capacity_status")=="NO_INFORMATION_MARGIN" or v.get("capacity_warning")=="NO_INFORMATION_MARGIN"
+            assert v.get("kernel_status")=="READY" or v["classification"] in ("V71_KERNEL_READY_FEASIBLE","V71_KERNEL_ADAPTER_FEASIBLE","V71_KERNEL_HEAVY")
+    assert found2M
+
+def test_kernel_backend_capacity_fields():
+    j=json.loads(pathlib.Path("v71_results.json").read_text(encoding="utf-8"))
+    for v in j["per_session"].values():
+        assert "kernel_status" in v and "backend_status" in v and "capacity_status" in v

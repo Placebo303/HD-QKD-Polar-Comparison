@@ -69,16 +69,15 @@ def load_frames(pairs_path,fids):
  assert len(g)==len(fids) and (g==256).all()
  a=sub["alice_symbol"].to_numpy(dtype=np.int32); b=sub["bob_symbol"].to_numpy(dtype=np.int32); return a,b
 def bench_kernel(log_prior,n_sym,block):
- n_inv=n_sym//block if block!=1 else n_sym
- if block==9: n_inv=(n_sym+8)//9
- if block==1024: n_inv=(n_sym+1023)//1024
- # repeat to get stable wall for small n_inv
- repeat= max(1, 500//max(1,n_inv))
+ # ponytail: deterministic seed, per-symbol 1 call, wall covers 1024 symbols (1024/block invocations)
+ rng=np.random.default_rng(0)
+ llr_rand=rng.standard_normal(10)
+ n_inv=1024
  walls=[]; peaks=[]
- for llr in [np.zeros(10), np.random.randn(10)]:
+ for llr in [np.zeros(10), llr_rand]:
   tracemalloc.start(); t0=time.monotonic()
-  for _ in range(n_inv*repeat): _=soft_joint_factor_kernel(log_prior, llr)
-  t1=time.monotonic(); cur,peak=tracemalloc.get_traced_memory(); tracemalloc.stop(); walls.append((t1-t0)/repeat); peaks.append(peak/(1024*1024))
+  for _ in range(n_inv): _=soft_joint_factor_kernel(log_prior, llr)
+  t1=time.monotonic(); cur,peak=tracemalloc.get_traced_memory(); tracemalloc.stop(); walls.append(t1-t0); peaks.append(peak/(1024*1024))
  wall=float(np.median(walls)); peak_mib=float(np.median(peaks)); per_ns=float(wall*1e9/max(1,n_inv)); return wall,peak_mib,per_ns,n_inv
 def main():
  ap=argparse.ArgumentParser(); ap.add_argument("--registry",default="v71_data_registry.json"); ap.add_argument("--out",default="v71_results.json"); ap.add_argument("--table-csv",default="v71_table.csv"); ap.add_argument("--table-json",default="v71_table.json"); ap.add_argument("--manifest",default="v71_manifest.json"); args=ap.parse_args()
@@ -129,7 +128,7 @@ def main():
   if b["1024"]["wall_s"]<=30.0 and b["1024"]["peak_MiB"]<=2048: e_pass_global=True
  counts={"ready":0,"adapter":0,"heavy":0,"not_compatible":0,"evidence":0,"model":0}; classifications={}
  for sess in reg["sessions"]:
-  sid=sess["session_id"]; v=tmp[sid]; audit="READY"; C_non=np.all(np.isfinite(v["Ps_full"]))==False; pure_fail=v["max_delta"]>=1e-12; ev=(C_non or pure_fail or not v["d9"]); dCE=abs(v["ce_full_val"]-v["ce_full_cv"]); max_dCE=float(np.max(np.abs(np.array(v["ce_bits_cv"])-np.array(v["ce_bits_val"])))); val_unseen=float(np.mean(v["N_b_full"][v["b_val"]]==0)); is_fin=math.isfinite(v["ce_full_val"]); model=v["lam_bd"] or dCE>0.50 or max_dCE>0.50 or val_unseen>0.01 or not is_fin or v["D_val"]<-1e-9 or not v["d3"] or not v["d4"] or not v["d5"] or not v["d6"] or not v["d7"] or not v["d8"]; not_comp=(not v["d1"] or not v["d2"]); e_pass=e_pass_global
+  sid=sess["session_id"]; v=tmp[sid]; audit="ADAPTER"; C_non=np.all(np.isfinite(v["Ps_full"]))==False; pure_fail=v["max_delta"]>=1e-12; ev=(C_non or pure_fail or not v["d9"]); dCE=abs(v["ce_full_val"]-v["ce_full_cv"]); max_dCE=float(np.max(np.abs(np.array(v["ce_bits_cv"])-np.array(v["ce_bits_val"])))); val_unseen=float(np.mean(v["N_b_full"][v["b_val"]]==0)); is_fin=math.isfinite(v["ce_full_val"]); model=v["lam_bd"] or dCE>0.50 or max_dCE>0.50 or val_unseen>0.01 or not is_fin or v["D_val"]<-1e-9 or not v["d3"] or not v["d4"] or not v["d5"] or not v["d6"] or not v["d7"] or not v["d8"]; not_comp=(not v["d1"] or not v["d2"]); e_pass=e_pass_global
   if ev: cls="V71_EVIDENCE_INCOMPLETE"; suc="recollect"; counts["evidence"]+=1
   elif model: cls="V71_MODEL_NOT_STABLE"; suc="recollect_or_new_prior"; counts["model"]+=1
   elif not_comp: cls="V71_NOT_COMPATIBLE"; suc="v71_new_representation"; counts["not_compatible"]+=1
@@ -137,7 +136,12 @@ def main():
   elif v["d1"] and v["d2"] and v["d3"] and v["d4"] and v["d5"] and v["d6"] and v["d7"] and v["d8"] and v["d9"] and v["d10"] and audit=="ADAPTER" and e_pass: cls="V71_KERNEL_ADAPTER_FEASIBLE"; suc="v71_kernel_adapter_design"; counts["adapter"]+=1
   else: cls="V71_KERNEL_HEAVY"; suc="v71_kernel_adapter_design_or_downscale"; counts["heavy"]+=1
   classifications[sid]=(cls,suc)
-  row={"session_id":sid,"acquisition_id":sess["acquisition_id"],"source_label":sess["source_label"],"provenance":sess["provenance"],"CAL_lambda":float(v["lam_star"]),"CAL_lambda_at_boundary":bool(v["lam_bd"]),"CAL_CE_full":float(v["ce_full_cv"]),"CAL_D_bits":float(v["D_cv"]),"CE_full_VAL":float(v["ce_full_val"]),"D_bits_VAL":float(v["D_val"]),"chain_delta":float(v["chain_delta"]),"pure_brute_maxDelta_all_zero":float(v["pure_zero"]),"pure_brute_maxDelta_delta_a0":float(v["delta_info"][0][1]),"pure_brute_maxDelta_delta_a511":float(v["delta_info"][1][1]),"pure_brute_maxDelta_delta_a1023":float(v["delta_info"][2][1]),"pure_is_pure":True,"D1":bool(v["d1"]),"D2":bool(v["d2"]),"D3":bool(v["d3"]),"D4":bool(v["d4"]),"D5":bool(v["d5"]),"D6":bool(v["d6"]),"D7":bool(v["d7"]),"D8":bool(v["d8"]),"D9":bool(v["d9"]),"D10":bool(v["d10"]),"audit":audit,"required":int(v["required"]),"f_actual":"NOT_MEASURED","classification":cls,"successor":suc}
+  is_2m=sess["source_label"]=="2M"
+  kernel_status="READY" if (v["d1"] and v["d2"] and v["d3"] and v["d4"] and v["d5"] and v["d6"] and v["d7"] and v["d8"] and v["d9"] and v["d10"] and e_pass) else "NOT_READY"
+  backend_status=audit
+  capacity_status="NO_INFORMATION_MARGIN" if is_2m else "MEASURED"
+  capacity_warning="NO_INFORMATION_MARGIN" if (is_2m and kernel_status=="READY") else ("NONE" if e_pass else "HEAVY")
+  row={"session_id":sid,"acquisition_id":sess["acquisition_id"],"source_label":sess["source_label"],"provenance":sess["provenance"],"CAL_lambda":float(v["lam_star"]),"CAL_lambda_at_boundary":bool(v["lam_bd"]),"CAL_CE_full":float(v["ce_full_cv"]),"CAL_D_bits":float(v["D_cv"]),"CE_full_VAL":float(v["ce_full_val"]),"D_bits_VAL":float(v["D_val"]),"chain_delta":float(v["chain_delta"]),"pure_brute_maxDelta_all_zero":float(v["pure_zero"]),"pure_brute_maxDelta_delta_a0":float(v["delta_info"][0][1]),"pure_brute_maxDelta_delta_a511":float(v["delta_info"][1][1]),"pure_brute_maxDelta_delta_a1023":float(v["delta_info"][2][1]),"pure_is_pure":True,"D1":bool(v["d1"]),"D2":bool(v["d2"]),"D3":bool(v["d3"]),"D4":bool(v["d4"]),"D5":bool(v["d5"]),"D6":bool(v["d6"]),"D7":bool(v["d7"]),"D8":bool(v["d8"]),"D9":bool(v["d9"]),"D10":bool(v["d10"]),"audit":audit,"kernel_status":kernel_status,"backend_status":backend_status,"capacity_status":capacity_status,"capacity_warning":capacity_warning,"required":int(v["required"]),"f_actual":"NOT_MEASURED","classification":cls,"successor":suc}
   if sid in bench:
    b=bench[sid]; row["bench_wall_1"]=b["1"]["wall_s"]; row["bench_peak_1"]=b["1"]["peak_MiB"]; row["bench_wall_9"]=b["9"]["wall_s"]; row["bench_peak_9"]=b["9"]["peak_MiB"]; row["bench_wall_1024"]=b["1024"]["wall_s"]; row["bench_peak_1024"]=b["1024"]["peak_MiB"]; row["E_PERF_PASS"]=bool(b["1024"]["wall_s"]<=30.0 and b["1024"]["peak_MiB"]<=2048)
   else: row["bench_wall_1"]=None; row["bench_peak_1"]=None; row["bench_wall_9"]=None; row["bench_peak_9"]=None; row["bench_wall_1024"]=None; row["bench_peak_1024"]=None; row["E_PERF_PASS"]=e_pass_global

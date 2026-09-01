@@ -35,16 +35,20 @@
       "D8": true,
       "D9": true,
       "D10": true,
-      "audit": "READY",
+      "audit": "ADAPTER",
+      "kernel_status": "READY",
+      "backend_status": "ADAPTER",
+      "capacity_status": "MEASURED",
+      "capacity_warning": "NONE",
       "required": 9519,
       "f_actual": "NOT_MEASURED",
-      "classification": "V71_KERNEL_READY_FEASIBLE",
-      "successor": "v71_ldpc_v5_integration",
-      "bench_wall_1": 4.0625,
+      "classification": "V71_KERNEL_ADAPTER_FEASIBLE",
+      "successor": "v71_kernel_adapter_design",
+      "bench_wall_1": 0.04649999999674037,
       "bench_peak_1": 0.086578369140625,
-      "bench_wall_9": 0.45300000000861473,
+      "bench_wall_9": 0.0470000000204891,
       "bench_peak_9": 0.086578369140625,
-      "bench_wall_1024": 0.004428571426875091,
+      "bench_wall_1024": 0.046999999991385266,
       "bench_peak_1024": 0.086578369140625,
       "E_PERF_PASS": true
     },
@@ -75,11 +79,15 @@
       "D8": true,
       "D9": true,
       "D10": true,
-      "audit": "READY",
+      "audit": "ADAPTER",
+      "kernel_status": "READY",
+      "backend_status": "ADAPTER",
+      "capacity_status": "MEASURED",
+      "capacity_warning": "NONE",
       "required": 10047,
       "f_actual": "NOT_MEASURED",
-      "classification": "V71_KERNEL_READY_FEASIBLE",
-      "successor": "v71_ldpc_v5_integration",
+      "classification": "V71_KERNEL_ADAPTER_FEASIBLE",
+      "successor": "v71_kernel_adapter_design",
       "bench_wall_1": null,
       "bench_peak_1": null,
       "bench_wall_9": null,
@@ -115,11 +123,15 @@
       "D8": true,
       "D9": true,
       "D10": true,
-      "audit": "READY",
+      "audit": "ADAPTER",
+      "kernel_status": "READY",
+      "backend_status": "ADAPTER",
+      "capacity_status": "NO_INFORMATION_MARGIN",
+      "capacity_warning": "NO_INFORMATION_MARGIN",
       "required": 11169,
       "f_actual": "NOT_MEASURED",
-      "classification": "V71_KERNEL_READY_FEASIBLE",
-      "successor": "v71_ldpc_v5_integration",
+      "classification": "V71_KERNEL_ADAPTER_FEASIBLE",
+      "successor": "v71_kernel_adapter_design",
       "bench_wall_1": null,
       "bench_peak_1": null,
       "bench_wall_9": null,
@@ -129,10 +141,10 @@
       "E_PERF_PASS": true
     }
   },
-  "overall": "V71_OVERALL_KERNEL_READY",
+  "overall": "V71_OVERALL_KERNEL_ADAPTER_OR_HEAVY",
   "counts": {
-    "ready": 3,
-    "adapter": 0,
+    "ready": 0,
+    "adapter": 3,
     "heavy": 0,
     "not_compatible": 0,
     "evidence": 0,
@@ -141,19 +153,19 @@
   "benchmark": {
     "20260123_1M_600k_0dB": {
       "1": {
-        "wall_s": 4.0625,
+        "wall_s": 0.04649999999674037,
         "peak_MiB": 0.086578369140625,
-        "per_invocation_ns": 61988.83056640625
+        "per_invocation_ns": 45410.15624681677
       },
       "9": {
-        "wall_s": 0.45300000000861473,
+        "wall_s": 0.0470000000204891,
         "peak_MiB": 0.086578369140625,
-        "per_invocation_ns": 62208.18456586305
+        "per_invocation_ns": 45898.43752000888
       },
       "1024": {
-        "wall_s": 0.004428571426875091,
+        "wall_s": 0.046999999991385266,
         "peak_MiB": 0.086578369140625,
-        "per_invocation_ns": 69196.4285449233
+        "per_invocation_ns": 45898.437491587174
       }
     }
   },

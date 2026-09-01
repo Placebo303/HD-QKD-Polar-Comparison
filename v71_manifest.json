@@ -43,10 +43,10 @@
     "R71-10": true,
     "R71-11": true
   },
-  "overall": "V71_OVERALL_KERNEL_READY",
+  "overall": "V71_OVERALL_KERNEL_ADAPTER_OR_HEAVY",
   "counts": {
-    "ready": 3,
-    "adapter": 0,
+    "ready": 0,
+    "adapter": 3,
     "heavy": 0,
     "not_compatible": 0,
     "evidence": 0,
