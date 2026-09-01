@@ -1,7 +1,7 @@
 # Spec: V70R1 Parametric Channel Model Check
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
-**HEAD**: `pending-new-sha` (`HEAD == origin/formal-ir-mainline` 推送后重核；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan)；`initial_implementation` `179916f7cfec0ea469683bb78083c3752700193d`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` (`487be11387a5a68c275c43ccb5528ec700bfd3d3`) **Predecessor V70**: `9bc34be64a2822c8babb4320efb47fc7e335a21a`
+**HEAD**: `EXTERNALLY_BOUND_AT_PRE_EXECUTE` — 非自引用（`current_parent` `082fa89a`，不自引用未来 SHA） **accepted_plan_sha** `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan) **initial_implementation** `179916f7cfec0ea469683bb78083c3752700193d` **execution** `EXTERNALLY_BOUND_AT_PRE_EXECUTE` (`HEAD == origin/formal-ir-mainline` 推送后由 Pre-EXECUTE 外部核对) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` (`487be11387a5a68c275c43ccb5528ec700bfd3d3`) **Predecessor V70**: `9bc34be64a2822c8babb4320efb47fc7e335a21a`
 
 ## 1. 冻结常量
 

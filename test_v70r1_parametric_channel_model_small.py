@@ -203,7 +203,7 @@ def test_preregistered_grids_are_frozen():
 
 
 def test_provenance_accepted_plan_and_four_artifacts():
-    """Provenance: accepted_plan_sha 0509d10b (full 0509d10ba78902b36f6bcf447f1ebfe289e03fc89b) only four files, 179916f7 successor, four terminals."""
+    """Provenance: non-self-referential contract — accepted 0509d10b, initial 179916f7, parent 082fa89a, execution EXTERNALLY_BOUND."""
     base = Path(__file__).parent / "openspec" / "changes" / "formal-ir-v70r1-parametric-channel-model-check"
     four = [base / "proposal.md", base / "design.md", base / "tasks.md", base / "specs" / "spec.md"]
     for p in four:
@@ -212,6 +212,13 @@ def test_provenance_accepted_plan_and_four_artifacts():
         assert "0509d10b" in txt
         assert "13b38b79" not in txt
         assert "179916f7" in txt
+        # non-self-referential contract: EXTERNALLY_BOUND, parent 082fa89a, no pending placeholder, no self SHA
+        assert "EXTERNALLY_BOUND" in txt
+        assert "EXTERNALLY_BOUND_AT_PRE_EXECUTE" in txt
+        assert "082fa89a" in txt
+        assert "current_parent" in txt
+        assert "pending-new-sha" not in txt
+        assert "pending_new_sha" not in txt.lower()
     # only four files should mention accepted_plan_sha
     assert len(four) == 4
     # four terminals consistent across artifacts and script

@@ -3,7 +3,7 @@
 **Change ID**: `formal-ir-v70r1-parametric-channel-model-check`
 **Cycle ID**: `V70R1` (parametric-channel-model-check)
 **Branch**: `formal-ir-mainline`
-**HEAD**: `pending-new-sha` (`HEAD == origin/formal-ir-mainline` 推送后重核，不 force；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan)；`initial_implementation` `179916f7cfec0ea469683bb78083c3752700193d`；`predecessor_v71` `487be11387a5a68c275c43ccb5528ec700bfd3d3`；`predecessor_v70` `9bc34be64a2822c8babb4320efb47fc7e335a21a`)
+**HEAD**: `EXTERNALLY_BOUND_AT_PRE_EXECUTE` — 非自引用（文档不内嵌自身未来 SHA；`current_parent` `082fa89a`，占位已删）；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan)；`initial_implementation` `179916f7cfec0ea469683bb78083c3752700193d`；`predecessor_v71` `487be11387a5a68c275c43ccb5528ec700bfd3d3`；`predecessor_v70` `9bc34be64a2822c8babb4320efb47fc7e335a21a`；`execution` `EXTERNALLY_BOUND_AT_PRE_EXECUTE`，`HEAD == origin/formal-ir-mainline` 由 Pre-EXECUTE 外部核对，推送后重核，不 force
 **Data SHA**: `84d62779` (`d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点，不换处理点)
 **Predecessor**: `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be6` implementation，`V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE`) + `formal-ir-v71-soft-joint-factor-kernel` (`6bc06d4d..487be113` 区间 latest accepted `487be113`，`V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`)
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — `V72_NOT_STARTED`

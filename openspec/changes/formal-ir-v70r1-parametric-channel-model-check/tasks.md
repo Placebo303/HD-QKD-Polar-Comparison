@@ -1,7 +1,7 @@
 # Tasks: V70R1 Parametric Channel Model Check
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
-**HEAD**: `pending-new-sha` (`HEAD == origin/formal-ir-mainline` 推送后重核；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan)；`initial_implementation` `179916f7cfec0ea469683bb78083c3752700193d`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` (`487be11387a5a68c275c43ccb5528ec700bfd3d3`) **Predecessor V70**: `9bc34be64a2822c8babb4320efb47fc7e335a21a`
+**HEAD**: `EXTERNALLY_BOUND_AT_PRE_EXECUTE` — 非自引用（`current_parent` `082fa89a`，不自引用未来 SHA；占位已删） **accepted_plan_sha** `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan) **initial_implementation** `179916f7cfec0ea469683bb78083c3752700193d` **execution** `EXTERNALLY_BOUND_AT_PRE_EXECUTE` (`HEAD == origin/formal-ir-mainline` 推送后由 Pre-EXECUTE 外部核对) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` (`487be11387a5a68c275c43ccb5528ec700bfd3d3`) **Predecessor V70**: `9bc34be64a2822c8babb4320efb47fc7e335a21a`
 
 ## Phase A — 绑定与复用（无新数据）
 
@@ -49,7 +49,7 @@
 
 ## 验收
 
-- `proposal/design/tasks/specs` 一致，HEAD `pending-new-sha`（`HEAD == origin/formal-ir-mainline` 推送后重核；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan, `179916f7` initial_implementation)，`6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`），Data `84d62779`，lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V72_NOT_STARTED=true`，V70 数值不变；仅四文件为 `179916f7` 后继，四终态一致。
+- `proposal/design/tasks/specs` 一致，HEAD `EXTERNALLY_BOUND_AT_PRE_EXECUTE` 非自引用（`current_parent` `082fa89a`，`accepted` `0509d10b` revised_plan / `initial` `179916f7`，`execution` `EXTERNALLY_BOUND_AT_PRE_EXECUTE` 由 Pre-EXECUTE 外部核对 `HEAD == origin/formal-ir-mainline` 推送后重核），`6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`，Data `84d62779`，lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V72_NOT_STARTED=true`，V70 数值不变；仅四文件为 `179916f7` 后继，四终态一致。
 - 三模型预注册（M0 表 / M1 circulant / M2 wrapped Gaussian-或-Laplace + 背景），M2 族由 CAL 4-fold CV 二选一已实现，VAL 只确认一次。
 - CAL/VAL 帧复用 V70 已实现并断言；M0 复现 V70 `CE_full_VAL` 作为 `EVIDENCE_INVALID` 前置已实现。
 - `required` 显式 ceil 不 cap、`gap` 显式、三分流阈与 V70 一致、`f_max` 与规划 `1.3` 分离已实现。
