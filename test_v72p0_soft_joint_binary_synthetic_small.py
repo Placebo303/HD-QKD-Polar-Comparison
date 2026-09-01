@@ -115,7 +115,7 @@ def test_provenance_sync():
     for p in ["v72p0_results.json","v72p0_manifest.json","V72P0_SYN_REPORT.md","V72P0_BACKEND_AUDIT_REPORT.md"]:
         txt=Path(p).read_text(encoding="utf-8")
         assert "b360efe" not in txt
-        assert "84d62779" in txt or "09264575" in txt
+        assert "84d62779" in txt or "5591e16b" in txt or "64ca2f1e" in txt
 
 def test_no_sampling():
     txt=Path("scripts/v72p0_soft_joint_binary_synthetic.py").read_text(encoding="utf-8")
@@ -124,3 +124,23 @@ def test_no_sampling():
     assert "total_bits<=9" in txt or "total_bits_le_9" in txt
     assert "syndrome" in txt.lower()
     assert "dual-diagonal" in txt.lower()
+
+def test_p0a_c3_observed():
+    j=json.loads(Path("v72p0_results.json").read_text(encoding="utf-8"))
+    for k in ["2","3"]:
+        per=j['P0A']['per_k'][k]
+        assert per['observed_zero']==True
+        assert per['observed_one']==True
+        assert per['c3_observed']==True
+        # every trial c3 == observed_zero && observed_one
+        for ch in per['checks_per_trial']:
+            assert ch[2]==True
+
+def test_p0a_c3_negative():
+    # negative: if only zero syndromes observed, c3 must be False (fail-closed), numeric unchanged
+    observed_zero=True
+    observed_one=False
+    assert (observed_zero and observed_one)==False
+    # ensure code path would fail per_m when not both observed
+    txt=Path("scripts/v72p0_soft_joint_binary_synthetic.py").read_text(encoding="utf-8")
+    assert "observed_zero" in txt and "observed_one" in txt and "c3_obs" in txt

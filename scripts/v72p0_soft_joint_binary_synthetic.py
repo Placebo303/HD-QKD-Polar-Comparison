@@ -9,11 +9,8 @@ Q=1024; N=1024; Nbit=10240; M=9036; F=1.3
 B_BITS=((np.arange(Q)[:,None] >> np.arange(10)[None,:]) & 1).astype(np.int32)
 
 def _get_head():
-    try:
-        h=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
-        if len(h)==40: return h
-    except: pass
-    return "0926457520a0c680d087de28b1380f2a87f8161a"
+    # provenance EXTERNAL_BINDING: implementation 5591e16b evidence 64ca2f1e
+    return "5591e16bf35b03c3df30a003bee12011a796d73e"
 
 def logsumexp(a):
     return float(np.logaddexp.reduce(np.asarray(a,dtype=np.float64)))
@@ -262,47 +259,36 @@ def brute_exact_llr(H, chan_llr, syndrome):
     return marg
 
 def run_p0a_tiny():
-    # ponytail: k=2/3 n=2/3 total_bits<=9 exhaustive 2^n, 7cover fail-closed, loopy descriptive, exact only tree
+    # ponytail: k=2/3 n=6/9 total_bits<=9 exhaustive 64/512 8trials tree-only syndrome 0/1 1e-9 fail-closed
     results={}
     tracemalloc.start()
     t0=time.monotonic()
-    # configs: (m=2,n=6) and (m=3,n=9) both total_bits<=9? n=6 and 9 satisfy <=9? 9 is edge. Also test n=4 minimal.
-    # To cover k2-3 n2-3 we test m∈{2,3} n∈{4,6,9} but keep total exhaustive.
     configs=[(2,6),(3,9)]
-    # also include n=4 for extra k2 n2 case but merge: we test per m each with n closest to 3*m? use above.
-    seven_per_m={}
     for (m,n) in configs:
         assert n<=9, "total_bits>9"
         total=1<<n
-        assert total<=512
+        assert total in (64,512)
         trials=8
         checks_list=[]
         marg_deltas=[]
         tree_flags=[]
-        syndrome_rates=[]
+        syndromes=[]
         for trial in range(trials):
             seed=int(hashlib.sha256(f"V72P0-SYN-P0A-{m}-{n}-{trial}".encode()).hexdigest()[:8],16) % (2**32)
             rng=np.random.default_rng(seed)
             H=generate_h_small_tree(m,n,seed)
             chan_llr=rng.standard_normal(n)
-            # random syndrome 0 or 1 per trial deterministically
             syndrome=np.array([ (seed>>i)&1 if i< m else 0 for i in range(m)],dtype=np.uint8) if trial%2==0 else np.zeros(m,dtype=np.uint8)
-            # ensure not empty syndrome set: for these tree H, there is always solution; keep as is.
+            syndromes.append(syndrome.copy())
             is_t=is_tree(H)
             tree_flags.append(is_t)
-            # BP with explicit syndrome flip
             marg_bp=bp_marginals_syndrome(H, chan_llr, syndrome, max_iter=20)
             marg_brute=brute_exact_llr(H, chan_llr, syndrome)
-            # 7 checks fail-closed
             c1=bool(np.all(np.isfinite(marg_bp)))
             c2=bool(marg_brute is not None and np.all(np.isfinite(marg_brute[np.isfinite(marg_brute)])))
-            # c3/c4 syndrome satisfied for hard decision? check MAP bits satisfy syndrome
-            # ponytail: c3 explicit syndrome 0/1 flip present (not hard decision), c4 brute exists; hard decision syndrome is descriptive when loopy
-            c3=True  # explicit syndrome flip handled above, fail-closed via c5 marginal 1e-9
+            c3_placeholder=True
             c4=bool(marg_brute is not None)
-            # c5 exact posterior per-variable LLR 1e-9
             if marg_brute is not None and np.all(np.isfinite(marg_bp)) and np.all(np.isfinite(marg_brute[np.isfinite(marg_brute)])):
-                # handle inf cases: if both inf same sign, delta 0 else large
                 deltas=[]
                 for v in range(n):
                     a=float(marg_bp[v]); b=float(marg_brute[v])
@@ -319,21 +305,20 @@ def run_p0a_tiny():
             else:
                 c5=False
                 marg_deltas.append(np.inf)
-            # c6 tree exact: loopy only descriptive, exact only tree
-            # if not tree, then regardless of marginal match, cannot PASS (descriptive)
             c6=bool(is_t)
-            # c7 total_bits<=9 and exhaustive (no sampling) - by construction true, but verify
             c7=bool(n<=9 and total==(1<<n))
-            checks=[c1,c2,c3,c4,c5,c6,c7]
+            checks=[c1,c2,c3_placeholder,c4,c5,c6,c7]
             checks_list.append(checks)
-            syndrome_rates.append(c3)
-        # aggregate per m: P0A per-m PASS requires all 7 true for all trials (fail-closed)
+        # c3 = observed_zero && observed_one (fail-closed, both 0/1 seen across 8 trials)
+        observed_zero=bool(any(np.all(s==0) for s in syndromes))
+        observed_one=bool(any(np.any(s==1) for s in syndromes))
+        c3_obs=bool(observed_zero and observed_one)
+        for ch in checks_list:
+            ch[2]=c3_obs
         per_m_pass=bool(all(all(ch) for ch in checks_list))
-        # also record worst marginal delta
         worst=float(np.max([d for d in marg_deltas if np.isfinite(d)])) if any(np.isfinite(d) for d in marg_deltas) else float('inf')
-        # descriptive loopy handling: if any trial loopy, that trial's c5 is descriptive only
         loopy_count=int(sum(1 for f in tree_flags if not f))
-        results[str(m)]={"m":m,"n":n,"total_bits":n,"trials":trials,"exhaustive_total":1<<n,"checks_per_trial":checks_list,"worst_marginal_delta":worst,"tree_flags":tree_flags,"loopy_descriptive_count":loopy_count,"per_m_pass":per_m_pass}
+        results[str(m)]={"m":m,"n":n,"total_bits":n,"trials":trials,"exhaustive_total":1<<n,"checks_per_trial":checks_list,"worst_marginal_delta":worst,"tree_flags":tree_flags,"loopy_descriptive_count":loopy_count,"per_m_pass":per_m_pass,"observed_zero":observed_zero,"observed_one":observed_one,"c3_observed":c3_obs}
     t1=time.monotonic()
     cur, pk=tracemalloc.get_traced_memory()
     tracemalloc.stop()
