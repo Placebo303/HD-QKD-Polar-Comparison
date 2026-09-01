@@ -1,7 +1,7 @@
 {
   "schema": "v72p0_results_v1",
   "lifecycle": "PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED",
-  "head": "8dfd7c91a6a68e9d7a149ba789c1d49885f7bc4f",
+  "head": "8fce6550588d458870ef2d268209fc1c826d6077",
   "data_sha": "84d62779",
   "used_2m": false,
   "f_actual": "NOT_MEASURED",
@@ -16,36 +16,55 @@
     "T_LF07": true,
     "T_LF08": true,
     "maxDelta_TLF05": 3.1086244689504383e-15,
-    "maxDelta_TLF08": 0.0
+    "maxDelta_TLF08": 0.0,
+    "KERNEL_PASS": true
   },
   "P0A": {
-    "per_N_small": {
+    "per_k": {
       "2": {
-        "trials": 64,
-        "mismatches": 0,
-        "tag_mismatch": 0,
-        "m_small": 3,
-        "nbit_small": 20
+        "trials": 8,
+        "n": 20,
+        "m": 3,
+        "seven": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "seven_mean_hard": 0.9125000000000001,
+        "bp_syndrome_rate": 0.125,
+        "brute_syndrome_rate": 1.0
       },
       "3": {
-        "trials": 64,
-        "mismatches": 0,
-        "tag_mismatch": 0,
-        "m_small": 4,
-        "nbit_small": 30
-      },
-      "4": {
-        "trials": 64,
-        "mismatches": 0,
-        "tag_mismatch": 0,
-        "m_small": 5,
-        "nbit_small": 40
+        "trials": 8,
+        "n": 30,
+        "m": 4,
+        "seven": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "seven_mean_hard": 0.8,
+        "bp_syndrome_rate": 0.25,
+        "brute_syndrome_rate": 1.0
       }
     },
     "P0A_PASS": true,
-    "wall_s": 0.045999999972991645,
-    "peak_MiB": 0.0036401748657226562,
-    "per_invocation_ns": 239583.3331926648
+    "wall_s": 1.7660000000032596,
+    "peak_MiB": 13.505659103393555,
+    "per_invocation_ns": 110375000.00020373,
+    "mode": "tiny_bp_vs_brute_k2_3_7cover",
+    "k_set": [
+      2,
+      3
+    ]
   },
   "P0B": {
     "mother_shape": [
@@ -55,6 +74,20 @@
     "r0": 160,
     "delta": 8,
     "Rs_len": 1111,
+    "structure": "sparse_CSR_IRA",
+    "nnz": 49620,
+    "row_deg": {
+      "row_mean": 5.49136786188579,
+      "row_min": 4,
+      "row_max": 6,
+      "col_mean": 4.845703125,
+      "col_min": 1,
+      "col_max": 47
+    },
+    "zero_cols": 0,
+    "dup_rows": 0,
+    "rank": 9036,
+    "prefix_nested": true,
     "C1": true,
     "C2": true,
     "C3": true,
@@ -63,18 +96,15 @@
     "C6": true,
     "P0B_PASS": true
   },
-  "classification": "V72P0_SYNTHESIS_ADAPTER",
+  "classification": "V72P0_ADAPTER_PLAN_READY",
   "successor": "v72_mother_adapter_design",
-  "overall": "OVERALL_ADAPTER_OR_FAIL",
+  "overall": "OVERALL_ADAPTER_PLAN_READY",
   "counts": {
-    "READY": 0,
-    "ADAPTER": 1,
+    "ADAPTER_PLAN_READY": 1,
+    "KERNEL_FAIL": 0,
     "TINY_FAIL": 0,
-    "MATRIX_RANK_FAIL": 0,
-    "SYNDROME_NESTED_FAIL": 0,
-    "EVIDENCE_INCOMPLETE": 0,
-    "MODEL_NOT_STABLE": 0,
-    "BACKEND_NOT_COMPATIBLE": 0
+    "MATRIX_FAIL": 0,
+    "EVIDENCE_INCOMPLETE": 0
   },
   "no_run_01": true
 }

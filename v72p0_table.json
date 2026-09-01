@@ -15,18 +15,20 @@
     "T_LF06": true,
     "T_LF07": true,
     "T_LF08": true,
+    "KERNEL_PASS": true,
     "P0A_PASS": true,
     "P0B_PASS": true,
+    "P0A_k_set": "2,3",
+    "P0B_nnz": 49620,
+    "P0B_zero_cols": 0,
     "C1": true,
     "C2": true,
     "C3": true,
     "C4": true,
-    "C5": true,
-    "C6": true,
-    "wall_s": 0.045999999972991645,
-    "peak_MiB": 0.0036401748657226562,
-    "classification": "V72P0_SYNTHESIS_ADAPTER",
+    "wall_s": 1.7660000000032596,
+    "peak_MiB": 13.505659103393555,
+    "classification": "V72P0_ADAPTER_PLAN_READY",
     "successor": "v72_mother_adapter_design",
-    "overall": "OVERALL_ADAPTER_OR_FAIL"
+    "overall": "OVERALL_ADAPTER_PLAN_READY"
   }
 ]
