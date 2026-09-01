@@ -28,7 +28,7 @@
   2. `S2 prior: prior_logp[1024,1024], hard_symbols[N], hard_bits[Nbit]` 合成先验（SYNTHETIC_ONLY 均匀或固定 λ*，不读 2M）
   3. `S3 local_factor 自排除: LLR_{→i}=logsumexp_{bit_i=1} Σ_{j≠i} bits_j·llr_j - logsumexp_{bit_i=0} Σ_{j≠i}`（`T_LF01-08` 1e-12/1e-9）
   4. `S4 extrinsic 打包: factor_to_bit[N,10] col=sym*10+bit` 11数组打包
-  5. `S5 mother 前缀: H_mother 9036×10240 sparse CSR IRA dual-diagonal, H_r = H_mother[0:r] r∈Δ8序列 160,168,...,9032,9036 且 checkpoint72 checkpoint 160,288,...,8992,9036`
+  5. `S5 mother 前缀: H_mother 9036×10240 sparse CSR IRA dual-diagonal, H_r = H_mother[0:r] r∈Δ8序列 160,168,...,9032,9036 且 checkpoint72 checkpoint 160,288,...,8992,9032,9036`
   6. `S6 增量 syndrome: s_r = H_r·b mod2, s_{r+8}=s_r ∪ 8 new rows`（异或增量，Δ8 粒度）
   7. `S7 披露计费: leak_r = r·1 +64 bits, f=1.3 frozen f_actual NOT_MEASURED，checkpoint r 上报告disclosed=r+64`
   8. `S8 exact tag: tag=SHA256(b)[:8B] LE, verify tag==SHA256(s_hat)[:8B]`
@@ -90,7 +90,7 @@
 1. **冻结主体与处理点零改（1024维符号 adapter 扩展，仅衔接验证，精确复用 V72P0 mother）**：`Q1024 N1024 Nbit10240 M9036 r0 160 Δ8 max9036 f1.3 NOT_MEASURED used_2m false tag64b exact SHA256(bits)[:8B] LE col sym*10+bit bit_i=(s>>i)&1 去self Σ_{j≠i}` 全只读；`84d62779 legacy_v1` 单点；精确复用 `V72P0 mother 9036×10240 nnz=49620 indptr/indices相等`，删 `V72P1 新seed` 新 seed；不引 V72P1 新码本以外的表示。
 2. **10 步数据流 S1-S10 + 3 类型 Config 8字段/Result/Adapter + 5公式**：`S1 synthetic_bits → S2 prior → S3 去self LF → S4 extrinsic打包（11数组 sym*10+bit） → S5 mother前缀（Δ8 vs checkpoint分离） → S6 增量syndrome → S7 披露计费 checkpoint disclosed → S8 exact tag → S9 边/内存11数组分项 float → S10 5态分流 first-match`，`AdapterConfig 8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits} 精确冻结`，落盘 `v72p1_manifest.json`。
 3. **R72P1-02 5公式**：`prior_logp[1024,1024] / bit_to_factor[N,10] / factor_to_bit[N,10] / variable_to_check[nnz] / variable_to_check[nnz] / check_to_variable[nnz] / app_llr[Nbit] / syndrome_target[active_rows] / syndrome_observed / app_llr[Nbit]` 各公式显式，`O(nnz+N*Q*10)` 复杂度来源11数组。
-4. **R72P1-04 分离Δ8 与 decode checkpoint schedule**：`Δ=8` 为增量 syndrome 粒度 `r∈{160,168,...,9032,9036}`；`checkpoint schedule` 为真解码触发点 `r_checkpoint ∈ {160,288,416,...,8992,9036}`（72批量，起始160，末端9036 max上限），`disclosed=r_checkpoint·1+64` 报告，`max=9036` 为上限。
+4. **R72P1-04 分离Δ8 与 decode checkpoint schedule**：`Δ=8` 为增量 syndrome 粒度 `r∈{160,168,...,9032,9036}`；`checkpoint schedule` 为真解码触发点 `r_checkpoint ∈ {160,288,416,...,8992,9032,9036}`（72批量，起始160，末端9036 max上限），`disclosed=r_checkpoint·1+64` 报告，`max=9036` 为上限。
 5. **P1A plumbing（SYNTHETIC_ONLY 确定性，精确复用 mother）**：`adapter_pack / syndrome / tag / prefix_nested / incremental` 纯函数探针，校验 `indptr/indices相等` 前缀 `H_r==H_mother[0:r]`、`s_{r+8}=s_r ∪ new8` 异或一致性、tag LE exact，`wall≤30s`。
 6. **P1B tiny 端到端（k2/3 n6/9 64/512 各8 trials tree-only）**：`64 exhaustive (k2,n6) + 512 exhaustive (k3,n9) 各8 trials` 经 adapter 到 `syndrome+tag` 端到端，`c3 observed_zero&&observed_one fail-closed + 负向测试`，`c5 BP-marg vs brute max|Δ|<1e-9 tree-only`，`wall≤30s peak≤2048MiB`。
 7. **P1C 真消息传递 1/3/10 iter（10240×9036 精确复用 mother）**：`H_mother 9036×10240 sparse CSR IRA dual-diagonal det1 rank9036 nnz=49620 indptr/indices相等` 上 `1 iter / 3 iter / 10 iter` 三档真消息传递，各计 `wall_s/peak_MiB/finite/maxLLR/residual/edges/CSR bytes/syndrome增量/tag exact`，`C1-C6 re-validate`（`rank9036 row_min>0 dup0 prefix inc tag`）+ `checkpoint 160,288,416,9036 disclosed`，超限判 `MATRIX_SMOKE_FAIL`。
@@ -98,7 +98,7 @@
 9. **边/内存/复杂度 11数组分项 float**：`nnz=49620 精确 zero0 dup0 CSR≈229KB 11数组≈9.2MiB peak<2GiB` 显式落盘，`per invocation ns = wall·1e9 / calls`，`O(nnz + N*Q*10)` 复杂度注释 `ponytail:` 标 ceiling。
 10. **终态 per-case 5 态 first-match + 总体 2 态 + 预算/复杂度审计**：每 case `EVIDENCE > KERNEL(T_LF01-02) > PLUMBING_TINY(P1A/P1B) > MATRIX_SMOKE(P1C/P0B) > ADAPTER_PLAN_READY(KERNEL∧P1A∧P1B∧P1C∧wall≤30 4硬 AND)` first-match 互斥；总体 `ADAPTER_PLAN_READY (all cases READY) / NOT_READY` + `5 counts + edges/memory10/wall` 审计；`P1D loopy` 正交 `capacity_warning` 仅描述不过门禁。删除 `1 pct容差` 容差，AND gate 机械修正。
 11. **四工件交付（SYNTHETIC_ONLY，本轮只四工件）**：`proposal.md/design.md/tasks.md/specs/spec.md` 四工件修订，`py_compile PASS`，`rg "V72P1 新seed" 0 hits`，`rg "decode" 0 hits`，本轮不产脚本/registry/报告，仅四工件。
-12. **守卫 R72P1-01~10**：见 Design §8 / Spec §10，覆盖 `精确复用 mother nnz49620 indptr/indices相等 / 5公式 / Config8字段 / Δ8与checkpoint分离72批量9036 max disclosed / 真消息传递1/3/10 finite/maxLLR/residual / 11数组memory O(nnz+N*Q*10) / 5态first-match AND / 机械修正无1 pct容差 保持未完成 / 本轮只四工件`。
+12. **守卫 R72P1-01~10**：见 Design §8 / Spec §10，覆盖 `精确复用 mother nnz49620 indptr/indices相等 / 5公式 / SoftJointConfig 8字段 / Δ8与checkpoint分离72批量9036 max disclosed / 真消息传递1/3/10 finite/maxLLR/residual / 11数组memory O(nnz+N*Q*10) / 5态first-match AND / 机械修正无1 pct容差 保持未完成 / 本轮只四工件`。
 
 ## Impact Scope
 
@@ -108,11 +108,11 @@
 
 ## Acceptance Criteria
 
-- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD TBD (freeze-time git rev-parse HEAD)` + `data 84d62779 synthetic_v72p1` + `predecessor V72P0 5591e16b / V71 e038114d / V70 9bc34be6` 已绑定，显式声明 SYNTHETIC_ONLY、零 decoder/业务矩阵、最小 adapter 10 步数据流 3 类型 5 终态、11数组、Config8字段、Δ8与checkpoint分离、四层 P1A/B/C/D、边/内存11数组、first-match 5态、四工件产出已声明。
+- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD TBD (freeze-time git rev-parse HEAD)` + `data 84d62779 synthetic_v72p1` + `predecessor V72P0 5591e16b / V71 e038114d / V70 9bc34be6` 已绑定，显式声明 SYNTHETIC_ONLY、零 decoder/业务矩阵、最小 adapter 10 步数据流 3 类型 5 终态、11数组、SoftJointConfig 8字段、Δ8与checkpoint分离、四层 P1A/B/C/D、边/内存11数组、first-match 5态、四工件产出已声明。
 - [ ] **R72P1-01 精确复用 V72P0 mother **：`rg "V72P1 新seed" 0 hits`，`H_mother 9036×10240 nnz=49620` 精确值，`indptr/indices byte-equal` 校验已定义，`git diff -- src/ ==0 && git diff -- comparison_bench/src/comparison_bench/formal_ir/ldpc_v5* ==0`，无新 seed。
 - [ ] **R72P1-02 5公式**：`prior_logp[1024,1024] / bit_to_factor[N,10] / factor_to_bit[N,10] / variable_to_check[nnz] / variable_to_check[nnz] / check_to_variable[nnz] / app_llr[Nbit] / syndrome_target[active_rows] / syndrome_observed / app_llr[Nbit]` 11数组枚举与公式 `LLR_{→i}=logsumexp_{1}-logsumexp_{0}|Σ_{j≠i}` 已显式，`py_compile PASS`。
 - [ ] **R72P1-03 Config 8字段冻结**：`AdapterConfig` 仅 8字段 `{checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits}` 精确冻结，多一少一即 FAIL，`seedMother 0 hits` 在 Config 定义内。
-- [ ] **R72P1-04 Δ8与 checkpoint 分离**：`Δ=8` 增量粒度 `r∈{160,168,...,9032,9036}` 与 `checkpoint schedule {160,288,416,...,8992,9036} 72批量 max=9036 上限 报告disclosed=r+64` 分离已显式，`leak_r` 与 `disclosed` 一致。
+- [ ] **R72P1-04 Δ8与 checkpoint 分离**：`Δ=8` 增量粒度 `r∈{160,168,...,9032,9036}` 与 `checkpoint schedule {160,288,416,...,8992,9032,9036} 72批量 max=9036 上限 报告disclosed=r+64` 分离已显式，`leak_r` 与 `disclosed` 一致。
 - [ ] **去self 8 测试 T_LF01-08 **：`log_post_excl_i=prior+Σ_{j≠i} - logZ`，`T_LF01 completeness / T_LF02 normalization 1e-12 / T_LF03 marginal 1e-12 / T_LF04 delta 1e-9 / T_LF05 self_exclusion 1e-12 / T_LF06 stability K1e6 isfinite / T_LF07 determinism==0 / T_LF08 brute 1e-12` 正交 `8test` 全 PASS。
 - [ ] **P1A plumbing **：`adapter_pack deterministic && prefix_nested H_r==H_mother[0:r] indptr/indices相等 && incremental s_{r+8} 异或一致 && tag LE exact && 二次调用 max|Δ|==0`，`wall≤30s` 。
 - [ ] **P1B tiny 端到端**：`(k2,n6)64 (k3,n9)512 各8 trials exhaustive tree forest` 经 adapter 到 `syndrome+tag` 端到端，`c1 isfinite / c2 brute exists isfinite / c3 observed_zero&&observed_one fail-closed + 负向测试 / c4 brute exists / c5 max|Δ|<1e-9 tree-only / c6 tree / c7 total≤9 exhaustive` 7 checks 全 PASS，`worst<1e-9 wall≤30s peak≤2048MiB` 。
@@ -130,6 +130,6 @@
 
 ## Lifecycle
 
-`V64` 已 `22/24 full-tag PASS`；`V65` new-session 对照；`V66` 单 session `72` 自适应 `RATE_NOT_FEASIBLE`；`V67-MAP` 已 `V67_FEASIBILITY_MAP_ACCEPTED` 3 sessions 均 `NEAR_FULL`（natural 5+5）；`V68-BAL` 为均衡 5+5 均衡性地图；`V69-3L` 为三层表示可行性地图；`V70-BSJ` 为二进制 soft-joint 因子完整性地图；`V71-SJK` 为 1024-state 纯因子核 5 函数 D1-D10 地图；`V72P0-SYN` 为合成 correctness P0 壁垒（`T_LF 去self 8test + P0A k2/3 6/9 64/512 8trials tree-only c3观测 1e-9 + P0B sparse 9036×10240 nnz=49620 5-state`，`PLAN_CANDIDATE/SYNTHETIC_ONLY/EXECUTE_NOT_AUTHORIZED`，`5591e16b/64ca2f1e`）；`V72P1-ADP` 为**最小 adapter 衔接可行性与复杂度地图**合成探针（`10 步 S1-S10 + 3 类型 Config8字段/Result/Adapter + 11数组 + P1A plumbing / P1B tiny 端到端 / P1C 真消息1/3/10 finite/maxLLR/residual / P1D small loopy + 11数组 memory O(nnz+N*Q*10) + 5态 first-match`，`PLAN_CANDIDATE/SYNTHETIC_ONLY/EXECUTE_NOT_AUTHORIZED`，精确复用 V72P0 mother，不跑 decoder，不启 V72）；`V72P1` 本身不直接进入 V72 qualification；任何 decoder / 真码率 V72 需另起 `EXECUTE_AUTH`。
+`V64` 已 `22/24 full-tag PASS`；`V65` new-session 对照；`V66` 单 session `72` 自适应 `RATE_NOT_FEASIBLE`；`V67-MAP` 已 `V67_FEASIBILITY_MAP_ACCEPTED` 3 sessions 均 `NEAR_FULL`（natural 5+5）；`V68-BAL` 为均衡 5+5 均衡性地图；`V69-3L` 为三层表示可行性地图；`V70-BSJ` 为二进制 soft-joint 因子完整性地图；`V71-SJK` 为 1024-state 纯因子核 5 函数 D1-D10 地图；`V72P0-SYN` 为合成 correctness P0 壁垒（`T_LF 去self 8test + P0A k2/3 6/9 64/512 8trials tree-only c3观测 1e-9 + P0B sparse 9036×10240 nnz=49620 5-state`，`PLAN_CANDIDATE/SYNTHETIC_ONLY/EXECUTE_NOT_AUTHORIZED`，`5591e16b/64ca2f1e`）；`V72P1-ADP` 为**最小 adapter 衔接可行性与复杂度地图**合成探针（`10 步 S1-S10 + 3 类型 SoftJointConfig 8字段/Result/Adapter + 11数组 + P1A plumbing / P1B tiny 端到端 / P1C 真消息1/3/10 finite/maxLLR/residual / P1D small loopy + 11数组 memory O(nnz+N*Q*10) + 5态 first-match`，`PLAN_CANDIDATE/SYNTHETIC_ONLY/EXECUTE_NOT_AUTHORIZED`，精确复用 V72P0 mother，不跑 decoder，不启 V72）；`V72P1` 本身不直接进入 V72 qualification；任何 decoder / 真码率 V72 需另起 `EXECUTE_AUTH`。
 
-# 权威合同校验行 max10 total720 warm_true float64 9.2MiB prefix1111 tail4 checkpoint72 prior_logp[1024,1024] 11数组 5公式 Config8字段 workspace streaming 双向 edge
+# 权威合同校验行 max10 total720 warm_true float64 9.2MiB prefix1111 tail4 checkpoint72 prior_logp[1024,1024] 11数组 5公式 SoftJointConfig 8字段 workspace streaming 双向 edge

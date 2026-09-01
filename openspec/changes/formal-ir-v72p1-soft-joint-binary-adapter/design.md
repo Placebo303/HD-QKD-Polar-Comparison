@@ -1,6 +1,6 @@
 # OpenSpec Design: formal-ir-v72p1-soft-joint-binary-adapter
 
-**Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — **最小 adapter 衔接 1024 local factor 自排除 ↔ binary IRA mother 9036×10240 nnz=49620 prefix1111 tail4 精确复用 V72P0 mother indptr/indices相等 ↔ exact 64-bit tag，10 步 S1-S10 + 3 类型 Config8字段/Result/Adapter + 5公式，P1A plumbing / P1B tiny 端到端 64/512 8trials tree-only 1e-9 / P1C 真消息传递 1/3/10 iter 报告finite/maxLLR/residual 9036×10240 / P1D small loopy 描述性，11数组 memory O(nnz+N*Q*10)，5 态 first-match AND，不跑 decoder 精确复用 V72P0 mother 不启 V72**
+**Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — **最小 adapter 衔接 1024 local factor 自排除 ↔ binary IRA mother 9036×10240 nnz=49620 prefix1111 tail4 精确复用 V72P0 mother indptr/indices相等 ↔ exact 64-bit tag，10 步 S1-S10 + 3 类型 SoftJointConfig 8字段/Result/Adapter + 5公式，P1A plumbing / P1B tiny 端到端 64/512 8trials tree-only 1e-9 / P1C 真消息传递 1/3/10 iter 报告finite/maxLLR/residual 9036×10240 / P1D small loopy 描述性，11数组 memory O(nnz+N*Q*10)，5 态 first-match AND，不跑 decoder 精确复用 V72P0 mother 不启 V72**
 
 **Cycle**: `V72P1-ADP` predecessor `V72P0-SYN 5591e16bf35b03c3df30a003bee12011a796d73e (V72P0 64ca2f1e)` + `V71-SJK e038114db5095a57158b0e1cd36884d6a1a5d8be` + `V70-BSJ 9bc34be6` + `V67-MAP` HEAD `TBD (freeze-time git rev-parse HEAD)` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` — **SYNTHETIC_ONLY 精确复用 V72P0 mother nnz=49620 indptr/indices相等，不读 2M，不创 run_01，不启 V72**
 
@@ -10,7 +10,7 @@
 
 ## 1. 科学问题与关键判断
 
-> 在**完全冻结主体**（`Q1024 N1024 Nbit10240 M9036 r0 160 Δ8 max9036 f1.3 NOT_MEASURED tag 64b exact 漏 Σw_i·m_i+64`，**不改 Q/N/M/f/tag/col/去self 语义，精确复用 V72P0 mother nnz=49620 indptr/indices相等**）下，**验证最小 adapter 的 10 步无损衔接 + 11数组 + Config8字段 + Δ8与checkpoint分离 + P1A/B/C/D 真消息传递 + 11数组 memory 复杂度**：定义 `S1 合成 bits → S2 prior → S3 去self LF → S4 extrinsic打包 11数组 → S5 mother前缀 Δ8 vs checkpoint → S6 增量syndrome → S7 披露计费 checkpoint disclosed → S8 exact tag → S9 11数组 memory → S10 5态分流 first-match` + `3 类型 AdapterConfig8字段/AdapterResult/Adapter` + `5公式` + `P1A plumbing / P1B tiny 64/512 c3观测 1e-9 / P1C 真消息 9036×10240 1/3/10 finite/maxLLR/residual / P1D small loopy`，每 case 5 终端总体 2 态。全程 SYNTHETIC_ONLY，精确复用 V72P0 mother，不跑 decoder，不启 V72。
+> 在**完全冻结主体**（`Q1024 N1024 Nbit10240 M9036 r0 160 Δ8 max9036 f1.3 NOT_MEASURED tag 64b exact 漏 Σw_i·m_i+64`，**不改 Q/N/M/f/tag/col/去self 语义，精确复用 V72P0 mother nnz=49620 indptr/indices相等**）下，**验证最小 adapter 的 10 步无损衔接 + 11数组 + SoftJointConfig 8字段 + Δ8与checkpoint分离 + P1A/B/C/D 真消息传递 + 11数组 memory 复杂度**：定义 `S1 合成 bits → S2 prior → S3 去self LF → S4 extrinsic打包 11数组 → S5 mother前缀 Δ8 vs checkpoint → S6 增量syndrome → S7 披露计费 checkpoint disclosed → S8 exact tag → S9 11数组 memory → S10 5态分流 first-match` + `3 类型 AdapterSoftJointConfig 8字段/AdapterResult/Adapter` + `5公式` + `P1A plumbing / P1B tiny 64/512 c3观测 1e-9 / P1C 真消息 9036×10240 1/3/10 finite/maxLLR/residual / P1D small loopy`，每 case 5 终端总体 2 态。全程 SYNTHETIC_ONLY，精确复用 V72P0 mother，不跑 decoder，不启 V72。
 - **对照**：`V72P0 T_LF/P0A/P0B` 基线作 `KERNEL/P0B re-validate` 对照，母码 `nnz=49620 indptr/indices相等` 精确复用校验；`ldpc_v5` 的 `caps/disclosure` 作 `A5/A6` 轻量对照（只读，不执行）；`1/3/10 真消息传递` 三档作复杂度路由，报告 `finite/maxLLR/residual`。
 - **不变量**：`Q1024 N1024 Nbit10240 M9036 r0 160 Δ8 f1.3 tag64 col sym*10+bit 去self Σ_{j≠i} H_mother 9036×10240 nnz=49620` 全冻结；**本变更仅验证 adapter 衔接与复杂度，不生成新 mother**。
 - **地图性质**：纯 SYNTHETIC_ONLY，`1024 枚举 log-domain + sparse CSR IRA 精确复用 + adapter pack/syndrome/tag + 11数组 + P1A/B/C/D + 11数组 memory`，`2M/TEST` 密封不读，V72P0 复用校验，每 case 5 终端总体 2 态，不启 V72。
@@ -26,7 +26,7 @@
 | LF | 去self `LLR_{→i}=logsumexp_{1}-logsumexp_{0} \| Σ_{j≠i}` 11数组 | V72P0 |
 | mother | `H_mother 9036×10240` `n_info 1204` `H_p dual-diagonal det1 rank9036` `info每行3-4` `nnz=49620 精确` `zero0 dup0` `indptr/indices与V72P0 byte-equal` | V72P0 P0B 精确复用，删 V72P1 新seed |
 | Rs_Δ | `r0 160 Δ8 →9036` 增量粒度 `r∈{160,168,...,9032,9036}` | V72P0 Δ8 |
-| checkpoint | `r_checkpoint ∈ {160,288,416,...,8992,9036} 72批量 max9036 上限 报告disclosed=r+64` | V72P1 R72P1-04 分离 |
+| checkpoint | `r_checkpoint ∈ {160,288,416,...,8992,9032,9036} 72批量 max9036 上限 报告disclosed=r+64` | V72P1 R72P1-04 分离 |
 | leak | `leak_r = r·1 +64` `disclosed = r_checkpoint+64` `f_actual NOT_MEASURED` | V27/V31 |
 | adapter | `pack / syndrome / tag / prefix / incremental` 纯函数 11数组 | V72P1 新增 |
 | Config | `AdapterConfig 8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits}` 精确冻结 | V72P1 R72P1-03 |
@@ -49,7 +49,7 @@
 | P0B re-validate | 9036×10240 sparse CSR nnz=49620 精确复用 | 复用 V72P0 `C1-C6 checkpoint` 校验 `indptr/indices相等` |
 | 2M/TEST real | 密封不读 | `used_2m false used_test false` |
 
-- **注册表**：`v72p1_data_registry_synthetic.json` (`schema v72p1_synthetic_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head TBD (freeze-time binding), reused_from v72p0_synthetic_v1, successor_v72_not_started true, frozen {Q1024,N1024,Nbit10240,M9036,r0 160,Δ8,max9036,checkpoint 160 72批量 8992 9036 disclosed,max9036,tag f1.3,col sym*10+bit, mother精确复用 V72P0 nnz49620 indptr/indices相等, Config8字段, 11数组, P1A plumbing, P1B {k2/3 n6/9 64/512 8trials tree-only}, P1C {9036×10240 nnz49620 1/3/10 真消息 finite/maxLLR/residual}, P1D {n12 k3 loopy descriptive}, used_2m false}`)。
+- **注册表**：`v72p1_data_registry_synthetic.json` (`schema v72p1_synthetic_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head TBD (freeze-time binding), reused_from v72p0_synthetic_v1, successor_v72_not_started true, frozen {Q1024,N1024,Nbit10240,M9036,r0 160,Δ8,max9036,checkpoint 160 72批量 8992 9036 disclosed,max9036,tag f1.3,col sym*10+bit, mother精确复用 V72P0 nnz49620 indptr/indices相等, SoftJointConfig 8字段, 11数组, P1A plumbing, P1B {k2/3 n6/9 64/512 8trials tree-only}, P1C {9036×10240 nnz49620 1/3/10 真消息 finite/maxLLR/residual}, P1D {n12 k3 loopy descriptive}, used_2m false}`)。
 - **零改精确复用**：`V72P0` 的 `P0A/P0B` 精确复用 `H_mother nnz=49620 indptr/indices相等`，不重估计；`V70/V71` 的 Stage2 仅对照，不作先验来源；删 `V72P1 新seed` 新 seed。
 
 ### 3.2 数据就绪门（SYNTHETIC_ONLY）
@@ -59,8 +59,8 @@ assert Q==1024 && N==1024 && Nbit==10240 && M==9036 && r0==160 && Δ==8 && max==
 assert f==1.3 && f_actual=="NOT_MEASURED" && used_2m==false && used_test==false
 assert successor_v72_not_started==true && head==TBD (freeze-time)
 assert P1A {plumbing probes 4 indptr/indices相等} && P1B {64/512 8trials tree} && P1C {9036×10240 nnz49620 1/3/10 真消息 finite/maxLLR/residual} && P1D {n12 k3}
-assert mother {nnz==49620 && indptr==v72p0_indptr && indices==v72p0_indices && rank9036 && zero0 && dup0 && checkpoint 160,288,416,8992,9036 disclosed}
-assert Config8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits} 多一少一即 FAIL
+assert mother {nnz==49620 && indptr==v72p0_indptr && indices==v72p0_indices && rank9036 && zero0 && dup0 && checkpoint 160,288,416,8992,9032,9036 disclosed}
+assert SoftJointConfig 8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits} 多一少一即 FAIL
 assert 11数组 {prior,extrinsic[10],factor_to_bit,variable_to_check,variable_to_check,check_to_variable,app_llr,syndrome_target,syndrome,app_llr} 已定义
 ```
 
@@ -75,12 +75,12 @@ assert 11数组 {prior,extrinsic[10],factor_to_bit,variable_to_check,variable_to
 | 5 | LF 去self 11数组 | `Σ_{j≠i} bits_j·llr_j logsumexp` `LLR_{→i}` 公式 |
 | 6 | mother 精确复用 | `9036×10240 sparse CSR IRA dual-diagonal nnz=49620 indptr/indices相等` 删新 seed |
 | 7 | Rs_Δ | `r0 160 Δ8 max9036 r∈{160,168,...,9032,9036}` |
-| 8 | checkpoint | `r_checkpoint∈{160,288,...,8992,9036} 72批量 max9036 报告disclosed=r+64` |
+| 8 | checkpoint | `r_checkpoint∈{160,288,...,8992,9032,9036} 72批量 max9036 报告disclosed=r+64` |
 | 9 | tag | `SHA256 LE 64b exact` |
 | 10 | adapter 11数组 | `pack / syndrome / tag / prefix / incremental` 11数组 |
 | 11 | 10步 S1-S10 | `S1 bits → S2 prior → S3 LF 11数组 → S4 pack → S5 mother Δ8 vs checkpoint → S6 syndrome → S7 leak disclosed → S8 tag → S9 11数组 memory → S10 5-state first-match` |
 
-## 5. 估计器 — 10 步 S1-S10 + 3 类型 Config8字段 + 11数组 + P1A/B/C/D + 11数组 memory（SYNTHETIC_ONLY，精确复用 V72P0 mother，不启 V72）
+## 5. 估计器 — 10 步 S1-S10 + 3 类型 SoftJointConfig 8字段 + 11数组 + P1A/B/C/D + 11数组 memory（SYNTHETIC_ONLY，精确复用 V72P0 mother，不启 V72）
 
 ### 5.1 3 类型定义（最小 adapter，Config 8字段冻结）
 
@@ -158,7 +158,7 @@ S4 extrinsic 打包: factor_to_bit[N,10] where factor_to_bit[sym*10+bit] = extri
 
 S5 mother 前缀: H_mother 9036×10240 sparse CSR IRA dual-diagonal det1 rank9036 nnz=49620 精确复用 V72P0 indptr/indices相等
     # 精确复用 V72P0 mother，不生成新 mother；校验 indptr/indices byte-equal；Δ8 粒度 r∈{160,168,...,9032,9036} 前缀嵌套
-    # checkpoint 72批量 r_checkpoint∈{160,288,...,8992,9036} 为真解码触发点，max9036 上限
+    # checkpoint 72批量 r_checkpoint∈{160,288,...,8992,9032,9036} 为真解码触发点，max9036 上限
 
 S6 增量 syndrome: s_r = H_r · b mod2 (sparse 按行异或) 对应 #9
     # 增量一致性: s_{r+8} == s_r || (H_{r:r+8}·b mod2)，即 s_{r+8}[0:r]=s_r 且新增 8 行独立 Δ8粒度
@@ -222,7 +222,7 @@ H_mother 9036×10240 sparse CSR IRA dual-diagonal nnz=49620 精确复用 indptr/
   C4 prefix_nested (H_r == H_mother[0:r] ∀r indptr/indices相等)
   C5 incremental (s_{r+8} 异或一致 Δ8)
   C6 tag64 exact (64 samples SHA256 LE exact)
-  checkpoint 160,288,416,8992,9036 72批量 max9036 报告disclosed=r+64
+  checkpoint 160,288,416,8992,9032,9036 72批量 max9036 报告disclosed=r+64
 
 P1C 真消息传递 3 档 (SYNTHETIC_ONLY，真消息传递，非空 smoke，不判收敛)：
   for iter in [1,3,10]:
@@ -305,7 +305,7 @@ else:
 # P1D loopy 仅 capacity_warning 正交旗标，不过硬门禁，但报告单独章节；无 OR SYM，AND gate 精确；无 1 pct容差容差
 ```
 
-- **阈值冻结**：`T_LF01-08 1e-12/1e-9`、`P1B worst<1e-9`、`P1C 1 iter<1s 3 iter<5s 10 iter≤30s finite==true peak≤2048`、`C1-C6 + checkpoint 160,288,416,8992,9036 disclosed`、`c3 observed_zero&&observed_one`、`nnz=49620 精确`。
+- **阈值冻结**：`T_LF01-08 1e-12/1e-9`、`P1B worst<1e-9`、`P1C 1 iter<1s 3 iter<5s 10 iter≤30s finite==true peak≤2048`、`C1-C6 + checkpoint 160,288,416,8992,9032,9036 disclosed`、`c3 observed_zero&&observed_one`、`nnz=49620 精确`。
 
 ### 6.2 总体 2 态
 
@@ -326,7 +326,7 @@ else:
 
 - **本轮只四工件**：`proposal/design/tasks/specs` 四工件修订，不产 `scripts/`，下一轮脚本需满足 `rg "decode" 0 hits`，`rg "V72P1 新seed" 0 hits`，`py_compile PASS`；输出为四工件一致性；`v72p1_data_registry_synthetic.json` 等 registry 为下一轮占位，本轮仅定义。
 - **后续脚本 `scripts/v72p1_soft_joint_binary_adapter.py`** (SYNTHETIC_ONLY): `python scripts/v72p1_soft_joint_binary_adapter.py [--out v72p1_results.json]` → `T_LF01-08 → P1A plumbing indptr/indices相等 → P1B tiny 64/512 8trials c3观测负向测试 → P1C 9036×10240 nnz49620 1/3/10 真消息 finite/maxLLR/residual C1-C6 checkpoint → P1D loopy descriptive → 11数组 memory → 5态 first-match AND`，`rg "decode" 0 hits`，`rg "V72P1 新seed" 0 hits`，`rg -i "met|protograph|sc_coupling" 0 hits`，仅 `numpy/pandas/pyarrow/scipy.sparse/hashlib`，`py_compile PASS`；输出 `v72p1_results.json + v72p1_table.{csv,json} + v72p1_manifest.json + V72P1_SYN_REPORT.md` + 控制台 5 态/2 态摘要；校验 `used_2m false`、`f_actual NOT_MEASURED`、`T_LF 1e-12`、`nnz49620 indptr/indices相等`、`11数组`、`O(nnz+N*Q*10)` 。
-- **后续脚本 `scripts/v72p1_backend_audit.py`** (read-only): `python scripts/v72p1_backend_audit.py [--out v72p1_audit_report.json]` → `AdapterConfig8字段/AdapterResult/Adapter 3 类型校验 + 10 步 S1-S10 完整性 + 11数组校验 + 5态枚举探针`，`rg "decode" 0 hits`，`rg "\"ADAPTER_PLAN_READY\"" 0 hits`（枚举用 `IntEnum` 比较 `==BackendState.ADAPTER_PLAN_READY`），`py_compile PASS`；输出 `v72p1_audit_report.json + V72P1_BACKEND_AUDIT_REPORT.md`。
+- **后续脚本 `scripts/v72p1_backend_audit.py`** (read-only): `python scripts/v72p1_backend_audit.py [--out v72p1_audit_report.json]` → `AdapterSoftJointConfig 8字段/AdapterResult/Adapter 3 类型校验 + 10 步 S1-S10 完整性 + 11数组校验 + 5态枚举探针`，`rg "decode" 0 hits`，`rg "\"ADAPTER_PLAN_READY\"" 0 hits`（枚举用 `IntEnum` 比较 `==BackendState.ADAPTER_PLAN_READY`），`py_compile PASS`；输出 `v72p1_audit_report.json + V72P1_BACKEND_AUDIT_REPORT.md`。
 - **报告 `V72P1_SYN_REPORT.md`**（下一轮）：`per case T_LF01-08 / P1A plumbing indptr/indices相等 / P1B 64/512 c3_obs worst / P1C 1/3/10 真消息 finite/maxLLR/residual edges/CSR/11数组/wall/disclosed / P1D loopy capacity_warning + overall 2 态 + S1-S10 3 类型8字段 + 11数组 + Δ8 vs checkpoint + 11数组 memory O(nnz+N*Q*10)` 与 `json/csv` 一致，不扩大为 `FER/SKR`，显式 `SYNTHETIC_ONLY used_2m false f1.3 NOT_MEASURED 精确复用 V72P0 mother nnz49620`。
 - **报告 `V72P1_BACKEND_AUDIT_REPORT.md`**：`3 类型8字段 / 10 步 / 11数组 / 5态 first-match` 枚举探针结果。
 - **守卫**：SYNTHETIC_ONLY 期零 decoder、零业务矩阵构造、每 case 5 终端总体 2 态 first-match AND、**不创建 `run_01`**、精确复用 mother、不比较方法、不调 V72P1 以外码、**不启 V72**、**本轮只四工件**。
@@ -338,7 +338,7 @@ else:
 | R72P1-01 | 冻结主体 + 2M 禁 + 精确复用 V72P0 mother + 不启 V72 | `Q1024 N1024 Nbit10240 M9036 r0 160 Δ8 max9036 col sym*10+bit LF去self tag64 f1.3 NOT_MEASURED used_2m false successor_v72_not_started && H_mother 9036×10240 nnz=49620 精确 indptr/indices与V72P0 byte-equal && rg "V72P1 新seed" 0 hits && git diff src==0 && git diff ldpc_v5*==0` |
 | R72P1-02 | 5公式 | `11数组 {prior_logp[1024,1024], bit_to_factor[N,10], factor_to_bit[N,10], variable_to_check[nnz], variable_to_check[nnz], check_to_variable[nnz], app_llr[Nbit], syndrome_target[active_rows], syndrome_observed, app_llr[Nbit]} 各公式显式 LLR_{→i}=logsumexp_{1}-logsumexp_{0}\|Σ_{j≠i} ` |
 | R72P1-03 | Config 8字段冻结 | `AdapterConfig 仅 8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits} 精确冻结，多一少一即 FAIL，rg "seedMother" 0 hits 在 Config 定义` |
-| R72P1-04 | Δ8与 checkpoint 分离 72批量 9036 max disclosed | `Δ8 增量粒度 r∈{160,168,...,9032,9036} 与 checkpoint {160,288,...,8992,9036} 72批量 max9036 上限 报告disclosed=r+64 分离已显式` |
+| R72P1-04 | Δ8与 checkpoint 分离 72批量 9036 max disclosed | `Δ8 增量粒度 r∈{160,168,...,9032,9036} 与 checkpoint {160,288,...,8992,9032,9036} 72批量 max9036 上限 报告disclosed=r+64 分离已显式` |
 | R72P1-05 | P1C 真消息传递 1/3/10 iter 9036×10240 finite/maxLLR/residual | `H_mother 9036×10240 nnz=49620 indptr/indices相等 sparse CSR IRA dual-diagonal rank9036 zero0 dup0 checkpoint disclosed 全 PASS && 1 iter wall<1s finite==true && 3 iter <5s && 10 iter ≤30s && peak≤2048MiB && syndrome增量/tag exact 三档全 PASS 报告 finite/maxLLR/residual` |
 | R72P1-06 | 11数组 memory 分项 float 复杂度 O(nnz+N*Q*10) | `nnz=49620 精确 zero0 dup0 CSR≈278192B 11数组≈9.2MiB (prior_logp8192B+bit_to_factor80KB+factor_to_bit80KB+variable_to_check80KB+variable_to_check388192B+check_to_variable388192B+app_llr80KB+syndrome_target71KB+syndrome_observed[active_rows]9KB+app_llr80KB) peak≤2048MiB per_invocation_ns 已落盘 O(nnz+N*Q*10)=O(49620+1024*1024*10) ponytail ceiling 已标，无1 pct容差` |
 | R72P1-07 | 5终态 first-match AND gate 精确 | `per-case EVIDENCE>KERNEL>PLUMBING_TINY>MATRIX_SMOKE>ADAPTER_PLAN_READY first-match 互斥 AND gate 精确 (∧ 非 OR SYM) overall ADAPTER_PLAN_READY (all cases READY) / NOT_READY 已落盘 && 5 counts + wall≤30s && finite==true ` |
@@ -361,4 +361,4 @@ else:
 - D6 不产生新矩阵/码参数，仅 `T_LF/P1A/B/C/D/edges/memory10/wall/5态` 与 successor 建议，`ADAPTER_PLAN_READY 4硬 AND` 方可零改对接 V72 mother。
 - D7 本变更为 `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED`，不产生 `run_01`，任何 decoder/V72 需 `PLAN_ACCEPT + EXECUTE_AUTH` 后才允，本轮只四工件保持未完成。
 
-# 权威合同校验行 max10 total720 warm_true float64 9.2MiB prefix1111 tail4 checkpoint72 prior_logp[1024,1024] 11数组 5公式 Config8字段 workspace streaming 双向 edge
+# 权威合同校验行 max10 total720 warm_true float64 9.2MiB prefix1111 tail4 checkpoint72 prior_logp[1024,1024] 11数组 5公式 SoftJointConfig 8字段 workspace streaming 双向 edge
