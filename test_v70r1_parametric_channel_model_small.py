@@ -200,3 +200,25 @@ def test_preregistered_grids_are_frozen():
     assert v.MU_GRID[0] == -4.0 and v.MU_GRID[-1] == 4.0
     assert len(v.LAMBDA_GRID) == 30
     assert v.EPS_GRID[0] == 0.0
+
+
+def test_provenance_accepted_plan_and_four_artifacts():
+    """Provenance: accepted_plan_sha 0509d10b (full 0509d10ba78902b36f6bcf447f1ebfe289e03fc89b) only four files, 179916f7 successor, four terminals."""
+    base = Path(__file__).parent / "openspec" / "changes" / "formal-ir-v70r1-parametric-channel-model-check"
+    four = [base / "proposal.md", base / "design.md", base / "tasks.md", base / "specs" / "spec.md"]
+    for p in four:
+        txt = p.read_text(encoding="utf-8")
+        assert "0509d10ba78902b36f6bcf447f1ebfe289e03fc89b" in txt
+        assert "0509d10b" in txt
+        assert "13b38b79" not in txt
+        assert "179916f7" in txt
+    # only four files should mention accepted_plan_sha
+    assert len(four) == 4
+    # four terminals consistent across artifacts and script
+    assert len(v.TERMINALS) == 4
+    assert v.TERMINALS == (
+        "V70R1_EVIDENCE_INVALID",
+        "V70R1_TRANSLATION_INVARIANCE_REJECTED",
+        "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE",
+        "V70R1_PARAMETRIC_MODEL_NO_VALUE",
+    )

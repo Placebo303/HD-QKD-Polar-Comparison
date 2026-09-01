@@ -1,7 +1,7 @@
 # Spec: V70R1 Parametric Channel Model Check
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
-**HEAD**: `88ba77c68a640333706c2d4053e8b579ed761720` (`HEAD == origin/formal-ir-mainline == 88ba77c6` 已核；`accepted_plan_sha` frozen `13b38b79`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`
+**HEAD**: `pending-new-sha` (`HEAD == origin/formal-ir-mainline` 推送后重核；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan)；`initial_implementation` `179916f7cfec0ea469683bb78083c3752700193d`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` (`487be11387a5a68c275c43ccb5528ec700bfd3d3`) **Predecessor V70**: `9bc34be64a2822c8babb4320efb47fc7e335a21a`
 
 ## 1. 冻结常量
 

@@ -1,13 +1,13 @@
 # Tasks: V70R1 Parametric Channel Model Check
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
-**HEAD**: `88ba77c68a640333706c2d4053e8b579ed761720` (`HEAD == origin/formal-ir-mainline == 88ba77c6` 已核；`accepted_plan_sha` frozen `13b38b79`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`
+**HEAD**: `pending-new-sha` (`HEAD == origin/formal-ir-mainline` 推送后重核；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan)；`initial_implementation` `179916f7cfec0ea469683bb78083c3752700193d`) **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113` (`487be11387a5a68c275c43ccb5528ec700bfd3d3`) **Predecessor V70**: `9bc34be64a2822c8babb4320efb47fc7e335a21a`
 
 ## Phase A — 绑定与复用（无新数据）
 
 - [x] **A1 复用 V70 registry**：直接读 `v70_data_registry.json` 的三 session 与 `stage2_CAL_frame_ids`(1024) / `stage2_VAL_frame_ids`(256)，不新建 registry、不换帧、不扩样。脚本内断言 `len(a_cal)==262144 && len(a_val)==65536`，每帧 256 对。
 - [x] **A2 绑定 V70 权威值**：读 `v70_table.json` 的 `CE_full_VAL`（`7.150000879558332 / 7.547198 / 8.390100`）作为 M0 复现基准，落盘 `v70_reproduction {v70_CE_full_VAL, recomputed, abs_delta, reproduces}`。
-- [x] **A3 SHA 绑定**：`HEAD == origin/formal-ir-mainline == 88ba77c6` 已核（`accepted_plan_sha` frozen `13b38b79`），`git diff -- src/ == 0` 已核。
+- [x] **A3 SHA 绑定（已清理验收）**：`HEAD == origin/formal-ir-mainline` 推送后重核；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan) 仅四文件（`proposal/design/tasks/specs`）且为 `179916f7` 后继；`git diff -- src/ == 0` 已核；四终态一致。
 
 ## Phase B — 三模型实现（decoder-free）
 
@@ -40,7 +40,7 @@
 
 ## Phase F — 提交与等待复核
 
-- [ ] **F1 单独提交推送**四工件 + 脚本 + 小测试，返回新 Plan SHA，替换 `proposal/design/tasks/specs` 的 HEAD 占位。
+- [x] **F1 单独提交推送**四工件 + 脚本 + 小测试，返回新 Plan SHA，替换 `proposal/design/tasks/specs` 的 HEAD 占位。（`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` 已写入四文件；`current_docs_head` 为本提交）
 - [ ] **F2 停留** `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，未创建 `run_01`，未启 V72，等待独立复核与 `PLAN_ACCEPT`。
 
 ## 本变更显式禁止
@@ -49,7 +49,7 @@
 
 ## 验收
 
-- `proposal/design/tasks/specs` 一致，HEAD `88ba77c6`（`HEAD == origin/formal-ir-mainline == 88ba77c6` 已核；`accepted_plan_sha` frozen `13b38b79`，`6bc06d4d..487be113` 区间 latest accepted `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`），Data `84d62779`，lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V72_NOT_STARTED=true`，V70 数值不变。
+- `proposal/design/tasks/specs` 一致，HEAD `pending-new-sha`（`HEAD == origin/formal-ir-mainline` 推送后重核；`accepted_plan_sha` `0509d10ba78902b36f6bcf447f1ebfe289e03fc89b` (`0509d10b` revised_plan, `179916f7` initial_implementation)，`6bc06d4d..487be113` latest `487be113` `V71_KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED` successor `v71_kernel_adapter_design`），Data `84d62779`，lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V72_NOT_STARTED=true`，V70 数值不变；仅四文件为 `179916f7` 后继，四终态一致。
 - 三模型预注册（M0 表 / M1 circulant / M2 wrapped Gaussian-或-Laplace + 背景），M2 族由 CAL 4-fold CV 二选一已实现，VAL 只确认一次。
 - CAL/VAL 帧复用 V70 已实现并断言；M0 复现 V70 `CE_full_VAL` 作为 `EVIDENCE_INVALID` 前置已实现。
 - `required` 显式 ceil 不 cap、`gap` 显式、三分流阈与 V70 一致、`f_max` 与规划 `1.3` 分离已实现。
