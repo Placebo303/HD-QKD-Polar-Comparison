@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024维符号 GF32两层验证冻结仅重划分10 bits，CAL-only 252枚举按升序唯一词典序 max→sum→abs→lex 选 S*，Phase A CAL-only Phase B VAL确认报告 natural 参照，V67三Session Stage2 复用，per-session 4分流 + 总体3态 + common审计，不跑decoder不构矩阵**
 
-**Cycle**: `V68-BAL` (balanced-gf32-bit-partition), predecessor `V67-MAP (d6f590ac6f30deaa8b0bf6cf5c419593fc037720 V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS` + `V66 832e5394`, HEAD `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
+**Cycle**: `V68-BAL` (balanced-gf32-bit-partition), predecessor `V67-MAP (fcf3e457ecf45c58e23f91d750acd5267d541795 V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS` + `V66 832e5394`, HEAD `fcf3e457ecf45c58e23f91d750acd5267d541795` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
 
 **Feasibility**: `V67` 3 sessions 上 `natural 5+5 (s>>5 / s&31)` 均 `m1_raw≥1024 (1024–1199)` 且 `raw_disclosure 9589–11379` 证 `NEAR_FULL`，`λ` 未触边、`ΔNLL≤0.05`、`val_b 0` 证模型稳定但天然不均衡；`V68` 以均衡重划分纠正不均衡为假设，decoder-free 验证 `∃S: m1<1024&&m2<1024`。
 
@@ -49,7 +49,7 @@
 
 - **复用**：`v68_data_registry.json` 由 `v67_data_registry.json` 的 3 sessions (`20260123_1M_600k_0dB 1M, 20260107_PPLN_1p5M 1p5M, 20260123_2M_1p2M_0dB 2M`) 的 `stage2_CAL[1024] + stage2_VAL[256]` 原样拷贝（`total 3, per_category 1,1,1, acquisition_dedup_verified, frozen, not_sorted_by_CE`），`zero_overlap_verified` 与 `V13..V67` 零重叠已验，禁止事后换 session 或按 `CE/m` 替换。
 - **不重估计 V67**：V67 的 `natural` `CE/m` 仅引用对照，不在 V68 上重算 `natural` 的 `C_ab`（但 V68 的 `VAL` 计量会对 `S_nat` 同算法重算以保一致口径，报告 `Δ`）。
-- **注册表**：`v68_data_registry.json` (`schema v68_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head d6f590ac6f30deaa8b0bf6cf5c419593fc037720, reused_from v67`) 含 `sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`。
+- **注册表**：`v68_data_registry.json` (`schema v68_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head fcf3e457ecf45c58e23f91d750acd5267d541795, reused_from v67`) 含 `sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`。
 
 ### 3.2 数据就绪门（decoder-free）
 
