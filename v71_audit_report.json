@@ -1,0 +1,43 @@
+{
+  "schema": "v71_audit_v1",
+  "successor_not_started": true,
+  "per_session": {
+    "20260123_1M_600k_0dB": {
+      "checks": {
+        "A1_interface_presence": true,
+        "A2_policy_manifest_schema": true,
+        "A3_channel_binding": true,
+        "A4_extrinsic_interface": true,
+        "A5_runtime_caps": true,
+        "A6_disclosure_accounting": true
+      },
+      "classification": "READY"
+    },
+    "20260107_PPLN_1p5M": {
+      "checks": {
+        "A1_interface_presence": true,
+        "A2_policy_manifest_schema": true,
+        "A3_channel_binding": true,
+        "A4_extrinsic_interface": true,
+        "A5_runtime_caps": true,
+        "A6_disclosure_accounting": true
+      },
+      "classification": "READY"
+    },
+    "20260123_2M_1p2M_0dB": {
+      "checks": {
+        "A1_interface_presence": true,
+        "A2_policy_manifest_schema": true,
+        "A3_channel_binding": true,
+        "A4_extrinsic_interface": true,
+        "A5_runtime_caps": true,
+        "A6_disclosure_accounting": true
+      },
+      "classification": "READY"
+    }
+  },
+  "overall": "V71_OVERALL_KERNEL_READY",
+  "ready": 3,
+  "adapter": 0,
+  "not_compatible": 0
+}

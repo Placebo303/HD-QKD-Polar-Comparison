@@ -1,0 +1,58 @@
+{
+  "schema": "v71_manifest_v1",
+  "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
+  "head": "9825d0b336042ad4bf2b26ed31b7fa09a04de620",
+  "data_sha": "84d62779",
+  "successor_not_started": true,
+  "frozen_body": {
+    "n": 1024,
+    "q": 1024,
+    "GF": "GF32 poly37",
+    "H1": "16x1024 rank16",
+    "10bit": "bit_i(s)=(s>>i)&1",
+    "extrinsic_def": "ext=log_post-log_prior",
+    "per_frame": 256,
+    "Lane_C_base": {
+      "1M": 184,
+      "1p5M": 190,
+      "2M": 192
+    },
+    "H_inc": "Delta8",
+    "decoder": "90/1.0 poly37 disabled",
+    "verification": "full-tag canonical 64b",
+    "leak": "sum w_i*m_i+64",
+    "materialization": "legacy_v1",
+    "f1.3": "frozen",
+    "successor_not_started": true
+  },
+  "extrinsic": {
+    "def": "ext[a]=log_post[a]-log_prior[a]",
+    "log_domain": true,
+    "pure": true
+  },
+  "guards": {
+    "R71-01": true,
+    "R71-02": true,
+    "R71-03": true,
+    "R71-04": true,
+    "R71-05": true,
+    "R71-06": true,
+    "R71-07": true,
+    "R71-08": true,
+    "R71-09": true,
+    "R71-10": true,
+    "R71-11": true
+  },
+  "overall": "V71_OVERALL_KERNEL_READY",
+  "counts": {
+    "ready": 3,
+    "adapter": 0,
+    "heavy": 0,
+    "not_compatible": 0,
+    "evidence": 0,
+    "model": 0
+  },
+  "used_val_in_selection": false,
+  "used_test": false,
+  "no_run_01": true
+}
