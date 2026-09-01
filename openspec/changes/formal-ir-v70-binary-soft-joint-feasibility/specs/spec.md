@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 仅plan四工件 + decoder-free二进制soft-joint因子完整性地图，不改1024维符号GF32两层验证，仅验证10-bit soft-joint factor保留完整1024-ary posterior，不跑decoder不构业务矩阵不读TEST不启V71
 
-**Change**: `formal-ir-v70-binary-soft-joint-feasibility` (`V70-BSJ`, branch `formal-ir-mainline`, HEAD `d6f590ac6f30deaa8b0bf6cf5c419593fc037720`, data `84d62779`, 3 sessions复用V69 Stage2, 10-bit软联合A-H八等式，1024枚举纯函数，10240嵌套秩族)
+**Change**: `formal-ir-v70-binary-soft-joint-feasibility` (`V70-BSJ`, branch `formal-ir-mainline`, HEAD `9bc34be64a2822c8babb4320efb47fc7e335a21a` implementation 9bc34be6, provenance deviation 9825d0b336042ad4bf2b26ed31b7fa09a04de620 vs 9bc34be6, data `84d62779`, 3 sessions复用V69 Stage2, 10-bit软联合A-H八等式，1024枚举纯函数，family 10240 tail+7)
 
 **Predecessor**: `formal-ir-v69-three-layer-representation-feasibility` (`d6f590ac6f30deaa8b0bf6cf5c419593fc037720` `PLAN_CANDIDATE`) + `formal-ir-v67-multisession-feasibility-map` (`V67_FEASIBILITY_MAP_ACCEPTED`) + `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) — V70新增二进制soft-joint因子完整性地图，A-H全约束，decoder-free，不启V71
 
@@ -136,18 +136,21 @@ Rs= {r0, r0+8, r0+16, ..., required} 步长8（或1，报告显式）
 
 ## 6. Phase F — 分流与总体 (per-session 5终端 + 总体4态，CAL选VAL确认一次)
 
-### 6.1 Per-session 5终端（优先级高→低，互斥）
+### 6.1 Per-session 6终端 first-match（优先级高→低，互斥，与实现 9bc34be6 一致）
 
 ```
-if not materialization_ok or frame_256_violation or D_chain_not_closed or C_ab_nonfinite or pure_brute_fail or rank_not_checked:
+# first-match: required>=10240 -> NO_INFORMATION_MARGIN, matrix NOT_APPLICABLE (family NOT_APPLICABLE, tail+7 不构造)
+if required >= 10240:
+    classification = V70_SOFT_JOINT_NO_INFORMATION_MARGIN; successor = v70_new_representation_or_recollect
+elif not materialization_ok or frame_256_violation or D_chain_not_closed or C_ab_nonfinite or pure_brute_fail:
     classification = V70_EVIDENCE_INCOMPLETE; successor = recollect
 elif λ_at_boundary or |CE_full^{VAL}-CE_full^{CV}|>0.50 or ∃i |CE_bit_i^{VAL}-CE_bit_i^{CV}|>0.50 or ΔNLL>0.50 or val_b_unseen>0.01 or not isfinite(ValNLL) or D<-1e-9 or pure_maxΔ>=1e-12:
     classification = V70_MODEL_NOT_STABLE; successor = recollect_or_new_prior
-elif gap>=512 && rank_ok && D>= -1e-9 && pure_maxΔ<1e-12:  # margin_gap≥5%
+elif gap>=512 && rank_ok && D>= -1e-9 && pure_maxΔ<1e-12:  # 9519 tail+7 achieved==requested
     classification = V70_SOFT_JOINT_FEASIBLE; successor = v70_binary_soft_joint_code_design
-elif 0<=gap<512 && rank_ok && D>= -1e-9 && pure_maxΔ<1e-12:
+elif 0<=gap<512 && rank_ok && D>= -1e-9 && pure_maxΔ<1e-12:  # 10047 tail+7
     classification = V70_SOFT_JOINT_MARGINAL; successor = v70_binary_soft_joint_code_design
-else: # gap<0
+else: # gap<0 and required<10240
     classification = V70_SOFT_JOINT_HEAVY; successor = v70_new_representation_or_recollect
 ```
 
@@ -156,15 +159,14 @@ else: # gap<0
 ### 6.2 总体4态
 
 ```
-common_preserving = #{sess | classification∈{FEASIBLE, MARGINAL}} # gap≥0 0..3
-feasible_count = #{sess | FEASIBLE} # 0..3
-marginal_count = #{sess | MARGINAL}
-heavy_count = #{sess | HEAVY}
+feasible_count=1, marginal_count=1, no_information_margin_count=1, heavy_count=0, evidence_incomplete_count=0, model_not_stable_count=0 # 6 orthogonal counts (implementation 9bc34be6)
 if any EVIDENCE_INCOMPLETE:
     overall = V70_OVERALL_EVIDENCE_INCOMPLETE
-elif any MODEL_NOT_STABLE and common_preserving==0:
+elif any MODEL_NOT_STABLE and (feasible_count+marginal_count)==0:
     overall = V70_OVERALL_MODEL_NOT_STABLE
-elif common_preserving==3: # 三session均 margin≥0且D≥0且rank_ok且brute_ok
+elif feasible_count==1 and marginal_count==1 and no_information_margin_count==1:
+    overall = V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE  # family_sha 97ab00bc tail+7 9519/10047 achieved==requested, 11169 NOT_APPLICABLE
+elif (feasible_count+marginal_count)==3:
     overall = V70_OVERALL_SOFT_JOINT_PRESERVING
 else:
     overall = V70_OVERALL_SOFT_JOINT_HEAVY

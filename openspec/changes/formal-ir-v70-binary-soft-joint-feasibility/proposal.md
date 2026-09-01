@@ -10,7 +10,7 @@
 
 **Branch**: `formal-ir-mainline`
 
-**HEAD**: `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` (V69 清理后冻结HEAD，本变更基于此；推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核，不一致阻塞)
+**HEAD**: `9bc34be64a2822c8babb4320efb47fc7e335a21a` (implementation 9bc34be6; provenance deviation: registry/report head 9825d0b336042ad4bf2b26ed31b7fa09a04de620 vs implementation 9bc34be6, report 已记 provenance 9825d0b not d6f590ac; 推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核，不一致阻塞)
 
 **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点；V70复用V67/V69三session的`Stage2 CAL1024+VAL256`，不换点，不换bin/mapping，不新增acquisition)
 
@@ -47,25 +47,25 @@
 
 ### 4. 嵌套二进制校验族10240长 r0起始 到required递增 确切GF2秩 非零不重复 前缀嵌套
 - **族**：`H_bin ∈ GF(2)^{required ×10240}`（`10240=10·1024`，每符号`s`展为10 bits纵向拼接，列序`col = sym_idx*10 + bit_pos`，`bit_pos 0..9`LSB→MSB与A-H位定义一致），`r0=160`（`16×10`对应GF32 H1的二进制展开行数）起始，`r= r0, r0+8, ..., required`（步长8对应Δ8的二进制等效；若`required-r0`非8整除则末段补至`required`，末行仍满足秩），**或步长1**（实现可选其一但报告显式，二者均满足前缀嵌套，守卫按报告步长校验）
-- **确切GF2秩**：`rank_{GF2}(H_r) == r ∀r`（高斯消元`GF2`精确秩，非数值秩），每行非零`weight>0`，行间不重复`H_i≠H_j`（`i≠j`），前缀嵌套`H_r = H_required[0:r, :]`（即任一`r1<r2`则`H_{r1}`为`H_{r2}`前缀）
-- **构造约束**：确定性SeedSequence `V70-BSJ-` + `session`无关（全session共用同一族，仅预算`required` per-session异），`py`内`numpy`生成 + `GF2 rank`校验，不调decoder，不构业务LDPC码（仅验证族存在性与秩性质）
+- **确切GF2秩**：`rank_{GF2}(H_r) == r ∀r`（`required<10240` 时；`required≥10240` 则 `family NOT_APPLICABLE` 不校验秩），每行非零`weight>0`，行间不重复`H_i≠H_j`，前缀嵌套`H_r = H_required[0:r, :]`
+- **构造约束**：确定性SeedSequence `V70-BSJ-` + `session`无关（全session共用同一族），`family_sha=97ab00bc38ab5a70`，`tail+7: 9519=160+8*1169+7, 10047=160+8*1235+7 achieved==requested true, 11169 NOT_APPLICABLE`，`numpy` 生成 + `GF2 rank` 校验，6 正交计数与实现一致
 
 ### 5. CAL选 VAL确认一次 每session 5终端 总体4态 decoder-free
 - **复用**：`v70_data_registry.json`复用`v69_data_registry.json`（即`v67 Stage2`）的3 sessions `stage2_CAL[1024]+stage2_VAL[256]`原样（`total 3, per_category 1,1,1, acquisition_dedup_verified, zero_overlap_verified`），与`V13..V69`零重叠键`(source,session,frame)`已验，禁止跨acquisition拼接或按`CE/required`换session
 - **Phase A CAL-only**：`λ`择优仅CAL内4-fold`CV NLL`最小，`CE_full^{CV}`与`H_full^{CAL}`与`D_bits^{CAL}`与`soft_joint_factor_update`的marginal/delta对照仅CAL上完成，脚本内`assert used_val_in_selection==False && used_test==False`
 - **Phase B VAL确认一次**：对`CAL`择的`λ`在`VAL256`上独立一次计量`CE_full^{VAL}/CE_bit_i^{VAL}/D_bits^{VAL}/required^{VAL}/margin^{VAL}/H_bin秩/纯函数VAL一致性`，落盘不重选`P*`，`VAL確認僅一次`
-- **Per-session 5终端（优先级高→低互斥）**：
-  1. `V70_EVIDENCE_INCOMPLETE` — 物化/帧256/provenance/D_bits链式` |ΣCE_bit - CE_full - D_bits|≥1e-9`/`C_ab`非有限/1024枚举不足/秩校验失败
-  2. `V70_MODEL_NOT_STABLE` — `λ`触边`[1e-2,1e4]`或`ΔCE=|CE^{VAL}-CE^{CAL-CV}|>0.50`或`ΔNLL>0.50`或`val_b_unseen>1%`或纯函数brute-force偏差`≥1e-12`或`D_bits< -1e-9`
-  3. `V70_SOFT_JOINT_FEASIBLE` — `margin_rel ≥5% && rank_ok && D_bits≥0 && brute_ok && MODEL_NOT_STABLE未触发`
-  4. `V70_SOFT_JOINT_MARGINAL` — `0 ≤ margin_rel <5% && rank_ok && D_bits≥0 && brute_ok`（临界可行）
-  5. `V70_SOFT_JOINT_HEAVY` — `margin_rel <0`（披露不足，需更深表示/新acquisition）
-- **总体4态（基于3 sessions汇聚）**：
-  1. `V70_OVERALL_EVIDENCE_INCOMPLETE` — 任一session `EVIDENCE_INCOMPLETE`
-  2. `V70_OVERALL_MODEL_NOT_STABLE` — 无`EVIDENCE`但任一`MODEL_NOT_STABLE`且无共同FEASIBLE
-  3. `V70_OVERALL_SOFT_JOINT_PRESERVING` — `common_feasible_count==3`（三session同`H_bin`族且每session `margin_rel≥0`（含`MARGINAL`）且`D_bits≥0`且`rank_ok`）
-  4. `V70_OVERALL_SOFT_JOINT_HEAVY` — 否则（`0` session `margin≥0`，即便软联合亦仍heavy）
-  （优先级`EVIDENCE > MODEL > PRESERVING > HEAVY`，互斥；预算三分流在报告内仍显式`FEASIBLE/MARGINAL/HEAVY`计数）
+- **Per-session 6终端 first-match（优先级高→低互斥，与实现 9bc34be6 一致）**：
+   1. `V70_SOFT_JOINT_NO_INFORMATION_MARGIN` — `required ≥10240 → matrix NOT_APPLICABLE`（first-match 最优先，非 EVIDENCE/rank_fail，tail+7 家族不构造）
+   2. `V70_EVIDENCE_INCOMPLETE` — 物化/帧256/provenance/D_bits链式` |ΣCE_bit - CE_full - D_bits|≥1e-9`/`C_ab`非有限/1024枚举不足（NO_INFORMATION_MARGIN 已拦截则不入此）
+   3. `V70_MODEL_NOT_STABLE` — `λ`触边`[1e-2,1e4]`或`ΔCE=|CE^{VAL}-CE^{CAL-CV}|>0.50`或`ΔNLL>0.50`或`val_b_unseen>1%`或纯函数brute-force偏差`≥1e-12`或`D_bits< -1e-9`
+   4. `V70_SOFT_JOINT_FEASIBLE` — `margin_rel ≥5% && rank_ok && D_bits≥0 && brute_ok && MODEL_NOT_STABLE未触发`
+   5. `V70_SOFT_JOINT_MARGINAL` — `0 ≤ margin_rel <5% && rank_ok && D_bits≥0 && brute_ok`（临界可行）
+   6. `V70_SOFT_JOINT_HEAVY` — `margin_rel <0`（披露不足，需更深表示/新acquisition）
+- **总体4态（基于3 sessions汇聚，与实现一致为 PARTIAL 家族语义）**：
+   1. `V70_OVERALL_EVIDENCE_INCOMPLETE` — 任一session `EVIDENCE_INCOMPLETE`
+   2. `V70_OVERALL_MODEL_NOT_STABLE` — 无`EVIDENCE`但任一`MODEL_NOT_STABLE`且无共同FEASIBLE
+   3. `V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE` — `feasible 1 + marginal 1 + no_information_margin 1`（实现 9bc34be6 实测，family_sha 97ab00bc38ab5a70，tail+7: 9519=160+8*1169+7,10047=160+8*1235+7 均 achieved==requested true, 11169 NOT_APPLICABLE，不再用 common_preserving 3）
+   4. `V70_OVERALL_SOFT_JOINT_PRESERVING / HEAVY` — 否则（保留历史命名；优先级`EVIDENCE > MODEL > PARTIAL/PRESERVING > HEAVY`，互斥；预算三分流在报告内显式 6 正交计数 `feasible/marginal/heavy/no_information_margin/evidence/model`）
 
 ### 6. 本轮交付边界（四工件 + 审计报告，decoder-free）
 - 产出`proposal/design/tasks/specs`四工件 + `v70_data_registry.json`（复用V69三session Stage2） + `scripts/v70_binary_soft_joint_feasibility.py`（纯函数枚举1024态`rg "decode_" 0 hits`） + `v70_results.json`（per session `CE_full/CE_bit/D_bits/required/margin/rank` + 纯函数校验） + `v70_table.csv/.json`（每行`session/CE_full/CE_bit/D_bits/required/margin/r0/required/rank_ok/classification`） + `V70_BINARY_SOFT_JOINT_REPORT.md` + `test_v70_binary_soft_joint_small.py`（`py_compile PASS, pytest -p no:cacheprovider -q`） + `v70_manifest.json` + 控制台5终端/4态摘要；**禁**`decode_/construct_H*`业务调用、`run_01`、`H`业务码构造（除嵌套验证族秩校验）、跨方法比较、改`src/`baseline、调`TEST`、启动V71。

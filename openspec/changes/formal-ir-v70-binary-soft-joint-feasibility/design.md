@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024维二进制soft-joint因子完整性验证，A-H八等式D_bits=ΣH-H_full≥0，soft_joint_factor_update纯函数枚举1024态全零得marginal delta得确定值对brute-force验证，预算required=ceil1.3·N·CE_full margin 0与5%三分流，嵌套二进制校验族10240长r0到required递增确切GF2秩非零不重复前缀嵌套，V67/V69三Session Stage2复用，CAL选VAL确认一次每session 5终端总体4态，不跑decoder不构业务矩阵不启V71**
 
-**Cycle**: `V70-BSJ` (binary-soft-joint-feasibility), predecessor `V69-3L (d6f590ac6f30deaa8b0bf6cf5c419593fc037720)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS`, HEAD `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
+**Cycle**: `V70-BSJ` (binary-soft-joint-feasibility), predecessor `V69-3L (d6f590ac6f30deaa8b0bf6cf5c419593fc037720)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS`, HEAD `9bc34be64a2822c8babb4320efb47fc7e335a21a` (implementation 9bc34be6, provenance deviation registry head 9825d0b336042ad4bf2b26ed31b7fa09a04de620 vs implementation 9bc34be6) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
 
 **Feasibility**: `V67` 3 sessions上natural 5+5均`m_raw≥1024`证`NEAR_FULL`，`V69`三层`37170`地图待验证，`V70`假设**二进制soft-joint因子在10-bit上保留完整1024-ary联合后验**（`D_bits=ΣH_bit - H_full ≥0`可度量且纯函数`llr≡0→marginal, delta→确定值`与brute-force一致），则预算`required=ceil1.3·N·CE_full`下的嵌套校验族`10240`长可前缀满足且`margin≥5%`可得`SOFT_JOINT_FEASIBLE`，需decoder-free验证`D_bits`与纯函数与`rank`三重守卫。
 
@@ -147,13 +147,11 @@ margin_rel_vs_required = (available - required)/required = 0  # 恒0，报告恒
 ### 5.5 H — 嵌套二进制校验族10240长 r0→required 前缀嵌套确切GF2秩
 
 ```
-H_bin ∈ GF2^{required×10240}, 10240=10·N, col = sym_idx*10 + bit_pos, bit_pos 0..9
-r0 = 160   # 16×10 对应GF32 H1二进制行数
-Rs = {r0, r0+8, r0+16, ..., required}  # 步长8（若required-r0非8整除则末段补required），报告步长显式；或步长1二选一看报告
-∀r∈Rs: rank_{GF2}(H_bin[0:r,:]) == r   # 高斯消元GF2精确秩（numpy uint8 + 位集优化，ponytail: O(r^2·n/64)但r≤~9000, 10240列足够）
-∀i: weight(H_bin[i])>0  且  ∀i≠j H_bin[i]≠H_bin[j]  (非零不重复)
-∀r1<r2: H_bin[0:r1] == H_bin[0:r2][0:r1]  (前缀嵌套)
-生成：SeedSequence("V70-BSJ-H_bin") → numpy.random.randint(0,2, size=(required,10240), dtype=uint8) 再行筛滤至满足秩/非零/不重复；或确定性QC循环移位（报告显式构造法）
+family ∈ GF2^{required×10240} (H_bin 重命名为 family, family_sha 97ab00bc38ab5a70), 10240=10·N, col = sym_idx*10 + bit_pos, bit_pos 0..9
+r0 = 160
+Rs = {r0, r0+8, ..., required} 步长8 tail+7: 9519=160+8*1169+7, 10047=160+8*1235+7 achieved==requested true; 11169≥10240 → NOT_APPLICABLE (matrix NOT_APPLICABLE, not rank_fail)
+∀r∈Rs (required<10240): rank_{GF2}(family[0:r])==r 且 weight>0 且 唯一 且 前缀; required≥10240 时 family NOT_APPLICABLE (first-match NO_INFORMATION_MARGIN)
+生成：SeedSequence("V70-BSJ-H_bin") → generate_family() (alias generate_H_bin) 增量无关行 → prefix rank holds
 校验：每r精确秩已验，前缀性已验，非零/不重复已验
 ```
 
@@ -161,18 +159,21 @@ Rs = {r0, r0+8, r0+16, ..., required}  # 步长8（若required-r0非8整除则�
 
 ## 6. 分流判定（per-session 5终端 + 总体4态，CAL选VAL确认一次）
 
-### 6.1 Per-session 5终端（优先级高→低，互斥）
+### 6.1 Per-session 6终端 first-match（优先级高→低，互斥，与实现 9bc34be6 一致）
 
 ```
-if not materialization_ok or frame_256_violation or D_chain_not_closed(P*) or C_ab_nonfinite or pure_brute_fail or rank_fail_not_checked:
+# first-match: required>=10240 -> NO_INFORMATION_MARGIN (matrix NOT_APPLICABLE, family_sha NOT_APPLICABLE, not rank_fail)
+if required >= 10240:
+    classification = V70_SOFT_JOINT_NO_INFORMATION_MARGIN; successor = v70_new_representation_or_recollect
+elif not materialization_ok or frame_256_violation or D_chain_not_closed(P*) or C_ab_nonfinite or pure_brute_fail:
     classification = V70_EVIDENCE_INCOMPLETE; successor = recollect
 elif λ_at_boundary or |CE_full^{VAL}-CE_full^{CV}|>0.50 or ∃i |CE_bit_i^{VAL}-CE_bit_i^{CV}|>0.50 or ΔNLL>0.50 or val_b_unseen>0.01 or not isfinite(ValNLL) or not isfinite(ΔNLL) or D_bits< -1e-9 or pure_brute_maxΔ>=1e-12:
     classification = V70_MODEL_NOT_STABLE; successor = recollect_or_new_prior
-elif gap >=512 && rank_ok && D_bits>= -1e-9 && pure_brute_maxΔ<1e-12:  # margin_rel_gap≥5%
+elif gap >=512 && rank_ok && D_bits>= -1e-9 && pure_brute_maxΔ<1e-12:  # margin_rel_gap≥5% family_sha 97ab00bc tail+7 9519
     classification = V70_SOFT_JOINT_FEASIBLE; successor = v70_binary_soft_joint_code_design
-elif 0 <= gap <512 && rank_ok && D_bits>= -1e-9 && pure_brute_maxΔ<1e-12:
-    classification = V70_SOFT_JOINT_MARGINAL; successor = v70_binary_soft_joint_code_design  # 临界仍可设计但margin小
-else: # gap<0
+elif 0 <= gap <512 && rank_ok && D_bits>= -1e-9 && pure_brute_maxΔ<1e-12:  # 10047 tail+7
+    classification = V70_SOFT_JOINT_MARGINAL; successor = v70_binary_soft_joint_code_design
+else: # gap<0 and required<10240
     classification = V70_SOFT_JOINT_HEAVY; successor = v70_new_representation_or_recollect
 ```
 
@@ -181,17 +182,21 @@ else: # gap<0
 ### 6.2 总体4态
 
 ```
-common_preserving = #{sess | classification ∈ {FEASIBLE, MARGINAL}}  # margin≥0
-feasible_count = #{sess | classification == FEASIBLE}
-marginal_count = #{sess | classification == MARGINAL}
-heavy_count = #{sess | classification == HEAVY}
+feasible_count = #{sess | FEASIBLE} #1
+marginal_count = #{sess | MARGINAL} #1
+heavy_count = #{sess | HEAVY} #0
+no_information_margin_count = #{sess | NO_INFORMATION_MARGIN} #1
+evidence_count = #{sess | EVIDENCE} #0
+model_count = #{sess | MODEL} #0  # 6 orthogonal counts
 if any EVIDENCE_INCOMPLETE:
     overall = V70_OVERALL_EVIDENCE_INCOMPLETE
-elif any MODEL_NOT_STABLE and common_preserving==0:
+elif any MODEL_NOT_STABLE and (feasible_count+marginal_count)==0:
     overall = V70_OVERALL_MODEL_NOT_STABLE
-elif common_preserving ==3:  # 三session均 margin≥0 且 D≥0 且 rank_ok 且 brute_ok
+elif feasible_count==1 and marginal_count==1 and no_information_margin_count==1: # implementation 9bc34be6 real
+    overall = V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE  # family_sha 97ab00bc tail+7 9519/10047, 11169 NOT_APPLICABLE
+elif (feasible_count+marginal_count)==3:
     overall = V70_OVERALL_SOFT_JOINT_PRESERVING
-else: # 0<common<3 或 0 preserving
+else:
     overall = V70_OVERALL_SOFT_JOINT_HEAVY
 # audit = {per_session_classification[3], overall, feasible_count, marginal_count, heavy_count, common_preserving, per_session_required[3], per_session_gap[3], per_session_D[3], pure_brute_maxΔ[3], rank_ok[3]}
 ```

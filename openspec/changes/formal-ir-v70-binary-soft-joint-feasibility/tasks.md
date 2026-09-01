@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024维二进制soft-joint因子是否保留完整1024-ary posterior，A-H八等式D_bits=ΣH-H_full≥0，soft_joint_factor_update纯函数枚举1024态全零得marginal delta得确定值对brute-force验证，预算required=ceil1.3·N·CE_full margin 0与5%三分流，嵌套二进制校验族10240长r0到required递增确切GF2秩非零不重复前缀嵌套，CAL选VAL确认一次每session 5终端总体4态，四工件spike/results/table/report+test，守卫R70-01~10，不跑decoder不构业务矩阵不读TEST不启V71**
 
-**HEAD**: `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` + data `84d62779` (复用V69清理后HEAD)
+**HEAD**: `9bc34be64a2822c8babb4320efb47fc7e335a21a` (implementation 9bc34be6, provenance deviation 9825d0b336042ad4bf2b26ed31b7fa09a04de620 vs 9bc34be6) + data `84d62779`
 
 **Predecessor**: `formal-ir-v69-three-layer-representation-feasibility` `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` + `formal-ir-v67-multisession-feasibility-map` `V67_FEASIBILITY_MAP_ACCEPTED` (3 sessions均`NEAR_FULL`) → `V70-BSJ`
 
@@ -41,8 +41,8 @@
 
 ## Phase F — per-session 5终端总体4态CAL选VAL确认一次（优先级互斥，不启V71）
 
-- [ ] **F1 Per-session 5终端（优先级互斥，预算三分流 + D/秩/纯函数）**：取`VAL`上`CE_full/D/required/gap/margin/rank_ok/pure_brute_maxΔ`按`EVIDENCE_INCOMPLETE(物化/帧256/C_ab非有限/纯函数brute失败/rank未检) > MODEL_NOT_STABLE(λ触边/|CE^{VAL}-CE^{CV}|>0.50/ΔNLL>0.50/val_b_unseen>1%/D<-1e-9/pureΔ≥1e-12) > SOFT_JOINT_FEASIBLE(gap≥512&&rank_ok&&D≥-1e-9&&pure<1e-12) > SOFT_JOINT_MARGINAL(0≤gap<512&&rank_ok&&D≥-1e-9) > SOFT_JOINT_HEAVY(gap<0)`互斥已验，`capacity_warning`正交，`H_cal/q_mass`仅描述性，落盘`classification + successor {v70_binary_soft_joint_code_design, v70_new_representation_or_recollect, recollect}` per session，且`V71_not_started`。
-- [ ] **F2 总体4态（基于3 sessions汇聚）**：对3 sessions的`classification`得`feasible_count/marginal_count/heavy_count/common_preserving=#{sess|gap≥0}`，判定`overall = EVIDENCE_INCOMPLETE if any EVIDENCE else MODEL_NOT_STABLE if any MODEL and common_preserving==0 else SOFT_JOINT_PRESERVING if common_preserving==3 (三session均margin≥0且rank_ok且D≥0且brute_ok) else SOFT_JOINT_HEAVY`，落盘`overall + feasible_count + marginal_count + heavy_count + common_preserving + per_session_required/gap/D/pure_maxΔ/rank_ok`。
+- [ ] **F1 Per-session 6终端 first-match（优先级互斥，预算三分流 + D/秩/纯函数，与实现 9bc34be6 一致）**：`required≥10240 → NO_INFORMATION_MARGIN (matrix NOT_APPLICABLE, family_sha NOT_APPLICABLE, tail+7 不构造) first-match` > `EVIDENCE_INCOMPLETE` > `MODEL_NOT_STABLE` > `SOFT_JOINT_FEASIBLE(gap≥512&&rank_ok)` > `MARGINAL(0≤gap<512&&rank_ok)` > `HEAVY(gap<0)`，`family 9519/10047 tail+7 achieved==requested true, 11169 NOT_APPLICABLE` 已验，`6 orthogonal counts feasible/marginal/heavy/no_information_margin/evidence/model` 已验，`capacity_warning`正交，落盘`classification + successor + family_sha/shape/step/tail/achieved/requested/matrix_status` per session。
+- [ ] **F2 总体4态 PARTIAL（基于3 sessions汇聚，6 正交计数）**：`feasible 1 + marginal 1 + no_information_margin 1 (heavy 0, evidence 0, model 0) → overall V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE` (实现 9bc34be6)，`family_sha 97ab00bc tail+7 9519/10047 achieved==requested, 11169 NOT_APPLICABLE` 已验，落盘`overall + 6 counts + family`。
 - [ ] **F3 Common审计表**：落盘`audit {per_session_classification[3], overall, feasible/marginal/heavy counts, common_preserving, per_session CE_full/CE_bit/D/required/gap/margin/rank_ok/pure_brute_maxΔ, cal_val_consistency[3], successor per session}`，报告`overall 4态`审计章节显式三session是否同族且同`margin≥0`。
 
 ## Phase G — 四工件 + 审计报告交付（PLAN_CANDIDATE / DECODER_FREE，不启V71）
