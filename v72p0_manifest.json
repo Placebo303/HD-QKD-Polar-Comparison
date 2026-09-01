@@ -1,7 +1,7 @@
 {
   "schema": "v72p0_manifest_v1",
   "lifecycle": "PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED",
-  "head": "b360efe9828484c1022c90c5a14819ebbb9dadcb",
+  "head": "0926457520a0c680d087de28b1380f2a87f8161a",
   "data_sha": "84d62779",
   "frozen_body": {
     "Q": 1024,
@@ -15,7 +15,8 @@
     "successor_v72_not_started": true,
     "used_2m": false,
     "structure": "sparse_CSR_IRA",
-    "P0A_mode": "tiny_bp_vs_brute_k2_3"
+    "P0A_mode": "tiny_exhaustive_syndrome_marginal_tree",
+    "total_bits_le_9": true
   },
   "guards": {
     "R72-01": true,

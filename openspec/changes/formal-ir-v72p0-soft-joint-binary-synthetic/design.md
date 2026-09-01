@@ -2,17 +2,17 @@
 
 # OpenSpec Design: formal-ir-v72p0-soft-joint-binary-synthetic
 
-**Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — **1024→10bit local factor 去 self-message LLR ↔ binary LDPC mother 9036×10240 BP incremental syndrome ↔ exact 64-bit tag 链条合成 correctness 合成校验，Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止，T_LF01-08 8测试正交，backend 6问三态 enum 非字符串 READY，P0A tiny 2-4 symbols exhaustive + P0B synthetic mother nested rank C1-C6，8终态 wall first-match，T0-T3 矩阵，不跑 decoder 不改 V70/V70R1/V71**
+**Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — **1024→10bit local factor 去 self-message LLR ↔ binary LDPC mother 9036×10240 BP incremental syndrome ↔ exact 64-bit tag 链条合成 correctness 合成校验，Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止，T_LF01-08 8测试正交，backend 6问三态 enum 非字符串 READY，P0A tiny total_bits≤9 k2-3 n2-3 exhaustive symbols exhaustive + P0B synthetic mother nested rank C1-C6，8终态 wall first-match，T0-T3 矩阵，不跑 decoder 不改 V70/V70R1/V71**
 
-**Cycle**: `V72P0-SYN` (soft-joint-binary-synthetic P0), predecessor `V71-SJK (487be113)` + `V70-BSJ (9bc34be6)` + `V70R1 (0509d10b CHANGES)`，HEAD `b360efe9828484c1022c90c5a14819ebbb9dadcb` (动态绑定 `git rev-parse HEAD`; 2M 禁止, 9036×10240 mother 仅合成, V70/V71 零改) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` + `synthetic_v72p0`
+**Cycle**: `V72P0-SYN` (soft-joint-binary-synthetic P0), predecessor `V71-SJK (487be113)` + `V70-BSJ (9bc34be6)` + `V70R1 (0509d10b CHANGES)`，HEAD `0926457520a0c680d087de28b1380f2a87f8161a` (动态绑定 `git rev-parse HEAD`; 2M 禁止, 9036×10240 mother 仅合成, V70/V71 零改) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` + `synthetic_v72p0`
 
 **Feasibility**: `V70` `PARTIAL` 证 `D_bits≥0` 且 `soft_joint_factor_update` 纯函数双极 `1e-12`，`V71` `ADAPTER_REQUIRED` 证纯因子核 `D1-D10` 全 PASS 但需适配层，母亲码 `9036×10240` 未验增量嵌套与 tag exact。`V72P0` 假设 **local factor 去 self + mother incremental syndrome + exact tag 在合成域可零构造正确**（`T_LF01-08` 全 PASS 且 `Q1-Q6` 至多 `ADAPTER` 且 `P0A` tiny exhaustive `0 mismatch` 且 `P0B` `C1-C6` 全 PASS 且 `wall≤30s/peak≤2GiB`），则该链条可进入 `V72` real mother 设计，否则 `TINY/RANK/NESTED` 失败需重构。
 
-**Key judgement**: **在合成域（P0A tiny 2-4 symbols + P0B 1024 full）上，验证 1024→10bit 去 self local factor 的外发 LLR 定义 + mother 前缀秩/增量/tag exact 三重 correctness**：`T_LF05 self_exclusion` 显式 `Σ_{j≠i}` 且 `8测试` 双极 `1e-12`，且只读 backend `Q1-Q6` 三态 enum 得 `READY/ADAPTER`，且 `P0A` `2/3/4` symbols exhaustive `0 mismatch`，且 `P0B` `9036×10240` `r0=160 Δ8→9036` 确切 GF2 秩前缀满足 `C1-C6`，且 `wall≤30s/peak≤2GiB`，即判定 `SYNTHESIS_READY`，否则 `ADAPTER/TINY_FAIL/RANK_FAIL/NESTED_FAIL`。
+**Key judgement**: **在合成域（P0A tiny total_bits≤9 k2-3 n2-3 exhaustive symbols + P0B 1024 full）上，验证 1024→10bit 去 self local factor 的外发 LLR 定义 + mother 前缀秩/增量/tag exact 三重 correctness**：`T_LF05 self_exclusion` 显式 `Σ_{j≠i}` 且 `8测试` 双极 `1e-12`，且只读 backend `Q1-Q6` 三态 enum 得 `READY/ADAPTER`，且 `P0A` `2/3/4` symbols exhaustive `0 mismatch`，且 `P0B` `9036×10240` `r0=160 Δ8→9036` 确切 GF2 秩前缀满足 `C1-C6`，且 `wall≤30s/peak≤2GiB`，即判定 `SYNTHESIS_READY`，否则 `ADAPTER/TINY_FAIL/RANK_FAIL/NESTED_FAIL`。
 
 ## 1. 科学问题与关键判断
 
-> 在**完全冻结主体**（`Q1024 N1024 Nbit10240 M9036 f1.3 full-tag canonical`，**不改1024维符号/q/GF/两层验证**，2M real 禁止）下，**验证 1024→10bit local factor 去 self ↔ binary LDPC mother 9036×10240 BP incremental syndrome ↔ exact 64-bit tag 链条合成 correctness**：定义去 self LLR（`Σ_{j≠i} bits_j·llr_j`）+ 8测试正交（`T_LF01-08`）+ 只读 backend `Q1-Q6` 三态 enum + 合成 P0A tiny 2-4 exhaustive + P0B mother nested rank `C1-C6` + `f1.3 NOT_MEASURED` + wall `30s/2GiB`，8终态 `EVIDENCE/MODEL/BACKEND_NOT_COMPATIBLE/TINY/RANK/NESTED/READY/ADAPTER` + overall 2态。合成域，不跑 decoder，不改 V70/V71，不启 V72。
+> 在**完全冻结主体**（`Q1024 N1024 Nbit10240 M9036 f1.3 full-tag canonical`，**不改1024维符号/q/GF/两层验证**，2M real 禁止）下，**验证 1024→10bit local factor 去 self ↔ binary LDPC mother 9036×10240 BP incremental syndrome ↔ exact 64-bit tag 链条合成 correctness**：定义去 self LLR（`Σ_{j≠i} bits_j·llr_j`）+ 8测试正交（`T_LF01-08`）+ 只读 backend `Q1-Q6` 三态 enum + 合成 P0A tiny total_bits≤9 k2-3 n2-3 exhaustive exhaustive + P0B mother nested rank `C1-C6` + `f1.3 NOT_MEASURED` + wall `30s/2GiB`，8终态 `EVIDENCE/MODEL/BACKEND_NOT_COMPATIBLE/TINY/RANK/NESTED/READY/ADAPTER` + overall 2态。合成域，不跑 decoder，不改 V70/V71，不启 V72。
 
 - **对照**：`V70 D_bits` 与 `V71 D1-D10` 基线作 LF 对照；`ldpc_v5` caps/disclosure 作 `Q5/Q6` 对照；`P0A/P0B` 合成 wall/peak 作 `E` 路由。
 - **不变量**：`Q1024 / N1024 / Nbit10240 / M9036 / f1.3 / tag 64b exact / period 204800 / 2M禁止` 全冻结；**本变更仅验证合成链条 correctness**。
@@ -36,7 +36,7 @@
 | LF 语义 | `去 self: Σ_{j≠i} bits_j·llr_j` 冻结 | V72P0 Phase C |
 | 8测试 | `T_LF01-08` 正交 | V72P0 Phase C |
 | Backend | `Q1-Q6` 三态 enum 非字符串 | V72P0 Phase D |
-| P0A | tiny `N_small 2/3/4` exhaustive | V72P0 Phase E |
+| P0A | tiny `total_bits≤9 k2-3 n2-3` exhaustive | V72P0 Phase E |
 | P0B | mother `9036×10240 r0=160 Δ8` nested rank | V72P0 Phase F |
 | 终态 | 8终态 wall first-match | V72P0 Phase G |
 | T0-T3 | T0 compile / T1 unit / T2 fake / T3 regression | V72P0 Phase H |
@@ -57,7 +57,7 @@
 | Real 2M | **密封不读** | `84d62779` 2M session | `used_2m==False`，V72P0 不启 |
 | ldpc_v5* | 只读探针 | `formal_ir/ldpc_v5*.py` | Q1-Q6 三态 audit |
 
-- **合成注册表**：`v72p0_data_registry_synthetic.json` (`schema v72p0_synthetic_v1, lifecycle PLAN_CANDIDATE/SYNTHETIC_ONLY, Q1024 N1024 Nbit10240 M9036 f1.3 synthetic_seed V72P0-SYN, P0A {N_small 2/3/4 各 64 trials} P0B {mother 9036×10240 r0 160 Δ8 Rs}, successor_v72_not_started true, used_2m false`），**禁止事后换 synthetic seed 或读 2M**。
+- **合成注册表**：`v72p0_data_registry_synthetic.json` (`schema v72p0_synthetic_v1, lifecycle PLAN_CANDIDATE/SYNTHETIC_ONLY, Q1024 N1024 Nbit10240 M9036 f1.3 synthetic_seed V72P0-SYN, P0A {total_bits≤9 k2-3 n2-3 各 64 trials} P0B {mother 9036×10240 r0 160 Δ8 Rs}, successor_v72_not_started true, used_2m false`），**禁止事后换 synthetic seed 或读 2M**。
 - **零重叠**：`synthetic` 键与 `V13..V71` 任何 real `(source,session,frame)` 零重叠（`synthetic` 域独立）。
 
 ### 3.2 数据就绪门（synthetic-only）
@@ -92,7 +92,7 @@ assert ldpc_v5*_files exist && git diff -- .../formal_ir/ldpc_v5* ==0
 
 ```
 synthetic先验 P_synth(a) = (1-ε)·K_δ(a) + ε/1024, K_δ 为 δ 分布峰值载体
-N_small 2/3/4 的 P0A 各自独立 synthetic 采样，N=1024 的 P0B 仅 matrix 构造（不估计 CE）
+total_bits≤9 k2-3 n2-3 的 P0A 各自独立 synthetic 采样，N=1024 的 P0B 仅 matrix 构造（不估计 CE）
 Q=1024, N=1024, Nbit=10240
 ```
 
@@ -163,7 +163,7 @@ guard: rg '"READY"' audit脚本 0 hits (除注释); assert backend_state == Back
 
 - 只读：`ast.parse` + `inspect.signature` + `importlib.util.spec_from_file_location` 不执行 `run_ldpc_formal_v5`，`rg "run_ldpc_formal_v5\(" 0 hits`（除探针注释），`git diff ldpc_v5* ==0`。
 
-### 5.5 Phase E — P0A tiny 2-4 symbols exhaustive
+### 5.5 Phase E — P0A tiny total_bits≤9 k2-3 n2-3 exhaustive symbols exhaustive
 
 ```
 # 合成 tiny 域
@@ -239,7 +239,7 @@ else: overall = OVERALL_ADAPTER_OR_FAIL
 
 ## 7. 脚本与报告（SYNTHETIC_ONLY守卫，不启 V72）
 
-- **脚本 `scripts/v72p0_soft_joint_binary_synthetic.py`** (SYNTHETIC_ONLY): `python scripts/v72p0_soft_joint_binary_synthetic.py [--registry v72p0_data_registry_synthetic.json] [--out v72p0_results.json]` → `T_LF01-08 去 self → P0A tiny 2-4 exhaustive → P0B 9036×10240 C1-C6 → wall/peak + f1.3 NOT_MEASURED`，`rg "decode_" 0 hits`，`rg '"READY"' 0 hits`，`py_compile PASS`；输出 `v72p0_results.json + v72p0_table.{csv,json}` + 控制台 8终态摘要。
+- **脚本 `scripts/v72p0_soft_joint_binary_synthetic.py`** (SYNTHETIC_ONLY): `python scripts/v72p0_soft_joint_binary_synthetic.py [--registry v72p0_data_registry_synthetic.json] [--out v72p0_results.json]` → `T_LF01-08 去 self → P0A tiny total_bits≤9 k2-3 n2-3 exhaustive exhaustive → P0B 9036×10240 C1-C6 → wall/peak + f1.3 NOT_MEASURED`，`rg "decode_" 0 hits`，`rg '"READY"' 0 hits`，`py_compile PASS`；输出 `v72p0_results.json + v72p0_table.{csv,json}` + 控制台 8终态摘要。
 - **脚本 `scripts/v72p0_backend_audit.py`** (read-only 三态 enum): `python scripts/v72p0_backend_audit.py [--out v72p0_backend_audit_report.json]` → `Q1-Q6` 三态 enum `READY/ADAPTER/NOT_COMPATIBLE`，`rg "decode_" 0 hits`，`rg '"READY"' 0 hits`（除注释），`rg "run_ldpc_formal_v5\(" 0 hits`，`py_compile PASS`；输出 `v72p0_backend_audit_report.json + V72P0_BACKEND_AUDIT_REPORT.md`。
 - **报告 `V72P0_SYN_REPORT.md`**：`per synthetic T_LF01-08/P0A/P0B C1-C6/wall/peak/per_invocation + overall + tag exact + 2M未读 + Q1024冻结 + V72_not_started` 与 `json/csv` 一致，不扩大为 `FER/SKR`。
 - **报告 `V72P0_BACKEND_AUDIT_REPORT.md`**：`Q1-Q6 per case 三态 enum / READY/ADAPTER/NOT_COMPATIBLE` + wall + `f1.3 NOT_MEASURED`。
@@ -252,7 +252,7 @@ else: overall = OVERALL_ADAPTER_OR_FAIL
 | R72-01 | 冻结主体 Q1024 N1024 Nbit10240 M9036 f1.3 + 2M禁止 + 不启V72 | `Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M未读 git diff src==0 && successor_v72_not_started && used_2m==false` |
 | R72-02 | local factor 去 self LLR 冻结 + 8测试 | `去 self Σ_{j≠i} 冻结，8测试 T_LF01-08 正交，brute 1e-12，无I/O/随机` |
 | R72-03 | backend 只读 Q1-Q6 三态 enum 非字符串 READY | `Q1-Q6 每问 PASS/FAIL/NOT_APPLICABLE enum，READY 用 enum== 判断，rg '"READY"' 0 hits` |
-| R72-04 | synthetic P0A tiny 2-4 symbols exact | `N_small 2/3/4 各64 trials 0 mismatch，tag exact，wall≤30s` |
+| R72-04 | synthetic P0A tiny total_bits≤9 k2-3 n2-3 exhaustive symbols exact | `total_bits≤9 k2-3 n2-3 各64 trials 0 mismatch，tag exact，wall≤30s` |
 | R72-05 | synthetic P0B mother 9036×10240 nested rank C1-C6 | `r0=160 Δ8→9036 前缀 rank==r 非零去重前缀增量 tag exact` |
 | R72-06 | 8终态 wall first-match | `EVIDENCE>MODEL>BACKEND>TINY>RANK>NESTED>READY>ADAPTER 互斥，wall/peak 已落盘` |
 | R72-07 | T0-T3 矩阵 | `T0 compile/import/tiny-math, T1 8测试+Q1-Q6 mock, T2 fake P0A/P0B 前K秩, T3 V70/V71 只读+2M回归` |
@@ -270,7 +270,7 @@ else: overall = OVERALL_ADAPTER_OR_FAIL
 - D1 完全冻结主体（`Q/N/Nbit/M/tag`），V72P0 仅验证合成链条 correctness，不改码（多 synthetic，P0A/P0B），不启 V72，2M 禁止。
 - D2 单一 synthetic 先验 `P_synth`，local factor 仅为 10-bit 去 self `Σ_{j≠i}`，不搜索多分布。
 - D3 `f1.3` 不 cap，`required_ref≈1065` 与 `9036` 上限 gap 双报告，`READY` 限 `P0A PASS ∧ C1-C6 PASS ∧ Q1-Q6 READY`。
-- D4 数据 `P0A N_small 2/3/4 各64 trials + P0B mother 9036×10240` 确定性 synthetic，不搜索多划分，2M 隔离，V72 不启。
+- D4 数据 `P0A total_bits≤9 k2-3 n2-3 各64 trials + P0B mother 9036×10240` 确定性 synthetic，不搜索多划分，2M 隔离，V72 不启。
 - D5 8终态 per-synthetic + overall 2态 + T0-T3 正交审计，不以平均替代。
 - D6 不产生 real 矩阵/码参数，仅 `P0A/P0B/C1-C6/wall` 与 successor 建议，`READY` 方可进入 V72。
 - D7 本变更为 `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED`，不产生 `run_01`，任何 decoder/V72 需 `PLAN_ACCEPT + EXECUTE_AUTH` 后才允。

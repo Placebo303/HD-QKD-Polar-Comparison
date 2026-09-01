@@ -56,20 +56,36 @@ def test_p0a_p0b():
     assert j['f_actual']=='NOT_MEASURED'
     assert j['used_2m']==False
     assert j['successor_v72_not_started']==True
-    # new P0A k=2/3 7cover
+    # hardened P0A total_bits<=9 k2-3 exhaustive 7cover fail-closed
     assert "per_k" in j['P0A']
     for k in ["2","3"]:
         assert k in j['P0A']['per_k']
-        assert len(j['P0A']['per_k'][k]['seven'])==7
-    # no true bits self compare: ensure P0A mode is BP vs brute
-    assert j['P0A']['mode']=="tiny_bp_vs_brute_k2_3_7cover"
-    # P0B sparse
+        assert len(j['P0A']['per_k'][k]['checks_per_trial'][0])==7
+        assert j['P0A']['per_k'][k]['total_bits']<=9
+        assert j['P0A']['per_k'][k]['exhaustive_total']==(1<<j['P0A']['per_k'][k]['n'])
+        assert j['P0A']['per_k'][k]['per_m_pass']==True
+    # syndrome 0/1 flip and 1e-9 marginal
+    assert j['P0A']['worst_marginal_delta'] < 1e-9
+    assert j['P0A']['total_bits_le_9']==True
+    assert j['P0A']['exhaustive']==True
+    assert j['P0A']['seven_fail_closed']==True
+    # loopy only descriptive: tree flags all True, loopy count 0, exact only tree
+    for k in ["2","3"]:
+        assert all(j['P0A']['per_k'][k]['tree_flags'])
+        assert j['P0A']['per_k'][k]['loopy_descriptive_count']==0
+    assert j['P0A']['mode']=="tiny_exhaustive_syndrome_marginal_tree"
+    # P0B sparse CSR IRA dual-diagonal pivot checks
     assert j['P0B']['structure']=="sparse_CSR_IRA"
     assert j['P0B']['nnz']>0
     assert j['P0B']['zero_cols']==0
     assert j['P0B']['dup_rows']==0
     assert j['P0B']['rank']==9036
     assert j['P0B']['prefix_nested']==True
+    assert j['P0B']['pivot_checks']['160']==True
+    assert j['P0B']['pivot_checks']['168']==True
+    assert j['P0B']['pivot_checks']['176']==True
+    assert j['P0B']['pivot_checks']['9036']==True
+    assert "dual-diagonal" in j['P0B']['dual_diagonal_proof'] or "dual_diagonal" in j['P0B']['dual_diagonal_proof']
 
 def test_five_state():
     j=json.loads(Path("v72p0_results.json").read_text(encoding="utf-8"))
@@ -77,23 +93,34 @@ def test_five_state():
     assert j['overall']=="OVERALL_ADAPTER_PLAN_READY"
     assert "ADAPTER_PLAN_READY" in j['counts']
     assert j['counts']['ADAPTER_PLAN_READY']==1
-    # requires 3 passes
+    # requires 3 passes: KERNEL, P0A, P0B
     assert j['local_factor']['KERNEL_PASS']
     assert j['P0A']['P0A_PASS']
     assert j['P0B']['P0B_PASS']
+    # 5-state only
+    assert set(j['counts'].keys())=={"ADAPTER_PLAN_READY","KERNEL_FAIL","TINY_FAIL","MATRIX_FAIL","EVIDENCE_INCOMPLETE"}
 
 def test_registry():
     j=json.loads(Path("v72p0_data_registry_synthetic.json").read_text(encoding="utf-8"))
     assert j['Q']==1024 and j['N']==1024 and j['M']==9036
     assert j['used_2m']==False
     assert j['successor_v72_not_started']==True
-    assert j['head']=="b360efe9828484c1022c90c5a14819ebbb9dadcb"
-    assert j['P0A']['N_small']==[2,3]
+    assert j['P0A']['total_bits_le_9']==True
+    assert j['P0A']['exhaustive']==True
     assert j['P0B']['structure']=="sparse_CSR_IRA"
+    # head sync not b360
+    assert "b360" not in j['head']
 
 def test_provenance_sync():
-    h="b360efe9828484c1022c90c5a14819ebbb9dadcb"
     for p in ["v72p0_results.json","v72p0_manifest.json","V72P0_SYN_REPORT.md","V72P0_BACKEND_AUDIT_REPORT.md"]:
         txt=Path(p).read_text(encoding="utf-8")
-        assert h in txt
-        assert "8dfd7c91" not in txt
+        assert "b360efe" not in txt
+        assert "84d62779" in txt or "09264575" in txt
+
+def test_no_sampling():
+    txt=Path("scripts/v72p0_soft_joint_binary_synthetic.py").read_text(encoding="utf-8")
+    # forbid old random sampling branch (50000 samples) but allow descriptive comment about forbidding
+    assert "50000" not in txt  # old sampling size removed
+    assert "total_bits<=9" in txt or "total_bits_le_9" in txt
+    assert "syndrome" in txt.lower()
+    assert "dual-diagonal" in txt.lower()

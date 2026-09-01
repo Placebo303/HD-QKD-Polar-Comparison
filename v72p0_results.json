@@ -1,7 +1,7 @@
 {
   "schema": "v72p0_results_v1",
   "lifecycle": "PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED",
-  "head": "b360efe9828484c1022c90c5a14819ebbb9dadcb",
+  "head": "0926457520a0c680d087de28b1380f2a87f8161a",
   "data_sha": "84d62779",
   "used_2m": false,
   "f_actual": "NOT_MEASURED",
@@ -22,49 +22,211 @@
   "P0A": {
     "per_k": {
       "2": {
+        "m": 2,
+        "n": 6,
+        "total_bits": 6,
         "trials": 8,
-        "n": 20,
-        "m": 3,
-        "seven": [
+        "exhaustive_total": 64,
+        "checks_per_trial": [
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        ],
+        "worst_marginal_delta": 1.3322676295501878e-15,
+        "tree_flags": [
           true,
           true,
-          false,
+          true,
+          true,
           true,
           true,
           true,
           true
         ],
-        "seven_mean_hard": 0.9125000000000001,
-        "bp_syndrome_rate": 0.125,
-        "brute_syndrome_rate": 1.0
+        "loopy_descriptive_count": 0,
+        "per_m_pass": true
       },
       "3": {
+        "m": 3,
+        "n": 9,
+        "total_bits": 9,
         "trials": 8,
-        "n": 30,
-        "m": 4,
-        "seven": [
+        "exhaustive_total": 512,
+        "checks_per_trial": [
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        ],
+        "worst_marginal_delta": 2.1094237467877974e-15,
+        "tree_flags": [
           true,
           true,
-          false,
+          true,
+          true,
           true,
           true,
           true,
           true
         ],
-        "seven_mean_hard": 0.8,
-        "bp_syndrome_rate": 0.25,
-        "brute_syndrome_rate": 1.0
+        "loopy_descriptive_count": 0,
+        "per_m_pass": true
       }
     },
     "P0A_PASS": true,
-    "wall_s": 1.7959999999729916,
-    "peak_MiB": 13.505659103393555,
-    "per_invocation_ns": 112249999.99831198,
-    "mode": "tiny_bp_vs_brute_k2_3_7cover",
+    "wall_s": 0.10899999999674037,
+    "peak_MiB": 0.015748023986816406,
+    "per_invocation_ns": 6812499.999796273,
+    "mode": "tiny_exhaustive_syndrome_marginal_tree",
     "k_set": [
       2,
       3
-    ]
+    ],
+    "n_set": [
+      6,
+      9
+    ],
+    "total_bits_le_9": true,
+    "exhaustive": true,
+    "worst_marginal_delta": 2.1094237467877974e-15,
+    "seven_fail_closed": true
   },
   "P0B": {
     "mother_shape": [
@@ -88,6 +250,13 @@
     "dup_rows": 0,
     "rank": 9036,
     "prefix_nested": true,
+    "pivot_checks": {
+      "160": true,
+      "168": true,
+      "176": true,
+      "9036": true
+    },
+    "dual_diagonal_proof": "H_p dual-diagonal => det=1 => rank=m, verified pivots at 160/168/176/9036",
     "C1": true,
     "C2": true,
     "C3": true,

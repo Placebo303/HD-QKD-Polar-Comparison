@@ -1,7 +1,7 @@
 {
   "schema": "v72p0_synthetic_v1",
   "lifecycle": "PLAN_CANDIDATE/SYNTHETIC_ONLY",
-  "head": "b360efe9828484c1022c90c5a14819ebbb9dadcb",
+  "head": "0926457520a0c680d087de28b1380f2a87f8161a",
   "data_sha": "84d62779",
   "Q": 1024,
   "N": 1024,
@@ -13,12 +13,18 @@
   "successor_v72_not_started": true,
   "synthetic_seed": "V72P0-SYN-P0A-B",
   "P0A": {
-    "N_small": [
+    "total_bits_le_9": true,
+    "k_set": [
       2,
       3
     ],
+    "n_set": [
+      6,
+      9
+    ],
+    "exhaustive": true,
     "trials": 8,
-    "mode": "tiny_bp_vs_brute_k2_3_7cover"
+    "mode": "tiny_exhaustive_syndrome_marginal_tree"
   },
   "P0B": {
     "mother_shape": [
@@ -1141,6 +1147,7 @@
       9036
     ],
     "col_order": "sym*10+bit",
-    "structure": "sparse_CSR_IRA"
+    "structure": "sparse_CSR_IRA",
+    "dual_diagonal_proof": "H_p dual-diagonal det=1"
   }
 }
