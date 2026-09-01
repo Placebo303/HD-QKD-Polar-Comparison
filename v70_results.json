@@ -1,7 +1,7 @@
 {
   "schema": "v70_binary_soft_joint_v1",
   "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
-  "head": "d6f590ac6f30deaa8b0bf6cf5c419593fc037720",
+  "head": "9825d0b336042ad4bf2b26ed31b7fa09a04de620",
   "data_sha": "84d62779",
   "V71_not_started": true,
   "used_val_in_selection": false,
@@ -60,8 +60,6 @@
       "margin_vs_required": 0.0,
       "r0": 160,
       "required_rows": 9519,
-      "H_bin_shape": "9519x10240",
-      "H_bin_sha": "97ab00bc38ab5a70",
       "rank_ok": true,
       "prefix_ok": true,
       "nonzero_ok": true,
@@ -75,7 +73,15 @@
       "capacity_warning": true,
       "successor_v71_not_started": true,
       "cal_val_ce_consistency": 0.0149957067556592,
-      "required_consistency": 20
+      "required_consistency": 20,
+      "family_sha": "97ab00bc38ab5a70",
+      "family_shape": "9519x10240",
+      "family_step": 8,
+      "family_tail": 7,
+      "family_achieved": 9519,
+      "family_requested": 9519,
+      "family_achieved_equals_requested": true,
+      "matrix_status": "APPLICABLE"
     },
     "20260107_PPLN_1p5M": {
       "session_id": "20260107_PPLN_1p5M",
@@ -125,8 +131,6 @@
       "margin_vs_required": 0.0,
       "r0": 160,
       "required_rows": 10047,
-      "H_bin_shape": "10047x10240",
-      "H_bin_sha": "97ab00bc38ab5a70",
       "rank_ok": true,
       "prefix_ok": true,
       "nonzero_ok": true,
@@ -140,7 +144,15 @@
       "capacity_warning": true,
       "successor_v71_not_started": true,
       "cal_val_ce_consistency": 0.023953680440750524,
-      "required_consistency": 32
+      "required_consistency": 32,
+      "family_sha": "97ab00bc38ab5a70",
+      "family_shape": "10047x10240",
+      "family_step": 8,
+      "family_tail": 7,
+      "family_achieved": 10047,
+      "family_requested": 10047,
+      "family_achieved_equals_requested": true,
+      "matrix_status": "APPLICABLE"
     },
     "20260123_2M_1p2M_0dB": {
       "session_id": "20260123_2M_1p2M_0dB",
@@ -190,8 +202,6 @@
       "margin_vs_required": 0.0,
       "r0": 160,
       "required_rows": 11169,
-      "H_bin_shape": "11169x10240",
-      "H_bin_sha": "97ab00bc38ab5a70",
       "rank_ok": false,
       "prefix_ok": false,
       "nonzero_ok": false,
@@ -200,33 +210,49 @@
       "joint_unseen": 0.595001220703125,
       "DeltaCE": 0.004515582244398075,
       "max_dCE_bit": 0.006815251724630822,
-      "classification": "V70_EVIDENCE_INCOMPLETE",
-      "successor": "recollect",
+      "classification": "V70_SOFT_JOINT_NO_INFORMATION_MARGIN",
+      "successor": "v70_new_representation_or_recollect",
       "capacity_warning": true,
       "successor_v71_not_started": true,
       "cal_val_ce_consistency": 0.004515582244398075,
-      "required_consistency": 6
+      "required_consistency": 6,
+      "family_sha": "NOT_APPLICABLE",
+      "family_shape": "NOT_APPLICABLE",
+      "matrix_status": "NOT_APPLICABLE",
+      "family_achieved": "NOT_APPLICABLE",
+      "family_requested": 11169,
+      "family_achieved_equals_requested": "NOT_APPLICABLE",
+      "family_step": "NOT_APPLICABLE",
+      "family_tail": "NOT_APPLICABLE"
     }
   },
-  "overall": "V70_OVERALL_EVIDENCE_INCOMPLETE",
+  "overall": "V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE",
   "feasible_count": 1,
   "marginal_count": 1,
   "heavy_count": 0,
-  "common_preserving": 2,
   "counts_per_classification": {
-    "V70_EVIDENCE_INCOMPLETE": 1,
+    "V70_EVIDENCE_INCOMPLETE": 0,
     "V70_MODEL_NOT_STABLE": 0,
     "V70_SOFT_JOINT_FEASIBLE": 1,
     "V70_SOFT_JOINT_MARGINAL": 1,
-    "V70_SOFT_JOINT_HEAVY": 0
+    "V70_SOFT_JOINT_HEAVY": 0,
+    "V70_SOFT_JOINT_NO_INFORMATION_MARGIN": 1
   },
-  "H_bin": {
+  "no_run_01": true,
+  "family": {
     "cols": 10240,
     "r0": 160,
     "step": 8,
     "max_required": 11169,
-    "sha": "97ab00bc38ab5a70",
-    "rank_ok_global": true
+    "family_sha": "97ab00bc38ab5a70",
+    "rank_ok_global": true,
+    "construction": "r0=160 step+8 tail+7 for required 9519 (160+8*1169=9512 +7=9519) and 10047 (160+8*1235=10040 +7=10047) achieved==requested true",
+    "tail_9519": 7,
+    "tail_10047": 7,
+    "achieved_equals_requested": "true for 9519/10047",
+    "max_feasible_required": 10047
   },
-  "no_run_01": true
+  "no_information_margin_count": 1,
+  "evidence_incomplete_count": 0,
+  "model_not_stable_count": 0
 }
