@@ -1,6 +1,6 @@
 # V71 Kernel Report — 1024-state pure factor kernel 5FUNC D1-D10 1M 1/9/1024 30s/2GiB f1.3 NOT_MEASURED
 Lifecycle: PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED, V72_not_started
-Head: dc18fd2fc17a606fb3a05713efdd9f05ed6472a4 Data: 84d62779
+Head: e8c44e6eeb2343e00f78f15a3d551f8d9793088e Data: 84d62779 (动态绑定 git rev-parse HEAD)
 
 ## Frozen body
 n1024 q1024 GF32 poly37 H1 16x1024 rank16 10-bit bit_i(s)=(s>>i)&1 extrinsic ext=log_post-log_prior log-domain Lane C 184/190/192 H_inc Delta8 decoder 90/1.0 disabled full-tag canonical leak sum w_i*m_i+64

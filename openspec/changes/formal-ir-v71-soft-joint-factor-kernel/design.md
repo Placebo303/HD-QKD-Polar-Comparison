@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024-state 纯因子核校验完整 posterior 保留，extrinsic 冻结 `ext=log_post-log_prior` log域差分，5函数纯枚举 log-domain，D1-D10 十不变量正交，ldpc_v5* 只读 A1-A6 分流 READY/ADAPTER/NOT_COMPATIBLE，1M CAL/VAL benchmark 1/9/1024 block 30s/2GiB 路由阈，f1.3 freeze `f_actual NOT_MEASURED`，per-session 6终端总体4态，不跑 decoder 不构业务矩阵不启 V72**
 
-**Cycle**: `V71-SJK` (soft-joint-factor-kernel), predecessor `V70-BSJ (9bc34be64a2822c8babb4320efb47fc7e335a21a)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS` + `binary-ldpc-v5 ldpc_v5*` (read-only audit 对象), HEAD `4afc4eec2a3adfca88a8f79bc9c051e3819405ac` (provenance deviation registry head `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` vs predecessor `9bc34be6`) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` — **rev A1 1/9/1024 各 1024次 deterministic seed0 / A2 去 self 比较需真接口否则 ADAPTER / A3 kernel/backend/capacity 分离 2M NO_INFORMATION_MARGIN**
+**Cycle**: `V71-SJK` (soft-joint-factor-kernel), predecessor `V70-BSJ (9bc34be64a2822c8babb4320efb47fc7e335a21a)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS` + `binary-ldpc-v5 ldpc_v5*` (read-only audit 对象), HEAD `e8c44e6eeb2343e00f78f15a3d551f8d9793088e` (动态绑定 `git rev-parse HEAD`; 已修正历史静态偏差 `历史三头` vs predecessor `9bc34be6`) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` — **rev A1 1/9/1024 各 1024次 deterministic seed0 / A2 去 self 比较需真接口否则 ADAPTER / A3 kernel/backend/capacity 分离 2M NO_INFORMATION_MARGIN**
 
 **Feasibility**: `V70` 在 3 sessions 上验证 `D_bits≥0` 且 `soft_joint_factor_update` 纯函数双极 `1e-12`，证二进制 soft-joint 因子保留 1024-ary posterior；`V71` 假设 **1024-state 纯因子核以 log-domain 5 函数纯枚举可完整保留 posterior**（`extrinsic` 冻结分离，且 `D1-D10` 全 PASS 且 `ldpc_v5*` A1-A6 至少 `ADAPTER` 且 `1M benchmark 30s/2GiB` 内），则核可零改对接 `ldpc_v5` 仅需适配层，需 decoder-free 验证 `D1-D10` 与 `A1-A6` 与 `E benchmark` 三重守卫。
 
@@ -51,7 +51,7 @@
 | ldpc_v5* | 只读探针 | `formal_ir/ldpc_v5*.py` | A1-A6 audit 对象 |
 
 - **复用**：`v71_data_registry.json` 由 `v69_data_registry.json` 的 3 sessions（`20260123_1M_600k_0dB 1M, 20260107_PPLN_1p5M 1p5M, 20260123_2M_1p2M_0dB 2M`）的 `stage2_CAL[1024]+stage2_VAL[256]` 原样拷贝（`total 3, per_category 1,1,1, acquisition_dedup_verified, frozen, not_sorted_by_CE`），`zero_overlap_verified` 与 `V13..V71` 零重叠已验，禁止事后换 session 或按 `CE/required` 替换，`successor_v72_not_started true`，**Phase E benchmark 仅 1M session 实测**（`1p5M/2M` 仅 audit 输入，不测 benchmark）。
-- **注册表**：`v71_data_registry.json` (`schema v71_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head dc18fd2fc17a606fb3a05713efdd9f05ed6472a4 (provenance deviation), reused_from v69, successor_v72_not_started true, sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`)。
+- **注册表**：`v71_data_registry.json` (`schema v71_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head e8c44e6eeb2343e00f78f15a3d551f8d9793088e (动态绑定 git rev-parse HEAD; 已修正 历史三头 偏差), reused_from v69, successor_v72_not_started true, sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`)。
 
 ### 3.2 数据就绪门（decoder-free）
 

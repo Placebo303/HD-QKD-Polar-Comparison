@@ -1,6 +1,6 @@
 # V71 Audit Report — A1-A6 READY/ADAPTER/NOT_COMPATIBLE
 Lifecycle: PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED, V72_not_started
-Head: dc18fd2fc17a606fb3a05713efdd9f05ed6472a4 Data: 84d62779
+Head: e8c44e6eeb2343e00f78f15a3d551f8d9793088e Data: 84d62779 (动态绑定 git rev-parse HEAD)
 
 ## A1-A6 per session
 - 20260123_1M_600k_0dB: READY checks {'A1_interface_presence': True, 'A2_policy_manifest_schema': True, 'A3_channel_binding': True, 'A4_extrinsic_interface': True, 'A5_runtime_caps': True, 'A6_disclosure_accounting': True}
