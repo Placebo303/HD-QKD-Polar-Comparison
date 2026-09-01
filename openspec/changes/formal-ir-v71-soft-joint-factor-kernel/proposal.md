@@ -10,7 +10,7 @@
 
 **Branch**: `formal-ir-mainline`
 
-**HEAD**: `TBD_new_plan_SHA` (implementation TBD; provenance deviation: registry/report head `9825d0b336042ad4bf2b26ed31b7fa09a04de620` vs predecessor `9bc34be6` 将在推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核，不一致阻塞)
+**HEAD**: `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` (implementation TBD; provenance deviation: registry/report head `dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` vs predecessor `9bc34be6` 将在推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核，不一致阻塞)
 
 **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点；V71 复用 V67/V69 三 session 的 `Stage2 CAL1024+VAL256` 作 AUDIT/KERNEL 完整性锚点，但 **Phase E benchmark 仅在 1M session 的 CAL1024+VAL256 上执行 1/9/1024 block 实测**，不换点，不换 bin/mapping，不新增 acquisition，不读 TEST)
 
@@ -119,7 +119,7 @@
 
 ## Acceptance Criteria
 
-- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD TBD_new_plan_SHA` + `data 84d62779` + `predecessor V70 9bc34be6 / V67 FEASIBILITY_MAP_ACCEPTED / V64 22/24 PASS` 已绑定，显式声明 decoder-free、零 decoder/业务矩阵、1024-state 纯因子核、5函数纯枚举 log-domain、A1-A6 READY/ADAPTER/NOT_COMPATIBLE、D1-D10 不变量、1M CAL/VAL 1/9/1024 block 30s/2GiB 路由阈、f1.3 freeze `f_actual NOT_MEASURED`、per-session 6终端总体4态、四工件产出已声明。
+- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD dc18fd2fc17a606fb3a05713efdd9f05ed6472a4` + `data 84d62779` + `predecessor V70 9bc34be6 / V67 FEASIBILITY_MAP_ACCEPTED / V64 22/24 PASS` 已绑定，显式声明 decoder-free、零 decoder/业务矩阵、1024-state 纯因子核、5函数纯枚举 log-domain、A1-A6 READY/ADAPTER/NOT_COMPATIBLE、D1-D10 不变量、1M CAL/VAL 1/9/1024 block 30s/2GiB 路由阈、f1.3 freeze `f_actual NOT_MEASURED`、per-session 6终端总体4态、四工件产出已声明。
 - [ ] **冻结主体零改已验**：`git diff -- src/ ==0 && git diff -- experiments/ ==0 && git diff -- tools/ ==0`，`n1024 q1024 GF32 poly37 H1 16×1024 rank16 80b U=32*U1+U2 F03 5+5 Lane C 184/190/192 H_inc Δ8 decoder 90/1.0 full-tag canonical leak Σw_i·m_i+64` 全只读，处理点 `84d62779 legacy_v1` 单点，`rg -i "gray|met|protograph|sc_coupling" scripts/v71_soft_joint_factor.py` 0 hits（除纯因子核注释），`rg "decode_|construct_.*business|gf_rank.*business|nested.*business" 0 hits` 已验（`ldpc_v5*` 只读探针不属业务 `construct`），`rg "TEST.*read|read.*TEST" 0 hits` 且 `used_test==False`。
 - [ ] **只读 `ldpc_v5*` A1-A6 已验**：`A1 interface_presence / A2 policy_manifest_schema / A3 channel_binding / A4 extrinsic_interface / A5 runtime_caps / A6 disclosure_accounting` 每 session 独立 `PASS/FAIL`，分流 `READY(A1-A6 PASS) / ADAPTER(A1-A3 PASS, A4/A6 需适配) / NOT_COMPATIBLE(A1/A2 或 D1/D2 FAIL)` 已判定，`ldpc_v5*` 文件 `git diff ==0` 且脚本内 `rg "run_ldpc_formal_v5\(" 0 hits`（仅 import 探针，不执行），落盘 `v71_audit_report.json` 与 `V71_AUDIT_REPORT.md` 一致。
 - [ ] **冻结 extrinsic + 5 函数纯枚举 log-domain 已验**：`extrinsic = log_post - log_prior` 已冻结定义，5 函数 `log_prior_from_posterior / bit_factor_from_llr / soft_joint_factor_kernel / extrinsic_from_logs / validate_kernel` 枚举 1024 态，全零 `llr≡0 ⇒ log_post ≡ log_prior` (`max|Δ|<1e-12`) 且 delta `K=1e6` 定向 `a*=0,511,1023 ⇒ posterior` 退化 `a*` (`log_post[a*]=0` 其余 `-inf`, `|Δ|<1e-9`) 二极与显式 1024 枚举 brute-force 对照 `max|Δ|<1e-12`，`logsumexp` 实现 `numpy.logaddexp.reduce` 无 `exp overflow`，纯函数无 I/O/随机/全局，`py_compile PASS`，`pytest` 小测试 PASS。

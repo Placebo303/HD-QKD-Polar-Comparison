@@ -1,7 +1,7 @@
 {
   "schema": "v70_manifest_v1",
   "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
-  "head": "9825d0b336042ad4bf2b26ed31b7fa09a04de620",
+  "head": "d6f590ac6f30deaa8b0bf6cf5c419593fc037720",
   "data_sha": "84d62779",
   "V71_not_started": true,
   "frozen_body": {
@@ -36,36 +36,16 @@
     "R70-09": true,
     "R70-10": true
   },
-  "overall": "V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE",
+  "overall": "V70_OVERALL_EVIDENCE_INCOMPLETE",
   "counts": {
-    "V70_EVIDENCE_INCOMPLETE": 0,
+    "V70_EVIDENCE_INCOMPLETE": 1,
     "V70_MODEL_NOT_STABLE": 0,
     "V70_SOFT_JOINT_FEASIBLE": 1,
     "V70_SOFT_JOINT_MARGINAL": 1,
-    "V70_SOFT_JOINT_HEAVY": 0,
-    "V70_SOFT_JOINT_NO_INFORMATION_MARGIN": 1
+    "V70_SOFT_JOINT_HEAVY": 0
   },
+  "common_preserving": 2,
   "used_val_in_selection": false,
   "used_test": false,
-  "no_run_01": true,
-  "orthogonal_counts": {
-    "V70_EVIDENCE_INCOMPLETE": 0,
-    "V70_MODEL_NOT_STABLE": 0,
-    "V70_SOFT_JOINT_FEASIBLE": 1,
-    "V70_SOFT_JOINT_MARGINAL": 1,
-    "V70_SOFT_JOINT_HEAVY": 0,
-    "V70_SOFT_JOINT_NO_INFORMATION_MARGIN": 1
-  },
-  "no_information_margin_count": 1,
-  "feasible_count": 1,
-  "marginal_count": 1,
-  "provenance_head": "9825d0b336042ad4bf2b26ed31b7fa09a04de620",
-  "provenance_note": "provenance 9825d0b, not d6f590ac",
-  "family": {
-    "step": 8,
-    "tail_9519": 7,
-    "tail_10047": 7,
-    "achieved_equals_requested": true,
-    "matrix_for_11169": "NOT_APPLICABLE"
-  }
+  "no_run_01": true
 }

@@ -1,7 +1,7 @@
 {
   "schema": "v71_results_v1",
   "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
-  "head": "9825d0b336042ad4bf2b26ed31b7fa09a04de620",
+  "head": "dc18fd2fc17a606fb3a05713efdd9f05ed6472a4",
   "data_sha": "84d62779",
   "successor_not_started": true,
   "used_val_in_selection": false,

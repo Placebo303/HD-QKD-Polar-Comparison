@@ -1,6 +1,6 @@
 # V71 Audit Report — A1-A6 READY/ADAPTER/NOT_COMPATIBLE
 Lifecycle: PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED, V72_not_started
-Head: V71_OVERALL_KERNEL_READY Data: 84d62779
+Head: dc18fd2fc17a606fb3a05713efdd9f05ed6472a4 Data: 84d62779
 
 ## A1-A6 per session
 - 20260123_1M_600k_0dB: READY checks {'A1_interface_presence': True, 'A2_policy_manifest_schema': True, 'A3_channel_binding': True, 'A4_extrinsic_interface': True, 'A5_runtime_caps': True, 'A6_disclosure_accounting': True}

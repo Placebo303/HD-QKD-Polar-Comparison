@@ -21,11 +21,25 @@ def probe_a2(path):
     return "policy_sha256" in txt and "decoder_sha256" in txt and "h1_binding" in txt
 
 def probe_a3(sel_path, chan_path):
-    # check model_sha256 binding via text search
+    import re
     t1 = Path(sel_path).read_text(encoding="utf-8") if Path(sel_path).exists() else ""
     t2 = Path(chan_path).read_text(encoding="utf-8") if Path(chan_path).exists() else ""
-    # simplified: if both contain model_sha256 then PASS
-    return "model_sha256" in t1 or "model_sha256" in t2 or True
+    # strict: both must contain model_sha256 and values must match when extracted
+    if "model_sha256" not in t1 or "model_sha256" not in t2:
+        return False
+    # extract hex values after model_sha256
+    pat = re.compile(r"model_sha256[^a-f0-9]*([a-f0-9]{16,64})", re.IGNORECASE)
+    m1 = pat.findall(t1)
+    m2 = pat.findall(t2)
+    if not m1 or not m2:
+        # fallback to presence check if no hex extracted but keyword present -> strict still false?
+        # require at least one extractable; if same file, check consistency of duplicates
+        return False
+    # when both paths are same file, check internal consistency (all extracted same)
+    if Path(sel_path).resolve() == Path(chan_path).resolve():
+        return len(set(m1)) == 1
+    # different files: intersection must be non-empty (shared binding)
+    return bool(set(m1) & set(m2))
 
 def probe_a4(path):
     txt = Path(path).read_text(encoding="utf-8")

@@ -95,7 +95,17 @@ def main():
   for k,Ps in enumerate(Ps_trains):
    lo=k*fold; hi=(k+1)*fold if k<3 else n; a_te=a_cal[lo:hi]; b_te=b_cal[lo:hi]; cf,cb,db=ce_vals(Ps,a_te,b_te); ce_bits_cv_list.append(cb)
   ce_bits_cv=list(np.mean(np.array(ce_bits_cv_list),axis=0)); ce_full_cv=float(cv_ce); D_cv=float(sum(ce_bits_cv)-ce_full_cv)
-  ce_full_val,ce_bits_val,D_val=ce_vals(Ps_full,a_val,b_val); chain_delta=abs(D_val-(sum(ce_bits_val)-ce_full_val))
+  ce_full_val,ce_bits_val,D_val=ce_vals(Ps_full,a_val,b_val)
+  # D8 independent CE chain: recompute CE chain from Ps_full without reusing D_val definition
+  p_ind=np.maximum(Ps_full[b_val,a_val],1e-300); ce_full_ind=float(-np.mean(np.log2(p_ind)))
+  ce_bits_ind=[]
+  for i in range(10):
+   P_bit_ind=np.zeros((Q,2),dtype=np.float64)
+   for b in range(Q):
+    row=Ps_full[b]; bits=B_BITS[:,i]; bc=np.bincount(bits,weights=row,minlength=2); P_bit_ind[b,0]=bc[0]; P_bit_ind[b,1]=bc[1]
+   bits_eval=B_BITS[a_val,i]; p_bit_ind=P_bit_ind[b_val,bits_eval]; p_bit_ind=np.maximum(p_bit_ind,1e-300); ce_bits_ind.append(float(-np.mean(np.log2(p_bit_ind))))
+  D_ind=float(sum(ce_bits_ind)-ce_full_ind)
+  chain_delta=max(abs(D_val-D_ind), abs(ce_full_val-ce_full_ind), max(abs(a-b) for a,b in zip(ce_bits_val, ce_bits_ind)))
   b_choice=int(np.argmax(N_b_full)); p_row=np.maximum(Ps_full[b_choice].copy(),1e-300); log_prior=log_prior_from_posterior(np.log(p_row))
   llr0=np.zeros(10); log_post=soft_joint_factor_kernel(log_prior,llr0); log_post_b=brute_soft_joint(log_prior,llr0); pure_zero=float(np.max(np.abs(log_post-log_post_b))); all_zero=float(np.max(np.abs(log_post-log_prior)))
   max_delta=pure_zero; delta_info=[]

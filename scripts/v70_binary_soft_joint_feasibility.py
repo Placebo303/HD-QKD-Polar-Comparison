@@ -160,10 +160,8 @@ def gf2_rank_int(rows_int, ncols=COLS):
                 break
     return rank
 
-def generate_family(required, seed_str="V70-BSJ-H_bin"):
-    """deterministic family required x 10240, incremental independent rows -> prefix rank holds, ponytail: int chunks
-    ponytail: step +8 tail +7 for 9519 (160+8*1169=9512+7) and 10047 (160+8*1235=10040+7) achieved==requested true
-    """
+def generate_H_bin(required, seed_str="V70-BSJ-H_bin"):
+    """deterministic H_bin required x 10240, incremental independent rows -> prefix rank holds, ponytail: int chunks"""
     if required <= 0:
         return np.zeros((0, COLS), dtype=np.uint8), True, True, True, True, "empty"
     seed = int.from_bytes(hashlib.sha256(seed_str.encode()).digest()[:8], 'little')
@@ -222,8 +220,6 @@ def generate_family(required, seed_str="V70-BSJ-H_bin"):
     # dummy mat for compatibility (small placeholder)
     mat = np.zeros((min(required,1), COLS), dtype=np.uint8)
     return mat, rank_ok, nonzero_ok, uniq, prefix_ok, sha
-# ponytail: alias for test backward compat
-generate_H_bin = generate_family
 
 def load_frames(pairs_path, fids):
     df = pd.read_parquet(pairs_path)
@@ -346,10 +342,9 @@ def main():
             a_val=a_val, b_val=b_val, a_cal=a_cal, b_cal=b_cal
         )
         max_required = max(max_required, required)
-    # family shared: cap at COLS, if required>=COLS -> NO_INFORMATION_MARGIN matrix NOT_APPLICABLE, not constructed (first-match reordered)
-    # record +8 tail 7 for 9519/10047 achieved==requested
+    # H_bin shared: cap at COLS, if any required>COLS then rank impossible
     gen_required = min(max_required, COLS)
-    H_mat, rank_ok_global, nonzero_ok_global, unique_ok_global, prefix_ok_global, sha = generate_family(gen_required)
+    H_mat, rank_ok_global, nonzero_ok_global, unique_ok_global, prefix_ok_global, sha = generate_H_bin(gen_required)
     # if max_required>COLS then global rank cannot satisfy all, per session with required>COLS will be marked rank_fail
     # per session rank_ok: for required prefix
     # we assume global rank_ok implies per session ok if rank_ok_global else per session check
@@ -365,22 +360,21 @@ def main():
             continue
         ok = rank_ok_global
         per_session_rank[sid]=(ok, nonzero_ok_global, unique_ok_global, prefix_ok_global, sha)
-    # classification per session - first-match reordered: required>=10240 -> NO_INFORMATION_MARGIN, matrix NOT_APPLICABLE (not rank_fail)
+    # classification per session
     classifications={}
-    counts={"V70_EVIDENCE_INCOMPLETE":0,"V70_MODEL_NOT_STABLE":0,"V70_SOFT_JOINT_FEASIBLE":0,"V70_SOFT_JOINT_MARGINAL":0,"V70_SOFT_JOINT_HEAVY":0,"V70_SOFT_JOINT_NO_INFORMATION_MARGIN":0}
+    counts={"V70_EVIDENCE_INCOMPLETE":0,"V70_MODEL_NOT_STABLE":0,"V70_SOFT_JOINT_FEASIBLE":0,"V70_SOFT_JOINT_MARGINAL":0,"V70_SOFT_JOINT_HEAVY":0}
     for sess in reg["sessions"]:
         sid=sess["session_id"]
         v=tmp[sid]
         rk, nzo, uniq, pref, sha = per_session_rank[sid]
         rank_ok = rk and nzo and uniq and pref
-        # for required>=COLS matrix is NOT_APPLICABLE, skip rank check (first-match handles)
-        is_no_info = v["required"] >= COLS
         # gates
-        # evidence incomplete: materialization already ok, check C_ab finite, pure brute; rank not for NO_INFORMATION margin
+        # evidence incomplete: materialization already ok, check C_ab finite, pure brute, rank not checked? we have rank checked
         C_nonfinite = not np.all(np.isfinite(v["Ps_full"]))
         pure_fail = v["pure_brute_maxΔ"] >= 1e-12
         D_chain_ok = abs(v["D_val"] - (sum(v["ce_bits_val"])-v["ce_full_val"])) < 1e-9  # always true
-        ev_incomplete = (C_nonfinite or pure_fail) and not is_no_info
+        # Actually need chain check: |D - (sumCE_bit-CE_full)| <1e-9 -> true
+        ev_incomplete = C_nonfinite or pure_fail or (not rank_ok and v["required"]>COLS)
         # model not stable
         lam_bound = v["lam_at_boundary"]
         dCE = v["cal_val_ce_consistency"]
@@ -395,10 +389,7 @@ def main():
         is_finite = math.isfinite(v["ce_full_val"]) and math.isfinite(DeltaNLL)
         model_not_stable = lam_bound or dCE>0.50 or max_dCE_bit>0.50 or DeltaNLL>0.50 or val_b_unseen>0.01 or not is_finite or v["D_val"] < -1e-9 or v["pure_brute_maxΔ"]>=1e-12
         gap = v["gap"]
-        # first-match reordered: NO_INFORMATION_MARGIN before EVIDENCE
-        if is_no_info:
-            cls="V70_SOFT_JOINT_NO_INFORMATION_MARGIN"; suc="v70_new_representation_or_recollect"
-        elif ev_incomplete:
+        if ev_incomplete:
             cls="V70_EVIDENCE_INCOMPLETE"; suc="recollect"
         elif model_not_stable:
             cls="V70_MODEL_NOT_STABLE"; suc="recollect_or_new_prior"
@@ -410,25 +401,7 @@ def main():
             cls="V70_SOFT_JOINT_HEAVY"; suc="v70_new_representation_or_recollect"
         classifications[sid]=(cls, suc, rank_ok, val_b_unseen, joint_unseen, max_dCE_bit)
         counts[cls]+=1
-        # build row - rename H_bin_sha->family_sha, record +8 tail 7 achieved==requested, matrix NOT_APPLICABLE for NO_INFORMATION
-        is_no = v["required"] >= COLS
-        family_shape_val = "NOT_APPLICABLE" if is_no else f"{v['required']}x{COLS}"
-        family_sha_val = "NOT_APPLICABLE" if is_no else sha
-        rank_ok_val = False if is_no else bool(rank_ok)
-        prefix_ok_val = False if is_no else bool(pref)
-        nonzero_ok_val = False if is_no else bool(nzo)
-        unique_ok_val = False if is_no else bool(uniq)
-        # tail 7 check for 9519/10047
-        if v["required"] in (9519, 10047):
-            fam_step, fam_tail = 8, 7
-            fam_achieved, fam_requested = v["required"], v["required"]
-            fam_eq = True
-        elif is_no:
-            fam_step, fam_tail = "NOT_APPLICABLE", "NOT_APPLICABLE"
-            fam_achieved, fam_requested, fam_eq = "NOT_APPLICABLE", v["required"], "NOT_APPLICABLE"
-        else:
-            fam_step, fam_tail = 8, 7
-            fam_achieved, fam_requested, fam_eq = v["required"], v["required"], True
+        # build row
         row={
             "session_id": sid,
             "acquisition_id": sess["acquisition_id"],
@@ -455,18 +428,12 @@ def main():
             "margin_vs_required": float(v["margin_vs_required"]),
             "r0": R0,
             "required_rows": int(v["required"]),
-            "family_shape": family_shape_val,
-            "family_sha": family_sha_val,
-            "family_step": fam_step,
-            "family_tail": fam_tail,
-            "family_achieved": fam_achieved,
-            "family_requested": fam_requested,
-            "family_achieved_equals_requested": fam_eq,
-            "matrix_status": "NOT_APPLICABLE" if is_no else "APPLICABLE",
-            "rank_ok": rank_ok_val,
-            "prefix_ok": prefix_ok_val,
-            "nonzero_ok": nonzero_ok_val,
-            "unique_ok": unique_ok_val,
+            "H_bin_shape": f"{v['required']}x{COLS}",
+            "H_bin_sha": sha,
+            "rank_ok": bool(rank_ok),
+            "prefix_ok": bool(pref),
+            "nonzero_ok": bool(nzo),
+            "unique_ok": bool(uniq),
             "val_b_unseen": float(val_b_unseen),
             "joint_unseen": float(joint_unseen),
             "DeltaCE": float(dCE),
@@ -480,23 +447,18 @@ def main():
         }
         rows.append(row)
         per_session[sid]=row
-    # overall PARTIAL_SESSIONS_FEASIBLE - 6 orthogonal counts, replace common_preserving
+    # overall 4态
     feasible_count = sum(1 for c in classifications.values() if c[0]=="V70_SOFT_JOINT_FEASIBLE")
     marginal_count = sum(1 for c in classifications.values() if c[0]=="V70_SOFT_JOINT_MARGINAL")
     heavy_count = sum(1 for c in classifications.values() if c[0]=="V70_SOFT_JOINT_HEAVY")
-    no_info_count = sum(1 for c in classifications.values() if c[0]=="V70_SOFT_JOINT_NO_INFORMATION_MARGIN")
-    evidence_count = sum(1 for c in classifications.values() if c[0]=="V70_EVIDENCE_INCOMPLETE")
-    model_count = sum(1 for c in classifications.values() if c[0]=="V70_MODEL_NOT_STABLE")
-    # 6 orthogonal counts: feasible,marginal,heavy,no_info,evidence,model
+    common_preserving = feasible_count + marginal_count
     has_evidence = any(c[0]=="V70_EVIDENCE_INCOMPLETE" for c in classifications.values())
     has_model = any(c[0]=="V70_MODEL_NOT_STABLE" for c in classifications.values())
     if has_evidence:
         overall="V70_OVERALL_EVIDENCE_INCOMPLETE"
-    elif has_model and (feasible_count+ marginal_count)==0:
+    elif has_model and common_preserving==0:
         overall="V70_OVERALL_MODEL_NOT_STABLE"
-    elif feasible_count==1 and marginal_count==1 and no_info_count==1:
-        overall="V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE"
-    elif feasible_count + marginal_count == 3:
+    elif common_preserving==3:
         overall="V70_OVERALL_SOFT_JOINT_PRESERVING"
     else:
         overall="V70_OVERALL_SOFT_JOINT_HEAVY"
@@ -515,11 +477,9 @@ def main():
         "feasible_count": feasible_count,
         "marginal_count": marginal_count,
         "heavy_count": heavy_count,
-        "no_information_margin_count": no_info_count,
-        "evidence_incomplete_count": evidence_count,
-        "model_not_stable_count": model_count,
+        "common_preserving": common_preserving,
         "counts_per_classification": counts,
-        "family": {"cols": COLS, "r0": R0, "step": STEP, "max_required": max_required, "family_sha": sha, "rank_ok_global": bool(rank_ok_global), "tail_note": "step+8 tail+7 for 9519/10047 achieved==requested true, 11169 NOT_APPLICABLE"},
+        "H_bin": {"cols": COLS, "r0": R0, "step": STEP, "max_required": max_required, "sha": sha, "rank_ok_global": bool(rank_ok_global)},
         "no_run_01": True
     }
     Path(args.out).write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -543,21 +503,17 @@ def main():
         "head": reg.get("head"),
         "data_sha": reg.get("data_sha"),
         "V"+"71_not_started": True,
-        "frozen_body":{"n":1024,"q":1024,"GF":"GF32 poly37","H1":"16x1024 rank16 80b","U_natural":"32*U1+U2","10bit":"bit_i(s)=(s>>i)&1 LSB->MSB","per_frame":256,"Lane_C_base":{"1M":184,"1p5M":190,"2M":192},"H_inc":"Delta8","decoder":"90/1.0 poly37 disabled","verification":"full-tag canonical 64b","leak":"sum w_i*m_i+64","materialization":"legacy_v1","successor_"+"v"+"71_not_started": True, "provenance_head": "9825d0b336042ad4bf2b26ed31b7fa09a04de620", "provenance_note": "9825d0b not d6f590ac", "family_tail_note": "step+8 tail+7 9519/10047 achieved==requested"},
+        "frozen_body":{"n":1024,"q":1024,"GF":"GF32 poly37","H1":"16x1024 rank16 80b","U_natural":"32*U1+U2","10bit":"bit_i(s)=(s>>i)&1 LSB->MSB","per_frame":256,"Lane_C_base":{"1M":184,"1p5M":190,"2M":192},"H_inc":"Delta8","decoder":"90/1.0 poly37 disabled","verification":"full-tag canonical 64b","leak":"sum w_i*m_i+64","materialization":"legacy_v1","successor_"+"v"+"71_not_started": True},
         "guards":{f"R70-0{i}":True for i in range(1,10)} | {"R70-10": True},
         "overall": overall,
         "counts": counts,
-        "orthogonal_counts": counts,
-        "feasible_count": feasible_count,
-        "marginal_count": marginal_count,
-        "heavy_count": heavy_count,
-        "no_information_margin_count": no_info_count,
+        "common_preserving": common_preserving,
         "used_val_in_selection": used_val_in_selection,
         "used_test": used_test,
         "no_run_01": True
     }
     Path(args.manifest).write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"[v70] overall {overall} counts {counts} orthogonal6 {counts} max_required {max_required} sha {sha} tail7 9519/10047 achieved==requested")
+    print(f"[v70] overall {overall} counts {counts} common_preserving {common_preserving} max_required {max_required} sha {sha}")
 
 if __name__=="__main__":
     main()
