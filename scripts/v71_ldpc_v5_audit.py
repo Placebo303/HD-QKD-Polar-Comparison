@@ -20,12 +20,11 @@ def probe_a2(path):
     txt = Path(path).read_text(encoding="utf-8")
     return "policy_sha256" in txt and "decoder_sha256" in txt and "h1_binding" in txt
 
-def probe_a3(sel_path, chan_path):
-    # A2: delete self-comparison, only read-only verification; true accept requires extrinsic check elsewhere
+def probe_a3_backend_model_binding_field_present(path):
+    # A2: delete self-binding, A3_backend_model_binding_field_present read-only check
     # ponytail: read-only presence check, no self-comparison
-    t1 = Path(sel_path).read_text(encoding="utf-8") if Path(sel_path).exists() else ""
-    # verification is read-only: just check model_sha256 presence, no cross-file self-compare
-    return "model_sha256" in t1
+    t1 = Path(path).read_text(encoding="utf-8") if Path(path).exists() else ""
+    return "model_sha256" in t1 or "channel_model_sha256" in t1
 
 def probe_a4(path):
     txt = Path(path).read_text(encoding="utf-8")
@@ -54,26 +53,25 @@ def audit_one(session_label):
     p_v5 = base / "ldpc_v5.py"
     ok1 = probe_a1(p_v5)
     ok2 = probe_a2(p_v5)
-    ok3 = probe_a3(p_v5, p_v5)
+    ok3 = probe_a3_backend_model_binding_field_present(p_v5)
     ok4 = probe_a4(p_v5)
     ok5 = probe_a5(p_v5)
     ok6 = probe_a6(p_v5)
-    d = {"A1_interface_presence": bool(ok1), "A2_policy_manifest_schema": bool(ok2), "A3_channel_binding": bool(ok3), "A4_extrinsic_interface": bool(ok4), "A5_runtime_caps": bool(ok5), "A6_disclosure_accounting": bool(ok6)}
-    # A2: true accept needs 10-bit extrinsic+10240 else ADAPTER_REQUIRED
+    d = {"A1_interface_presence": bool(ok1), "A2_policy_manifest_schema": bool(ok2), "A3_backend_model_binding_field_present": bool(ok3), "A4_extrinsic_interface": bool(ok4), "A5_runtime_caps": bool(ok5), "A6_disclosure_accounting": bool(ok6)}
+    # A2: delete self-binding; A3 field present only; true READY requires 10-bit extrinsic+10240 else ADAPTER_REQUIRED (never READY for current ldpc_v5)
     if not ok1 or not ok2:
         cls = "NOT_COMPATIBLE"
     elif ok1 and ok2 and ok3 and ok4 and ok5 and ok6:
-        cls = "READY"
+        cls = "ADAPTER_REQUIRED"
     elif ok1 and ok2 and ok3:
-        cls = "ADAPTER_REQUIRED" if not (ok4 and ok6) else "ADAPTER"
-        if cls == "ADAPTER_REQUIRED":
-            cls = "ADAPTER"
+        cls = "ADAPTER_REQUIRED"
     else:
         cls = "NOT_COMPATIBLE"
-    # A3: separate kernel/backend/capacity: kernel ready even if backend ADAPTER, capacity NO_INFORMATION_MARGIN for 2M
+    # A3: mechanical capacity reuse V70: 1M FEASIBLE,1p5M MARGINAL,2M NO_INFORMATION
+    cap_map={"1M":"FEASIBLE","1p5M":"MARGINAL","2M":"NO_INFORMATION"}
     kernel_status = "READY" if (ok1 and ok2) else "NOT_READY"
     backend_status = cls
-    capacity_status = "NO_INFORMATION_MARGIN" if session_label=="2M" else "MEASURED"
+    capacity_status = cap_map.get(session_label,"UNKNOWN")
     d.update({"kernel_status": kernel_status, "backend_status": backend_status, "capacity_status": capacity_status})
     return d, cls
 
@@ -90,7 +88,7 @@ def main():
     # overall 4-state via per session audit + placeholder D/E (assume D pass E pass)
     # counts from audit
     ready = sum(1 for v in per.values() if v["classification"]=="READY")
-    adapter = sum(1 for v in per.values() if v["classification"]=="ADAPTER")
+    adapter = sum(1 for v in per.values() if v["classification"] in ("ADAPTER","ADAPTER_REQUIRED"))
     notc = sum(1 for v in per.values() if v["classification"]=="NOT_COMPATIBLE")
     if notc>0:
         overall="V71_OVERALL_KERNEL_ADAPTER_OR_HEAVY"

@@ -6,43 +6,43 @@
       "checks": {
         "A1_interface_presence": true,
         "A2_policy_manifest_schema": true,
-        "A3_channel_binding": true,
+        "A3_backend_model_binding_field_present": true,
         "A4_extrinsic_interface": false,
         "A5_runtime_caps": true,
         "A6_disclosure_accounting": false,
         "kernel_status": "READY",
-        "backend_status": "ADAPTER",
-        "capacity_status": "MEASURED"
+        "backend_status": "ADAPTER_REQUIRED",
+        "capacity_status": "FEASIBLE"
       },
-      "classification": "ADAPTER"
+      "classification": "ADAPTER_REQUIRED"
     },
     "20260107_PPLN_1p5M": {
       "checks": {
         "A1_interface_presence": true,
         "A2_policy_manifest_schema": true,
-        "A3_channel_binding": true,
+        "A3_backend_model_binding_field_present": true,
         "A4_extrinsic_interface": false,
         "A5_runtime_caps": true,
         "A6_disclosure_accounting": false,
         "kernel_status": "READY",
-        "backend_status": "ADAPTER",
-        "capacity_status": "MEASURED"
+        "backend_status": "ADAPTER_REQUIRED",
+        "capacity_status": "MARGINAL"
       },
-      "classification": "ADAPTER"
+      "classification": "ADAPTER_REQUIRED"
     },
     "20260123_2M_1p2M_0dB": {
       "checks": {
         "A1_interface_presence": true,
         "A2_policy_manifest_schema": true,
-        "A3_channel_binding": true,
+        "A3_backend_model_binding_field_present": true,
         "A4_extrinsic_interface": false,
         "A5_runtime_caps": true,
         "A6_disclosure_accounting": false,
         "kernel_status": "READY",
-        "backend_status": "ADAPTER",
-        "capacity_status": "NO_INFORMATION_MARGIN"
+        "backend_status": "ADAPTER_REQUIRED",
+        "capacity_status": "NO_INFORMATION"
       },
-      "classification": "ADAPTER"
+      "classification": "ADAPTER_REQUIRED"
     }
   },
   "overall": "V71_OVERALL_KERNEL_ADAPTER_OR_HEAVY",

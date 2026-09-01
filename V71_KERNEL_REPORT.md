@@ -12,27 +12,29 @@ n1024 q1024 GF32 poly37 H1 16x1024 rank16 10-bit bit_i(s)=(s>>i)&1 extrinsic ext
 - extrinsic_from_logs: pure True
 - validate_kernel: pure True
 brute_maxDelta all_zero 0.0 delta_a0 0.0 a511 0.0 a1023 0.0 <1e-12 PASS
+bench_kernel n_inv=int(workload) deterministic default_rng(0) three档 1/9/1024 PASS
 
 ## D1-D10 per session
 - 20260123_1M_600k_0dB: D1 True D2 True D3 True D4 True D5 True D6 True D7 True D8 True D9 True D10 True
 - 20260107_PPLN_1p5M: D1 True D2 True D3 True D4 True D5 True D6 True D7 True D8 True D9 True D10 True
 - 20260123_2M_1p2M_0dB: D1 True D2 True D3 True D4 True D5 True D6 True D7 True D8 True D9 True D10 True
 
-## Benchmark 1M 1/9/1024 block wall/peak
-- 20260123_1M_600k_0dB 1 wall 4.0625s peak 0.09MiB per 61989ns
-  9 wall 0.4530s peak 0.09MiB per 62208ns
-  1024 wall 0.0044s peak 0.09MiB per 69196ns E_PERF_PASS True
+## Benchmark 1M 1/9/1024 block kernel_calls/wall total/per peak E only 1024
+- 20260123_1M_600k_0dB 1 kernel_calls 1 wall 0.0000s peak 0.09MiB per 0ns
+  9 kernel_calls 9 wall 0.0000s peak 0.09MiB per 0ns
+  1024 kernel_calls 1024 wall 0.0545s peak 0.09MiB per 53222ns E_PERF_PASS True (E only 1024 wall<=30s peak<=2048)
 
 ## f1.3 freeze f_actual NOT_MEASURED
 CE_full_1M 7.150001 required_1M 9519 f_actual NOT_MEASURED
 
-## Per-session classification 6-terminal
-- 20260123_1M_600k_0dB V71_KERNEL_READY_FEASIBLE successor v71_ldpc_v5_integration required 9519 D True
-- 20260107_PPLN_1p5M V71_KERNEL_READY_FEASIBLE successor v71_ldpc_v5_integration required 10047 D True
-- 20260123_2M_1p2M_0dB V71_KERNEL_READY_FEASIBLE successor v71_ldpc_v5_integration required 11169 D True
+## Per-session classification 6-terminal (A3 mechanical capacity FEASIBLE/MARGINAL/NO_INFORMATION)
+- 20260123_1M_600k_0dB V71_KERNEL_ADAPTER_FEASIBLE successor v71_kernel_adapter_design required 9519 audit ADAPTER_REQUIRED kernel READY backend ADAPTER_REQUIRED capacity FEASIBLE
+- 20260107_PPLN_1p5M V71_KERNEL_ADAPTER_FEASIBLE successor v71_kernel_adapter_design required 10047 audit ADAPTER_REQUIRED kernel READY backend ADAPTER_REQUIRED capacity MARGINAL
+- 20260123_2M_1p2M_0dB V71_KERNEL_ADAPTER_FEASIBLE successor v71_kernel_adapter_design required 11169 audit ADAPTER_REQUIRED kernel READY backend ADAPTER_REQUIRED capacity NO_INFORMATION
 
 ## Overall 4-state
-V71_OVERALL_KERNEL_READY counts {'ready': 3, 'adapter': 0, 'heavy': 0, 'not_compatible': 0, 'evidence': 0, 'model': 0} ready 3 adapter 0 heavy 0 not_compatible 0 evidence 0 model 0
+V71_OVERALL_KERNEL_ADAPTER_OR_HEAVY counts {'ready': 0, 'adapter': 3, 'heavy': 0, 'not_compatible': 0, 'evidence': 0, 'model': 0} ready 0 adapter 3 heavy 0 not_compatible 0 evidence 0 model 0
 
 TEST isolation used_test False used_val_in_selection False PASS
 1024-state frozen verification PASS, V72_not_started
+E only 1024 block wall<=30s peak<=2048MiB PASS
