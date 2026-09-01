@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024-state 纯因子核校验完整 posterior 保留，extrinsic 冻结 `ext=log_post-log_prior` log域差分，5函数纯枚举 log-domain，D1-D10 十不变量正交，ldpc_v5* 只读 A1-A6 分流 READY/ADAPTER/NOT_COMPATIBLE，1M CAL/VAL benchmark 1/9/1024 block 30s/2GiB 路由阈，f1.3 freeze `f_actual NOT_MEASURED`，per-session 6终端总体4态，不跑 decoder 不构业务矩阵不启 V72**
 
-**Cycle**: `V71-SJK` (soft-joint-factor-kernel), predecessor `V70-BSJ (9bc34be64a2822c8babb4320efb47fc7e335a21a)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS` + `binary-ldpc-v5 ldpc_v5*` (read-only audit 对象), HEAD `580b83e640c7e93ae7f9f7eab229eb8556cbc5a0` (动态绑定 `git rev-parse HEAD`; 已修正历史静态偏差 `历史三头` vs predecessor `9bc34be6`) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` — **rev A1 workload对应 kernel_calls 1/9/1024 (1->1, 9->9, 1024->1024) deterministic seed0 / A2 去 self 比较需真接口否则 ADAPTER_REQUIRED / A3 backend_model_binding kernel/backend/capacity 分离 2M NO_INFORMATION (capacity FEASIBLE/MARGINAL/NO_INFORMATION)**
+**Cycle**: `V71-SJK` (soft-joint-factor-kernel), predecessor `V70-BSJ (9bc34be64a2822c8babb4320efb47fc7e335a21a)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS` + `binary-ldpc-v5 ldpc_v5*` (read-only audit 对象), HEAD `e038114db5095a57158b0e1cd36884d6a1a5d8be` (动态绑定 `git rev-parse HEAD`; 已修正历史静态偏差 `历史三头` vs predecessor `9bc34be6`) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` — **rev A1 workload对应 kernel_calls 1/9/1024 (1->1, 9->9, 1024->1024) deterministic seed0 / A2 去 self 比较需真接口否则 ADAPTER_REQUIRED / A3 backend_model_binding kernel/backend/capacity 分离 2M NO_INFORMATION (capacity FEASIBLE/MARGINAL/NO_INFORMATION)**
 
 **Feasibility**: `V70` 在 3 sessions 上验证 `D_bits≥0` 且 `soft_joint_factor_update` 纯函数双极 `1e-12`，证二进制 soft-joint 因子保留 1024-ary posterior；`V71` 假设 **1024-state 纯因子核以 log-domain 5 函数纯枚举可完整保留 posterior**（`extrinsic` 冻结分离，且 `D1-D10` 全 PASS 且 `ldpc_v5*` A1-A6 至少 `ADAPTER` 且 `1M benchmark 30s/2GiB` 内），则核可零改对接 `ldpc_v5` 仅需适配层，需 decoder-free 验证 `D1-D10` 与 `A1-A6` 与 `E benchmark` 三重守卫。
 
@@ -51,7 +51,7 @@
 | ldpc_v5* | 只读探针 | `formal_ir/ldpc_v5*.py` | A1-A6 audit 对象 |
 
 - **复用**：`v71_data_registry.json` 由 `v69_data_registry.json` 的 3 sessions（`20260123_1M_600k_0dB 1M, 20260107_PPLN_1p5M 1p5M, 20260123_2M_1p2M_0dB 2M`）的 `stage2_CAL[1024]+stage2_VAL[256]` 原样拷贝（`total 3, per_category 1,1,1, acquisition_dedup_verified, frozen, not_sorted_by_CE`），`zero_overlap_verified` 与 `V13..V71` 零重叠已验，禁止事后换 session 或按 `CE/required` 替换，`successor_v72_not_started true`，**Phase E benchmark 仅 1M session 实测**（`1p5M/2M` 仅 audit 输入，不测 benchmark）。
-- **注册表**：`v71_data_registry.json` (`schema v71_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head 580b83e640c7e93ae7f9f7eab229eb8556cbc5a0 (动态绑定 git rev-parse HEAD; 已修正 历史三头 偏差), reused_from v69, successor_v72_not_started true, sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`)。
+- **注册表**：`v71_data_registry.json` (`schema v71_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head e038114db5095a57158b0e1cd36884d6a1a5d8be (动态绑定 git rev-parse HEAD; 已修正 历史三头 偏差), reused_from v69, successor_v72_not_started true, sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`)。
 
 ### 3.2 数据就绪门（decoder-free）
 
@@ -172,7 +172,7 @@ f_actual = "NOT_MEASURED"  # 冻结不测
 ```
 A1 interface_presence: AST探针 ldpc_v5.py 是否导出 5 函数且签名稳定
 A2 policy_manifest_schema: 是否含 policy_sha256/decoder_sha256/h1_binding 且重建一致
-A3 channel_binding: channel_model_sha256 是否 == selection_manifest.channel_model_sha256
+A3 backend_model_binding: channel_model_sha256 是否 == selection_manifest.channel_model_sha256
 A4 extrinsic_interface: error_channel 是否为 list[float] 且 plane_error_channel 是否可注入 extrinsic (探针参数类型)
 A5 runtime_caps: caps {wall_s 10, decoder_calls 20, events 32} 是否 ≥ 因子核开销 (描述性，cap 不超限即 PASS)
 A6 disclosure_accounting: OUTCOME_FIELDS 是否含 ldpc_syndrome_bits/h1/h2/verification_tag_bits_component 且可容纳 extrinsic (不混 key_dependent)
@@ -245,7 +245,7 @@ else:
 | R71-01 | 冻结主体 1024维纯因子核验证不改 + 不启 V72 | `n1024 q1024 GF32 poly37 H1 16×1024 rank16 Lane C/H_inc Δ8 decoder 90/1.0 full-tag git diff src==0 && successor_v72_not_started && rg -i "v72|qualification" 0 hits` |
 | R71-02 | extrinsic 冻结 + 5函数纯枚举 log-domain | `ext=log_post-log_prior 冻结，5函数签名稳定，枚举1024态，全零⇒marginal delta⇒确定值 brute 1e-12，无I/O/随机` |
 | R71-03 | D1-D10 十不变量正交完备 | `D1 completeness / D2 normalization / D3 marginal / D4 delta / D5 extrinsic / D6 stability / D7 determinism / D8 chain / D9 test_isolation / D10 orthogonality 逐项 PASS/FAIL 正交已验` |
-| R71-04 | 只读 ldpc_v5* A1-A6 READY/ADAPTER/NOT_COMPATIBLE | `A1 interface / A2 policy_manifest / A3 channel_binding / A4 extrinsic_interface / A5 runtime_caps / A6 disclosure_accounting 每 session READY/ADAPTER/NOT_COMPATIBLE 已分流` |
+| R71-04 | 只读 ldpc_v5* A1-A6 READY/ADAPTER/NOT_COMPATIBLE | `A1 interface / A2 policy_manifest / A3 backend_model_binding / A4 extrinsic_interface / A5 runtime_caps / A6 disclosure_accounting 每 session READY/ADAPTER/NOT_COMPATIBLE 已分流` |
 | R71-05 | 仅 1M CAL/VAL benchmark 1/9/1024 block 30s/2GiB 路由阈 | `仅1M session 1/9/1024 block 各 wall/peak 已测，1024-block wall≤30s && peak≤2048MiB 判 PASS，三档 per_invocation_ns 已报告` |
 | R71-06 | f1.3 冻结 f_actual NOT_MEASURED | `f=1.3 frozen, required=ceil(1.3*1024*CE_full^{VAL_1M}), f_actual=="NOT_MEASURED" 全 session 已验` |
 | R71-07 | V67/V69 三 Session Stage2 复用 CAL选VAL确认一次 | `v71 registry sessions==v69 Stage2 3 sessions, total 3 per_cat 1,1,1 acq_dedup_verified zero_overlap_verified, used_val_in_selection==False` |
