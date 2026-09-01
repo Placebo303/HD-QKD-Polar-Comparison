@@ -96,7 +96,7 @@ CAL 拟合和 VAL 评估都只消费 1024 格直方图，不重扫 pairs。M0 �
 - **R70R1-05** `required` 显式 `ceil`，不 cap 在 10240；`gap = 10240 − required` 显式。
 - **R70R1-06** 三分流阈与 V70 一致（`≥512` / `[0,512)` / `required≥10240`），不新设阈。
 - **R70R1-07** 不声称 CE 分解；`ce_decomposition_claimed == false`；Fano 仅作上界诊断。
-- **R70R1-08** 五终端 first-match 互斥且完备，overall 同序聚合。
+- **R70R1-08** 四终端 first-match 互斥且完备，overall 同序聚合（`REDUCES_ESTIMATION_COST` 已删除，cost 仅 descriptive-only；`terminal_counts` 4 项）。
 - **R70R1-09** decoder-free：`rg "decode_" 0 hits`，不构业务矩阵，不创建 `run_01`，不启 V72，`git diff -- src/ == 0`。
 - **R70R1-10** 四工件 + 脚本 + 小测试齐全，`py_compile` PASS，`pytest` PASS，报告与 json/csv 行对等，无 TBD。
 

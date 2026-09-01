@@ -37,12 +37,11 @@ SCALE_GRID = np.logspace(math.log10(0.05), math.log10(8.0), 40)
 EPS_GRID = np.linspace(0.0, 0.999, 200)
 M2_FAMILIES = ("gaussian", "laplace")
 
-# terminals, first-match mutually exclusive
+# terminals, first-match mutually exclusive (4-terminal, REDUCES removed; cost descriptive-only)
 TERMINALS = (
     "V70R1_EVIDENCE_INVALID",
     "V70R1_TRANSLATION_INVARIANCE_REJECTED",
     "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE",
-    "V70R1_PARAMETRIC_MODEL_REDUCES_ESTIMATION_COST",
     "V70R1_PARAMETRIC_MODEL_NO_VALUE",
 )
 CE_VALUE_THRESHOLD = 0.10        # bits/symbol, "no value" ceiling
@@ -379,15 +378,13 @@ def evaluate_session(sess, v70_ref):
         or lam_K_boundary
     )
 
-    # first-match, mutually exclusive
+    # first-match, mutually exclusive (4-terminal; cost_win descriptive-only, not a terminal)
     if evidence_invalid:
         terminal = "V70R1_EVIDENCE_INVALID"
     elif invariance_rejected:
         terminal = "V70R1_TRANSLATION_INVARIANCE_REJECTED"
     elif route_change:
         terminal = "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE"
-    elif cost_win:
-        terminal = "V70R1_PARAMETRIC_MODEL_REDUCES_ESTIMATION_COST"
     else:
         terminal = "V70R1_PARAMETRIC_MODEL_NO_VALUE"
 
