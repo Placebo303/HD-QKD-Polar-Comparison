@@ -1,13 +1,13 @@
 # Tasks: V70R1 Parametric Channel Model Check
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` / `V72_NOT_STARTED=true`
-**HEAD**: `487be11387a5a68c275c43ccb5528ec700bfd3d3` **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113`
+**HEAD**: `13b38b7930be67465c03744491b86e31406a1669` **Data SHA**: `84d62779` **Predecessor V71**: `6bc06d4d..487be113` latest `487be113`
 
 ## Phase A — 绑定与复用（无新数据）
 
 - [x] **A1 复用 V70 registry**：直接读 `v70_data_registry.json` 的三 session 与 `stage2_CAL_frame_ids`(1024) / `stage2_VAL_frame_ids`(256)，不新建 registry、不换帧、不扩样。脚本内断言 `len(a_cal)==262144 && len(a_val)==65536`，每帧 256 对。
 - [x] **A2 绑定 V70 权威值**：读 `v70_table.json` 的 `CE_full_VAL`（`7.150000879558332 / 7.547198 / 8.390100`）作为 M0 复现基准，落盘 `v70_reproduction {v70_CE_full_VAL, recomputed, abs_delta, reproduces}`。
-- [x] **A3 SHA 绑定**：`HEAD == origin/formal-ir-mainline == 74c5ba6e` 已核，`git diff -- src/ == 0` 已核。
+- [x] **A3 SHA 绑定**：`HEAD == origin/formal-ir-mainline == 487be113` 已核，`git diff -- src/ == 0` 已核。
 
 ## Phase B — 三模型实现（decoder-free）
 

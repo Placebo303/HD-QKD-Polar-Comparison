@@ -3,7 +3,7 @@
 **Change ID**: `formal-ir-v70r1-parametric-channel-model-check`
 **Cycle ID**: `V70R1` (parametric-channel-model-check)
 **Branch**: `formal-ir-mainline`
-**HEAD**: `487be11387a5a68c275c43ccb5528ec700bfd3d3` (`HEAD == origin/formal-ir-mainline` 已核；推送前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞，不 force)
+**HEAD**: `13b38b7930be67465c03744491b86e31406a1669` (`HEAD == origin/formal-ir-mainline` 已核；推送前 `git fetch && git rev-parse HEAD == origin/formal-ir-mainline` 重核，不一致阻塞，不 force)
 **Data SHA**: `84d62779` (`d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点，不换处理点)
 **Predecessor**: `formal-ir-v70-binary-soft-joint-feasibility` (`9bc34be6` implementation，`V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE`) + `formal-ir-v71-soft-joint-factor-kernel` (`6bc06d4d..487be113` 区间 latest accepted `487be113`，`V71_KERNEL_READY_FEASIBLE`)
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — `V72_NOT_STARTED`
