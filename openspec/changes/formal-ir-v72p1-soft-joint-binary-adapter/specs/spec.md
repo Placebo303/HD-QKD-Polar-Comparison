@@ -45,7 +45,7 @@
 `Q1024 N1024 M9036 nnz49620 f1.3 NOT_MEASURED used_2m false used_test false successor_v72_not_started` 且 `indptr==v72p0_indptr && indices==v72p0_indices` 且 `P1A 4 probes indptr/indices相等` 且 `P1B 64/512 8trials` 且 `P1C 1/3/10 真消息 finite/maxLLR/residual checkpoint disclosed` 且 `P1D n12 k3` 且 `mother rank9036 zero0 dup0 checkpoint 72批量` 且 `Config8字段` 且 `4消息数组` 否则 `EVIDENCE_INCOMPLETE` 本轮只四工件
 
 ## 4. 输入合同
-`Q1024 N1024 Nbit10240 M9036 nnz49620 r0 160 Δ8 max9036 checkpoint128 col sym*10+bit bit_i去self LF T_LF01-08 4消息数组 tag64b exact leak r·1+64 disclosed r+64 f NOT_MEASURED mother 9036×10240 nnz49620 indptr/indices相等 adapter S1-S10 10步 3类型 Config8字段 4消息数组` 落 `AdapterConfig 8字段`。
+`Q1024 N1024 Nbit10240 M9036 nnz49620 r0 160 Δ8 max9036 checkpoint72 col sym*10+bit bit_i去self LF T_LF01-08 4消息数组 tag64b exact leak r·1+64 disclosed r+64 f NOT_MEASURED mother 9036×10240 nnz49620 indptr/indices相等 adapter S1-S10 10步 3类型 Config8字段 4消息数组` 落 `AdapterConfig 8字段`。（更正：checkpoint 128→72；71 vs 72：71为V71因子核历史值、72为V72批量72本变更正值）
 
 ## 5. Phase C/D/E/F/G
 

@@ -8,7 +8,7 @@
 
 **Method frozen**: `Q1024 prior[1024,1024] N1024 Nbit10240 M9036 r0 160 Δ8 max9036 checkpoint 72批量 f1.3 NOT_MEASURED used_2m false tag64b exact SHA256 LE col sym*10+bit bit_i(s)=(s>>i)&1 LF去self Σ_{j≠i} logsumexp 4消息数组 mother 9036×10240 nnz49620 indptr/indices相等 sparse CSR IRA dual-diagonal det1 rank9036` 零改精确复用；10 步 S1-S10 + 3 类型 Config8字段 + 4消息数组 + P1A-D 四层 synthetic 真消息
 
-**Boundary**: 仅验证 adapter 无损衔接 + 4消息数组 + Config8字段 + Δ8 vs checkpoint + 真消息传递 + 10数组 memory 复杂度，不改主体精确复用 mother；S1 synthetic_bits → S2 prior → S3 LF去self T_LF01-08 1e-12/1e-9 10数组 → S4 extrinsic打包 sym*10+bit 10数组 → S5 mother前缀 H_r 精确复用 V72P0 Δ8 vs checkpoint128 → S6 增量syndrome s_{r+8}=s_r∪new8 → S7 披露 checkpoint disclosed r+64 f NOT_MEASURED → S8 exact tag SHA256 LE → S9 10数组 memory nnz49620 CSR indptr/indices相等 peak → S10 5态 first-match AND，每 case 5 终端总体 2 态，不跑 decoder 精确复用 mother 不启 V72 本轮只四工件
+**Boundary**: 仅验证 adapter 无损衔接 + 4消息数组 + Config8字段 + Δ8 vs checkpoint + 真消息传递 + 10数组 memory 复杂度，不改主体精确复用 mother；S1 synthetic_bits → S2 prior → S3 LF去self T_LF01-08 1e-12/1e-9 10数组 → S4 extrinsic打包 sym*10+bit 10数组 → S5 mother前缀 H_r 精确复用 V72P0 Δ8 vs checkpoint72（71为V71因子核历史值，本变更统一72批量） → S6 增量syndrome s_{r+8}=s_r∪new8 → S7 披露 checkpoint disclosed r+64 f NOT_MEASURED → S8 exact tag SHA256 LE → S9 10数组 memory nnz49620 CSR indptr/indices相等 peak → S10 5态 first-match AND，每 case 5 终端总体 2 态，不跑 decoder 精确复用 mother 不启 V72 本轮只四工件
 
 ## Phase A — 合成注册表占位（SYNTHETIC_ONLY，精确复用 V72P0 mother，不读 2M，不启 V72，本轮只定义不落盘）
 
@@ -89,7 +89,7 @@ decoder/业务矩阵构造（`decode_*` / `construct_*_business` / `gf_rank_busi
 
 - proposal/design/tasks/specs 一致 `V72P0 5591e16b→新 Plan SHA` `84d62779` lifecycle `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` + `V72_NOT_STARTED` 5 态 2 态按 first-match AND 优先级互斥明确，显式 10 步 S1-S10 + 3 类型 Config8字段/Result/Adapter + 4公式 + P1A plumbing indptr/indices相等 / P1B tiny 64/512 c3观测 1e-9 / P1C 真消息 9036×10240 nnz49620 1/3/10 finite/maxLLR/residual checkpoint 72批量 / P1D small loopy 描述性 + 10数组 memory O(nnz+N*Q*10) + checkpoint disclosed 已声明，精确复用 V72P0 mother 删新 seed，本轮只四工件 保持未完成
 - 10 步数据流 + 3 类型8字段 + 4消息数组，`T_LF01-08 1e-12` ，`Config8字段 {Q,N,M,r0,delta,max_r,f,tag_bits}` ，`P1A plumbing indptr/indices相等` ，`P1B 64/512 c3观测 负向 worst<1e-9` ，`P1C 1/3/10 9036×10240 nnz49620 checkpoint disclosed finite/maxLLR/residual` ，`P1D loopy` 描述性，`10数组 memory O(nnz+N*Q*10)` ，`5态 first-match AND` ，`overall 2态` ，`wall≤30s finite==true` ，不扩，禁第二 estimator  精确复用 mother
-- 合同 `Q1024 N1024 Nbit10240 M9036 nnz49620 r0 160 Δ8 max9036 checkpoint128 tag64 f1.3 NOT_MEASURED col sym*10+bit` 算法一致，`10-bit位展开` 每 case ，`S1-S10` 无丢，`4消息数组` ，`indptr/indices相等` 
+- 合同 `Q1024 N1024 Nbit10240 M9036 nnz49620 r0 160 Δ8 max9036 checkpoint72 tag64 f1.3 NOT_MEASURED col sym*10+bit` 算法一致（128为历史误植，71 vs 72：71系V71核、72系V72批量72正值），`10-bit位展开` 每 case ，`S1-S10` 无丢，`4消息数组` ，`indptr/indices相等` 
 - 每 case `S1 bits→S2 prior→S3 LF去self 10数组→S4 pack→S5 mother 精确复用 Δ8 vs checkpoint→S6 syndrome→S7 leak disclosed→S8 tag→S9 10数组 memory→S10 5态 first-match AND` 已定义且 `SYNTHETIC_ONLY` 精确复用 mother 不读 2M ，`P1A/B/C/D` 已定义，`T_LF` 双极 `1e-12` ，`Δ8 vs checkpoint分离` 
 - 每 case `5 终端 final_classification + successor` 定义 first-match AND，`overall 2 态` 已定义
 - 守卫 `R72P1-01~10` （`精确复用 mother nnz49620 indptr/indices相等 删新 seed / 4公式 / Config8字段 / Δ8与checkpoint分离72批量9036 max disclosed / 真消息1/3/10 finite/maxLLR/residual / 10数组 memory O(nnz+N*Q*10) / 5态 first-match AND / 机械修正无1pct容差 保持未完成 / 本轮只四工件 / SYNTHETIC_ONLY不构业务矩阵不读TEST不创run_01不改V70/V72P0不启V72`）
