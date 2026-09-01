@@ -1,0 +1,2 @@
+synthetic_case,Q,N,Nbit,M,f,f_actual,T_LF01,T_LF02,T_LF03,T_LF04,T_LF05,T_LF06,T_LF07,T_LF08,P0A_PASS,P0B_PASS,C1,C2,C3,C4,C5,C6,wall_s,peak_MiB,classification,successor,overall
+V72P0-SYN,1024,1024,10240,9036,1.3,NOT_MEASURED,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,0.045999999972991645,0.0036401748657226562,V72P0_SYNTHESIS_ADAPTER,v72_mother_adapter_design,OVERALL_ADAPTER_OR_FAIL

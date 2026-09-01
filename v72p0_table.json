@@ -1,0 +1,32 @@
+[
+  {
+    "synthetic_case": "V72P0-SYN",
+    "Q": 1024,
+    "N": 1024,
+    "Nbit": 10240,
+    "M": 9036,
+    "f": 1.3,
+    "f_actual": "NOT_MEASURED",
+    "T_LF01": true,
+    "T_LF02": true,
+    "T_LF03": true,
+    "T_LF04": true,
+    "T_LF05": true,
+    "T_LF06": true,
+    "T_LF07": true,
+    "T_LF08": true,
+    "P0A_PASS": true,
+    "P0B_PASS": true,
+    "C1": true,
+    "C2": true,
+    "C3": true,
+    "C4": true,
+    "C5": true,
+    "C6": true,
+    "wall_s": 0.045999999972991645,
+    "peak_MiB": 0.0036401748657226562,
+    "classification": "V72P0_SYNTHESIS_ADAPTER",
+    "successor": "v72_mother_adapter_design",
+    "overall": "OVERALL_ADAPTER_OR_FAIL"
+  }
+]
