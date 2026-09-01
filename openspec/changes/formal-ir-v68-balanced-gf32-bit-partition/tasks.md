@@ -2,9 +2,9 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024维符号 GF32两层验证冻结仅重划分10 bits，枚举252子集按升序唯一词典序 max→sum→abs→lex 选 S*，Phase A CAL-only 选 S* Phase B VAL确认报告 natural 参照，session 复用 V67 三预注册 Stage2，per-session 4分流 + 总体3态 + common审计，四工件 spike/results/table/report+test，守卫 R68-01~10，不跑decoder不构矩阵**
 
-**HEAD**: `fcf3e457ecf45c58e23f91d750acd5267d541795` + data `84d62779` (复用 V67 清理后 HEAD)
+**HEAD**: `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` + data `84d62779` (复用 V67 清理后 HEAD)
 
-**Predecessor**: `formal-ir-v67-multisession-feasibility-map` `fcf3e457ecf45c58e23f91d750acd5267d541795` `V67_FEASIBILITY_MAP_ACCEPTED` (3 sessions 均 `NEAR_FULL` natural 5+5) → `V68-BAL`
+**Predecessor**: `formal-ir-v67-multisession-feasibility-map` `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` `V67_FEASIBILITY_MAP_ACCEPTED` (3 sessions 均 `NEAR_FULL` natural 5+5) → `V68-BAL`
 
 **Method frozen**: `n1024 q1024 GF32 poly37 H1 16×1024 rank16 80b U=32*U1+U2 F03 5+5 natural (仅新增 S 重标记) Lane C ordinal-2 s38310x m2 184/190/192 H_inc Δ8 decoder 90/1.0 full-tag canonical 32*U1+U2 leak 5*(m1+m2)+64` 零改；处理点 `84d62779` 单点；`S` 252 枚举
 
@@ -12,7 +12,7 @@
 
 ## Phase A — 注册表复用与枚举前置（V67 Stage2 复用，不重估计）
 
-- [x] **A1 复用 `v67_data_registry.json` 的 Stage2 帧集（机械，不按 CE 替换）**：读取 `openspec/changes/formal-ir-v67-multisession-feasibility-map/v67_data_registry.json` 的 `sessions[3]`（`20260123_1M_600k_0dB 1M / 20260107_PPLN_1p5M 1p5M / 20260123_2M_1p2M_0dB 2M`）的 `stage2_CAL_frame_ids[1024] (262144 pairs) + stage2_VAL_frame_ids[256] (65536 pairs)` 原样拷贝至 `v68_data_registry.json`（`schema v68_data_v1, lifecycle PLAN_CANDIDATE, head fcf3e457ecf45c58e23f91d750acd5267d541795, data_sha 84d62779, reused_from v67, sessions[3], per_session {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified, frozen, not_sorted_by_CE}`），校验 `total 3 && per_category 1,1,1 && acquisition_dedup_verified && zero_overlap_verified && Stage2_key ∩ (V13..V67)_key ==∅` 键 `(source,session,frame)`，禁止事后换 session。
+- [x] **A1 复用 `v67_data_registry.json` 的 Stage2 帧集（机械，不按 CE 替换）**：读取 `openspec/changes/formal-ir-v67-multisession-feasibility-map/v67_data_registry.json` 的 `sessions[3]`（`20260123_1M_600k_0dB 1M / 20260107_PPLN_1p5M 1p5M / 20260123_2M_1p2M_0dB 2M`）的 `stage2_CAL_frame_ids[1024] (262144 pairs) + stage2_VAL_frame_ids[256] (65536 pairs)` 原样拷贝至 `v68_data_registry.json`（`schema v68_data_v1, lifecycle PLAN_CANDIDATE, head d6f590ac6f30deaa8b0bf6cf5c419593fc037720, data_sha 84d62779, reused_from v67, sessions[3], per_session {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified, frozen, not_sorted_by_CE}`），校验 `total 3 && per_category 1,1,1 && acquisition_dedup_verified && zero_overlap_verified && Stage2_key ∩ (V13..V67)_key ==∅` 键 `(source,session,frame)`，禁止事后换 session。
 - [x] **A2 枚举 252 子集升序生成（ponytail: itertools.combinations）**：`S_list = list(itertools.combinations(range(10),5))` 升序 252 行，校验 `len==252 && S_list[0]==(0,1,2,3,4) && S_list[-1]==(5,6,7,8,9)` 且 `C(10,5)==252`，`S_nat=(5,6,7,8,9)` 恒包含，落盘 `v68_manifest.json:enum {count 252, S_nat index, generation lex order}`。
 - [x] **A3 冻结 U 重标记函数（纯比特置换，不改 s）**：实现 `bits_S(s, S) -> (u1', u2')` 其中 `u1' = Σ_{k=0..4} ((s>>S[k])&1)<<k`, `u2' = Σ_{k=0..4} ((s>>T[k])&1)<<k` with `T = sorted(B\S)`, 每帧校验 `natural S_nat 时 bits_S(s)==s>>5 && bits_T(s)==s&31`，`rg "gray|met|protograph" 0 hits`（除注释），`src/` 零改。
 
@@ -71,7 +71,7 @@ decoder/矩阵构造 (`decode_*` / `construct_*` / `gf_rank` / `nested` 等)；�
 
 ## 验收
 
-- proposal/design/tasks/specs 一致 `fcf3e457ecf45c58e23f91d750acd5267d541795→新 Plan SHA` `84d62779` lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` 4分流+3态按优先级互斥明确，显式 1024维冻结仅重划分10 bits、枚举252升序唯一词典序 `max→sum→abs→lex` 选 `S*`、`Phase A CAL-only` 不读 VAL/TEST `Phase B VAL确认+natural参照`、V67三Session Stage2 复用、per-session 4分流 + 总体3态 + common审计、四工件产出已声明，严格复用 V56 权威算法，冻结分段/熵-CE 与 m 公式/分流阈
+- proposal/design/tasks/specs 一致 `d6f590ac6f30deaa8b0bf6cf5c419593fc037720→新 Plan SHA` `84d62779` lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` 4分流+3态按优先级互斥明确，显式 1024维冻结仅重划分10 bits、枚举252升序唯一词典序 `max→sum→abs→lex` 选 `S*`、`Phase A CAL-only` 不读 VAL/TEST `Phase B VAL确认+natural参照`、V67三Session Stage2 复用、per-session 4分流 + 总体3态 + common审计、四工件产出已声明，严格复用 V56 权威算法，冻结分段/熵-CE 与 m 公式/分流阈
 - 1024维冻结仅重划分已验，`S 252` 枚举升序唯一词典序 `T max→sum→abs→lex` 已验，`Phase A CAL-only` 不读 VAL/TEST 且 `S*` 以 `CAL m_cv` 选已验，`Phase B VAL` 上 `S*/S_nat` 双计 `CE/m` 链式 `|CE_full-CE1-CE2|<1e-9` 已验，`m_raw ceil` 不 cap，`TEST` 未读已验，3 sessions 复用已验，**新 Plan SHA 已推送**
 - 合同 `dimension 1024 / bin200 / nearest legacy_v1 / channels/frame anchor/mapping 每帧256` 算法一致已验，`U` 重标记 `bits_S` 每帧已验，偏则 `EVIDENCE_INCOMPLETE` 已验，`252` 已验
 - 每 session `CAL 252×C_ab → P(U1'|B)/P(U2'|U1'B) λ(CAL 4-fold) → VAL CE1/CE2/CE_full 链式 → m1_raw/m2_raw ceil → T max→sum→abs→lex 选 S*` 已算且 `CAL-only` 已验，`VAL` 上 `S*/S_nat` 双计 `m_raw/raw` 且 `natural Δ` 已报告，不扩，禁第二 estimator 已验，`cal_val_consistency` 已报告

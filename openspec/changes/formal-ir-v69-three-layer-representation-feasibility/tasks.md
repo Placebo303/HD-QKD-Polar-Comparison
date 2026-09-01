@@ -2,9 +2,9 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024维符号三层有序 `w∈[2,5]` 重划分，枚举 `3^10=59049→37170` 去重统计，按升序唯一词典序 `max_util→disclosure→ΔNLL→lex` 选 `P*`，Phase A CAL-only 选 P* Phase B VAL确认 per-layer `VAL-CAL≤0.5` + `unseen≤1%` + `chain 1e-9` + `m<1024`，session 复用 V67 三预注册 Stage2，per-session 5分流 + 总体5态 + common三 session 同 assignment 审计，四工件 spike/results/table/report+test，守卫 R69-01~10，不跑decoder不构矩阵不读TEST不启V70**
 
-**HEAD**: `fcf3e457ecf45c58e23f91d750acd5267d541795` + data `84d62779` (复用 V67/V68 清理后 HEAD)
+**HEAD**: `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` + data `84d62779` (复用 V67/V68 清理后 HEAD)
 
-**Predecessor**: `formal-ir-v68-balanced-gf32-bit-partition` `fcf3e457ecf45c58e23f91d750acd5267d541795` + `formal-ir-v67-multisession-feasibility-map` `V67_FEASIBILITY_MAP_ACCEPTED` (3 sessions 均 `NEAR_FULL` natural 5+5) → `V69-3L`
+**Predecessor**: `formal-ir-v68-balanced-gf32-bit-partition` `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` + `formal-ir-v67-multisession-feasibility-map` `V67_FEASIBILITY_MAP_ACCEPTED` (3 sessions 均 `NEAR_FULL` natural 5+5) → `V69-3L`
 
 **Method frozen**: `n1024 q1024 GF32 poly37 H1 16×1024 rank16 80b U 二层 natural 5+5 参照 + U 三层 (S1,S2,S3) w∈[2,5] Σw=10 有序非空 37170种仅重标记 Lane C ordinal-2 s38310x m2 184/190/192 H_inc Δ8 decoder 90/1.0 full-tag canonical leak Σw_i·m_i+64` 零改；处理点 `84d62779` 单点；`P` `3^10→37170` 枚举去重
 
@@ -12,7 +12,7 @@
 
 ## Phase A — 注册表复用与枚举前置（V67 Stage2 复用，`3^10→37170` 去重统计，不重估计）
 
-- [ ] **A1 复用 `v67_data_registry.json` 的 Stage2 帧集（机械，不按 CE 替换，不启 V70）**：读取 `openspec/changes/formal-ir-v67-multisession-feasibility-map/v67_data_registry.json` 的 `sessions[3]`（`20260123_1M_600k_0dB 1M / 20260107_PPLN_1p5M 1p5M / 20260123_2M_1p2M_0dB 2M`）的 `stage2_CAL_frame_ids[1024] (262144 pairs) + stage2_VAL_frame_ids[256] (65536 pairs)` 原样拷贝至 `v69_data_registry.json`（`schema v69_data_v1, lifecycle PLAN_CANDIDATE, head fcf3e457ecf45c58e23f91d750acd5267d541795, data_sha 84d62779, reused_from v67, successor_v70_not_started true, sessions[3], per_session {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified, frozen, not_sorted_by_CE}`），校验 `total 3 && per_category 1,1,1 && acquisition_dedup_verified && zero_overlap_verified && Stage2_key ∩ (V13..V68)_key ==∅` 键 `(source,session,frame)`，禁止事后换 session，且 `successor_v70_not_started==true`。
+- [ ] **A1 复用 `v67_data_registry.json` 的 Stage2 帧集（机械，不按 CE 替换，不启 V70）**：读取 `openspec/changes/formal-ir-v67-multisession-feasibility-map/v67_data_registry.json` 的 `sessions[3]`（`20260123_1M_600k_0dB 1M / 20260107_PPLN_1p5M 1p5M / 20260123_2M_1p2M_0dB 2M`）的 `stage2_CAL_frame_ids[1024] (262144 pairs) + stage2_VAL_frame_ids[256] (65536 pairs)` 原样拷贝至 `v69_data_registry.json`（`schema v69_data_v1, lifecycle PLAN_CANDIDATE, head d6f590ac6f30deaa8b0bf6cf5c419593fc037720, data_sha 84d62779, reused_from v67, successor_v70_not_started true, sessions[3], per_session {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified, frozen, not_sorted_by_CE}`），校验 `total 3 && per_category 1,1,1 && acquisition_dedup_verified && zero_overlap_verified && Stage2_key ∩ (V13..V68)_key ==∅` 键 `(source,session,frame)`，禁止事后换 session，且 `successor_v70_not_started==true`。
 
 - [ ] **A2 枚举 `3^10=59049` → 过滤 `37170` 有效三层有序非空 `w∈[2,5]` 划分（ponytail: `itertools.product`/`base-3`）**：生成 `assign_list = list(itertools.product([1,2,3], repeat=10))` 或等价 `base-3 0..59048` 升序 `59049` 行，校验 `len(raw)==59049==3**10`，对每 `assign` 计 `w_i = count(assign==i)`，过滤 `2≤w_i≤5 ∀i && Σw_i==10 && S_i≠∅` 得 `valid_list` 校验 `len(valid)==37170` 且 `12` 种 `w pattern` 各计数 `2520/3150/4200` 分表一致（见 Design §5.4），`dedup_stats={raw 59049, valid 37170, per_pattern[12], empty_filtered, width_filtered}` 落盘 `v69_manifest.json:enum`，`P_lex = tuple(assign)` 字典序保证唯一。
 
@@ -85,7 +85,7 @@ decoder/矩阵构造 (`decode_*` / `construct_*` / `gf_rank` / `nested` 等)；�
 
 ## 验收
 
-- proposal/design/tasks/specs 一致 `fcf3e457ecf45c58e23f91d750acd5267d541795→新 Plan SHA` `84d62779` lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V70_NOT_STARTED` 5分流+5态按优先级互斥明确，显式 1024维冻结仅重划分10 bits 三层有序 `w∈[2,5]`、枚举 `3^10=59049→37170` 去重统计升序唯一词典序 `max_util→disclosure→ΔNLL→lex` 选 `P*` + common同 assignment、`Phase A CAL-only` 不读 VAL/TEST `Phase B VAL确认 per-layer ≤0.5 + unseen≤1% + chain 1e-9 + m<1024`、V67三Session Stage2 复用、per-session 5分流 + 总体5态 + common审计、四工件产出已声明，严格复用 V56 权威算法，冻结分段/熵-CE 与 m 公式/分流阈 + V70_not_started
+- proposal/design/tasks/specs 一致 `d6f590ac6f30deaa8b0bf6cf5c419593fc037720→新 Plan SHA` `84d62779` lifecycle `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` + `V70_NOT_STARTED` 5分流+5态按优先级互斥明确，显式 1024维冻结仅重划分10 bits 三层有序 `w∈[2,5]`、枚举 `3^10=59049→37170` 去重统计升序唯一词典序 `max_util→disclosure→ΔNLL→lex` 选 `P*` + common同 assignment、`Phase A CAL-only` 不读 VAL/TEST `Phase B VAL确认 per-layer ≤0.5 + unseen≤1% + chain 1e-9 + m<1024`、V67三Session Stage2 复用、per-session 5分流 + 总体5态 + common审计、四工件产出已声明，严格复用 V56 权威算法，冻结分段/熵-CE 与 m 公式/分流阈 + V70_not_started
 - 1024维冻结仅重划分已验，`P 3^10→37170` 去重枚举升序唯一词典序 `T max_util→disclosure→ΔNLL→lex` + common同 assignment 已验，`Phase A CAL-only` 不读 VAL/TEST 且 `P*` 以 `CAL m_cv` 选已验，`Phase B VAL` 上 `P*` 双计 `CE/m` 链式 `|CE_full-ΣCE_i|<1e-9` 且 per-layer `VAL-CAL≤0.5 && unseen≤1% && m<1024` 已验，`m_raw ceil` 不 cap，`TEST` 未读已验，3 sessions 复用已验，**新 Plan SHA 已推送，V70 未启动**
 - 合同 `dimension 1024 / bin200 / nearest legacy_v1 / channels/frame anchor/mapping 每帧256` 算法一致已验，`U` 三层重标记 `bits_P` 每帧已验，偏则 `EVIDENCE_INCOMPLETE` 已验，`37170` 去重 + `59049` raw 已验
 - 每 session `CAL 37170×C_ab → P(U1|B)/P(U2|U1,B)/P(U3|U1,U2,B) λ(CAL 4-fold) → VAL CE1/CE2/CE3/CE_full 链式 → m_i_raw ceil → T max_util→disclosure→ΔNLL→lex 选 P*` 已算且 `CAL-only` 已验，`VAL` 上 `P*` 计 `m_raw/raw` 且 per-layer `ΔCE/ΔNLL/unseen` 已报告，不扩，禁第二 estimator 已验，`cal_val_consistency` 已报告，`dedup_stats 12-pattern` 已落盘

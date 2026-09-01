@@ -2,15 +2,15 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 仅 plan 四工件 + decoder-free 均衡 bit-partition 地图，不改1024维符号 GF32两层验证，仅重划分10 bits，不跑decoder不构矩阵
 
-**Change**: `formal-ir-v68-balanced-gf32-bit-partition` (`V68-BAL`, branch `formal-ir-mainline`, HEAD `fcf3e457ecf45c58e23f91d750acd5267d541795`, data `84d62779`, 3 sessions 复用 V67 Stage2)
+**Change**: `formal-ir-v68-balanced-gf32-bit-partition` (`V68-BAL`, branch `formal-ir-mainline`, HEAD `d6f590ac6f30deaa8b0bf6cf5c419593fc037720`, data `84d62779`, 3 sessions 复用 V67 Stage2)
 
-**Predecessor**: `formal-ir-v67-multisession-feasibility-map` (`fcf3e457ecf45c58e23f91d750acd5267d541795` `V67_FEASIBILITY_MAP_ACCEPTED`) + `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) — V68 新增均衡 partition 地图，A-G 全约束，decoder-free
+**Predecessor**: `formal-ir-v67-multisession-feasibility-map` (`d6f590ac6f30deaa8b0bf6cf5c419593fc037720` `V67_FEASIBILITY_MAP_ACCEPTED`) + `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) — V68 新增均衡 partition 地图，A-G 全约束，decoder-free
 
 ## 1. 变更类型与生命周期
 
 - **Type**: `BALANCED_BIT_PARTITION_MAP` — 于 V67 三预注册 Session 的 `Stage2 CAL1024+VAL256` 上，对 `B={0..9}` 的全部 `C(10,5)=252` 个 5-bit 子集 `S` 定义 `U1'=bits_S(s), U2'=bits_{B\S}(s)`，每 `S` 在 `CAL` 上估 `P(U1'|B)/P(U2'|U1'B)`（`λ` 仅 CAL 4-fold），在 `VAL` 上计 `CE1/CE2/CE_full chain→m1_raw/m2_raw ceil不cap`，以升序唯一词典序 `max→sum→abs→lex` 选 `S*_per_session` 与 `S*_common`，报告 `natural S_nat={5,6,7,8,9}` 参照，`Phase A CAL-only` 不读 VAL/TEST，`Phase B VAL` 确认，per-session 4分流 + 总体3态 + common审计。
 - **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件 + decoder-free 地图（`v68_data_registry.json + v68_spike.py + v68_results.json + v68_table.{csv,json} + V68_BALANCED_REPORT.md + test_v68_spike_small.py`），**不实现 runner，不执行 decoder，不构矩阵，不创建 `run_01`，不读 VAL/TEST 择优，不改1024维主体/V67/src**；正式 `run_01` 需独立 `PLAN_ACCEPT` + `EXECUTE_AUTH`；`DECODER_FREE` 表示零 `decode_* / construct_* / gf_rank / nested` 调用（`rg 0 hits`）。
-- **Branch**: `formal-ir-mainline`；`HEAD` `fcf3e457ecf45c58e23f91d750acd5267d541795` 重核，不一致阻塞；已与 `git rev-parse HEAD` 一致。`TBD` 0 hits，`f4040fc1` 0 hits 已验（V67 已清理）。
+- **Branch**: `formal-ir-mainline`；`HEAD` `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` 重核，不一致阻塞；已与 `git rev-parse HEAD` 一致。`TBD` 0 hits，`f4040fc1` 0 hits 已验（V67 已清理）。
 - **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) — V68 复用 V67 三 session Stage2 (`CAL1024+VAL256`)，不换点。
 - **Session bound**: `total 3 (=V67 3)` 复用，`per_category 1,1,1`，不新增 acquisition。
 - **Rate feasibility**: **m1_raw=ceil(1.3*1024*CE1/5), m2_raw=ceil(1.3*1024*CE2/5), raw_disclosure=5*(m1+m2)+64 不 cap**，择优键 `T=(max,sum,abs,S_lex)` 升序，分流阈 `m<1024 && raw<5120` 为 `BALANCED`。

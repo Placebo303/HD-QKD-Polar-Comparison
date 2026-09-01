@@ -6,11 +6,11 @@
 
 **Change ID**: `formal-ir-v69-three-layer-representation-feasibility`
 
-**Cycle ID**: `V69-3L` (three-layer-representation-feasibility), predecessor `formal-ir-v68-balanced-gf32-bit-partition` (`fcf3e457ecf45c58e23f91d750acd5267d541795` V68 `PLAN_CANDIDATE/DECODER_FREE`) + `formal-ir-v67-multisession-feasibility-map` (`V67_FEASIBILITY_MAP_ACCEPTED` 3 sessions 均 `NEAR_FULL` on natural 5+5) + `formal-ir-v64` (`22/24 PASS`)
+**Cycle ID**: `V69-3L` (three-layer-representation-feasibility), predecessor `formal-ir-v68-balanced-gf32-bit-partition` (`d6f590ac6f30deaa8b0bf6cf5c419593fc037720` V68 `PLAN_CANDIDATE/DECODER_FREE`) + `formal-ir-v67-multisession-feasibility-map` (`V67_FEASIBILITY_MAP_ACCEPTED` 3 sessions 均 `NEAR_FULL` on natural 5+5) + `formal-ir-v64` (`22/24 PASS`)
 
 **Branch**: `formal-ir-mainline`
 
-**HEAD**: `fcf3e457ecf45c58e23f91d750acd5267d541795` (V67/V68 清理后冻结 HEAD，本变更基于此；推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核)
+**HEAD**: `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` (V67/V68 清理后冻结 HEAD，本变更基于此；推送后以 `git rev-parse HEAD == origin/formal-ir-mainline` 40位重核)
 
 **Data SHA**: `84d62779` (`84d62779603e62de50ded5182ed65b65d3dc6084`, `d=1024 bw=200ps pairing=nearest rule=legacy_v1` 单点；V69 复用 V67 三 session 的 `Stage2 CAL1024+VAL256`，不换点，不换 bin/mapping，不新增 acquisition)
 
@@ -86,7 +86,7 @@
 
 ## Acceptance Criteria
 
-- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD fcf3e457ecf45c58e23f91d750acd5267d541795` + `data 84d62779` + `predecessor V68 fcf3e457ecf45c58e23f91d750acd5267d541795 / V67 FEASIBILITY_MAP_ACCEPTED / V64 22/24 PASS` 已绑定，显式声明 decoder-free、零 decoder/矩阵、1024维符号三层有序 `w∈[2,5]` 重划分、枚举 `3^10=59049→37170` 去重统计、升序唯一词典序 `max_util→disclosure→ΔNLL→lex` 选 `P*`、`Phase A CAL-only Phase B VAL确认` per-layer `VAL-CAL≤0.5` + `unseen≤1%` + `chain 1e-9` + `m<1024` + `raw disclosure` + common 三 session 同 assignment、四工件产出已声明，**V69 无独立 plan commit — provenance 待推送后生成**。
+- [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD d6f590ac6f30deaa8b0bf6cf5c419593fc037720` + `data 84d62779` + `predecessor V68 d6f590ac6f30deaa8b0bf6cf5c419593fc037720 / V67 FEASIBILITY_MAP_ACCEPTED / V64 22/24 PASS` 已绑定，显式声明 decoder-free、零 decoder/矩阵、1024维符号三层有序 `w∈[2,5]` 重划分、枚举 `3^10=59049→37170` 去重统计、升序唯一词典序 `max_util→disclosure→ΔNLL→lex` 选 `P*`、`Phase A CAL-only Phase B VAL确认` per-layer `VAL-CAL≤0.5` + `unseen≤1%` + `chain 1e-9` + `m<1024` + `raw disclosure` + common 三 session 同 assignment、四工件产出已声明，**V69 无独立 plan commit — provenance 待推送后生成**。
 - [ ] **冻结主体零改已验**：`git diff -- src/ ==0 && git diff -- experiments/ ==0 && git diff -- tools/ ==0`，`n1024 q1024 GF32 poly37 H1 16×1024 rank16 80b U=(U1,U2,U3) 三层 (仅 S 重标记) Lane C 184/190/192 H_inc Δ8 decoder 90/1.0 full-tag canonical leak Σ w_i·m_i+64` 全只读，处理点 `84d62779 legacy_v1` 单点，`rg -i "gray|met|protograph|sc_coupling" scripts/v69_three_layer_feasibility.py` 0 hits（除 `P` 纯比特重划分注释），`rg "decode_|construct_|gf_rank|nested" 0 hits` 已验，`rg "TEST.*read|read.*TEST" 0 hits` 且 `used_test==False`。
 - [ ] **枚举 `3^10→37170` 去重统计已验**：`3^10=59049` 个 `B→{1,2,3}` 分配由 `base-3` 或 `itertools.product([1,2,3], repeat=10)` 升序生成，去重后过滤 `w_i∈[2,5]` 且 `Σw_i=10` 且 `S_i≠∅` 得 `37170` 有序三层 partition（`12` 种 `w` pattern 各 `2520/3150/4200` 已分表统计），每 `P` 独立 `C_ab 1024×1024 → P_global → P(U1|B)/P(U2|U1,B)/P(U3|U1,U2,B) λ(CAL 4-fold [1e-2,1e4]) → VAL CE1/CE2/CE3/CE_full chain |CE_full-ΣCE_i|<1e-9 → m_i_raw=ceil(1.3*1024*CE_i/w_i) raw_disclosure Σ w_i·m_i+64` 不 cap，且 `T(P)=(max_util, raw, max_ΔNLL, P_lex)` 升序选 `P*_per_session`，`T_common(P)=(max_{sess} max_util, max_{sess} raw, max_{sess} ΔNLL, P_lex)` 选 `P*_common`（三 session 同 assignment），`dedup_stats` 已落盘且 `59049→37170` 已验，排序稳定唯一。
 - [ ] **Phase A CAL-only Phase B VAL确认（含 per-layer ≤0.5 + unseen≤1% + chain + m<1024）已验**：`P*` 择优仅 `CAL1024` 内 `4-fold CV NLL/CE_cv` 最小 `λ`，脚本内 `used_val_in_selection==False && used_test==False` 已验；`VAL256` 上对 `P*` 计 `CE1/CE2/CE3/CE_full/λ/ΔNLL_i/val_b_unseen/chain_delta/H_cal`，`∀i |CE_i^{VAL}-CE_i^{CAL-CV}|≤0.5` 且 `ΔNLL_i≤0.5` 且 `val_b_context_unseen≤1%` 且 `|ΣCE_i-CE_full|<1e-9` 且 `m_i_raw<1024 ∀i` 均已链式校验，`H_cal/q_mass/joint` 仅描述性，不入稳定性门禁，`m_raw` 不 cap 显式，`raw_disclosure` 显式。

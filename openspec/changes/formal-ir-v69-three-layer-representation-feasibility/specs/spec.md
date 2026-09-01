@@ -2,15 +2,15 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 仅 plan 四工件 + decoder-free 三层表示可行性地图，不改1024维符号 GF32两层验证，仅重划分10 bits 为三层有序 `w∈[2,5]`，不跑decoder不构矩阵不读TEST不启V70
 
-**Change**: `formal-ir-v69-three-layer-representation-feasibility` (`V69-3L`, branch `formal-ir-mainline`, HEAD `fcf3e457ecf45c58e23f91d750acd5267d541795`, data `84d62779`, 3 sessions 复用 V67 Stage2, `3^10=59049→37170`)
+**Change**: `formal-ir-v69-three-layer-representation-feasibility` (`V69-3L`, branch `formal-ir-mainline`, HEAD `d6f590ac6f30deaa8b0bf6cf5c419593fc037720`, data `84d62779`, 3 sessions 复用 V67 Stage2, `3^10=59049→37170`)
 
-**Predecessor**: `formal-ir-v68-balanced-gf32-bit-partition` (`fcf3e457ecf45c58e23f91d750acd5267d541795` `PLAN_CANDIDATE`) + `formal-ir-v67-multisession-feasibility-map` (`V67_FEASIBILITY_MAP_ACCEPTED`) + `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) — V69 新增三层表示可行性地图，A-G 全约束，decoder-free，不启 V70
+**Predecessor**: `formal-ir-v68-balanced-gf32-bit-partition` (`d6f590ac6f30deaa8b0bf6cf5c419593fc037720` `PLAN_CANDIDATE`) + `formal-ir-v67-multisession-feasibility-map` (`V67_FEASIBILITY_MAP_ACCEPTED`) + `formal-ir-v64-full-symbol-verification-correction` (`22/24 PASS`) — V69 新增三层表示可行性地图，A-G 全约束，decoder-free，不启 V70
 
 ## 1. 变更类型与生命周期
 
 - **Type**: `THREE_LAYER_REPRESENTATION_FEASIBILITY_MAP` — 于 V67 三预注册 Session 的 `Stage2 CAL1024+VAL256` 上，对 `B={0..9}` 的全部 `3^10=59049` 个分配 `assign: B→{1,2,3}` 去重统计后过滤 `w_i=|{j:assign[j]=i}|∈[2,5]` 且 `Σw_i=10` 且 `S_i≠∅` 得 **37170** 个有效有序三层划分 `P=(S1,S2,S3)` 定义 `U_i=bits_{S_i}(s)`（宽度 `w_i`, 值域 `0..2^{w_i}-1`），每 `P` 在 `CAL` 上估 `P(U1|B)/P(U2|U1,B)/P(U3|U1,U2,B)`（`λ` 仅 CAL 4-fold），在 `VAL` 上计 `CE1/CE2/CE3/CE_full chain→m_i_raw=ceil(1.3*1024*CE_i/w_i) raw_disclosure=Σw_i·m_i+64` 不 cap，链式 `|ΣCE_i-CE_full|<1e-9`，per-layer `|CE_i^{VAL}-CE_i^{CAL-CV}|≤0.5` 且 `val_b_unseen≤1%` 且 `∀m_i<1024` 门禁，以升序唯一词典序 `max_util→disclosure→max_ΔNLL→lex` 选 `P*_per_session` 与 `P*_common`（需三 session 同 assignment），`Phase A CAL-only` 不读 VAL/TEST，`Phase B VAL` 确认 per-layer 门禁。
 - **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — 本轮止于 plan 四工件 + decoder-free 地图（`v69_data_registry.json + v69_three_layer_feasibility.py + v69_results.json + v69_table.{csv,json} + V69_THREE_LAYER_REPORT.md + test_v69_three_layer_small.py + dedup_stats`），**不实现 runner，不执行 decoder，不构矩阵，不创建 `run_01`，不读 VAL/TEST 择优，不改1024维主体/V67/V68/src，不启动 V70**；正式 `run_01` 需独立 `PLAN_ACCEPT` + `EXECUTE_AUTH`；`DECODER_FREE` 表示零 `decode_* / construct_* / gf_rank / nested` 调用（`rg 0 hits`），`V70_NOT_STARTED` 表示零 `V70_*/run_01` 且 `rg -i "v70|qualification" 0 hits`（除 successor 注释）。
-- **Branch**: `formal-ir-mainline`；`HEAD` `fcf3e457ecf45c58e23f91d750acd5267d541795` 重核，不一致阻塞；已与 `git rev-parse HEAD` 一致。`TBD` 0 hits。
+- **Branch**: `formal-ir-mainline`；`HEAD` `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` 重核，不一致阻塞；已与 `git rev-parse HEAD` 一致。`TBD` 0 hits。
 - **Data SHA**: `84d62779` (`d1024 bw200 nearest legacy_v1`) — V69 复用 V67 三 session Stage2 (`CAL1024+VAL256`)，不换点，不启 V70。
 - **Session bound**: `total 3 (=V67 3)` 复用，`per_category 1,1,1`，不新增 acquisition。
 - **Rate feasibility**: **m_i_raw=ceil(1.3*1024*CE_i/w_i), raw_disclosure=Σw_i·m_i+64 不 cap**，择优键 `T=(max_util, raw, max_ΔNLL, P_lex)` 升序，分流阈 `∀m_i<1024 && raw<10240 && ∀ΔCE_i≤0.5 && unseen≤1%` 为 `THREE_LAYER_FEASIBLE`，`common` 需三 session 同 assignment。

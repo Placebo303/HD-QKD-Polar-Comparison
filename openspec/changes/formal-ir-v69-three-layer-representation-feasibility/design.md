@@ -2,7 +2,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED` — **1024维符号三层有序 `w∈[2,5]` 重划分，`3^10=59049→37170` 枚举去重，按升序唯一词典序 `max_util→disclosure→ΔNLL→lex` 选 `P*`，Phase A CAL-only Phase B VAL确认 per-layer `VAL-CAL≤0.5` + `unseen≤1%` + `chain 1e-9` + `m<1024`，V67三Session Stage2 复用，per-session 5分流 + 总体5态 + common三 session 同 assignment 审计，不跑decoder不构矩阵不启V70**
 
-**Cycle**: `V69-3L` (three-layer-representation-feasibility), predecessor `V68-BAL (fcf3e457ecf45c58e23f91d750acd5267d541795)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS`, HEAD `fcf3e457ecf45c58e23f91d750acd5267d541795` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
+**Cycle**: `V69-3L` (three-layer-representation-feasibility), predecessor `V68-BAL (d6f590ac6f30deaa8b0bf6cf5c419593fc037720)` + `V67-MAP (V67_FEASIBILITY_MAP_ACCEPTED 3× NEAR_FULL)` + `V64 22/24 PASS`, HEAD `d6f590ac6f30deaa8b0bf6cf5c419593fc037720` data `84d62779` 单点 `d1024 bw200 nearest legacy_v1`
 
 **Feasibility**: `V67` 3 sessions 上 `natural 5+5` 均 `m1_raw≥1024` 证 `NEAR_FULL`，`V68` 252 均衡 `5+5` 地图待验证，`V69` 假设**三层 `w∈[2,5]` 有序非空划分**可在 `CE` 维度拆散 `H(U1|B)+H(U2|U1,B)+H(U3|U1,U2,B)` 使每层 `m_i<1024` 的概率高于二层，需 decoder-free 验证 `∃P: ∀i m_i<1024` 且 `common` 三 session 同 assignment。
 
@@ -50,7 +50,7 @@
 
 - **复用**：`v69_data_registry.json` 由 `v67_data_registry.json` 的 3 sessions (`20260123_1M_600k_0dB 1M, 20260107_PPLN_1p5M 1p5M, 20260123_2M_1p2M_0dB 2M`) 的 `stage2_CAL[1024] + stage2_VAL[256]` 原样拷贝（`total 3, per_category 1,1,1, acquisition_dedup_verified, frozen, not_sorted_by_CE`），`zero_overlap_verified` 与 `V13..V68` 零重叠已验，禁止事后换 session 或按 `CE/m` 替换。
 - **不重估计 V67/V68**：V67/V68 的 `CE/m` 仅引用对照，不在 V69 上重算；V69 仅在新三层 `P` 上重估。
-- **注册表**：`v69_data_registry.json` (`schema v69_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head fcf3e457ecf45c58e23f91d750acd5267d541795, reused_from v67, successor V70_not_started`) 含 `sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`。
+- **注册表**：`v69_data_registry.json` (`schema v69_data_v1, lifecycle PLAN_CANDIDATE, data_sha 84d62779, head d6f590ac6f30deaa8b0bf6cf5c419593fc037720, reused_from v67, successor V70_not_started`) 含 `sessions[3] {session_id, acquisition_id, source_label, provenance, stage2_CAL[1024], stage2_VAL[256], zero_overlap_verified, acquisition_dedup_verified}`。
 
 ### 3.2 数据就绪门（decoder-free）
 
