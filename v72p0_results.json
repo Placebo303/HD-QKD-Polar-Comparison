@@ -1,7 +1,7 @@
 {
   "schema": "v72p0_results_v1",
   "lifecycle": "PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED",
-  "head": "8fce6550588d458870ef2d268209fc1c826d6077",
+  "head": "b360efe9828484c1022c90c5a14819ebbb9dadcb",
   "data_sha": "84d62779",
   "used_2m": false,
   "f_actual": "NOT_MEASURED",
@@ -57,9 +57,9 @@
       }
     },
     "P0A_PASS": true,
-    "wall_s": 1.7660000000032596,
+    "wall_s": 1.7959999999729916,
     "peak_MiB": 13.505659103393555,
-    "per_invocation_ns": 110375000.00020373,
+    "per_invocation_ns": 112249999.99831198,
     "mode": "tiny_bp_vs_brute_k2_3_7cover",
     "k_set": [
       2,

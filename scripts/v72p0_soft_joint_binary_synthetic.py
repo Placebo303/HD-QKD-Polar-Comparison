@@ -385,7 +385,7 @@ def main():
     ap.add_argument("--manifest",default="v72p0_manifest.json")
     args=ap.parse_args()
     reg_path=Path(args.registry)
-    new_head="8fce6550588d458870ef2d268209fc1c826d6077"
+    new_head="b360efe9828484c1022c90c5a14819ebbb9dadcb"
     if not reg_path.exists():
         r0=160
         Rs=list(range(r0,9036,8))
@@ -395,8 +395,8 @@ def main():
     else:
         reg=json.loads(reg_path.read_text(encoding="utf-8"))
         # provenance sync: update head if old
-        if reg.get("head")!="8fce6550588d458870ef2d268209fc1c826d6077":
-            reg["head"]="8fce6550588d458870ef2d268209fc1c826d6077"
+        if reg.get("head")!="b360efe9828484c1022c90c5a14819ebbb9dadcb":
+            reg["head"]="b360efe9828484c1022c90c5a14819ebbb9dadcb"
         # update P0A to k=2/3 and mode
         reg["P0A"]={"N_small":[2,3],"trials":8,"mode":"tiny_bp_vs_brute_k2_3_7cover"}
         reg["P0B"]["structure"]="sparse_CSR_IRA"

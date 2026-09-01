@@ -87,12 +87,12 @@ def test_registry():
     assert j['Q']==1024 and j['N']==1024 and j['M']==9036
     assert j['used_2m']==False
     assert j['successor_v72_not_started']==True
-    assert j['head']=="8fce6550588d458870ef2d268209fc1c826d6077"
+    assert j['head']=="b360efe9828484c1022c90c5a14819ebbb9dadcb"
     assert j['P0A']['N_small']==[2,3]
     assert j['P0B']['structure']=="sparse_CSR_IRA"
 
 def test_provenance_sync():
-    h="8fce6550588d458870ef2d268209fc1c826d6077"
+    h="b360efe9828484c1022c90c5a14819ebbb9dadcb"
     for p in ["v72p0_results.json","v72p0_manifest.json","V72P0_SYN_REPORT.md","V72P0_BACKEND_AUDIT_REPORT.md"]:
         txt=Path(p).read_text(encoding="utf-8")
         assert h in txt

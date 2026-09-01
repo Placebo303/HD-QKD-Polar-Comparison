@@ -1,7 +1,7 @@
 {
   "schema": "v72p0_manifest_v1",
   "lifecycle": "PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED",
-  "head": "8fce6550588d458870ef2d268209fc1c826d6077",
+  "head": "b360efe9828484c1022c90c5a14819ebbb9dadcb",
   "data_sha": "84d62779",
   "frozen_body": {
     "Q": 1024,

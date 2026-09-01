@@ -4,7 +4,7 @@
 
 **Lifecycle**: `PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED` — **1024→10bit local factor 去 self-message LLR ↔ binary LDPC mother 9036×10240 BP incremental syndrome ↔ exact 64-bit tag 链条合成 correctness 合成校验，Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED 2M禁止，T_LF01-08 8测试正交，backend 6问三态 enum 非字符串 READY，P0A tiny 2-4 symbols exhaustive + P0B synthetic mother nested rank C1-C6，8终态 wall first-match，T0-T3 矩阵，不跑 decoder 不改 V70/V70R1/V71**
 
-**Cycle**: `V72P0-SYN` (soft-joint-binary-synthetic P0), predecessor `V71-SJK (487be113)` + `V70-BSJ (9bc34be6)` + `V70R1 (0509d10b CHANGES)`，HEAD `01b4493f8c78f5033b9259efdd4a0e4e99f8189e` (动态绑定 `git rev-parse HEAD`; 2M 禁止, 9036×10240 mother 仅合成, V70/V71 零改) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` + `synthetic_v72p0`
+**Cycle**: `V72P0-SYN` (soft-joint-binary-synthetic P0), predecessor `V71-SJK (487be113)` + `V70-BSJ (9bc34be6)` + `V70R1 (0509d10b CHANGES)`，HEAD `b360efe9828484c1022c90c5a14819ebbb9dadcb` (动态绑定 `git rev-parse HEAD`; 2M 禁止, 9036×10240 mother 仅合成, V70/V71 零改) data `84d62779` 单点 `d1024 bw200 nearest legacy_v1` + `synthetic_v72p0`
 
 **Feasibility**: `V70` `PARTIAL` 证 `D_bits≥0` 且 `soft_joint_factor_update` 纯函数双极 `1e-12`，`V71` `ADAPTER_REQUIRED` 证纯因子核 `D1-D10` 全 PASS 但需适配层，母亲码 `9036×10240` 未验增量嵌套与 tag exact。`V72P0` 假设 **local factor 去 self + mother incremental syndrome + exact tag 在合成域可零构造正确**（`T_LF01-08` 全 PASS 且 `Q1-Q6` 至多 `ADAPTER` 且 `P0A` tiny exhaustive `0 mismatch` 且 `P0B` `C1-C6` 全 PASS 且 `wall≤30s/peak≤2GiB`），则该链条可进入 `V72` real mother 设计，否则 `TINY/RANK/NESTED` 失败需重构。
 
