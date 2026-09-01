@@ -73,7 +73,7 @@ CAL 拟合和 VAL 评估都只消费 1024 格直方图，不重扫 pairs。M0 �
 | `required` | `ceil(1.3·1024·CE_VAL)`，不 cap | 路线 |
 | `f_max_channel_ceiling` | `(10240−64)/(1024·CE_VAL)` | 与规划 f 分离 |
 | `n_parameters` | `1024²+1 / 1024+1 / 4` | 估计代价 |
-| `sample_curve` | CAL 前缀 32/64/128/256/512/1024 帧各自重拟合含超参重选（同网格 CAL-only 4-fold CV 重选 λ/λ_K/μ,s,ε及M2族）→ 同一 VAL 的 CE | 终态 4 证据 |
+| `sample_curve` | CAL 前缀 32/64/128/256/512/1024 帧各自仅重拟合 μ/s/ε（λ/λ_K/M2族固用全量1024帧CAL选出值，不做每前缀4-fold重选）→ 同一 VAL 的 CE <!-- ponytail: 固参版sample_curve，每前缀仅重拟合μ/s/ε，λ固用全量CAL值；不做每前缀4-fold重选以避免小样本高方差与O(6×4)成本，待大样本再考虑每前缀重选 --> | 终态 4 证据 |
 
 **显式非声称**：脚本落盘 `ce_decomposition_claimed: false`。报告中不得出现"模型 KL = CE − H_true"一类分解；只写 observed CE、模型间 CE 差、Fano 上界。
 

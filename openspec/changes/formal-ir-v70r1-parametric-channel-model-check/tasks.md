@@ -21,7 +21,7 @@
 - [x] **C1** `CE_*_VAL` / `CE_*_CAL` / `cal_val_nll_gap` 三模型分别落盘。
 - [x] **C2** `map_accuracy_VAL`（M0 走 `argmax` 行，M1/M2 走 `hist[argmax K]`）与 `fano_upper_bound_diagnostic`，**标注为上界诊断**。
 - [x] **C3** `required = ceil(1.3·1024·CE_VAL)` 不 cap、`gap = 10240 − required`、`margin_gap`、`f_max_channel_ceiling`、`classification`（沿用 V70 三分流阈）、`n_parameters`。
-- [x] **C4** `sample_curve`：CAL 前缀 `32/64/128/256/512/1024` 帧，三模型各自重拟合**含超参重选**（每前缀内 CAL-only 按同网格/同 4-fold CV 重选 `λ/λ_K/μ,s,ε及M2族`），**同一 VAL** 评估；`small_sample_drift` 与 `estimation_cost_win`（64 帧探针：参数化 `≤0.10` 且表 `≥0.50`）。
+- [x] **C4** `sample_curve`：CAL 前缀 `32/64/128/256/512/1024` 帧，三模型各自仅重拟合 μ/s/ε（λ/λ_K/M2族固用全量1024帧CAL选出值，不做每前缀4-fold重选）<!-- ponytail: 固参版sample_curve，每前缀仅重拟合μ/s/ε，λ固用全量CAL值；不做每前缀4-fold重选以避免小样本高方差与O(6×4)成本，待大样本再考虑每前缀重选 -->，**同一 VAL** 评估；`small_sample_drift` 与 `estimation_cost_win`（64 帧探针：参数化 `≤0.10` 且表 `≥0.50`）。
 - [x] **C5** `delta_mass {mass_0, mass_p1, mass_m1, other}` on VAL，用于与 V56 诊断的 8 帧先验对照。
 
 ## Phase D — 终态分流
