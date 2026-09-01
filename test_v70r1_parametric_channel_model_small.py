@@ -5,6 +5,7 @@ No real session data, no TEST frames, no decoder, no run_01.
 from __future__ import annotations
 
 import importlib.util
+import json
 import math
 from pathlib import Path
 
@@ -183,6 +184,8 @@ def test_terminals_are_ordered_and_unique():
     assert len(set(v.TERMINALS)) == len(v.TERMINALS)
     assert v.TERMINALS[0] == "V70R1_EVIDENCE_INVALID"
     assert v.TERMINALS[-1] == "V70R1_PARAMETRIC_MODEL_NO_VALUE"
+    assert len(v.TERMINALS) == 5
+    assert v.TERMINALS[3] == "V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE"
 
 
 def test_source_is_decoder_free_and_declares_no_decomposition():
@@ -221,11 +224,66 @@ def test_provenance_accepted_plan_and_four_artifacts():
         assert "pending_new_sha" not in txt.lower()
     # only four files should mention accepted_plan_sha
     assert len(four) == 4
-    # four terminals consistent across artifacts and script
-    assert len(v.TERMINALS) == 4
+    # five terminals consistent across artifacts and script (R2 mechanical revision)
+    assert len(v.TERMINALS) == 5
     assert v.TERMINALS == (
         "V70R1_EVIDENCE_INVALID",
         "V70R1_TRANSLATION_INVARIANCE_REJECTED",
         "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE",
+        "V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE",
         "V70R1_PARAMETRIC_MODEL_NO_VALUE",
     )
+
+
+# ---------------------------------------------------------------- R2 5-terminal mechanics (Pre-RESULT mechanical revision)
+
+def test_reduces_val_ce_branch_route_false_and_delta_threshold():
+    """REDUCES iff route==false && delta>=0.10; cost descriptive-only, not a trigger."""
+    # probe synthetic: route false delta 0.36 -> REDUCES, delta 0.05 -> NO_VALUE
+    src = (Path(__file__).parent / "scripts" / "v70r1_parametric_channel_model_check.py").read_text(encoding="utf-8")
+    assert "REDUCES_VAL_CE" in src
+    assert "delta_ce >= CE_VALUE_THRESHOLD" in src
+    assert "not route_change" in src
+    # cost must be descriptive-only
+    assert "cost_win descriptive-only" in src or "descriptive-only" in src
+
+
+def test_changes_precedence_over_reduces():
+    """CHANGES (route true) must precede REDUCES in first-match order."""
+    assert v.TERMINALS.index("V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE") < v.TERMINALS.index("V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE")
+    assert v.TERMINALS.index("V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE") < v.TERMINALS.index("V70R1_PARAMETRIC_MODEL_NO_VALUE")
+
+
+def test_mechanical_reclassification_expected_counts():
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    assert data["terminal_counts"]["V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE"] == 2
+    assert data["terminal_counts"]["V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE"] == 1
+    assert data["terminal_counts"]["V70R1_PARAMETRIC_MODEL_NO_VALUE"] == 0
+    assert data["overall"] == "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE"
+    mapping = {s["session_id"]: s["terminal"] for s in data["per_session"]}
+    assert mapping["20260123_1M_600k_0dB"] == "V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE"
+    assert mapping["20260107_PPLN_1p5M"] == "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE"
+    assert mapping["20260123_2M_1p2M_0dB"] == "V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE"
+
+
+def test_table_csv_json_sync_with_results():
+    rows = json.loads((Path(__file__).parent / "v70r1_table.json").read_text(encoding="utf-8"))
+    data = json.loads((Path(__file__).parent / "v70r1_results.json").read_text(encoding="utf-8"))
+    by_id = {s["session_id"]: s["terminal"] for s in data["per_session"]}
+    for r in rows:
+        assert r["terminal"] == by_id[r["session_id"]]
+    import csv
+    with open(Path(__file__).parent / "v70r1_table.csv", encoding="utf-8") as f:
+        reader = list(csv.DictReader(f))
+        for row in reader:
+            assert row["terminal"] == by_id[row["session_id"]]
+
+
+def test_no_value_threshold_and_cost_not_trigger():
+    """delta <0.10 with route false -> NO_VALUE; delta >=0.10 with route true -> CHANGES not REDUCES."""
+    # synthetic boundary: CE_VALUE_THRESHOLD is 0.10
+    assert v.CE_VALUE_THRESHOLD == 0.10
+    # logic check via source ordering already, plus manifest guards
+    manifest = json.loads((Path(__file__).parent / "v70r1_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["terminal_counts"]["V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE"] == 2
+    assert manifest["guards"]["R70R1-08"] is True

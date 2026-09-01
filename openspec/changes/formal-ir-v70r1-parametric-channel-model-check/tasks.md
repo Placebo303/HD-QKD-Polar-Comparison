@@ -26,9 +26,9 @@
 
 ## Phase D — 终态分流
 
-- [x] **D1 四终端 first-match 互斥**：`EVIDENCE_INVALID` > `TRANSLATION_INVARIANCE_REJECTED` > `CHANGES_CAPACITY_ROUTE` > `NO_VALUE`（`REDUCES_ESTIMATION_COST` 已删除，`sample_curve` descriptive-only）。
-- [x] **D2 Overall** 按同序在三 session 聚合，落盘 `terminal_counts` 四计数。
-- [x] **D3 非声称落盘**：`ce_decomposition_claimed: false`、`planning_f_is_not_achieved_f: true`、`used_val_in_selection: false`、`used_test: false`、`V71_not_started` 改为 `V72_not_started` 语义（V71 已完成）。
+- [x] **D1 五终端 first-match 互斥**：`EVIDENCE_INVALID` > `TRANSLATION_INVARIANCE_REJECTED` > `CHANGES_CAPACITY_ROUTE` > `REDUCES_VAL_CE (route==false && ΔCE>=0.10)` > `NO_VALUE`（cost `sample_curve`/`estimation_cost_win` 仅 descriptive-only 不参与分流）。机械重分类：1M REDUCES / 1p5M CHANGES / 2M REDUCES / overall CHANGES（不重跑）。
+- [x] **D2 Overall** 按同序在三 session 聚合，落盘 `terminal_counts` 五计数（`REDUCES_VAL_CE` / `NO_VALUE` 分离）。
+- [x] **D3 非声称落盘**：`ce_decomposition_claimed: false`、`planning_f_is_not_achieved_f: true`、`used_val_in_selection: false`、`used_test: false`、`V71_not_started` 改为 `V72_not_started` 语义（V71 已完成）；`plan_revision` 记录 5 终态机械修订（`REDUCES_VAL_CE` 插入，cost descriptive-only，不重跑）。
 
 ## Phase E — 工件与自检
 

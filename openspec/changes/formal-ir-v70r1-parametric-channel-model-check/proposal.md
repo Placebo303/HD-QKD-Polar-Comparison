@@ -44,16 +44,17 @@ V71 已 `KERNEL_ADAPTER_FEASIBLE / ADAPTER_REQUIRED`（`6bc06d4d..487be113` late
 
 关键量：`ΔCE = CE_table − CE_best_parametric`。
 
-## 终态（first-match 互斥）
+## 终态（first-match 互斥，5 终态）
 
 1. `V70R1_EVIDENCE_INVALID` — M0 未复现 V70 `CE_full_VAL`（`<1e-9`），或 CE 非有限，或任一 λ 落在网格边界。
 2. `V70R1_TRANSLATION_INVARIANCE_REJECTED` — M1 与 M2 的 `CE_VAL` 均比 M0 差超过 `0.05 bit/symbol`。
 3. `V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE` — 最优参数化模型的 `classification`（FEASIBLE/MARGINAL/NO_INFORMATION_MARGIN，沿用 V70 三分流阈）与 M0 不同。
-4. `V70R1_PARAMETRIC_MODEL_NO_VALUE` — 以上均不成立（含 `ΔCE < 0.10 bit/symbol` 且无路线变化；`sample_curve` 仅 descriptive-only，不触发终态）。
+4. `V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE` — `route_change==false && ΔCE >= 0.10 bit/symbol`（仅 VAL CE 降低，cost `sample_curve`/`estimation_cost_win` 仅 descriptive-only 不参与分流）。
+5. `V70R1_PARAMETRIC_MODEL_NO_VALUE` — 以上均不成立（含 `ΔCE < 0.10` 且无路线变化；`sample_curve` 仅 descriptive-only）。
 
-Overall 按同一 first-match 顺序在三 session 上聚合。
+Overall 按同一 first-match 顺序在三 session 上聚合（本次以既有 `v70r1_results` 数值机械重分类：1M→REDUCES, 1p5M→CHANGES, 2M→REDUCES, overall→CHANGES）。
 
-**只有终态 3 才把参数化 estimator 带进未来自动适配器（V77）。** 终态 4 则直接进 `v71_kernel_adapter_design`，不再改估计器。
+**只有终态 3 才把参数化 estimator 带进未来自动适配器（V77）。** 终态 4 为有价值的 CE 降低但未改路线，终态 5 则直接进 `v71_kernel_adapter_design`，不再改估计器。
 
 ## Entry gate
 

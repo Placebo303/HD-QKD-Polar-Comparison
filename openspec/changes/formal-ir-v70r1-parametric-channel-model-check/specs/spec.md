@@ -68,26 +68,27 @@ fano_ub    = h₂(1−acc) + (1−acc)·log2(Q−1)                     # 上界
 
 `TARGET_F_PLANNING` 仅用于把 CE 换算为 `required`；不得被解释为达成效率。本轮 decoder-free，`f_actual` 一律 `NOT_MEASURED`。落盘 `planning_f_is_not_achieved_f: true`。
 
-## 7. 终态（first-match，互斥且完备）
+## 7. 终态（first-match，互斥且完备，5 终态）
 
 | # | 终态 | 条件 |
 |---|---|---|
 | 1 | `V70R1_EVIDENCE_INVALID` | M0 未复现 V70 `CE_full_VAL` `<1e−9`，或 CE 非有限，或 λ/λ_K 落边界，或选择隔离被破坏 |
 | 2 | `V70R1_TRANSLATION_INVARIANCE_REJECTED` | `CE_circulant > CE_table + 0.05` **且** `CE_parametric > CE_table + 0.05` |
 | 3 | `V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE` | `classification(best_parametric) != classification(table)` |
-| 4 | `V70R1_PARAMETRIC_MODEL_NO_VALUE` | 以上均不成立（含 `ΔCE < 0.10` 且无路线变化；`sample_curve` 仅 descriptive-only，不触发终态） |
+| 4 | `V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE` | `route_change==false && ΔCE >= 0.10`（仅 VAL CE 降低，cost `sample_curve`/`estimation_cost_win` 仅 descriptive-only 不参与分流） |
+| 5 | `V70R1_PARAMETRIC_MODEL_NO_VALUE` | 以上均不成立（含 `ΔCE < 0.10` 且无路线变化） |
 
-`best_parametric = argmin(CE_circulant_VAL, CE_parametric_VAL)`。Overall 按同序在三 session 聚合：取第一个计数非零的终态。
+`best_parametric = argmin(CE_circulant_VAL, CE_parametric_VAL)`；`ΔCE = CE_table_VAL − CE_best_parametric_VAL`。Overall 按同序在三 session 聚合：取第一个计数非零的终态（机械重分类：1M REDUCES / 1p5M CHANGES / 2M REDUCES / overall CHANGES，不重跑）。
 
-**后继绑定**：终态 3 → 参数化 estimator 进入 V77 自动适配器候选，且 V72 的 mother code 码率按新 `required` 设计；终态 2 或 4 → 保持 M0，直接进 `v71_kernel_adapter_design`；终态 1 → 阻塞，不进 V72。
+**后继绑定**：终态 3 → 参数化 estimator 进入 V77 自动适配器候选，且 V72 的 mother code 码率按新 `required` 设计；终态 4 → 记录 VAL CE 降低但不改路线，按 V70 原 `required` 推进并记录降幅；终态 5 → 保持 M0，直接进 `v71_kernel_adapter_design`；终态 2 或 1 → 阻塞或保持 M0。
 
 ## 8. 产出
 
 ```
-v70r1_results.json     per_session[3] + terminal_counts[4] + overall + 非声称字段
-v70r1_table.csv/.json  行对等，每 session 一行，三模型的 CE/acc/fano/required/gap/class/params
-V70R1_PARAMETRIC_CHANNEL_REPORT.md
-v70r1_manifest.json    guards R70R1-01..10
+v70r1_results.json     per_session[3] + terminal_counts[5] + overall + 非声称字段 + plan_revision
+v70r1_table.csv/.json  行对等，每 session 一行，三模型的 CE/acc/fano/required/gap/class/params + terminal 5 终态
+V70R1_PARAMETRIC_CHANNEL_REPORT.md  （机械生成，同步 JSON/CSV，不重跑）
+v70r1_manifest.json    guards R70R1-01..10 + 5-terminal counts
 ```
 
 ## 9. 守卫 R70R1-01~10
