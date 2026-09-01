@@ -61,7 +61,7 @@ assert successor_v72_not_started==true && head==TBD (freeze-time)
 assert P1A {plumbing probes 4 indptr/indices相等} && P1B {64/512 8trials tree} && P1C {9036×10240 nnz49620 1/3/10 真消息 finite/maxLLR/residual} && P1D {n12 k3}
 assert mother {nnz==49620 && indptr==v72p0_indptr && indices==v72p0_indices && rank9036 && zero0 && dup0 && checkpoint 160,288,416,8992,9036 disclosed}
 assert Config8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits} 多一少一即 FAIL
-assert 11数组 {prior,extrinsic[10],bit_llr,obs_llr,msg_v2c,msg_c2v,belief_accum,check_residual,syndrome,app_llr} 已定义
+assert 11数组 {prior,extrinsic[10],factor_to_bit,variable_to_check,variable_to_check,check_to_variable,app_llr,syndrome_target,syndrome,app_llr} 已定义
 ```
 
 ## 4. 输入合同 — 严格复用 V56 权威算法（仅新增 adapter 最小接口，精确复用 mother）
@@ -107,13 +107,13 @@ class AdapterResult:
     P1C: dict        # {iter1 {wall,peak,finite,maxLLR,residual,edges,CSR,syndrome_inc,tag,disclosed}, iter3 {...}, iter10 {...}, C1_C6, checkpoint, P1C_PASS}
     P1D: dict        # {n12_k3_loopy: {syndrome_ok, tag_ok, cycle_count, BP_residual, capacity_warning}}
     edges: dict      # {nnz=49620 精确, row_deg_min/max/mean, col_deg_min/max/mean, zero_cols, dup, indptr_equal, indices_equal}
-    memory: dict     # {CSR_bytes, 11数组分项 {prior_logp 8192B, llr_ext 80KB, bit_llr 80KB, obs_llr 80KB, msg_v2c 387KB, msg_c2v 387KB, belief_accum 80KB, check_residual 70KB, syndrome 9KB, app_llr 80KB + workspace_buf 720*8=5760B}, total_11array≈9.2MiB, peak_MiB}
+    memory: dict     # {CSR_bytes, 11数组分项 {prior_logp 8192B, bit_to_factor 80KB, factor_to_bit 80KB, variable_to_check 80KB, variable_to_check 387KB, check_to_variable 387KB, app_llr 80KB, syndrome_target 70KB, syndrome 9KB, app_llr 80KB + factor_workspace 720*8=5760B}, total_11array≈9.2MiB, peak_MiB}
     classification: str  # 5-state first-match
     overall: str     # ADAPTER_PLAN_READY / NOT_READY
 
 class Adapter:  # 纯函数接口（ponytail: 仅 pack/syndrome/tag/prefix，无状态）
-    def pack(self, extrinsic_10x1024) -> bit_llr_10240: ...  # col sym*10+bit 双射 11数组打包
-    def syndrome(self, bits_10240, H_r) -> syndrome_r: ...  # H_r·b mod2 sparse 精确复用 mother
+    def pack(self, extrinsic_10x1024) -> factor_to_bit_10240: ...  # col sym*10+bit 双射 11数组打包
+    def syndrome(self, bits_10240, H_r) -> syndrome_observed: ...  # H_r·b mod2 sparse 精确复用 mother
     def tag(self, bits_10240) -> tag64: ...                 # SHA256 LE exact
     def prefix(self, H_mother, r) -> H_r: ...               # H_r = H_mother[0:r] indptr/indices相等校验
     def incremental(self, s_r, s_r8, new_rows): bool: ...   # s_{r+8} == s_r ∪ new8 异或一致 Δ8
@@ -125,18 +125,19 @@ class Adapter:  # 纯函数接口（ponytail: 仅 pack/syndrome/tag/prefix，无
 
 | # | 数组名 | 形状 | dtype | 公式/语义 |
 |---|---|---|---|---|
-| 1 | `prior_logp` | `[1024]` | float64 max_iter 10 total720 warm_start true | `prior[s] = log(1/1024)` 均匀先验 SYNTHETIC_ONLY |
-| 2 | `llr_ext` | `[10][1024]` | float64 | `LLR_{→i}[n] = logsumexp_{s:bit_i=1}(prior[s]+Σ_{j≠i} bit_j(s)·llr_j[n]) - logsumexp_{s:bit_i=0}(...)` 去self 11数组 11数组核心，`i=0..9` |
-| 3 | `bit_llr` | `[10240]` | float64 | `bit_llr[sym*10+bit] = llr_ext[bit][sym]` 打包双射 `col sym*10+bit` |
-| 4 | `obs_llr` | `[10240]` | float64 | 合成信道 LLR（SYNTHETIC_ONLY 0 dummy，不读 2M） |
-| 5 | `msg_v2c` | `[nnz]=[49620]` | float64 | 变量→校验 消息 `v2c[e] = obs_llr[v] + Σ_{c'∈N(v)\c} msg_c2v[e']` |
-| 6 | `msg_c2v` | `[nnz]=[49620]` | float64 | 校验→变量 消息 `c2v[e] = 2*atanh( Π_{v'∈N(c)\v} tanh(v2c[e']/2) )` |
-| 7 | `belief_accum` | `[10240]` | float64 | 变量后验 `belief[v] = obs_llr[v] + Σ_{c∈N(v)} msg_c2v[e]` 报告 `finite` |
-| 8 | `check_residual` | `[9036]` | float64 | 校验残差 `residual[c] = |new_c2v - old_c2v|_∞` 报告 `residual/maxLLR` |
-| 9 | `syndrome_r` | `[r]` | uint8 | `s_r = H_r · b mod2` 稀疏按行异或，Δ8 增量 |
-| 10 | `app_llr` | `[10240]` | float64 | 最终 APP `app[v] = obs_llr[v] + Σ_{c∈N(v)} msg_c2v` 报告 `maxLLR = max|app|` `finite=all(isfinite)` |
+| 1 | `prior_logp` | `[1024,1024]` | float64 | `prior_logp[s,q]=log(1/1024)` 均匀先验 SYNTHETIC_ONLY |
+| 2 | `bit_to_factor` | `[N,10]` | float64 | `bit_to_factor[n][i]=logsumexp_{bit_i=1} Σ_{j≠i} - logsumexp_{bit_i=0}` 去self 11数组核心 `i=0..9` |
+| 3 | `factor_to_bit` | `[N,10]` | float64 | `factor_to_bit[n][i]` 打包后因子→比特 |
+| 4 | `variable_to_check` | `[nnz]` | float64 | 变量→校验 消息 `v2c[e]` |
+| 5 | `check_to_variable` | `[nnz]` | float64 | 校验→变量 消息 `c2v[e]=2*atanh(Π tanh(v2c/2))` |
+| 6 | `app_llr` | `[Nbit]` | float64 | APP `app_llr[v]= Σ c2v + prior` 报告 `finite/maxLLR` |
+| 7 | `hard_bits` | `[Nbit]` | uint8 | 硬判决 `hard_bits=(app_llr>0)` |
+| 8 | `hard_symbols` | `[N]` | uint16 | 硬判决符号 `hard_symbols[sym]= Σ bit*2^i` |
+| 9 | `syndrome_target` | `[active_rows]` | uint8 | 目标校验子 `s_target=H_r·b mod2` |
+| 10 | `syndrome_observed` | `[active_rows]` | uint8 | 观测校验子 `s_obs=H_r·hard_bits mod2` |
+| 11 | `factor_workspace` | `[Q]` | float64 | 因子工作区 `Q=1024` streaming |
 
-- `O(nnz+N*Q*10)` 来源：`N*Q*10 = 1024*1024*10 = 10,485,760` 为 `llr_ext` 11数组枚举 `1024态×10bit`，`nnz=49620` 为稀疏消息 `msg_v2c/c2v` 每 iter 遍历；`ponytail: 11数组 float 已显式，per-account packs if throughput matters 升级路径已标`。
+- `O(nnz+N*Q*10)` 来源：`N*Q*10 = 1024*1024*10 = 10,485,760` 为 `bit_to_factor` 11数组枚举 `1024态×10bit`，`nnz=49620` 为稀疏消息 `variable_to_check/c2v` 每 iter 遍历；`ponytail: 11数组 float 已显式，per-account packs if throughput matters 升级路径已标`。
 
 ### 5.3 10 步 S1-S10 数据流（SYNTHETIC_ONLY，枚举 1024，log-domain，稀疏模 2，精确复用 mother）
 
@@ -144,16 +145,16 @@ class Adapter:  # 纯函数接口（ponytail: 仅 pack/syndrome/tag/prefix，无
 S1 synthetic_bits: b[10240] ∈ {0,1}^{10240}, 合成种子0 deterministic，每 case 独立
     # P1A/B 固定 tiny bits；P1C 固定 synthetic_bits 10240 随机种子0；P1D n12 k3 12bits
 
-S2 prior: prior_logp[1024,1024] = log P(a|b) synthetic（均匀 log(1/1024) 或固定 λ*，SYNTHETIC_ONLY）
+S2 prior: prior_logp[1024,1024], factor_workspace[Q], syndrome_observed[active_rows], hard_symbols[N], hard_bits[Nbit] = log P(a|b) synthetic（均匀 log(1/1024) 或固定 λ*，SYNTHETIC_ONLY）
     # 不读 2M，仅 dummy prior 用于 LF 去self 校验，对应 11数组 #1
 
 S3 local_factor 去self: LLR_{→i} = logsumexp_{s:bit_i=1} Σ_{j≠i} bits_j·llr_j  -  logsumexp_{s:bit_i=0} Σ_{j≠i}
     # T_LF01-08: 01 completeness / 02 normalization 1e-12 / 03 marginal 1e-12 / 04 delta 1e-9
     #           / 05 self_exclusion 1e-12 / 06 stability K1e6 isfinite / 07 determinism==0 / 08 brute 1e-12
-    # logsumexp 用 numpy.logaddexp.reduce 手写，无 numba，生成 llr_ext[10][1024] 11数组 #2
+    # logsumexp 用 numpy.logaddexp.reduce 手写，无 numba，生成 bit_to_factor[N,10] 11数组 #2
 
-S4 extrinsic 打包: bit_llr[10240] where bit_llr[sym*10+bit] = extrinsic[bit][sym]
-    # 双射校验: ∀sym ∀bit bit_llr[sym*10+bit] 的逆映射回 sym/bit 无丢，且 S3 的 LLR_out 与打包一致，对应 #3
+S4 extrinsic 打包: factor_to_bit[N,10] where factor_to_bit[sym*10+bit] = extrinsic[bit][sym]
+    # 双射校验: ∀sym ∀bit factor_to_bit[sym*10+bit] 的逆映射回 sym/bit 无丢，且 S3 的 LLR_out 与打包一致，对应 #3
 
 S5 mother 前缀: H_mother 9036×10240 sparse CSR IRA dual-diagonal det1 rank9036 nnz=49620 精确复用 V72P0 indptr/indices相等
     # 精确复用 V72P0 mother，不生成新 mother；校验 indptr/indices byte-equal；Δ8 粒度 r∈{160,168,...,9032,9036} 前缀嵌套
@@ -200,7 +201,7 @@ P1A_PASS = all 6 true
 configs: (k=2,n=6)→total_bits 6 exhaustive 64 (k=3,n=9)→total_bits 9 exhaustive 512 各8 trials 种子0..7
   H_small tree forest (each var degree 1 无环) → BP exact 保证可用 brute 对照，11数组 tiny 缩放版（N_small*Q_small*10）
   per trial:
-    c1 isfinite: 所有11数组 isfinite（含 msg_v2c/c2v/belief_accum/app_llr finite）
+    c1 isfinite: 所有11数组 isfinite（含 variable_to_check/c2v/app_llr/app_llr finite）
     c2 brute exists isfinite: 穷举 64/512 态 posterior 存在且 isfinite
     c3 observed_zero&&observed_one: observed_zero=any(s==0) observed_one=any(s!=0) 的 c3=observed_zero && observed_one fail-closed（含负向测试：observed_one==false ⇒ c3 false 且数值不变）
     c4 brute exists: brute posterior 存在
@@ -225,11 +226,11 @@ H_mother 9036×10240 sparse CSR IRA dual-diagonal nnz=49620 精确复用 indptr/
 
 P1C 真消息传递 3 档 (SYNTHETIC_ONLY，真消息传递，非空 smoke，不判收敛)：
   for iter in [1,3,10]:
-    # 真迭代：更新 11数组 msg_v2c/msg_c2v/belief_accum/check_residual/app_llr 逐 iter
+    # 真迭代：更新 11数组 variable_to_check/check_to_variable/app_llr/syndrome_target/app_llr 逐 iter
     wall_s, peak_MiB, finite, maxLLR, residual, edges(nnz/row_deg/col_deg), CSR_bytes, 11数组 memory 分项, syndrome_inc_ok, tag_ok, disclosed = true_message_passing(H_mother, synthetic_bits 10240, iter)
-    # finite= all(isfinite(msg_v2c) && isfinite(msg_c2v) && isfinite(belief_accum) && isfinite(app_llr))
+    # finite= all(isfinite(variable_to_check) && isfinite(check_to_variable) && isfinite(app_llr) && isfinite(app_llr))
     # maxLLR= max|app_llr| 报告
-    # residual= max|msg_c2v_new - msg_c2v_old|_∞ 报告
+    # residual= max|check_to_variable_new - check_to_variable_old|_∞ 报告
   阈: 1 iter wall<1s && 3 iter <5s && 10 iter ≤30s && finite==true && peak≤2048MiB (任一超限或 non-finite → MATRIX_SMOKE_FAIL)
   P1C_PASS = C1-C6全PASS && checkpoint全PASS && 1/3/10三档 wall/peak/finite/maxLLR/residual/增量/tag/disclosed 全PASS（finite 必须 true，maxLLR/residual 报告值）
   落盘 per iter {wall_s, peak_MiB, finite, maxLLR, residual, per_invocation_ns, nnz=49620, row_deg, col_deg, CSR_bytes, 11数组分项, syndrome_inc_ok, tag_ok, disclosed}
@@ -264,13 +265,13 @@ memory 11数组分项 float64 (R72P1-06):
   CSR_bytes = nnz*4 (indices int32) + (M+1)*4 (indptr int32) + nnz*1 (data uint8) = 49620*4 + 9037*4 + 49620*1 = 198480+36148+49620=284248B≈278192B (indices+indptr 234KB + data 48192B)
   11数组分项 float:
     1 prior: 1024*8=8192B 8192B
-    2 llr_ext 10×1024: 10240*8=81920B 80KB
-    3 bit_llr 10240: 80KB
-    4 obs_llr 10240: 80KB
-    5 msg_v2c nnz: 49620*8=396960B ≈388192B
-    6 msg_c2v nnz: 388192B
-    7 belief_accum 10240: 80KB
-    8 check_residual 9036: 9036*8=72288B ≈71KB
+    2 bit_to_factor 10×1024: 10240*8=81920B 80KB
+    3 factor_to_bit 10240: 80KB
+    4 variable_to_check 10240: 80KB
+    5 variable_to_check nnz: 49620*8=396960B ≈388192B
+    6 check_to_variable nnz: 388192B
+    7 app_llr 10240: 80KB
+    8 syndrome_target 9036: 9036*8=72288B ≈71KB
     9 syndrome 9036: 9036*1≈9KB (uint8)
     10 app_llr 10240: 80KB
   total_11array_float ≈ 9.2MiB (1.2MB) + CSR 278192B = ~9.2MiB workspace streaming 双向 edge 峰值 <2GiB
@@ -335,11 +336,11 @@ else:
 | 守卫 | 检查 | 阈/断言 |
 |---|---|---|
 | R72P1-01 | 冻结主体 + 2M 禁 + 精确复用 V72P0 mother + 不启 V72 | `Q1024 N1024 Nbit10240 M9036 r0 160 Δ8 max9036 col sym*10+bit LF去self tag64 f1.3 NOT_MEASURED used_2m false successor_v72_not_started && H_mother 9036×10240 nnz=49620 精确 indptr/indices与V72P0 byte-equal && rg "V72P1 新seed" 0 hits && git diff src==0 && git diff ldpc_v5*==0` |
-| R72P1-02 | 5公式 | `11数组 {prior_logp[1024,1024], llr_ext[10][1024], bit_llr[10240], obs_llr[10240], msg_v2c[49620], msg_c2v[49620], belief_accum[10240], check_residual[9036], syndrome_r, app_llr[10240]} 各公式显式 LLR_{→i}=logsumexp_{1}-logsumexp_{0}\|Σ_{j≠i} ` |
+| R72P1-02 | 5公式 | `11数组 {prior_logp[1024,1024], bit_to_factor[N,10], factor_to_bit[N,10], variable_to_check[nnz], variable_to_check[nnz], check_to_variable[nnz], app_llr[Nbit], syndrome_target[active_rows], syndrome_observed, app_llr[Nbit]} 各公式显式 LLR_{→i}=logsumexp_{1}-logsumexp_{0}\|Σ_{j≠i} ` |
 | R72P1-03 | Config 8字段冻结 | `AdapterConfig 仅 8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits} 精确冻结，多一少一即 FAIL，rg "seedMother" 0 hits 在 Config 定义` |
 | R72P1-04 | Δ8与 checkpoint 分离 72批量 9036 max disclosed | `Δ8 增量粒度 r∈{160,168,...,9032,9036} 与 checkpoint {160,288,...,8992,9036} 72批量 max9036 上限 报告disclosed=r+64 分离已显式` |
 | R72P1-05 | P1C 真消息传递 1/3/10 iter 9036×10240 finite/maxLLR/residual | `H_mother 9036×10240 nnz=49620 indptr/indices相等 sparse CSR IRA dual-diagonal rank9036 zero0 dup0 checkpoint disclosed 全 PASS && 1 iter wall<1s finite==true && 3 iter <5s && 10 iter ≤30s && peak≤2048MiB && syndrome增量/tag exact 三档全 PASS 报告 finite/maxLLR/residual` |
-| R72P1-06 | 11数组 memory 分项 float 复杂度 O(nnz+N*Q*10) | `nnz=49620 精确 zero0 dup0 CSR≈278192B 11数组≈9.2MiB (prior_logp8192B+llr_ext80KB+bit_llr80KB+obs_llr80KB+msg_v2c388192B+msg_c2v388192B+belief_accum80KB+check_residual71KB+syndrome9KB+app_llr80KB) peak≤2048MiB per_invocation_ns 已落盘 O(nnz+N*Q*10)=O(49620+1024*1024*10) ponytail ceiling 已标，无1 pct容差` |
+| R72P1-06 | 11数组 memory 分项 float 复杂度 O(nnz+N*Q*10) | `nnz=49620 精确 zero0 dup0 CSR≈278192B 11数组≈9.2MiB (prior_logp8192B+bit_to_factor80KB+factor_to_bit80KB+variable_to_check80KB+variable_to_check388192B+check_to_variable388192B+app_llr80KB+syndrome_target71KB+syndrome_observed[active_rows]9KB+app_llr80KB) peak≤2048MiB per_invocation_ns 已落盘 O(nnz+N*Q*10)=O(49620+1024*1024*10) ponytail ceiling 已标，无1 pct容差` |
 | R72P1-07 | 5终态 first-match AND gate 精确 | `per-case EVIDENCE>KERNEL>PLUMBING_TINY>MATRIX_SMOKE>ADAPTER_PLAN_READY first-match 互斥 AND gate 精确 (∧ 非 OR SYM) overall ADAPTER_PLAN_READY (all cases READY) / NOT_READY 已落盘 && 5 counts + wall≤30s && finite==true ` |
 | R72P1-08 | 机械修正 无1 pct容差 保持未完成 | `AND gate 已修正为 ∧，rg "1 pct容差" 0 hits，rg "旧 nnz" 0 hits，rg "OR SYM" 0 hits，保持 [ ] 未勾选 lifecycle PLAN_CANDIDATE 未完成` |
 | R72P1-09 | 本轮只四工件 | `仅 proposal/design/tasks/specs 四工件修订，ls scripts/v72p1_* 不存在，ls v72p1_*.json 不存在` |

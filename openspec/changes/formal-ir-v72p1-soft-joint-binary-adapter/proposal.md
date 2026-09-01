@@ -19,15 +19,15 @@
 
 ### 1. 冻结最小 adapter 衔接 `local factor 自排除 ↔ IRA mother 增量 ↔ exact tag`，SYNTHETIC_ONLY 不跑 decoder 精确复用 V72P0 mother
 - **冻结主体零改**：`Q=1024 N=1024 Nbit=10240 M=9036 f=1.3 NOT_MEASURED used_2m false tag 64b exact SHA256(bits)[:8B] LE col sym*10+bit bit_i(s)=(s>>i)&1 local factor 去self Σ_{j≠i} bits_j·llr_j logsumexp` 全只读（`git diff -- src/ ==0 && git diff -- comparison_bench/src/comparison_bench/formal_ir/ldpc_v5* ==0`），处理点 `84d62779` 单点 synthetic，不读 2M，不改 V70/V72P0 已冻结量。
-- **Adapter 定义**：纯函数 `adapter_pack(extrinsic_10×1024 → bit_llr_10240) / adapter_syndrome(bits_10240, H_r) → syndrome_r / adapter_tag(bits_10240) → tag64`，无 I/O/随机/全局状态，枚举 1024 态 log-domain + 稀疏 CSR 模 2，前缀嵌套 `H_r = H_mother[0:r]`。
+- **Adapter 定义**：纯函数 `adapter_pack(extrinsic_10×1024 → factor_to_bit_10240) / adapter_syndrome(bits_10240, H_r) → syndrome_observed / adapter_tag(bits_10240) → tag64`，无 I/O/随机/全局状态，枚举 1024 态 log-domain + 稀疏 CSR 模 2，前缀嵌套 `H_r = H_mother[0:r]`。
 - **R72P1-01 精确复用 V72P0 mother**：删 `V72P1 新seed` 新 seed，精确复用 `V72P0-SYN-MOTHER` 生成的 `H_mother 9036×10240 nnz=49620`，校验 `H_mother.indptr` 与 `H_mother.indices` 与 V72P0 落盘母码 byte-equal（`np.array_equal(indptr, v72p0_indptr) && np.array_equal(indices, v72p0_indices)`），`nnz=49620` 精确值，无容差，不重生成。
 
 ### 2. 定义 10 步数据流（S1-S10）+ 3 类型（Config 8字段/Result/Adapter）+ 5公式 + 5 终态
 - **10 步 S1-S10**（见 Design §5）：
   1. `S1 synthetic_bits: b[10240]` 合成 bits（每符号 10 bits，`sym*10+bit` 列序）
-  2. `S2 prior: prior_logp[1024,1024]` 合成先验（SYNTHETIC_ONLY 均匀或固定 λ*，不读 2M）
+  2. `S2 prior: prior_logp[1024,1024], hard_symbols[N], hard_bits[Nbit]` 合成先验（SYNTHETIC_ONLY 均匀或固定 λ*，不读 2M）
   3. `S3 local_factor 自排除: LLR_{→i}=logsumexp_{bit_i=1} Σ_{j≠i} bits_j·llr_j - logsumexp_{bit_i=0} Σ_{j≠i}`（`T_LF01-08` 1e-12/1e-9）
-  4. `S4 extrinsic 打包: bit_llr[10240] col=sym*10+bit` 11数组打包
+  4. `S4 extrinsic 打包: factor_to_bit[N,10] col=sym*10+bit` 11数组打包
   5. `S5 mother 前缀: H_mother 9036×10240 sparse CSR IRA dual-diagonal, H_r = H_mother[0:r] r∈Δ8序列 160,168,...,9032,9036 且 checkpoint72 checkpoint 160,288,...,8992,9036`
   6. `S6 增量 syndrome: s_r = H_r·b mod2, s_{r+8}=s_r ∪ 8 new rows`（异或增量，Δ8 粒度）
   7. `S7 披露计费: leak_r = r·1 +64 bits, f=1.3 frozen f_actual NOT_MEASURED，checkpoint r 上报告disclosed=r+64`
@@ -40,16 +40,16 @@
   - `Adapter {pack, syndrome, tag, prefix_nested, incremental}` — 最小接口，纯函数
 - **5公式**（Design §5.2，R72P1-02）：
   1. `prior_logp[1024,1024] = log(1/1024)` 均匀先验
-  2. `llr_ext[i][n] i=0..9 n=0..1023` 去self 外信息 `LLR_{→i}[n] = logsumexp_{s:bit_i=1} (prior[s]+Σ_{j≠i} bit_j(s)·llr_j[n]) - logsumexp_{s:bit_i=0}(...)`
-  3. `bit_llr[10240] : bit_llr[sym*10+bit]=llr_ext[bit][sym]` 打包双射
-  4. `obs_llr[10240]` 信道/合成 dummy 先验（SYNTHETIC_ONLY 0）
-  5. `msg_v2c[nnz] float64 max_iter 10 total720 warm_start true` 变量→校验 消息
-  6. `msg_c2v[nnz] float64` 校验→变量 消息
-  7. `belief_accum[10240] float64` 变量后验 `belief = obs_llr + Σ_{c∈N(v)} msg_c2v`
-  8. `check_residual[9036] float64` 校验残差 `residual_c = tanh` 迭代差
-  9. `syndrome_r[ r ] uint8` `s_r = H_r·b mod2`
-  10. `app_llr[10240] float64` 最终 APP `app = obs_llr + Σ msg_c2v` 报告 `finite/maxLLR`
-  11. `workspace_buf[720] float64` max10 total720 warm_true float64 workspace streaming 双向 edge 缓冲 11数组第11项
+  2. `bit_to_factor[N,10] float64` 去self 外信息 `LLR_{→i}[n] = logsumexp_{s:bit_i=1} (prior[s]+Σ_{j≠i} bit_j(s)·llr_j[n]) - logsumexp_{s:bit_i=0}(...)`
+  3. `factor_to_bit[N,10] float64` 打包双射 `factor_to_bit[sym*10+bit]=bit_to_factor[bit][sym]`
+  4. `variable_to_check[nnz] float64` 变量→校验 消息
+  5. `check_to_variable[nnz] float64` 校验→变量 消息 `c2v = 2*atanh(Π tanh(v2c/2))`
+  6. `app_llr[Nbit] float64` 变量后验 `app_llr[v]= Σ check_to_variable + prior` 报告 `finite/maxLLR`
+  7. `hard_bits[Nbit] uint8` 硬判决比特 `hard_bits = (app_llr>0)`
+  8. `hard_symbols[N] uint16` 硬判决符号 `hard_symbols[sym]= Σ bit*2^i`
+  9. `syndrome_target[active_rows] uint8` 目标校验子 `s_target = H_r·b mod2`
+  10. `syndrome_observed[active_rows] uint8` 观测校验子 `s_obs = H_r·hard_bits mod2`
+  11. `factor_workspace[Q] float64` 因子工作区 `Q=1024` streaming 双向 edge 缓冲 11数组第11项 max10 total720 warm_true float64
 - **5 终态 per synthetic case**（Design §7，R72P1-07 first-match）：
   1. `EVIDENCE_INCOMPLETE` — 输入缺失/非有限/frame 非法
   2. `KERNEL_FAIL` — `T_LF01-08` 任一 FAIL（去self 8 测试不通过）
@@ -66,7 +66,7 @@
 
 ### 4. 估算 edge / memory（复杂度探针 11数组分项 float）
 - **Edge**：`nnz=49620` 精确值（`V72P0 mother` 精确复用，无1 pct容差容差），`row_deg min>0 max≤6, col_deg` 分布已落盘，`zero_cols 0 dup 0`，`CSR indptr/indices byte-equal` 。
-- **Memory 11数组分项 float**（Design §5.7，R72P1-06）：`CSR = nnz*4 + (M+1)*4 ≈ 49620*4+9037*4=234628B≈229KB + overhead`，11数组分项：`prior_logp 1024*8=8192B + llr_ext_10x1024 10240*8=80KB + bit_llr 80KB + obs_llr 80KB + msg_v2c 49620*8≈387KB + msg_c2v 387KB + belief_accum 80KB + check_residual 9036*8≈70KB + syndrome 9036*1≈9KB + app_llr 80KB + workspace_buf 720*8=5760B ≈9.2MiB`，`peak≤2048MiB` 报告显式 `CSR bytes / 11数组分项 / peak_MiB`
+- **Memory 11数组分项 float**（Design §5.7，R72P1-06）：`CSR = nnz*4 + (M+1)*4 ≈ 49620*4+9037*4=234628B≈229KB + overhead`，11数组分项：`prior_logp 1024*8=8192B + bit_to_factor[N,10] 10240*8=80KB + factor_to_bit 80KB + variable_to_check 80KB + variable_to_check 49620*8≈387KB + check_to_variable 387KB + app_llr 80KB + syndrome_target 9036*8≈70KB + syndrome 9036*1≈9KB + app_llr 80KB + factor_workspace 720*8=5760B ≈9.2MiB`，`peak≤2048MiB` 报告显式 `CSR bytes / 11数组分项 / peak_MiB`
 - **Complexity**：`O(nnz + N*Q*10)`（`N=1024 Q=1024 10bit 枚举 10,485,760 + 稀疏模 2 nnz=49620`，每 iter 11数组更新），`ponytail:` 已标 ceiling。
 
 ### 5. 四工件，不跑 decoder 不改 V70/V72P0 本轮只四工件
@@ -89,7 +89,7 @@
 
 1. **冻结主体与处理点零改（1024维符号 adapter 扩展，仅衔接验证，精确复用 V72P0 mother）**：`Q1024 N1024 Nbit10240 M9036 r0 160 Δ8 max9036 f1.3 NOT_MEASURED used_2m false tag64b exact SHA256(bits)[:8B] LE col sym*10+bit bit_i=(s>>i)&1 去self Σ_{j≠i}` 全只读；`84d62779 legacy_v1` 单点；精确复用 `V72P0 mother 9036×10240 nnz=49620 indptr/indices相等`，删 `V72P1 新seed` 新 seed；不引 V72P1 新码本以外的表示。
 2. **10 步数据流 S1-S10 + 3 类型 Config 8字段/Result/Adapter + 5公式**：`S1 synthetic_bits → S2 prior → S3 去self LF → S4 extrinsic打包（11数组 sym*10+bit） → S5 mother前缀（Δ8 vs checkpoint分离） → S6 增量syndrome → S7 披露计费 checkpoint disclosed → S8 exact tag → S9 边/内存11数组分项 float → S10 5态分流 first-match`，`AdapterConfig 8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits} 精确冻结`，落盘 `v72p1_manifest.json`。
-3. **R72P1-02 5公式**：`prior_logp[1024,1024] / llr_ext[10][1024] / bit_llr[10240] / obs_llr[10240] / msg_v2c[nnz] / msg_c2v[nnz] / belief_accum[10240] / check_residual[9036] / syndrome_r / app_llr[10240]` 各公式显式，`O(nnz+N*Q*10)` 复杂度来源11数组。
+3. **R72P1-02 5公式**：`prior_logp[1024,1024] / bit_to_factor[N,10] / factor_to_bit[N,10] / variable_to_check[nnz] / variable_to_check[nnz] / check_to_variable[nnz] / app_llr[Nbit] / syndrome_target[active_rows] / syndrome_observed / app_llr[Nbit]` 各公式显式，`O(nnz+N*Q*10)` 复杂度来源11数组。
 4. **R72P1-04 分离Δ8 与 decode checkpoint schedule**：`Δ=8` 为增量 syndrome 粒度 `r∈{160,168,...,9032,9036}`；`checkpoint schedule` 为真解码触发点 `r_checkpoint ∈ {160,288,416,...,8992,9036}`（72批量，起始160，末端9036 max上限），`disclosed=r_checkpoint·1+64` 报告，`max=9036` 为上限。
 5. **P1A plumbing（SYNTHETIC_ONLY 确定性，精确复用 mother）**：`adapter_pack / syndrome / tag / prefix_nested / incremental` 纯函数探针，校验 `indptr/indices相等` 前缀 `H_r==H_mother[0:r]`、`s_{r+8}=s_r ∪ new8` 异或一致性、tag LE exact，`wall≤30s`。
 6. **P1B tiny 端到端（k2/3 n6/9 64/512 各8 trials tree-only）**：`64 exhaustive (k2,n6) + 512 exhaustive (k3,n9) 各8 trials` 经 adapter 到 `syndrome+tag` 端到端，`c3 observed_zero&&observed_one fail-closed + 负向测试`，`c5 BP-marg vs brute max|Δ|<1e-9 tree-only`，`wall≤30s peak≤2048MiB`。
@@ -110,7 +110,7 @@
 
 - [ ] `proposal/design/tasks/specs/spec.md` 齐全一致，`lifecycle PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED`，`branch formal-ir-mainline` + `HEAD TBD (freeze-time git rev-parse HEAD)` + `data 84d62779 synthetic_v72p1` + `predecessor V72P0 5591e16b / V71 e038114d / V70 9bc34be6` 已绑定，显式声明 SYNTHETIC_ONLY、零 decoder/业务矩阵、最小 adapter 10 步数据流 3 类型 5 终态、11数组、Config8字段、Δ8与checkpoint分离、四层 P1A/B/C/D、边/内存11数组、first-match 5态、四工件产出已声明。
 - [ ] **R72P1-01 精确复用 V72P0 mother **：`rg "V72P1 新seed" 0 hits`，`H_mother 9036×10240 nnz=49620` 精确值，`indptr/indices byte-equal` 校验已定义，`git diff -- src/ ==0 && git diff -- comparison_bench/src/comparison_bench/formal_ir/ldpc_v5* ==0`，无新 seed。
-- [ ] **R72P1-02 5公式**：`prior_logp[1024,1024] / llr_ext[10][1024] / bit_llr[10240] / obs_llr[10240] / msg_v2c[nnz] / msg_c2v[nnz] / belief_accum[10240] / check_residual[9036] / syndrome_r / app_llr[10240]` 11数组枚举与公式 `LLR_{→i}=logsumexp_{1}-logsumexp_{0}|Σ_{j≠i}` 已显式，`py_compile PASS`。
+- [ ] **R72P1-02 5公式**：`prior_logp[1024,1024] / bit_to_factor[N,10] / factor_to_bit[N,10] / variable_to_check[nnz] / variable_to_check[nnz] / check_to_variable[nnz] / app_llr[Nbit] / syndrome_target[active_rows] / syndrome_observed / app_llr[Nbit]` 11数组枚举与公式 `LLR_{→i}=logsumexp_{1}-logsumexp_{0}|Σ_{j≠i}` 已显式，`py_compile PASS`。
 - [ ] **R72P1-03 Config 8字段冻结**：`AdapterConfig` 仅 8字段 `{checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits}` 精确冻结，多一少一即 FAIL，`seedMother 0 hits` 在 Config 定义内。
 - [ ] **R72P1-04 Δ8与 checkpoint 分离**：`Δ=8` 增量粒度 `r∈{160,168,...,9032,9036}` 与 `checkpoint schedule {160,288,416,...,8992,9036} 72批量 max=9036 上限 报告disclosed=r+64` 分离已显式，`leak_r` 与 `disclosed` 一致。
 - [ ] **去self 8 测试 T_LF01-08 **：`log_post_excl_i=prior+Σ_{j≠i} - logZ`，`T_LF01 completeness / T_LF02 normalization 1e-12 / T_LF03 marginal 1e-12 / T_LF04 delta 1e-9 / T_LF05 self_exclusion 1e-12 / T_LF06 stability K1e6 isfinite / T_LF07 determinism==0 / T_LF08 brute 1e-12` 正交 `8test` 全 PASS。
@@ -118,7 +118,7 @@
 - [ ] **P1B tiny 端到端**：`(k2,n6)64 (k3,n9)512 各8 trials exhaustive tree forest` 经 adapter 到 `syndrome+tag` 端到端，`c1 isfinite / c2 brute exists isfinite / c3 observed_zero&&observed_one fail-closed + 负向测试 / c4 brute exists / c5 max|Δ|<1e-9 tree-only / c6 tree / c7 total≤9 exhaustive` 7 checks 全 PASS，`worst<1e-9 wall≤30s peak≤2048MiB` 。
 - [ ] **R72P1-05 P1C 真消息传递 1/3/10 iter **：`H_mother 9036×10240 nnz=49620 indptr/indices相等 sparse CSR IRA dual-diagonal rank9036` 上 `1 iter / 3 iter / 10 iter` 真消息传递，各报告 `wall_s/peak_MiB/finite/maxLLR/residual/edges/CSR bytes/syndrome增量/tag exact`，`C1-C6 re-validate` 且 `checkpoint 160/288/416/9036 disclosed` ，`1 iter wall<1s / 3 iter <5s / 10 iter ≤30s` 三档全 PASS。
 - [ ] **P1D small loopy 描述性**：`n=12 k=3 total 12 bits` 含单环 small graph `syndrome/tag exact` ，BP 非 exact 仅 `descriptive_diagnostics {loopy_graph, cycle_count, BP_residual, syndrome_ok, tag_ok}` + `capacity_warning` 正交旗标，不入硬门禁。
-- [ ] **R72P1-06 11数组 memory/复杂度**：`nnz=49620 精确 zero0 dup0 CSR≈229KB 11数组≈9.2MiB (prior_logp 8192B+llr_ext80KB+bit_llr80KB+obs_llr80KB+msg_v2c387KB+msg_c2v387KB+belief_accum80KB+check_residual70KB+syndrome9KB+app_llr80KB) peak<2GiB per_invocation ns` 已显式，`O(nnz+N*Q*10)` = `O(49620+1024*1024*10)` 复杂度注释 `ponytail:` 已标 ceiling，无 `1 pct容差`。
+- [ ] **R72P1-06 11数组 memory/复杂度**：`nnz=49620 精确 zero0 dup0 CSR≈229KB 11数组≈9.2MiB (prior_logp 8192B+bit_to_factor80KB+factor_to_bit80KB+variable_to_check80KB+variable_to_check387KB+check_to_variable387KB+app_llr80KB+syndrome_target70KB+syndrome_observed[active_rows]9KB+app_llr80KB) peak<2GiB per_invocation ns` 已显式，`O(nnz+N*Q*10)` = `O(49620+1024*1024*10)` 复杂度注释 `ponytail:` 已标 ceiling，无 `1 pct容差`。
 - [ ] **R72P1-07 5终态 first-match **：每 case `classification ∈ {EVIDENCE_INCOMPLETE, KERNEL_FAIL, PLUMBING_TINY_FAIL, MATRIX_SMOKE_FAIL, ADAPTER_PLAN_READY}` 按 `EVIDENCE > KERNEL(T_LF01-02) > PLUMBING_TINY(P1A/P1B) > MATRIX_SMOKE(P1C/P0B) > ADAPTER_PLAN_READY(KERNEL∧P1A∧P1B∧P1C∧wall≤30 4硬 AND)` first-match 已判定，无 `OR SYM` 误用；总体 `overall ∈ {ADAPTER_PLAN_READY (all cases READY), NOT_READY}` 基于 `5 orthogonal counts` 已判定。
 - [ ] **R72P1-08 机械修正**：AND gate 已修正为 `∧`（无 `OR SYM`），删除 `1 pct容差` 容差表述，删除 `≈旧 nnz` 误值，保持 `未完成`（`[ ]` 未勾选，`TBD` 保留，`lifecycle PLAN_CANDIDATE`）。
 - [ ] **R72P1-09 本轮只四工件**：仅 `proposal/design/tasks/specs` 四工件修订，未创建 `scripts/`/`registry`/`results`/`reports`/`tests`，`ls scripts/v72p1_*` 不存在。

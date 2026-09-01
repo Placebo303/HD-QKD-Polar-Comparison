@@ -14,7 +14,7 @@
 
 ## 2. 冻结方法
 - `Q1024 N1024 Nbit10240 M9036 f1.3 NOT_MEASURED used_2m false tag64b exact SHA256 LE col sym*10+bit bit_i(s)=(s>>i)&1`
-- `LF 去self Σ_{j≠i} T_LF01-08 1e-12/1e-9 logsumexp 11数组 llr_ext[10][1024]`
+- `LF 去self Σ_{j≠i} T_LF01-08 1e-12/1e-9 logsumexp 11数组 bit_to_factor[N,10]`
 - `mother 9036×10240 sparse CSR IRA dual-diagonal det1 rank9036 nnz=49620 prefix1111 tail4 精确值 indptr/indices与V72P0 byte-equal 零容差 删V72P1 新seed 新 seed`
 - `Rs_Δ r0 160 Δ8 max9036 r∈{160,168,...,9032,9036} 与 checkpoint 72批量 r_checkpoint∈{160,288,...,8992,9036} max9036 上限 分离 报告disclosed`
 - `adapter pack / syndrome / tag / prefix / incremental 纯函数 11数组`
@@ -50,7 +50,7 @@
 ## 5. Phase C/D/E/F/G
 
 ### 5.2 去self LF (S3, 10步之三，11数组核心)
-`log_post_excl_i = prior + Σ_{j≠i} bits_j·llr_j - logZ` `llr_ext[10][1024]` 11数组 `T_LF01-08` `1e-12/1e-9` `i∈{0,5,9}` 三点探针
+`log_post_excl_i = prior + Σ_{j≠i} bits_j·llr_j - logZ` `bit_to_factor[N,10]` 11数组 `T_LF01-08` `1e-12/1e-9` `i∈{0,5,9}` 三点探针
 
 ### 5.3 T_LF01-08
 `01 completeness 02 normalization 1e-12 03 marginal 1e-12 04 delta 1e-9 05 self_exclusion 1e-12 06 stability K1e6 isfinite 07 determinism==0 08 brute 1e-12`
@@ -59,10 +59,10 @@
 `AdapterConfig 8字段 {checkpoint_rows, max_iter_per_checkpoint, max_total_iterations, llr_clip, convergence_tol, warm_start, dtype, tag_bits} 精确冻结 多一少一即 FAIL` `AdapterResult {T_LF,P1A,P1B,P1C 真消息 finite/maxLLR/residual,P1D,edges nnz49620, memory 11数组分项 float, wall,class,overall}` `Adapter {pack,syndrome,tag,prefix,incremental} 纯函数 11数组 无 I/O/随机`
 
 ### 5.5 5公式（R72P1-02）
-`1 prior_logp[1024,1024] log(1/1024) | 2 llr_ext[10][1024] LLR_{→i}=logsumexp_{1}-logsumexp_{0}|Σ_{j≠i} | 3 bit_llr[10240] sym*10+bit | 4 obs_llr[10240] | 5 msg_v2c[49620] v2c | 6 msg_c2v[49620] c2v 2*atanh(Π tanh) | 7 belief_accum[10240] ch+Σc2v finite | 8 check_residual[9036] |residual| maxLLR | 9 syndrome_r[r] H_r·b mod2 | 10 app_llr[10240] | workspace_buf[720] ch+Σc2v maxLLR` 各 float 公式显式 `O(nnz+N*Q*10)`
+`1 prior_logp[1024,1024] log(1/1024) | 2 bit_to_factor[N,10] LLR_{→i}=logsumexp_{1}-logsumexp_{0}|Σ_{j≠i} | 3 factor_to_bit[N,10] | 4 variable_to_check[nnz] v2c | 5 check_to_variable[nnz] c2v 2*atanh(Π tanh) | 6 app_llr[Nbit] | 7 hard_bits[Nbit] | 8 hard_symbols[N] | 9 syndrome_target[active_rows] H_r·b | 10 syndrome_observed[active_rows] H_r·hard_bits | 11 factor_workspace[Q]` 各 float 公式显式 `O(nnz+N*Q*10)`
 
 ### 5.6 S1-S10 10 步 精确复用 mother Δ8 vs checkpoint 分离
-`S1 b[10240]合成 → S2 prior_logp[1024,1024] → S3 LF去self 11数组 → S4 bit_llr[10240] sym*10+bit → S5 H_mother 9036×10240 nnz49620 indptr/indices相等 H_r prefix Δ8 {160,168,...,9032,9036} vs checkpoint {160,288,...,8992,9036} 72批量 max9036 → S6 s_r=H_r·b mod2 增量 s_{r+8}=s_r∪new8 Δ8 → S7 leak r·1+64 disclosed checkpoint+64 f NOT_MEASURED → S8 tag SHA256 LE 64 samples → S9 edges/memory 11数组分项 nnz49620 CSR 278192B 11数组9.2MiB peak<2GiB O(nnz+N*Q*10) → S10 5态分流 first-match AND`
+`S1 b[10240]合成 → S2 prior_logp[1024,1024] → S3 LF去self 11数组 → S4 factor_to_bit[N,10] sym*10+bit → S5 H_mother 9036×10240 nnz49620 indptr/indices相等 H_r prefix Δ8 {160,168,...,9032,9036} vs checkpoint {160,288,...,8992,9036} 72批量 max9036 → S6 s_r=H_r·b mod2 增量 s_{r+8}=s_r∪new8 Δ8 → S7 leak r·1+64 disclosed checkpoint+64 f NOT_MEASURED → S8 tag SHA256 LE 64 samples → S9 edges/memory 11数组分项 nnz49620 CSR 278192B 11数组9.2MiB peak<2GiB O(nnz+N*Q*10) → S10 5态分流 first-match AND`
 
 ### 5.7 P1A plumbing 精确复用 mother
 `pack_determinism==0 ∧ prefix_nested ∀checkpoint∈{160,288,416,9036} H_r==H_mother[0:r] indptr/indices相等 ∧ incremental s_{r+8} 异或一致 Δ8 ∧ tag LE exact 64 samples ∧ indptr_indices_equal byte-equal ∧ wall≤30s ⇒ P1A_PASS AND`
@@ -77,7 +77,7 @@
 `n12 k3 total12 8trials 含单环 11数组: syndrome_ok ∧ tag_ok ∧ cycle_count==1 ∧ BP_residual/maxLLR/finite 描述性 ∧ wall ⇒ P1D_descriptive, capacity_warning=(cycle>0||residual>1e-9||!finite) 正交不过硬门禁`
 
 ### 5.11 边内存复杂度 11数组分项 float O(nnz+N*Q*10)
-`nnz=49620 精确 zero0 dup0 indptr_equal&&indices_equal CSR≈278192B (indices+indptr 234KB+data48192B) 11数组≈9.2MiB (prior_logp8192B+llr_ext80KB+bit_llr80KB+obs_llr80KB+msg_v2c388192B+msg_c2v388192B+belief_accum80KB+check_residual71KB+syndrome9KB+app_llr80KB) peak≤2048MiB per_invocation_ns 已落盘 O(nnz+N*Q*10)=O(49620+1024*1024*10) ponytail ceiling 已标 无1 pct容差`
+`nnz=49620 精确 zero0 dup0 indptr_equal&&indices_equal CSR≈278192B (indices+indptr 234KB+data48192B) 11数组≈9.2MiB (prior_logp8192B+bit_to_factor80KB+factor_to_bit80KB+variable_to_check80KB+variable_to_check388192B+check_to_variable388192B+app_llr80KB+syndrome_target71KB+syndrome_observed[active_rows]9KB+app_llr80KB) peak≤2048MiB per_invocation_ns 已落盘 O(nnz+N*Q*10)=O(49620+1024*1024*10) ponytail ceiling 已标 无1 pct容差`
 
 ## 6. 分流 5-state first-match AND + overall 2-state
 
