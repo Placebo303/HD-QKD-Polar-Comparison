@@ -1,7 +1,9 @@
 cycle_id: V72P1-ADP
-state: PLAN_ACCEPTED
+state: ADDENDUM_ACCEPTED
 accepted_plan_sha: 73efd91f379b5abdeda675c36d1a054f59ff89ff
+accepted_addendum_sha: b0d551054e3481c08068fd9a2c58363c44eb9bfa
 implementation_sha: null
-development_execution_authorized: false
+development_execution_authorized: true
+development_execution_scope: synthetic_qualification_only
 formal_execution_authorized: false
 scientific_promotion: false
