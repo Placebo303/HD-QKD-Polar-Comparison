@@ -21,17 +21,40 @@ This repository contains the current HD-QKD Polar comparison workspace, includin
 
 ## Current Status
 
-As of 2026-08-24, the active research mainline is performance-first formal IR:
+As of 2026-09-02, the active research mainline is performance-first formal IR,
+on branch `formal-ir-mainline` (HEAD `ea82423f`).
 
-- V34 is closed as an ER1-accepted bounded failure for the tested matched
-  empirical-P V31 QC packet/decoder (`0/60` exact, useful residual reduction).
-- V35R1 is a bounded negative for one hand-designed mixed-degree NB-LDPC
+**Active cycle — V72P1-ADP** (`formal-ir-v72p1-soft-joint-binary-adapter`):
+lifecycle `PLAN_ACCEPTED / IMPLEMENTATION_NOT_STARTED / EXECUTE_NOT_AUTHORIZED`.
+The accepted plan SHA is `73efd91f`; the frozen implementation packet is
+`fb441f0f`; the execution-packet addendum `ea82423f` is a candidate awaiting
+independent review. After acceptance only three new files are permitted
+(`v72p1_soft_joint_adapter.py`, `scripts/v72p1_soft_joint_synthetic.py`,
+`test_v72p1_soft_joint_adapter_small.py`) with synthetic-only output under
+`v72p1_synthetic_qual/`. Real data, `2M`/`TEST`/holdout sampling, `run_01`,
+parameter tuning and seed changes remain prohibited.
+
+**Three mainline routes and their bounded outcomes:**
+
+| Route | Versions | Terminal outcome |
+|---|---|---|
+| Nonbinary GF(32) LDPC | V13–V38 | `finite_graph_fail` (V31: n=1024, 300/300 blocks, 0 exact, 0 false accepts) |
+| Binary Cascade / engineering | V39–V64 | `RETIRE_BINARY_CASCADE_PRIMARY_ROUTE_UNDER_CURRENT_FRAME_AND_VERIFICATION_CONTRACT` |
+| Binary soft-joint factor | V65–V72P1 | `V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE` (1 feasible + 1 marginal + 1 no-information-margin); V72P0 `LOCAL_FACTOR_KERNEL_PASS` + `ADAPTER_PLAN_READY` |
+
+No route has yet produced a successful reconciliation on real HD-QKD data within
+an acceptable leakage budget. Each negative result is bounded and isolated to
+the layer explicitly named in that cycle's OpenSpec change.
+
+**Archived bounded outcomes (superseded, retained as evidence):**
+
+- V34: ER1-accepted bounded failure for the tested matched empirical-P V31 QC
+  packet/decoder (`0/60` exact, useful residual reduction).
+- V35R1: bounded negative for one hand-designed mixed-degree NB-LDPC
   configuration; it does not close empirical-P irregular or MET designs.
-- V36 produced an exploratory paired residual signal, but its DE selection and
+- V36: exploratory paired residual signal, but its DE selection and
   finite-graph structural gates do not satisfy the frozen OpenSpec. It is not
   an accepted candidate and remains `NO_FINITE_GRAPH_ADVANCE`.
-- The next algorithm decision is a small corrected DE/finite-graph experiment,
-  not automatic MET promotion or more verifier infrastructure.
 
 The older Polar reporting line below remains frozen baseline context, not the
 active algorithm-development objective.
@@ -56,8 +79,14 @@ Route B-lite is a completed archived study. Its LLR-only gains were local and un
   - [docs/research-cycle-sop.md](docs/research-cycle-sop.md)
   - [ChatGPT review prompt](docs/prompts/chatgpt-research-review.md)
   - [OpenCode execution prompt](docs/prompts/opencode-research-execution.md)
-- active formal-IR state:
+- active formal-IR state (V72P1-ADP, current cycle):
+  - [docs/research_cycles/V72P1-ADP/cycle_state.yaml](docs/research_cycles/V72P1-ADP/cycle_state.yaml) — authoritative lifecycle + authorization flags
+  - [docs/research_cycles/V72P1-ADP/REVIEW_VERDICT.md](docs/research_cycles/V72P1-ADP/REVIEW_VERDICT.md) — plan acceptance record
+  - [docs/research_cycles/V72P1-ADP/EXECUTION_PACKET_ADDENDUM.md](docs/research_cycles/V72P1-ADP/EXECUTION_PACKET_ADDENDUM.md) — frozen file list, `llr_clip=20.0`, `convergence_tol=1e-6`, seed `20260902`
+  - [openspec/changes/formal-ir-v72p1-soft-joint-binary-adapter/](openspec/changes/formal-ir-v72p1-soft-joint-binary-adapter/) — accepted four-artifact plan
+- prior handoffs (historical, superseded above):
   - [AGENT_HANDOFF.md](AGENT_HANDOFF.md)
+  - [HANDOFF.md](HANDOFF.md)
   - [docs/nbldpc-v36-empirical-graph-development.md](docs/nbldpc-v36-empirical-graph-development.md)
 
 - latest workflow and run method:
@@ -89,6 +118,19 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
+
+### Optional dependency sets
+
+The repository ships three requirement files. Install the sets your task needs:
+
+| File | Contents | Needed for |
+|---|---|---|
+| `requirements.txt` | `numpy`, `pandas`, `numba`, `tqdm`, `matplotlib` | Polar baseline, front-half and reporting scripts |
+| `comparison_bench/requirements-comparison.txt` | `pyyaml`, `pyarrow`, `pytest` | comparison-benchmark CLIs, YAML configs, Parquet I/O, test suites |
+| `comparison_bench/requirements-formal-ir.txt` | `ldpc==2.4.1` | binary LDPC backends (`layered_ldpc_lite`, V35 MLC stage) |
+
+Without `pyarrow`, Parquet outputs silently fall back to pickle. See
+[Troubleshooting](docs/troubleshooting.md).
 
 Additional runtime requirements:
 
@@ -164,7 +206,11 @@ python tools\verify_authoritative_results.py --verify docs\AUTHORITATIVE_RESULTS
 - `tools/diagnostics/`: non-authoritative diagnostics
 - `tools/archive/routeB_lite/`: archived Route B-lite study
 - `docs/`: result semantics, workflow, and scientific boundaries
+- `docs/research_cycles/`: per-cycle lifecycle state, review verdicts and execution packets (authoritative for "where are we now")
+- `scripts/`: decoder-free feasibility spikes and synthetic runners for the V65–V72 line
 - `tests/`: raw-data-free smoke tests
+- root `test_v*_small.py`: small pytest suites for the active V68–V72P0 soft-joint line
+- `workspace/`: scratch and pytest temp roots (not production output)
 
 ## Safe checks
 
@@ -173,7 +219,22 @@ python -m unittest discover -s tests -v
 python -m compileall -q src experiments pipelines tools analysis tests
 ```
 
-These checks do not replace a raw-data E2E or full replay run.
+Active formal-IR checks (verified 2026-09-02):
+
+```powershell
+python -m comparison_bench.src.comparison_bench.cli.smoke_test --config comparison_bench/configs/benchmark_synth.yaml
+python -m pytest -q -p no:cacheprovider test_v68_spike_small.py test_v69_three_layer_small.py test_v70_binary_soft_joint_small.py test_v70r1_parametric_channel_model_small.py test_v71_soft_joint_factor_kernel_small.py test_v72p0_soft_joint_binary_synthetic_small.py
+```
+
+Notes:
+
+- `pytest.ini` sets `addopts = -p no:cacheprovider` and a `--basetemp` under
+  `workspace/`. Without them, Windows ACLs on pytest cache directories trigger
+  benign permission-denied warnings.
+- The six root-level `test_v*_small.py` files cover the active V68–V72P0
+  soft-joint line (77 tests). The broader comparison suite (166 files) lives in
+  `comparison_bench/tests/`.
+- These checks do not replace a raw-data E2E or full replay run.
 
 ## Key documents
 

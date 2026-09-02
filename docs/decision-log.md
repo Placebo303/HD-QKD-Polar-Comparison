@@ -2,6 +2,25 @@
 
 Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison project.
 
+> **Currency note (2026-09-02).** Entries below run through the V32 closeout
+> (2026-08-23). Decisions from V33 onward were recorded in the per-cycle
+> documents and OpenSpec change folders rather than appended here. Nothing in
+> this file has been rewritten; use the index below to locate newer records.
+>
+> **Active cycle**: V72P1-ADP, branch `formal-ir-mainline`, HEAD `ea82423f`,
+> lifecycle `PLAN_ACCEPTED / IMPLEMENTATION_NOT_STARTED / EXECUTE_NOT_AUTHORIZED`.
+>
+> | Versions | Where the decisions are recorded |
+> |---|---|
+> | V33–V64 | `openspec/changes/formal-ir-v<N>-*/` four-artifact folders; `docs/nbldpc-v3*.md`, `docs/v34-*`, `docs/v35-algorithm-development-report.md` |
+> | V65–V69 | `openspec/changes/formal-ir-v65*/`, `-v66-*`, `-v67-*` (with `V67_FEASIBILITY_MAP_ACCEPTED.md`), `-v68-*` (with `V68_RESULT_ACCEPTED.md`), `-v69-*` |
+> | V70–V71 | `openspec/changes/formal-ir-v70-binary-soft-joint-feasibility/`, `-v70r1-parametric-channel-model-check/`, `-v71-soft-joint-factor-kernel/` |
+> | V72P0–V72P1 | `openspec/changes/formal-ir-v72p0-soft-joint-binary-synthetic/`, `-v72p1-soft-joint-binary-adapter/`; `docs/research_cycles/V72P1-ADP/` |
+> | Cycle state | `docs/research_cycles/<CYCLE-ID>/cycle_state.yaml` (V37P0 … V65AR2, V72P1-ADP) |
+>
+> Backfilling the V33–V72P1 decisions into this file is an open item; it needs
+> per-cycle scientific conclusions that are deliberately not restated here.
+
 ---
 
 ## Template

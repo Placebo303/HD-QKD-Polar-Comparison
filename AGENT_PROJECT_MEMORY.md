@@ -1,3 +1,49 @@
+## 2026-09-02 V65–V72P1 binary soft-joint line (memory backfill)
+
+- Active cycle [repo-observed]: `V72P1-ADP` / change
+  `formal-ir-v72p1-soft-joint-binary-adapter`, branch `formal-ir-mainline`,
+  HEAD `ea82423f`; lifecycle
+  `PLAN_ACCEPTED / IMPLEMENTATION_NOT_STARTED / EXECUTE_NOT_AUTHORIZED`.
+  `docs/research_cycles/V72P1-ADP/cycle_state.yaml` records
+  `accepted_plan_sha=73efd91f`, `implementation_sha=null`,
+  `development_execution_authorized=false`, `formal_execution_authorized=false`.
+  Companion records: `REVIEW_VERDICT.md` (PLAN_ACCEPTED), `EXECUTION_PACKET.md`,
+  `EXECUTION_PACKET_ADDENDUM.md` (CANDIDATE, base `fb441f0f`, awaiting
+  `INDEPENDENT_ADDENDUM_REVIEW`).
+- Route-level outcomes [repo-observed]: nonbinary GF(32) LDPC (V13–V38) closed
+  `finite_graph_fail` — V31 ran n=1024 over 300/300 blocks with exact 0/300,
+  tag 0/300 and 0 false accepts; binary Cascade engineering line (V39–V64)
+  closed
+  `RETIRE_BINARY_CASCADE_PRIMARY_ROUTE_UNDER_CURRENT_FRAME_AND_VERIFICATION_CONTRACT`
+  (T2 terminal stop, T3/T4 not executed).
+- Feasibility-map chain [repo-observed]: V66 `RATE_NOT_FEASIBLE`; V67
+  `V67_FEASIBILITY_MAP_ACCEPTED` with all three sessions `NEAR_FULL_DISCLOSURE`;
+  V68 `V68_OVERALL_STILL_HEAVY`; V70 `V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE`
+  (1 feasible + 1 marginal + 1 no-information-margin); V71 `ADAPTER_REQUIRED`
+  with 2M fixed `NO_INFORMATION_MARGIN`; V72P0 `LOCAL_FACTOR_KERNEL_PASS` +
+  `ADAPTER_PLAN_READY`.
+- V69 realized terminal is **unconfirmed** [unverified]: the change defines five
+  overall states (`EVIDENCE_INCOMPLETE`, `MODEL_NOT_STABLE`,
+  `THREE_LAYER_COMMON_FEASIBLE`, `THREE_LAYER_PER_SESSION_ONLY`, `STILL_HEAVY`),
+  but the realized classification was not located during this backfill. Do not
+  restate a V69 outcome until `v69_results.json` is read.
+- V72P1 frozen constants [repo-observed]: `FrozenMotherSpec` exactly 9 fields
+  (`Q=1024, N=1024, Nbit=10240, M=9036, r0=160, delta=8, max_rows=9036,
+  f_planning=1.3, column_mapping="sym*10+bit"`); `SoftJointConfig` exactly 8
+  fields (`checkpoint_rows` 72 entries, `max_iter_per_checkpoint=10`,
+  `max_total_iterations=720`, `llr_clip=20.0`, `convergence_tol=1e-6`,
+  `warm_start=true`, `dtype="float64"`, `tag_bits=64`); 11 working arrays
+  9,466,840 B plus CSR 284,248 B (nnz 49,620); disclosure prefixes 1111;
+  single seed `20260902`.
+- Authorization boundary [decision]: a plan ACCEPT never authorizes
+  implementation, decoder execution, real-data access, or `run_01`. Each is a
+  separate authorization bound to an exact SHA.
+- Documentation-lag correction (2026-09-02) [repo-observed]: before this
+  backfill, `CURRENT_TASK.md` stopped at V31 (2026-08-21), this log at V55
+  (2026-08-28) and `docs/decision-log.md` at V32 (2026-08-23), while the branch
+  had reached V72P1. Currency notes were added to each file instead of
+  rewriting historical records.
+
 ## 2026-08-28 V55 pre-EXECUTE / pre-RESULT 双重 review 门禁（强制）
 
 - 根因 [repo-observed]: V55 连续复用 V54 模板常量 `efd34ef` 作为 `ACCEPTED_PLAN_SHA` 未替换，导致计划绑定错误。
@@ -1386,8 +1432,9 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 ## 3. Execution Environment
 - Expected OS: Windows host environment is directly observed; WSL support is also explicitly provisioned via `wsl-env.sh`. [repo-observed]
 - Expected Python/MATLAB/Octave/other runtime:
-  - Python with `numpy`, `pandas`, `numba`, `tqdm` from root `requirements.txt` [repo-observed]
+  - Python with `numpy`, `pandas`, `numba`, `tqdm`, `matplotlib` from root `requirements.txt` [repo-observed]
   - optional comparison dependencies: `pyyaml`, `pyarrow`, `pytest` from `comparison_bench/requirements-comparison.txt` [repo-observed]
+  - optional formal-IR dependency: `ldpc==2.4.1` from `comparison_bench/requirements-formal-ir.txt` (binary LDPC backends: `layered_ldpc_lite`, V35 MLC stage) [repo-observed]
   - compiled Polar binaries exist under `src/reconciliation/cpp_polar/` (`.dll`, `.exe`) [repo-observed]
   - MATLAB/Octave usage is [uncertain]; no current comparison harness file directly invokes them, but prior planning discussed possible external hooks. [memory-derived]
 - Known environment constraints:
@@ -1422,11 +1469,11 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   - `experiments/run_real_polar_max_pie.py` against raw or large real-data inputs by default. [repo-observed]
 
 ### Workflow: replay / security / audit aggregation
-- entrypoint:
-  - `tools/longrun_build_replay_index.py` [repo-observed]
-  - `tools/longrun_run_actual_ir_replay.py` [repo-observed]
-  - `tools/longrun_build_finite_key_audit_table.py` [repo-observed]
-  - `tools/longrun_build_security_master_table.py` [repo-observed]
+- entrypoint (path correction 2026-09-02: the root-level `tools/longrun_*.py` paths previously recorded here no longer exist and were moved under `pipelines/`):
+  - `pipelines/current/longrun_build_replay_index.py` [repo-observed]
+  - `pipelines/current/longrun_run_actual_ir_replay.py` [repo-observed]
+  - `tools/security_reports/round2_build_finite_key_audit_table.py` [repo-observed]
+  - `tools/security_reports/longrun_build_security_master_table.py` [repo-observed]
 - input: prior Polar logs/results and audit/replay inputs [repo-observed]
 - output: audit/shadow/master security summaries under result directories [repo-observed]
 - safe smoke command: [uncertain]

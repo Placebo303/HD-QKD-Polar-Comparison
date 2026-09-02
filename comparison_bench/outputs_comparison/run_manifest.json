@@ -43,7 +43,7 @@
     ]
   },
   "comparison_bench_version": "0.1.0",
-  "git_commit": "b639e3d3cf1e2d3d784621d7f172baaec3853179",
+  "git_commit": "ea82423fe313c2ce3ef532fb48c87dc34e752e5a",
   "outputs": {
     "frame_results": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\ir_frame_results.parquet",
     "results_csv": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\ir_benchmark_results.csv"

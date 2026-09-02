@@ -1,3 +1,12 @@
+> **Currency note (2026-09-02): the entries below are historical (latest
+> 2026-08-24, V35R1/V36) and are retained as evidence. The active cycle is
+> V72P1-ADP** (`openspec/changes/formal-ir-v72p1-soft-joint-binary-adapter`,
+> branch `formal-ir-mainline`, HEAD `ea82423f`), lifecycle
+> `PLAN_ACCEPTED / IMPLEMENTATION_NOT_STARTED / EXECUTE_NOT_AUTHORIZED`.
+> Authoritative current state lives in
+> `docs/research_cycles/V72P1-ADP/{cycle_state.yaml,REVIEW_VERDICT.md,EXECUTION_PACKET_ADDENDUM.md}`
+> and `CURRENT_TASK.md`.
+
 ## STRICT PROJECT FIRST PRINCIPLE — PERFORMANCE ALGORITHMS
 
 High-performance error-correction/IR algorithm discovery, implementation, and

@@ -1,23 +1,47 @@
 # Current Mainline
 
-## Formal-IR research mainline (2026-08-24)
+## Formal-IR research mainline (updated 2026-09-02)
 
 The strict first principle is high-performance error correction for actual
 HD-QKD data. The frozen Polar line below is a comparison baseline; active
-algorithm work lives under `comparison_bench/`, OpenSpec, and the NB-LDPC
-research documents.
+algorithm work lives under `comparison_bench/`, `scripts/`, OpenSpec, and the
+per-cycle documents in `docs/research_cycles/`.
 
-Current bounded state:
+**Active cycle: V72P1-ADP** (`formal-ir-v72p1-soft-joint-binary-adapter`),
+branch `formal-ir-mainline`, HEAD `ea82423f`.
+
+- Lifecycle `PLAN_ACCEPTED / IMPLEMENTATION_NOT_STARTED / EXECUTE_NOT_AUTHORIZED`.
+- Accepted plan `73efd91f`; frozen implementation packet `fb441f0f`; execution
+  packet addendum `ea82423f` awaiting independent review.
+- After acceptance the scope is synthetic-only: three new files, output under
+  `v72p1_synthetic_qual/`. Real data, `run_01`, parameter tuning and seed
+  changes remain prohibited.
+
+Bounded outcomes of the three mainline routes:
+
+| Route | Versions | Terminal outcome |
+|---|---|---|
+| Nonbinary GF(32) LDPC | V13–V38 | `finite_graph_fail` (V31: n=1024, 300/300 blocks, 0 exact) |
+| Binary Cascade / engineering | V39–V64 | `RETIRE_BINARY_CASCADE_PRIMARY_ROUTE_UNDER_CURRENT_FRAME_AND_VERIFICATION_CONTRACT` |
+| Binary soft-joint factor | V65–V72P1 | `V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE`; V72P0 `LOCAL_FACTOR_KERNEL_PASS` + `ADAPTER_PLAN_READY` |
+
+Historical state (superseded in currency, retained as evidence):
 
 - V34: matched empirical-P fixed-packet bounded failure, ER1 accepted.
 - V35R1: no candidate for the tested hand-designed NB configuration.
-- V36: real exploratory residual decrease on 15 paired development blocks,
-  but no exact recovery and no finite-graph advance. Its DE-selection gate is
-  not accepted and its realized graphs violate the frozen zero-cycle gate.
+- V36: real exploratory residual decrease on 15 paired development blocks, but
+  no exact recovery and no finite-graph advance. Its DE-selection gate is not
+  accepted and its realized graphs violate the frozen zero-cycle gate.
+- V66 `RATE_NOT_FEASIBLE`; V67 three sessions all `NEAR_FULL_DISCLOSURE`;
+  V68 `V68_OVERALL_STILL_HEAVY`; V71 `ADAPTER_REQUIRED` with 2M fixed
+  `NO_INFORMATION`.
+
+No route has yet produced a successful reconciliation on real HD-QKD data
+within an acceptable leakage budget.
 
 Use `docs/research-cycle-sop.md` for the next plan -> ChatGPT review -> OpenCode
-implementation -> result-review loop. No successor or formal run is currently
-authorized by this status document.
+implementation -> result-review loop. No formal run is authorized by this status
+document; V72P1 implementation awaits the addendum review.
 
 ## Reporting Rule
 

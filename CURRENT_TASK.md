@@ -1,3 +1,35 @@
+Status: **V72P1-ADP — `PLAN_ACCEPTED / IMPLEMENTATION_NOT_STARTED / EXECUTE_NOT_AUTHORIZED`** — 2026-09-02 当前
+
+当前活跃周期 V72P1-ADP（`formal-ir-v72p1-soft-joint-binary-adapter`），分支
+`formal-ir-mainline`，HEAD `ea82423f`：
+
+- `accepted_plan_sha = 73efd91f`（四工件计划已通过独立 plan review）；
+  实现包 `fb441f0f` 已冻结；执行包 addendum `ea82423f` 为 CANDIDATE，
+  待独立审阅（`INDEPENDENT_ADDENDUM_REVIEW`）。
+- `cycle_state.yaml`：`implementation_sha = null`，
+  `development_execution_authorized = false`，`formal_execution_authorized = false`，
+  `scientific_promotion = false`。
+- 审阅通过后仅允许 3 个新文件：
+  `comparison_bench/src/comparison_bench/formal_ir/v72p1_soft_joint_adapter.py`、
+  `scripts/v72p1_soft_joint_synthetic.py`、`test_v72p1_soft_joint_adapter_small.py`；
+  输出仅落在 `v72p1_synthetic_qual/`（4 个文件），SYNTHETIC_ONLY。
+- 冻结常量：FrozenMotherSpec 9 字段（`Q=N=1024`, `Nbit=10240`, `M=9036`,
+  `r0=160`, `delta=8`, nnz 49620）；SoftJointConfig 8 字段
+  （`llr_clip=20.0`, `convergence_tol=1e-6`, `warm_start=true`,
+  `dtype=float64`, `tag_bits=64`）；11 数组 9,466,840 B + CSR 284,248 B；
+  prefix 1111 / checkpoint 72；唯一 seed `20260902`。
+- 禁止：真实数据、2M/TEST/holdout 采样、`run_01`、调参或换 seed、
+  覆盖既有输出、启动 V72。
+
+三条主线路线终态：非二进制 GF(32) LDPC（V13–V38）`finite_graph_fail`
+（V31 n=1024 300/300 块，exact 0/300，零误接受）；二进制 Cascade 工程线
+（V39–V64）`RETIRE_BINARY_CASCADE_PRIMARY_ROUTE_UNDER_CURRENT_FRAME_AND_VERIFICATION_CONTRACT`；
+二进制软联合（V65–V72P1）`V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE`
+（1 feasible + 1 marginal + 1 no-information-margin），V72P0
+`LOCAL_FACTOR_KERNEL_PASS` + `ADAPTER_PLAN_READY`。
+
+---
+
 Status: **V31 ARCHIVED — `finite_graph_fail`** — 2026-08-21 收口
 V31 deterministic finite-graph redesign gate 已执行并归档（用户目标授权）。
 - M1 DE confirmation PASS 60/60（每 n 30/30，m1=16）。

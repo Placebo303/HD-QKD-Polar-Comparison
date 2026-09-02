@@ -1,5 +1,14 @@
 # HANDOFF — HD-QKD Nonbinary LDPC route (V31 archived: finite_graph_fail)
 
+> **Currency note (2026-09-02): this file records the V25–V31 nonbinary LDPC
+> route and is retained as evidence. It is not the current state.**
+> The active cycle is **V72P1-ADP** on branch `formal-ir-mainline` (HEAD
+> `ea82423f`), lifecycle
+> `PLAN_ACCEPTED / IMPLEMENTATION_NOT_STARTED / EXECUTE_NOT_AUTHORIZED`.
+> Authoritative current state: `docs/research_cycles/V72P1-ADP/cycle_state.yaml`
+> and `CURRENT_TASK.md`. The hard prohibitions recorded below remain in force
+> for the V31 packet itself.
+
 ## Current state (2026-08-21)
 
 - V31 deterministic finite-graph redesign gate is ARCHIVED with terminal

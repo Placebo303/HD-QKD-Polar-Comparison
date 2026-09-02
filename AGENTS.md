@@ -7,9 +7,14 @@ These rules apply to all agents operating in this repository.
 ## 0. Repository Scope (READ FIRST — boundary rule)
 
 - **This checkout (`HD-QKD_Polar_Comparison`) is the FORMAL IR / LDPC
-  RESEARCH MAINLINE** (`main` branch): formal Cascade/LDPC methods,
-  binary-LDPC v3+ long-frame work, and the nonbinary-LDPC ladder live and
-  evolve here.
+  RESEARCH MAINLINE**: formal Cascade/LDPC methods, binary-LDPC v3+
+  long-frame work, and the nonbinary-LDPC ladder live and evolve here.
+- **Active working branch is `formal-ir-mainline`.** All V65+ cycles (the
+  binary soft-joint line, current cycle V72P1-ADP) are committed there. The
+  `main` branch retains the earlier Cascade/LDPC/nonbinary-ladder history and
+  currently sits behind `formal-ir-mainline`. Verify the current branch with
+  `git branch -vv` before assuming which branch is authoritative; do not treat
+  `main` as the active research tip.
 - **The sibling checkout `../HD-QKD_Polar_Release` is the BINARY POLAR
   MAINLINE** (branch `polar-mainline`): mature binary Polar usage, frozen
   baseline, security tooling. Do not advance Polar-mainline workstreams
@@ -202,17 +207,37 @@ openspec/
 - **Entrypoints**: `run_cascade_param_sweep.py`, `run_layered_ldpc_param_sweep.py`, `run_qldpc_param_sweep.py`, `run_ir_v3_master.py`
 - **All under**: `python -m comparison_bench.src.comparison_bench.cli.<entrypoint> --config <config>`
 
+### Formal-IR Research Cycles (V65+)
+
+- **Lifecycle documents** (authoritative for current state):
+  - `docs/research_cycles/<CYCLE-ID>/cycle_state.yaml` — lifecycle, `accepted_plan_sha`, `implementation_sha`, authorization flags
+  - `docs/research_cycles/<CYCLE-ID>/REVIEW_VERDICT.md` — acceptance record with SHA verification
+  - `docs/research_cycles/<CYCLE-ID>/EXECUTION_PACKET*.md` — frozen file list, constants, seed, stop rules
+  - `openspec/changes/formal-ir-v<N>-<topic>/` — four-artifact plan (`proposal.md`, `design.md`, `tasks.md`, `specs/spec.md`)
+- **Decoder-free spikes / synthetic runners**: `scripts/v<N>_*.py` (for example `scripts/v71_soft_joint_factor.py`, `scripts/v72p0_soft_joint_binary_synthetic.py`), with companion root-level `test_v<N>_*_small.py` pytest files.
+- **Authorization**: every cycle starts as `EXECUTE_NOT_AUTHORIZED`. Implementation, decoder execution, real-data access and `run_01` creation each require an explicit separate authorization on the exact SHA. Never infer authorization from a plan ACCEPT.
+
 ### Replay / Security / Audit Aggregation
-- **Entrypoints**: `tools/longrun_*.py`, `tools/minrerun_*.py`
+
+- **Maintained entrypoints**:
+  - `pipelines/current/longrun_build_replay_index.py`
+  - `pipelines/current/longrun_run_actual_ir_replay.py`
+  - `tools/security_reports/round2_build_finite_key_audit_table.py`
+  - `tools/security_reports/longrun_build_security_master_table.py`
 - **Do not run** unless explicitly requested.
+- The historical root-level `tools/longrun_*.py` and `tools/minrerun_*.py`
+  paths no longer exist; they were moved under `pipelines/current/` and
+  `pipelines/archive/`.
 
 ---
 
 ## 8. Execution Environment
 
 - **OS**: Windows host; WSL support via `wsl-env.sh`
-- **Python dependencies**: `numpy`, `pandas`, `numba`, `tqdm` (root `requirements.txt`)
+- **Python dependencies**: `numpy`, `pandas`, `numba`, `tqdm`, `matplotlib` (root `requirements.txt`)
 - **Optional comparison deps**: `pyyaml`, `pyarrow`, `pytest` (`comparison_bench/requirements-comparison.txt`)
+- **Optional formal-IR deps**: `ldpc==2.4.1` (`comparison_bench/requirements-formal-ir.txt`) — needed by binary LDPC backends such as `layered_ldpc_lite` and the V35 MLC stage
+- **Test runner**: `pytest` (from the comparison set). `pytest.ini` sets `addopts = -p no:cacheprovider` with a `--basetemp` under `workspace/`.
 - **Known constraints**:
   - PowerShell profile may emit execution-policy warnings (non-fatal)
   - `.git/index.lock` permission issues may block git operations
