@@ -1,3 +1,13 @@
+## 2026-09-04 V72P2D1 parity-layout diagnostic accepted close (descriptive-only, non-fresh, no promotion)
+
+- Lifecycle [repo-observed]: base `ba0df2d3bea4147574e0b8224480f45c93505178`, implementation/accepted-plan `07744ccf3095eaa35b4c457005e268fb5ff52c41`, result `58656f59943b66f6319226d139e1fe67c41702a4` on `formal-ir-v72p1-addendum-clean` (`HEAD == origin` verified); single authorized invocation A-then-B serial, no rerun, no third layout, no other block; `CLOSED_ACCEPTED` / `RESULT_ACCEPTED`, pre-EXECUTE PASS + pre-RESULT PASS.
+- Structure [repo-observed]: 9036x10240 nnz49620 both arms, deg2 9035 both arms, check-degree {4:1,5:4594,6:4441}; four-cycles 1196/1196, collisions 1194/1194, graph-isomorphic under degree-2 parity-column permutation (recomputed, not hand-filled); B col_map[1204:10239]=1204+permutation(9035), rng=default_rng(20260902), diagnostic-only seed.
+- Baseline gate [repo-observed]: arm A reproduces V72P2 block0 — ckpt 72/72, iters 334/334, `LADDER_EXHAUSTED`, bit 3100/3100, sym 620/620, syndrome+tag+control 9036+64+71; lambda `221.22162910704503` exact-equal; CE `7.135005172802673` bitwise equal.
+- Outcome [repo-observed]: A `LADDER_EXHAUSTED` 334 iters 118.97s / B `LADDER_EXHAUSTED` 321 iters 114.14s; invocation 240.17s (budget 1800s, 600s/arm, no overrun); 0 protocol-accepted, 0 verified-exact, 0 undetected (isolated, never merged); overall COMPLETED, fatal null.
+- Metering [repo-observed]: per arm `leak_IR_bits=9100` (9036+64), `total_public_bits=9171` (+71 CONTINUE); `f_model_relative=1.2455097837734634`, `f_public_model_relative=1.2552274974710365` (denominator selected CAL-CV CE `7.135005172802673`, failed attempts included).
+- Scope [decision]: single non-fresh block VAL1726-1729 (session 20260123_1M_600k_0dB, registry v71_data_registry.json schema v71_data_v1, data_sha 84d62779, CAL702..1725 shared prior); D1-D8 per-checkpoint wrapper scalars only (72 ckpts x 2 arms), no full prior/matrix/LLR/edge storage; DESCRIPTIVE_ONLY — no FER/SKR/information-limit/qualification/promotion; authorization consumed, no V73.
+- Evidence [repo-observed]: `comparison_bench/outputs_comparison/v72p2d1_parity_layout_ab/` exactly four files (manifest.json/results.json/table.csv/report.md) + `docs/research_cycles/V72P2D1-PARITY/RESULT_SUMMARY.md` + `cycle_state.yaml`.
+
 ## 2026-09-03 V72P2-VAL descriptive real smoke completed (non-fresh, no promotion)
 
 - Lifecycle [repo-observed]: exactly one authorized invocation used implementation/plan SHA `b33664d00b5b22a02b61df95b00c99ae0a0368b8`; all 9 assigned blocks were attempted with no rerun or tuning.
