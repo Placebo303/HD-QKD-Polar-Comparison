@@ -1,3 +1,14 @@
+## 2026-09-03 V72P2-VAL descriptive real smoke completed (non-fresh, no promotion)
+
+- Lifecycle [repo-observed]: exactly one authorized invocation used implementation/plan SHA `b33664d00b5b22a02b61df95b00c99ae0a0368b8`; all 9 assigned blocks were attempted with no rerun or tuning.
+- Outcome [repo-observed]: 0/9 protocol-accepted, 0/9 undetected, 9/9 `LADDER_EXHAUSTED`, and no decoder/numeric errors; final candidates converged but syndrome/tag checks failed.
+- Accounting [repo-observed]: total wall `1057.375s`, `3037` iterations; aggregate `leak_IR_bits=81900`, `total_public_bits=82539`; each block disclosed `9100/9171` IR/public bits.
+- Prior denominator [repo-observed]: CAL-only selected CV `CE_ref_log2=7.135005172802673` at lambda `221.22162910704503`; all-attempt model-relative ratio `1.2455097837734632`.
+- Claim boundary [decision]: this is descriptive reuse of non-fresh VAL, not FER, SKR, information-limit, algorithm-qualification, or promotion evidence; equal raw/final error counts do not establish bitwise identity.
+- Historical timing [decision]: the V72P1 P1C one-iteration `1.046s` versus `<1s` failure remains explicit non-blocking evidence; do not claim the old timing suite passed.
+- Evidence [repo-observed]: `comparison_bench/outputs_comparison/v72p2_val_descriptive_smoke_20260903/` and `docs/research_cycles/V72P2-VAL/REVIEW_VERDICT.md`.
+- Authorization [decision]: V72P2 execution authorization is consumed; no successor execution or promotion is authorized.
+
 ## 2026-09-03 V72P1-ADP synthetic qualification accepted (synthetic-only, transcribed)
 
 - Implementation SHA [repo-observed]: `ff88696f3c242cfb441dc9c82720e4fa6a371968` on `formal-ir-v72p1-addendum-clean` (`HEAD == origin` verified).
