@@ -66,3 +66,21 @@
   不得将“ladder 结果未动”等同于“因子图结构未变”或任何因果解释；
   未完成观测不重写成 PASS；不做 FER / SKR / 信息论极限 /
   方法定级 / 推广性断言。
+
+## 6. 离线补证链接（追加，不改历史测量）
+
+- 见 `docs/research_cycles/V72P2D1-PARITY/OFFLINE_EVIDENCE.md`
+  与脚本 `workspace/v72p2d1_offline_e45269c9/recompute.py`
+ （命令 `python workspace/v72p2d1_offline_e45269c9/recompute.py`，
+  decoder-free、CAL-free，不重跑 A/B，不覆盖四文件）。
+- 证据状态更新（第 2 节表格口径不变，仅更新证据状态）：
+  - pure-H check–check 1196/1196：库内已验证（含本补证复算）。
+  - pure-H collision 对数 1194/1194：库内已验证（含本补证复算）；
+    禁止冒充 symbol rows。
+  - symbol-factor ΣC(k,2) 8452/328（本臂列号 `v//10` 重分组）：
+    workspace 离线复算值，口径见补证 §3；最小口径测试 ASSERT_PASS。
+  - symbol / collision rows 8170/326：仍为外部预期，
+    本次 workspace 未独立输出该行数，仍待库内留痕，暂不作验证事实。
+- 第 2 节“外部复算引用，库内未留痕”降级语义保留为历史记录；
+  本节仅对上列四项分别标注新证据状态，不删除原降级表述，
+  不改变计量与科学结论。
