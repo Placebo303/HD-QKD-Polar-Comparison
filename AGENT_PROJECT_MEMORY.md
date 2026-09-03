@@ -3145,3 +3145,27 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   metering 9100/9171 retained. Descriptive-only; incomplete observations
   are not PASS. No decoder run / rerun / tuning / four-file overwrite /
   per-symbol key read.
+
+## 2026-09-04 V72P2D1 algorithm-route exploration (read-only, proposed successors)
+
+- `docs/research_cycles/V72P2D1-PARITY/ALGORITHM_ROUTE_RESEARCH.md` records
+  the route study at b04e5757. Pure-H four-cycle/collision counts are
+  1196/1196 and 1194/1194; symbol-factor 8452/328 is a workspace recount,
+  while symbol/collision rows 8170/326 remain external, not repo-verified.
+- The b04 O1 supplement read only the four VAL1726--1729 frames (not CAL) and
+  is `POSTHOC_RECONSTRUCTED`; this route exploration itself read no raw/parquet,
+  ran no decoder, and did not change code, results, or lifecycle.
+- Static review found no active-path LLR-direction, local-factor
+  self-exclusion, syndrome-aware SPA, or warm-start semantic error. The
+  Bob-oriented weak-fixed-point explanation is an inference, not a proven root
+  cause. `run_incremental_decoder` returning stale variable-to-check output is
+  a separate known bug; current D1 used `run_decoder`.
+- The mother has 1204 high-degree columns (mean degree about 26.2035) versus
+  9035 degree-2 and one degree-1 parity columns. Fixed symbol grouping leaves
+  symbol edge totals 19/20/303 in both A/B; a degree-balanced interleaver and
+  grouped-symbol mask BP are `PROPOSED`, not accepted designs.
+- M0 hierarchical prior (lambda 221.22162910704503, CE about 7.135/7.150)
+  and historical V70R1 M2 (VAL CE 6.7871) should be compared only under a new
+  frozen plan. Proposed next diagnostic is one-block L/I/P orthogonal triage;
+  three arms failing to escape would stop binary edge-level micro-tuning and
+  permit proposing tiny exhaustive grouped-symbol-mask or GF32 comparison work.
