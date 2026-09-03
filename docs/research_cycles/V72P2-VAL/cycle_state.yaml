@@ -1,0 +1,10 @@
+cycle_id: V72P2-VAL
+state: PLAN_CANDIDATE
+predecessor_base_sha: cd0b0e77c5cedbf3ac74d271cff3d6649f7043fc
+accepted_plan_sha: null
+implementation_sha: null
+development_execution_authorized: false
+formal_execution_authorized: false
+scientific_promotion: false
+scope: 1M_9block_nonfresh_VAL_descriptive_smoke
+output_directory: comparison_bench/outputs_comparison/v72p2_val_descriptive_smoke_20260903
