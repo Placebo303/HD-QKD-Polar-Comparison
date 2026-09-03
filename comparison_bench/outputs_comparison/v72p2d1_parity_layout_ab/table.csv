@@ -1,0 +1,3 @@
+arm,status,attempted,disclosed_rows,syndrome_bits_published,tag_bits_published,control_bits_sent,leak_IR_bits,total_public_bits,iterations_used,elapsed_s,protocol_accepted,verified_exact_success,undetected,oracle_exact,raw_bit_errors,raw_symbol_errors,bit_errors,symbol_errors,f_model_relative,f_public_model_relative,error
+A,LADDER_EXHAUSTED,True,9036,9036,64,71,9100,9171,334,118.96799999999348,False,False,False,False,3100,620,3100,620,1.2455097837734634,1.2552274974710365,
+B,LADDER_EXHAUSTED,True,9036,9036,64,71,9100,9171,321,114.14099999994505,False,False,False,False,3100,620,3100,620,1.2455097837734634,1.2552274974710365,
