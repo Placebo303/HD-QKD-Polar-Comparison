@@ -1,0 +1,12 @@
+cycle_id: V72P2D2-TRIAGE
+state: PLAN_ACCEPTED
+branch: formal-ir-v72p1-addendum-clean
+accepted_plan_git_revision: 4592bdad357a02f8f08a880ca0036beaed3ee900
+development_execution_authorized: true
+development_execution_scope: implementation_and_synthetic_preflight_only
+real_execution_authorized: false
+formal_execution_authorized: false
+decoder_executed: false
+result_created: false
+scientific_promotion: false
+next_gate: INDEPENDENT_IMPLEMENTATION_REVIEW
