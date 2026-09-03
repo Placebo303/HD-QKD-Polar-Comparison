@@ -453,7 +453,11 @@ def run_generic_csr_bp(indptr, indices, n_vars, channel_llr, syndrome_target, ma
     return {"variable_to_check": variable_to_check, "check_to_variable": check_to_variable, "app_llr": app_llr}
 
 def run_decoder(prior_logp, syndrome_target, indptr=None, indices=None, max_iter=10, warm_start_c2v=None):
-    """soft-joint decoder for synthetic smoke; returns dict with messages plus hard_bits/syndrome_observed"""
+    """Run BP and return the final-message readout plus scalar convergence data.
+
+    The returned APP/hard decisions are recomputed from the final c2v message
+    state; this is a readout only and is not an additional BP iteration.
+    """
     if indptr is None or indices is None:
         indptr, indices, _ = get_mother_csr()
     indptr = np.asarray(indptr, dtype=np.int32)
@@ -538,12 +542,27 @@ def run_decoder(prior_logp, syndrome_target, indptr=None, indices=None, max_iter
             check_to_variable = check_to_variable_new
         app_llr = (f_flat + sums).astype(np.float64)
         app_llr = np.clip(app_llr, -SoftJointConfig["llr_clip"], SoftJointConfig["llr_clip"])
-        res = float(np.max(np.abs(check_to_variable - prev_c2v))) if it>0 or max_iter>1 else 0.0
-        if it == 0:
-            res = float(np.max(np.abs(check_to_variable)))
+        res = float(np.max(np.abs(check_to_variable - prev_c2v))) if nnz else 0.0
         residuals.append(res)
         if res < SoftJointConfig["convergence_tol"]:
             break
+
+    # Final readout from final c2v.  Do not charge or perform another update.
+    sums_final = np.bincount(edge_var, weights=check_to_variable, minlength=nbit)
+    bit_to_factor = sums_final.reshape(n, 10).astype(np.float64)
+    is_uniform = bool(np.all(np.abs(prior_logp - prior_logp[0, 0]) < 1e-12))
+    if is_uniform:
+        factor_to_bit = np.zeros((n, 10), dtype=np.float64)
+    elif HAS_NUMBA:
+        factor_to_bit = np.zeros((n, 10), dtype=np.float64)
+        _factor_batch_numba(prior_logp, bit_to_factor, factor_to_bit, B_BITS)
+    else:
+        factor_to_bit = np.zeros((n, 10), dtype=np.float64)
+        for sym in range(n):
+            for b in range(10):
+                factor_to_bit[sym, b] = local_factor_extrinsic(prior_logp[sym], bit_to_factor[sym], b)
+    app_llr = factor_to_bit.reshape(nbit) + sums_final
+    app_llr = np.clip(app_llr, -SoftJointConfig["llr_clip"], SoftJointConfig["llr_clip"])
     finite = bool(np.all(np.isfinite(variable_to_check)) and np.all(np.isfinite(check_to_variable)) and np.all(np.isfinite(app_llr)) and np.all(np.isfinite(factor_to_bit)) and np.all(np.isfinite(bit_to_factor)))
     max_llr = float(np.max(np.abs(app_llr))) if app_llr.size else 0.0
     hard_bits, hard_symbols, syndrome_observed = _compute_hard_bits_and_syndrome(app_llr, indptr, indices, active_rows=len(syndrome_target))

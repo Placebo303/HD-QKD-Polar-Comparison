@@ -9,7 +9,7 @@
 - [ ] T1-D: First160+tag64; second288 adds128+one CONTINUE; tails40/4; exception/nonfinite retains published counters and stops; incomplete slots retained.
 - [ ] T1-E: Exact four-frame grouping, stable pair ordering, invalid/missing/duplicate frame no replacement; CAL/SMOKE disjoint; hierarchical orientation/natural-log prior; selected CV score fixed as denominator, smoke labels cannot affect prior/model selection.
 - [ ] T1-F: Deadline stop accounting and nine-row partial output; output directory existing -> refuse; fake tests never read real data or invoke default real decoder.
-- [ ] T2: Existing V72P1 23-test regression and the new focused tests. Retain failures; do not weaken numerical thresholds. Update only initialization-specific test expectation explicitly changed by final-readout semantics.
+- [ ] T2: Run existing V72P1 23-test regression and new focused tests. Retain29 passes and the historical P1C one-iteration timing failure; independently check P1C numerical/structural evidence. Only that timing failure is non-blocking per the design's main-review amendment. Do not change historical tests/thresholds or claim an all-pass regression. Update only initialization-specific test expectation explicitly changed by final-readout semantics.
 - [ ] R0: Main independent implementation review; exact new Git version committed/pushed; Pre-EXECUTE checklist recorded. Only then release one real invocation.
 - [ ] E1: Execute nine assigned real blocks once at frozen parameters. Zero successes is a scientifically valid result, not reason to tune/retry.
 - [ ] R1: Main Pre-RESULT re-computes counts, communication, ratios and state/claim boundaries from actual four artifacts; no decoder rerun.

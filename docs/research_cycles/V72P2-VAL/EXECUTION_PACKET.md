@@ -39,7 +39,7 @@ T0 command: python -m py_compile comparison_bench/src/comparison_bench/formal_ir
 
 T1/T2 command: pytest -p no:cacheprovider test_v72p2_real_smoke_small.py test_v72p1_soft_joint_adapter_small.py --basetemp workspace/v72p2_tests/<unique>/pytest
 
-Implement all T1-A..F from tasks.md. Explicitly test invalid seventh frame no substitution, true warm delta/current readout, final legal iteration acceptance, zero budget zero communication, undetected isolation, failed-disclosure accounting and strict prefix CSR/new edges. Existing tests must pass; diagnostics may run targeted synthetic tests, never real-data experiments to repair tests. No real output until main review.
+Implement all T1-A..F from tasks.md. Explicitly test invalid seventh frame no substitution, true warm delta/current readout, final legal iteration acceptance, zero budget zero communication, undetected isolation, failed-disclosure accounting and strict prefix CSR/new edges. Apply the design's explicit main-review timing amendment:29 tests and independent P1C numerical/structural checks must pass; retained historical1.046s/<1s failure alone is non-blocking and must not be relabeled PASS. Do not change historical thresholds or kernel. No real output until main review.
 
 Root records plan acceptance and accepted_plan_sha in the next milestone after the plan commit. Worker may perform exact-add plan/implementation commits and ordinary pushes ONLY when instructed by root. Before any push check git diff --check, cached manifest, branch and HEAD. Never git add -A/stash/reset/switch/clean.
 

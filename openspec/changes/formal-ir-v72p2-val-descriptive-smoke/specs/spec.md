@@ -28,3 +28,6 @@ First publication SHALL charge160 syndrome+64tag; subsequent checks SHALL charge
 
 ### Requirement: bounded additive execution
 Only the exact reviewed implementation SHALL run once after Pre-EXECUTE, in the frozen new directory. All9 assigned outcomes and partial failures SHALL be retained; no real rerun, other source, overwrite, confirmation or promotion is authorized. Pre-RESULT SHALL precede result commit.
+
+### Requirement: explicit historical timing regression
+The retained P1C one-iteration1.046s failure against <1s SHALL remain reported, not relabeled PASS. It alone is non-blocking for this successor's correctness-focused smoke, as specified in design's main-review amendment. All29 other regression tests and independently checked P1C numerical/structural conditions SHALL pass; other failures block. No performance claim or kernel change is authorized.

@@ -189,8 +189,14 @@ def test_T_DATAFLOW_4_prior_only_via_local():
     # factor must differ, app differs via factor
     assert not np.allclose(r1["factor_to_bit"], r2["factor_to_bit"])
     assert not np.allclose(r1["app_llr"], r2["app_llr"])
-    # ensure bit_to_factor unchanged across priors at same iteration start (since c2v zero)
-    assert np.allclose(r1["bit_to_factor"], r2["bit_to_factor"])
+    # The returned snapshot is recomputed from final c2v, not the initial state.
+    for result in (r1, r2):
+        final_sum = np.bincount(
+            result["edge_var"],
+            weights=result["check_to_variable"],
+            minlength=10240,
+        ).reshape(1024, 10)
+        assert np.allclose(result["bit_to_factor"], final_sum)
 
 def test_T_DATAFLOW_5_self_exclusion():
     import comparison_bench.src.comparison_bench.formal_ir.v72p1_soft_joint_adapter as ad
@@ -391,4 +397,3 @@ def test_hard_bits_and_syndrome_observed():
             s ^= int(hard_bits[int(indices[e])])
         recomputed[c]=s
     assert np.array_equal(recomputed, res["syndrome_observed"])
-

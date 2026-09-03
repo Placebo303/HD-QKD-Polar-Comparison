@@ -32,6 +32,12 @@ leak_IR_bits=syndrome_bits_published+tag_bits_published. total_public_bits=leak_
 
 ## Resources and result retention
 
+### Main-review amendment before real execution
+
+The combined synthetic regression returned 29 passed / 1 failed. The sole failure is the historical P1C one-iteration time: 1.046s versus <1s, after the required final-factor readout correction. Three/ten-iteration times are 1.297/1.313s; finite, nonzero messages, hard output,72 checkpoints and144 total iterations pass. P1C aggregate45.578s and script50.891s are NOT the ten-iteration time. Evidence: workspace/v72p1_rework_tests/9651abe2/v72p1_results.json. No rerun was selected to erase this failure.
+
+For this V72P2 correctness-focused smoke, that historical one-iteration performance regression is non-blocking under AGENTS first principle. The historical test and thresholds remain unchanged and remain FAILED; do not claim all23 predecessor tests passed or a throughput improvement. All29 other tests and the independent P1C numerical/structural checks are critical and must pass. No kernel optimization is allowed. This explicitly replaces the earlier blanket requirement that every historical timing assertion pass. Real-run600s/block and7200s/invocation budgets remain unchanged. Any other test or numerical failure blocks execution.
+
 One real invocation, serial nine blocks, no rerun/tuning. Soft deadlines checked before/after each checkpoint: 600s/block, 7200s whole invocation including CAL; one checkpoint can overrun. These are operator safety budgets, not predicted performance. A failed run is retained, not retried automatically. Report actual wall time; no fabricated RSS claim. Known working-array accounting is not process peak memory. Do not run a real-data trial to set a new budget.
 
 Additive output root is frozen in EXECUTION_PACKET.md. Four compact artifacts: manifest.json (code/plan Git refs, params, data identities/roles, command), results.json (9 assigned rows plus lightweight per-checkpoint scalar logs), table.csv (9 rows), report.md (descriptive summary). No raw symbols, syndrome/tag bytes or fitted matrix committed. Save a candidate after each completed block without overwriting any pre-existing run directory; results of an interrupted invocation remain inspectable. Pre-RESULT main review precedes commit/publication.

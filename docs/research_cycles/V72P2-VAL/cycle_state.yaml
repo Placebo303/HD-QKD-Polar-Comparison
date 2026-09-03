@@ -1,9 +1,10 @@
 cycle_id: V72P2-VAL
-state: PLAN_CANDIDATE
+state: PLAN_ACCEPTED
 predecessor_base_sha: cd0b0e77c5cedbf3ac74d271cff3d6649f7043fc
-accepted_plan_sha: null
+accepted_plan_sha: a97b23cee38a83d32ad67cd56d6c722b7e8e3de6
 implementation_sha: null
-development_execution_authorized: false
+development_execution_authorized: true
+development_execution_scope: synthetic_tests_only
 formal_execution_authorized: false
 scientific_promotion: false
 scope: 1M_9block_nonfresh_VAL_descriptive_smoke

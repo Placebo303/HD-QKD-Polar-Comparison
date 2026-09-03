@@ -1,6 +1,6 @@
 # V72P2 real VAL-reuse descriptive smoke
 
-Status: PLAN_CANDIDATE. Cycle: V72P2-VAL.
+Status: PLAN_REVISED_FOR_MAIN_ACCEPTANCE. Cycle: V72P2-VAL.
 Base: cd0b0e77c5cedbf3ac74d271cff3d6649f7043fc, branch formal-ir-v72p1-addendum-clean.
 V72P1 accepted synthetic evidence and its historical implementation remain intact.
 
@@ -17,3 +17,5 @@ The user explicitly requested the main conversation to plan/review and luna_work
 3. Preserve old artifacts. No artifact hashes, new registry framework, generator, damping, layered schedule or extra dependencies. The existing 64-bit reconciliation tag remains a protocol check, not an artifact integrity system.
 
 Authoritative details and test IDs are in design.md, specs/spec.md and the cycle EXECUTION_PACKET.md.
+
+Pre-execution amendment: retain the measured historical P1C one-iteration timing failure as non-blocking for this correctness-focused successor; all numerical checks remain mandatory. The design records exact evidence and replaces the blanket all-historical-timings-pass gate without changing any historical threshold, decoder kernel or real-run budget.
