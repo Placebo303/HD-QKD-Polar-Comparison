@@ -33,9 +33,11 @@ Git 版本绑定，不承担数据/artifact 内容校验；本计划不引入数
   因素；禁止 layered+I、I+M2、layered+M2。
 - **D2T0-4**：tiny 1-check 双 bit 同 symbol 只用于统计口径，断言 pure-H
   check-pair 为 0、mixed symbol `sum C(k,2)` 为 1。
-- **D2T0-5**：按 V70R1 公式构造 M2 K，`sum(K)=1`、每个 prior 行归一，
-  不触发生产输入；接口固定为 A，L 使用新 layered API，I/P 使用既有
-  `run_decoder`，不调用 `run_incremental_decoder`。
+- **D2T0-5**：按 V70R1 公式构造 M2 K 与每个条件分布 P，分别断言 finite、
+  strictly positive、sum=1；断言 `prior_logp` finite，且
+  `exp(prior_logp)` 与 P 逐元素相等并逐行归一，不把 log-probability 的正号
+  作为条件。整个测试不触发生产输入；接口固定为 A，L 使用新 layered API，
+  I/P 使用既有 `run_decoder`，不调用 `run_incremental_decoder`。
 
 ## D2T1L：layered 数学和状态
 
@@ -66,6 +68,41 @@ Git 版本绑定，不承担数据/artifact 内容校验；本计划不引入数
   `run_layered_decoder(prior_logp, syndrome_target, indptr, indices,
   max_sweeps, warm_start_c2v)`。若实现不能证明上述顺序和最新消息可见性，
   结果为 `BLOCKER`，禁止把 row loop 包装 flooding 称为 layered。
+- **D2T1L-10**：一个 factor target evaluation 严格定义为一个
+  `f2b[sym,b]` over `Q=1024` states 的完整 marginal。冻结
+  `warm_start_c2v.shape == (len(indices),)`；首 checkpoint
+  必须传全零数组，后续只复制同臂上一 checkpoint 的 active 前缀并将新边置零。
+  `run_layered_decoder` 返回 `bit_to_factor`、`factor_to_bit`、
+  `variable_to_check`、`check_to_variable`、`app_llr`、`hard_bits`、
+  `hard_symbols`、`syndrome_observed`、`finite`、`residuals`、`converged`、
+  `max_llr` 及完整核心/diagnostic factor 计数，所有计数可机械复算。
+- **D2T1L-11**：按每 row `10*distinct_affected_symbols` 复算 L 核心
+  `local_factor_target_updates`；I/P 每个实际 flooding iteration 为 10240 核心
+  targets；统一 `state_evaluations=1024*target_updates`。每臂 L0 full batch 严格
+  只计算一次并缓存，固定 `diagnostic_L0_target_updates=10240`；后续 checkpoint
+  metrics 只能读缓存，重复计算须另加 10240 diagnostic targets 并使 T2 失败。
+  L 每个实际 checkpoint 强制完整 rebuild f2b，固定增加
+  `diagnostic_checkpoint_rebuild_target_updates=10240`，不允许 cache/recompute
+  二选一；L final readout 复用最后状态为 0。I/P 每一次实际 `run_decoder` 调用
+  末尾由 adapter 重算完整 `factor_to_bit` batch，固定增加
+  `diagnostic_final_readout_target_updates=10240` 和对应
+  `10240*1024` diagnostic state evaluations，I/P 不得写成 final readout=0。
+  三阶段相加为 `diagnostic_factor_target_updates`，并有对应 diagnostic state
+  evaluations；纯 readout 另列。每臂输出阶段计数和 core+diagnostic 总计，并由
+  T2 机械断言无漏计或重复计数。
+  断言结构上界 `338388*6*10*10=203032800` targets、`207905587200` state
+  evaluations，并标为上界而非测量值。
+- **D2T1L-12**：cost-preflight 使用真实 mother 结构和合成 prior/syndrome、
+  零/非零 warm state，在 `active_rows=160,2048,4096,8192,9036` 每点恰测 1
+  个完整 sweep。记录 `U_r=10*sum(distinct_affected_symbols(row) for row<r)`
+  和 elapsed，`tau=max(elapsed/U_r)`；另测完整 rebuild 的
+  `tau_diag=max(seconds/target)`，用独立 timer 取非核心每-checkpoint overhead
+  `h=max(observed_noncore_overhead)`。令
+  `W=sum(10*sum(distinct_affected_symbols(row) for row<ck) for ck in ladder)`、
+  `D=10240*(1+72)`，断言
+  `projected_L_wall_s=(tau*W+tau_diag*D+72*h)*1.2`。超过 600 s 必须
+  `PLAN_REVISE_REQUIRED`，不准改算法偷过预算；`<=480 s` 是 20% 余量目标。
+  真实 L 超时只能是 `RESOURCE_BLOCKED`。
 
 ## D2T1I：full-column interleaver
 
@@ -100,12 +137,20 @@ Git 版本绑定，不承担数据/artifact 内容校验；本计划不引入数
 - **D2T1P-2**：按 design §5 的 wrapped Laplace shape、`K` 混合公式和循环
   位移构造；K 先正常归一，不能对 K floor 或 floor 后重归一。
 - **D2T1P-3**：断言 `prior_logp[sym,a]=log(max(K[(a-bob_phys[sym])%1024],
-  1e-300))`，floor 只在 log 阶段；每个 Bob 值的 prior 行是循环平移，全部值
-  finite/positive/归一。
+  1e-300))`，floor 只在 log 阶段；K、P 和每个 Bob 值的 prior 行必须 finite、
+  strictly positive、sum=1；`prior_logp` 必须 finite，且
+  `exp(prior_logp)` 与 P 逐元素相等并逐行归一。不得测试 logp 的正号。
 - **D2T1P-4**：builder 只接收 physical Bob 与冻结参数，不接 Alice；Alice
   只能进入 runner 的 syndrome/oracle 边界。BP 用 natural log，CE 用 log2。
 - **D2T1P-5**：历史 M2 CE `6.787126437359054` 仅作非门槛背景；测试必须
   允许 M2 消息改变但 syndrome-only 结果变差或完全不变。
+- **D2T1P-6**：I/P 核心 factor 计数只按既有 `run_decoder` 返回的
+  `actual_iterations=len(residuals)` 计；每次实际 iteration 增加
+  `local_factor_target_updates=1024*10=10240`，并满足
+  `state_evaluations=1024*local_factor_target_updates`。L0、rebuild、readout
+  另列 diagnostic 计数；每次实际 `run_decoder` 调用末尾的完整
+  `factor_to_bit` batch 固定增加 `diagnostic_final_readout_target_updates=10240`
+  （state evaluations 为 `10240*1024`），runner L0 每臂只计一次 10240。
 
 ## D2T1M：metrics 与敏感数据边界
 
@@ -121,13 +166,20 @@ Git 版本绑定，不承担数据/artifact 内容校验；本计划不引入数
 - **D2T1M-4**：记录 violation
   `weight(((H_arm[:r]@hard_bits)%2) XOR syndrome_target[:r])`、candidate-vs-
   Bob bit/symbol flips、residual、sweeps、edge_updates、local-factor target
-  updates、`state_evaluations=1024*target_updates`、finite 和 clip counts。
+  updates、`state_evaluations=1024*target_updates`、finite 和 clip counts；
+  核心 target/state 只含 actual decoder updates，另列
+  `diagnostic_factor_target_updates`、`diagnostic_state_evaluations` 和
+  `diagnostic_readout_evaluations`。
 - **D2T1M-5**：分别记录单边 `max|c2v|` 与
   `max_v|sum incident c2v|`；记录 c2v/f2b `abs>=20-1e-12` 计数和
   `abs(A_raw)>20` 计数。APP 输出可 clip 到 20，不能声称保留 factor preclip。
 - **D2T1M-6**：输出不包含秘密数组、Alice/Bob symbols、syndrome bytes、
   完整 prior、完整消息或逐 symbol 数组；D1 O1 只能标
   `POSTHOC_RECONSTRUCTED`。
+- **D2T1M-7**：冻结当前进程 RSS 采样为
+  `psutil.Process(os.getpid()).memory_info().rss`，在 prep、每 checkpoint 后和
+  arm 结束采样；`peak_rss_bytes` 取样本最大值，不能混用 Python 对象大小或
+  子进程口径。
 
 ## D2T2：fake 端到端与 syndrome-only 计费
 
@@ -140,14 +192,23 @@ Git 版本绑定，不承担数据/artifact 内容校验；本计划不引入数
 - **D2T2-3**：每个新臂独立计数 syndrome rows/bits、零 tag bits、CONTINUE
   control bits 和 disclosed rows；进入下一 checkpoint 才加 1 CONTINUE；
   满 ladder 正常计费结构为 `9036+71=9107`，预算中断/异常/timeout 保留
-  已发布计数，三臂不相加。
+  已发布计数，三臂不相加；每个 factor target evaluation 必须对应一个
+  `f2b[sym,b]` 的 1024-state marginal。T2 机械断言每臂 L0 严格一次且
+  `diagnostic_L0_target_updates=10240`、L 的每个实际 checkpoint
+  `diagnostic_checkpoint_rebuild_target_updates=10240`、L final readout 为 0，
+  I/P 的 `diagnostic_final_readout_target_updates=10240*actual_run_decoder_calls`
+  （每次对应 `10240*1024` state evaluations），以及 diagnostic/core/total 求和
+  关系；任何 L0 重算、rebuild 漏计或重复计数均失败。
 - **D2T2-4**：fake 反例覆盖：发布后异常不回滚；零余额不发布、不调用、不增加
   任何计数；candidate syndrome violation、syndrome 满足与收敛分离；
   oracle 只在 arm 结束后运行，不参与停止或 ladder 决策。
 - **D2T2-5**：结束后事后分类仅使用
-  `diagnostic_exact=syndrome_satisfied && oracle_exact` 与
-  `syndrome_collision_wrong=syndrome_satisfied && !oracle_exact`；二者仅作
-  描述性 oracle 分类，不改变 ladder 或计费。
+  `final_syndrome_satisfied` 与同一 final candidate 的
+  `final_oracle_exact`：`diagnostic_exact=final_syndrome_satisfied &&
+  final_oracle_exact`，`syndrome_collision_wrong=final_syndrome_satisfied &&
+  !final_oracle_exact`。`first_syndrome_satisfied_ckpt` 只作传播诊断；构造
+  “早期满足、后续 candidate 改变”的 fake 反例，断言最终分类只使用最后一个
+  已完成 checkpoint，不跨 checkpoint 混合。
 - **D2T2-6**：A 新指标为 null 并附
   `not_recorded_reason="D1 baseline did not record this metric; A was not rerun"`；
   baseline 只比较已存共同指标：outcome、iterations、candidate-vs-Bob、D1
@@ -157,6 +218,17 @@ Git 版本绑定，不承担数据/artifact 内容校验；本计划不引入数
 - **D2T2-8**：严格科学字段 replay 在相同 seed 下确定；wall、RSS、timestamp、
   临时 path 排除确定性比较；不要求整文件字节一致，也不使用数据或 artifact
   内容校验。
+- **D2T2-9**：每个 checkpoint 及 arm 终态断言
+  `disclosed_rows == syndrome_rows_published == syndrome_bits_published`，三者
+  单调不减；full ladder 名义公开计费固定为 `9036+71=9107`，三臂计数独立。
+- **D2T2-11**：T2 synthetic cost-preflight 必须使用真实 mother 结构与合成输入，
+  五个代表点各跑 1 sweep，机械复算 U、W、D、`tau`、`tau_diag`、独立计时的
+  `h` 及 `(tau*W+tau_diag*D+72*h)*1.2`；断言硬门槛 `projected_L_wall_s<=600`
+  和 RSS 采样口径，禁止用修改科学算法降低投影。
+- **D2T2-10**：验证每个 checkpoint 的 `final_checkpoint_rows`、
+  `final_syndrome_satisfied`、`final_oracle_exact`、`diagnostic_exact` 和
+  `syndrome_collision_wrong` 字段绑定同一 final candidate；checkpoint 层
+  oracle 必须为 null，并附 `oracle_runs_after_arm_end`。
 
 ## D2T3：未来真实执行门禁（本计划不执行）
 
@@ -172,12 +244,20 @@ Git 版本绑定，不承担数据/artifact 内容校验；本计划不引入数
   上限 2400 s，peak RSS 2 GiB。准备失败为三臂 `NOT_ATTEMPTED` 并非零；新臂
   exception、nonfinite、RSS 或 timeout 使该臂 `BLOCKED`，立即停止 invocation，
   后续为 `NOT_ATTEMPTED`；普通 `LADDER_EXHAUSTED` 继续下一臂。
+- **D2T3-3a**：Pre-EXECUTE 前必须完成 synthetic cost-preflight；使用真实
+  mother 结构、合成 prior/syndrome 与零/非零 warm state，在
+  `active_rows=160,2048,4096,8192,9036` 测 layered kernel，记录实际
+  target/state 计数、wall 和当前进程 RSS，并外推 `projected_L_wall_s`。硬门槛
+  为 `projected_L_wall_s<=600`，`<=480` 为建议的 20% 余量目标；超过 600 必须
+  `PLAN_REVISE_REQUIRED`，不得改变科学算法绕过。preflight 不运行正式三臂、不
+  读取 raw/parquet；真实 L 超过 600 s 只能为 `RESOURCE_BLOCKED`，不作路线失败。
 - **D2T3-4**：A 只读复用，L/I/P 各一次，无 rerun、无调参、独立 c2v；首次
   `syndrome_satisfied` 只记录不停止；执行前依次通过独立 Plan Review、
   Implementation Review、Pre-EXECUTE，发布前通过 Pre-RESULT。
 - **D2T3-5**：manifest/results/table/report 顶层与 per-arm 字段遵循 design §8，
   保存 provenance、Git revision binding、config、stop、metrics、accounting
-  和 claim boundary，不保存敏感数组或数据/artifact 内容校验字段。
+  和 claim boundary，不保存敏感数组或数据/artifact 内容校验字段；RSS 字段
+  遵循 D2T1M-7 的采样口径。
 
 ## D2T4：判别、文献和返回
 

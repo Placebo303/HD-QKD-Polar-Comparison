@@ -51,12 +51,42 @@ tolerance 1e-6。
 active-row sweep，I/P 的更新单位是完整 active-edge flooding iteration。
 三臂均不启动 partial update，c2v 状态仅在同臂相邻 checkpoint 携带，新边置零。
 
+一个 factor target evaluation 严格定义为一个 `f2b[sym,b]` over `Q=1024`
+states 的完整 marginal。核心 factor work 只统计实际 decoder update evaluations：
+L 每个 row 的 `local_factor_target_updates` 增加
+`10*distinct_affected_symbols`，I/P 每个实际 flooding iteration 增加
+`1024*10=10240`；核心 `state_evaluations=1024*local_factor_target_updates`。
+实际迭代数取 decoder 返回的完整更新数，而非请求上限。
+
+非核心阶段每臂分别计数：L0 full `[1024,10]` batch 严格只运行一次，固定为
+`diagnostic_L0_target_updates=10240`，并缓存供后续 checkpoint metrics 只读；任何
+重复计算都另加 `10240` diagnostic targets，且 T2 失败。L 的每个实际 checkpoint
+强制从 active state 完整 rebuild f2b，固定为
+`diagnostic_checkpoint_rebuild_target_updates=10240`，不允许 cache/recompute
+二选一；L 的 final readout 复用最后状态，计 0。I/P 的每一次实际
+`run_decoder` 调用末尾由 adapter 重算完整 `factor_to_bit` batch，故增加
+`diagnostic_final_readout_target_updates=10240`，对应 `10240*1024` state
+evaluations；I/P 不得写成 final readout=0。三阶段相加为
+`diagnostic_factor_target_updates`，并有
+`diagnostic_state_evaluations=1024*diagnostic_factor_target_updates`；纯 readout
+另列。每臂输出阶段计数、core+diagnostic 总计和总 state evaluations。
+
+L 的结构上界为 active-row 总和 `338388`、每 row 至多 6 个 distinct symbols、
+10 sweeps，即最多 `203032800` 个 factor targets 和
+`207905587200` 个 state evaluations；这是上界，不是实测成本结论。
+
 ## 固定接口、prior 和映射
 
 新模块固定提供
 `run_layered_decoder(prior_logp, syndrome_target, indptr, indices,
 max_sweeps, warm_start_c2v)`；adapter 不改，L 只调用该 API，I/P 只调用既有
 `run_decoder`。`run_incremental_decoder` stale-return bug deferred。
+`warm_start_c2v.shape` 必须等于 `(len(indices),)`，首 checkpoint 为全零数组，
+后续 checkpoint 只携带同一臂上一 checkpoint 的 active 前缀。该 API 返回消息、
+候选、`finite`、`residuals`、完整更新数及核心/诊断 factor 计数，至少包含
+`bit_to_factor`、`factor_to_bit`、`variable_to_check`、`check_to_variable`、
+`app_llr`、`hard_bits`、`hard_symbols`、`syndrome_observed`、`converged` 和
+`max_llr`，供 runner 机械复算；不把完整消息写入结果文件。
 
 I 使用 old high columns `0..1203`，按 `(-degree,old_col)` 排序；使用
 `info_load/info_count` 的字典序 tie-break，把 high 列写入物理
@@ -68,6 +98,9 @@ P 固定为 V70R1 1M CAL-only M2：Laplace、`mu=0.0`、
 `scale=0.2714417616594907`、`eps=0.562251256281407`、`Q=1024`。K 先正常
 归一，log 阶段才用 `max(K,1e-300)`；builder 只接 physical Bob，不接 Alice；
 BP 用自然 log，CE 用 log2。历史 CE `6.787126437359054` 不是门槛。
+合成验收必须断言 K 与每个条件分布 P finite、strictly positive、sum=1，
+`prior_logp` finite，且 `exp(prior_logp)` 与对应 P 逐行相等并归一；不得把
+“logp positive”作为条件。
 
 ## 无 tag 的诊断与计费
 
@@ -81,16 +114,25 @@ evaluations、finite 和 syndrome 状态。quantiles 为
 
 `syndrome_satisfied = finite && candidate syndrome 与公开 syndrome prefix 一致`。
 首次满足只记录 `first_syndrome_satisfied_ckpt` 和当前候选的标量摘要，不早停，
-继续完整预注册 ladder 到 9036 或预算/异常停止。oracle 仅在结束后运行；
-`diagnostic_exact = syndrome_satisfied && oracle_exact`，
-`syndrome_collision_wrong = syndrome_satisfied && !oracle_exact`，二者均为
-描述性事后分类，不称未检测错误、协议失败或验证成功。
+继续完整预注册 ladder 到 9036 或预算/异常停止。arm 结束时只取最后一个已完成
+checkpoint 的 candidate，并在同一 checkpoint prefix 上定义
+`final_syndrome_satisfied`；没有 candidate 时为 null。oracle 仅结束后比较这个
+final candidate，形成 `final_oracle_exact`。不得把 first checkpoint 的 syndrome
+与 final candidate 的 oracle 混合。最终仅作描述性分类：
+`diagnostic_exact = final_syndrome_satisfied && final_oracle_exact`，
+`syndrome_collision_wrong = final_syndrome_satisfied && !final_oracle_exact`。
+结果必须同时报告 `final_checkpoint_rows`、`final_syndrome_satisfied`、
+`final_oracle_exact`、`diagnostic_exact` 和 `syndrome_collision_wrong`；没有已完成
+checkpoint 时这些 final 字段为 null。checkpoint 层的 oracle 字段固定为 null，
+并注明 `oracle_runs_after_arm_end`。
 
 每臂独立记录 `syndrome_rows_published`、`syndrome_bits_published`、
 `tag_bits_published=0`、`control_bits_sent` 和 `disclosed_rows`；公开计费为
 `syndrome_bits_published+control_bits_sent`。每 checkpoint 发布新增 syndrome
-rows，进入下一 checkpoint 才增加 1 CONTINUE control bit；异常、timeout、预算
-中断保留已发布计数。完整 ladder 正常达到的名义计费为 `9036+71=9107`，三臂
+rows，并始终断言
+`disclosed_rows == syndrome_rows_published == syndrome_bits_published`，三者单调不减；
+进入下一 checkpoint 才增加 1 CONTINUE control bit；异常、timeout、预算中断保留
+已发布计数。完整 ladder 正常达到的名义计费为 `9036+71=9107`，三臂
 counterfactual 计数不相加，不称真实 session leakage。
 
 A 只允许与 D1 已存共同指标比较：outcome、iterations、candidate-vs-Bob、D1
@@ -119,6 +161,22 @@ artifact 均保留。普通 `LADDER_EXHAUSTED` 或预算正常耗尽才继续下
 soft wall 为 600 秒，invocation 为 2400 秒（prep 600 + 三臂各 600），peak
 RSS 硬上限 2 GiB。执行前必须通过独立 Plan Review、Implementation Review、
 Pre-EXECUTE，发布前必须通过 Pre-RESULT；本计划不授任何执行权限。
+
+Pre-EXECUTE 还必须先运行 synthetic cost-preflight：使用真实 mother 结构、合成
+prior/syndrome 与零/非零 warm state，仅测 layered kernel，不运行正式三臂且不读
+raw/parquet。固定代表点 `active_rows=160,2048,4096,8192,9036`，每点恰跑 1 个
+完整 sweep。令 `U_r=10*sum(distinct_affected_symbols(row) for row<r)`，记录
+elapsed 与 U，`tau=max(elapsed/U_r)`（包含 row scheduling/core kernel overhead）。
+完整 ladder 核心 workload 为
+`W=sum(10*sum(distinct_affected_symbols(row) for row<ck) for ck in ladder)`。
+诊断投影固定 `D=10240*(1+72)` targets；`tau_diag` 为代表点完整 rebuild 最大
+实测 seconds/target；非核心每-checkpoint overhead 用独立 timer 测量，
+`h=max(observed_noncore_overhead)`。投影为
+`projected_L_wall_s=(tau*W+tau_diag*D+72*h)*1.2`。硬门槛为 `<=600` 秒，
+建议 20% 余量目标为 `<=480` 秒；超过 600 必须回到 `PLAN_REVISE_REQUIRED`，
+不得改科学算法偷过预算。真实 L 超过 600 秒只记 `RESOURCE_BLOCKED`，不解释成
+路线失败。RSS 采样为 `psutil.Process(os.getpid()).memory_info().rss`，在 prep、
+每 checkpoint 后和 arm 结束采样，peak 取样本最大值。
 
 ## 判别与出口
 
