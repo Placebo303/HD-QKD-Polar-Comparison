@@ -2,8 +2,15 @@ cycle_id: V72P1-ADP
 state: ADDENDUM_ACCEPTED
 accepted_plan_sha: 73efd91f379b5abdeda675c36d1a054f59ff89ff
 accepted_addendum_sha: b0d551054e3481c08068fd9a2c58363c44eb9bfa
-implementation_sha: null
+implementation_sha: ff88696f3c242cfb441dc9c82720e4fa6a371968
 development_execution_authorized: true
 development_execution_scope: synthetic_qualification_only
 formal_execution_authorized: false
 scientific_promotion: false
+synthetic_qualification: ACCEPTED
+synthetic_candidate_path: workspace/v72p1_baseline_check/20260903_h90q
+synthetic_solidified_path: comparison_bench/outputs_comparison/v72p1_synthetic_accepted_20260903_h90q
+synthetic_acceptance_record: docs/research_cycles/V72P1-ADP/SYNTHETIC_ACCEPTANCE_RECORD_20260903_h90q.md
+implementation_review: PASS
+pre_result_review: PASS
+review_scope: synthetic_only_transcribed

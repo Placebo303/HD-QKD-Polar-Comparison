@@ -1,3 +1,12 @@
+## 2026-09-03 V72P1-ADP synthetic qualification accepted (synthetic-only, transcribed)
+
+- Implementation SHA [repo-observed]: `ff88696f3c242cfb441dc9c82720e4fa6a371968` on `formal-ir-v72p1-addendum-clean` (`HEAD == origin` verified).
+- Candidate [repo-observed]: `workspace/v72p1_baseline_check/20260903_h90q/` (v72p1_results.json/v72p1_manifest.json/v72p1_table.csv/v72p1_compact_report.md, seed 20260902, data_sha 84d62779, FrozenMotherSpec 9 / SoftJointConfig 8 / 11 arrays / CSR284248 / prefix1111 / checkpoint72).
+- Solidified [repo-observed]: `comparison_bench/outputs_comparison/v72p1_synthetic_accepted_20260903_h90q/` (four files byte-identical, no rename, candidate preserved).
+- Dual review [decision, transcribed]: `IMPLEMENTATION_REVIEW PASS` + `PRE_RESULT_REVIEW PASS` — user independent conclusion transcribed, covers only this implementation and candidate directory, synthetic qualification only (not re-reviewed this turn).
+- Results [repo-observed]: P1A pack/prefix1111/checkpoint72/incremental/tag_ok deterministic pass; P1B tiny k2/3 n6/9 worst 1.998e-15 <1e-9 pass; P1C 9036x10240 1/3/10 all finite pass residual 4.2e-10 wall < thresholds; P1D n12k3 descriptive finite pass; overall true, five_state true, wall 53.125s peak 126.94MiB, llr_clip20.0 convergence_tol1e-6.
+- Lifecycle [decision]: `accepted_plan_sha 73efd91f...` / `accepted_addendum_sha b0d55105...` unchanged; `implementation_sha ff88696f...`; `formal_execution_authorized false`; `scientific_promotion false`; real-data/formal decoder/run_01 not authorized, not verified. [repo-observed]
+
 ## 2026-08-28 V55 pre-EXECUTE / pre-RESULT 双重 review 门禁（强制）
 
 - 根因 [repo-observed]: V55 连续复用 V54 模板常量 `efd34ef` 作为 `ACCEPTED_PLAN_SHA` 未替换，导致计划绑定错误。
