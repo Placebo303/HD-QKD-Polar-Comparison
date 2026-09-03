@@ -7,6 +7,10 @@
 - 当前计划不实现、不运行 decoder、不读 raw/parquet、不创建结果目录、不授予
   development 或 formal execution。
 
+Base/accepted-plan/implementation SHA 只承担 AGENTS 要求的 Git 版本绑定；它们
+不承担数据或 artifact 内容校验。本计划不新增数据或 artifact 内容摘要、签名
+或其他校验字段。
+
 ## Goal
 
 V72P2D1 已接受的单块诊断显示，原 binary flooding 候选在 72 个 checkpoint
@@ -63,25 +67,35 @@ I 使用 old high columns `0..1203`，按 `(-degree,old_col)` 排序；使用
 P 固定为 V70R1 1M CAL-only M2：Laplace、`mu=0.0`、
 `scale=0.2714417616594907`、`eps=0.562251256281407`、`Q=1024`。K 先正常
 归一，log 阶段才用 `max(K,1e-300)`；builder 只接 physical Bob，不接 Alice；
-BP 用自然 log，CE 用 log2。历史 VAL CE `6.787126437359054` 不是门槛。
+BP 用自然 log，CE 用 log2。历史 CE `6.787126437359054` 不是门槛。
 
-## 诊断与计费
+## 无 tag 的诊断与计费
 
-每个新臂每 checkpoint 保存固定 scalar metrics：candidate syndrome violation、
-candidate-vs-Bob bit/symbol flips、L0、F、S、A_raw、delta_app 的分位数/幅度/
-zero、3x3 sign transitions、residual、sweeps/edge updates、factor target
-updates/state evaluations、finite/clip、syndrome/tag/oracle 状态。quantiles 为
+本 change 固定 `tag_bits=0`、`tag_ok=NOT_APPLICABLE`，诊断中不生成或处理 tag。
+不定义协议接受、验证成功或未检测错误语义。每个新臂
+每 checkpoint 只保存标量聚合：candidate syndrome violation、
+candidate-vs-Bob bit/symbol flips、L0、F、S、A、delta APP 的分位数/幅度/zero、
+sign transitions、residual、sweeps/edge updates、factor target updates/state
+evaluations、finite 和 syndrome 状态。quantiles 为
 `[0,0.01,0.05,0.25,0.5,0.75,0.95,0.99,1]`，zero tolerance 为 `1e-15`。
-不写秘密数组、完整 prior、完整消息或 syndrome bytes。D1 O1 始终标
-`POSTHOC_RECONSTRUCTED`。
 
-每臂独立记录 syndrome rows/bits、64 tag bits 和 CONTINUE control bits；tag
-在第一次验证前发布，进入下一 checkpoint 才增加 1 control bit；失败和异常
-保留已发布计数；成功按 `reached_rows+64+control_bits_sent`，满 ladder 失败按
-`9036+64+71`。三臂 counterfactual 计数不相加，不硬写 9100。A 的新指标为
-null 并附未记录原因，只比较 D1 已存共同指标：outcome、iterations、
-candidate-vs-Bob、D1 APP、D1 single-edge c2v 和
-`POSTHOC_RECONSTRUCTED` O1 violation。
+`syndrome_satisfied = finite && candidate syndrome 与公开 syndrome prefix 一致`。
+首次满足只记录 `first_syndrome_satisfied_ckpt` 和当前候选的标量摘要，不早停，
+继续完整预注册 ladder 到 9036 或预算/异常停止。oracle 仅在结束后运行；
+`diagnostic_exact = syndrome_satisfied && oracle_exact`，
+`syndrome_collision_wrong = syndrome_satisfied && !oracle_exact`，二者均为
+描述性事后分类，不称未检测错误、协议失败或验证成功。
+
+每臂独立记录 `syndrome_rows_published`、`syndrome_bits_published`、
+`tag_bits_published=0`、`control_bits_sent` 和 `disclosed_rows`；公开计费为
+`syndrome_bits_published+control_bits_sent`。每 checkpoint 发布新增 syndrome
+rows，进入下一 checkpoint 才增加 1 CONTINUE control bit；异常、timeout、预算
+中断保留已发布计数。完整 ladder 正常达到的名义计费为 `9036+71=9107`，三臂
+counterfactual 计数不相加，不称真实 session leakage。
+
+A 只允许与 D1 已存共同指标比较：outcome、iterations、candidate-vs-Bob、D1
+APP、D1 single-edge c2v 和 O1 的 `POSTHOC_RECONSTRUCTED violation`。新 F/S/A/L0
+指标在 A 中为 null，并附 `not_recorded_reason`，不得补造或与 A 定量差分。
 
 ## 未来实现与状态门禁
 
@@ -91,25 +105,35 @@ candidate-vs-Bob、D1 APP、D1 single-edge c2v 和
 - `scripts/v72p2d2_orthogonal_triage.py`
 - `comparison_bench/tests/test_v72p2d2_orthogonal_triage.py`
 
-真实输出固定为
+禁止 config/fixture、adapter 或 frozen baseline 改动。真实输出固定为
 `comparison_bench/outputs_comparison/v72p2d2_orthogonal_oneblock_20260904/`
-下的 manifest/results/table/report 四文件。prep allowance 600 s，L/I/P
-各 soft wall 600 s，总 invocation 2400 s，peak RSS 2 GiB。prep 失败时三臂
-`NOT_ATTEMPTED` 并返回非零；新臂 exception、nonfinite、RSS 或 timeout 时该臂
-`BLOCKED`，后续臂 `NOT_ATTEMPTED`；正常 ladder exhaustion 才继续下一臂。
-A 不运行，L/I/P 各运行一次，无 rerun/调参。执行及发布必须分别通过独立
-Plan Review、Implementation Review、Pre-EXECUTE、Pre-RESULT；本计划不授权。
+下的 `manifest.json`、`results.json`、`table.csv`、`report.md` 四文件，不覆盖
+D1 输出且不创建 `run_01`。manifest 只保留 AGENTS 要求的
+`base_sha`、`accepted_plan_sha`、`implementation_sha` Git 版本绑定字段；不含
+数据或 artifact 内容摘要、签名或校验字段。
+
+真实执行固定为 L/I/P 各一次；A 只读。准备失败使三臂为 `NOT_ATTEMPTED` 并
+返回非零；任一新臂 exception、nonfinite、RSS 超限或 600 秒 soft wall 超时使
+该臂 `BLOCKED`，停止本次 invocation，其余臂为 `NOT_ATTEMPTED`，四个 arm
+artifact 均保留。普通 `LADDER_EXHAUSTED` 或预算正常耗尽才继续下一臂。单臂
+soft wall 为 600 秒，invocation 为 2400 秒（prep 600 + 三臂各 600），peak
+RSS 硬上限 2 GiB。执行前必须通过独立 Plan Review、Implementation Review、
+Pre-EXECUTE，发布前必须通过 Pre-RESULT；本计划不授任何执行权限。
 
 ## 判别与出口
 
-- L 只有 candidate escape、violation 下降或验证成功才支持继续调度路线；仅更快
-  不算改善。
-- I 只有 escape 或 violation 下降才支持该映射；单块不证明图结构因果。
-- P 的消息/翻转改变但未验证只说明 prior 影响；完全不变只削弱 prior-only
-  解释；不得宣称 M2 优胜。
-- 三臂均无 hard-bit escape 时停止 binary edge-level flooding/layered/damping
-  微调，下一周期只排 grouped-symbol mask BP tiny exhaustive 或同块 GF32 对照。
-- 任一臂成功只进入同路线小样本 confirmation plan，不直接进入 V73。
-- 禁 FER、SKR、信息极限、LDPC 无效、因果和跨 session 断言。
+- L 只有出现 candidate escape、violation 下降或 syndrome_satisfied，才支持
+  继续调度路线；仅 runtime 变快不算纠错改善。
+- I 只有出现 escape、violation 下降或 syndrome_satisfied，才支持该映射；单块
+  不证明图结构因果。
+- P 若改变消息或翻转但未出现 syndrome_satisfied，只能说明 prior 影响；完全
+  不变则削弱 prior-only 解释；不得宣称 M2 优胜。
+- L/I/P 都无 hard-bit escape 时，停止 binary edge-level flooding/layered/
+  damping 微调，下一周期限定为 grouped-symbol mask BP tiny exhaustive 或同块
+  GF32 对照。
+- 任一臂出现 syndrome_satisfied 只允许进入同路线的小样本 confirmation plan，
+  不直接进入 V73；没有协议接受语义。
+- 禁止 FER、SKR、信息极限、LDPC 无效、图结构因果、M2 优胜或跨 session 推广
+  断言。
 
 完整数学、计量、测试和 schema 见同目录 `design.md`、`tasks.md`、`specs/spec.md`。

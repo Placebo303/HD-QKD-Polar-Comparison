@@ -1,9 +1,13 @@
-# V72P2D2 Spec Delta：正交单块分诊
+# V72P2D2 Spec Delta：正交单块 syndrome-only 分诊
 
 状态：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。本 delta 绑定 base
 `e094f7e548380db4bfcbc1fe73472e670c32379a`，不合并、不替代已接受的 V72P1、
 V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/parquet、不创建
 结果目录。
+
+`base_sha`、`accepted_plan_sha`、`implementation_sha` 只承担 AGENTS 要求的
+Git commit/计划/实现版本绑定，不承担 data/artifact 内容校验。输出不得包含
+数据或 artifact 内容摘要、签名或其他校验字段。
 
 ## S-ARM：四臂正交性
 
@@ -17,7 +21,7 @@ V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/par
   layered 或 interleaver。
 - **S-ARM-05**：L/I/P SHALL 使用同一 D1 非新鲜 block、同一 72 checkpoint
   ladder、每 checkpoint 10 次完整更新、每臂 720 次、`float64`、clip 20、
-  tolerance 1e-6、验证和计费语义；L/I/P 的 c2v SHALL 独立。
+  tolerance 1e-6、syndrome-only 诊断和计费语义；L/I/P 的 c2v SHALL 独立。
 - **S-ARM-06**：不得创建 layered+I、I+M2 或 layered+M2 混合臂；不得事后调参、
   重跑或扩展 block。
 
@@ -30,12 +34,13 @@ V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/par
   `{4:1,5:4594,6:4441}`，degree-2 列 9035。ladder SHALL 为
   `range(160,8993,128)+[9032,9036]`，共 72 点。
 - **S-COMMON-03**：每次完整更新 SHALL 更新每个 active edge 一次；L 的完整
-  更新是一个 active-row sweep，I/P 的完整更新是一次 flooding iteration。
+  更新是一个 active-row sweep，I/P 的一次完整更新是一次 flooding iteration。
   partial update SHALL NOT 启动。
 - **S-COMMON-04**：checkpoint 间 SHALL 携带同一臂的 active c2v；新边 SHALL
   置零；L/I/P 间 SHALL NOT 共享可变状态；不跨 block 携带。
 - **S-COMMON-05**：residual SHALL 是完整更新前后 active c2v snapshot 的全边
-  L-infinity 差；`residual<1e-6` SHALL 只表示 converged，不表示验证正确。
+  L-infinity 差；`residual<1e-6` SHALL 只表示 converged，不表示 syndrome
+  满足或 oracle 正确。
 
 ## S-LAY：layered 数学合同
 
@@ -56,7 +61,7 @@ V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/par
   atanh 输入 SHALL clip 到 `[-1+1e-12,1-1e-12]`，输出 SHALL clip 到 `[-20,20]`。
 - **S-LAY-06**：整行提交后 SHALL 更新受影响变量的 bit_to_factor；受影响的每个
   symbol SHALL 重算全部 10 个 factor_to_bit，目标 bit SHALL self-exclude；
-  然后 SHALL 更新 APP_raw。
+  然后 SHALL 更新该 symbol 全部 10 个 APP_raw。
 - **S-LAY-07**：APP_clipped 只可用于诊断、输出和 hard sign；clip SHALL NOT
   改变 sign。syndrome 0/1、check degree 1/2/3 的 sign 语义 SHALL 一致。
 - **S-LAY-08**：一 sweep SHALL 按 active row `0..r-1` 执行，每 active edge
@@ -101,9 +106,9 @@ V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/par
 - **S-M2-03**：prior SHALL 为
   `log(max(K[(a-int(bob_phys[sym]))%1024],1e-300))`；K SHALL 先归一，不能
   在 K 阶段 floor 或 floor 后重归一；floor 只保护 log，当前 eps>0 不应触发。
-- **S-M2-04**：builder 只接 physical Bob 和冻结参数，不接 Alice；BP 输入用
-  natural log；CE 报告用 log2；LSB bit 0 和现有 B_BITS 保持。
-- **S-M2-05**：历史 M2 VAL CE `6.787126437359054` 是非门槛背景；M2 变差或
+- **S-M2-04**：builder 只接 physical Bob 和冻结参数，不接 Alice；Alice 只进入
+  runner 的 syndrome/oracle 边界。BP 输入用 natural log，CE 用 log2。
+- **S-M2-05**：历史 M2 CE `6.787126437359054` 是非门槛背景；M2 变差或
   不改变候选均是合法观测，不得写成优胜。
 
 ## S-MET：诊断字段
@@ -122,23 +127,30 @@ V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/par
 - **S-MET-05**：每 checkpoint SHALL 记录 violation
   `weight(((H_arm[:r]@hard_bits)%2) XOR syndrome_target[:r])`、candidate-vs-Bob
   bit/symbol flips、residual、sweeps、edge_updates、factor target updates、
-  state evaluations、finite、clip、syndrome_ok、tag_ok、oracle_exact、
-  undetected。单边 max c2v 与变量 incident sum max SHALL 分开。
+  state evaluations、finite、clip、syndrome_satisfied 和 `tag_ok=NOT_APPLICABLE`。
+  `oracle_exact` 在 checkpoint 层 SHALL 为 null，并附
+  `not_recorded_reason=oracle_runs_after_arm_end`；单边 max c2v 与变量
+  incident sum max SHALL 分开。
 - **S-MET-06**：clip 字段 SHALL 包含 c2v/f2b `abs>=20-1e-12` 计数和
   `abs(A_raw)>20` 计数；APP 输出可 clip 到 20，但不得声称保存 factor preclip。
 - **S-MET-07**：结果 SHALL NOT 保存秘密数组、Alice/Bob symbols、syndrome
-  bytes、完整 prior、完整消息或逐 symbol 数组。D1 O1 只能标
+  bytes、完整 prior、完整消息或逐 symbol 数组；D1 O1 只能标
   `POSTHOC_RECONSTRUCTED`。
 
 ## S-ACCT：公开计费
 
 - **S-ACCT-01**：L/I/P SHALL 各自维护
-  `syndrome_rows_published`、`syndrome_bits_published`、`tag_bits_published`、
-  `control_bits_sent`、`disclosed_rows`；三臂 counterfactual 计数 SHALL NOT 相加。
-- **S-ACCT-02**：每 checkpoint 发布新增 syndrome rows；首次进入 tag 验证前
-  发布一次 64 tag bits；只有进入下一 checkpoint 才增加 1 CONTINUE bit。
-- **S-ACCT-03**：成功、ladder exhausted、exception、timeout SHALL 保留已发布
-  计数，不回滚；不得把所有臂固定写成 9100。A 的历史计量不重解释为新臂计量。
+  `syndrome_rows_published`、`syndrome_bits_published`、
+  `tag_bits_published=0`、`control_bits_sent`、`disclosed_rows`；三臂
+  counterfactual 计数 SHALL NOT 相加。
+- **S-ACCT-02**：每 checkpoint 发布新增 syndrome rows；不发布 tag bits；只有
+  进入下一 checkpoint 才增加 1 CONTINUE bit。
+- **S-ACCT-03**：公开计费 SHALL 为
+  `syndrome_bits_published+control_bits_sent`。完整 ladder 正常达到的名义值
+  为 `9036+71=9107`；预算中断、exception、timeout SHALL 保留已发布计数，
+  不得固定写成 9100；A 的历史计量不重解释为新臂计量。
+- **S-ACCT-04**：首次 `syndrome_satisfied` 只记录 checkpoint，不停止 ladder，
+  不改变计费，也不称协议接受。oracle 只在 arm 结束后运行。
 
 ## S-IO：未来实现、执行和 schema
 
@@ -151,16 +163,21 @@ V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/par
   `comparison_bench/outputs_comparison/v72p2d2_orthogonal_oneblock_20260904/`，
   且只含 `manifest.json`、`results.json`、`table.csv`、`report.md`；不得覆盖
   D1 输出或创建 `run_01`。
-- **S-IO-03**：manifest/results 顶层 SHALL 含 schema、cycle、base_sha、
-  implementation_sha、source registry/data_sha、session/block provenance、
-  non_fresh、mother shape/nnz、ladder、预算、数值、arm order、invocation status、
-  arms 和 claim boundary。每 arm SHALL 含 status、graph/prior/schedule、
-  attempted checkpoints、stop、sweeps、edge/factor work、accounting、metrics、
-  common metrics 和新指标。
-- **S-IO-04**：A 的新指标 SHALL 为 null 并附
+- **S-IO-03**：manifest/results 顶层 SHALL 含 schema、cycle、
+  `base_sha`、`accepted_plan_sha`、`implementation_sha`、source registry、
+  session/block provenance、`non_fresh`、mother shape/nnz、ladder、预算、
+  数值、arm order、invocation status、arms 和 claim boundary。上述三个字段
+  仅是 Git 版本绑定，不承担 artifact/data 内容校验；不得添加其他内容校验字段。
+- **S-IO-04**：每 arm SHALL 含 status、graph/prior/schedule、attempted
+  checkpoints、stop、first_syndrome_satisfied_ckpt、sweeps、edge/factor work、
+  accounting、checkpoint metrics、common metrics、new metrics 和 posthoc oracle。
+  `tag_bits=0`、`tag_ok=NOT_APPLICABLE` SHALL 固定出现；不得出现协议接受、
+  验证成功或未检测错误字段。
+- **S-IO-05**：A 的新指标 SHALL 为 null 并附
   `not_recorded_reason="D1 baseline did not record this metric; A was not rerun"`；
-  L/I/P SHALL 填实际标量聚合。科学字段 replay 比较排除 wall、RSS、timestamp、
-  临时 path；不要求整文件字节一致。
+  A 只允许比较 D1 的 outcome、iterations、candidate-vs-Bob、APP、single-edge
+  c2v 和 `POSTHOC_RECONSTRUCTED` O1 violation。L/I/P SHALL 填实际标量聚合。
+  科学字段 replay 排除 wall、RSS、timestamp、临时 path，不要求整文件字节一致。
 
 ## S-STOP：真实执行状态机
 
@@ -171,28 +188,30 @@ V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/par
   `BLOCKED`，立即停止 invocation，后续臂 SHALL 为 `NOT_ATTEMPTED`，已生成的
   四臂 artifact SHALL 保留。
 - **S-STOP-03**：普通 `LADDER_EXHAUSTED` 或达到 720 的正常终态允许继续下一臂；
-  A 不运行；L/I/P 各运行一次；不得 rerun 或调参。
+  A 不运行；L/I/P 各运行一次；首次 syndrome_satisfied 不停止；不得 rerun 或
+  调参。
 - **S-STOP-04**：执行前 SHALL 通过独立 Plan Review、Implementation Review、
   Pre-EXECUTE，发布前 SHALL 通过 Pre-RESULT；本计划 SHALL NOT 授权执行。
 
 ## S-CLAIM：判别和科学边界
 
-- **S-CLAIM-01**：L 只有 candidate escape、violation 下降或验证成功才支持
-  调度路线；仅 runtime 变快不算纠错改善。
-- **S-CLAIM-02**：I 只有 escape 或 violation 下降才支持该映射；单块不得证明
-  普遍图因果。
-- **S-CLAIM-03**：P 的消息/翻转变化但未验证只能归为 prior 影响；完全不变只
-  削弱 prior-only 解释；不得宣称 M2 优胜。
+- **S-CLAIM-01**：L 只有 candidate escape、violation 下降或
+  `syndrome_satisfied` 才支持调度路线；仅 runtime 变快不算纠错改善。
+- **S-CLAIM-02**：I 只有 escape、violation 下降或 `syndrome_satisfied` 才支持
+  该映射；单块不得证明普遍图因果。
+- **S-CLAIM-03**：P 的消息/翻转变化但未满足 syndrome 只能归为 prior 影响；完全
+  不变只削弱 prior-only 解释；不得宣称 M2 优胜。
 - **S-CLAIM-04**：L/I/P 均无 hard-bit escape 时 SHALL 停止 binary edge-level
   flooding/layered/damping 微调，后继限定为 grouped-symbol mask BP tiny
   exhaustive 或同块 GF32 对照。
-- **S-CLAIM-05**：任一臂成功只允许进入同路线小样本 confirmation plan，不直接
-  进入 V73；不得作 FER、SKR、信息极限、LDPC 无效或跨 session 推广断言。
+- **S-CLAIM-05**：任一臂出现 syndrome_satisfied 只允许进入同路线小样本
+  confirmation plan，不直接进入 V73；不得作 FER、SKR、信息极限、LDPC 无效或
+  跨 session 推广断言。
 
 ## S-TEST：未来 synthetic 验收
 
 - **S-TEST-01**：T0 SHALL 覆盖 py_compile/import 无副作用、字段/母图/预算常量、
-  tiny mixed/pure cycle 口径和 M2 归一。
+  tiny mixed/pure cycle 口径和 M2 归一，并断言没有数据或 artifact 内容校验字段。
 - **S-TEST-02**：T1-L SHALL 覆盖 layered 顺序、row snapshot、非零 prior/c2v、
   最新消息可见性、stale flooding 差异、APP_raw 25 减旧 c2v 1 得 24、
   self-exclusion、syndrome/degree sign、warm-start rebuild、edge/factor budget。
@@ -202,9 +221,10 @@ V72P2 或 D1 行为。本周期不实现、不运行 decoder、不读取 raw/par
 - **S-TEST-04**：T1-P SHALL 覆盖冻结参数、wrapped Laplace、K floor 阶段、
   1024 循环平移、Bob-only、natural-log/log2 分离，并允许结果变差。
 - **S-TEST-05**：T1-METRICS SHALL 覆盖 quantiles/sign/zero、手算 F/S/A、
-  单边与变量聚合分离、violation、clip 计数、candidate 直接比较和敏感数组
-  禁止。
+  单边与变量聚合分离、violation、clip 计数、candidate 直接比较、无 tag
+  字段语义和敏感数组禁止。
 - **S-TEST-06**：T2 SHALL 使用显式 fake runner 和 fresh workspace，覆盖三臂
-  ladder、动态四计数器、提前成功/满梯/异常/timeout/RSS/NOT_ATTEMPTED、
-  baseline null 原因、四文件 schema、production path 门禁和科学字段 replay。
-  replay SHALL 排除 wall/RSS/timestamp/path，不要求整文件字节一致。
+  full ladder、首次 syndrome 满足不早停、动态四计数器（tag=0）、满梯/异常/
+  timeout/RSS/NOT_ATTEMPTED、结束后 oracle 分类、baseline null 原因、四文件
+  schema、production path 门禁和科学字段 replay。replay 排除 wall/RSS/timestamp/
+  path，不要求整文件字节一致。

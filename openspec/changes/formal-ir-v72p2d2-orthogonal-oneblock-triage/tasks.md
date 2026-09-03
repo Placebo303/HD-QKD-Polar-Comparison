@@ -3,8 +3,12 @@
 状态：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。本任务表绑定 base
 `e094f7e548380db4bfcbc1fe73472e670c32379a` 和分支
 `formal-ir-v72p1-addendum-clean`。本轮只审查计划，不实现、不运行 decoder、
-不读取 raw/parquet、不创建结果目录、不改 adapter、memory、cycle_state、
+不读 raw/parquet、不创建结果目录、不改 adapter、memory、cycle_state、
 `src/`、`experiments/`、`tools/`、`results/`或既有输出。
+
+`base_sha`、`accepted_plan_sha`、`implementation_sha` 只承担 AGENTS 要求的
+Git 版本绑定，不承担数据/artifact 内容校验；本计划不引入数据或 artifact
+内容摘要、签名或其他校验字段。
 
 本变更的计划文件固定为：
 
@@ -30,7 +34,7 @@
 - **D2T0-4**：tiny 1-check 双 bit 同 symbol 只用于统计口径，断言 pure-H
   check-pair 为 0、mixed symbol `sum C(k,2)` 为 1。
 - **D2T0-5**：按 V70R1 公式构造 M2 K，`sum(K)=1`、每个 prior 行归一，
-  不触发生产输入；接口方案固定为 A，L 使用新 layered API，I/P 使用既有
+  不触发生产输入；接口固定为 A，L 使用新 layered API，I/P 使用既有
   `run_decoder`，不调用 `run_incremental_decoder`。
 
 ## D2T1L：layered 数学和状态
@@ -45,9 +49,9 @@
 - **D2T1L-3**：验证内部使用
   `APP_raw=f2b+b2f`，`v2c=f2b+b2f-c2v_old`；构造
   `APP_raw=25,c2v_old=1`，断言 v2c 为 24，即不能使用 clipped APP。
-- **D2T1L-4**：验证受影响 symbol 的全部 10 个 f2b 重算，目标 bit self-
-  exclusion 保持；syndrome 0/1 和 check degree 1/2/3 的 sign 与手算 SPA
-  一致，Numba/Python 路径（若存在）一致。
+- **D2T1L-4**：验证受影响 symbol 的全部 10 个 f2b 与全部 10 个 APP_raw 重算，
+  目标 bit self-exclusion 保持；syndrome 0/1 和 check degree 1/2/3 的 sign
+  与手算 SPA 一致，Numba/Python 路径（若存在）一致。
 - **D2T1L-5**：验证 active c2v checkpoint rebuild：旧边完整携带、新边为零，
   从 c2v 重建 b2f/f2b/APP_raw；不跨 block 携带。
 - **D2T1L-6**：验证一个完整 sweep 更新每个 active edge 一次；residual 是
@@ -56,8 +60,8 @@
 - **D2T1L-7**：验证每 checkpoint 最多 10 个完整 sweep、每臂最多 720 个，
   余量不足完整 sweep 时不启动 partial sweep；L 的 factor work 另计，不能
   以 edge budget 代替总计算量。
-- **D2T1L-8**：验证 `residual<tol` 只设置 converged，不跳过 syndrome/tag
-  验证；验证接受必须仍满足 finite、syndrome 和 tag 条件。
+- **D2T1L-8**：验证 `residual<tol` 只设置 converged，不改变 syndrome-only
+  诊断；syndrome 满足也不提前结束 ladder。
 - **D2T1L-9**：只允许调用
   `run_layered_decoder(prior_logp, syndrome_target, indptr, indices,
   max_sweeps, warm_start_c2v)`。若实现不能证明上述顺序和最新消息可见性，
@@ -66,12 +70,12 @@
 ## D2T1I：full-column interleaver
 
 - **D2T1I-1**：固定 high-degree 集合 old columns `0..1203`，degree 由原 H
-  `bincount` 得到，按 `(-degree,old_col)` 排序；使用
-  `info_count/info_load` 和字典序 `(info_load,info_count,symbol_id)` 选择，
-  高连接列放入该 symbol 的 slot `bit_id=info_count`，每次递增计数。
-- **D2T1I-2**：固定 seed `20260902` 的
-  `default_rng` permutation 对 old parity columns `1204..10239` 排序，
-  依序填充 `(symbol_id,bit_id)` 升序剩余物理 slots；物理 bit 采用 LSB bit 0。
+  `bincount` 得到，按 `(-degree,old_col)` 排序；使用 `info_count/info_load`
+  和字典序 `(info_load,info_count,symbol_id)` 选择，高连接列放入该 symbol
+  的 slot `bit_id=info_count`，每次递增计数。
+- **D2T1I-2**：固定 seed `20260902` 的 `default_rng` permutation 对 old
+  parity columns `1204..10239` 排序，依序填充 `(symbol_id,bit_id)` 升序剩余
+  物理 slots；物理 bit 采用 LSB bit 0。
 - **D2T1I-3**：断言 `old_to_phys` 是全 10240 列 bijection，
   `phys_to_old[old_to_phys[j]]=j` 且反向同样成立；重复构造得到相同映射。
 - **D2T1I-4**：断言每个 symbol 恰有 10 个物理 bit，前 1204 old high
@@ -99,9 +103,9 @@
   1e-300))`，floor 只在 log 阶段；每个 Bob 值的 prior 行是循环平移，全部值
   finite/positive/归一。
 - **D2T1P-4**：builder 只接收 physical Bob 与冻结参数，不接 Alice；Alice
-  只能进入 runner 的 syndrome/tag/oracle 边界。BP 用自然 log，CE 只用 log2。
-- **D2T1P-5**：历史 M2 VAL CE `6.787126437359054` 仅作非门槛背景；测试必须
-  允许 M2 消息改变但验证变差或完全不变。
+  只能进入 runner 的 syndrome/oracle 边界。BP 用 natural log，CE 用 log2。
+- **D2T1P-5**：历史 M2 CE `6.787126437359054` 仅作非门槛背景；测试必须
+  允许 M2 消息改变但 syndrome-only 结果变差或完全不变。
 
 ## D2T1M：metrics 与敏感数据边界
 
@@ -119,31 +123,40 @@
   Bob bit/symbol flips、residual、sweeps、edge_updates、local-factor target
   updates、`state_evaluations=1024*target_updates`、finite 和 clip counts。
 - **D2T1M-5**：分别记录单边 `max|c2v|` 与
-  `max_v|sum incident c2v|`；记录 c2v/f2b `abs>=20-1e-12` clip count 和
-  `abs(A_raw)>20` count。APP 输出可裁剪，不能声称保留 factor preclip 数组。
+  `max_v|sum incident c2v|`；记录 c2v/f2b `abs>=20-1e-12` 计数和
+  `abs(A_raw)>20` 计数。APP 输出可 clip 到 20，不能声称保留 factor preclip。
 - **D2T1M-6**：输出不包含秘密数组、Alice/Bob symbols、syndrome bytes、
   完整 prior、完整消息或逐 symbol 数组；D1 O1 只能标
   `POSTHOC_RECONSTRUCTED`。
 
-## D2T2：fake 端到端与公开计费
+## D2T2：fake 端到端与 syndrome-only 计费
 
-- **D2T2-1**：fake runner 使 L/I/P 在 tiny graph 完成 ladder，验证每臂状态
-  独立、checkpoint 顺序、warm-start 和四文件 schema；测试只写
+- **D2T2-1**：fake runner 使 L/I/P 在 tiny graph 完成 full ladder，验证每臂
+  状态独立、checkpoint 顺序、warm-start 和四文件 schema；测试只写
   `workspace/<task>/<uuid>`，不写生产输出根。
-- **D2T2-2**：每个新臂独立计数 syndrome rows/bits、tag bits、CONTINUE
-  control bits 和 disclosed rows；tag 在第一次验证前只发布一次 64 bits，
-  进入下一 checkpoint 才加 1 CONTINUE；成功、耗尽、异常、timeout 均保留
+- **D2T2-2**：固定 `tag_bits=0`、`tag_bits_published=0`、`tag_ok=NOT_APPLICABLE`；
+  每个 checkpoint 报告 `syndrome_satisfied=finite && candidate syndrome 与
+  公开 prefix 一致`，并记录首次满足点但继续 ladder，不因 syndrome 满足早停。
+- **D2T2-3**：每个新臂独立计数 syndrome rows/bits、零 tag bits、CONTINUE
+  control bits 和 disclosed rows；进入下一 checkpoint 才加 1 CONTINUE；
+  满 ladder 正常计费结构为 `9036+71=9107`，预算中断/异常/timeout 保留
   已发布计数，三臂不相加。
-- **D2T2-3**：fake 反例覆盖：发布后异常不回滚；满 ladder 为
-  `9036+64+71` 的计费结构；提前成功按 reached rows 加 tag/control；余额为
-  零不发布、不调用、不增加任何计数；不能把每臂写成固定 9100。
-- **D2T2-4**：测试 candidate syndrome violation、双条件 verification、
-  convergence 与 verification 分离、A 新指标 null 及
-  `not_recorded_reason`；baseline 只比较已存共同指标。
-- **D2T2-5**：T2 只显式注入 fake runner；默认 import/CLI 不进入真实 decoder、
+- **D2T2-4**：fake 反例覆盖：发布后异常不回滚；零余额不发布、不调用、不增加
+  任何计数；candidate syndrome violation、syndrome 满足与收敛分离；
+  oracle 只在 arm 结束后运行，不参与停止或 ladder 决策。
+- **D2T2-5**：结束后事后分类仅使用
+  `diagnostic_exact=syndrome_satisfied && oracle_exact` 与
+  `syndrome_collision_wrong=syndrome_satisfied && !oracle_exact`；二者仅作
+  描述性 oracle 分类，不改变 ladder 或计费。
+- **D2T2-6**：A 新指标为 null 并附
+  `not_recorded_reason="D1 baseline did not record this metric; A was not rerun"`；
+  baseline 只比较已存共同指标：outcome、iterations、candidate-vs-Bob、D1
+  APP、D1 single-edge c2v 和 `POSTHOC_RECONSTRUCTED` O1 violation。
+- **D2T2-7**：T2 只显式注入 fake runner；默认 import/CLI 不进入真实 decoder、
   raw/parquet、`run_01`或生产输出。
-- **D2T2-6**：严格科学字段 replay 在相同 seed 下确定；wall、RSS、timestamp、
-  临时 path 排除确定性比较。不要求整文件字节一致。
+- **D2T2-8**：严格科学字段 replay 在相同 seed 下确定；wall、RSS、timestamp、
+  临时 path 排除确定性比较；不要求整文件字节一致，也不使用数据或 artifact
+  内容校验。
 
 ## D2T3：未来真实执行门禁（本计划不执行）
 
@@ -159,19 +172,19 @@
   上限 2400 s，peak RSS 2 GiB。准备失败为三臂 `NOT_ATTEMPTED` 并非零；新臂
   exception、nonfinite、RSS 或 timeout 使该臂 `BLOCKED`，立即停止 invocation，
   后续为 `NOT_ATTEMPTED`；普通 `LADDER_EXHAUSTED` 继续下一臂。
-- **D2T3-4**：A 只读复用，L/I/P 各恰一次，无 rerun、无调参、独立 c2v；执行
-  前依次通过独立 Plan Review、Implementation Review、Pre-EXECUTE，发布前
-  通过 Pre-RESULT。
+- **D2T3-4**：A 只读复用，L/I/P 各一次，无 rerun、无调参、独立 c2v；首次
+  `syndrome_satisfied` 只记录不停止；执行前依次通过独立 Plan Review、
+  Implementation Review、Pre-EXECUTE，发布前通过 Pre-RESULT。
 - **D2T3-5**：manifest/results/table/report 顶层与 per-arm 字段遵循 design §8，
-  保存 provenance、base/implementation SHA、config、stop、metrics、accounting
-  和 claim boundary，不保存敏感数组。
+  保存 provenance、Git revision binding、config、stop、metrics、accounting
+  和 claim boundary，不保存敏感数组或数据/artifact 内容校验字段。
 
 ## D2T4：判别、文献和返回
 
-- **D2T4-1**：机械执行预注册判别：L 需 escape/violation 下降/验证成功才支持
-  调度路线；I 需 escape/violation 下降才支持该映射；P 只把消息/翻转变化
-  标为 prior 影响，未验证不得晋级；三臂无 escape 则停止 binary edge-level
-  flooding/layered/damping 微调。
+- **D2T4-1**：机械执行预注册判别：L 需 escape/violation 下降/syndrome 满足
+  才支持调度路线；I 需 escape/violation 下降/syndrome 满足才支持该映射；P
+  只把消息/翻转变化标为 prior 影响，未满足 syndrome 不得晋级；三臂无 escape
+  则停止 binary edge-level flooding/layered/damping 微调。
 - **D2T4-2**：三无 escape 后继只记录 grouped-symbol mask BP tiny exhaustive
   或同块 GF32 对照；不能从单块作 FER、SKR、信息极限、LDPC 无效、图因果、
   M2 优胜或跨 session 结论。

@@ -1,12 +1,15 @@
 # V72P2D2 正交单块分诊设计
 
-状态：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。本设计绑定
+状态：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。本设计绑定 base
 `e094f7e548380db4bfcbc1fe73472e670c32379a`、分支
-`formal-ir-v72p1-addendum-clean`。它只描述未来一次合规实现与诊断，不修改
-V72P1、V72P2 或 D1，也不授权实现、decoder、真实数据、parquet 或结果输出。
+`formal-ir-v72p1-addendum-clean`。它只描述一次合规实现与诊断，不修改 V72P1、
+V72P2 或 D1，不授权实现、decoder、真实数据、parquet 或结果输出。
 
+本设计中的 `base_sha`、`accepted_plan_sha`、`implementation_sha` 只表示
+AGENTS 要求的 Git commit/计划/实现版本绑定，不承担数据或 artifact 内容校验。
+manifest 不含数据或 artifact 内容摘要、签名或其他校验字段。
 Ponytail lite：算法模块、runner 和 focused test 各一个；不用框架、插件、事件
-总线、缓存、锁、retry、checksum、完整消息持久化或新的 adapter 抽象。
+总线、缓存、锁、retry 或完整消息持久化。
 
 ## 1. 共同数据、数值和预算
 
@@ -25,9 +28,12 @@ partial update。L 的一次完整更新定义为一个 active-row sweep；I/P �
 对每个新臂独立初始化 c2v 为零，checkpoint 间携带该臂已激活边；新边置零。
 L/I/P 不共享可变消息。A 不运行，仅读取 D1 已接受的 Arm A 共同指标。
 
-协议验证只沿用现有 64-bit tag 与 syndrome 语义：当前候选同时满足 finite、
-`syndrome_observed == syndrome_target[:r]` 和既有 `tag_ok` 才是
-`protocol_accepted`；oracle 只在结束后比较。converged 永不替代验证。
+无 tag 诊断固定 `tag_bits=0`、`tag_bits_published=0`、`tag_ok=NOT_APPLICABLE`；
+诊断中不生成或处理 tag。
+每个 checkpoint 的核心判据只有
+`syndrome_satisfied = finite && candidate syndrome 与公开 syndrome prefix 一致`。
+该判据只作描述性诊断，不构成协议接受或验证成功。oracle 只在整个 ladder、
+预算或异常结束后作事后比较。
 
 ## 2. 四臂正交性
 
@@ -40,7 +46,8 @@ L/I/P 不共享可变消息。A 不运行，仅读取 D1 已接受的 Arm A 共�
 
 M0 使用 D1 记录的 `lambda=221.22162910704503` 和
 `CE_CAL_CV=7.135005172802673`。L/I/P 的 block、ladder、更新预算、clip、
-tolerance、验证和计费相同。不得合成 layered+I、I+M2 或 layered+M2 的臂。
+tolerance 和 syndrome-only 诊断相同。不得合成 layered+I、I+M2 或 layered+M2
+的臂。
 
 ## 3. L：真正的 row-serial layered decoder
 
@@ -81,7 +88,7 @@ sweep 前完成，并由单元测试验证；它不跨 block 携带状态。
    edge 都只能从这个 snapshot 及当前已提交的其他 rows 计算，不能看到同一 row
    已经写入的新 c2v。
 2. 对该行每条边先计算全部 `v2c[e] = f2b[v] + b2f[v] -
-   c2v_row_start[e]`，然后才计算任何新的 c2v。这样同一 row 的 v2c 不受 edge
+   c2v_row_start[e]`，然后才计算任何新的 c2v。同一 row 的 v2c 不受 edge
    遍历顺序污染。
 3. 对每条边同时使用该行全部 v2c 计算新 c2v：
 
@@ -93,18 +100,18 @@ sweep 前完成，并由单元测试验证；它不跨 block 携带状态。
    c2v_new[e] = clip(c2v_new[e], -20, 20)
    ```
 
-   `S_c` 和 check-degree parity 必须显式进入 sign；目标 syndrome 为 0 或 1、
-   度 1/2/3 的 sign 均由同一公式覆盖。
+   `S_c` 和 check-degree parity 必须显式进入 sign；syndrome 0/1、度 1/2/3 的
+   sign 均由同一公式覆盖。
 4. 只有整行新 c2v 全部计算完后才一次性 commit。对每个受影响变量，以新旧
    c2v 差更新 `b2f`；对每个受影响 symbol 重算全部 10 个 `f2b`，每个目标 bit
-    排除自己的 b2f 项；随后更新该 symbol 全部 10 个 `APP_raw=f2b+b2f`。
+   排除自己的 b2f 项；随后更新该 symbol 全部 10 个 `APP_raw=f2b+b2f`。
 5. 继续下一 row。前面已经 commit 的 rows 对后续 rows 可见；当前 row 内的
    v2c/c2v 则始终使用 row-start snapshot。
 6. 一个完整 sweep 完成后，residual 是 sweep 开始的 active c2v snapshot 与
    sweep 结束 active c2v 的全 active-edge `max(abs(delta))`。`sweeps` 计完整
    sweep，`edge_updates` 计写入的 c2v 边数。
-7. residual 小于 tolerance 只设置 `converged=true`，仍须进行 syndrome/tag
-   验证。若当前 checkpoint 未验证成功，按预算继续 checkpoint。
+7. residual 小于 tolerance 只设置 `converged=true`，不改变 syndrome-only
+   诊断流程；当前 checkpoint 未满足 syndrome 时按预算继续。
 
 ### 3.4 L API 与公平计量
 
@@ -124,7 +131,7 @@ adapter。
 
 每个完整更新的公平字段是：一次 c2v edge update 写一个新 c2v，一次 v2c
 evaluation 计算一个 v2c，一次 local-factor target update 计算一个目标 bit 的
-1024-state marginal。每个完整 sweep/iteration 每个 active edge各更新一次；
+1024-state marginal。每个完整 sweep/iteration 每个 active edge 各更新一次；
 记录 `local_factor_target_updates` 与
 `state_evaluations=1024*local_factor_target_updates`。L 的 local-factor work
 可能多于 I/P，必须单独报告，不能用 edge/sweep 预算声称总计算相等。
@@ -170,6 +177,7 @@ shape[d] = sum(exp(-abs(signed_disp[d] + period*Q - mu)/scale)
                 for period in (-1,0,1))
 shape = shape / sum(shape)
 K = (1-eps)*shape + eps/Q
+K = K / sum(K)
 P(a|b) = K[(a-b) mod Q]
 prior_logp[sym,a] = log(max(K[(a-int(bob_phys[sym])) mod Q], 1e-300))
 ```
@@ -198,13 +206,14 @@ parameters，不能接 Alice。BP 输入是自然 log，CE 仅以 log2 报告。
 - 保存 `sign(L0)->sign(F_post)` 和 `sign(F_post)->sign(A_raw_post)` 的
   3x3 transition counts；它们相对每个 checkpoint 的 L0，不相对首 checkpoint。
 - 保存 candidate syndrome violation、candidate-vs-Bob bit/symbol flips、
-  residual、sweeps、edge_updates、finite、clip counts、syndrome_ok、tag_ok、
-  oracle_exact 和 undetected 状态。
+  residual、sweeps、edge_updates、finite、clip counts，以及
+  `syndrome_satisfied`、`tag_bits=0`、`tag_ok=NOT_APPLICABLE`。oracle 字段在
+  checkpoint 层为 null，并附 `not_recorded_reason=oracle_runs_after_arm_end`。
 - violation 固定为
   `weight(((H_arm[:r] @ hard_bits) % 2) XOR syndrome_target[:r])`。
-- `c2v_at_clip_count` 统计 `abs(c2v)>=20-1e-12`，`f2b_at_clip_count` 同口径；
-  `app_preclip_exceed_count` 统计 `abs(A_raw)>20`。APP 输出裁到 20，但不宣称
-  保存了 factor preclip 值。
+- `c2v_at_clip_count` 统计 `abs(c2v)>=20-1e-12`，`f2b_at_clip_count` 同
+  口径；`app_preclip_exceed_count` 统计 `abs(A_raw)>20`。APP 输出裁到 20，
+  但不宣称保存了 factor preclip 值。
 
 必须把单边 `max(abs(c2v))` 与 `max_v(abs(sum incident c2v))` 分开。不得用
 residual 代表正确，不得由相同错误数推断 candidate==Bob；candidate-vs-Bob
@@ -213,19 +222,17 @@ A 只允许与 D1 已存共同指标比较：`outcome`、`iterations`、
 `candidate-vs-Bob`、D1 APP、D1 single-edge c2v，以及 O1 的
 `POSTHOC_RECONSTRUCTED violation`；L/I/P 新增的 F/S/A/L0 等指标在 A 中不作
 定量差分，也不从旧 artifact 补造。
-结果不得写秘密数组、Alice/Bob symbols、syndrome bytes、完整 prior、完整
-消息或逐 symbol 数组。
 
 ## 7. 动态公开计费
 
 L/I/P 各自维护独立 counterfactual 计数器：
 `syndrome_rows_published`、`syndrome_bits_published`、
-`tag_bits_published`、`control_bits_sent`、`disclosed_rows`。在当前 checkpoint
-开始前发布新增 syndrome rows；第一次进入 tag 验证前发布一次 64 tag bits；
-只有进入下一个 checkpoint 才发送并计入 1 个 CONTINUE control bit。成功的
-IR disclosure 为 `reached_rows+64+control_bits_sent`；满 ladder 失败为
-`9036+64+71`；异常和 timeout 都保留已经发布的计数，不回滚。三臂计数不相加，
-不预填 `9100`。A 的 D1 历史计量只作为共同指标背景，不改写成新臂计量。
+`tag_bits_published=0`、`control_bits_sent`、`disclosed_rows`。在当前 checkpoint
+开始前发布新增 syndrome rows；只有进入下一个 checkpoint 才发送并计入 1 个
+CONTINUE control bit。首次 `syndrome_satisfied` 不停止、不改变计费，也不称
+协议接受。若完整 ladder 到达 9036，名义公开计费为
+`9036 syndrome bits + 71 control bits = 9107 bits`；预算中断、异常和 timeout
+只保留已发布计数。三臂计数不相加，不称真实 session leakage。
 
 ## 8. 真实执行状态机与输出
 
@@ -242,27 +249,31 @@ IR disclosure 为 `reached_rows+64+control_bits_sent`；满 ladder 失败为
 恰有 `manifest.json`、`results.json`、`table.csv`、`report.md`。顶层至少包含：
 
 ```text
-schema, cycle, base_sha, implementation_sha, source_registry, data_sha,
-session_id, block_frame_ids, non_fresh, mother_shape, mother_nnz,
-checkpoint_rows, max_sweeps_per_checkpoint, max_total_sweeps,
-llr_clip, convergence_tol, dtype, arm_order, invocation_status,
-prep_status, arms, claim_boundary
+schema, cycle, base_sha, accepted_plan_sha, implementation_sha,
+source_registry, session_id, block_frame_ids, non_fresh, mother_shape,
+mother_nnz, checkpoint_rows, max_sweeps_per_checkpoint,
+max_total_sweeps, llr_clip, convergence_tol, dtype, arm_order,
+invocation_status, prep_status, arms, claim_boundary
 ```
 
-每个 `arms[arm_id]` 至少包含：
+其中 `base_sha`、`accepted_plan_sha`、`implementation_sha` 仅为 Git 版本绑定，
+不是 artifact/data 内容字段。每个 `arms[arm_id]` 至少包含：
 
 ```text
 status, graph_id, prior_id, schedule_id, attempted_checkpoints,
-stop_reason, sweeps_used, edge_updates, local_factor_target_updates,
-state_evaluations, accounting, checkpoint_metrics, common_metrics,
-new_metric_fields
+stop_reason, first_syndrome_satisfied_ckpt, sweeps_used, edge_updates,
+local_factor_target_updates, state_evaluations, accounting,
+checkpoint_metrics, common_metrics, new_metric_fields, posthoc_oracle
 ```
 
-`accounting` 包含四个公开计数器和 `disclosed_rows`；`checkpoint_metrics` 只含
-第 6 节标量。A 的 `new_metric_fields` 结构为
-`{value: null, not_recorded_reason: "D1 baseline did not record this metric; A was not rerun"}`
-而不是补造值。L/I/P 的所有新指标必须填写真实聚合结果。路径、时间戳、wall
-和 RSS 属于运行元数据，不参与科学字段确定性比较。四个文件不得包含秘密数组。
+`accounting` 包含 `syndrome_rows_published`、`syndrome_bits_published`、
+`tag_bits_published=0`、`control_bits_sent`、`disclosed_rows` 和
+`public_disclosure_bits=syndrome_bits_published+control_bits_sent`。
+`checkpoint_metrics` 只含第 6 节标量；`tag_ok` 固定为 `NOT_APPLICABLE`，
+`oracle_exact` 仅在 arm 结束后的 `posthoc_oracle` 中填写。A 的新指标结构为
+`{value: null, not_recorded_reason: "D1 baseline did not record this metric; A was not rerun"}`，
+不得补造值。L/I/P 的所有新指标必须填写真实聚合结果。四个文件不得包含秘密
+数组或数据/artifact 内容校验字段。
 
 ## 9. grouped-symbol mask BP 后继
 
