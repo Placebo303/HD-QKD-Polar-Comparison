@@ -1,108 +1,115 @@
-# V72P2D2 正交单块分诊计划候选 — Proposal (PLAN_CANDIDATE, 未接受, 不授权执行)
+# V72P2D2 正交单块分诊计划候选
 
-- Change: `formal-ir-v72p2d2-orthogonal-oneblock-triage`
-- Date: 2026-09-04. Lifecycle: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`.
-- 本文仅为计划候选。不是 `PLAN_ACCEPTED`,不是实现授权,不是 decoder 授权,
-  不是 scientific promotion 记录。任何 L/I/P、interleaver、mask BP、GF32 对照
-  均需新计划独立 review 与明确执行授权后方可进行。
-- 约束(本变更内固化):只允许新增 5 个文件(本目录 4 个 + `docs/research_cycles/V72P2D2-TRIAGE/PLAN_CANDIDATE.md`);
-  禁实现代码、禁运行 decoder、禁读 raw/parquet、禁真实执行、禁建结果目录;
-  不改 V72P1/V72P2/D1 已接受代码、结果、`OpenSpec`、`cycle_state.yaml`、memory;
-  禁写 `PLAN_ACCEPTED`/授予执行。
+- Change：`formal-ir-v72p2d2-orthogonal-oneblock-triage`
+- Base：`e094f7e548380db4bfcbc1fe73472e670c32379a`
+- Branch：`formal-ir-v72p1-addendum-clean`
+- Lifecycle：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`
+- 当前计划不实现、不运行 decoder、不读 raw/parquet、不创建结果目录、不授予
+  development 或 formal execution。
 
 ## Goal
 
-在单个非新鲜诊断块上,用一次性的四臂对照区分当前 binary flooding 失败的三个正交因素,
-不预设优胜者:
+V72P2D1 已接受的单块诊断显示，原 binary flooding 候选在 72 个 checkpoint
+逐 bit 等于 Bob，APP 约 0.8，单边 c2v 约 0.025，Arm A/旧 Arm B 均耗尽 ladder。
+本 change 在同一非新鲜 D1 block 上冻结一次正交四臂分诊，区分：
 
-- 科学问题(直接引用已验证观测,不重新计算):单块 binary flooding 候选全 ckpt 逐 bit 等于 Bob、
-  APP 约 0.8、单边 c2v 约 0.025、A/B 均 `LADDER_EXHAUSTED`。
-  具体锚点见 `docs/research_cycles/V72P2D1-PARITY/`:
-  `RESULT_SUMMARY.md`(A 334 iters / B 321 iters, bit 3100 / sym 620, 72 ckpt 全候选-vs-Bob 0,
-  APP max 约 0.788–0.8004)、`CORRIGENDUM.md`(NOT_RECORDED 清单)、`OFFLINE_EVIDENCE.md`、
-  `ALGORITHM_ROUTE_RESEARCH.md` §3(静态 dataflow 审查:弱消息固定点为 INFERENCE,非已证根因)。
-- 一次单块正交区分 L 调度 / I degree-role 对齐 / P prior,不扩大到九块,不写 FER/SKR/信息极限。
+1. L：row-serial layered 调度是否能让最新消息传播；
+2. I：mother 的 degree-role 是否被固定 symbol 分组错误对齐；
+3. P：M0 prior 是否把候选锁在 Bob-oriented fixed point。
 
-## Non-Goals
+Arm A 只读复用 D1 记录，L/I/P 各只改变一个因素，不预设成功路线。
 
-- 不重跑 D1 Arm A(基线复用,禁重跑);不做九块确认/FER/SKR/信息极限/方法定级/推广。
-- 不调参、不混合三臂(每臂只变一个因素)、不事后调参、不重选 M2 参数。
-- 不重构 `v72p1_soft_joint_adapter.py`;不修复除接口二选一之外的任何 adapter 逻辑。
-- 不做 grouped-symbol mask BP 实现与 GF32 对照(仅描述后继,见 design §8)。
-- 不写三臂必胜;M2 VAL CE 低不得直接推断 decoder 一定改善(见 §5 INFERENCE)。
-- Ponytail lite 禁止:框架/插件/事件总线/缓存/锁/retry/checksum(见 AGENTS.md §5.7)。
+## Non-goals
 
-## Impact Scope
+本 change 不重跑 A，不做九块确认、FER、SKR、信息极限、方法定级或跨 session
+推广；不混合三臂，不重选参数，不实现 grouped-symbol mask BP，不做 GF32
+对照，不修复 V72P1 adapter 的 deferred stale-return bug，不改原始
+`src/experiments/tools/results` 或既有输出。
 
-- 允许新增(本变更,共 5 个,唯一精确清单):
-  1. `openspec/changes/formal-ir-v72p2d2-orthogonal-oneblock-triage/proposal.md`(本文件)
-  2. `openspec/changes/formal-ir-v72p2d2-orthogonal-oneblock-triage/design.md`
-  3. `openspec/changes/formal-ir-v72p2d2-orthogonal-oneblock-triage/tasks.md`
-  4. `openspec/changes/formal-ir-v72p2d2-orthogonal-oneblock-triage/specs/spec.md`
-  5. `docs/research_cycles/V72P2D2-TRIAGE/PLAN_CANDIDATE.md`
-- 未来实现(另走 Plan/Implementation/Pre-EXECUTE/Pre-RESULT,本次不授权)的新文件上限 5 个、
-  能合一不拆(详见 design §9):新算法模块 + CLI/runner + focused test + 小 config/fixture 各至多其一,
-  合并优先,不建框架。
-- 冻结目录零改动:`src/`,`experiments/`,`tools/`,`results/`,
-  `comparison_bench/outputs_comparison/` 现有输出,D1 四文件,
-  V72P1/V72P2/D1 的 `cycle_state.yaml`、已接受 `OpenSpec`、memory。
-- 未来执行输出(如另行授权)新根恰四文件(manifest/results/table/report),禁覆盖既有输出,禁建 `run_01`
-  (本计划不建任何结果目录)。
+## 固定实验设计
 
-## 冻结(摘要,完整定义见 design + spec)
+共同 block 是 session `20260123_1M_600k_0dB` 的 D1 `VAL1726..1729` 四帧
+连续 1024-symbol 块，明确 `non_fresh=true`。mother 固定为
+`9036x10240`、`nnz=49620`、check degree `{4:1,5:4594,6:4441}`、degree-2
+列 9035。ladder 固定为
+`range(160,8993,128)+[9032,9036]`，共 72 点；数值固定为 float64、clip 20、
+tolerance 1e-6。
 
-- 四臂(同 block/ladder/edge 预算/clip/tol/验证泄漏口径):
-  - 基线 A:复用 D1 Arm A 已记录事实,禁重跑。
-  - L:原 H + M0 prior + 真正 layered,只变调度(11 点数学合同,design §3)。
-  - I:deterministic degree-balanced full-column interleaver + M0 prior + flooding
-    (全 10240 列;前 1204 每 symbol 1 或 2 个;其余填满 10 bit;唯一算法/tie-break/seed;
-    old→物理 `sym*10+bit` 方向;syndrome 对映射后 H 与原物理 Alice 算;prior 对物理 symbol;
-    保持 shape 9036x10240/nnz49620/row-col degree multiset/rank/prefix;
-    试算 41/47/65、95/95 仅参考非门槛)。
-  - P:原 H + 冻结 V70R1 M2 laplace(`mu=0.0`,`scale=0.2714417616594907`,`eps=0.562251256281407`,
-    Q=1024,`shape ∝ Σ_period exp(-|disp+period*Q-mu|/scale)`,`K=(1-eps)*shape+eps/Q`,
-    `P=K[(a-b) mod Q]`,prior 自然 log、CE log2、行归一、现有 floor 1e-300,不读 Alice、不重选;
-    VAL CE 6.7871 仅历史,允许变差)。
-- 接口二选一:A(推荐)不调用列 deferred bug 路径,或 B 必须调用则最小修复 + 回归,禁重构 adapter。
-  Bug 位置:`comparison_bench/src/comparison_bench/formal_ir/v72p1_soft_joint_adapter.py`
-  `run_incremental_decoder` 末尾已算 `variable_to_check_final` 但返回旧 `variable_to_check_active`
-  填充的 `variable_to_check_full`(见 `ALGORITHM_ROUTE_RESEARCH.md` §3;D1 用 `run_decoder`,
-  与本次 D1 失败无关)。
-- 诊断聚合每 ckpt 最少量(完整清单见 design §5);明确单边 `max|c2v| ≠ max_v|Σ|`,
-  收敛 ≠ 正确,`candidate==Bob` 直接比,O1 POSTHOC 辅助,不提交敏感数组。
-- T0/T1-L/T1-I/T1-P/T1-METRICS/T2 矩阵完整冻结见 tasks.md;数学合同无法冻结则 BLOCKED 列未决,
-  禁 TBD 猜测。
+四臂固定如下：
 
-## Acceptance Criteria
+- **A**：复用 D1 Arm A 的已存共同指标，禁止重跑。
+- **L**：原 H + D1 M0 + 真正 layered row-serial decoder，只改变调度。
+- **I**：全 10240 列 degree-balanced `H_I` + D1 M0 + 原 flooding，只改变
+  物理列与 symbol 的分配。
+- **P**：原 H + V70R1 1M CAL-only M2 + 原 flooding，只改变 prior。
 
-- AC1:5 文件齐且仅 5 文件新增;无实现代码、无 decoder 运行、无 raw/parquet 读取、
-  无结果目录创建、无既有文件改动(含 `cycle_state.yaml`/memory/`OpenSpec` 已接受部分)。
-- AC2:四臂正交性文本可审:每臂“仅改变的因素”唯一且与其余臂不混合;基线 A 明确禁重跑。
-- AC3:Layered 11 点合同逐条可证或明确标 BLOCKED(禁猜测);证不出真用最新消息而
-  禁 row-loop 包 flooding 冒充(见 design §3 第 11 点)。
-- AC4:I 非门槛数值(41/47/65、95/95)明确标“参考非门槛”;P 的 VAL CE 明确标“历史非门槛,
-  允许变差”;无 M2 优胜/因果/推广断言。
-- AC5:未来执行合同含同 D1 块非新鲜、A 不重跑、L/I/P 各一次、无 rerun、独立 c2v、
-  新根恰四文件、预算数值依据,并声明另走 Plan/Implementation/Pre-EXECUTE/Pre-RESULT,
-  本计划不授权。
-- AC6:预注册判别与三无-escape 停止规则完整(禁 FER/SKR/因果/M2 优胜/推广)。
-- AC7:文献 DOI 与历史边界齐全且措辞正确(见下)。
+每 checkpoint 最多 10 次完整更新，每臂最多 720 次；L 的更新单位是完整
+active-row sweep，I/P 的更新单位是完整 active-edge flooding iteration。
+三臂均不启动 partial update，c2v 状态仅在同臂相邻 checkpoint 携带，新边置零。
 
-## 文献 DOI 与历史边界(措辞冻结)
+## 固定接口、prior 和映射
 
-- PEG: https://doi.org/10.1109/TIT.2004.839541 (重构图基础候选,不保证 finite-length 成功)。
-- Layered: https://doi.org/10.1109/SIPS.2004.1363033 (调度改善 ≠ capacity/FER 突破)。
-- Spatial coupling: https://arxiv.org/abs/1001.1826 (需针对性 DE,有耦合/边界/有限长代价)。
-- Non-binary LDPC: https://arxiv.org/abs/2305.08631 (保留符号相关性需正确 full-vector 语义)。
-- 历史边界:旧 GF32 主候选相关同域真实数据 V54 development 43/45、V64 full-symbol
-  verification 22/24、undetected 0(实际成功证据,不自动转移到当前 binary mother);
-  V5-C2 384/384 另一条已冻结域/方法边界仅历史背景;V67–V72P1 为容量/kernel/synthetic
-  qualification/接口/诊断证据,不能冒充真实纠错成功;V72P0 tiny-tree 仅验证小树语义。
-  不写三臂必胜。
+新模块固定提供
+`run_layered_decoder(prior_logp, syndrome_target, indptr, indices,
+max_sweeps, warm_start_c2v)`；adapter 不改，L 只调用该 API，I/P 只调用既有
+`run_decoder`。`run_incremental_decoder` stale-return bug deferred。
 
-## Tasks(指向 tasks.md)
+I 使用 old high columns `0..1203`，按 `(-degree,old_col)` 排序；使用
+`info_load/info_count` 的字典序 tie-break，把 high 列写入物理
+`sym*10+info_count`；parity 列使用 seed `20260902` 的 `default_rng` permutation
+填充 `(symbol_id,bit_id)` 升序剩余 slots。完整算法和代数方向在 design/spec
+固定，参考的 symbol 边数与 cycle 数不是门槛。
 
-- T0 编译/导入/结构/小数学(无 decoder、无 parquet)。
-- T1-L layered 合同单元;T1-I interleaver 确定性;T1-P M2 prior 冻结;T1-METRICS 诊断聚合。
-- T2 矩阵完整冻结(fake tiny + 严格口径,无真实执行)。
-- 计划冻结自检(本变更内,无代码运行):5 文件清单、禁项、措辞检查。
+P 固定为 V70R1 1M CAL-only M2：Laplace、`mu=0.0`、
+`scale=0.2714417616594907`、`eps=0.562251256281407`、`Q=1024`。K 先正常
+归一，log 阶段才用 `max(K,1e-300)`；builder 只接 physical Bob，不接 Alice；
+BP 用自然 log，CE 用 log2。历史 VAL CE `6.787126437359054` 不是门槛。
+
+## 诊断与计费
+
+每个新臂每 checkpoint 保存固定 scalar metrics：candidate syndrome violation、
+candidate-vs-Bob bit/symbol flips、L0、F、S、A_raw、delta_app 的分位数/幅度/
+zero、3x3 sign transitions、residual、sweeps/edge updates、factor target
+updates/state evaluations、finite/clip、syndrome/tag/oracle 状态。quantiles 为
+`[0,0.01,0.05,0.25,0.5,0.75,0.95,0.99,1]`，zero tolerance 为 `1e-15`。
+不写秘密数组、完整 prior、完整消息或 syndrome bytes。D1 O1 始终标
+`POSTHOC_RECONSTRUCTED`。
+
+每臂独立记录 syndrome rows/bits、64 tag bits 和 CONTINUE control bits；tag
+在第一次验证前发布，进入下一 checkpoint 才增加 1 control bit；失败和异常
+保留已发布计数；成功按 `reached_rows+64+control_bits_sent`，满 ladder 失败按
+`9036+64+71`。三臂 counterfactual 计数不相加，不硬写 9100。A 的新指标为
+null 并附未记录原因，只比较 D1 已存共同指标：outcome、iterations、
+candidate-vs-Bob、D1 APP、D1 single-edge c2v 和
+`POSTHOC_RECONSTRUCTED` O1 violation。
+
+## 未来实现与状态门禁
+
+接受本计划并完成后续 Implementation Review/Pre-EXECUTE，未来实现精确只有：
+
+- `comparison_bench/src/comparison_bench/formal_ir/v72p2d2_orthogonal_triage.py`
+- `scripts/v72p2d2_orthogonal_triage.py`
+- `comparison_bench/tests/test_v72p2d2_orthogonal_triage.py`
+
+真实输出固定为
+`comparison_bench/outputs_comparison/v72p2d2_orthogonal_oneblock_20260904/`
+下的 manifest/results/table/report 四文件。prep allowance 600 s，L/I/P
+各 soft wall 600 s，总 invocation 2400 s，peak RSS 2 GiB。prep 失败时三臂
+`NOT_ATTEMPTED` 并返回非零；新臂 exception、nonfinite、RSS 或 timeout 时该臂
+`BLOCKED`，后续臂 `NOT_ATTEMPTED`；正常 ladder exhaustion 才继续下一臂。
+A 不运行，L/I/P 各运行一次，无 rerun/调参。执行及发布必须分别通过独立
+Plan Review、Implementation Review、Pre-EXECUTE、Pre-RESULT；本计划不授权。
+
+## 判别与出口
+
+- L 只有 candidate escape、violation 下降或验证成功才支持继续调度路线；仅更快
+  不算改善。
+- I 只有 escape 或 violation 下降才支持该映射；单块不证明图结构因果。
+- P 的消息/翻转改变但未验证只说明 prior 影响；完全不变只削弱 prior-only
+  解释；不得宣称 M2 优胜。
+- 三臂均无 hard-bit escape 时停止 binary edge-level flooding/layered/damping
+  微调，下一周期只排 grouped-symbol mask BP tiny exhaustive 或同块 GF32 对照。
+- 任一臂成功只进入同路线小样本 confirmation plan，不直接进入 V73。
+- 禁 FER、SKR、信息极限、LDPC 无效、因果和跨 session 断言。
+
+完整数学、计量、测试和 schema 见同目录 `design.md`、`tasks.md`、`specs/spec.md`。
