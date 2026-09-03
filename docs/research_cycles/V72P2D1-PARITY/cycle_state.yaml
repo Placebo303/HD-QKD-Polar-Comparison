@@ -22,3 +22,4 @@ scientific_promotion: false
 scope: single_nonfresh_VAL_block_AB_parity_layout_descriptive_once
 output_directory: comparison_bench/outputs_comparison/v72p2d1_parity_layout_ab
 output_state: PRESENT_TERMINAL_FOUR_FILES
+corrigendum: docs/research_cycles/V72P2D1-PARITY/CORRIGENDUM.md

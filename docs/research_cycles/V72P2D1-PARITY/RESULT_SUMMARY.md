@@ -64,3 +64,13 @@ Artifacts: comparison_bench/outputs_comparison/v72p2d1_parity_layout_ab/
 exactly four files (manifest.json / results.json / table.csv / report.md).
 No raw symbols / syndrome bytes / fitted matrix / per-bit arrays published;
 reproduction IDs and command recorded in manifest, not permission to rerun.
+
+## Corrigendum link (appended, original above unchanged)
+
+- See `docs/research_cycles/V72P2D1-PARITY/CORRIGENDUM.md`:
+  corrects the M1-M7 "four-cycles 1196/1196, collisions 1194/1194
+  (graph-isomorphic)" reading; pure-H check-check 1196/1196 does not
+  imply fixed-symbol-grouping full-factor-graph isomorphism
+  (symbol-factor-check 8452/328, collision rows 8170/326);
+  D1 is input-syndrome consistency only with NOT_RECORDED list therein.
+  Descriptive-only; incomplete observations are not PASS.

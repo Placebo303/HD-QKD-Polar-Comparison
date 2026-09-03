@@ -3131,3 +3131,17 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   the V29 holdout as fresh qualification. This historical snapshot predates
   the later V30R execution and is superseded by the V30R closeout at the top
   of this file.
+
+## 2026-09-04 V72P2D1-PARITY corrigendum link (descriptive-only correction, history unchanged)
+
+- Corrigendum [decision]: `docs/research_cycles/V72P2D1-PARITY/CORRIGENDUM.md`
+  corrects the M1-M7 "four-cycles 1196/1196, collisions 1194/1194
+  (graph-isomorphic)" reading; pure-H check-check 1196/1196 does not imply
+  fixed-symbol-grouping full-factor-graph isomorphism
+  (symbol-factor-check 8452/328, collision rows 8170/326);
+  D1 is input-syndrome consistency only (NOT_RECORDED: candidate syndrome
+  violation count, quantiles, sum(c2v), prior-only baseline, edge gain);
+  two-arm 72ckpt candidate-vs-Bob all 0, A334/B321, verification failed,
+  metering 9100/9171 retained. Descriptive-only; incomplete observations
+  are not PASS. No decoder run / rerun / tuning / four-file overwrite /
+  per-symbol key read.

@@ -13,3 +13,13 @@ OpenSpec: openspec/changes/formal-ir-v72p2d1-parity-layout-diagnostic/ (proposal
 - P5前半 PASS scope: this packet creates only docs/research_cycles/V72P2D1-PARITY/ minimal records (EXECUTION_PACKET.md / REVIEW_VERDICT.md / cycle_state.yaml) plus the already-frozen harness + focused tests + OpenSpec four件; output dir comparison_bench/outputs_comparison/v72p2d1_parity_layout_ab/ confirmed absent (zero files, no overwrite); py_compile + pytest -p no:cacheprovider full-matrix evidence recorded with exit codes (workspace独立temp, fake only, no real parquet content read beyond registered IDs).
 - Formal A/B execution NOT released in P5前半. Pre-EXECUTE (HEAD == origin/branch == implementation SHA, ACCEPTED_PLAN_SHA re-derived, stale-SHA search 0 hits, target run absent, budgets/gates consistent, py_compile + critical tests PASS) remains pending. Pre-RESULT remains pending. No scientific conclusion, no promotion, no rerun authorization.
 - Next: exact-add commit + ordinary push of the nine V72P2D1 files only (no add -A, no force, no clean/stash), then bind implementation SHA in cycle_state.yaml at P5后半.
+
+## Corrigendum link (appended, original above unchanged)
+
+- See `docs/research_cycles/V72P2D1-PARITY/CORRIGENDUM.md`:
+  corrects the "four-cycles 1196/1196, collisions 1194/1194
+  (graph-isomorphic)" reading; pure-H check-check 1196/1196 does not
+  imply fixed-symbol-grouping full-factor-graph isomorphism
+  (symbol-factor-check 8452/328, collision rows 8170/326);
+  D1 is input-syndrome consistency only with NOT_RECORDED list therein.
+  Descriptive-only; incomplete observations are not PASS.
