@@ -502,6 +502,171 @@ def test_d7_full_dual_layer_budget_and_runner_guards(tmp_path):
     assert runner.main(["--phase", "real", "--execute-real"]) == 2
 
 
+# ---- Fake-E2E real-entry chain (workspace only; no parquet, no true decoder,
+# no production root). Each fake exercises the frozen production order with
+# max90/damping1.0/cold, CAL702..1725, VAL1726..1729, A read-only, tag 0.
+
+def _fake_e2e_registry():
+    return {
+        "sessions": [
+            {
+                "session_id": "20260123_1M_600k_0dB",
+                "source_label": "1M",
+                "stage2_CAL_frame_ids": list(range(702, 1726)),
+                "stage2_VAL_frame_ids": list(range(1726, 1762)),
+            }
+        ]
+    }
+
+
+def _fake_e2e_frames():
+    rng = np.random.default_rng(20260902)
+    frames = {}
+    for fid in (702, 703, 704, 705, 1726, 1727, 1728, 1729):
+        frames[fid] = {
+            "alice_symbols": rng.integers(0, 1024, size=256),
+            "bob_symbols": rng.integers(0, 1024, size=256),
+        }
+    return frames
+
+
+def _fake_e2e_matrices():
+    rng = np.random.default_rng(20260903)
+
+    def _sparse(rows):
+        h = np.zeros((rows, 1024), dtype=np.uint8)
+        for r in range(rows):
+            cols = rng.choice(1024, size=8, replace=False)
+            h[r, cols] = rng.integers(1, 32, size=8).astype(np.uint8)
+        return h
+
+    h_total = _sparse(200)
+    return {
+        "h1": _sparse(16),
+        "h_base": h_total[:184].copy(),
+        "h_joint": h_total[:192].copy(),
+        "h_total": h_total,
+    }
+
+
+def _fake_e2e_decode_fn(h_mat, prior_p, target):
+    # Explicit test-only fake (argmax readout, history syndrome oracle for the
+    # observed value only); production passes decode_fn=None (true kernel).
+    pp = np.asarray(prior_p, dtype=np.float64)
+    x_hat = np.argmax(pp, axis=1).astype(np.uint8)
+    obs = np.asarray(mod.gf32_syndrome(np.asarray(h_mat, dtype=np.uint8), x_hat))
+    return {
+        "x_hat": x_hat,
+        "iterations_used": 1,
+        "syndrome_ok": bool(np.array_equal(obs, np.asarray(target, dtype=np.uint8) & 31)),
+        "runtime_s": 0.001,
+        "stop": "fake-e2e",
+        "final_beliefs": np.log(np.maximum(pp, 1e-15)),
+    }
+
+
+def _fake_e2e_preflight():
+    return {"status": "PASS", "cycle": "V72P2D3-GF32", "synthetic_only": True}
+
+
+def test_fake_e2e_real_chain_workspace_20_checks():
+    import shutil
+
+    out = Path(runner.WORKSPACE_ROOT) / "v72p2d3_real_e2e_fake"
+    if out.exists():
+        shutil.rmtree(out)
+    prod = (
+        ROOT.parent
+        / "comparison_bench"
+        / "outputs_comparison"
+        / "v72p2d3_gf32_contrast_20260904"
+    )
+    prod_existed = prod.exists()
+    try:
+        report = runner.run_real_orchestration(
+            out_dir=out,
+            registry=_fake_e2e_registry(),
+            frames=_fake_e2e_frames(),
+            matrices=_fake_e2e_matrices(),
+            preflight=_fake_e2e_preflight(),
+            authorized=True,
+            decode_fn=_fake_e2e_decode_fn,
+        )
+        assert report["gate"] == "PASS"  # c01 authorization/preflight/output gate
+        assert report["block_ids"] == [1726, 1727, 1728, 1729]  # c02 single VAL block
+        assert report["arm_a_attempted"] is False  # c03 A read-only, never rerun
+        assert report["branch"] in mod.REAL_BRANCHES  # c04 four-branch discriminant
+        assert report["tag_bits"] == 0 and report["tag_ok"] == "NOT_APPLICABLE"  # c05 no tag
+        assert report["leak_bits"] in (1064, 1104, 1144)  # c06 frozen leak triple
+        assert report["prep_wall_s"] <= 300.0 and report["g_wall_s"] <= 300.0  # c07 prep/G budget
+        assert report["inv_wall_s"] <= 600.0  # c08 invocation budget
+        assert report["peak_rss_bytes"] is None or report["peak_rss_bytes"] < 2 * 1024**3  # c09 RSS budget
+        assert {p.name for p in out.iterdir()} == {"manifest.json", "results.json", "table.csv", "report.md"}  # c10 four files
+        assert out.resolve() != prod.resolve() and prod.resolve() not in out.resolve().parents  # c11 outside formal root
+        manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+        assert manifest["cycle"] == "V72P2D3-GF32" and manifest["tag_bits"] == 0  # c12 manifest schema
+        assert manifest["history_kernel"] == "V35-decode_row_layered_fftqspa-via-V54-chain"  # c13 kernel binding
+        results = json.loads((out / "results.json").read_text(encoding="utf-8"))
+        assert results["arms"]["A"]["attempted"] is False  # c14 A reuse in artifact
+        assert results["arms"]["G"]["branch"] == report["branch"]  # c15 G branch persisted
+        assert mod.MAX_ITER == 90 and mod.DAMPING_ALPHA == 1.0  # c16 frozen decoder caps
+        assert tuple(mod.REAL_CAL_IDS) == tuple(range(702, 1726))  # c17 frozen CAL domain
+        assert report["fake_decoder"] is True  # c18 true decoder never ran
+        assert report["n_cal_symbols"] == 4 * 256  # c19 CAL-only fit, no VAL backfill
+        assert prod.exists() == prod_existed  # c20 formal root untouched
+    finally:
+        if out.exists():
+            shutil.rmtree(out)
+
+
+def test_real_chain_guards_and_bans(tmp_path):
+    frames = _fake_e2e_frames()
+    matrices = _fake_e2e_matrices()
+    good_preflight = _fake_e2e_preflight()
+    with pytest.raises(PermissionError):
+        mod.require_real_gate(execute_real=False, authorized=True, preflight=good_preflight, out_dir=tmp_path / "a")
+    with pytest.raises(PermissionError):
+        mod.require_real_gate(execute_real=True, authorized=False, preflight=good_preflight, out_dir=tmp_path / "b")
+    with pytest.raises(PermissionError):
+        mod.require_real_gate(execute_real=True, authorized=True, preflight={"status": "FAIL"}, out_dir=tmp_path / "c")
+    with pytest.raises(FileExistsError):
+        mod.require_real_gate(execute_real=True, authorized=True, preflight=good_preflight, out_dir=tmp_path)
+    prod = ROOT.parent / "comparison_bench" / "outputs_comparison" / "v72p2d3_gf32_contrast_20260904"
+    with pytest.raises(ValueError):
+        mod.require_real_gate(execute_real=True, authorized=True, preflight=good_preflight, out_dir=prod / "x")
+    with pytest.raises(ValueError):
+        mod.validate_registry({"sessions": []})
+    bad_cal = _fake_e2e_registry()
+    bad_cal["sessions"][0]["stage2_CAL_frame_ids"] = list(range(700, 1724))
+    with pytest.raises(ValueError):
+        mod.validate_registry(bad_cal)
+    bad_val = _fake_e2e_registry()
+    bad_val["sessions"][0]["stage2_VAL_frame_ids"] = list(range(1800, 1836))
+    with pytest.raises(ValueError):
+        mod.validate_registry(bad_val)
+    with pytest.raises(ValueError):
+        mod.assemble_block_frames(mod.validate_frame_bundle(frames, [1726, 1727, 1728, 1729]), [1726, 1727, 1728, 1730])
+    broken = dict(matrices)
+    broken["h_joint"] = (np.asarray(matrices["h_joint"]) ^ np.uint8(1))
+    with pytest.raises(ValueError):
+        mod.validate_nested_matrices(broken["h1"], broken["h_base"], broken["h_joint"], broken["h_total"])
+    with pytest.raises(PermissionError):
+        runner.run_real_orchestration(out_dir=tmp_path / "nofakes", registry=None, frames=None, matrices=None)
+    assert runner.main(["--phase", "real"]) == 2
+    assert runner.main(["--phase", "real", "--execute-real"]) == 2
+    assert runner.PREP_LIMIT_S == mod.PREP_LIMIT_S == 300.0
+    assert runner.G_LIMIT_S == mod.G_LIMIT_S == 300.0
+    assert runner.INV_LIMIT_S == mod.INV_LIMIT_S == 600.0
+    assert runner.RSS_LIMIT_BYTES == mod.RSS_LIMIT_BYTES == 2 * 1024**3
+    src = MODULE_PATH.read_text(encoding="utf-8")
+    assert "read_parquet" not in src
+    assert src.count("compute_tag_64") == 2  # readonly probe only, no tag generation
+    assert "mock" not in src.lower() and "stub" not in src.lower()
+    rsrc = RUNNER_PATH.read_text(encoding="utf-8")
+    assert "read_parquet" not in rsrc and "import pandas" not in rsrc
+    assert "mock" not in rsrc.lower() and "stub" not in rsrc.lower()
+
+
 # ---- R6 true-decode (production v35 decode_row_layered_fftqspa, decode_fn=None) ----
 # Synthetic tiny only; no parquet, no production root. Each case uses the true
 # iterative kernel via run_g_layer/history_decode with cold start.

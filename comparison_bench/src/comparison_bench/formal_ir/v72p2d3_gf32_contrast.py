@@ -37,6 +37,15 @@ Call graph (production, decode_fn=None):
   -> write_contrast_outputs (4-file schema).
 Short-circuit (R5, V54 order): base verify skips joint/total; joint
 verify skips total; L1 q always feeds L2 (no L1 gate).
+
+Real-entry production call chain (frozen order, fake-E2E only in this
+change): gate(authorize/preflight/output) -> registry -> CAL/VAL validate
+-> fit -> assemble block -> A reuse -> words -> matrices -> syndromes
+(Alice side) -> true kernel (L1 cold + L2 chain cold, production
+decode_fn=None) -> reassemble -> posthoc -> four files. Budgets
+prep<=300s, G<=300s, invocation<=600s, peak RSS<2GiB. No parquet import,
+no real decoder run, no production-root creation here; callers inject
+registry/frames/matrices and an explicit test-only decode_fn.
 """
 from __future__ import annotations
 
@@ -84,6 +93,26 @@ PROB_FLOOR = 1e-300
 LN2 = math.log(2.0)
 CYCLE_ID = "V72P2D3-GF32"
 BASE_SHA = "e094f7e548380db4bfcbc1fe73472e670c32379a"
+
+# Real-entry budgets and fixed block geometry (EXECUTION_PACKET section 6:
+# prep300 / G300 / invocation600 seconds, RSS 2GiB). Single VAL block only;
+# a nine-block loop SHALL NOT be added here.
+PREP_LIMIT_S = 300.0
+G_LIMIT_S = 300.0
+INV_LIMIT_S = 600.0
+RSS_LIMIT_BYTES = 2 * 1024**3
+FRAME_PAIRS = 256
+REAL_CAL_IDS = tuple(range(CAL_START, CAL_END + 1))
+REAL_BLOCK_IDS = tuple(VAL_FRAMES)
+# ponytail: fake-E2E smoothing is a frozen scalar, not a tuned grid; the
+# production selection grid lives outside this change.
+FAKE_E2E_LAM = 1.0
+REAL_BRANCHES = (
+    "G_EXACT",
+    "G_COLLISION",
+    "G_IMPROVED_NO_SYNDROME",
+    "G_NO_MOTION",
+)
 
 
 def _repo_root() -> Path:
@@ -571,6 +600,8 @@ def run_g_layer(
         stop = str(res.get("stop", res.get("status", "fake")))
         final_beliefs = res.get("final_beliefs", None)
         finite = bool(np.all(np.isfinite(final_beliefs))) if final_beliefs is not None else True
+        if final_beliefs is None:
+            final_beliefs = np.log(prior_p)
     else:
         dec = history_decoder_fn()
         out = dec(
@@ -587,7 +618,8 @@ def run_g_layer(
         iterations_used = int(out.iterations)
         runtime_s = float(out.runtime_s)
         stop = str(out.status)
-        finite = bool(np.all(np.isfinite(np.asarray(out.final_beliefs))))
+        final_beliefs = np.asarray(out.final_beliefs, dtype=np.float64)
+        finite = bool(np.all(np.isfinite(final_beliefs)))
     if not 0 <= iterations_used <= int(max_iter):
         raise ValueError("history kernel returned out-of-range iterations")
     syndrome_observed = np.asarray(
@@ -618,6 +650,8 @@ def run_g_layer(
         "candidate_changed": candidate_changed,
         "vs_bob": vs_bob,
         "cold_start": bool(belief_warm is None),
+        # L1->L2 recombination input: q=softmax(final_beliefs) via V54.
+        "final_beliefs": np.asarray(final_beliefs, dtype=np.float64),
         # Back-compat aliases for the frozen D6 contract: views of
         # x_hat/iterations_used/syndrome_ok, not separate measurements.
         "hard": x_hat.astype(np.int64),
@@ -906,3 +940,373 @@ def write_contrast_outputs(
     if names != {"manifest.json", "results.json", "table.csv", "report.md"}:
         raise RuntimeError("contrast output root must contain exactly four files")
     return out
+
+
+def require_real_gate(
+    *,
+    execute_real: bool,
+    authorized: bool,
+    preflight: dict[str, Any] | None,
+    out_dir: str | Path,
+    workspace_root: str | Path | None = None,
+) -> dict[str, Any]:
+    """Step 1: authorization / preflight / output check (no data touched)."""
+    if not execute_real:
+        raise PermissionError("real chain requires execute_real")
+    if not authorized:
+        raise PermissionError("real execution is not authorized")
+    if not isinstance(preflight, dict) or preflight.get("status") != "PASS":
+        raise PermissionError("synthetic preflight PASS artifact is required")
+    if preflight.get("cycle") != CYCLE_ID and preflight.get("cycle_id") != CYCLE_ID:
+        raise PermissionError("preflight belongs to another cycle")
+    out = Path(out_dir).resolve()
+    prod = _production_root()
+    if out == prod or prod in out.parents:
+        raise ValueError("fake-E2E output must stay outside the production root")
+    if workspace_root is not None and out != Path(workspace_root).resolve():
+        try:
+            out.relative_to(Path(workspace_root).resolve())
+        except ValueError as exc:
+            raise ValueError("fake-E2E output must stay under workspace/") from exc
+    if out.exists():
+        raise FileExistsError(f"output directory already exists: {out}")
+    return {"gate": "PASS"}
+
+
+def validate_registry(registry: dict[str, Any]) -> dict[str, Any]:
+    """Step 2: registry check — one 1M session, CAL702..1725, block VAL1726..1729."""
+    if not isinstance(registry, dict):
+        raise ValueError("registry must be a mapping")
+    sessions = registry.get("sessions", [])
+    found = [
+        s
+        for s in sessions
+        if isinstance(s, dict)
+        and s.get("session_id") == SESSION_ID
+        and s.get("source_label") == "1M"
+    ]
+    if len(found) != 1:
+        raise ValueError("registry must contain exactly one target 1M session")
+    session = found[0]
+    cal_ids = [int(v) for v in session.get("stage2_CAL_frame_ids", [])]
+    if cal_ids != list(REAL_CAL_IDS):
+        raise ValueError("CAL assignment is not the frozen 702..1725 sequence")
+    val_ids = [int(v) for v in session.get("stage2_VAL_frame_ids", [])]
+    if val_ids[:4] != list(REAL_BLOCK_IDS):
+        raise ValueError("VAL assignment does not start with frozen 1726..1729")
+    # Single fixed block only; never loop VAL groups here (no nine-block runner).
+    return {
+        "session": dict(session),
+        "cal_ids": cal_ids,
+        "block_ids": list(REAL_BLOCK_IDS),
+    }
+
+
+def validate_frame_bundle(
+    frames: dict[Any, Any], frame_ids: list[int]
+) -> dict[int, dict[str, np.ndarray]]:
+    """Step 3: CAL/VAL loading validation — 256 integral symbols 0..1023/frame."""
+    if not isinstance(frames, dict):
+        raise ValueError("frames must be a mapping")
+    bundle: dict[int, dict[str, np.ndarray]] = {}
+    for fid in frame_ids:
+        rec = frames.get(int(fid), frames.get(str(fid)))
+        if not isinstance(rec, dict):
+            raise ValueError(f"frame {fid} is missing")
+        alice = np.asarray(rec["alice_symbols"]).reshape(-1)
+        bob = np.asarray(rec["bob_symbols"]).reshape(-1)
+        if alice.shape != (FRAME_PAIRS,) or bob.shape != (FRAME_PAIRS,):
+            raise ValueError(f"frame {fid} must hold {FRAME_PAIRS} pairs")
+        for arr in (alice, bob):
+            if np.any(arr < 0) or np.any(arr >= Q):
+                raise ValueError(f"frame {fid} symbol outside 0..1023")
+            if not np.all(arr == np.floor(arr.astype(np.float64))):
+                raise ValueError(f"frame {fid} has non-integral symbols")
+        bundle[int(fid)] = {
+            "alice_symbols": alice.astype(np.int64),
+            "bob_symbols": bob.astype(np.int64),
+        }
+    return bundle
+
+
+def fit_cal_prior_from_frames(
+    cal_bundle: dict[int, dict[str, np.ndarray]], lam: float = FAKE_E2E_LAM
+) -> dict[str, Any]:
+    """Step 4: CAL-only fit — P1(high|B), P2(low|high,B), V54 counts (no VAL)."""
+    if len(cal_bundle) == 0:
+        raise ValueError("CAL bundle must be non-empty")
+    a_cal = np.concatenate([cal_bundle[f]["alice_symbols"] for f in sorted(cal_bundle)])
+    b_cal = np.concatenate([cal_bundle[f]["bob_symbols"] for f in sorted(cal_bundle)])
+    a_low, a_high = symbols_to_layers(a_cal)
+    _, _ = symbols_to_layers(b_cal)
+    p1 = build_stage1_P(b_cal, a_high, float(lam), n_b_states=Q, q_sub=Q_SUB)
+    p2 = build_stage2_P(a_high, b_cal, a_low, float(lam), n_b_states=Q, q_sub=Q_SUB)
+    counts = np.zeros((Q, Q), dtype=np.float64)
+    np.add.at(counts, (b_cal.astype(np.int64), a_cal.astype(np.int64)), 1.0)
+    if float(counts.sum()) <= 0:
+        raise ValueError("CAL counts are all zero")
+    return {
+        "P1": p1,
+        "P2": p2,
+        "counts": counts,
+        "lam": float(lam),
+        "n_cal": int(a_cal.size),
+    }
+
+
+def assemble_block_frames(
+    bundle: dict[int, dict[str, np.ndarray]], block_ids: list[int]
+) -> tuple[np.ndarray, np.ndarray]:
+    """Step 5:拼块 — four consecutive VAL frames into one 1024-symbol block."""
+    if list(block_ids) != list(REAL_BLOCK_IDS):
+        raise ValueError("block must be the frozen VAL1726..1729")
+    alice = np.concatenate([bundle[int(f)]["alice_symbols"] for f in block_ids])
+    bob = np.concatenate([bundle[int(f)]["bob_symbols"] for f in block_ids])
+    if alice.shape != (N,) or bob.shape != (N,):
+        raise ValueError("a four-frame block must contain 1024 symbols")
+    return alice.astype(np.int64), bob.astype(np.int64)
+
+
+def validate_nested_matrices(
+    h1: np.ndarray,
+    h_base: np.ndarray,
+    h_joint: np.ndarray,
+    h_total: np.ndarray,
+) -> dict[str, Any]:
+    """Step 8: matrix check — shapes, nested prefix, row weight cap (GF32 values)."""
+    mats = {
+        "h1": (np.asarray(h1, dtype=np.uint8), (H1_ROWS, N)),
+        "h_base": (np.asarray(h_base, dtype=np.uint8), (M_BASE, N)),
+        "h_joint": (np.asarray(h_joint, dtype=np.uint8), (M_BASE + 8, N)),
+        "h_total": (np.asarray(h_total, dtype=np.uint8), (M_TOTAL, N)),
+    }
+    for name, (mat, shape) in mats.items():
+        if mat.shape != shape:
+            raise ValueError(f"{name} shape must be {shape}, got {mat.shape}")
+        if mat.max() >= Q_SUB:
+            raise ValueError(f"{name} holds values outside GF32")
+        if int((mat != 0).sum(axis=1).max()) > 16:
+            raise ValueError(f"{name} row weight exceeds 16")
+    h1m, hbm = mats["h1"][0], mats["h_base"][0]
+    hjm, htm = mats["h_joint"][0], mats["h_total"][0]
+    if not (np.array_equal(hjm[:M_BASE], hbm) and np.array_equal(htm[:M_BASE], hbm)):
+        raise ValueError("nested prefix 184 does not match H_base")
+    if not np.array_equal(htm[: M_BASE + 8], hjm):
+        raise ValueError("nested prefix 192 does not match H_joint")
+    return {"rows": (H1_ROWS, M_BASE, M_BASE + 8, M_TOTAL), "nested": list(NESTED_ROWS)}
+
+
+def _sample_rss(rss_reader: Any = None) -> int | None:
+    if rss_reader is not None:
+        try:
+            return int(rss_reader())
+        except Exception:
+            return None
+    try:
+        import psutil as _psutil
+        import os as _os
+
+        return int(_psutil.Process(_os.getpid()).memory_info().rss)
+    except Exception:
+        return None
+
+
+def run_real_contrast(
+    *,
+    out_dir: str | Path,
+    registry: dict[str, Any],
+    frames: dict[Any, Any],
+    matrices: dict[str, np.ndarray],
+    preflight: dict[str, Any] | None = None,
+    authorized: bool = False,
+    execute_real: bool = True,
+    decode_fn: Any = None,
+    lam: float = FAKE_E2E_LAM,
+    clock: Any = None,
+    rss_reader: Any = None,
+    workspace_root: str | Path | None = None,
+) -> dict[str, Any]:
+    """Run the frozen 11-step real-entry chain on injected fakes (no parquet).
+
+    Order: gate -> registry -> CAL/VAL validate -> fit -> assemble block ->
+    A reuse -> words -> matrices -> syndromes -> true kernel -> reassemble ->
+    posthoc -> four files. Production calls pass decode_fn=None (true v35
+    kernel, cold each stage); tests pass an explicit fake decode_fn.
+    """
+    import time as _time
+
+    now = clock if clock is not None else _time.monotonic
+    inv_start = float(now())
+    rss_peak: list[int] = []
+
+    def _sample() -> None:
+        value = _sample_rss(rss_reader)
+        if value is not None:
+            rss_peak.append(int(value))
+
+    _sample()
+    prep_start = float(now())
+    gate = require_real_gate(
+        execute_real=execute_real,
+        authorized=authorized,
+        preflight=preflight,
+        out_dir=out_dir,
+        workspace_root=workspace_root,
+    )
+    reg = validate_registry(registry)
+    cal_ids, block_ids = reg["cal_ids"], reg["block_ids"]
+    cal_provided = sorted({int(f) for f in frames} & set(cal_ids))
+    if len(cal_provided) == 0:
+        raise ValueError("frames hold no CAL frame in 702..1725")
+    cal_bundle = validate_frame_bundle(frames, cal_provided)
+    block_bundle = validate_frame_bundle(frames, block_ids)
+    fit = fit_cal_prior_from_frames(cal_bundle, lam)
+    alice, bob = assemble_block_frames(block_bundle, block_ids)
+    # Step 6: A只读复用 — never rerun.
+    arm_a = a_baseline_record()
+    if arm_a.get("attempted") is not False:
+        raise ValueError("Arm A must stay read-only reuse")
+    # Step 7: words — symbols_to_layers, direction bound to v35 factorize_f03.
+    alice_low, alice_high = symbols_to_layers(alice)
+    bob_low, bob_high = symbols_to_layers(bob)
+    u1, u2, _, _ = factorize_f03_binding(alice, bob)
+    if not (
+        np.array_equal(u1.astype(np.int64), alice_high)
+        and np.array_equal(u2.astype(np.int64), alice_low)
+    ):
+        raise ValueError("word direction disagrees with v35 factorize_f03")
+    geo = validate_nested_matrices(
+        matrices["h1"], matrices["h_base"], matrices["h_joint"], matrices["h_total"]
+    )
+    field = get_gf32_field()
+    h1 = np.asarray(matrices["h1"], dtype=np.uint8)
+    h_base = np.asarray(matrices["h_base"], dtype=np.uint8)
+    h_joint = np.asarray(matrices["h_joint"], dtype=np.uint8)
+    h_total = np.asarray(matrices["h_total"], dtype=np.uint8)
+    # Step 9: syndromes, Alice side only, via the history GF32 oracle.
+    s1 = gf32_syndrome(h1, alice_high.astype(np.uint8), field)
+    s_base = gf32_syndrome(h_base, alice_low.astype(np.uint8), field)
+    s_joint = gf32_syndrome(h_joint, alice_low.astype(np.uint8), field)
+    s_total = gf32_syndrome(h_total, alice_low.astype(np.uint8), field)
+    # Production prior order: P(U1|B) then q@P (exact V54 reuse).
+    counts = np.asarray(fit["counts"], dtype=np.float64)
+    prior_u1 = get_l1_prior_production(counts, bob)
+    prep_wall = float(now()) - prep_start
+    _sample()
+    if prep_wall > PREP_LIMIT_S:
+        raise TimeoutError(f"prep wall {prep_wall:.3f}s exceeds {PREP_LIMIT_S}s")
+    # Step 10:真核 — L1 cold, then L2 chain cold (production decode_fn=None).
+    g_start = float(now())
+    l1 = run_l1_stage(
+        h1, prior_u1, s1, bob_u1=bob_high, field=field, decode_fn=decode_fn
+    )
+    # Frozen recombination: q=softmax(L1 final_beliefs), then prior_l2=q@P.
+    q = softmax_beliefs_history(np.asarray(l1["final_beliefs"], dtype=np.float64))
+    prior_l2 = build_l2_prior_from_l1(counts, bob, q)
+    chain = run_l2_incremental_chain(
+        h_base,
+        h_joint,
+        h_total,
+        prior_l2,
+        s_base,
+        s_joint,
+        s_total,
+        bob_u2=bob_low,
+        field=field,
+        decode_fn=decode_fn,
+    )
+    g_wall = float(now()) - g_start
+    _sample()
+    if g_wall > G_LIMIT_S:
+        raise TimeoutError(f"G wall {g_wall:.3f}s exceeds {G_LIMIT_S}s")
+    final = chain["final"]
+    # Step 11a:重组 — layers_to_symbols (+ q already recombined above).
+    final_u1 = np.asarray(l1["x_hat"], dtype=np.int64).reshape(-1)
+    final_u2 = np.asarray(final["x_hat"], dtype=np.int64).reshape(-1)
+    final_symbols = layers_to_symbols(final_u2, final_u1)
+    if not np.array_equal(
+        layers_to_symbols(*symbols_to_layers(final_symbols)), final_symbols
+    ):
+        raise ValueError("reassembly roundtrip failed")
+    # Step 11b: posthoc oracle (final candidate only, after arm end).
+    vs_bob = direct_flips(final_symbols, bob)
+    vs_alice = direct_flips(final_symbols, alice)
+    oracle_exact = bool(np.array_equal(final_symbols, alice))
+    final_ok = bool(final["syndrome_ok"])
+    # Measurement-only prior-argmax baseline for the IMPROVED branch; it is
+    # never fed back into any decoder.
+    prior_argmax = layers_to_symbols(
+        np.argmax(np.asarray(prior_l2, dtype=np.float64), axis=1).astype(np.int64),
+        np.argmax(np.asarray(prior_u1, dtype=np.float64), axis=1).astype(np.int64),
+    )
+    prior_vs_bob = direct_flips(prior_argmax, bob)
+    changed = bool(vs_bob != prior_vs_bob or not np.array_equal(final_symbols, prior_argmax))
+    if final_ok and oracle_exact:
+        branch = "G_EXACT"
+    elif final_ok:
+        branch = "G_COLLISION"
+    elif changed or vs_bob < prior_vs_bob:
+        branch = "G_IMPROVED_NO_SYNDROME"
+    else:
+        branch = "G_NO_MOTION"
+    joint_executed = not bool(chain["skipped"]["joint"])
+    total_executed = not bool(chain["skipped"]["total"])
+    reached_base = 184 if not joint_executed else (192 if not total_executed else 200)
+    leak_bits = leak_for_base(int(reached_base))
+    control_bits = int(joint_executed) + int(total_executed)
+    arm_g = {
+        "status": "SYNDROME_SATISFIED" if final_ok else "LADDER_EXHAUSTED",
+        "branch": branch,
+        "rows": int(geo["rows"][3]),
+        "iters": int(l1["iterations_used"]) + int(final["iterations_used"]),
+        "iters_l1": int(l1["iterations_used"]),
+        "iters_l2": int(final["iterations_used"]),
+        "syndrome_satisfied": bool(final_ok),
+        "final_oracle_exact": bool(oracle_exact),
+        "bit_flips": int(vs_bob),
+        "symbol_flips": int(vs_bob),
+        "vs_bob": int(vs_bob),
+        "vs_alice": int(vs_alice),
+        "prior_vs_bob": int(prior_vs_bob),
+        "leak_bits": int(leak_bits),
+        "control_bits": int(control_bits),
+        "reached_base": int(reached_base),
+        "wall_prep_s": float(prep_wall),
+        "wall_g_s": float(g_wall),
+        "cold_start": bool(l1.get("cold_start", True)),
+        "tag_bits": TAG_BITS,
+        "tag_ok": TAG_OK,
+        "synthetic_only": True,
+    }
+    written = write_contrast_outputs(out_dir, arm_g, arm_a)
+    _sample()
+    inv_wall = float(now()) - inv_start
+    peak = max(rss_peak) if rss_peak else None
+    if inv_wall > INV_LIMIT_S:
+        raise TimeoutError(f"invocation wall {inv_wall:.3f}s exceeds {INV_LIMIT_S}s")
+    if peak is not None and peak >= RSS_LIMIT_BYTES:
+        raise MemoryError("peak RSS exceeds 2GiB")
+    return {
+        "cycle": CYCLE_ID,
+        "gate": gate["gate"],
+        "status": arm_g["status"],
+        "branch": branch,
+        "block_ids": list(block_ids),
+        "n_cal_frames": len(cal_provided),
+        "n_cal_symbols": int(fit["n_cal"]),
+        "arm_a_attempted": False,
+        "final_syndrome_satisfied": bool(final_ok),
+        "final_oracle_exact": bool(oracle_exact),
+        "vs_bob": int(vs_bob),
+        "vs_alice": int(vs_alice),
+        "leak_bits": int(leak_bits),
+        "control_bits": int(control_bits),
+        "tag_bits": TAG_BITS,
+        "tag_ok": TAG_OK,
+        "prep_wall_s": float(prep_wall),
+        "g_wall_s": float(g_wall),
+        "inv_wall_s": float(inv_wall),
+        "peak_rss_bytes": peak,
+        "output": str(written),
+        "fake_decoder": decode_fn is not None,
+    }
