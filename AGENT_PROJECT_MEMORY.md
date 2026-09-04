@@ -1,3 +1,11 @@
+## 2026-09-04 V72P2D2 orthogonal one-block BLOCKED PREP_FAILED (descriptive-only, non-fresh, no promotion)
+
+- Lifecycle [repo-observed]: base `e094f7e548380db4bfcbc1fe73472e670c32379a`, accepted-plan `4592bdad357a02f8f08a880ca0036beaed3ee900`, implementation `580471cf` on `formal-ir-v72p1-addendum-clean`; single authorized invocation consumed (`execution_count_completed=1/1`); `real_execution_authorized=false`, `scientific_promotion=false`, `result_created=true`; Pre-RESULT PASS; terminal `BLOCKED_PREP_FAILED`, `next_gate=BLOCKED_CLOSE_NO_RERUN`.
+- Outcome [repo-observed]: `invocation_status=PREP_FAILED`, `prep_status=FAILED`, `fatal_error=NameError: name 'Q' is not defined`; L/I/P `NOT_ATTEMPTED`, 0 ckpts, 0 sweeps, 0 disclosure; A `LADDER_EXHAUSTED` `D1_REUSED` not rerun (carried 334 iters, 3100 bits / 620 syms); `normal_new_arm_count=0/3`; `no_run_01=true`; tag 0 `NOT_APPLICABLE` syndrome-only.
+- Metering [repo-observed]: `prep_wall_s=0.43700000003445894` (limit 600), `invocation_wall_s_before_report=0.4529999999795109` (limit 2400), `peak_rss_bytes=174399488` (<2GiB); within budget, per-arm 600s wall not reached.
+- Scope [decision]: single non-fresh VAL1726-1729 (session 20260123_1M_600k_0dB), mother 9036x10240 nnz49620, 72-pt ladder; DESCRIPTIVE_ONLY — no FER/SKR/information-limit/route/promotion; prep NameError is not a schedule/interleaver/prior verdict; authorization consumed, no rerun.
+- Evidence [repo-observed]: `comparison_bench/outputs_comparison/v72p2d2_orthogonal_oneblock_20260904/` exactly four files (manifest.json/results.json/table.csv/report.md) + `docs/research_cycles/V72P2D2-TRIAGE/RESULT_SUMMARY.md` + `cycle_state.yaml`.
+
 ## 2026-09-04 V72P2D1 parity-layout diagnostic accepted close (descriptive-only, non-fresh, no promotion)
 
 - Lifecycle [repo-observed]: base `ba0df2d3bea4147574e0b8224480f45c93505178`, implementation/accepted-plan `07744ccf3095eaa35b4c457005e268fb5ff52c41`, result `58656f59943b66f6319226d139e1fe67c41702a4` on `formal-ir-v72p1-addendum-clean` (`HEAD == origin` verified); single authorized invocation A-then-B serial, no rerun, no third layout, no other block; `CLOSED_ACCEPTED` / `RESULT_ACCEPTED`, pre-EXECUTE PASS + pre-RESULT PASS.

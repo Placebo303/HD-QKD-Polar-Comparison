@@ -1,0 +1,5 @@
+arm_id,status,graph_id,prior_id,schedule_id,attempted,attempted_checkpoints,stop_reason,first_syndrome_satisfied_ckpt,final_checkpoint_rows,final_syndrome_satisfied,final_oracle_exact,diagnostic_exact,syndrome_collision_wrong,sweeps_used,edge_updates,local_factor_target_updates,state_evaluations,diagnostic_factor_target_updates,diagnostic_state_evaluations,peak_rss_bytes,syndrome_rows_published,syndrome_bits_published,tag_bits_published,control_bits_sent,disclosed_rows,public_disclosure_bits
+A,LADDER_EXHAUSTED,original_D1_reused,D1_M0_reused,D1_flooding_reused,False,72,D1_REUSED,,,,,,,,,,,,,,,,,,,
+L,NOT_ATTEMPTED,,,,False,0,NameError: name 'Q' is not defined,,,,,,,0,0,0,0,0,0,,0,0,0,0,0,0
+I,NOT_ATTEMPTED,,,,False,0,NameError: name 'Q' is not defined,,,,,,,0,0,0,0,0,0,,0,0,0,0,0,0
+P,NOT_ATTEMPTED,,,,False,0,NameError: name 'Q' is not defined,,,,,,,0,0,0,0,0,0,,0,0,0,0,0,0
