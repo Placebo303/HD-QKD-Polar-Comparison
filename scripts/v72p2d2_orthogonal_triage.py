@@ -41,6 +41,9 @@ DEFAULT_OUTPUT = WORKSPACE_ROOT / "v72p2d2_orthogonal_preflight" / "cost_preflig
 REAL_OUTPUT_ROOT = (
     PRODUCTION_OUTPUT_ROOT / "v72p2d2_orthogonal_oneblock_20260904"
 ).resolve()
+R1_OUTPUT_ROOT = (
+    PRODUCTION_OUTPUT_ROOT / "v72p2d2r1_orthogonal_oneblock_20260904"
+).resolve()
 D1_RESULTS_PATH = (
     PRODUCTION_OUTPUT_ROOT / "v72p2d1_parity_layout_ab" / "results.json"
 ).resolve()
@@ -171,14 +174,26 @@ def require_real_authorization(
         raise PermissionError("cycle-state cycle_id does not match V72P2D2-TRIAGE")
     if state.get("accepted_plan_git_revision") != ACCEPTED_PLAN_GIT_REVISION:
         raise PermissionError("cycle-state accepted plan revision is not the accepted V72P2D2 plan")
-    if state.get("real_execution_authorized") is not True:
-        raise PermissionError("cycle-state real_execution_authorized is not true")
-    if state.get("formal_execution_authorized") is not False:
-        raise PermissionError("formal_execution_authorized must remain false")
-    completed = int(state.get("execution_count_completed", 0))
-    authorized = int(state.get("execution_count_authorized", 0))
-    if authorized != 1 or completed != 0:
-        raise PermissionError("the single authorized diagnostic invocation is already consumed")
+    # ponytail: R1 new root reads r1 counts/flags (1/0 or true/false); old root keeps old counts.
+    is_r1_output = output_path is not None and Path(output_path).resolve() == R1_OUTPUT_ROOT
+    if is_r1_output:
+        if state.get("r1_real_execution_authorized") != 1:
+            raise PermissionError("cycle-state r1_real_execution_authorized is not true")
+        if state.get("r1_formal_execution_authorized") != 0:
+            raise PermissionError("r1_formal_execution_authorized must remain false")
+        completed = int(state.get("r1_execution_count_completed", 0))
+        authorized = int(state.get("r1_execution_count_authorized", 0))
+        if authorized != 1 or completed != 0:
+            raise PermissionError("the single authorized R1 diagnostic invocation is already consumed")
+    else:
+        if state.get("real_execution_authorized") is not True:
+            raise PermissionError("cycle-state real_execution_authorized is not true")
+        if state.get("formal_execution_authorized") is not False:
+            raise PermissionError("formal_execution_authorized must remain false")
+        completed = int(state.get("execution_count_completed", 0))
+        authorized = int(state.get("execution_count_authorized", 0))
+        if authorized != 1 or completed != 0:
+            raise PermissionError("the single authorized diagnostic invocation is already consumed")
     if output_path is not None and Path(output_path).resolve().exists():
         raise FileExistsError(f"output directory already exists: {Path(output_path).resolve()}")
     return state
@@ -1035,8 +1050,9 @@ def run_real_orchestration(
 ) -> int:
     """Execute the single authorized fixed-block L/I/P diagnostic."""
     output_path = Path(out_dir).resolve()
-    if output_path != REAL_OUTPUT_ROOT:
-        raise ValueError(f"real output root is fixed at {REAL_OUTPUT_ROOT}")
+    # ponytail: R1 additive root only; default stays the D2 root, anything else is rejected.
+    if output_path not in (REAL_OUTPUT_ROOT, R1_OUTPUT_ROOT):
+        raise ValueError(f"real output root must be {REAL_OUTPUT_ROOT} or {R1_OUTPUT_ROOT}")
     state = require_real_authorization(
         execute_real=True,
         cycle_state_path=cycle_state_path,

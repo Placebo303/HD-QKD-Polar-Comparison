@@ -20,3 +20,10 @@ formal_protocol_qualification: false
 scientific_promotion: false
 output_directory: comparison_bench/outputs_comparison/v72p2d2_orthogonal_oneblock_20260904
 next_gate: BLOCKED_CLOSE_NO_RERUN
+# R1 recovery authorization (additive; D2 1/1 history above is frozen, untouched)
+r1_execution_count_authorized: 1
+r1_execution_count_completed: 0
+r1_real_execution_authorized: true
+r1_formal_execution_authorized: false
+r1_implementation_revision: a11cf239
+r1_output_directory: comparison_bench/outputs_comparison/v72p2d2r1_orthogonal_oneblock_20260904

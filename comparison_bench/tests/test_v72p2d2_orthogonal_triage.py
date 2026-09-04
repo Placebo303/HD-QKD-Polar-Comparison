@@ -1050,3 +1050,58 @@ def test_fake_preparation_registry_overread_and_gates_fail_before_decoder(tmp_pa
     with pytest.raises(FileExistsError):
         runner._write_real_outputs(out_dir, manifest, runner._real_results(manifest))
     assert decoder_calls == []
+
+
+def test_r1_gate_reads_r1_counts_while_old_root_stays_blocked(tmp_path):
+    # D2 history is consumed (1/1); R1 is freshly authorized (1/0).
+    state_path = tmp_path / "cycle_state.yaml"
+
+    def write_state(r1_real: str, r1_formal: str, r1_completed: int = 0):
+        state_path.write_text(
+            "\n".join(
+                (
+                    f"cycle_id: {runner.CYCLE_ID}",
+                    f"accepted_plan_git_revision: {runner.ACCEPTED_PLAN_GIT_REVISION}",
+                    "real_execution_authorized: false",
+                    "formal_execution_authorized: false",
+                    "execution_count_authorized: 1",
+                    "execution_count_completed: 1",
+                    "r1_real_execution_authorized: " + r1_real,
+                    "r1_formal_execution_authorized: " + r1_formal,
+                    "r1_execution_count_authorized: 1",
+                    f"r1_execution_count_completed: {r1_completed}",
+                )
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    write_state("true", "false")
+    state = runner.require_real_authorization(
+        execute_real=True, cycle_state_path=state_path, output_path=runner.R1_OUTPUT_ROOT
+    )
+    assert state["r1_execution_count_completed"] == 0
+    # Old root still uses the consumed D2 counts and stays blocked.
+    with pytest.raises(PermissionError):
+        runner.require_real_authorization(
+            execute_real=True, cycle_state_path=state_path,
+            output_path=tmp_path / "old_root_nonexistent",
+        )
+    with pytest.raises(PermissionError):
+        runner.require_real_authorization(execute_real=True, cycle_state_path=state_path)
+    # Integer 1/0 flags also pass for the R1 root.
+    write_state("1", "0")
+    runner.require_real_authorization(
+        execute_real=True, cycle_state_path=state_path, output_path=runner.R1_OUTPUT_ROOT
+    )
+    # Consumed R1 count or raised R1 formal flag blocks the R1 root.
+    write_state("true", "false", r1_completed=1)
+    with pytest.raises(PermissionError):
+        runner.require_real_authorization(
+            execute_real=True, cycle_state_path=state_path, output_path=runner.R1_OUTPUT_ROOT
+        )
+    write_state("true", "true")
+    with pytest.raises(PermissionError):
+        runner.require_real_authorization(
+            execute_real=True, cycle_state_path=state_path, output_path=runner.R1_OUTPUT_ROOT
+        )
