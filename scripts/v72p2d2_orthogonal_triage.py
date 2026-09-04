@@ -59,6 +59,13 @@ CAL_FRAME_IDS = tuple(range(702, 1726))
 VAL_FRAME_IDS = tuple(range(1726, 1762))
 PROBABILITY_FLOOR = 1e-300
 LAMBDA_GRID = tuple(10.0 ** value for value in np.linspace(-2.0, 4.0, 30))
+# ponytail: runner mirrors the core's authoritative block constants; test asserts equality.
+Q = 1024
+N = 1024
+NBIT = 10240
+M = 9036
+NNZ = 49620
+CHECKPOINT_ROWS = tuple(list(range(160, 8993, 128)) + [9032, 9036])
 
 
 def load_triage_module():
@@ -237,9 +244,9 @@ def _derive_syndrome(bits: np.ndarray, indptr: np.ndarray, indices: np.ndarray) 
     values = np.asarray(bits, dtype=np.uint8)
     offsets = np.asarray(indptr, dtype=np.int32)
     columns = np.asarray(indices, dtype=np.int32)
-    if values.shape != (10240,) or offsets.ndim != 1 or columns.ndim != 1:
+    if values.shape != (NBIT,) or offsets.ndim != 1 or columns.ndim != 1:
         raise ValueError("syndrome inputs have unexpected shapes")
-    if offsets.size != 9037 or int(offsets[0]) != 0 or int(offsets[-1]) != columns.size:
+    if offsets.size != M + 1 or int(offsets[0]) != 0 or int(offsets[-1]) != columns.size:
         raise ValueError("syndrome CSR does not match the frozen mother")
     syndrome = np.zeros(offsets.size - 1, dtype=np.uint8)
     for row in range(syndrome.size):
@@ -250,10 +257,10 @@ def _derive_syndrome(bits: np.ndarray, indptr: np.ndarray, indices: np.ndarray) 
 
 def _pack_symbols(bits: np.ndarray) -> np.ndarray:
     values = np.asarray(bits, dtype=np.uint8)
-    if values.shape != (10240,):
+    if values.shape != (NBIT,):
         raise ValueError("bit array must have shape (10240,)")
     return np.asarray(
-        [sum(int(values[10 * symbol + bit]) << bit for bit in range(10)) for symbol in range(1024)],
+        [sum(int(values[10 * symbol + bit]) << bit for bit in range(10)) for symbol in range(N)],
         dtype=np.uint16,
     )
 
@@ -261,7 +268,7 @@ def _pack_symbols(bits: np.ndarray) -> np.ndarray:
 def _physicalize_bits(bits: np.ndarray, old_to_phys: np.ndarray) -> np.ndarray:
     values = np.asarray(bits, dtype=np.uint8)
     mapping = np.asarray(old_to_phys, dtype=np.int32)
-    if values.shape != (10240,) or mapping.shape != (10240,):
+    if values.shape != (NBIT,) or mapping.shape != (NBIT,):
         raise ValueError("physical bit mapping inputs have unexpected shapes")
     physical = np.zeros_like(values)
     physical[mapping] = values
@@ -353,16 +360,16 @@ def _assemble_frame_group(
         raise ValueError("cannot assemble a group with an invalid frame")
     alice = np.concatenate([frames[int(fid)]["alice_symbols"] for fid in frame_ids])
     bob = np.concatenate([frames[int(fid)]["bob_symbols"] for fid in frame_ids])
-    if alice.shape != (1024,) or bob.shape != (1024,):
+    if alice.shape != (N,) or bob.shape != (N,):
         raise ValueError("a four-frame group must contain 1024 symbols")
     return alice.astype(np.int32), bob.astype(np.int32)
 
 
 def _symbols_to_bits(symbols: np.ndarray) -> np.ndarray:
     values = np.asarray(symbols, dtype=np.int32)
-    if values.shape != (1024,) or np.any(values < 0) or np.any(values >= Q):
+    if values.shape != (N,) or np.any(values < 0) or np.any(values >= Q):
         raise ValueError("symbols must have shape (1024,) and lie in 0..1023")
-    return ((values[:, None] >> np.arange(10, dtype=np.int32)) & 1).astype(np.uint8).reshape(10240)
+    return ((values[:, None] >> np.arange(10, dtype=np.int32)) & 1).astype(np.uint8).reshape(NBIT)
 
 
 def _hierarchical_p(counts: np.ndarray, p_global: np.ndarray, n_b: np.ndarray, lam: float) -> np.ndarray:
@@ -438,7 +445,7 @@ def _fit_cal_model(a_cal: np.ndarray, b_cal: np.ndarray) -> dict[str, Any]:
 def _build_m0_prior(bob_symbols: np.ndarray, probabilities: np.ndarray) -> np.ndarray:
     bob = np.asarray(bob_symbols, dtype=np.int32)
     probabilities = np.asarray(probabilities, dtype=np.float64)
-    if bob.shape != (1024,) or probabilities.shape != (Q, Q):
+    if bob.shape != (N,) or probabilities.shape != (Q, Q):
         raise ValueError("Bob symbols/prior model have an unexpected shape")
     rows = np.maximum(probabilities[bob], PROBABILITY_FLOOR)
     rows /= rows.sum(axis=1, keepdims=True)
@@ -902,9 +909,9 @@ def _real_manifest(
         "session_id": prepared.get("session", {}).get("session_id") if prepared else TARGET_SESSION,
         "block_frame_ids": list(prepared.get("block_frame_ids", TARGET_BLOCK_FRAMES)) if prepared else list(TARGET_BLOCK_FRAMES),
         "non_fresh": True,
-        "mother_shape": [9036, 10240],
-        "mother_nnz": 49620,
-        "checkpoint_rows": list(range(160, 8993, 128)) + [9032, 9036],
+        "mother_shape": [M, NBIT],
+        "mother_nnz": NNZ,
+        "checkpoint_rows": list(CHECKPOINT_ROWS),
         "max_sweeps_per_checkpoint": 10,
         "max_total_sweeps": 720,
         "llr_clip": 20.0,
@@ -929,7 +936,7 @@ def _real_manifest(
                 "mu": 0.0,
                 "scale": 0.2714417616594907,
                 "eps": 0.562251256281407,
-                "Q": 1024,
+                "Q": Q,
             },
             "prior_log_base": "natural_log",
             "ce_log_base": "log2",

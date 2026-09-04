@@ -1,8 +1,10 @@
 """Focused synthetic checks for V72P2D2; no production data or output paths."""
 from __future__ import annotations
 
+import ast
 import importlib.util
 import inspect
+import json
 import shutil
 from pathlib import Path
 
@@ -764,3 +766,287 @@ def test_runner_has_no_legacy_smoke_coupling():
     assert "_current_git_revision" not in source
     core_source = MODULE_PATH.read_text(encoding="utf-8")
     assert "v72p2_real_smoke" not in core_source
+
+
+def test_runner_authoritative_block_constants_match_core():
+    # R2: runner mirrors the core's authoritative block constants.
+    assert runner.Q == triage.Q == 1024
+    assert runner.N == triage.N == 1024
+    assert runner.NBIT == triage.NBIT == 10240
+    assert runner.M == triage.M == 9036
+    assert runner.NNZ == triage.NNZ == 49620
+    assert tuple(runner.CHECKPOINT_ROWS) == tuple(triage.CHECKPOINT_ROWS)
+
+
+def test_runner_has_no_scattered_block_literals():
+    # R2: no function-internal numeric 1024/10240; module level owns them.
+    tree = ast.parse(RUNNER_PATH.read_text(encoding="utf-8"))
+    offenders = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            for child in ast.walk(node):
+                if isinstance(child, ast.Constant) and child.value in (1024, 10240):
+                    offenders.append((node.name, child.value, child.lineno))
+    assert offenders == []
+
+
+def _runner_undefined_names() -> list[str]:
+    # ponytail: global-Store collection; sufficient for top-level Q/N/NBIT/M focus,
+    # not a full pyflakes scope analysis (comprehension/for-target shadowing is approximate).
+    import builtins
+
+    tree = ast.parse(RUNNER_PATH.read_text(encoding="utf-8"))
+    defined: set[str] = set(dir(builtins)) | {"__name__", "__file__"}
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            defined.add(node.name)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                defined.add((alias.asname or alias.name).split(".")[0])
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            defined.add(node.name)
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            defined.add(node.id)
+        elif isinstance(node, ast.arg):
+            defined.add(node.arg)
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            defined.add(node.name)
+    undefined: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id not in defined:
+            undefined.add(node.id)
+    return sorted(undefined)
+
+
+def test_runner_has_no_undefined_names():
+    # R2: mechanical undefined-name gate without adding a production dependency.
+    assert _runner_undefined_names() == []
+    for name in (
+        "Q", "N", "NBIT", "M", "CHECKPOINT_ROWS",
+        "_derive_syndrome", "_pack_symbols", "_physicalize_bits",
+        "_load_registry", "_select_target_session", "_assigned_frame_groups",
+        "_read_selected_pairs", "_validate_selected_frame", "_assemble_frame_group",
+        "_symbols_to_bits", "_fit_cal_model", "_build_m0_prior",
+        "_prepare_real_inputs", "_run_real_arm", "run_real_invocation",
+        "_preflight_for_manifest", "_write_real_outputs",
+    ):
+        assert hasattr(runner, name), name
+
+
+def _fake_registry_payload(provenance: str) -> dict:
+    return {
+        "schema": "fake",
+        "sessions": [
+            {
+                "session_id": runner.TARGET_SESSION,
+                "source_label": "1M",
+                "stage2_CAL_frame_ids": list(range(702, 1726)),
+                "stage2_VAL_frame_ids": list(range(1726, 1762)),
+                "provenance": provenance,
+            }
+        ],
+    }
+
+
+def _fake_pairs_df(mutate=None):
+    import pandas as pd
+
+    ids = list(range(702, 1726)) + [1726, 1727, 1728, 1729]
+    frame_ids = np.repeat(np.asarray(ids, dtype=np.int32), 256)
+    pair_idx = np.tile(np.arange(256, dtype=np.int32), len(ids))
+    alice = ((frame_ids.astype(np.int64) + pair_idx.astype(np.int64)) % 1024).astype(np.int32)
+    bob = ((frame_ids.astype(np.int64) * 3 + pair_idx.astype(np.int64) * 7) % 1024).astype(np.int32)
+    frame = pd.DataFrame(
+        {"frame_id": frame_ids, "pair_idx": pair_idx, "alice_symbol": alice, "bob_symbol": bob}
+    )
+    if mutate is not None:
+        frame = mutate(frame)
+    return frame
+
+
+def _write_fake_registry_and_d1(tmp_path: Path, provenance: str):
+    registry_path = tmp_path / "registry.json"
+    registry_path.write_text(json.dumps(_fake_registry_payload(provenance)), encoding="utf-8")
+    d1_path = tmp_path / "d1.json"
+    d1_path.write_text(json.dumps({"arms": [{"arm": "A", "status": "OK", "iterations_used": 0}]}), encoding="utf-8")
+    return registry_path, d1_path
+
+
+def test_fake_preparation_end_to_end_stops_at_decoder_sentinel(tmp_path, monkeypatch):
+    provenance = str(tmp_path / "nonexistent.parquet")
+    registry_path, d1_path = _write_fake_registry_and_d1(tmp_path, provenance)
+    assert not Path(provenance).exists()
+    frame = _fake_pairs_df()
+    assert set(frame.columns) == {"frame_id", "pair_idx", "alice_symbol", "bob_symbol"}
+    read_calls: list[list[int]] = []
+
+    def fake_read(path, frame_ids):
+        read_calls.append([int(v) for v in frame_ids])
+        return frame, "predicate_pushdown"
+
+    monkeypatch.setattr(runner, "_read_selected_pairs", fake_read)
+    before = set(runner.REAL_OUTPUT_ROOT.iterdir()) if runner.REAL_OUTPUT_ROOT.exists() else set()
+    try:
+        prepared = runner._prepare_real_inputs(str(registry_path), str(d1_path), triage)
+    except NameError as exc:
+        pytest.fail(f"preparation raised NameError: {exc}")
+    # Registry/filter/validate path used the fake frame without touching real parquet.
+    assert len(read_calls) == 1
+    assert 1730 not in read_calls[0]
+    assert sorted(read_calls[0]) == sorted(list(range(702, 1726)) + [1726, 1727, 1728, 1729])
+    assert prepared["read_mode"] == "predicate_pushdown"
+    assert prepared["cal_frame_ids"] == list(range(702, 1726))
+    assert prepared["block_frame_ids"] == [1726, 1727, 1728, 1729]
+    # CAL concatenation and lambda/Ps path.
+    assert prepared["model"]["Ps_full"].shape == (1024, 1024)
+    assert float(prepared["model"]["selected_lambda"]) in [float(v) for v in runner.LAMBDA_GRID]
+    # VAL 4x256 -> 1024 symbols; M0+M2 priors and bit mappings built.
+    assert prepared["alice_symbols"].shape == (1024,) and prepared["bob_symbols"].shape == (1024,)
+    assert prepared["alice_bits"].shape == (10240,) and prepared["bob_bits"].shape == (10240,)
+    assert prepared["prior_m0"].shape == (1024, 1024)
+    assert prepared["prior_m0_i"].shape == (1024, 1024)
+    assert prepared["prior_m2"].shape == (1024, 1024)
+    assert prepared["syndrome"].shape == (9036,) and prepared["syndrome_i"].shape == (9036,)
+    assert prepared["indices"].shape == (49620,) and prepared["indices_i"].shape == (49620,)
+    # A is read-only reuse with zero decoder calls.
+    assert prepared["a_baseline"]["arm_id"] == "A"
+    assert prepared["a_baseline"]["tag_bits"] == 0
+    # No tag/hash disclosure artifact is generated by preparation.
+    assert "hash" not in json.dumps({k: str(type(v)) for k, v in prepared.items()}).lower()
+    assert prepared["a_baseline"]["tag_ok"] == "NOT_APPLICABLE"
+    # Alice never enters the prior: both builders are Bob-only by signature.
+    assert "alice" not in inspect.signature(triage.build_m0_prior_logp).parameters
+    assert "alice" not in inspect.signature(runner._build_m0_prior).parameters
+    assert np.array_equal(
+        prepared["prior_m0"], runner._build_m0_prior(prepared["bob_symbols"], prepared["model"]["Ps_full"])
+    )
+    # I-coordinate syndrome algebra is consistent with the original graph.
+    assert np.array_equal(prepared["syndrome"], prepared["syndrome_i"])
+    assert np.array_equal(
+        prepared["syndrome_i"],
+        runner._derive_syndrome(prepared["alice_bits_i"], prepared["indptr"], prepared["indices_i"]),
+    )
+
+    class _Sentinel(Exception):
+        pass
+
+    decoder_calls: list[str] = []
+
+    def sentinel_arm(arm_id: str, _prepared):
+        decoder_calls.append(arm_id)
+        raise _Sentinel(f"stopped at {arm_id}")
+
+    arms, status, error = runner.run_real_invocation(
+        prepared, triage, arm_runner=sentinel_arm, clock=lambda: 0.0
+    )
+    assert decoder_calls == ["L"]
+    assert arms["A"]["stop_reason"] == "D1_REUSED"
+    assert "A" not in decoder_calls
+    assert status == "RESOURCE_BLOCKED" and "exception" in str(error).lower()
+    after = set(runner.REAL_OUTPUT_ROOT.iterdir()) if runner.REAL_OUTPUT_ROOT.exists() else set()
+    assert after == before
+
+
+def _assert_prepare_fails_before_decoder(tmp_path, monkeypatch, frame, registry_mutate=None):
+    provenance = str(tmp_path / "nonexistent.parquet")
+    payload = _fake_registry_payload(provenance)
+    if registry_mutate is not None:
+        registry_mutate(payload)
+    registry_path = tmp_path / "registry.json"
+    registry_path.write_text(json.dumps(payload), encoding="utf-8")
+    d1_path = tmp_path / "d1.json"
+    d1_path.write_text(json.dumps({"arms": [{"arm": "A", "status": "OK"}]}), encoding="utf-8")
+    monkeypatch.setattr(runner, "_read_selected_pairs", lambda path, ids: (frame, "predicate_pushdown"))
+    decoder_calls: list[str] = []
+
+    def sentinel_arm(arm_id: str, _prepared):
+        decoder_calls.append(arm_id)
+        raise AssertionError("decoder must not run after failed preparation")
+
+    with pytest.raises((ValueError, PermissionError, FileNotFoundError)):
+        prepared = runner._prepare_real_inputs(str(registry_path), str(d1_path), triage)
+        runner.run_real_invocation(prepared, triage, arm_runner=sentinel_arm, clock=lambda: 0.0)
+    assert decoder_calls == []
+
+
+def test_fake_preparation_invalid_frames_fail_before_decoder(tmp_path, monkeypatch):
+    base = _fake_pairs_df()
+    # Missing column.
+    _assert_prepare_fails_before_decoder(
+        tmp_path, monkeypatch, base.drop(columns=["alice_symbol"])
+    )
+    # Fewer than 256 rows for one VAL frame.
+    def drop_one(frame):
+        return frame.drop(frame[(frame["frame_id"] == 1726)].index[:1])
+
+    _assert_prepare_fails_before_decoder(tmp_path, monkeypatch, _fake_pairs_df(drop_one))
+    # Incomplete pair_idx (duplicate 0, missing 255) for one VAL frame.
+    def dup_pair(frame):
+        mutated = frame.copy()
+        idx = mutated[(mutated["frame_id"] == 1727)].index
+        mutated.loc[idx[255], "pair_idx"] = 0
+        return mutated
+
+    _assert_prepare_fails_before_decoder(tmp_path, monkeypatch, _fake_pairs_df(dup_pair))
+    # Out-of-range symbol.
+    def out_of_range(frame):
+        mutated = frame.copy()
+        idx = mutated[(mutated["frame_id"] == 1728)].index[0]
+        mutated.loc[idx, "alice_symbol"] = 1024
+        return mutated
+
+    _assert_prepare_fails_before_decoder(tmp_path, monkeypatch, _fake_pairs_df(out_of_range))
+
+
+def test_fake_preparation_registry_overread_and_gates_fail_before_decoder(tmp_path, monkeypatch):
+    # Over-read 1730: registered VAL block does not begin with the fixed D1 block.
+    def shift_val(payload):
+        payload["sessions"][0]["stage2_VAL_frame_ids"] = list(range(1730, 1766))
+
+    _assert_prepare_fails_before_decoder(
+        tmp_path, monkeypatch, _fake_pairs_df(), registry_mutate=shift_val
+    )
+    # Preflight failure stops before any decoder.
+    bad = {
+        "cycle_id": runner.CYCLE_ID,
+        "synthetic_only": True,
+        "real_decoder_executed": False,
+        "status": "PLAN_REVISE_REQUIRED",
+        "projected_L_wall_s": 100.0,
+        "peak_rss_bytes": 1024,
+    }
+    bad_path = tmp_path / "bad_preflight.json"
+    bad_path.write_text(json.dumps(bad), encoding="utf-8")
+    decoder_calls: list[str] = []
+    with pytest.raises(PermissionError):
+        runner._preflight_for_manifest(str(bad_path), {})
+    assert decoder_calls == []
+    # Existing output directory refuses before any decoder.
+    out_dir = tmp_path / "diagnostic"
+    out_dir.mkdir()
+    state_path = tmp_path / "cycle_state.yaml"
+    state_path.write_text(
+        "\n".join(
+            (
+                f"cycle_id: {runner.CYCLE_ID}",
+                f"accepted_plan_git_revision: {runner.ACCEPTED_PLAN_GIT_REVISION}",
+                "real_execution_authorized: true",
+                "formal_execution_authorized: false",
+                "execution_count_authorized: 1",
+                "execution_count_completed: 0",
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(FileExistsError):
+        runner.require_real_authorization(
+            execute_real=True, cycle_state_path=state_path, output_path=out_dir
+        )
+    assert decoder_calls == []
+    arms = {arm_id: runner._not_attempted_arm(arm_id, "x") for arm_id in runner.ARM_ORDER}
+    manifest = {"arms": arms, "tag_semantics": {"tag_bits": 0, "tag_ok": "NOT_APPLICABLE"}}
+    with pytest.raises(FileExistsError):
+        runner._write_real_outputs(out_dir, manifest, runner._real_results(manifest))
+    assert decoder_calls == []
