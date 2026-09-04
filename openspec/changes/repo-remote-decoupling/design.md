@@ -130,11 +130,17 @@ was deleted. The observed post-execution state is recorded below.
 | Release metadata | PRIVATE; default `polar-mainline` |
 | Comparison metadata | PRIVATE; default `main`; description set to the formal-IR/LDPC research-mainline description |
 | Release heads | `codex/feat/polar-diagnostics-occupancy@1b7055c7f8f13e8cc50cc4adf6d4d89394c193c`, `codex/security-workbench-master-roadmap@546beb8d476db04d3301c6403e7f878873f46872`, `feat/consolidate-cascade-single-kernel@df01f0689ce08b33517c7d5dfc09db6c3171b060`, `main@6a58adbda0b20f8899f250f9471cd4f3fb915373`, `polar-mainline@be6293893dbc47fc0b5e03147db8dd97c7e48ffe`, `project-restructure-20260427@7d9a77f944fa9fccaa7afdd5fda333be018a2cd3`, `sync/polar-mainline-20260906@9b5793a35568149e476f8985a20d08108c861abb` |
-| Comparison heads | `formal-ir-mainline@d7acfd28df80c5a1d5e22b4e77a3fa578105c25a`, `formal-ir-v72p1-addendum-clean@a393f83960c8434495fd0b43fb831dc7cf0442ce`, `main@ed0adfca7af1537f7808fbf5bdde83113479d235` |
+| Comparison heads at the execution snapshot | `formal-ir-mainline@d7acfd28df80c5a1d5e22b4e77a3fa578105c25a`, `formal-ir-v72p1-addendum-clean@a393f83960c8434495fd0b43fb831dc7cf0442ce` (base before the evidence-only commit), `main@ed0adfca7af1537f7808fbf5bdde83113479d235` |
 | Release tags | `checkpoint-aggressive-line-20260827`, `polar-v1.0-aggressive-adaptive` |
 | Comparison tags | `polar-v1.0-aggressive-adaptive` |
 | Default protection | Both defaults report `allow_force_pushes.enabled=false` and `allow_deletions.enabled=false`; Release has PR review protection with 0 required approvals, Comparison has PR review protection with 1 required approval. |
 | Legacy remotes | Fetch URL retained; push URL is `no_push://legacy-origin-disabled` in both checkouts. |
+
+The evidence files were committed on the Comparison
+`formal-ir-v72p1-addendum-clean` branch after the execution snapshot. Thus the
+base SHA above is the deletion/recovery checkpoint, while the branch tip is
+the tip containing these docs; the exact current tip is verified in the final
+handoff rather than inferred from this pre-commit table.
 
 The Release security branch had a later local-only `4c79117` commit when the
 post-check was read; the remote remains intentionally bound to the reviewed
