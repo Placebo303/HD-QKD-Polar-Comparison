@@ -888,8 +888,17 @@ def run_arm_synthetic(
     checkpoint_rows: Sequence[int] = CHECKPOINT_ROWS,
     max_per_checkpoint: int = MAX_SWEEPS_PER_CHECKPOINT,
     max_total: int = MAX_TOTAL_SWEEPS,
+    deadline_s: float | None = None,
+    rss_limit_bytes: int | None = None,
+    clock: Callable[[], float] | None = None,
+    rss_reader: Callable[[], int] | None = None,
 ) -> dict[str, Any]:
-    """Run one fully synthetic arm; retained for T2 fake-runner tests."""
+    """Run one arm with injectable data/decoder and optional resource monitors.
+
+    The historical name is retained because the focused tests use this helper
+    with fake inputs.  Real orchestration supplies real block arrays and the
+    same decoder primitives; no data or output side effect lives here.
+    """
     prior = _validate_prior(prior_logp)
     syndrome = np.asarray(syndrome_full, dtype=np.uint8)
     alice = np.asarray(alice_bits, dtype=np.uint8)
@@ -923,12 +932,38 @@ def run_arm_synthetic(
     stop_reason = "ladder_exhausted"
     l0_values: np.ndarray | None = None
     budget_limit = min(int(max_total), MAX_TOTAL_SWEEPS)
+    if deadline_s is not None and float(deadline_s) < 0.0:
+        raise ValueError("deadline_s must be nonnegative")
+    if rss_limit_bytes is not None and int(rss_limit_bytes) <= 0:
+        raise ValueError("rss_limit_bytes must be positive")
+    if clock is None:
+        clock = time.monotonic
+    rss_samples: list[int] = []
+
+    def sample_rss() -> bool:
+        if rss_reader is None:
+            return False
+        value = int(rss_reader())
+        rss_samples.append(value)
+        return rss_limit_bytes is not None and value > int(rss_limit_bytes)
+
+    started = float(clock())
+    if sample_rss():
+        status = "RESOURCE_BLOCKED"
+        stop_reason = "rss_exceeded"
     for checkpoint_index, rows in enumerate(checkpoint_tuple):
+        if status in ("BLOCKED", "RESOURCE_BLOCKED"):
+            break
         remaining = budget_limit - total_used
         if remaining <= 0:
             status = "BUDGET_EXHAUSTED"
             stop_reason = "budget_exhausted_normal"
             break
+        if deadline_s is not None and float(clock()) - started >= float(deadline_s):
+            status = "RESOURCE_BLOCKED"
+            stop_reason = "timeout"
+            break
+        # ponytail: full sweep is the unit; remaining 1..9 runs min(10,remaining), only 0 refuses.
         max_updates = min(int(max_per_checkpoint), MAX_SWEEPS_PER_CHECKPOINT, remaining)
         if max_updates <= 0:
             status = "BUDGET_EXHAUSTED"
@@ -965,11 +1000,11 @@ def run_arm_synthetic(
                 )
             decoder_calls += 1
         except TimeoutError:
-            status = "BLOCKED"
+            status = "RESOURCE_BLOCKED"
             stop_reason = "timeout"
             break
         except Exception:
-            status = "BLOCKED"
+            status = "RESOURCE_BLOCKED"
             stop_reason = "exception"
             break
         # The frozen flooding adapter predates the diagnostic counter fields.
@@ -1043,9 +1078,11 @@ def run_arm_synthetic(
                 status = "BLOCKED"
                 stop_reason = "core_counter_mismatch"
                 break
+            # ponytail: metrics pre-state rebuild is real work; count as rebuild, not final.
+            counters["diagnostic_checkpoint_rebuild_target_updates"] += NBIT
             counters["diagnostic_final_readout_target_updates"] += NBIT
             pre_state = None
-            diag_delta = NBIT
+            diag_delta = 2 * NBIT
         if core_delta < 0:
             status = "BLOCKED"
             stop_reason = "core_counter_invalid"
@@ -1059,7 +1096,7 @@ def run_arm_synthetic(
             break
         counters["diagnostic_readout_evaluations"] += readout_delta
         if not bool(result["finite"]):
-            status = "BLOCKED"
+            status = "RESOURCE_BLOCKED"
             stop_reason = "nonfinite"
         try:
             metrics = checkpoint_metrics(
@@ -1097,9 +1134,17 @@ def run_arm_synthetic(
         final_checkpoint = rows
         previous_c2v = np.asarray(result["check_to_variable"], dtype=np.float64).copy()
         previous_nnz = active_nnz
-        if status == "BLOCKED":
+        if sample_rss():
+            status = "RESOURCE_BLOCKED"
+            stop_reason = "rss_exceeded"
+        if deadline_s is not None and float(clock()) - started >= float(deadline_s):
+            status = "RESOURCE_BLOCKED"
+            stop_reason = "timeout"
+        if status in ("BLOCKED", "RESOURCE_BLOCKED"):
             break
     _finish_counters(counters)
+    if rss_reader is not None:
+        sample_rss()
     if final_candidate is None:
         final_oracle = None
         diagnostic_exact = None
@@ -1129,6 +1174,9 @@ def run_arm_synthetic(
         "sweeps_used": total_used,
         "decoder_calls": decoder_calls,
         "edge_updates": int(sum(x["edge_updates"] for x in checkpoint_metrics_list)),
+        "elapsed_s": float(clock()) - started,
+        "peak_rss_bytes": int(max(rss_samples)) if rss_samples else None,
+        "rss_samples": [int(value) for value in rss_samples],
         **counters,
         "accounting": accounting,
         "checkpoint_metrics": checkpoint_metrics_list,

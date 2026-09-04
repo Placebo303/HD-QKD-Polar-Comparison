@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import inspect
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -15,6 +16,12 @@ SPEC = importlib.util.spec_from_file_location("v72p2d2_triage_test_module", str(
 assert SPEC is not None and SPEC.loader is not None
 triage = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(triage)
+
+RUNNER_PATH = ROOT.parent / "scripts" / "v72p2d2_orthogonal_triage.py"
+RUNNER_SPEC = importlib.util.spec_from_file_location("v72p2d2_runner_test_module", str(RUNNER_PATH))
+assert RUNNER_SPEC is not None and RUNNER_SPEC.loader is not None
+runner = importlib.util.module_from_spec(RUNNER_SPEC)
+RUNNER_SPEC.loader.exec_module(runner)
 
 
 def tiny_prior(n: int = 2) -> np.ndarray:
@@ -488,11 +495,12 @@ def test_flooding_counterfactual_uses_actual_iterations_and_final_readout_stage(
     assert arm["local_factor_target_updates"] == 2 * 10240
     assert arm["state_evaluations"] == 1024 * arm["local_factor_target_updates"]
     assert arm["diagnostic_L0_target_updates"] == 10240
-    assert arm["diagnostic_checkpoint_rebuild_target_updates"] == 0
+    # ponytail: metrics pre-state rebuild is counted as rebuild, final readout stays separate.
+    assert arm["diagnostic_checkpoint_rebuild_target_updates"] == 2 * 10240
     assert arm["diagnostic_final_readout_target_updates"] == 2 * 10240
-    assert arm["diagnostic_factor_target_updates"] == 3 * 10240
-    assert arm["diagnostic_state_evaluations"] == 1024 * 3 * 10240
-    assert arm["total_target_updates"] == 5 * 10240
+    assert arm["diagnostic_factor_target_updates"] == 5 * 10240
+    assert arm["diagnostic_state_evaluations"] == 1024 * 5 * 10240
+    assert arm["total_target_updates"] == 7 * 10240
     assert all(metric["oracle_exact"] is None for metric in arm["checkpoint_metrics"])
 
 
@@ -514,7 +522,7 @@ def test_arm_exception_and_timeout_preserve_published_accounting(exception, stop
         "L", prior, syndrome, bits, bits, indptr, indices, failing, "layered",
         checkpoint_rows=(1,), max_per_checkpoint=1, max_total=1,
     )
-    assert arm["status"] == "BLOCKED" and arm["stop_reason"] == stop_reason
+    assert arm["status"] == "RESOURCE_BLOCKED" and arm["stop_reason"] == stop_reason
     assert arm["attempted_checkpoints"] == 0
     assert arm["accounting"]["disclosed_rows"] == 1
     assert arm["accounting"]["syndrome_rows_published"] == 1
@@ -537,7 +545,7 @@ def test_nonfinite_decoder_is_blocked_after_checkpoint_metrics():
         "L", prior, syndrome, bits, bits, indptr, indices, nonfinite, "layered",
         checkpoint_rows=(1,), max_per_checkpoint=1, max_total=1,
     )
-    assert arm["status"] == "BLOCKED" and arm["stop_reason"] == "nonfinite"
+    assert arm["status"] == "RESOURCE_BLOCKED" and arm["stop_reason"] == "nonfinite"
     assert arm["attempted_checkpoints"] == 1
     assert arm["checkpoint_metrics"][0]["finite"] is False
     assert arm["final_syndrome_satisfied"] is False
@@ -590,3 +598,169 @@ def test_cost_projection_formula_is_not_hidden_by_threshold():
     projected = (tau * work + tau_diag * diag + 72 * overhead) * 1.2
     assert projected > 0
     assert projected == pytest.approx((tau * work + tau_diag * diag + 72 * overhead) * 1.2)
+
+
+def test_real_invocation_reuses_a_and_calls_new_arms_once_in_order():
+    calls: list[str] = []
+    prepared = {"a_baseline": runner._not_attempted_arm("A", "D1_REUSED")}
+
+    def fake_arm(arm_id: str, _prepared):
+        calls.append(arm_id)
+        if arm_id == "I":
+            return {"arm_id": arm_id, "status": "RESOURCE_BLOCKED", "stop_reason": "nonfinite"}
+        return {"arm_id": arm_id, "status": "LADDER_EXHAUSTED", "stop_reason": "ladder_exhausted"}
+
+    arms, status, error = runner.run_real_invocation(
+        prepared, triage, arm_runner=fake_arm, clock=lambda: 0.0,
+    )
+    assert calls == ["L", "I"]
+    assert status == "RESOURCE_BLOCKED" and error == "nonfinite"
+    assert arms["A"]["stop_reason"] == "D1_REUSED"
+    assert arms["L"]["status"] == "LADDER_EXHAUSTED"
+    assert arms["I"]["status"] == "RESOURCE_BLOCKED"
+    assert arms["P"]["status"] == "NOT_ATTEMPTED"
+
+
+def test_real_invocation_exception_and_timeout_fail_closed():
+    prepared = {"a_baseline": runner._not_attempted_arm("A", "D1_REUSED")}
+    for failure, expected_reason in ((RuntimeError("boom"), "exception"), (TimeoutError("slow"), "timeout")):
+        calls: list[str] = []
+
+        def failing_arm(arm_id: str, _prepared, failure=failure):
+            calls.append(arm_id)
+            raise failure
+
+        arms, status, error = runner.run_real_invocation(
+            prepared, triage, arm_runner=failing_arm, clock=lambda: 0.0,
+        )
+        assert calls == ["L"]
+        assert status == "RESOURCE_BLOCKED" and expected_reason in str(error)
+        assert arms["L"]["status"] == "RESOURCE_BLOCKED"
+        assert arms["L"]["stop_reason"] == expected_reason
+        assert arms["I"]["status"] == "NOT_ATTEMPTED"
+        assert arms["P"]["status"] == "NOT_ATTEMPTED"
+
+
+def _fresh_test_root() -> Path:
+    # Keep these two filesystem tests in a dedicated workspace child rather
+    # than pytest's configured basetemp, which may be ACL-protected on Windows.
+    root = ROOT.parent / "workspace" / "v72p2d2_orthogonal_test_runtime"
+    if root.exists():
+        shutil.rmtree(root)
+    root.mkdir(parents=True)
+    return root
+
+
+def test_real_authorization_requires_explicit_real_only_and_keeps_formal_false():
+    state_path = _fresh_test_root() / "cycle_state.yaml"
+    state_path.write_text(
+        "\n".join(
+            (
+                f"cycle_id: {runner.CYCLE_ID}",
+                f"accepted_plan_git_revision: {runner.ACCEPTED_PLAN_GIT_REVISION}",
+                "real_execution_authorized: true",
+                "formal_execution_authorized: false",
+                "execution_count_authorized: 1",
+                "execution_count_completed: 0",
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    state = runner.require_real_authorization(execute_real=True, cycle_state_path=state_path)
+    assert state["execution_count_authorized"] == 1
+    with pytest.raises(PermissionError):
+        runner.require_real_authorization(execute_real=False, cycle_state_path=state_path)
+
+    formal_state = state_path.read_text(encoding="utf-8").replace(
+        "formal_execution_authorized: false", "formal_execution_authorized: true"
+    )
+    state_path.write_text(formal_state, encoding="utf-8")
+    with pytest.raises(PermissionError):
+        runner.require_real_authorization(execute_real=True, cycle_state_path=state_path)
+
+
+def test_real_output_schema_is_scalar_only_and_refuses_overwrite():
+    arms = {arm_id: runner._not_attempted_arm(arm_id, "not_run_in_fake_test") for arm_id in runner.ARM_ORDER}
+    manifest = {
+        "schema": "test_manifest",
+        "cycle": runner.CYCLE_ID,
+        "arms": arms,
+        "tag_semantics": {"tag_bits": 0, "tag_ok": "NOT_APPLICABLE"},
+    }
+    results = runner._real_results(manifest)
+    output = _fresh_test_root() / "diagnostic"
+    runner._write_real_outputs(output, manifest, results)
+    assert {item.name for item in output.iterdir()} == {
+        "manifest.json", "results.json", "table.csv", "report.md",
+    }
+    payload_text = (output / "results.json").read_text(encoding="utf-8")
+    for forbidden in (
+        "prior_logp", "syndrome_bytes", "alice_bits", "bob_bits",
+        "check_to_variable", "variable_to_check", "factor_to_bit",
+    ):
+        assert forbidden not in payload_text
+    with pytest.raises(FileExistsError):
+        runner._write_real_outputs(output, manifest, results)
+
+
+@pytest.mark.parametrize("remaining", [1, 2, 3, 4, 5, 6, 7, 8, 9])
+def test_remaining_budget_runs_capped_sweeps_and_only_zero_refuses(remaining: int):
+    # ponytail: max_iter=min(10,720-used); only remaining==0 refuses.
+    indptr = np.asarray([0, 1, 2], dtype=np.int32)
+    indices = np.asarray([0, 1], dtype=np.int32)
+    prior = triage.build_m2_prior_logp(np.asarray([0], dtype=np.uint16))
+    syndrome = np.zeros(2, dtype=np.uint8)
+    bits = np.zeros(10, dtype=np.uint8)
+    arm = triage.run_arm_synthetic(
+        "L", prior, syndrome, bits, bits, indptr, indices,
+        triage.run_layered_decoder, "layered",
+        checkpoint_rows=(1,), max_per_checkpoint=10, max_total=remaining,
+    )
+    # With remaining budget the single checkpoint must be attempted with capped sweeps.
+    assert arm["attempted_checkpoints"] == 1
+    assert arm["sweeps_used"] <= remaining
+    zero = triage.run_arm_synthetic(
+        "L", prior, syndrome, bits, bits, indptr, indices,
+        triage.run_layered_decoder, "layered",
+        checkpoint_rows=(1,), max_per_checkpoint=10, max_total=0,
+    )
+    # Zero remaining never calls the decoder and records no work.
+    assert zero["attempted_checkpoints"] == 0
+    assert zero["status"] == "BUDGET_EXHAUSTED"
+
+
+def test_preflight_gate_requires_pass_projected_peak_and_synthetic(tmp_path):
+    base = {
+        "cycle_id": runner.CYCLE_ID,
+        "synthetic_only": True,
+        "real_decoder_executed": False,
+        "status": "PASS",
+        "projected_L_wall_s": 100.0,
+        "peak_rss_bytes": 1024,
+    }
+    good = tmp_path / "good.json"
+    good.write_text(__import__("json").dumps(base), encoding="utf-8")
+    assert runner._preflight_for_manifest(str(good), {})["status"] == "PASS"
+    for key, value in [
+        ("status", "PLAN_REVISE_REQUIRED"),
+        ("projected_L_wall_s", 601.0),
+        ("peak_rss_bytes", 2 * 1024**3),
+        ("synthetic_only", False),
+        ("real_decoder_executed", True),
+    ]:
+        bad = dict(base)
+        bad[key] = value
+        path = tmp_path / f"bad_{key}.json"
+        path.write_text(__import__("json").dumps(bad), encoding="utf-8")
+        with pytest.raises(PermissionError):
+            runner._preflight_for_manifest(str(path), {})
+
+
+def test_runner_has_no_legacy_smoke_coupling():
+    source = RUNNER_PATH.read_text(encoding="utf-8")
+    assert "v72p2_real_smoke" not in source
+    assert "_load_real_smoke_module" not in source
+    assert "_current_git_revision" not in source
+    core_source = MODULE_PATH.read_text(encoding="utf-8")
+    assert "v72p2_real_smoke" not in core_source
