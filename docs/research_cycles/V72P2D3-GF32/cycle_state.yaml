@@ -8,7 +8,7 @@ implementation_sha: e0cf5c6772e26c8de561584941e2fe6eea62666e
 implementation_review: PASS
 development_execution_authorized: false
 formal_execution_authorized: false
-real_execution_authorized: false
+real_execution_authorized: true
 decoder_executed: false
 decoder_execution_attempts: 0
 syndrome_published_bits: 0
@@ -39,10 +39,11 @@ r3_execution_cycle: V72P2D3_GF32_R3_DECODER
 r3_implementation_sha: 1deb0fd8
 r3_prior_failed_packet_invocations: 0
 r3_prior_failed_decoder_calls: 0
-r3_authorized: 0
+r3_authorized: 1
 r3_attempts: 0
 r3_completed: 0
-r3_real_execution_authorized: false
+r3_real_execution_authorized: true
 r3_formal_execution_authorized: false
 r3_scientific_promotion: false
 # R3 guard fix 2026-09-04 (additive; R2 BLOCKED_PROD_UNREACHABLE untouched): prepare-only workspace-only; execute-real exact pre-registered root only; 51 passed (47+4); prepare-only READY decoder0; prod absent; no real execution, decoder never entered.
+# R3 auth 2026-09-04: Pre-EXECUTE PASS at HEAD afd0721f (HEAD==origin, r3 bound 1deb0fd8 code-identical, prod absent, 51 passed, READY, r3 pending); authorize one real invocation (global+r3 real=true, formal=false, promotion=false); r3_attempts=0.
