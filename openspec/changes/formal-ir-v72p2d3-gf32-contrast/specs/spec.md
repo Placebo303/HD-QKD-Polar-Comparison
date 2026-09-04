@@ -83,3 +83,4 @@
   prior/syndrome/matrix 值、candidate/messages；缺输入 SHALL 为 `PREP_FAILED`，
   预算超限 SHALL 为 `BLOCKED`；输出 SHALL 恰一文件且 SHALL NOT 为 `run_01`，
   SHALL NOT 在生产根下。
+- **S-R2-04**：R3 SHALL 绑定 `r3_implementation_sha=1deb0fd8`（首次真核绑定，非 retry；`implementation_sha` 旧值与 R2 BLOCKED 不动）；`--execute-real` SHALL 仅放行精确预注册根，其余生产路径与 workspace 路由仍拒绝。
