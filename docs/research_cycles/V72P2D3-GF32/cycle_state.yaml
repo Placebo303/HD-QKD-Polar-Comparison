@@ -20,3 +20,15 @@ next_gate: DECODER_PRE_EXECUTE_REVIEW
 # independent Pre-EXECUTE 14/14 PASS at HEAD 74af0450bc35eb9d6d50c6dcfd3b150bbb42156d (2026-09-04):
 # reviewed impl 12d66ce0ce44310984129217d9f563eab35c245a code-identical at HEAD; authorized one real invocation (real=true, formal=false, promotion=false); no decoder executed; production root still absent.
 # operator return exit2 fail-closed at HEAD 8f44e5ff: real chain needs injected registry/frames/matrices (parquet never opened); production root absent, zero files, no four-file fabrication; authorization consumed (completed=1/1, real=false, formal=false, promotion=false); no retry/rerun; Pre-RESULT PASS; terminal BLOCKED_FAIL_CLOSED.
+# R2 independent cycle (additive 2026-09-04; old execution_count_*=1/1 untouched):
+# attempts 0->1 only before first true kernel; completed only after terminal;
+# current submission is candidate, not bound to old SHA.
+r2_execution_cycle: V72P2D3_GF32_R2_DECODER
+r2_prior_failed_packet_invocations: 1
+r2_prior_failed_decoder_calls: 0
+r2_authorized: 1
+r2_attempts: 0
+r2_completed: 0
+r2_real_execution_authorized: false
+r2_formal_execution_authorized: false
+r2_scientific_promotion: false
