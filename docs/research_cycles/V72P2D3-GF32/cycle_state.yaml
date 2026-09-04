@@ -1,5 +1,6 @@
 cycle_id: V72P2D3-GF32
-state: PREP_READY
+state: DECODER_EXECUTION_AUTHORIZED
+execution_cycle: V72P2D3_GF32_R2_DECODER
 branch: formal-ir-v72p1-addendum-clean
 base_sha: e094f7e548380db4bfcbc1fe73472e670c32379a
 accepted_plan_sha: e0cf5c6772e26c8de561584941e2fe6eea62666e
@@ -7,7 +8,7 @@ implementation_sha: e0cf5c6772e26c8de561584941e2fe6eea62666e
 implementation_review: PASS
 development_execution_authorized: false
 formal_execution_authorized: false
-real_execution_authorized: false
+real_execution_authorized: true
 decoder_executed: false
 decoder_execution_attempts: 0
 syndrome_published_bits: 0
@@ -29,6 +30,7 @@ r2_prior_failed_decoder_calls: 0
 r2_authorized: 1
 r2_attempts: 0
 r2_completed: 0
-r2_real_execution_authorized: false
+# R2 auth 2026-09-04: global real_execution_authorized=true synced with r2_real_execution_authorized=true; runner reads global; formal=false, promotion=false.
+r2_real_execution_authorized: true
 r2_formal_execution_authorized: false
 r2_scientific_promotion: false
