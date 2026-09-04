@@ -949,8 +949,14 @@ def require_real_gate(
     preflight: dict[str, Any] | None,
     out_dir: str | Path,
     workspace_root: str | Path | None = None,
+    allow_production_root: bool = False,
 ) -> dict[str, Any]:
-    """Step 1: authorization / preflight / output check (no data touched)."""
+    """Step 1: authorization / preflight / output check (no data touched).
+
+    R3: the exact pre-registered production root passes only with
+    allow_production_root=True (execute-real production entry); any other
+    production path stays rejected and an existing root still refuses.
+    """
     if not execute_real:
         raise PermissionError("real chain requires execute_real")
     if not authorized:
@@ -961,9 +967,10 @@ def require_real_gate(
         raise PermissionError("preflight belongs to another cycle")
     out = Path(out_dir).resolve()
     prod = _production_root()
-    if out == prod or prod in out.parents:
+    prod_exact_allowed = bool(allow_production_root) and out == prod
+    if (out == prod or prod in out.parents) and not prod_exact_allowed:
         raise ValueError("fake-E2E output must stay outside the production root")
-    if workspace_root is not None and out != Path(workspace_root).resolve():
+    if workspace_root is not None and not prod_exact_allowed:
         try:
             out.relative_to(Path(workspace_root).resolve())
         except ValueError as exc:
@@ -1125,6 +1132,7 @@ def run_real_contrast(
     clock: Any = None,
     rss_reader: Any = None,
     workspace_root: str | Path | None = None,
+    allow_production_root: bool = False,
 ) -> dict[str, Any]:
     """Run the frozen 11-step real-entry chain on injected fakes (no parquet).
 
@@ -1152,6 +1160,7 @@ def run_real_contrast(
         preflight=preflight,
         out_dir=out_dir,
         workspace_root=workspace_root,
+        allow_production_root=allow_production_root,
     )
     reg = validate_registry(registry)
     cal_ids, block_ids = reg["cal_ids"], reg["block_ids"]

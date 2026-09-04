@@ -85,6 +85,21 @@ def _resolve_workspace_dir(path: str | Path) -> Path:
     return out
 
 
+def _resolve_execute_real_dir(path: str | Path) -> Path:
+    """R3 execute-real entry guard: only the exact pre-registered root.
+
+    Workspace, any other production path, and outside paths are rejected.
+    An existing root is refused later by the core gate (no overwrite).
+    """
+    candidate = Path(path)
+    if not candidate.is_absolute():
+        candidate = REPO_ROOT / candidate
+    out = candidate.resolve()
+    if out != PRODUCTION_ROOT:
+        raise ValueError("execute-real output must be exactly the pre-registered production root")
+    return out
+
+
 def run_synthetic_contrast(
     *, out_dir: str | Path, seed: int = SEED
 ) -> dict[str, Any]:
@@ -251,6 +266,7 @@ def run_real_orchestration(
     authorized: bool = False,
     execute_real: bool = True,
     decode_fn: Any = None,
+    allow_production_root: bool = False,
     seed: int = SEED,
 ) -> dict[str, Any]:
     """Run the frozen 11-step real-entry chain on injected fakes (workspace only).
@@ -259,10 +275,19 @@ def run_real_orchestration(
     never opens parquet, never calls the true decoder unless decode_fn is None
     (production, not exercised here), and never creates the production root —
     the core gate rejects it. Single VAL block only; no nine-block loop.
+
+    R3: with allow_production_root=True only the exact pre-registered
+    production root passes the entry guard (workspace is rejected there);
+    default False keeps the workspace-only fake-E2E path.
     """
     if int(seed) != SEED:
         raise ValueError(f"real-entry seed is frozen at {SEED}")
-    out = _resolve_workspace_dir(out_dir)
+    if bool(allow_production_root):
+        out = _resolve_execute_real_dir(out_dir)
+        gate_workspace_root = None
+    else:
+        out = _resolve_workspace_dir(out_dir)
+        gate_workspace_root = WORKSPACE_ROOT
     mod = load_contrast_module()
     assert mod.PREP_LIMIT_S == PREP_LIMIT_S, "prep budget drift"
     assert mod.G_LIMIT_S == G_LIMIT_S, "G budget drift"
@@ -282,10 +307,19 @@ def run_real_orchestration(
         authorized=bool(authorized),
         execute_real=bool(execute_real),
         decode_fn=decode_fn,
-        workspace_root=WORKSPACE_ROOT,
+        workspace_root=gate_workspace_root,
+        allow_production_root=bool(allow_production_root),
     )
     print(json.dumps({"status": report["status"], "branch": report["branch"], "output": report["output"]}, indent=2))
     return report
+
+
+def _is_preregistered_production_root(path: str | Path) -> bool:
+    """R3: True only for the exact pre-registered production root."""
+    candidate = Path(path)
+    if not candidate.is_absolute():
+        candidate = REPO_ROOT / candidate
+    return candidate.resolve() == PRODUCTION_ROOT
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -366,6 +400,7 @@ def main(argv: list[str] | None = None) -> int:
                 preflight={"status": "PASS", "cycle": mod.CYCLE_ID},
                 authorized=authorized,
                 execute_real=True,
+                allow_production_root=_is_preregistered_production_root(args.out_dir),
             )
         except (PermissionError, FileExistsError, ValueError) as exc:
             print(f"real execution is not authorized for V72P2D3-GF32: {exc}", file=sys.stderr)

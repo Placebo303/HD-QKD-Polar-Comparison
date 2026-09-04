@@ -1497,3 +1497,126 @@ def test_r8_prepare_regression_20_checks(tmp_path):
     finally:
         if out.exists():
             shutil.rmtree(out)
+
+
+# ---- R3 formal-output guard (prepare-only workspace-only; execute-real exact
+# pre-registered root only; no execute-real never calls decoder; no real run) ----
+
+def _r9_prod_root():
+    return ROOT.parent / "comparison_bench" / "outputs_comparison" / "v72p2d3_gf32_contrast_20260904"
+
+
+def test_r9_prepare_only_rejects_production(tmp_path):
+    reg_path = tmp_path / "r9_reg.json"
+    reg_path.write_text(json.dumps({"note": "unread, resolver rejects first"}), encoding="utf-8")
+    prod = _r9_prod_root()
+    assert not prod.exists()
+    # CLI prepare-only to the formal root (exact and child) fails closed.
+    assert runner.main(["--phase", "real", "--prepare-only", "--registry", str(reg_path), "--out-dir", str(prod)]) == 2
+    assert runner.main(["--phase", "real", "--prepare-only", "--registry", str(reg_path), "--out-dir", str(prod / "x")]) == 2
+    # Module levels reject production too; workspace resolver rejects it as well.
+    with pytest.raises(ValueError):
+        runner.run_prepare_only(out_dir=prod, registry_path=reg_path)
+    with pytest.raises(ValueError):
+        mod.prepare_real_input(registry_path=reg_path, out_dir=prod / "x", workspace_root=runner.WORKSPACE_ROOT)
+    with pytest.raises(ValueError):
+        runner._resolve_workspace_dir(prod)
+    assert not prod.exists()
+
+
+def test_r9_execute_real_rejects_workspace(tmp_path):
+    ws_out = tmp_path / "r9_ws_out"
+    with pytest.raises(ValueError):
+        runner._resolve_execute_real_dir(ws_out)
+    with pytest.raises(ValueError):
+        runner._resolve_execute_real_dir(Path(runner.WORKSPACE_ROOT) / "r9_ws_out")
+    # Orchestration production route refuses a workspace target before any gate.
+    with pytest.raises(ValueError):
+        runner.run_real_orchestration(
+            out_dir=ws_out,
+            registry=_fake_e2e_registry(),
+            frames=_fake_e2e_frames(),
+            matrices=_fake_e2e_matrices(),
+            preflight=_fake_e2e_preflight(),
+            authorized=True,
+            decode_fn=_fake_e2e_decode_fn,
+            allow_production_root=True,
+        )
+    assert not ws_out.exists()
+    assert not _r9_prod_root().exists()
+
+
+def test_r9_execute_real_exact_root_passes_entry_guard(tmp_path):
+    prod = _r9_prod_root()
+    assert not prod.exists()
+    # Entry guard accepts the exact root in str/Path/relative spelling.
+    assert runner._resolve_execute_real_dir(prod) == runner.PRODUCTION_ROOT
+    assert runner._resolve_execute_real_dir(str(prod)) == runner.PRODUCTION_ROOT
+    assert runner._resolve_execute_real_dir("comparison_bench/outputs_comparison/v72p2d3_gf32_contrast_20260904") == runner.PRODUCTION_ROOT
+    assert runner._is_preregistered_production_root(prod) is True
+    assert runner._is_preregistered_production_root(tmp_path / "r9_ws") is False
+    # Core gate passes the exact absent root only with the explicit flag.
+    gate = mod.require_real_gate(
+        execute_real=True, authorized=True, preflight=_fake_e2e_preflight(),
+        out_dir=prod, allow_production_root=True,
+    )
+    assert gate == {"gate": "PASS"}
+    with pytest.raises(ValueError):
+        mod.require_real_gate(
+            execute_real=True, authorized=True, preflight=_fake_e2e_preflight(), out_dir=prod,
+        )
+    # Other production paths stay rejected even with the flag; existence still refuses.
+    with pytest.raises(ValueError):
+        mod.require_real_gate(
+            execute_real=True, authorized=True, preflight=_fake_e2e_preflight(),
+            out_dir=prod / "x", allow_production_root=True,
+        )
+    with pytest.raises(ValueError):
+        runner._resolve_execute_real_dir(prod / "x")
+    with pytest.raises(FileExistsError):
+        mod.require_real_gate(
+            execute_real=True, authorized=True, preflight=_fake_e2e_preflight(),
+            out_dir=tmp_path, allow_production_root=True,
+        )
+    # Auth still enforced on the production route (no bypass, nothing written).
+    with pytest.raises(PermissionError):
+        runner.run_real_orchestration(
+            out_dir=prod,
+            registry=_fake_e2e_registry(),
+            frames=_fake_e2e_frames(),
+            matrices=_fake_e2e_matrices(),
+            preflight=_fake_e2e_preflight(),
+            authorized=False,
+            decode_fn=_fake_e2e_decode_fn,
+            allow_production_root=True,
+        )
+    assert not prod.exists()
+
+
+def test_r9_no_execute_real_never_calls_decoder(tmp_path):
+    calls: list[int] = []
+
+    def _counting(h_mat, prior_p, target):
+        calls.append(1)
+        return _fake_e2e_decode_fn(h_mat, prior_p, target)
+
+    kwargs = dict(
+        registry=_fake_e2e_registry(),
+        frames=_fake_e2e_frames(),
+        matrices=_fake_e2e_matrices(),
+        preflight=_fake_e2e_preflight(),
+        authorized=True,
+        execute_real=False,
+        decode_fn=_counting,
+    )
+    with pytest.raises(PermissionError):
+        mod.run_real_contrast(out_dir=tmp_path / "r9_nd_core", **kwargs)
+    assert calls == []
+    with pytest.raises(PermissionError):
+        runner.run_real_orchestration(out_dir=tmp_path / "r9_nd_orch", **kwargs)
+    assert calls == []
+    assert runner.main(["--phase", "real", "--registry", str(tmp_path / "r9_missing.json"), "--out-dir", str(tmp_path / "r9_nd_cli")]) == 2
+    assert calls == []
+    assert not (tmp_path / "r9_nd_core").exists()
+    assert not (tmp_path / "r9_nd_orch").exists()
+    assert not _r9_prod_root().exists()
