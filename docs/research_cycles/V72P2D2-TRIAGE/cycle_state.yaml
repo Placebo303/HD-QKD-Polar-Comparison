@@ -2,7 +2,8 @@ cycle_id: V72P2D2-TRIAGE
 state: IMPLEMENTATION_ACCEPTED_REAL_EXECUTION_AUTHORIZED
 branch: formal-ir-v72p1-addendum-clean
 accepted_plan_git_revision: 4592bdad357a02f8f08a880ca0036beaed3ee900
-implementation_revision: 7c40c4e03cd59f92ee0f58e6165b812adc91e6fe
+implementation_revision: 580471cf
+# preflight: PASS on 580471cf (rerun 2026-09-04; projected_L_wall_s=431.34<=600, peak_rss=146980864<2GiB; memo in workspace/v72p2d2_opencode_preflight/cost_preflight.json)
 implementation_review: PASS
 synthetic_preflight: PASS
 development_execution_authorized: true
