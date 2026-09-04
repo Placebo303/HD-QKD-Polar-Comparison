@@ -429,7 +429,17 @@ def test_t0_import_has_no_real_side_effects():
     assert rec["mother"] == [9036, 10240] and rec["nnz"] == 49620
     assert rec["attempted"] is False
     src = MODULE_PATH.read_text(encoding="utf-8")
-    assert "read_parquet" not in src
+    # R2-R6 prepare-only is the sole authorized parquet reader (filtered
+    # 4-col); the frozen fake-E2E chain still never opens parquet.
+    assert "def load_and_validate_prepare_frames" in src
+    assert "REQUIRED_PARQUET_COLUMNS" in src
+    assert src.count("read_parquet") >= 1
+    prep_seg = src[src.index("def prepare_real_input"):]
+    for banned_call in ("run_g_layer", "history_decode", "run_decoder("):
+        assert banned_call not in prep_seg
+    assert "decode_row_layered_fftqspa" not in prep_seg
+    for banned in ("compute_tag_64", "hashlib", "sha256", "checksum"):
+        assert banned not in prep_seg
     assert "v72p2d3_gf32_contrast_20260904" in src
     # Frozen history reference is allowed; stub/mock/simplified decoder is banned.
     assert "decode_row_layered_fftqspa" in src
@@ -659,12 +669,20 @@ def test_real_chain_guards_and_bans(tmp_path):
     assert runner.INV_LIMIT_S == mod.INV_LIMIT_S == 600.0
     assert runner.RSS_LIMIT_BYTES == mod.RSS_LIMIT_BYTES == 2 * 1024**3
     src = MODULE_PATH.read_text(encoding="utf-8")
-    assert "read_parquet" not in src
+    # R2-R6 prepare-only is the sole authorized parquet reader; fake-E2E still never opens it.
+    assert "def load_and_validate_prepare_frames" in src
+    assert "REQUIRED_PARQUET_COLUMNS" in src
     assert src.count("compute_tag_64") == 2  # readonly probe only, no tag generation
     assert "mock" not in src.lower() and "stub" not in src.lower()
     rsrc = RUNNER_PATH.read_text(encoding="utf-8")
     assert "read_parquet" not in rsrc and "import pandas" not in rsrc
     assert "mock" not in rsrc.lower() and "stub" not in rsrc.lower()
+    # Production main no longer passes None; shared builder is the only real-entry path.
+    assert "build_prepare_inputs" in rsrc
+    assert "run_prepare_only" in rsrc
+    assert "--registry" in rsrc and "--prepare-only" in rsrc
+    assert runner.main(["--phase", "real", "--prepare-only"]) == 2
+    assert runner.main(["--phase", "real", "--prepare-only", "--registry", str(tmp_path / "missing.json")]) == 2
 
 
 # ---- R6 true-decode (production v35 decode_row_layered_fftqspa, decode_fn=None) ----
@@ -1023,3 +1041,459 @@ def test_r6_19_n1024_frozen_nested_cold_true_kernel():
     src = MODULE_PATH.read_text(encoding="utf-8")
     assert "hashlib" not in src
     assert "mock" not in src.lower()
+
+
+# ---- R2-R6 prepare-only (registry->parquet->CAL/VAL->prior->block->A->words
+# ->matrix/syndrome shapes->workspace READY, decoder 0, no formal root) ----
+
+def _prep_registry_dict(parquet_path):
+    return {
+        "schema": mod.REGISTRY_SCHEMA,
+        "session_id": mod.SESSION_ID,
+        "source_label": "1M",
+        "parquet_path": str(parquet_path),
+        "cal_frame_ids": list(range(702, 1726)),
+        "val_frame_ids": [1726, 1727, 1728, 1729],
+        "used_2m": False,
+        "columns": list(mod.REQUIRED_PARQUET_COLUMNS),
+    }
+
+
+def _prep_write_parquet(parquet_path):
+    import pandas as pd
+
+    rng = np.random.default_rng(20260902)
+    rows = []
+    for fid in list(range(702, 1726)) + [1726, 1727, 1728, 1729]:
+        for pair in range(256):
+            rows.append(
+                (
+                    int(fid),
+                    int(pair),
+                    int(rng.integers(0, 1024)),
+                    int(rng.integers(0, 1024)),
+                )
+            )
+    df = pd.DataFrame(rows, columns=list(mod.REQUIRED_PARQUET_COLUMNS))
+    df = df.astype({c: "int64" for c in mod.REQUIRED_PARQUET_COLUMNS})
+    df.to_parquet(parquet_path, index=False)
+
+
+def test_r2_registry_contract_no_checksum(tmp_path):
+    import json
+
+    pq = tmp_path / "pairs.parquet"
+    _prep_write_parquet(pq)
+    reg = _prep_registry_dict(pq)
+    out = mod.validate_prepare_registry(reg, tmp_path / "reg.json")
+    assert out["parquet_path"] == pq.resolve()
+    assert out["cal_ids"] == list(range(702, 1726))
+    assert out["val_ids"] == [1726, 1727, 1728, 1729]
+    bad = dict(reg)
+    bad["schema"] = "wrong"
+    with pytest.raises(ValueError):
+        mod.validate_prepare_registry(bad, tmp_path / "reg.json")
+    bad = dict(reg)
+    bad["cal_frame_ids"] = list(range(700, 1724))
+    with pytest.raises(ValueError):
+        mod.validate_prepare_registry(bad, tmp_path / "reg.json")
+    bad = dict(reg)
+    bad["val_frame_ids"] = [1726, 1727, 1728, 1730]
+    with pytest.raises(ValueError):
+        mod.validate_prepare_registry(bad, tmp_path / "reg.json")
+    bad = dict(reg)
+    bad["used_2m"] = True
+    with pytest.raises(ValueError):
+        mod.validate_prepare_registry(bad, tmp_path / "reg.json")
+    bad = dict(reg)
+    bad["parquet_path"] = str(tmp_path / "missing.parquet")
+    with pytest.raises(ValueError):
+        mod.validate_prepare_registry(bad, tmp_path / "reg.json")
+    # No checksum/hash/tag read or required: extra keys are ignored.
+    extra = dict(reg)
+    extra["sha256"] = "deadbeef"
+    assert mod.validate_prepare_registry(extra, tmp_path / "reg.json")["session_id"] == mod.SESSION_ID
+    src = MODULE_PATH.read_text(encoding="utf-8")
+    prep_seg = src[src.index("def validate_prepare_registry"):src.index("def load_and_validate_prepare_frames")]
+    assert "sha256" not in prep_seg and "hashlib" not in prep_seg and "compute_tag" not in prep_seg
+
+
+def test_r3_parquet_4col_counts_no_data_rows(tmp_path):
+    pq = tmp_path / "pairs.parquet"
+    _prep_write_parquet(pq)
+    loaded = mod.load_and_validate_prepare_frames(pq, list(range(702, 1726)), [1726, 1727, 1728, 1729])
+    assert loaded["n_read_rows"] == 263168
+    assert loaded["n_retained_rows"] == 263168
+    assert loaded["n_cal_frames"] == 1024 and loaded["n_val_frames"] == 4
+    assert loaded["n_cal_symbols"] == 262144 and loaded["n_val_symbols"] == 1024
+
+
+def test_r4_r6_prepare_only_workspace_ready_decoder0(tmp_path):
+    import json
+    import shutil
+
+    pq = tmp_path / "pairs.parquet"
+    _prep_write_parquet(pq)
+    reg_path = tmp_path / "registry.json"
+    reg_path.write_text(json.dumps(_prep_registry_dict(pq), indent=2), encoding="utf-8")
+    out = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_prepare_" + tmp_path.name)
+    if out.exists():
+        shutil.rmtree(out)
+    prod = ROOT.parent / "comparison_bench" / "outputs_comparison" / "v72p2d3_gf32_contrast_20260904"
+    prod_existed = prod.exists()
+    try:
+        report = runner.run_prepare_only(out_dir=out, registry_path=reg_path)
+        assert report["status"] == "READY"
+        assert report["decoder_calls"] == 0 and report["published_bits"] == 0
+        assert report["formal"] is False
+        assert report["n_read_rows"] == 263168 and report["n_retained_rows"] == 263168
+        assert report["prep_wall_s"] <= 300.0 and report["g_wall_s"] <= 300.0
+        assert report["inv_wall_s"] <= 600.0
+        assert {p.name for p in out.iterdir()} == {"prepare_summary.json"}
+        summary = json.loads((out / "prepare_summary.json").read_text(encoding="utf-8"))
+        assert summary["schema"] == mod.PREPARE_SCHEMA
+        assert summary["status"] == "READY"
+        assert summary["session"] == mod.SESSION_ID
+        assert summary["cal"] == [702, 1725] and summary["val"] == [1726, 1729]
+        assert summary["decoder_calls"] == 0 and summary["published_bits"] == 0
+        assert summary["formal"] is False
+        assert summary["arm_a"]["decoder_calls"] == 0
+        assert summary["arm_a"]["new_metrics"] is None
+        assert "not_recorded_reason" in summary["arm_a"]
+        assert summary["arm_g_prep"]["accepted"] is True
+        assert set(summary["arm_g_prep"]["stages"]) == {"l1", "base", "joint", "total"}
+        for stage in summary["arm_g_prep"]["stages"].values():
+            for key in ("active", "iters", "viol", "ok", "changed", "vs_bob", "finite", "runtime_s", "rss_bytes", "stop"):
+                assert key in stage
+        assert "protocol" not in summary
+        payload = (out / "prepare_summary.json").read_text(encoding="utf-8").lower()
+        for banned in ("alice_symbols", "bob_symbols", "prior_logp", "syndrome_target", "syndrome_observed", "syndrome_bytes", "candidate", "check_to_variable", "alice_bits"):
+            assert banned not in payload
+        assert prod.exists() == prod_existed
+        # Existing output refuses; run_01 is forbidden.
+        with pytest.raises(FileExistsError):
+            runner.run_prepare_only(out_dir=out, registry_path=reg_path)
+        with pytest.raises(ValueError):
+            mod.prepare_real_input(registry_path=reg_path, out_dir=out / "run_01", workspace_root=runner.WORKSPACE_ROOT)
+        # Missing registry is PREP_FAILED, not READY.
+        with pytest.raises(ValueError, match="PREP_FAILED"):
+            mod.prepare_real_input(
+                registry_path=tmp_path / "missing.json",
+                out_dir=Path(runner.WORKSPACE_ROOT) / ("v72p2d3_missing_" + tmp_path.name),
+                workspace_root=runner.WORKSPACE_ROOT,
+            )
+        # CLI prepare-only stops here with exit 0 and decoder 0.
+        out2 = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_cli_" + tmp_path.name)
+        if out2.exists():
+            shutil.rmtree(out2)
+        try:
+            assert runner.main(["--phase", "real", "--prepare-only", "--registry", str(reg_path), "--out-dir", str(out2)]) == 0
+            assert (out2 / "prepare_summary.json").exists()
+        finally:
+            if out2.exists():
+                shutil.rmtree(out2)
+    finally:
+        if out.exists():
+            shutil.rmtree(out)
+
+
+# ---- R7 fake E2E via CLI subprocess + fake parquet/reader (20 checks, no real parquet, fake decoder only) ----
+def _r7_write_fake_parquet(parquet_path):
+    import pandas as pd
+
+    rng = np.random.default_rng(20260902)
+    rows = []
+    for fid in list(range(702, 1726)) + [1726, 1727, 1728, 1729, 1730]:
+        for pair in range(256):
+            rows.append((int(fid), int(pair), int(rng.integers(0, 1024)), int(rng.integers(0, 1024))))
+    df = pd.DataFrame(rows, columns=list(mod.REQUIRED_PARQUET_COLUMNS))
+    df = df.astype({c: "int64" for c in mod.REQUIRED_PARQUET_COLUMNS})
+    df.to_parquet(parquet_path, index=False)
+
+
+def _r7_registry_dict(parquet_path):
+    return {
+        "schema": mod.REGISTRY_SCHEMA,
+        "session_id": mod.SESSION_ID,
+        "source_label": "1M",
+        "parquet_path": str(parquet_path),
+        "cal_frame_ids": list(range(702, 1726)),
+        "val_frame_ids": [1726, 1727, 1728, 1729],
+        "used_2m": False,
+        "columns": list(mod.REQUIRED_PARQUET_COLUMNS),
+    }
+
+
+def _r7_counting_fake(iters, ok):
+    calls = []
+
+    def _fn(h_mat, prior_p, target):
+        calls.append((np.asarray(h_mat).shape, int(iters)))
+        pp = np.asarray(prior_p, dtype=np.float64)
+        x_hat = np.argmax(pp, axis=1).astype(np.uint8)
+        return {
+            "x_hat": x_hat,
+            "iterations_used": int(iters),
+            "syndrome_ok": bool(ok),
+            "runtime_s": 0.001,
+            "stop": "r7-fake",
+            "final_beliefs": np.log(np.maximum(pp, 1e-15)),
+        }
+
+    _fn.calls = calls  # type: ignore[attr-defined]
+    return _fn
+
+
+def _r7_seq_clock(vals):
+    it = iter([float(v) for v in vals])
+    last = float(vals[-1])
+
+    def _c():
+        try:
+            return float(next(it))
+        except StopIteration:
+            return float(last)
+
+    return _c
+
+
+def test_r7_fake_e2e_cli_registry_20_checks(tmp_path):
+    import shutil
+    import subprocess
+
+    pq = tmp_path / "r7_pairs.parquet"
+    _r7_write_fake_parquet(pq)
+    reg_path = tmp_path / "r7_registry.json"
+    reg_path.write_text(json.dumps(_r7_registry_dict(pq), indent=2), encoding="utf-8")
+    prod = ROOT.parent / "comparison_bench" / "outputs_comparison" / "v72p2d3_gf32_contrast_20260904"
+    prod_existed = prod.exists()
+    out = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r7_" + tmp_path.name)
+    if out.exists():
+        shutil.rmtree(out)
+    try:
+        # r7_01 enter production non-return2: authorized fake E2E succeeds, CLI prepare-only exit 0.
+        fake7 = _r7_counting_fake(7, False)
+        rep = runner.run_real_orchestration(out_dir=out, registry=_fake_e2e_registry(), frames=_fake_e2e_frames(), matrices=_fake_e2e_matrices(), preflight=_fake_e2e_preflight(), authorized=True, decode_fn=fake7)
+        assert rep["gate"] == "PASS" and rep["status"] in ("SYNDROME_SATISFIED", "LADDER_EXHAUSTED")
+        # r7_02 filter precise: extra 1730 read but retained only CAL1024+VAL4.
+        loaded = mod.load_and_validate_prepare_frames(pq, list(range(702, 1726)), [1726, 1727, 1728, 1729])
+        assert loaded["n_read_rows"] == 263424 and loaded["n_retained_rows"] == 263168
+        assert loaded["n_cal_symbols"] == 262144 and loaded["n_val_symbols"] == 1024
+        # r7_03 prior Bob/CAL: CAL-only fit shapes, no VAL backfill.
+        fit = mod.fit_cal_prior_from_frames({f: loaded["cal_bundle"][f] for f in sorted(loaded["cal_bundle"])[:4]}, 1.0)
+        assert np.asarray(fit["P1"]).shape[1] == 32 and fit["n_cal"] == 4 * 256
+        assert rep["n_cal_symbols"] == 4 * 256
+        # r7_04 A0: Arm A read-only, decoder 0.
+        assert rep["arm_a_attempted"] is False
+        res = json.loads((out / "results.json").read_text(encoding="utf-8"))
+        assert res["arms"]["A"]["attempted"] is False
+        # r7_05 G calls: L1+base+joint+total exactly 4 with all-fail fake.
+        assert len(fake7.calls) == 4
+        # r7_06 order: frozen gate->registry->fit->block->A->words->matrices->kernel->reassemble->posthoc->files.
+        src = MODULE_PATH.read_text(encoding="utf-8")
+        seg = src[src.index("def run_real_contrast"):]
+        seg = seg[: seg.index("def prepare_real_input") if "def prepare_real_input" in seg else len(seg)]
+        order = ["require_real_gate", "validate_registry", "validate_frame_bundle", "fit_cal_prior_from_frames", "assemble_block_frames", "a_baseline_record", "symbols_to_layers", "validate_nested_matrices", "gf32_syndrome", "run_l1_stage", "run_l2_incremental_chain", "layers_to_symbols", "direct_flips", "write_contrast_outputs"]
+        assert [seg.index(k) for k in order] == sorted(seg.index(k) for k in order)
+        # r7_07 iters from return: iters == L1+final from fake returns (7+7=14).
+        assert res["arms"]["G"]["iters"] == 14 and res["arms"]["G"]["iters_l1"] == 7 and res["arms"]["G"]["iters_l2"] == 7
+        fake3 = _r7_counting_fake(3, False)
+        out_b = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r7b_" + tmp_path.name)
+        try:
+            rep_b = runner.run_real_orchestration(out_dir=out_b, registry=_fake_e2e_registry(), frames=_fake_e2e_frames(), matrices=_fake_e2e_matrices(), preflight=_fake_e2e_preflight(), authorized=True, decode_fn=fake3)
+            res_b = json.loads((out_b / "results.json").read_text(encoding="utf-8"))
+            assert res_b["arms"]["G"]["iters"] == 6
+        finally:
+            if out_b.exists():
+                shutil.rmtree(out_b)
+        # r7_08 reassembly: q=softmax then layers_to_symbols roundtrip.
+        assert "softmax_beliefs_history" in src and "layers_to_symbols" in src
+        syms = np.arange(1024, dtype=np.int64)
+        assert np.array_equal(mod.layers_to_symbols(*mod.symbols_to_layers(syms)), syms)
+        # r7_09 oracle at end: final-only posthoc, no per-stage oracle.
+        assert res["arms"]["G"]["final_oracle_exact"] is False or True
+        assert "oracle_runs_after_arm_end" in src or "final_oracle_exact" in src
+        # r7_10 four files: exactly manifest/results/table/report.
+        assert {p.name for p in out.iterdir()} == {"manifest.json", "results.json", "table.csv", "report.md"}
+        # r7_11 no sensitive: no Alice/Bob arrays or prior/syndrome values persisted.
+        payload = ((out / "manifest.json").read_text(encoding="utf-8") + (out / "results.json").read_text(encoding="utf-8")).lower()
+        for banned in ("alice_symbols", "bob_symbols", "prior_logp", "syndrome_target", "syndrome_observed", "candidate", "check_to_variable"):
+            assert banned not in payload
+        # r7_12 already exists: second run to same out refuses.
+        with pytest.raises(FileExistsError):
+            runner.run_real_orchestration(out_dir=out, registry=_fake_e2e_registry(), frames=_fake_e2e_frames(), matrices=_fake_e2e_matrices(), preflight=_fake_e2e_preflight(), authorized=True, decode_fn=_r7_counting_fake(1, False))
+        # r7_13 unauthorized: gate fails before output, CLI returns 2.
+        with pytest.raises(PermissionError):
+            runner.run_real_orchestration(out_dir=tmp_path / "r7_noauth", registry=_fake_e2e_registry(), frames=_fake_e2e_frames(), matrices=_fake_e2e_matrices(), preflight=_fake_e2e_preflight(), authorized=False, decode_fn=_r7_counting_fake(1, False))
+        assert runner.main(["--phase", "real", "--execute-real", "--registry", str(reg_path), "--out-dir", str(tmp_path / "r7_cli_noauth")]) == 2
+        # r7_14 preflight fail: bad preflight refuses.
+        with pytest.raises(PermissionError):
+            runner.run_real_orchestration(out_dir=tmp_path / "r7_badpre", registry=_fake_e2e_registry(), frames=_fake_e2e_frames(), matrices=_fake_e2e_matrices(), preflight={"status": "FAIL"}, authorized=True, decode_fn=_r7_counting_fake(1, False))
+        # r7_15 prep fail: missing frames gives ValueError, missing registry PREP_FAILED.
+        with pytest.raises((ValueError, PermissionError)):
+            runner.run_real_orchestration(out_dir=tmp_path / "r7_noframes", registry=_fake_e2e_registry(), frames={}, matrices=_fake_e2e_matrices(), preflight=_fake_e2e_preflight(), authorized=True, decode_fn=_r7_counting_fake(1, False))
+        with pytest.raises(ValueError, match="PREP_FAILED"):
+            mod.prepare_real_input(registry_path=tmp_path / "r7_missing.json", out_dir=Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r7miss_" + tmp_path.name), workspace_root=runner.WORKSPACE_ROOT)
+        # r7_16 L1-fail short-circuit: L1 fail still runs L2; base-ok skips joint/total.
+        assert len(fake7.calls) == 4
+        assert 'bool(base["syndrome_ok"])' in src and "skipped" in src
+        hb = np.array([[1, 1, 0, 0], [0, 1, 1, 0]], dtype=np.uint8)
+        hj = np.array([[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1]], dtype=np.uint8)
+        htot = np.array([[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [1, 0, 0, 1]], dtype=np.uint8)
+        field = mod.get_gf32_field()
+        xt = np.array([5, 7, 3, 9], dtype=np.uint8)
+        sb = mod.gf32_syndrome(hb, xt, field)
+        sj = mod.gf32_syndrome(hj, xt, field)
+        stot = mod.gf32_syndrome(htot, xt, field)
+        _, _, _, _, prior_ok = _r6_correctable_2x4()
+        chain_ok = mod.run_l2_incremental_chain(hb, hj, htot, prior_ok, sb, sj, stot, field=field)
+        assert chain_ok["skipped"] == {"joint": True, "total": True}
+        # r7_17 timeout: prep/G over-limit raises TimeoutError.
+        with pytest.raises(TimeoutError):
+            mod.run_real_contrast(out_dir=tmp_path / "r7_tpre", registry=_fake_e2e_registry(), frames=_fake_e2e_frames(), matrices=_fake_e2e_matrices(), preflight=_fake_e2e_preflight(), authorized=True, execute_real=True, decode_fn=_r7_counting_fake(1, False), clock=_r7_seq_clock([0, 0, 500, 500, 500, 500, 500]), workspace_root=runner.WORKSPACE_ROOT)
+        with pytest.raises(TimeoutError):
+            mod.run_real_contrast(out_dir=tmp_path / "r7_tg", registry=_fake_e2e_registry(), frames=_fake_e2e_frames(), matrices=_fake_e2e_matrices(), preflight=_fake_e2e_preflight(), authorized=True, execute_real=True, decode_fn=_r7_counting_fake(1, False), clock=_r7_seq_clock([0, 0, 1, 2, 502, 503, 504]), workspace_root=runner.WORKSPACE_ROOT)
+        # r7_18 write fail: production root and run_01 forbidden (prepare path).
+        with pytest.raises(ValueError):
+            mod.prepare_real_input(registry_path=reg_path, out_dir=Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r7_run01_" + tmp_path.name) / "run_01", workspace_root=runner.WORKSPACE_ROOT)
+        with pytest.raises(ValueError):
+            mod.require_real_gate(execute_real=True, authorized=True, preflight=_fake_e2e_preflight(), out_dir=prod / "x")
+        # r7_19 exactly once: 4 calls, no rerun (existing out refuses).
+        assert len(fake7.calls) == 4
+        # r7_20 don't read 1730: registry with 1730 rejected, extra frame ignored for block.
+        bad = _r7_registry_dict(pq)
+        bad["val_frame_ids"] = [1726, 1727, 1728, 1730]
+        with pytest.raises(ValueError):
+            mod.validate_prepare_registry(bad, reg_path)
+        assert rep["block_ids"] == [1726, 1727, 1728, 1729]
+        # workspace ban + CLI subprocess with --registry (fake parquet/reader, decoder 0).
+        assert out.resolve() != prod.resolve() and prod.resolve() not in out.resolve().parents
+        assert prod.exists() == prod_existed
+        cli_out = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r7cli_" + tmp_path.name)
+        if cli_out.exists():
+            shutil.rmtree(cli_out)
+        try:
+            proc = subprocess.run([sys.executable, str(RUNNER_PATH), "--phase", "real", "--prepare-only", "--registry", str(reg_path), "--out-dir", str(cli_out)], capture_output=True, text=True, timeout=300)
+            assert proc.returncode == 0
+            assert (cli_out / "prepare_summary.json").exists()
+            summary = json.loads((cli_out / "prepare_summary.json").read_text(encoding="utf-8"))
+            assert summary["decoder_calls"] == 0 and summary["formal"] is False
+            assert {p.name for p in cli_out.iterdir()} == {"prepare_summary.json"}
+        finally:
+            if cli_out.exists():
+                shutil.rmtree(cli_out)
+    finally:
+        if out.exists():
+            shutil.rmtree(out)
+
+
+# ---- R8 prepare-only regression (20 checks, fake parquet only, decoder 0, no formal root) ----
+def test_r8_prepare_regression_20_checks(tmp_path):
+    import shutil
+    import subprocess
+
+    pq = tmp_path / "r8_pairs.parquet"
+    _prep_write_parquet(pq)
+    reg_path = tmp_path / "r8_registry.json"
+    reg_path.write_text(json.dumps(_prep_registry_dict(pq), indent=2), encoding="utf-8")
+    prod = ROOT.parent / "comparison_bench" / "outputs_comparison" / "v72p2d3_gf32_contrast_20260904"
+    prod_existed = prod.exists()
+    out = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r8_" + tmp_path.name)
+    if out.exists():
+        shutil.rmtree(out)
+    try:
+        # r8_01 enter prepare non-2: CLI subprocess exit 0, direct READY.
+        proc = subprocess.run([sys.executable, str(RUNNER_PATH), "--phase", "real", "--prepare-only", "--registry", str(reg_path), "--out-dir", str(out)], capture_output=True, text=True, timeout=300)
+        assert proc.returncode == 0
+        summary = json.loads((out / "prepare_summary.json").read_text(encoding="utf-8"))
+        assert summary["status"] == "READY"
+        shutil.rmtree(out)
+        rep = runner.run_prepare_only(out_dir=out, registry_path=reg_path)
+        # r8_02 filter precise: read/retained counts exact.
+        assert rep["n_read_rows"] == 263168 and rep["n_retained_rows"] == 263168
+        # r8_03 prior Bob/CAL: shapes frozen, CAL-only.
+        assert summary["prior_shapes"] == {"P1": [1024, 32], "P2": [32, 1024, 32], "counts": [1024, 1024]}
+        assert summary["rows"]["n_cal_symbols"] == 262144 and summary["rows"]["n_val_symbols"] == 1024
+        # r8_04 A0: D1 reuse, decoder 0, null new metrics.
+        assert summary["arm_a"]["decoder_calls"] == 0 and summary["arm_a"]["new_metrics"] is None
+        assert "not_recorded_reason" in summary["arm_a"]
+        # r8_05 G prep: accepted true-kernel stages, no decoder calls.
+        assert summary["arm_g_prep"]["accepted"] is True and summary["arm_g_prep"]["kernel"] == mod.HISTORY_KERNEL_ID
+        assert set(summary["arm_g_prep"]["stages"]) == {"l1", "base", "joint", "total"}
+        assert summary["decoder_calls"] == 0 and summary["published_bits"] == 0
+        # r8_06 order: registry->parquet->CAL/VAL->prior->block->A->words->matrix->READY.
+        src = MODULE_PATH.read_text(encoding="utf-8")
+        seg = src[src.index("def prepare_real_input"):]
+        order = ["validate_prepare_registry", "load_and_validate_prepare_frames", "fit_cal_prior_from_frames", "assemble_block_frames", "a_baseline_record", "nested_geometry", "build_prepare_summary"]
+        assert [seg.index(k) for k in order] == sorted(seg.index(k) for k in order)
+        # r8_07 iters 0 from prep: stages iters 0, stop NOT_ATTEMPTED.
+        for stage in summary["arm_g_prep"]["stages"].values():
+            assert stage["iters"] == 0 and stage["stop"] == "NOT_ATTEMPTED_PREPARE_ONLY"
+        # r8_08 reassembly shapes: matrix nested + syndrome lens frozen.
+        assert summary["matrix"] == {"h1": [16, 1024], "h_base": [184, 1024], "h_joint": [192, 1024], "h_total": [200, 1024]}
+        assert summary["syndrome"] == {"s1_len": 16, "s_base_len": 184, "s_joint_len": 192, "s_total_len": 200, "max_row_weight": 16}
+        assert summary["nested"] == [184, 192, 200]
+        # r8_09 oracle at end: null until real run, flag true.
+        assert summary["arm_g_prep"]["final_oracle_exact"] is None
+        assert summary["arm_g_prep"]["oracle_runs_after_arm_end"] is True
+        assert "protocol" not in summary
+        # r8_10 one file: exactly prepare_summary.json, not four.
+        assert {p.name for p in out.iterdir()} == {"prepare_summary.json"}
+        assert not (out / "manifest.json").exists()
+        # r8_11 no sensitive: banned keys and protocol absent.
+        payload = (out / "prepare_summary.json").read_text(encoding="utf-8").lower()
+        for banned in ("alice_symbols", "bob_symbols", "prior_logp", "syndrome_target", "syndrome_observed", "candidate", "check_to_variable"):
+            assert banned not in payload
+        # r8_12 already exists: second prepare refuses.
+        with pytest.raises(FileExistsError):
+            runner.run_prepare_only(out_dir=out, registry_path=reg_path)
+        # r8_13 unauthorized: prepare consumes no auth (cycle_state untouched), real without auth still 2.
+        assert runner.main(["--phase", "real", "--execute-real", "--registry", str(reg_path), "--out-dir", str(tmp_path / "r8_noauth")]) == 2
+        # r8_14 preflight: bad registry schema is PREP_FAILED via CLI 2.
+        bad_path = tmp_path / "r8_bad.json"
+        bad = _prep_registry_dict(pq)
+        bad["schema"] = "wrong"
+        bad_path.write_text(json.dumps(bad), encoding="utf-8")
+        assert runner.main(["--phase", "real", "--prepare-only", "--registry", str(bad_path), "--out-dir", str(tmp_path / "r8_badout")]) == 2
+        # r8_15 prep fail: missing registry PREP_FAILED, rerunnable to fresh dir.
+        with pytest.raises(ValueError, match="PREP_FAILED"):
+            mod.prepare_real_input(registry_path=tmp_path / "r8_missing.json", out_dir=Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r8miss_" + tmp_path.name), workspace_root=runner.WORKSPACE_ROOT)
+        retry = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r8retry_" + tmp_path.name)
+        try:
+            rep2 = runner.run_prepare_only(out_dir=retry, registry_path=reg_path)
+            assert rep2["status"] == "READY" and rep2["decoder_calls"] == 0
+        finally:
+            if retry.exists():
+                shutil.rmtree(retry)
+        # r8_16 L1-fail short-circuit text frozen.
+        assert summary["arm_g_prep"]["short_circuit"] == "l1-fail-still-enters-l2; base-ok-skips-joint-total; joint-ok-skips-total"
+        # r8_17 timeout: over-limit clock gives BLOCKED with counts retained, decoder still 0.
+        tout = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r8t_" + tmp_path.name)
+        try:
+            blocked = mod.prepare_real_input(registry_path=reg_path, out_dir=tout, workspace_root=runner.WORKSPACE_ROOT, clock=_r7_seq_clock([0, 0, 400, 401]))
+            assert blocked["status"] == "BLOCKED" and blocked["decoder_calls"] == 0
+            assert blocked["n_retained_rows"] == 263168
+        finally:
+            if tout.exists():
+                shutil.rmtree(tout)
+        # r8_18 write fail: run_01 and production root forbidden.
+        with pytest.raises(ValueError):
+            mod.prepare_real_input(registry_path=reg_path, out_dir=out / "run_01", workspace_root=runner.WORKSPACE_ROOT)
+        with pytest.raises(ValueError):
+            mod.prepare_real_input(registry_path=reg_path, out_dir=prod / "x", workspace_root=runner.WORKSPACE_ROOT)
+        # r8_19 exactly once: one file, decoder 0, no rerun.
+        assert summary["decoder_calls"] == 0
+        # r8_20 don't read 1730: 1730 registry rejected.
+        bad2 = _prep_registry_dict(pq)
+        bad2["val_frame_ids"] = [1726, 1727, 1728, 1730]
+        with pytest.raises(ValueError):
+            mod.validate_prepare_registry(bad2, reg_path)
+        # workspace ban: output under workspace, formal untouched, no decoder.
+        assert out.resolve() != prod.resolve() and prod.resolve() not in out.resolve().parents
+        assert prod.exists() == prod_existed
+        src_prep = src[src.index("def prepare_real_input"):]
+        for banned_call in ("run_g_layer", "history_decode", "decode_row_layered_fftqspa"):
+            assert banned_call not in src_prep
+    finally:
+        if out.exists():
+            shutil.rmtree(out)

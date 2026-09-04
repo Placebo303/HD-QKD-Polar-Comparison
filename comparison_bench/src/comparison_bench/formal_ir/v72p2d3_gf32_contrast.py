@@ -1310,3 +1310,423 @@ def run_real_contrast(
         "output": str(written),
         "fake_decoder": decode_fn is not None,
     }
+
+
+# ---------------------------------------------------------------------------
+# R2-R6 real-input adaptation, prepare-only (no decoder, no syndrome publish,
+# no formal dir, no decoder-auth consumption, no tag/hash).
+#
+# Frozen chain (prepare-only stops here, decoder_calls == 0):
+#   registry JSON -> parquet path -> filtered read (4 cols only) ->
+#   CAL/VAL validate -> prior fit -> block assemble -> D1 A scalar ->
+#   words -> matrix/syndrome shape validate -> workspace READY.
+#
+# Registry rules (R2, no checksum/hash/tag):
+#   schema/session/parquet-exists/256/CAL702..1725/VAL1726..1729 disjoint/
+#   forbid 1730+/used_2m false/columns exist. Extra checksum/hash/tag keys
+#   are ignored, never read or computed.
+# Parquet rules (R3): 4 cols only, record read/retained rows, validate
+#   CAL1024x256 VAL4x256 pair0..255 no-dup/no-NaN symbols0..1023 sorted;
+#   data rows never persist to disk (scalars only in summary).
+# Summary rules (R4-R6): prepare_summary.json scalars only, formal false,
+#   decoder 0, published 0; bans Alice/Bob arrays, prior/syndrome values,
+#   matrices values, candidate/messages. A reuses D1 scalars, missing is
+#   null+reason, missing inputs is PREP_FAILED. G prep records accepted
+#   adapter true-kernel per-stage fields, first-layer failure follows history
+#   short-circuit, oracle at end, no protocol field. Budgets prep300/G300/
+#   inv600/RSS2GiB phased, overlimit BLOCKED with counts retained.
+# ---------------------------------------------------------------------------
+
+REGISTRY_SCHEMA = "v72p2d3_real_registry_v1"
+PREPARE_SCHEMA = "v72p2d3_prepare_summary_v1"
+REQUIRED_PARQUET_COLUMNS = ("frame_id", "pair_idx", "alice_symbol", "bob_symbol")
+PREPARE_LAM = FAKE_E2E_LAM
+PREPARE_CAL = [CAL_START, CAL_END]
+PREPARE_VAL = [VAL_FRAMES[0], VAL_FRAMES[-1]]
+# ponytail: scalar-only summary; shapes/weights are frozen scalars, not data.
+PREPARE_BANNED_KEYS = (
+    "alice_symbols",
+    "bob_symbols",
+    "prior_logp",
+    "syndrome_target",
+    "syndrome_observed",
+    "syndrome_bytes",
+    "candidate",
+    "messages",
+    "check_to_variable",
+    "alice_bits",
+)
+
+
+def _resolve_prepare_parquet(raw: Any, registry_dir: Path) -> Path:
+    if not isinstance(raw, str) or not raw.strip():
+        raise ValueError("registry parquet_path must be a non-empty string")
+    cand = Path(raw.strip())
+    if not cand.is_absolute():
+        cand = (registry_dir / cand).resolve()
+        if not cand.exists():
+            alt = (_repo_root() / raw.strip()).resolve()
+            if alt.exists():
+                cand = alt
+    return cand.resolve()
+
+
+def validate_prepare_registry(
+    registry: dict[str, Any], registry_path: str | Path | None = None
+) -> dict[str, Any]:
+    """R2 registry validation (no checksum/hash/tag read or computed)."""
+    if not isinstance(registry, dict):
+        raise ValueError("registry must be a mapping")
+    if registry.get("schema") != REGISTRY_SCHEMA:
+        raise ValueError(f"registry schema must be {REGISTRY_SCHEMA}")
+    if registry.get("session_id") != SESSION_ID:
+        raise ValueError("registry session_id must be the frozen 1M session")
+    if registry.get("source_label") != "1M":
+        raise ValueError("registry source_label must be 1M")
+    if bool(registry.get("used_2m", False)) is not False:
+        raise ValueError("registry used_2m must be false")
+    if bool(registry.get("used_2M", False)) is not False:
+        raise ValueError("registry used_2M must be false")
+    cal_ids = [int(v) for v in registry.get("cal_frame_ids", [])]
+    val_ids = [int(v) for v in registry.get("val_frame_ids", [])]
+    if cal_ids != list(REAL_CAL_IDS):
+        raise ValueError("CAL must be the frozen 702..1725 sequence (1024 frames)")
+    if val_ids != list(REAL_BLOCK_IDS):
+        raise ValueError("VAL must be the frozen 1726..1729 sequence (4 frames)")
+    if set(cal_ids) & set(val_ids):
+        raise ValueError("CAL/VAL must be disjoint")
+    if any(v >= 1730 for v in cal_ids + val_ids):
+        raise ValueError("frame 1730+ is forbidden")
+    cols = list(registry.get("columns", []))
+    if set(cols) != set(REQUIRED_PARQUET_COLUMNS):
+        raise ValueError(f"registry columns must be exactly {list(REQUIRED_PARQUET_COLUMNS)}")
+    base_dir = Path(registry_path).resolve().parent if registry_path is not None else _repo_root()
+    parquet_path = _resolve_prepare_parquet(registry.get("parquet_path"), base_dir)
+    if not parquet_path.is_file():
+        raise ValueError(f"registry parquet_path does not exist: {parquet_path}")
+    # No checksum/hash/tag: intentionally never read or compute them here.
+    return {
+        "session_id": SESSION_ID,
+        "parquet_path": parquet_path,
+        "cal_ids": cal_ids,
+        "val_ids": list(val_ids),
+        "columns": list(REQUIRED_PARQUET_COLUMNS),
+    }
+
+
+def load_and_validate_prepare_frames(
+    parquet_path: str | Path,
+    cal_ids: list[int] | None = None,
+    val_ids: list[int] | None = None,
+) -> dict[str, Any]:
+    """R3 filtered parquet read (4 cols only); validates CAL/VAL geometry.
+
+    Returns in-memory bundles for the prepare chain plus scalar counts.
+    Data rows are never written to disk by this module; the summary keeps
+    scalars only.
+    """
+    import pandas as pd
+
+    cal = list(REAL_CAL_IDS) if cal_ids is None else [int(v) for v in cal_ids]
+    val = list(REAL_BLOCK_IDS) if val_ids is None else [int(v) for v in val_ids]
+    if cal != list(REAL_CAL_IDS) or val != list(REAL_BLOCK_IDS):
+        raise ValueError("CAL/VAL ids must be the frozen sequences")
+    cols = list(REQUIRED_PARQUET_COLUMNS)
+    try:
+        df = pd.read_parquet(Path(parquet_path), columns=cols)
+    except Exception as exc:
+        raise ValueError(f"parquet unreadable: {type(exc).__name__}: {exc}") from exc
+    n_read = int(len(df))
+    if set(df.columns) != set(cols):
+        raise ValueError(f"parquet columns must be exactly {cols}")
+    if int(df.isna().sum().sum()) != 0:
+        raise ValueError("parquet contains NaN")
+    for col in cols:
+        vals = df[col].to_numpy()
+        if not np.all(vals == np.floor(vals.astype(np.float64))):
+            raise ValueError(f"parquet column {col} must be integral")
+    keep = df[df["frame_id"].isin(cal + val)]
+    n_retained = int(len(keep))
+    # CAL 1024x256, VAL 4x256.
+    if n_retained != 1024 * 256 + 4 * 256:
+        raise ValueError(f"retained rows must be 263168, got {n_retained}")
+    for fid in cal + val:
+        sub = keep[keep["frame_id"] == fid].sort_values("pair_idx")
+        if len(sub) != 256:
+            raise ValueError(f"frame {fid} must hold 256 rows")
+        pairs = sub["pair_idx"].to_numpy(dtype=np.int64)
+        if not np.array_equal(pairs, np.arange(256, dtype=np.int64)):
+            raise ValueError(f"frame {fid} pair_idx must be sorted 0..255 with no dup")
+        for col in ("alice_symbol", "bob_symbol"):
+            syms = sub[col].to_numpy(dtype=np.int64)
+            if np.any(syms < 0) or np.any(syms >= Q):
+                raise ValueError(f"frame {fid} {col} outside 0..1023")
+    # In-memory bundles reuse the frozen fake-E2E builders (shared builder).
+    frames: dict[int, dict[str, np.ndarray]] = {}
+    for fid in cal + val:
+        sub = keep[keep["frame_id"] == fid].sort_values("pair_idx")
+        frames[int(fid)] = {
+            "alice_symbols": sub["alice_symbol"].to_numpy(dtype=np.int64),
+            "bob_symbols": sub["bob_symbol"].to_numpy(dtype=np.int64),
+        }
+    cal_bundle = {f: frames[f] for f in cal}
+    val_bundle = {f: frames[f] for f in val}
+    return {
+        "n_read_rows": n_read,
+        "n_retained_rows": n_retained,
+        "n_cal_frames": len(cal),
+        "n_val_frames": len(val),
+        "n_cal_symbols": len(cal) * 256,
+        "n_val_symbols": len(val) * 256,
+        "cal_bundle": cal_bundle,
+        "val_bundle": val_bundle,
+    }
+
+
+def _prepare_g_stages() -> dict[str, Any]:
+    """G prep per-stage scalars with accepted adapter true-kernel fields.
+
+    Decoder never runs here (iters 0, stop NOT_ATTEMPTED_PREPARE_ONLY).
+    Short-circuit follows history: L1 failure still enters L2 with q;
+    L2 base-ok would skip joint/total, joint-ok would skip total. Oracle
+    is recorded at the end only (null until a real run). No protocol field.
+    """
+    stages: dict[str, Any] = {}
+    for name, active in (("l1", H1_ROWS), ("base", M_BASE), ("joint", M_BASE + 8), ("total", M_TOTAL)):
+        stages[name] = {
+            "active": int(active),
+            "iters": 0,
+            "viol": None,
+            "ok": None,
+            "changed": None,
+            "vs_bob": None,
+            "finite": True,
+            "runtime_s": 0.0,
+            "rss_bytes": None,
+            "stop": "NOT_ATTEMPTED_PREPARE_ONLY",
+        }
+    return {
+        "accepted": True,
+        "kernel": HISTORY_KERNEL_ID,
+        "stages": stages,
+        "short_circuit": "l1-fail-still-enters-l2; base-ok-skips-joint-total; joint-ok-skips-total",
+        "final_oracle_exact": None,
+        "oracle_runs_after_arm_end": True,
+    }
+
+
+def build_prepare_summary(
+    *,
+    registry_path: str | Path,
+    validated: dict[str, Any],
+    counts: dict[str, Any],
+    fit: dict[str, Any],
+    ce: dict[str, float],
+    prep_wall_s: float,
+    g_wall_s: float,
+    inv_wall_s: float,
+    peak_rss: int | None,
+    status: str,
+) -> dict[str, Any]:
+    """Assemble the scalar-only prepare summary (no data rows/values)."""
+    arm_a = a_baseline_record()
+    arm_a = dict(arm_a)
+    arm_a["decoder_calls"] = 0
+    arm_a["new_metrics"] = None
+    arm_a["not_recorded_reason"] = "D1 baseline did not record this metric; A was not rerun"
+    summary: dict[str, Any] = {
+        "schema": PREPARE_SCHEMA,
+        "status": status,
+        "registry": str(registry_path),
+        "session": SESSION_ID,
+        "cal": [CAL_START, CAL_END],
+        "val": [VAL_FRAMES[0], VAL_FRAMES[-1]],
+        "rows": {
+            "n_cal_frames": int(counts["n_cal_frames"]),
+            "n_val_frames": int(counts["n_val_frames"]),
+            "n_cal_symbols": int(counts["n_cal_symbols"]),
+            "n_val_symbols": int(counts["n_val_symbols"]),
+            "n_read_rows": int(counts["n_read_rows"]),
+            "n_retained_rows": int(counts["n_retained_rows"]),
+        },
+        "lambda": float(fit["lam"]),
+        "ce": {"stage1": float(ce["stage1"]), "stage2": float(ce["stage2"]), "joint": float(ce["joint"])},
+        "prior_shapes": {"P1": [Q, Q_SUB], "P2": [Q_SUB, Q, Q_SUB], "counts": [Q, Q]},
+        "matrix": {
+            "h1": [H1_ROWS, N],
+            "h_base": [M_BASE, N],
+            "h_joint": [M_BASE + 8, N],
+            "h_total": [M_TOTAL, N],
+        },
+        "nested": list(NESTED_ROWS),
+        "syndrome": {
+            "s1_len": H1_ROWS,
+            "s_base_len": M_BASE,
+            "s_joint_len": M_BASE + 8,
+            "s_total_len": M_TOTAL,
+            "max_row_weight": 16,
+        },
+        "arm_a": arm_a,
+        "arm_g_prep": _prepare_g_stages(),
+        "wall": {"prep_s": float(prep_wall_s), "g_s": float(g_wall_s), "inv_s": float(inv_wall_s)},
+        "rss": {"peak_bytes": None if peak_rss is None else int(peak_rss)},
+        "decoder_calls": 0,
+        "published_bits": 0,
+        "formal": False,
+    }
+    return summary
+
+
+def _check_prepare_summary_allowed(summary: dict[str, Any]) -> None:
+    import json as _json
+
+    payload = _json.dumps(summary, ensure_ascii=False)
+    lowered = payload.lower()
+    for banned in PREPARE_BANNED_KEYS:
+        if banned.lower() in lowered:
+            raise ValueError(f"prepare summary must not store {banned}")
+    if '"protocol"' in lowered:
+        raise ValueError("prepare summary must not define protocol")
+
+
+def prepare_real_input(
+    *,
+    registry_path: str | Path,
+    out_dir: str | Path,
+    lam: float = PREPARE_LAM,
+    clock: Any = None,
+    rss_reader: Any = None,
+    workspace_root: str | Path | None = None,
+) -> dict[str, Any]:
+    """R2-R6 prepare-only chain (decoder never called, nothing published).
+
+    Writes exactly one file ``prepare_summary.json`` under a fresh workspace
+    directory and returns the scalar report. Missing inputs give PREP_FAILED;
+    budget overruns give BLOCKED with counts retained.
+    """
+    import json as _json
+    import time as _time
+
+    now = clock if clock is not None else _time.monotonic
+    inv_start = float(now())
+    rss_peak: list[int] = []
+
+    def _sample() -> None:
+        value = _sample_rss(rss_reader)
+        if value is not None:
+            rss_peak.append(int(value))
+
+    _sample()
+    prep_start = float(now())
+    out = Path(out_dir).resolve()
+    prod = _production_root()
+    if out == prod or prod in out.parents:
+        raise ValueError("prepare output must stay outside the production root")
+    if workspace_root is not None:
+        try:
+            out.relative_to(Path(workspace_root).resolve())
+        except ValueError as exc:
+            raise ValueError("prepare output must stay under workspace/") from exc
+    if out.exists():
+        raise FileExistsError(f"output directory already exists: {out}")
+    if out.name == "run_01" or "run_01" in out.parts:
+        raise ValueError("prepare output must not be run_01")
+    try:
+        reg_raw = _json.loads(Path(registry_path).read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise ValueError(f"PREP_FAILED: registry file is missing: {registry_path}") from exc
+    try:
+        validated = validate_prepare_registry(reg_raw, registry_path)
+    except ValueError as exc:
+        # Missing/invalid registry contract is PREP_FAILED, not READY/BLOCKED.
+        msg = str(exc)
+        if "PREP_FAILED" in msg:
+            raise
+        raise ValueError(f"PREP_FAILED: {exc}") from exc
+    loaded = load_and_validate_prepare_frames(
+        validated["parquet_path"], validated["cal_ids"], validated["val_ids"]
+    )
+    fit = fit_cal_prior_from_frames(loaded["cal_bundle"], float(lam))
+    a_cal = np.concatenate([loaded["cal_bundle"][f]["alice_symbols"] for f in sorted(loaded["cal_bundle"])])
+    b_cal = np.concatenate([loaded["cal_bundle"][f]["bob_symbols"] for f in sorted(loaded["cal_bundle"])])
+    a_low, a_high = symbols_to_layers(a_cal)
+    ce_s1 = ce_stage1_log2(fit["P1"], b_cal, a_high)
+    ce_s2 = ce_stage2_log2(fit["P2"], a_high, b_cal, a_low)
+    ce_j = ce_joint_log2(fit["P1"], fit["P2"], b_cal, a_high, a_low)
+    ce = {"stage1": float(ce_s1), "stage2": float(ce_s2), "joint": float(ce_j)}
+    # Block assemble (VAL1726..1729 -> 1024 symbols, sorted by frame/pair).
+    alice, bob = assemble_block_frames(loaded["val_bundle"], validated["val_ids"])
+    # D1 A scalar reuse is recorded in the summary; decoder_calls stays 0.
+    _arm_a = a_baseline_record()
+    if _arm_a.get("attempted") is not False:
+        raise ValueError("Arm A must stay read-only reuse")
+    # Words direction check (mapping only, no decoder).
+    alice_low, alice_high = symbols_to_layers(alice)
+    bob_low, bob_high = symbols_to_layers(bob)
+    u1, u2, _, _ = factorize_f03_binding(alice, bob)
+    if not (
+        np.array_equal(u1.astype(np.int64), alice_high)
+        and np.array_equal(u2.astype(np.int64), alice_low)
+    ):
+        raise ValueError("word direction disagrees with v35 factorize_f03")
+    # Matrix/syndrome shape validation (frozen geometry scalars only; no
+    # syndrome values are computed or published here).
+    geo = nested_geometry()
+    if tuple(geo["nested"]) != tuple(NESTED_ROWS):
+        raise ValueError("nested geometry drift")
+    if geo["shapes"] != [(M_BASE, N), (M_BASE + 8, N), (M_TOTAL, N)]:
+        raise ValueError("matrix shape drift")
+    if (H1_ROWS, M_BASE, M_TOTAL) != (16, 184, 200):
+        raise ValueError("matrix shape drift")
+    _ = (bob_low, bob_high)
+    prep_wall = float(now()) - prep_start
+    _sample()
+    peak = max(rss_peak) if rss_peak else None
+    g_wall = 0.0
+    if prep_wall > PREP_LIMIT_S or g_wall > G_LIMIT_S:
+        status = "BLOCKED"
+    else:
+        status = "READY"
+    inv_wall = float(now()) - inv_start
+    if inv_wall > INV_LIMIT_S:
+        status = "BLOCKED"
+    if peak is not None and peak >= RSS_LIMIT_BYTES:
+        status = "BLOCKED"
+    summary = build_prepare_summary(
+        registry_path=Path(registry_path).resolve(),
+        validated=validated,
+        counts=loaded,
+        fit=fit,
+        ce=ce,
+        prep_wall_s=prep_wall,
+        g_wall_s=g_wall,
+        inv_wall_s=inv_wall,
+        peak_rss=peak,
+        status=status,
+    )
+    _check_prepare_summary_allowed(summary)
+    out.mkdir(parents=True, exist_ok=False)
+    (out / "prepare_summary.json").write_text(
+        _json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    names = {item.name for item in out.iterdir()}
+    if names != {"prepare_summary.json"}:
+        raise RuntimeError("prepare output must contain exactly prepare_summary.json")
+    _sample()
+    return {
+        "status": status,
+        "registry": str(Path(registry_path).resolve()),
+        "session": SESSION_ID,
+        "n_cal_frames": int(loaded["n_cal_frames"]),
+        "n_val_frames": int(loaded["n_val_frames"]),
+        "n_read_rows": int(loaded["n_read_rows"]),
+        "n_retained_rows": int(loaded["n_retained_rows"]),
+        "decoder_calls": 0,
+        "published_bits": 0,
+        "formal": False,
+        "prep_wall_s": float(prep_wall),
+        "g_wall_s": float(g_wall),
+        "inv_wall_s": float(inv_wall),
+        "peak_rss_bytes": peak,
+        "output": str((out / "prepare_summary.json").resolve()),
+    }

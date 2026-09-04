@@ -1,5 +1,5 @@
 cycle_id: V72P2D3-GF32
-state: BLOCKED_FAIL_CLOSED
+state: PREP_READY
 branch: formal-ir-v72p1-addendum-clean
 base_sha: e094f7e548380db4bfcbc1fe73472e670c32379a
 accepted_plan_sha: e0cf5c6772e26c8de561584941e2fe6eea62666e
@@ -9,11 +9,14 @@ development_execution_authorized: false
 formal_execution_authorized: false
 real_execution_authorized: false
 decoder_executed: false
+decoder_execution_attempts: 0
+syndrome_published_bits: 0
 scientific_promotion: false
 execution_count_authorized: 1
 execution_count_completed: 1
 pre_execute_review: PASS
 pre_result_review: PASS
+next_gate: DECODER_PRE_EXECUTE_REVIEW
 # independent Pre-EXECUTE 14/14 PASS at HEAD 74af0450bc35eb9d6d50c6dcfd3b150bbb42156d (2026-09-04):
 # reviewed impl 12d66ce0ce44310984129217d9f563eab35c245a code-identical at HEAD; authorized one real invocation (real=true, formal=false, promotion=false); no decoder executed; production root still absent.
 # operator return exit2 fail-closed at HEAD 8f44e5ff: real chain needs injected registry/frames/matrices (parquet never opened); production root absent, zero files, no four-file fabrication; authorization consumed (completed=1/1, real=false, formal=false, promotion=false); no retry/rerun; Pre-RESULT PASS; terminal BLOCKED_FAIL_CLOSED.

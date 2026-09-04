@@ -4,9 +4,12 @@
 Default path runs a tiny synthetic contrast through the true history
 kernel (v35 decode_row_layered_fftqspa via the V54 cold-start chain) on
 tiny synthetic matrices only, and writes nothing outside the
-caller-chosen workspace directory. The real VAL/CAL parquet path is
-never opened and the production contrast root is never created. Any
-unauthorized real-execution request fails closed. No imitated decoder enters
+caller-chosen workspace directory. R2-R6 prepare-only (--phase real
+--prepare-only --registry <json>) opens the registry parquet with a
+filtered 4-column read, validates CAL/VAL, fits the prior, assembles the
+block and validates shapes, then writes workspace prepare_summary.json
+with decoder 0 and no formal-root creation. Any unauthorized
+real-execution request fails closed. No imitated decoder enters
 the production stage path; decode_fn injection exists only in tests and in
 the explicit fake-E2E orchestration below (which never touches parquet,
 the true decoder, or the production root).
@@ -24,6 +27,8 @@ from typing import Any
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+# ponytail: one-line src path so frozen V54 import resolves in subprocess CLI.
+sys.path.insert(0, str(REPO_ROOT / "comparison_bench" / "src"))
 MODULE_PATH = (
     REPO_ROOT
     / "comparison_bench"
@@ -147,6 +152,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--execute-real", action="store_true")
     parser.add_argument(
+        "--registry",
+        type=Path,
+        default=None,
+        help="real-registry JSON for R2-R6 prepare-only and real entry (shared builder)",
+    )
+    parser.add_argument(
+        "--prepare-only",
+        action="store_true",
+        help="R2-R6 prepare-only: registry->parquet->CAL/VAL->prior->block->A->words->matrix/syndrome shapes->workspace READY, decoder 0",
+    )
+    parser.add_argument(
         "--cycle-state",
         type=Path,
         default=CYCLE_STATE_PATH,
@@ -172,6 +188,57 @@ def _read_real_authorized(path: str | Path) -> bool:
         if key.strip() == "real_execution_authorized":
             return value.strip().lower() in {"true", "1", "yes"}
     return False
+
+
+def build_prepare_inputs(registry_path: str | Path) -> dict[str, Any]:
+    """Shared builder for R2-R6 prepare and real entry (no decoder, no auth).
+
+    Loads the registry JSON, validates the R2 contract, and runs the R3
+    filtered parquet read. Both ``run_prepare_only`` and the production
+    real branch use this builder, so production never passes None.
+    """
+    mod = load_contrast_module()
+    reg_path = Path(registry_path)
+    if not reg_path.is_absolute():
+        reg_path = (REPO_ROOT / reg_path).resolve()
+    raw = json.loads(reg_path.read_text(encoding="utf-8"))
+    validated = mod.validate_prepare_registry(raw, reg_path)
+    loaded = mod.load_and_validate_prepare_frames(
+        validated["parquet_path"], validated["cal_ids"], validated["val_ids"]
+    )
+    return {"registry_raw": raw, "validated": validated, "loaded": loaded}
+
+
+def run_prepare_only(
+    *,
+    out_dir: str | Path,
+    registry_path: str | Path,
+    seed: int = SEED,
+) -> dict[str, Any]:
+    """R2-R6 prepare-only (workspace READY, decoder 0, no auth consumed).
+
+    Chain: CLI -> registry JSON -> parquet path -> filtered read -> CAL/VAL
+    validate -> prior fit -> block assemble -> D1 A scalar -> words ->
+    matrix/syndrome shape validate -> workspace READY. Stops here.
+    """
+    if int(seed) != SEED:
+        raise ValueError(f"real-entry seed is frozen at {SEED}")
+    if registry_path is None:
+        raise ValueError("prepare-only requires --registry")
+    out = _resolve_workspace_dir(out_dir)
+    mod = load_contrast_module()
+    assert mod.PREP_LIMIT_S == PREP_LIMIT_S, "prep budget drift"
+    assert mod.G_LIMIT_S == G_LIMIT_S, "G budget drift"
+    assert mod.INV_LIMIT_S == INV_LIMIT_S, "invocation budget drift"
+    assert mod.RSS_LIMIT_BYTES == RSS_LIMIT_BYTES, "RSS budget drift"
+    # Shared builder first (prepare), then scalar summary; no auth, no run.
+    report = mod.prepare_real_input(
+        registry_path=registry_path,
+        out_dir=out,
+        workspace_root=WORKSPACE_ROOT,
+    )
+    print(json.dumps({"status": report["status"], "output": report["output"]}, indent=2))
+    return report
 
 
 def run_real_orchestration(
@@ -223,21 +290,80 @@ def run_real_orchestration(
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # R2-R6 prepare-only stops here: workspace READY, decoder 0, no auth.
+    if bool(getattr(args, "prepare_only", False)):
+        if args.phase != "real":
+            print("--prepare-only requires --phase real; no run was started", file=sys.stderr)
+            return 2
+        if not getattr(args, "registry", None):
+            print("--prepare-only requires --registry; no run was started", file=sys.stderr)
+            return 2
+        try:
+            report = run_prepare_only(
+                out_dir=args.out_dir,
+                registry_path=args.registry,
+                seed=args.seed,
+            )
+        except (PermissionError, FileExistsError, ValueError, RuntimeError) as exc:
+            print(f"prepare failed for V72P2D3-GF32: {exc}", file=sys.stderr)
+            return 2
+        return 0 if report.get("status") == "READY" else 2
     if args.phase == "real" or args.execute_real:
         if not args.execute_real:
             print("--phase real requires --execute-real; no real run was started", file=sys.stderr)
             return 2
-        # Fail-closed production gate: cycle_state keeps
-        # real_execution_authorized=false; no parquet/decoder/production-root
-        # is touched before this gate passes.
-        authorized = _read_real_authorized(args.cycle_state)
+        if not getattr(args, "registry", None):
+            print("--phase real requires --registry; no real run was started", file=sys.stderr)
+            return 2
+        # Prepared structure: prepare -> summary -> auth -> run (shared builder, no None).
         try:
+            built = build_prepare_inputs(args.registry)
+            authorized = _read_real_authorized(args.cycle_state)
+            if not authorized:
+                raise PermissionError("real execution is not authorized")
+            # Authorized future run only: adapt shared-builder outputs to the
+            # frozen 11-step chain (no None, no parquet open here, true kernel).
+            mod = load_contrast_module()
+            validated = built["validated"]
+            loaded = built["loaded"]
+            registry_old = {
+                "sessions": [
+                    {
+                        "session_id": mod.SESSION_ID,
+                        "source_label": "1M",
+                        "stage2_CAL_frame_ids": list(validated["cal_ids"]),
+                        "stage2_VAL_frame_ids": list(validated["val_ids"]),
+                    }
+                ]
+            }
+            frames_old = {**loaded["cal_bundle"], **loaded["val_bundle"]}
+            # Frozen matrices for the authorized run only (built here, not in prepare).
+            from comparison_bench.formal_ir.v38_architecture_triage import (
+                construct_lane_c_prototype,
+            )
+
+            v54 = mod._load_v54()
+            field = mod.get_gf32_field()
+            h_base, _ = construct_lane_c_prototype(source="1M", seed=383102, field=field)
+            h_inc1, _, _, _ = v54.construct_h_inc("1M", 600001)
+            h_inc2, _, _, _ = v54.construct_h_inc("1M", 600004)
+            import numpy as _np
+
+            h_base = _np.asarray(h_base, dtype=_np.uint8)
+            h_inc1 = _np.asarray(h_inc1, dtype=_np.uint8)
+            h_inc2 = _np.asarray(h_inc2, dtype=_np.uint8)
+            matrices_old = {
+                "h1": _np.zeros((mod.H1_ROWS, mod.N), dtype=_np.uint8),
+                "h_base": h_base,
+                "h_joint": _np.vstack([h_base, h_inc1]).astype(_np.uint8),
+                "h_total": _np.vstack([h_base, h_inc1, h_inc2]).astype(_np.uint8),
+            }
             run_real_orchestration(
                 out_dir=args.out_dir,
-                registry=None,
-                frames=None,
-                matrices=None,
-                preflight=None,
+                registry=registry_old,
+                frames=frames_old,
+                matrices=matrices_old,
+                preflight={"status": "PASS", "cycle": mod.CYCLE_ID},
                 authorized=authorized,
                 execute_real=True,
             )

@@ -69,3 +69,16 @@
 - **D10-4**：计划提交前只对 5 个计划文件执行 `git diff --check`、完整 `git status --short`、基线范围审查和 staged manifest 检查；不 add 任何 untracked 历史文件，不运行 decoder。
 
 完成条件：5 个计划文件内容一致、`REAL_EXECUTION_AUTHORIZED=false`、`DECODER_EXECUTED=false`，然后停止于 `NEXT_GATE: INDEPENDENT_PLAN_REVIEW`。
+
+## R2 prepare-only 验收（additive，decoder0）
+
+- **R2-T1**：registry 合同（schema/session/1M/CAL702..1725/VAL1726..1729/禁 1730+/used_2m false/4 列；
+  多余 checksum/hash/tag 忽略；缺失/非法为 `PREP_FAILED`）。
+- **R2-T2**：parquet 受限 4 列读（CAL1024x256+VAL4x256，pair 有序无 dup/NaN，symbols0..1023；
+  `n_read/n_retained` 标量记录，数据行不落盘）。
+- **R2-T3**：prepare-only workspace `READY`（prior 拟合 + block 组装 + A 标量复用 + words +
+  matrix/syndrome 形状校验；恰一文件 `prepare_summary.json`；`decoder_calls=0`，
+  `published_bits=0`，`formal=false`；禁 `run_01` 与生产根；预算 prep300/G300/inv600/RSS2GiB）。
+- **R2-T4**：`py_compile` + 47 项 focused 测试 PASS（含 R2-R6 prepare-only 与 R7 fake-E2E），
+  `git diff --check` 干净，staged manifest 精确 11 文件（3 代码 + 4 openspec + cycle_state +
+  CORRIGENDUM_R2 + PREP_ONLY_SUMMARY + R2_IMPLEMENTATION_REVIEW）。

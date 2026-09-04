@@ -70,3 +70,16 @@
 - **S-TEST-02**：D7 SHALL 断言全双层 `wall≤300s/peak<2GiB/误差≤15%` 与 RSS 采样口径。
 - **S-TEST-03**：D8 SHALL 断言三审查核唯一真核（import+已知答案+stub/mock 零命中+argmax 零命中）。
 - **S-TEST-04**：T2 SHALL 使用显式 fake（仅 orchestration 短路逻辑） 和 fresh workspace，覆盖 G 全双层、首次满足不早停、动态计费、final-candidate oracle 分类、四文件 schema、production path 门禁（生产 `decode_fn=None` 直调真核）；replay 排除 wall/RSS/timestamp/path。
+
+## S-R2：真实输入适配（prepare-only，additive）
+
+- **S-R2-01**：registry SHALL 为 `v72p2d3_real_registry_v1`（session 冻结 1M，
+  CAL702..1725/VAL1726..1729 disjoint，禁 1730+，`used_2m=false`，列恰 4 列）；
+  SHALL NOT 读或计算 checksum/hash/tag。
+- **S-R2-02**：parquet SHALL 仅受限 4 列读（`frame_id/pair_idx/alice_symbol/bob_symbol`），
+  SHALL 校验 CAL1024x256+VAL4x256 几何；数据行 SHALL NOT 落盘。
+- **S-R2-03**：prepare summary SHALL 仅标量（`v72p2d3_prepare_summary_v1`，
+  `formal=false`，`decoder_calls=0`，`published_bits=0`）；SHALL NOT 含 Alice/Bob 数组、
+  prior/syndrome/matrix 值、candidate/messages；缺输入 SHALL 为 `PREP_FAILED`，
+  预算超限 SHALL 为 `BLOCKED`；输出 SHALL 恰一文件且 SHALL NOT 为 `run_01`，
+  SHALL NOT 在生产根下。

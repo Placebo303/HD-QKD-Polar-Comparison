@@ -65,3 +65,17 @@ G decoder 冻结：`max_iter=90` 为硬帽、`damping=1.0`、无 residual tolera
 禁止 FER、SKR、信息极限、LDPC 无效、图结构因果、GF32 优胜或跨 session 推广断言。successor/文献/历史边界按任务书（D2T4-3 延续：PEG `10.1109/TIT.2004.839541`、layered `10.1109/SIPS.2004.1363033`、spatial coupling `arXiv:1001.1826`、HD-QKD NB-LDPC `arXiv:2305.08631`，以及 V54 `43/45`、V64 `22/24`、V5-C2 `384/384` 限定域，V67–V72P1 不写成真实纠错成功）。
 
 完整数学、计量、测试和 schema 见同目录 `design.md`、`tasks.md`、`specs/spec.md`。
+
+## R2 真实输入适配（prepare-only，additive，不改冻结语义）
+
+- R1 fail-closed（`registry/frames/matrices=None`，exit2）之后，R2 仅增加 prepare-only 链：
+  registry JSON -> parquet 受限 4 列读 -> CAL/VAL 校验 -> prior 拟合 -> block 组装 ->
+  D1 A 标量复用 -> words 方向检查 -> matrix/syndrome 形状校验 -> workspace `READY`。
+- R2 不运行 decoder（`decoder_calls=0`），不发布 syndrome/tag（`published_bits=0`），
+  不创建正式输出根四文件，不创建 `run_01`，不消耗执行授权，不授予 decoder 执行。
+- Registry 无 checksum/hash/tag（多余键忽略）；parquet 仅 4 列，数据行不落盘；
+  summary 仅标量（`PREP_ONLY_SUMMARY.json`），禁 Alice/Bob 数组与 prior/syndrome/matrix 值。
+- 预算 prep300/G300/invocation600/RSS2GiB，超限 `BLOCKED` 保留计数。实现仍精确三文件。
+- 证据：`docs/research_cycles/V72P2D3-GF32/PREP_ONLY_SUMMARY.json`、
+  `CORRIGENDUM_R2_REAL_INPUT_ADAPTER.md`、`R2_IMPLEMENTATION_REVIEW.md`、
+  `cycle_state.yaml`（`PREP_READY`，`real_execution_authorized=false`）。

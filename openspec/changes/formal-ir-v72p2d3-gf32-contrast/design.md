@@ -71,3 +71,18 @@ D7 全双层门禁：synthetic 全双层（low+high）`wall ≤ 300s`、`peak_rs
 ## 8. 后继与文献边界（按任务书）
 
 后继：`G_EXACT` 仅允许同路线小样本 confirmation plan；`G_COLLISION/IMPROVED` 仅描述性；`G_NO_MOTION` 后停止 binary/GF32 小参微调，后继限定为 grouped-symbol mask BP tiny exhaustive 或同块表示消融。文献保留 PEG DOI `10.1109/TIT.2004.839541`、layered DOI `10.1109/SIPS.2004.1363033`、spatial coupling `arXiv:1001.1826`、HD-QKD NB-LDPC `arXiv:2305.08631`，以及 V54 `43/45`、V64 `22/24`、V5-C2 `384/384` 限定域；V67–V72P1 不写成真实纠错成功。
+
+## 9. R2 真实输入适配（prepare-only，additive）
+
+- 链：`validate_prepare_registry`（R2：schema/session/1M/CAL702..1725/VAL1726..1729
+  disjoint/禁 1730+/used_2m false/4 列，无 checksum/hash/tag）->
+  `load_and_validate_prepare_frames`（R3：受限 4 列，CAL1024x256+VAL4x256，
+  pair0..255 有序无 dup/NaN，symbols0..1023，数据行不落盘）->
+  `fit_cal_prior_from_frames` + CE（log2）-> `assemble_block_frames`（VAL1726..1729->1024 symbols）->
+  D1 A 标量复用（decoder0）-> `factorize_f03` words 方向 -> `nested_geometry` 形状校验
+ （H1-16/base184/joint192/total200，syndrome 长 16/184/192/200，max_row_weight16）->
+  workspace `prepare_summary.json`（R4-R6：标量-only，`formal=false`，decoder0）。
+- G prep 每 stage `NOT_ATTEMPTED_PREPARE_ONLY`（accepted adapter true-kernel 字段，
+  短路历史文字，oracle 仅末端，禁 `protocol` 字段）；缺输入 `PREP_FAILED`，预算超限 `BLOCKED`。
+- Runner 共用 builder（prepare 与真实入口同一构建，生产不再传 None）；
+  `--prepare-only` 不耗授权，`--phase real --execute-real` 仍需 registry+授权否则 fail-closed 2。
