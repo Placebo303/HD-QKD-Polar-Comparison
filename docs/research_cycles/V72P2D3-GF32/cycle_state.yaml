@@ -10,3 +10,8 @@ formal_execution_authorized: false
 real_execution_authorized: false
 decoder_executed: false
 scientific_promotion: false
+execution_count_authorized: 1
+execution_count_completed: 0
+pre_execute_review: PENDING
+# placeholder proposal (NOT effective until independent Pre-EXECUTE PASS):
+# proposed real=true / formal=false / promotion=false; effective flags above remain false.
