@@ -1,8 +1,9 @@
 # GitHub-centered ChatGPT/OpenCode research-cycle SOP
 
 This is the default collaboration protocol for this research repository. It is
-deliberately small: GitHub preserves state, ChatGPT plans and reviews, OpenCode
-implements, and the user/main reviewer owns acceptance and execution authority.
+deliberately small: Git preserves provenance and recovery, ChatGPT plans and
+reviews, OpenCode implements, and the user/main reviewer owns acceptance and
+execution authority. Git commit identity is not an execution capability.
 
 ## 1. First principle
 
@@ -73,34 +74,35 @@ Recommended `cycle_state.yaml`:
 ```yaml
 cycle_id: V37R1
 state: PLAN_CANDIDATE
-accepted_plan_sha: null
-implementation_sha: null
+accepted_plan: false
+implementation_accepted: false
 development_execution_authorized: false
 formal_execution_authorized: false
 scientific_promotion: false
 ```
 
-Do not record a commit's own SHA inside that same commit. Put the target SHA in
-the handoff prompt; record it in the next verdict/return commit.
+Commit IDs may be added to a result for provenance, but are not recursive
+authorization gates and need not be embedded in lifecycle commits.
 
 ## 5. ChatGPT review sequence
 
-1. Push the plan or implementation candidate to GitHub with a normal push.
+1. Make the plan or implementation candidate available in the intended branch.
 2. Copy the prompt from `docs/prompts/chatgpt-research-review.md`.
-3. Fill repository, branch, target SHA, cycle ID, review kind, and entrypoint.
-4. Require ChatGPT to report whether it could verify the target SHA.
+3. Fill repository, branch, cycle ID, review kind, and entrypoint.
+4. Require ChatGPT to inspect the scoped files and current diff rather than
+   accepting a self-reported PASS.
 5. Copy the returned fixed-schema review into `REVIEW_VERDICT.md`.
 6. Commit corrections or acceptance as a separate milestone.
 
-If ChatGPT cannot verify the requested commit, its comments remain advisory and
-the verdict cannot be `ACCEPT`. Provide the PR diff and key compact artifacts
-directly in chat if necessary.
+If ChatGPT cannot inspect the scoped files or evidence, its comments remain
+advisory. A commit ID alone never makes a review valid.
 
 ## 6. OpenCode execution sequence
 
-1. Start from the accepted plan SHA.
+1. Start from the accepted plan and intended branch.
 2. Copy the prompt from `docs/prompts/opencode-research-execution.md`.
-3. OpenCode first confirms `git rev-parse HEAD` and reads the named packet.
+3. OpenCode confirms the intended branch, reads the named packet, and checks
+   only the scoped code/config/test files for unreviewed changes.
 4. It changes only allowed files and runs only authorized development work.
 5. It returns either `COMPLETE` or a concrete `BLOCKED` report.
 6. Copy the result into `OPERATOR_RETURN.md`, inspect the diff, and push an
@@ -132,10 +134,10 @@ git diff --cached --stat
 git log -1 --oneline
 ```
 
-The commit/PR must state:
+The commit/PR should state:
 
 - cycle ID and lifecycle status;
-- parent/accepted-plan SHA when applicable;
+- the relevant commit ID when useful for later provenance;
 - changed code/spec/test files;
 - tests and development commands actually run;
 - included data or result-summary path;
@@ -175,7 +177,7 @@ scientific-identity failure requires them.
 
 A research milestone is ready for review when all answers are yes:
 
-- Is the target SHA explicit?
+- Are the reviewed files and current scoped diff explicit?
 - Are requirements and thresholds frozen before implementation?
 - Can each headline number be traced to a committed artifact or calculation?
 - Are development and validation data roles distinguished?
@@ -184,25 +186,37 @@ A research milestone is ready for review when all answers are yes:
 - Does the report avoid promoting residual improvement to exact recovery?
 - Is formal execution still blocked unless the user explicitly authorized it?
 
-## 10. Pre-EXECUTE / Pre-RESULT review gates (mandatory — V55 `efd34ef` fix)
+## 10. Pre-EXECUTE / Pre-RESULT review gates
 
 No formal decoder execution and no development-result publication without a
 recorded review. "Publish first, review later" is forbidden.
 
-### 10.1 Pre-EXECUTE review — before every formal decoder execution
+### 10.1 Pre-EXECUTE review — before claim-bearing or costly execution
 
-Applies to every production `run_01` / `EXECUTE_AUTH` execution. On the exact
-implementation SHA, verify and record in cycle docs:
+Applies to real-data, formal, expensive, irreversible, or claim-bearing runs.
+Verify and record:
 
-1. `HEAD == origin/<branch> == implementation SHA` (no drift)
-2. `ACCEPTED_PLAN_SHA` equals the accepted plan SHA — re-derive from `git log`
-   / `cycle_state.yaml`; `rg <stale-SHA>` (e.g. reused template constant
-   `efd34ef`) returns 0 hits
-3. Target `run_01` does not already exist under the output root (no overwrite)
-4. Budget, gate thresholds, and `cycle_state` authorizations match the frozen plan
-5. `py_compile` + plan-specified critical tests PASS
+1. intended repository and branch are active;
+2. scoped code, tests, configuration, and packet have no unreviewed staged or
+   unstaged changes;
+3. frozen inputs, data roles, seeds, thresholds, command, budget, and stop rules
+   match the accepted plan;
+4. the target output directory does not already exist;
+5. focused `py_compile` and plan-critical tests pass;
+6. the user explicitly authorized this bounded run.
 
-FAIL → execution blocked, enter `revise-required`/rework, fix on a new SHA, re-review.
+Commit IDs are optional provenance. Do not require remote equality, exact
+implementation-SHA equality, stale-SHA grep, hashes, or a commit that records
+its own ID. Documentation-only commits after code acceptance do not invalidate
+the code. Exact revision locking is allowed only when the packet names a
+concrete multi-writer, destructive, release, or evidence-integrity risk.
+
+Active packets written before 2026-09-06 inherit this rule: conflicting
+SHA/remote-equality clauses are non-binding unless they state such a concrete
+exception. Their scientific scope, command, inputs, budgets, stop rules,
+authorization, and no-overwrite requirements remain binding.
+
+FAIL means the run stops until the scoped issue is corrected and reviewed.
 
 ### 10.2 Pre-RESULT review — before every development-result output
 
@@ -220,4 +234,15 @@ solidification — never submit `run_01` with a known review failure.
 
 Root cause prompting this gate: V55 repeatedly bound `ACCEPTED_PLAN_SHA` to the
 V54 template constant `efd34ef` without replacement.
+
+The corrective lesson is to inspect the actual scientific contract and scoped
+files, not to add another layer of SHA ceremony.
+
+### 10.3 Review frequency
+
+Do not require an independent reviewer after every documentation commit or
+tiny unchanged-scope correction. Use a focused self-check for low-risk edits
+and batch them into the next milestone review. Independent review remains
+mandatory at plan acceptance, before applicable claim-bearing/costly execution,
+and before claim-bearing result solidification.
 

@@ -10,14 +10,13 @@ formal or expensive production run.
 REPOSITORY: <repository path or URL>
 BRANCH_OR_PR: <branch name or PR URL>
 CYCLE_ID: <cycle ID>
-REQUIRED_BASE_SHA: <full accepted plan commit SHA, 40 hex characters>
 ENTRYPOINT: <docs/research_cycles/.../EXECUTION_PACKET.md>
 ALLOWED_DEVELOPMENT_RUNS: <exact commands or NONE>
 FORMAL_EXECUTION_AUTHORIZED: false
 ALLOWED_LIFECYCLE_ACTION: IMPLEMENT_AND_DEVELOPMENT_TEST_ONLY
 
 开始前必须：
-1. 运行 git rev-parse HEAD；若不等于 REQUIRED_BASE_SHA，立即 BLOCKED。
+1. 确认当前仓库和分支，并检查packet列出的代码/配置/测试文件无未审修改。
 2. 阅读 AGENTS.md、AGENT_PROJECT_MEMORY.md、ENTRYPOINT 及其列出的 OpenSpec。
 3. 输出允许修改文件、禁止文件、测试矩阵、输出目录和停止条件的简短复述。
 
@@ -40,7 +39,7 @@ ALLOWED_LIFECYCLE_ACTION: IMPLEMENT_AND_DEVELOPMENT_TEST_ONLY
 仅允许两种最终返回：
 
 COMPLETE
-BASE_SHA: ...
+STARTING_STATE: <branch + scoped cleanliness>
 HEAD_SHA_OR_WORKTREE_STATE: ...
 CHANGED_FILES:
 - ...
@@ -60,7 +59,7 @@ REMAINING_REVIEW_ITEMS:
 或：
 
 BLOCKED
-BASE_SHA: ...
+STARTING_STATE: <branch + scoped cleanliness>
 FAILING_COMMAND: ...
 EXACT_ERROR: ...
 ATTEMPTED_REMEDIES:

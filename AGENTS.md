@@ -67,9 +67,9 @@ These rules apply to all agents operating in this repository.
 - If implementation reveals requirement ambiguity, **stop** and return to planner or OpenSpec instead of guessing.
 - If a change modifies behavior, architecture, prompt rules, tool semantics, or workflow rules, **create or update an OpenSpec change first**.
 - Before modifying any file, read it first. Never write to a file without reading its current contents.
-- **Pre-EXECUTE review is mandatory before every formal decoder execution** (origin `EXECUTE_AUTH` or any production `run_01`). Must verify on the exact implementation SHA: `HEAD == origin/<branch> == implementation SHA`, `ACCEPTED_PLAN_SHA` matches the accepted plan (re-derive from `git log`/`cycle_state.yaml`, `rg` for stale SHA returns 0 hits), `run_01` does not already exist under the target output root, budget/gate thresholds and `cycle_state` authorizations are consistent with the frozen plan, and `py_compile` + the plan's critical tests PASS. Record the checklist in the cycle docs before authorizing execution.
+- **Pre-EXECUTE review is mandatory before claim-bearing, real-data, expensive, irreversible, or formal decoder execution.** Verify the intended branch; scoped code/config/test/packet cleanliness; frozen inputs, thresholds, command, budget and stop rules; explicit user authorization; target-output absence; and focused tests. Git commit IDs are provenance, not execution locks: do not require `HEAD == origin == implementation SHA`, stale-SHA grep, hashes, or recursive self-binding by default. Documentation-only commits after code acceptance do not invalidate the code. Record the scoped checklist before execution.
 - **Pre-RESULT review is mandatory before every development-result output is published or committed** (`OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` solidification). An independent thread or reviewer must re-check the frozen plan thresholds, leakage-formula decomposition, `undetected` isolation (never merged into success/FER), per-source breakdown, disclosure accounting, and other plan-specified semantics against the actual artifacts. Issues trigger immediate rework; do not publish first and patch review later.
-- **If either review FAILs, execution/solidification is blocked.** Enter `revise-required` / rework, fix the root cause on a new SHA, and re-review. Never submit `run_01` with a known review failure. Root cause: V55 repeated `ACCEPTED_PLAN_SHA` binding to the reused V54 template constant `efd34ef`.
+- **If either applicable review FAILs, execution/solidification is blocked.** Enter `revise-required` / rework, fix the scoped root cause, and re-review. Never submit `run_01` with a known review failure. Root cause: V55 reused a V54 template constant instead of checking the actual plan content.
 
 ---
 
@@ -283,7 +283,9 @@ This workflow is the default for all substantial delegated implementation:
 4. **Review in proportion to scientific risk.** Use freeze, candidate, and
    independent-acceptance reviews for irreversible or claim-bearing scientific
    execution. For low-risk algorithm iteration, use focused numerical review;
-   do not let review ceremony displace algorithm work.
+   do not let review ceremony displace algorithm work. Do not require an
+   independent reviewer after every docs-only commit or tiny unchanged-scope
+   correction; batch them into the next milestone review.
 5. **Reuse before rebuilding.** A successor starts from the nearest accepted
    predecessor contract and an explicit delta list. Preserve unchanged
    artifact, transcript, provenance, invalid-run, replay, and no-overwrite
@@ -328,9 +330,10 @@ pre-registered no-rerun/no-tuning rules intact.
   frozen implementation, focused tests, and only explicitly authorized
   development runs. Neither may grant its own acceptance, formal-execution
   authorization, qualification, or promotion.
-- Every handoff names the repository, branch/PR, full target SHA, cycle ID,
-  entrypoint document, lifecycle state, and allowed action. If the reviewer
-  cannot verify the target SHA, its result is advisory and cannot be ACCEPT.
+- Every handoff names the repository, branch/PR, cycle ID, entrypoint document,
+  scoped files, lifecycle state, and allowed action. If the reviewer cannot
+  inspect the actual scoped files/evidence, its result is advisory. A commit ID
+  may be included for provenance but is not an authorization token.
 - Every research milestone commit/PR includes the applicable OpenSpec, code,
   tests, and compact machine-readable data. If raw/large/binary/private data
   cannot be committed, include a result summary with provenance, seeds,
@@ -344,9 +347,12 @@ pre-registered no-rerun/no-tuning rules intact.
 
 ### 10.3 Pre-EXECUTE / Pre-RESULT Review Gates (Mandatory)
 
-- **Pre-EXECUTE** (formal decoder execution): verify `HEAD == origin/<branch> == implementation SHA`, `ACCEPTED_PLAN_SHA` is the accepted-plan SHA (re-derived, `rg <stale-SHA>` 0 hits), target `run_01` absent, budget/gate/`cycle_state` authorizations match the frozen plan, `py_compile` + critical tests PASS. Checklist recorded in cycle docs; FAIL blocks execution (`revise-required`).
+- **Pre-EXECUTE** (claim-bearing/costly/formal execution): verify intended branch, scoped code/config/test/packet cleanliness, frozen scientific contract, explicit user authorization, target-output absence, and focused tests. Do not require remote/SHA equality or stale-SHA searches unless a named concrete multi-writer, destructive, release, or evidence-integrity risk justifies that exception. Checklist recorded in cycle docs; FAIL blocks execution.
 - **Pre-RESULT** (development-result publication): independent thread/reviewer re-checks plan thresholds, leakage-formula decomposition, `undetected` isolation, per-source breakdown, disclosure accounting and plan-specified semantics against actual artifacts before any `OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` commit. Issues → immediate rework; never publish-then-patch. FAIL blocks solidification.
-- Both gates apply to every execution/result cycle without exception; V55 `efd34ef` stale-constant reuse is the negative example.
+- Apply each gate where its scope above requires it. Existing packets inherit
+  this rule: SHA/remote-equality clauses are non-binding unless a concrete
+  exception risk is stated. Scientific scope, authorization, tests, stop rules,
+  and no-overwrite checks remain binding.
 
 ---
 
