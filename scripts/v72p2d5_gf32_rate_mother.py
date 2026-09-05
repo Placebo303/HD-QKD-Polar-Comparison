@@ -21,6 +21,8 @@ CORE_PATH = (ROOT / "comparison_bench" / "src" / "comparison_bench"
              / "formal_ir" / "v72p2d5_gf32_rate_mother.py")
 STATE_PATH = (ROOT / "docs" / "research_cycles" / "V72P2D5-GF32-RATE-MOTHER"
               / "cycle_state.yaml")
+STRUCTURE_OUT_DIR = (ROOT / "workspace" / "v72p2d5_structure"
+                     / "20260905_r2")
 
 _SPEC = importlib.util.spec_from_file_location(
     "v72p2d5_gf32_rate_mother_core", str(CORE_PATH))
@@ -73,7 +75,11 @@ def main(argv=None):
         print(f"phase '{args.phase}' is not authorized; refusing before any work")
         return 3
     try:
-        _RUNNERS[args.phase](authorized=True)
+        if args.phase == "structure":
+            _RUNNERS["structure"](authorized=True,
+                                   out_dir=STRUCTURE_OUT_DIR)
+        else:
+            _RUNNERS[args.phase](authorized=True)
     except Exception as exc:
         print(f"phase '{args.phase}' refused: {exc}")
         return 3

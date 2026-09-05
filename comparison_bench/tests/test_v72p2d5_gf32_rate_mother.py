@@ -1303,3 +1303,89 @@ def test_T2_16_prefix_schema_frozen_24():
               "variable_degree_min", "zero_columns", "zero_rows"]
     assert sorted(rep) == frozen
     assert len(rep) == 24
+
+
+def test_T2_17_cli_unauthorized_creates_no_formal_dir(tmp_path, monkeypatch):
+    # Real CLI authorized path NOT run: unauthorized state only.
+    counts = {"runner": 0, "preflight": 0, "build": 0, "audit": 0,
+              "write": 0}
+
+    def _runner(**kw):
+        counts["runner"] += 1
+        return {"phase": "structure"}
+
+    orig_preflight = mod.run_structure_preflight
+    orig_build = mod.build_dv3_nested_mother
+    orig_audit = mod.audit_frozen_prefixes
+    orig_write = mod.write_structure_evidence
+
+    def _preflight(**kw):
+        counts["preflight"] += 1
+        return orig_preflight(**kw)
+
+    def _build(*a, **k):
+        counts["build"] += 1
+        return orig_build(*a, **k)
+
+    def _audit(*a, **k):
+        counts["audit"] += 1
+        return orig_audit(*a, **k)
+
+    def _write(*a, **k):
+        counts["write"] += 1
+        return orig_write(*a, **k)
+
+    monkeypatch.setitem(cli._RUNNERS, "structure", _runner)
+    monkeypatch.setattr(mod, "run_structure_preflight", _preflight)
+    monkeypatch.setattr(mod, "build_dv3_nested_mother", _build)
+    monkeypatch.setattr(mod, "audit_frozen_prefixes", _audit)
+    monkeypatch.setattr(mod, "write_structure_evidence", _write)
+    monkeypatch.setattr(cli, "_load_state",
+                        lambda path: {"structure_execution_authorized": False})
+    monkeypatch.chdir(tmp_path)
+    assert cli.main(["--phase", "structure"]) == 3
+    assert counts == {"runner": 0, "preflight": 0, "build": 0, "audit": 0,
+                      "write": 0}
+    assert not (ROOT / mod.STRUCTURE_FORMAL_ROOT).exists()
+    assert list(tmp_path.rglob("*")) == []
+
+
+def test_T2_18_cli_structure_frozen_out_dir_fake_files(tmp_path, monkeypatch):
+    # Real CLI authorized path NOT run: the spy captures the frozen out_dir
+    # value, then file creation is redirected to tmp; formal root untouched.
+    seen = {}
+    fake = _SeqFake(l1_pass=True, l2_pass=True)
+    real_seq = cli._RUNNERS["structure"]
+
+    def _spy(**kw):
+        seen.update(kw)
+        redir = tmp_path / "redir"
+        return real_seq(authorized=kw.get("authorized"),
+                        build_fn=fake.build, audit_fn=fake.audit,
+                        preflight_fn=fake.preflight, out_dir=str(redir))
+
+    monkeypatch.setitem(cli._RUNNERS, "structure", _spy)
+    monkeypatch.setattr(cli, "_load_state",
+                        lambda path: {"structure_execution_authorized": True})
+    monkeypatch.chdir(tmp_path)
+    assert cli.main(["--phase", "structure"]) == 0
+    assert seen.get("authorized") is True
+    assert str(seen.get("out_dir")) == str(
+        ROOT / "workspace" / "v72p2d5_structure" / "20260905_r2")
+    assert str(seen.get("out_dir")) == str(ROOT / mod.STRUCTURE_FORMAL_ROOT)
+    redir = tmp_path / "redir"
+    assert (sorted(p.name for p in redir.iterdir())
+            == sorted(mod.STRUCTURE_EVIDENCE_FILES))
+    assert not (ROOT / mod.STRUCTURE_FORMAL_ROOT).exists()
+    gseen = {}
+
+    def _gspy(**kw):
+        gseen.update(kw)
+        return {"phase": "g0"}
+
+    monkeypatch.setitem(cli._RUNNERS, "g0", _gspy)
+    monkeypatch.setattr(cli, "_load_state",
+                        lambda path: {"g0_execution_authorized": True})
+    assert cli.main(["--phase", "g0"]) == 0
+    assert gseen.get("authorized") is True
+    assert "out_dir" not in gseen

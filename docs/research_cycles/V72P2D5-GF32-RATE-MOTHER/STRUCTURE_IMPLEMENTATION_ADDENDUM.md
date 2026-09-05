@@ -210,3 +210,30 @@ byte-identical:
 - STRUCTURE_AUTHORIZED: false (all authorizations false; T1_19 green)
 - NEXT_GATE: independent STRUCTURE_IMPLEMENTATION_REVIEW
   (reviewer writes the verdict; A5 is a placeholder, not PASS)
+
+## 11. CLI out_dir close-out (final, implementation-only)
+
+Small fix only; core orchestrator/preflight/writer/mother untouched:
+
+- Call line (CLI): `_RUNNERS["structure"](authorized=True,
+  out_dir=STRUCTURE_OUT_DIR)` with `STRUCTURE_OUT_DIR = ROOT /
+  "workspace" / "v72p2d5_structure" / "20260905_r2"`, ROOT resolved
+  from the CLI file location (`_HERE.parents[1]`). No absolute paths,
+  no new CLI params.
+- Auth-before-create preserved: the `is_phase_authorized` gate still
+  runs first; the orchestrator call happens only after it passes.
+- Existing-dir refuse kept: the writer's `FileExistsError` propagates
+  through the CLI's refuse path (nonzero exit, no swallow).
+- Other phases unaffected: `g0 | p0-cost | g1 | g2` still call with
+  `authorized=True` only (T2_18 asserts `g0` receives no `out_dir`).
+- No preflight/writer/mother change; no science claim.
+- Binding: `structure_runner_implementation` set to
+  `737f731702106bacff3c509a3f877a8b037f1434` in `cycle_state.yaml`
+  (`accepted_r2_implementation` stays
+  `d39b5caec5560d96991b8747bfc12f473e2fe776`).
+- `next_gate` set to `STRUCTURE_PRE_EXECUTE_REVIEW`; it takes effect
+  only on independent review PASS. All execution authorizations stay
+  false; no execution granted.
+- Tests: 78/78 pass (76 prior + T2_17 unauthorized no-formal-dir +
+  T2_18 frozen-out_dir fake-files). The real CLI authorized path was
+  NOT run; the formal root was NOT created.
