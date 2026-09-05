@@ -1,0 +1,14 @@
+cycle_id: V72P2D5-GF32-RATE-MOTHER
+state: PLAN_ACCEPTED
+implementation_authorized: false
+structure_execution_authorized: false
+g0_execution_authorized: false
+g1_execution_authorized: false
+g2_execution_authorized: false
+synthetic_execution_authorized: false
+real_execution_authorized: false
+formal_execution_authorized: false
+scientific_promotion: false
+decoder_executed: false
+val_rows_read: 0
+next_gate: IMPLEMENTATION_PACKET_REVIEW
