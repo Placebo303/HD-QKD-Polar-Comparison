@@ -93,11 +93,37 @@ implement the smallest explicit synthetic entrypoint that:
 Do not modify the accepted mother construction, structure output, V31/V35/V54
 source, or any frozen D5 plan file. Do not add a generalized framework.
 
+The exact implementation allowlist for this delta is:
+
+- `comparison_bench/src/comparison_bench/formal_ir/v72p2d5_gf32_rate_mother.py`
+- `scripts/v72p2d5_gf32_rate_mother.py`
+- `comparison_bench/tests/test_v72p2d5_gf32_rate_mother.py`
+- `docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/G0_IMPLEMENTATION_REVIEW.md`
+- `docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/cycle_state.yaml`
+
+The first three are the only code/test files. The implementation review is
+written by an independent reviewer, not by the coder. No other tracked or
+untracked file may be staged for this delta.
+
 ## 6. Output contract after authorization
 
-Use a fresh additive workspace directory only, never the structure directory.
-The exact G0 output directory and four-file names must be fixed in the
-authorization record before execution. Store only scalar metrics, tiny
+Use this fresh additive workspace directory only, never the structure
+directory:
+
+```text
+workspace/v72p2d5_g0/20260905_r2/
+```
+
+The four file names are fixed now:
+
+```text
+results.json
+table.csv
+report.md
+execution_summary.json
+```
+
+Store only scalar metrics, tiny
 histograms, seed list, call counts, and the exhaustive error maximum.
 
 Do not store matrices, support/coeff arrays, prior tables, syndromes, raw
