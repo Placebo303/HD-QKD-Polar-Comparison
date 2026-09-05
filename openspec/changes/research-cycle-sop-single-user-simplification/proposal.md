@@ -24,4 +24,3 @@ without preventing a concrete scientific or overwrite failure.
 
 Workflow documentation and handoff templates only. No algorithm, decoder,
 dataset, result, or lifecycle authorization is changed by this proposal.
-

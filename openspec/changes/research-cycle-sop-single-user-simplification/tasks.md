@@ -5,4 +5,3 @@
 - [x] Update ChatGPT and OpenCode handoff templates.
 - [x] Preserve explicit authorization, no-overwrite, failure retention, and result review.
 - [x] Record the workflow decision in project memory and the decision log.
-
