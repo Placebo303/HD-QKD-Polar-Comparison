@@ -5,9 +5,9 @@ plan_accepted: true
 implementation_authorized: false
 implementation_candidate_accepted: false
 implementation_accepted: true
-structure_execution_authorized: true
-structure_execution_attempts: 0
-structure_execution_completed: 0
+structure_execution_authorized: false
+structure_execution_attempts: 1
+structure_execution_completed: 1
 g0_execution_authorized: false
 p0_cost_execution_authorized: false
 g1_execution_authorized: false
@@ -17,11 +17,11 @@ real_execution_authorized: false
 formal_execution_authorized: false
 scientific_promotion: false
 decoder_executed: false
-full_mother_built: false
+full_mother_built: true
 cal_rows_read: 0
 val_rows_read: 0
 reason: DEGREE2_PREFIX_CONNECTIVITY_IMPOSSIBLE
-next_gate: STRUCTURE_EXECUTION
+next_gate: G0_PACKET_REVIEW
 # R2 structure-runner version binding (implementation-only round, no auth change).
 accepted_r2_implementation: d39b5caec5560d96991b8747bfc12f473e2fe776
 structure_runner_implementation: 737f731702106bacff3c509a3f877a8b037f1434

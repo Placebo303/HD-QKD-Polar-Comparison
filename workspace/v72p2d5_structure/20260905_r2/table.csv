@@ -1,0 +1,9 @@
+layer,prefix_rows,rank,zero_rows,zero_columns,isolated_variables,connected_components,largest_component_fraction,duplicate_projective_columns,coefficients_nonzero,variable_degree_min,base_pair_duplicates,support_triple_duplicates,four_cycles,status
+L1,782,782,0,0,0,1,1.0,0,True,2,0,0,0,STRUCTURE_PASS
+L1,821,821,0,0,0,1,1.0,0,True,2,0,0,2,STRUCTURE_PASS_WITH_CYCLE_RISK
+L1,860,860,0,0,0,1,1.0,0,True,2,0,0,2,STRUCTURE_PASS_WITH_CYCLE_RISK
+L1,938,938,0,0,0,1,1.0,0,True,2,0,0,4,STRUCTURE_PASS_WITH_CYCLE_RISK
+L2,686,686,0,0,0,1,1.0,0,True,2,0,0,0,STRUCTURE_PASS
+L2,720,720,0,0,0,1,1.0,0,True,2,0,0,0,STRUCTURE_PASS
+L2,755,755,0,0,0,1,1.0,0,True,2,0,0,0,STRUCTURE_PASS
+L2,823,823,0,0,0,1,1.0,0,True,2,0,0,2,STRUCTURE_PASS_WITH_CYCLE_RISK
