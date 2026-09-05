@@ -50,9 +50,10 @@ r3_scientific_promotion: false
 # R4 binding 2026-09-05 (additive; R2/R3 untouched): candidate only, no authorization, no execution.
 r4_execution_cycle: V72P2D3_GF32_R4_DECODER
 r4_implementation_sha: ed7277da
-r4_authorized: 0
+r4_authorized: 1
 r4_attempts: 0
 r4_completed: 0
-r4_real_execution_authorized: false
+r4_real_execution_authorized: true
 r4_formal_execution_authorized: false
 r4_scientific_promotion: false
+# R4 auth 2026-09-05: Pre-EXECUTE PASS at HEAD cabecc21 (HEAD==origin, r4 bound ed7277da code-identical, prod absent, 53 passed, READY, r4 pending); authorize one real invocation (global+r4 real=true, formal=false, promotion=false); r4_attempts=0.
