@@ -6,6 +6,11 @@ required. Every phase refuses before any work because the frozen
 the authorization state itself; no data tables are read and no output is
 created. Authorization logic lives in exactly one place
 (:func:`is_phase_authorized` in the core module).
+
+G0 contract note: ``historical_decoder_invocations`` stays 0 for fake/test
+paths and 0->1 before the first real historic call (max 1 per whole G0). A
+single historic call that hangs needs an outer-process watchdog in the
+future Pre-EXECUTE packet; no extra-process machinery lives here.
 """
 
 from __future__ import annotations

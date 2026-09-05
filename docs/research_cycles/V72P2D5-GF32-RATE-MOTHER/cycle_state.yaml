@@ -27,7 +27,7 @@ structure_reason: all_8_prefixes_passed_11_hard_gates; four_cycle_risk_carried
 g0_packet_review: PASS
 g0_implementation_candidate: true
 g0_implementation_accepted: false
-next_gate: G0_IMPLEMENTATION_REVIEW
+next_gate: INDEPENDENT_G0_IMPLEMENTATION_R1_REVIEW
 # R2 structure-runner version binding (implementation-only round, no auth change).
 accepted_r2_implementation: d39b5caec5560d96991b8747bfc12f473e2fe776
 structure_runner_implementation: 737f731702106bacff3c509a3f877a8b037f1434

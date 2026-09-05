@@ -83,6 +83,10 @@ GRADE_BLOCKED = "IMPLEMENTATION_OR_NUMERICAL_BLOCKED"
 G0_FORMAL_ROOT = "workspace/v72p2d5_g0/20260905_r2"
 G0_EVIDENCE_FILES = ("results.json", "table.csv", "report.md",
                      "execution_summary.json")
+G0_WALL_BUDGET_S = 120.0
+G0_RSS_BUDGET_BYTES = 2 * 1024**3
+G0_TREE_COEFF_A = 7
+G0_TREE_SYNDROME = 5
 
 
 class NotAuthorizedError(PermissionError):
@@ -981,7 +985,15 @@ def _load_g0_decoder():
 
 
 def historical_g0_decoder(h, prior, syndrome, layer=None):
-    """Thin authorized adapter for the historical GF32 row-layered decoder."""
+    """Thin authorized adapter for the historical GF32 row-layered decoder.
+
+    Invocation contract: ``historical_decoder_invocations`` is 0 for every
+    fake-decoder run and 0->1 before the first real historic call in one G0
+    (max 1 per whole G0, stays 1 across its eight seeds). A single historic
+    call that hangs needs an outer-process watchdog in the future
+    Pre-EXECUTE packet; no multiprocessing/retry framework lives here
+    (ponytail-lite).
+    """
     _ = layer
     decoder = _load_g0_decoder()
     result = decoder(
@@ -999,6 +1011,9 @@ def historical_g0_decoder(h, prior, syndrome, layer=None):
         "iterations": int(result.iterations),
         "final_beliefs": np.asarray(result.final_beliefs),
     }
+
+
+historical_g0_decoder._v72p2d5_historical_decoder = True  # noqa: SLF001
 
 
 def build_g0_fixture():
@@ -1103,6 +1118,128 @@ def _g0_exhaustive_error(p_b, p_f):
     return float(max(errors))
 
 
+def _g0_factorization_error(p_b, p_f):
+    """Accurately named probability-decomposition check (NOT tree evidence).
+
+    Same explicit enumeration as :func:`_g0_exhaustive_error`; it verifies
+    ``P_F = P1 * P2`` recovery only. Tree-vs-exhaustive evidence comes solely
+    from :func:`_g0_tree_posterior_check`.
+    """
+    return _g0_exhaustive_error(p_b, p_f)
+
+
+def build_g0_tree_fixture():
+    """Frozen tiny tree fixture: two GF32 vars + one parity factor.
+
+    Factor ``x (+) a*y = syndrome`` with ``a = G0_TREE_COEFF_A`` (nonzero,
+    non-degenerate, nontrivial ``a != 0,1``) and frozen syndrome. Priors are
+    strictly positive, normalized, non-uniform and asymmetric (linear ramp
+    vs reversed quadratic ramp).
+    """
+    wx = np.arange(1, Q + 1, dtype=np.float64)
+    prior_x = wx / float(wx.sum())
+    wy = (np.arange(1, Q + 1, dtype=np.float64) ** 2)[::-1] + 0.5
+    prior_y = wy / float(wy.sum())
+    return prior_x, prior_y, int(G0_TREE_COEFF_A), int(G0_TREE_SYNDROME)
+
+
+def _tree_exhaustive_marginals(prior_x, prior_y, coeff_a, syndrome):
+    """Exhaustive side: explicit 32x32 enumeration with parity constraint."""
+    px = np.asarray(prior_x, dtype=np.float64).ravel()
+    py = np.asarray(prior_y, dtype=np.float64).ravel()
+    a, s = int(coeff_a), int(syndrome)
+    if px.shape != (Q,) or py.shape != (Q,):
+        raise ValueError("tree priors must have shape (32,)")
+    if not np.all(np.isfinite(px)) or not np.all(np.isfinite(py)):
+        raise ValueError("tree priors must be finite")
+    if np.any(px <= 0) or np.any(py <= 0):
+        raise ValueError("tree priors must be strictly positive")
+    if a == 0 or not 0 <= s < Q:
+        raise ValueError("tree factor needs nonzero coeff and 0<=syndrome<32")
+    joint = np.zeros((Q, Q), dtype=np.float64)
+    for x in range(Q):
+        for y in range(Q):
+            if (int(x) ^ int(_gf32_mul_raw(a, y))) == s:
+                joint[x, y] = float(px[x] * py[y])
+    total = float(joint.sum())
+    if not np.isfinite(total) or total <= 0:
+        raise ValueError("tree exhaustive joint mass is invalid")
+    return joint.sum(axis=1) / total, joint.sum(axis=0) / total
+
+
+def _tree_message_marginals(prior_x, prior_y, coeff_a, syndrome):
+    """Tree sum-product side: factor-to-variable messages, separate path."""
+    px = np.asarray(prior_x, dtype=np.float64).ravel()
+    py = np.asarray(prior_y, dtype=np.float64).ravel()
+    a, s = int(coeff_a), int(syndrome)
+    if px.shape != (Q,) or py.shape != (Q,):
+        raise ValueError("tree priors must have shape (32,)")
+    if not np.all(np.isfinite(px)) or not np.all(np.isfinite(py)):
+        raise ValueError("tree priors must be finite")
+    if np.any(px <= 0) or np.any(py <= 0):
+        raise ValueError("tree priors must be strictly positive")
+    if a == 0 or not 0 <= s < Q:
+        raise ValueError("tree factor needs nonzero coeff and 0<=syndrome<32")
+    inv_a = _gf32_inv(a)
+    msg_to_y = np.empty(Q, dtype=np.float64)
+    for y in range(Q):
+        msg_to_y[y] = float(px[int(s) ^ int(_gf32_mul_raw(a, y))])
+    msg_to_x = np.empty(Q, dtype=np.float64)
+    for x in range(Q):
+        msg_to_x[x] = float(py[int(_gf32_mul_raw(inv_a, int(s) ^ int(x)))])
+    un_x = px * msg_to_x
+    un_y = py * msg_to_y
+    sx, sy = float(un_x.sum()), float(un_y.sum())
+    if not np.isfinite(sx) or not np.isfinite(sy) or sx <= 0 or sy <= 0:
+        raise ValueError("tree message mass is invalid")
+    return un_x / sx, un_y / sy
+
+
+def _g0_tree_posterior_check(prior_x=None, prior_y=None, coeff_a=None,
+                             syndrome=None):
+    """Frozen tiny-tree vs exhaustive posterior gate (no decoder calls).
+
+    Uses the frozen fixture when args are None. Returns scalars only:
+    ``tree_exhaustive_posterior_error`` (max abs over x/y marginals),
+    ``tree_map_equal`` (both MAPs identical), ``tree_finite`` and
+    ``tree_prior_ok`` (frozen priors normalized/positive).
+    """
+    if prior_x is None and prior_y is None and coeff_a is None \
+            and syndrome is None:
+        prior_x, prior_y, coeff_a, syndrome = build_g0_tree_fixture()
+    px = np.asarray(prior_x, dtype=np.float64).ravel()
+    py = np.asarray(prior_y, dtype=np.float64).ravel()
+    prior_ok = bool(
+        px.shape == (Q,) and py.shape == (Q,)
+        and np.all(np.isfinite(px)) and np.all(np.isfinite(py))
+        and np.all(px > 0) and np.all(py > 0)
+        and abs(float(px.sum()) - 1.0) < 1e-12
+        and abs(float(py.sum()) - 1.0) < 1e-12
+        and not np.allclose(px, py))
+    try:
+        ex_x, ex_y = _tree_exhaustive_marginals(px, py, coeff_a, syndrome)
+        tr_x, tr_y = _tree_message_marginals(px, py, coeff_a, syndrome)
+    except Exception:
+        return {"tree_exhaustive_posterior_error": float("inf"),
+                "tree_map_equal": False, "tree_finite": False,
+                "tree_prior_ok": bool(prior_ok)}
+    finite = bool(np.all(np.isfinite(ex_x)) and np.all(np.isfinite(ex_y))
+                  and np.all(np.isfinite(tr_x)) and np.all(np.isfinite(tr_y)))
+    err = float(max(float(np.max(np.abs(tr_x - ex_x))),
+                    float(np.max(np.abs(tr_y - ex_y)))))
+    map_eq = bool(int(np.argmax(tr_x)) == int(np.argmax(ex_x))
+                  and int(np.argmax(tr_y)) == int(np.argmax(ex_y)))
+    return {"tree_exhaustive_posterior_error": err,
+            "tree_map_equal": map_eq,
+            "tree_finite": finite,
+            "tree_prior_ok": bool(prior_ok)}
+
+
+def _is_historical_decoder(decode_fn):
+    return bool(decode_fn is historical_g0_decoder
+                or getattr(decode_fn, "_v72p2d5_historical_decoder", False))
+
+
 def _run_layered_block(decode_fn, h1, h2, p1, p2, block, oracle):
     n = block["bob"].shape[0]
     prior_l1 = _floor_renorm(p1[:, block["bob"]].T, DECODER_FLOOR)
@@ -1164,9 +1301,19 @@ def run_structure_phase(*, h=None, layer="L1", authorized=False):
 
 def run_g0_phase(*, h=None, p_b=None, p_f=None,
                  decode_fn=None, authorized=False):
-    """G0 tiny math gate over the frozen G0 seeds (noiseless, oracle prior)."""
+    """G0 tiny math gate over the frozen G0 seeds (noiseless, oracle prior).
+
+    Math gate (all must hold or ``G0_BLOCKED_MATH`` before any decoder
+    lazy-import/call): factorization + true tree-vs-exhaustive posteriors +
+    MAP + prior norm/positivity + fixture/matrix checks. Resource contract:
+    before/after EACH seed call check elapsed<=120s and RSS<2GiB; on exceed
+    stop remaining seeds as ``G0_BLOCKED_RESOURCE`` with partial counts kept.
+    A single historic call that hangs needs an outer-process watchdog in the
+    future Pre-EXECUTE packet; no multiprocessing/retry here (ponytail-lite).
+    """
     _require_authorized("g0", authorized)
     _require_decode_fn("g0", decode_fn)
+    t_phase_start = time.perf_counter()
     h1, h2 = _split_layers(h)
     if p_b is None or p_f is None:
         raise ValueError("g0 requires injected p_b and p_f tables")
@@ -1187,15 +1334,48 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
     mapping_err = float(np.max(np.abs(
         layers_to_symbols(*symbols_to_layers(np.arange(2 * Q)))
         - np.arange(2 * Q))))
-    exhaustive_err = _g0_exhaustive_error(pb, pf)
+    try:
+        exhaustive_err = float(_g0_exhaustive_error(pb, pf))
+    except Exception:
+        exhaustive_err = float("inf")
+    factorization_err = float(exhaustive_err)
+    tree_rep = _g0_tree_posterior_check()
+    tree_err = float(tree_rep["tree_exhaustive_posterior_error"])
+    tree_map_eq = bool(tree_rep["tree_map_equal"])
+    tree_finite = bool(tree_rep["tree_finite"])
+    tree_prior_ok = bool(tree_rep["tree_prior_ok"])
+    try:
+        pb_norm = abs(float(pb.sum()) - 1.0)
+        pf_col = float(np.max(np.abs(pf.sum(axis=0) - 1.0)))
+        prior_norm_err = float(max(pb_norm, pf_col))
+        prior_positive = bool(np.all(np.isfinite(pb)) and np.all(np.isfinite(pf))
+                              and np.all(pb > 0) and np.all(pf > 0))
+    except Exception:
+        prior_norm_err, prior_positive = float("inf"), False
+    try:
+        fixture_ok = bool(
+            h1.ndim == 2 and h2.ndim == 2
+            and int(h1.shape[1]) == int(h2.shape[1]) == width
+            and 1 <= width <= 9 and int(h1.shape[0]) >= 1
+            and int(h2.shape[0]) >= 1
+            and bool(np.all(h1 >= 0)) and bool(np.all(h1 < Q))
+            and bool(np.all(h2 >= 0)) and bool(np.all(h2 < Q)))
+    except Exception:
+        fixture_ok = False
     math_pass = bool(marg_err < 1e-12 and cond_err < 1e-12
                      and chain_err < 1e-10 and mapping_err == 0.0
-                     and exhaustive_err < 1e-12)
+                     and factorization_err < 1e-12
+                     and tree_err < 1e-12 and tree_map_eq and tree_finite
+                     and tree_prior_ok
+                     and prior_norm_err < 1e-12 and prior_positive
+                     and fixture_ok)
 
-    # Do not call even an injected decoder when the probability or mapping
-    # gate is already invalid.  This makes a mathematical failure a distinct,
-    # fail-closed outcome rather than a decoder experiment on bad inputs.
+    # Do not call even an injected decoder when the math gate is invalid,
+    # and never lazy-import the historical decoder on that path. This makes
+    # a mathematical failure a distinct fail-closed outcome.
     if not math_pass:
+        wall_s = float(time.perf_counter() - t_phase_start)
+        peak = _rss_bytes()
         return {
             "phase": "g0",
             "marginal_err": marg_err,
@@ -1203,6 +1383,14 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             "chain_err": float(chain_err),
             "mapping_error": mapping_err,
             "exhaustive_error": exhaustive_err,
+            "factorization_error": factorization_err,
+            "tree_exhaustive_posterior_error": tree_err,
+            "tree_map_equal": tree_map_eq,
+            "tree_finite": tree_finite,
+            "tree_prior_ok": tree_prior_ok,
+            "prior_norm_error": prior_norm_err,
+            "prior_positive": prior_positive,
+            "fixture_ok": fixture_ok,
             "attempted_blocks": 0,
             "completed_blocks": 0,
             "exact_count": 0,
@@ -1212,6 +1400,9 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             "records": [],
             "seeds": [int(seed) for seed in G0_SEEDS],
             "decoder_calls": 0,
+            "historical_decoder_invocations": 0,
+            "wall_seconds": wall_s,
+            "peak_rss_bytes": peak,
             "failed_seed": None,
             "failure_stage": "math",
             "error": "G0 mathematical gate failed",
@@ -1219,6 +1410,10 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             "decision": "G0_BLOCKED_MATH",
         }
 
+    exact = 0
+    syndrome_ok = 0
+    is_hist = _is_historical_decoder(decode_fn)
+    hist_inv = 0
     exact = 0
     syndrome_ok = 0
     finite = 0
@@ -1230,7 +1425,25 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
     failure_stage = None
     failure_error = None
     failure_decision = None
-    for seed in G0_SEEDS:
+    seeds_list = [int(v) for v in G0_SEEDS]
+    for pos, seed in enumerate(seeds_list):
+        elapsed = float(time.perf_counter() - t_phase_start)
+        rss = _rss_bytes()
+        if elapsed > G0_WALL_BUDGET_S or (
+                rss is not None and rss >= G0_RSS_BUDGET_BYTES):
+            failed_seed = int(seed)
+            failure_stage = "resource"
+            failure_error = (f"RESOURCE budget exceeded before seed "
+                             f"{seed}: elapsed_s={elapsed:.3f} "
+                             f"rss_bytes={rss}")
+            failure_decision = "G0_BLOCKED_RESOURCE"
+            attempted += 1
+            records.append({"seed": int(seed), "exact": False,
+                            "syndrome_ok": False, "finite": False,
+                            "iterations": 0, "syndrome_weight": 0,
+                            "status": "RESOURCE_BLOCKED",
+                            "error": failure_error})
+            break
         attempted += 1
         try:
             block = sample_matched_block(pb, pf, width, seed)
@@ -1257,6 +1470,8 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
                             "status": "MATH_BLOCKED",
                             "error": failure_error})
             break
+        if is_hist and hist_inv == 0:
+            hist_inv = 1
         calls += 1
         try:
             e, syn_ok, iterations, is_finite, _, observed = _decode_block(
@@ -1293,18 +1508,33 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
                         "iterations": int(iterations),
                         "syndrome_weight": int(np.count_nonzero(observed)),
                         "status": "COMPLETED"})
+        elapsed = float(time.perf_counter() - t_phase_start)
+        rss = _rss_bytes()
+        if (elapsed > G0_WALL_BUDGET_S or (
+                rss is not None and rss >= G0_RSS_BUDGET_BYTES)) \
+                and pos + 1 < len(seeds_list):
+            failed_seed = int(seeds_list[pos + 1])
+            failure_stage = "resource"
+            failure_error = (f"RESOURCE budget exceeded after seed "
+                             f"{seed}: elapsed_s={elapsed:.3f} "
+                             f"rss_bytes={rss}")
+            failure_decision = "G0_BLOCKED_RESOURCE"
+            break
     attempted = int(attempted)
-    all_finite = finite == attempted
-    all_syndrome = syndrome_ok == attempted
+    all_finite = finite == attempted and attempted == completed
+    all_syndrome = syndrome_ok == attempted and attempted == completed
     passed = bool(failure_decision is None
                   and completed == len(G0_SEEDS)
                   and exact == attempted and all_syndrome and all_finite)
     if passed:
         decision = "G0_PASS"
     elif failure_decision is not None:
+        # Never mislabel a resource stop as decoder failure/success.
         decision = failure_decision
     else:
         decision = "G0_BLOCKED_DECODER"
+    wall_s = float(time.perf_counter() - t_phase_start)
+    peak = _rss_bytes()
     return {
         "phase": "g0",
         "marginal_err": marg_err,
@@ -1312,6 +1542,14 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
         "chain_err": float(chain_err),
         "mapping_error": mapping_err,
         "exhaustive_error": exhaustive_err,
+        "factorization_error": factorization_err,
+        "tree_exhaustive_posterior_error": tree_err,
+        "tree_map_equal": tree_map_eq,
+        "tree_finite": tree_finite,
+        "tree_prior_ok": tree_prior_ok,
+        "prior_norm_error": prior_norm_err,
+        "prior_positive": prior_positive,
+        "fixture_ok": fixture_ok,
         "attempted_blocks": attempted,
         "completed_blocks": int(completed),
         "exact_count": int(exact),
@@ -1320,8 +1558,11 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
         "syndrome_ok_count": int(syndrome_ok),
         "finite_count": int(finite),
         "records": records,
-        "seeds": [int(seed) for seed in G0_SEEDS],
+        "seeds": seeds_list,
         "decoder_calls": int(calls),
+        "historical_decoder_invocations": int(hist_inv),
+        "wall_seconds": wall_s,
+        "peak_rss_bytes": peak,
         "failed_seed": failed_seed,
         "failure_stage": failure_stage,
         "error": failure_error,
@@ -1331,7 +1572,12 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
 
 
 def write_g0_evidence(out_dir, result):
-    """Write the four scalar-only G0 evidence files to a fresh directory."""
+    """Write the four scalar-only G0 evidence files to a fresh directory.
+
+    Scalars/seeds/status/counts/error-bounds/small-hist only; no full
+    prior/matrix/support/coeff/syndrome arrays, raw symbols, absolute paths,
+    or hashes.
+    """
     d = Path(out_dir)
     if d.exists():
         raise FileExistsError(f"refusing to overwrite G0 evidence dir: {d}")
@@ -1348,6 +1594,7 @@ def write_g0_evidence(out_dir, result):
             "iterations": int(item.get("iterations", 0)),
             "syndrome_weight": int(item.get("syndrome_weight", 0)),
         })
+    _tree_def = float("inf")
     payload = {
         "phase": "g0",
         "decision": result.get("decision", "G0_BLOCKED_MATH"),
@@ -1363,16 +1610,32 @@ def write_g0_evidence(out_dir, result):
         "syndrome_ok_count": int(result.get("syndrome_ok_count", 0)),
         "finite_count": int(result.get("finite_count", 0)),
         "decoder_calls": int(result.get("decoder_calls", 0)),
+        "historical_decoder_invocations": int(
+            result.get("historical_decoder_invocations", 0)),
+        "wall_seconds": float(result.get("wall_seconds", 0.0)),
+        "peak_rss_bytes": result.get("peak_rss_bytes"),
         "marginal_err": float(result.get("marginal_err", float("inf"))),
         "conditional_err": float(result.get("conditional_err", float("inf"))),
         "chain_err": float(result.get("chain_err", float("inf"))),
         "mapping_error": float(result.get("mapping_error", float("inf"))),
         "exhaustive_error": float(
             result.get("exhaustive_error", float("inf"))),
+        "factorization_error": float(result.get(
+            "factorization_error", result.get("exhaustive_error", _tree_def))),
+        "tree_exhaustive_posterior_error": float(result.get(
+            "tree_exhaustive_posterior_error", _tree_def)),
+        "tree_map_equal": bool(result.get("tree_map_equal", False)),
+        "tree_finite": bool(result.get("tree_finite", False)),
+        "tree_prior_ok": bool(result.get("tree_prior_ok", False)),
+        "prior_norm_error": float(result.get("prior_norm_error", _tree_def)),
+        "prior_positive": bool(result.get("prior_positive", False)),
+        "fixture_ok": bool(result.get("fixture_ok", False)),
         "records": records,
         "error": result.get("error"),
         "output_files": list(G0_EVIDENCE_FILES),
     }
+    if payload["peak_rss_bytes"] is not None:
+        payload["peak_rss_bytes"] = int(payload["peak_rss_bytes"])
     with open(d / "results.json", "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2, sort_keys=True)
     with open(d / "table.csv", "w", encoding="utf-8") as fh:
@@ -1389,12 +1652,24 @@ def write_g0_evidence(out_dir, result):
              f"syndrome_ok_count: {payload['syndrome_ok_count']}",
              f"finite_count: {payload['finite_count']}",
              f"decoder_calls: {payload['decoder_calls']}",
+             f"historical_decoder_invocations: "
+             f"{payload['historical_decoder_invocations']}",
+             f"wall_seconds: {payload['wall_seconds']}",
+             f"peak_rss_bytes: {payload['peak_rss_bytes']}",
              f"exact_failure_fraction: {payload['exact_failure_fraction']}",
              f"marginal_err: {payload['marginal_err']}",
              f"conditional_err: {payload['conditional_err']}",
              f"chain_err: {payload['chain_err']}",
              f"mapping_error: {payload['mapping_error']}",
              f"exhaustive_error: {payload['exhaustive_error']}",
+             f"factorization_error: {payload['factorization_error']}",
+             f"tree_exhaustive_posterior_error: "
+             f"{payload['tree_exhaustive_posterior_error']}",
+             f"tree_map_equal: {payload['tree_map_equal']}",
+             f"tree_finite: {payload['tree_finite']}",
+             f"prior_norm_error: {payload['prior_norm_error']}",
+             f"prior_positive: {payload['prior_positive']}",
+             f"fixture_ok: {payload['fixture_ok']}",
              f"completed_blocks: {payload['completed_blocks']}",
              f"failed_seed: {payload['failed_seed']}",
              f"failure_stage: {payload['failure_stage']}"]
@@ -1410,6 +1685,10 @@ def write_g0_evidence(out_dir, result):
         "failed_seed": payload["failed_seed"],
         "failure_stage": payload["failure_stage"],
         "decoder_calls": payload["decoder_calls"],
+        "historical_decoder_invocations": payload[
+            "historical_decoder_invocations"],
+        "wall_seconds": payload["wall_seconds"],
+        "peak_rss_bytes": payload["peak_rss_bytes"],
         "files": list(G0_EVIDENCE_FILES),
     }
     with open(d / "execution_summary.json", "w", encoding="utf-8") as fh:
@@ -1432,7 +1711,14 @@ def run_g0_synthetic(*, authorized=False, decode_fn=None, out_dir=None):
             "attempted_blocks": 0, "completed_blocks": 0,
             "exact_count": 0, "exact_failure_fraction": 1.0,
             "syndrome_ok_count": 0, "finite_count": 0,
-            "decoder_calls": 0, "failed_seed": None,
+            "decoder_calls": 0, "historical_decoder_invocations": 0,
+            "wall_seconds": 0.0, "peak_rss_bytes": _rss_bytes(),
+            "factorization_error": float("inf"),
+            "tree_exhaustive_posterior_error": float("inf"),
+            "tree_map_equal": False, "tree_finite": False,
+            "tree_prior_ok": False, "prior_norm_error": float("inf"),
+            "prior_positive": False, "fixture_ok": False,
+            "failed_seed": None,
             "failure_stage": "fixture", "error": f"{type(exc).__name__}: {exc}",
         }
     except Exception as exc:
@@ -1443,6 +1729,13 @@ def run_g0_synthetic(*, authorized=False, decode_fn=None, out_dir=None):
             "exact_count": 0,
             "exact_failure_fraction": 1.0, "syndrome_ok_count": 0,
             "finite_count": 0, "decoder_calls": 0,
+            "historical_decoder_invocations": 0,
+            "wall_seconds": 0.0, "peak_rss_bytes": _rss_bytes(),
+            "factorization_error": float("inf"),
+            "tree_exhaustive_posterior_error": float("inf"),
+            "tree_map_equal": False, "tree_finite": False,
+            "tree_prior_ok": False, "prior_norm_error": float("inf"),
+            "prior_positive": False, "fixture_ok": False,
             "failed_seed": None, "failure_stage": "math",
             "error": f"{type(exc).__name__}: {exc}",
         }

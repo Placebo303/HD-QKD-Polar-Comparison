@@ -1754,3 +1754,282 @@ def test_T2_34_all_g0_p0_g1_g2_real_formal_auth_still_false():
     for phase in ("structure", "g0", "p0-cost", "g1", "g2"):
         assert mod.is_phase_authorized(state, phase) is False
     assert mod.is_phase_authorized(state, "no-such-phase") is False
+
+
+# --------------------------------------------------------------------------
+# R1 closeout rework: B1 true tree + B2 resource/invocation (fake/math/tmp)
+# --------------------------------------------------------------------------
+def test_R1_B1_tree_pass_no_decoder_calls():
+    px, py, a, s = mod.build_g0_tree_fixture()
+    assert px.shape == (32,) and py.shape == (32,)
+    assert bool(np.all(px > 0)) and bool(np.all(py > 0))
+    assert np.isclose(float(px.sum()), 1.0, atol=1e-12)
+    assert np.isclose(float(py.sum()), 1.0, atol=1e-12)
+    assert float(np.std(px)) > 0 and float(np.std(py)) > 0
+    assert not np.allclose(px, py)
+    assert a == mod.G0_TREE_COEFF_A and a not in (0, 1) and 1 <= a < 32
+    assert 0 <= s < 32
+    rep = mod._g0_tree_posterior_check()
+    assert rep["tree_exhaustive_posterior_error"] < 1e-12
+    assert rep["tree_map_equal"] is True
+    assert rep["tree_finite"] is True
+    assert rep["tree_prior_ok"] is True
+    ex_src = inspect.getsource(mod._tree_exhaustive_marginals)
+    msg_src = inspect.getsource(mod._tree_message_marginals)
+    assert ex_src != msg_src
+    assert "for x in range" in ex_src or "for y in range" in ex_src
+    assert "msg_to_" in msg_src or "message" in msg_src.lower()
+    loaded = []
+    orig = mod._load_g0_decoder
+    mod._load_g0_decoder = lambda: loaded.append(1) or (_ for _ in ()).throw(
+        AssertionError("tree check must not load decoder"))
+    try:
+        rep2 = mod._g0_tree_posterior_check()
+    finally:
+        mod._load_g0_decoder = orig
+    assert loaded == []
+    assert rep2["tree_exhaustive_posterior_error"] < 1e-12
+    h, p_b, p_f = mod.build_g0_fixture()
+    assert mod._g0_factorization_error(p_b, p_f) < 1e-12
+    assert mod._g0_factorization_error(p_b, p_f) == pytest.approx(
+        mod._g0_exhaustive_error(p_b, p_f))
+
+
+def test_R1_B1_tree_mutations_caught_by_gate_metric():
+    px, py, a, s = mod.build_g0_tree_fixture()
+    ex_x, ex_y = mod._tree_exhaustive_marginals(px, py, a, s)
+    wrong_a = 8 if a != 8 else 9
+    mx, my = mod._tree_message_marginals(px, py, wrong_a, s)
+    err_a = float(max(float(np.max(np.abs(mx - ex_x))),
+                      float(np.max(np.abs(my - ex_y)))))
+    assert err_a > 1e-6
+    wrong_s = (int(s) + 1) % 32
+    mx2, my2 = mod._tree_message_marginals(px, py, a, wrong_s)
+    err_s = float(max(float(np.max(np.abs(mx2 - ex_x))),
+                      float(np.max(np.abs(my2 - ex_y)))))
+    assert err_s > 1e-6
+    sx, sy = mod._tree_message_marginals(py, px, a, s)
+    err_t = float(max(float(np.max(np.abs(sx - ex_x))),
+                      float(np.max(np.abs(sy - ex_y)))))
+    assert err_t > 1e-6
+    h, p_b, p_f = mod.build_g0_fixture()
+    bad = np.asarray(p_f, dtype=np.float64).copy()
+    bad[:, 0] = bad[:, 0] * 2.0
+    assert float(mod._g0_factorization_error(p_b, bad)) > 1e-6
+
+
+def test_R1_B1_math_gate_blocks_before_loader_and_decoder():
+    h, p_b, p_f = mod.build_g0_fixture()
+    bad = np.asarray(p_f, dtype=np.float64).copy()
+    bad[:, 0] = bad[:, 0] * 2.0
+    loads = []
+    orig_loader = mod._load_g0_decoder
+
+    def _count_loader():
+        loads.append(1)
+        raise AssertionError("loader must not run on math fail")
+
+    mod._load_g0_decoder = _count_loader
+    fake = FakeDecoder()
+    try:
+        res = mod.run_g0_phase(h=h, p_b=p_b, p_f=bad, decode_fn=fake,
+                               authorized=True)
+    finally:
+        mod._load_g0_decoder = orig_loader
+    assert res["decision"] == "G0_BLOCKED_MATH"
+    assert res["decoder_calls"] == 0
+    assert loads == []
+    assert fake.calls == []
+    assert res["historical_decoder_invocations"] == 0
+    assert "factorization_error" in res
+    assert "tree_exhaustive_posterior_error" in res
+    assert "tree_map_equal" in res
+    orig_check = mod._g0_tree_posterior_check
+    loads2 = []
+
+    def _count_loader2():
+        loads2.append(1)
+        raise AssertionError("loader must not run on tree fail")
+
+    mod._load_g0_decoder = _count_loader2
+
+    def _bad_tree(*args, **kwargs):
+        return {"tree_exhaustive_posterior_error": 1e-3,
+                "tree_map_equal": False, "tree_finite": True,
+                "tree_prior_ok": True}
+
+    mod._g0_tree_posterior_check = _bad_tree
+    fake2 = FakeDecoder()
+    try:
+        res2 = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=fake2,
+                                authorized=True)
+    finally:
+        mod._g0_tree_posterior_check = orig_check
+        mod._load_g0_decoder = orig_loader
+    assert res2["decision"] == "G0_BLOCKED_MATH"
+    assert res2["decoder_calls"] == 0
+    assert fake2.calls == []
+    assert loads2 == []
+
+
+def test_R1_B2_fake_historical_zero_and_metering_fields():
+    h, p_b, p_f = mod.build_g0_fixture()
+    fake = FakeDecoder()
+    res = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=fake,
+                           authorized=True)
+    assert res["historical_decoder_invocations"] == 0
+    assert "wall_seconds" in res
+    assert isinstance(res["wall_seconds"], float)
+    assert "peak_rss_bytes" in res
+    assert res["decoder_calls"] == 8
+    assert res["factorization_error"] < 1e-12
+    assert res["tree_exhaustive_posterior_error"] < 1e-12
+    assert res["tree_map_equal"] is True
+    assert res["prior_positive"] is True
+    assert res["fixture_ok"] is True
+
+
+def test_R1_B2_historic_zero_to_one_then_stays_one(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    calls = []
+
+    def _zeros(hh, prior, syndrome, **kw):
+        calls.append(1)
+        n = np.asarray(prior).shape[0]
+
+        class _R:
+            x_hat = np.zeros(n, dtype=np.uint8)
+            syndrome_ok = False
+            iterations = 1
+            final_beliefs = np.zeros_like(np.asarray(prior))
+
+        return _R()
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", lambda: _zeros)
+    res = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f,
+                           decode_fn=mod.historical_g0_decoder,
+                           authorized=True)
+    assert res["historical_decoder_invocations"] == 1
+    assert res["decoder_calls"] == 8
+    assert len(calls) == 8
+
+    def _boom_hist(hh, prior, syndrome, **kw):
+        raise RuntimeError("injected historic fail")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", lambda: _boom_hist)
+    res2 = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f,
+                            decode_fn=mod.historical_g0_decoder,
+                            authorized=True)
+    assert res2["historical_decoder_invocations"] == 1
+    assert res2["decoder_calls"] == 1
+    assert res2["decision"] == "G0_BLOCKED_DECODER"
+    assert res2["failed_seed"] == mod.G0_SEEDS[0]
+
+
+def test_R1_B2_resource_exceed_keeps_partial_and_stops(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    monkeypatch.setattr(mod, "_rss_bytes", lambda: 3 * 1024**3)
+    fake = FakeDecoder()
+    res = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=fake,
+                           authorized=True)
+    assert res["decision"] == "G0_BLOCKED_RESOURCE"
+    assert res["failure_stage"] == "resource"
+    assert res["attempted_blocks"] == 1
+    assert res["completed_blocks"] == 0
+    assert res["decoder_calls"] == 0
+    assert fake.calls == []
+    assert res["historical_decoder_invocations"] == 0
+    assert res["failed_seed"] == mod.G0_SEEDS[0]
+    assert res["attempted_blocks"] > 0
+    assert res["attempted_blocks"] < len(mod.G0_SEEDS)
+    assert "wall_seconds" in res
+    assert res["peak_rss_bytes"] == 3 * 1024**3
+
+
+def test_R1_B2_writer_exactly_four_files_scalar_only(tmp_path):
+    out = tmp_path / "r1g0"
+    res = mod.run_g0_synthetic(authorized=True, decode_fn=FakeDecoder(),
+                               out_dir=out)
+    assert sorted(p.name for p in out.iterdir()) == sorted(
+        mod.G0_EVIDENCE_FILES)
+    assert len(list(out.iterdir())) == 4
+    payload = json.loads((out / "results.json").read_text(encoding="utf-8"))
+    assert payload["historical_decoder_invocations"] == 0
+    assert "wall_seconds" in payload
+    assert "peak_rss_bytes" in payload
+    assert "factorization_error" in payload
+    assert "tree_exhaustive_posterior_error" in payload
+    assert "tree_map_equal" in payload
+    banned_sub = ("hash", "checksum", "hmac", "sha256", "sha512", "sha1",
+                  "md5", "signature")
+    banned_key = {"h", "p_b", "p_f", "prior", "priors", "syndrome",
+                  "syndromes", "matrix", "matrices", "beliefs", "messages",
+                  "raw", "coefficients", "support"}
+    stack = [payload]
+    while stack:
+        cur = stack.pop()
+        if isinstance(cur, dict):
+            for k, v in cur.items():
+                low = str(k).lower()
+                assert not any(b in low for b in banned_sub)
+                assert low not in banned_key
+                assert "tag" not in set(low.split("_"))
+                stack.append(v)
+        elif isinstance(cur, list):
+            stack.extend(cur)
+        elif isinstance(cur, str):
+            assert ":\\" not in cur and ":/" not in cur
+            assert not cur.startswith("/")
+    table = (out / "table.csv").read_text(encoding="utf-8").splitlines()
+    assert table[0] == ("seed,exact,syndrome_ok,finite,iterations,"
+                        "syndrome_weight")
+    assert len(table) == 1 + res["attempted_blocks"]
+    summ = json.loads(
+        (out / "execution_summary.json").read_text(encoding="utf-8"))
+    assert summ["files"] == list(mod.G0_EVIDENCE_FILES)
+    assert summ["historical_decoder_invocations"] == 0
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+
+
+def test_R1_B2_cli_unauthorized_prework_all_zero(tmp_path, monkeypatch):
+    counts = {"runner": 0, "loader": 0, "decode": 0}
+
+    def _runner(**kw):
+        counts["runner"] += 1
+        raise AssertionError("unauthorized runner entered")
+
+    def _loader():
+        counts["loader"] += 1
+        raise AssertionError("loader entered while unauthorized")
+
+    orig_decode = FakeDecoder.__call__
+
+    def _decode(self, h, prior, syndrome, layer=None):
+        counts["decode"] += 1
+        return orig_decode(self, h, prior, syndrome, layer)
+
+    monkeypatch.setitem(cli._RUNNERS, "g0", _runner)
+    monkeypatch.setattr(mod, "_load_g0_decoder", _loader)
+    monkeypatch.setattr(cli, "_load_state",
+                        lambda path: {"g0_execution_authorized": False})
+    monkeypatch.chdir(tmp_path)
+    assert cli.main(["--phase", "g0"]) == 3
+    assert counts == {"runner": 0, "loader": 0, "decode": 0}
+    assert list(tmp_path.rglob("*")) == []
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+
+
+def test_R1_B2_all_exec_false_formal_absent_and_budgets():
+    state = cli._load_state(STATE_PATH)
+    for key in ("structure_execution_authorized", "g0_execution_authorized",
+                "p0_cost_execution_authorized", "g1_execution_authorized",
+                "g2_execution_authorized", "real_execution_authorized",
+                "formal_execution_authorized"):
+        assert key in state
+        assert state[key] is False
+    assert state.get("scientific_promotion", False) is False
+    for phase in ("structure", "g0", "p0-cost", "g1", "g2"):
+        assert mod.is_phase_authorized(state, phase) is False
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert float(mod.G0_WALL_BUDGET_S) == 120.0
+    assert int(mod.G0_RSS_BUDGET_BYTES) == 2 * 1024**3
