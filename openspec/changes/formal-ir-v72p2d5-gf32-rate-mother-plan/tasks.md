@@ -1,7 +1,9 @@
-# D5 任务与验收 R1（PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED）
+# D5 任务与验收 R2（PLAN_REVISE_REQUIRED）
 
-本轮只完成计划冻结任务（D5-T1..T7，本 turn 内闭环）；D5-T8 待 main thread 独立 Plan Review。
-实现任务（apply 阶段）只列名不授权，Review ACCEPT 前不得启动。
+R1 计划冻结任务（D5-T1..T7）已闭环但 mother 路径被 R2 corrigendum 取代（CAUSE: `DEGREE2_PREFIX_CONNECTIVITY_IMPOSSIBLE`；
+decoder 未执行，full mother 未构建；当前 3 `.py` 候选为 `UNCOMMITTED_NOT_ACCEPTED` 部分候选）。
+本轮只完成 R2 计划修订（5 文件 in-place + 新 corrigendum + cycle_state）；不写代码、不跑测试/构造/decoder、不读 CAL/VAL、不创建输出、不授权实现/结构/G0/G1/G2。
+D5-T8 由 `INDEPENDENT_R2_PLAN_REVIEW` 取代；本 agent 不得执行 review；PASS 后由后续 operator 统一 commit+push（本轮不 push 不 commit）。
 计划文件固定为（Review 只审这 5 文件）：
 `M_max=1000 is a D5 synthetic construction cap, not a production sufficiency claim.`
 
@@ -26,11 +28,17 @@
 - [x] D5-T3 行数表冻结 R1：`rows=ceil(N*CE*f/5)`，`f=1.0/1.05/1.1/1.2`（`f=1.3` 仅参照禁入，L1 1016 超 cap），分层独立 ceil 权威，
   旧 216 禁真实，per-layer `M_max=1000` synthetic 构造 cap 冻结。
   验收：与 D4R2（`1467 vs 216 / margin −1251`，`1907 vs 216 / −1691`）bit 级自洽；spec S-BUDGET 全过。
-- [x] D5-T4 嵌套 mother 设计冻结 R1：V31 基线 + Lane-C 备份 + 否决清单 + V72P0 四边界；
-  M0-STRUCTURE 两阶段（一次构建 1000x1024 候选 → 全 prefix PASS 才进 G0；prefix FAIL 只允许一次预注册 row ordering，仍 FAIL 则 `V31_PREFIX_FAMILY_UNSUITABLE` 返回 planner）；
+- [x] D5-T4 嵌套 mother 设计冻结 R1（历史；R2 已取代 mother 路径）：V31 基线 + Lane-C 备份 + 否决清单 + V72P0 四边界；
+  M0-STRUCTURE 两阶段（一次构建 1000x1024 候选 → 全 prefix PASS 才进 G0；prefix FAIL 只允许一次预注册 row ordering，仍 FAIL 则按旧终端返回 planner）；
   13 项 prefix 门禁 + 最低 PASS 五项；row ordering 合同（置换不改行内容，优先级覆盖→rank→连接，确定性 tie-break，不看 decoder，一次排序覆盖各自全 prefix，L1/L2 不同 seed 同算法）；
   最小披露 API、L1-then-L2 顺序。
   验收：spec S-MOTHER-01..09 可验收；一句话定义存在；无自然行序合格假设；不把换 family 写成唯一修复。
+- [x] D5-R2-T4 R2 mother 修订（本轮）：冻结单新 mother `G2_MINIMAL_NESTED_DV3_GF32`（每层 `1000x1024`，列重 3，GF32 非零；
+  2 base 边（最早前缀内每变量度 >=2）+ 1 expansion 边（覆盖全部 suffix 行）；每行度 >=2；无重复边；无重复三元组；全确定性；L1 seed `2026090501`、L2 seed `2026090502`；无 seed search；最小确定性贪心，无 PEG 库/通用框架）；
+  support/coeff 分离（系数 `1..31` 冻结 seed PRNG 一次；零 forbidden；无重播种；无 decoder 引导；无 support 追 rank；秩不足 => `G2_PREFIX_RANK_BLOCKED`）；
+  prefix 门新增 `variable_degree_min>=2` 硬门（非递减）；4-cycle 只计数报告（base-only 目标 0；非零则 `STRUCTURE_PASS_WITH_CYCLE_RISK`）；
+  删除 row-ordering live 路径（自然序 = 构造序，无 `order_rows_for_prefix_coverage`，无后构造/decoder 重排）。
+  验收：design §3–§4 与 spec S-MOTHER 一致；仅记 dv3 必要条件可满足（L2 `2444>=1709`、L1 `2636>=1805`），不预断结构 PASS。
 - [x] D5-T5 三级门控冻结 R1：G0 tiny（数学，`<1e-12`/`<1e-10`/syndrome 重算/tree 穷举/无噪 100%，失败 BLOCKED）/
   P0 COST-PREFLIGHT（n=64 2 blocks f=1.0+1.2，APP+oracle，wall/iterations/RSS，外推，不计入 G1）/
   G1 n=64（APP-fed 100 paired f={1.0,1.2}，单调+零 crash/nonfinite+结构趋势，无杀权）/
@@ -48,16 +56,17 @@
   `REAL_EXECUTION_AUTHORIZED=false`，`DECODER_EXECUTED=false`，
   `VAL_LOADER_CALLS=0`；生命周期冻结为 `PLAN_ACCEPTED + implementation_authorized:false + synthetic_execution_authorized:false + real_execution_authorized:false`；
   Review PASS 不自动授权实现；停于 `NEXT_GATE: INDEPENDENT_PLAN_REVIEW`。
-- [ ] D5-T8 独立 Plan Review（main thread）：审 5 文件 + R1 自查清单逐项（见 PLAN_FREEZE §8）；
-  ACCEPT / REVISE / CLOSED 三选一；本 agent 不得执行；PASS 后由后续 operator 统一 commit+push（本轮不 push 不 commit）。
+- [ ] D5-T8 独立 Plan Review（main thread）：R1 项已被 R2 取代；R2 门为 `INDEPENDENT_R2_PLAN_REVIEW`（18 checks，见 PLAN_FREEZE §8 R2 清单）；
+  ACCEPT / REVISE / CLOSED 三选一；本 agent 不得执行；PASS 后由后续 operator 统一 commit+push（本轮不 push 不 commit）。R2 staged manifest 恰为 7 docs（5 计划文件 + `PLAN_CORRIGENDUM_R2.md` + `cycle_state.yaml`）。
 
-## 实现任务（deferred，Review ACCEPT 前禁止启动，仅列名）
+## 实现任务（deferred，R2 Review ACCEPT + 新 R2 implementation packet 接受前禁止启动，仅列名 + delta）
 
-- D5-I1：`lambda*` 平滑 adapter（单函数，V54 下游逐字复用）+ 转置反例测试（含轴合同 assert）。
-- D5-I2：V31 `M_max=1000` 双层 mother 构建 + M0 13 项 prefix 验证 + 一次预注册 row ordering（如需）+ `gf_rank` 验证脚本（配预算）。
-- D5-I3：matched synthetic 生成器（`B∼P_CAL(B)` + `A∼P_F(·|B)`，冻结种子）+ P0/G0/G1/G2 runner 各一（P0 成本预检先行）。
-- D5-I4：P0→G0→G1→G2 按冻结阈值/种子/调用数/预算执行（development only），失败进归因/停止规则，不调阈值不换 seed。
-- D5-I5：分阶段授权链（如 G2 QUALIFIED 且 main thread 另批：implementation packet→review→M0/G0 auth→G0 review→P0/G1 auth→G1 review→G2 auth→G2 Pre-RESULT；禁止一次授权 G0/G1/G2）。
+- D5-I1：`lambda*` 平滑 adapter（单函数，V54 下游逐字复用）+ 转置反例测试（含轴合同 assert）。（R2 保留）
+- D5-I2-R2：最小 dv3 support 构建器（§4.3 贪心 + §4.4 系数合同；无 PEG 库/框架）+ M0 13 项 prefix 验证（含 `variable_degree_min>=2`）+ `gf_rank` 验证脚本（配预算）。删除项：degree-2 V31 adapter 作为生产候选路径；row-ordering 实现（含 `order_rows_for_prefix_coverage`）。
+- D5-I3：matched synthetic 生成器（`B∼P_CAL(B)` + `A∼P_F(·|B)`，冻结种子）+ P0/G0/G1/G2 runner 各一（P0 成本预检先行）。（R2 保留）
+- D5-I4：P0→G0→G1→G2 按冻结阈值/种子/调用数/预算执行（development only），失败进归因/停止规则，不调阈值不换 seed。（R2 保留；秩不足 => `G2_PREFIX_RANK_BLOCKED`）
+- D5-I5：分阶段授权链（如 G2 QUALIFIED 且 main thread 另批：R2 implementation packet→review→M0/G0 auth→G0 review→P0/G1 auth→G1 review→G2 auth→G2 Pre-RESULT；禁止一次授权 G0/G1/G2）。
+- R2 代码状态注记：当前未提交 3 `.py` 为部分候选（`UNCOMMITTED_NOT_ACCEPTED`），仅作历史；代码变更只在新 R2 implementation packet 接受后按 D5-I2-R2 delta 执行。
 
 ## 停止条件（任一即 BLOCKED，不猜测不替代）
 

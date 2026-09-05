@@ -1,8 +1,9 @@
-# D5 设计 R1：F 模型两层 prior 合同、行数表、嵌套 mother 与 synthetic 门控
+# D5 设计 R2：F 模型两层 prior 合同、行数表、嵌套 mother 与 synthetic 门控
 
-状态：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。只设计不实现；所有公式、阈值、种子、门禁在本轮冻结，
+状态：`PLAN_REVISE_REQUIRED`（R2；R1 已被 `PLAN_CORRIGENDUM_R2.md` 宣告 superseded，仅作历史保留）。只设计不实现；所有公式、阈值、种子、门禁在本轮冻结，
 apply 阶段不得回写放宽。`N=1024 symbols/block`，`q=32`，`GF(32)` poly `37`（`0b100101`），
 映射 `symbol = low + 32*high`（`U1=high/MSB`，`U2=low/LSB`，`bit0=LSB`），无 Gray、无置换。
+R2 不可能性结论：degree-2 前缀单连通不可满足（full `E=2N=2048, V=2024, need 2023` 可行；L2 `k=686: 1420<1709`、L1 `k=782: 1612<1805`，任意排序不可修复；非 V31 bug，非 decoder 结果，不关闭 GF32 路线）。
 
 `M_max=1000 is a D5 synthetic construction cap, not a production sufficiency claim.`
 不代表生产充分 / 传播税覆盖 / worst-fold 或 finite-size margin 充分，不授权 `n=1024` 真实。
@@ -134,29 +135,32 @@ std `0.0158` ≈ `16.2` bits ≈ 4 行；range `0.0423` ≈ `43.3` bits ≈ 9 �
 - Laziest alternative（一行）：统一 `1761×1024` mother 同时约束 U1/U2——否决，
   因为 L1/L2 活在不同 GF32 字母表上且历史 packet 全是分层独立矩阵，统一 mother 无复用基础。
 
-## 3. 嵌套 mother 设计（只设计不实现）
+## 3. 嵌套 mother 设计（只设计不实现；R2）
 
-### 3.1 选型：V31 `build_layer` 为扩展基线
+### 3.0 R2 冻结：V31 degree-2 路径 EXIT，新 mother G2_MINIMAL_NESTED_DV3_GF32
 
-`nonbinary_v31.build_layer(m, n=1024, *, family, field=GF(32), require_full_rank=True)`
-（支撑：`build_supports` + `select_projective_ratio_v31` + `projective_column_audit`；family 必须显式传参，不依赖默认）。
-选中理由（一行）：它是仓库唯一同时满足“任意 m（含 1000）、n=1024 已验证、确定性可重放、
-`occupancy≤31` 硬门、`projective_safe + full_row_rank` 双审计”的 GF32 构造器，
-且列重恒为 2 使 700–1000 行仍极稀疏。
+- V31 QC column-degree-2 作为 D5 嵌套 mother 的状态：`EXIT_PREFIX_CONNECTIVITY_IMPOSSIBLE`。
+  保留 V31 field 定义 / rank 审计方法 / decoder 接口复用；degree-2 support 构造不再作为 D5 嵌套 mother；不改 V31 历史文件；不是 GF32 路线失败。
+- 冻结单个新 mother（无并行家族）：`G2_MINIMAL_NESTED_DV3_GF32`：每层 `1000x1024`，列重 3，GF32 非零系数（`1..31`）。
+  L1 `k_min=782`，L2 `k_min=686`。论证仅为必要边数算术：`E=3N=3072`；
+  L2 `k=686: 3072-628=2444>=1709`、L1 `k=782: 3072-436=2636>=1805`，记“必要条件可满足”，不预断结构 PASS。
+- R2 删除的 live 语义：V31-is-selected-mother、natural-prefix-or-reorder-fix、`degree2-fits-700-1000-rows`、row-ordering-as-repair。历史删除注记保留，仅作记录。
 
-- 稀疏性：列重恒 2；行重均值 `2n/M`：`M=1000` 时 ≈2.05，`M=782` 时 ≈2.62——天然适配大 m。
-- rank 保证：audit 含 `rank / full_row_rank / projective_safe`；`construction_ok` 要求三者全过。
-- 可扩展性：`build_supports(m,n)` 对任意 `m≥2` 枚举候选对至 n 列，
-  `m=1000` 时候选对 `499500 ≫ 1024`，occupancy 自然 ≤2，无容量墙。
-- 嵌套注意：单 mother 一次性按 `M_max=1000` 构建后取行前缀 `H[:k]` 是 reinterpretation，
-  前缀秩未经构造器保证，必须经 §4 M0-STRUCTURE 逐个验证（见 §4；禁止假设自然行序合格）。
+### 3.1 选型历史（R1 记录，R2 已 EXIT，仅作追溯）
+
+R1 曾选中 `nonbinary_v31.build_layer(m, n=1024, *, family, field=GF(32), require_full_rank=True)`
+（支撑：`build_supports` + `select_projective_ratio_v31` + `projective_column_audit`）。
+R1 选中理由（历史）：任意 m 含 1000、n=1024 已验证、确定性可重放、`occupancy≤31` 硬门、
+`projective_safe + full_row_rank` 双审计、列重 2 使大 m 稀疏。
+R2 结论：上述构造器能力记录保留，但其 degree-2 support 在冻结前缀集下已被 §3.0 不可能性证明排除出 D5 嵌套 mother；
+field/rank/decoder 复用保留，不再以 degree-2 形态承担 700–1000 行嵌套披露。
 
 ### 3.2 备选与否决（冻结）
 
 - 备选：V38 `construct_lane_c_prototype`（SC-inspired banded，`L=8,w=2,dv=2`，4-cycle 回避）。
-  仅当 M0 结论为 `V31_PREFIX_FAMILY_UNSUITABLE` 且根因为图结构（非 prior/decoder）时，才允许另立 change 评估；
+  仅当 M0 结论为 `G2_PREFIX_RANK_BLOCKED` 或经诊断确认为图结构根因（非 prior/decoder）时，才允许另立 change 评估；
   D5 内不并行推进。理由：其 `SOURCE_CHECKS`/allocations 为小 m 冻结值，700+ 需重设计分配向量，
-  且 rank 审计弱于 V31。
+  且 rank 审计弱于 V31 方法复用。
 - 否决（D5 内不候选）：V36 `build_v36_incremental_matrix`（行重 10–14，700 行下平均列重 ≈8.2，
   对 FFT-QSPA 过密）；V35 `build_v35_incremental_mother_matrix`（硬编码 192→224，不支持任意 m）；
   `nonbinary_codebook` 家族（`32×64` 级小母矩阵，非 1024 列 regime）；
@@ -173,44 +177,72 @@ V72P0 mother（binary `9036×10240` IRA，`H_p` dual-diagonal `det=1 ⇒ rank=90
 (c) 码率 regime 不同（`f=1.3 NOT_MEASURED` vs F 联合 `7.16` bit/symbol 实测需求）；
 (d) decoder 不同（binary BP vs layered FFT-QSPA）。D5 的稀疏/rank 结论需独立验证。
 
-## 4. M0-STRUCTURE / prefix 门禁 / row ordering / 披露 API（冻结定义）
+## 4. M0-STRUCTURE / prefix 门禁 / 披露 API（冻结定义；R2：无 row ordering）
 
-- 一句话定义：每层 GF32 mother 是一次性构建的单个 `M_max×1024` 矩阵（`M_max=1000`），
-  披露是行前缀 `H[:k]`，`k` 取自冻结披露集合，对一切已披露 `k` 要求 GF(32) 满行秩，
+- 一句话定义：每层 GF32 mother 是一次性构建的单个 `M_max×1024` 矩阵（`M_max=1000`，列重 3，GF32 非零系数），
+  披露是行前缀 `H[:k]`（自然序 = 构造序：base 先、suffix 扩展后），`k` 取自冻结披露集合，对一切已披露 `k` 要求 GF(32) 满行秩，
   后增行只追加、不改动前缀行。
 - 披露集合 `K` 冻结：L1 `{782,821,860,938}`，L2 `{686,720,755,823}`（§2.1）；`H[:k1]` 是 `H[:k2]`（`k1<k2`）的精确行前缀。
-- 修正 V31 前缀假设：`build_layer(1000,1024)` 任意前缀视为 nested mother 是未验证假设。
-  改为 M0-STRUCTURE 两阶段：只构建一次 `1000x1024` 候选 → 检查所有冻结 prefix → 全 PASS 才进 G0；
-  full `(1000,1024)` PASS 但某 prefix FAIL 时，不允许换 seed 搜索、不允许每 `k` 独立矩阵冒充 nested，
-  只允许一个预注册确定性 rank/coverage-aware row ordering 候选，一次完成冻结，后续 prefix 来自同一排序 mother；
-  排序后仍 FAIL 则 `V31_PREFIX_FAMILY_UNSUITABLE` 停止返回 planner，不进 decoder。
+- R2 构造：最小确定性贪心 support 构造（无 PEG 库、无通用框架；§4.3）+ support/coeff 分离的 GF32 系数合同（§4.4）。
+  只构建一次 `1000x1024` 候选 → 检查所有冻结 prefix → 全 PASS 才进 G0；
+  不允许换 seed 搜索、不允许每 `k` 独立矩阵冒充 nested、不允许 support 追 rank 重抽、不允许 decoder 引导调图；
+  任一冻结 prefix 秩不足则 `G2_PREFIX_RANK_BLOCKED` 停止返回 planner，不进 decoder。
   不要把换 family 写成唯一修复。
 
-### 4.1 每个 prefix 必须报告并冻结的 13 项结构门禁
+### 4.1 每个 prefix 必须报告并冻结的 13 项结构门禁（R2：新增变量度硬门）
 
 对 L1 每个 `k in {782,821,860,938}` 与 L2 每个 `k in {686,720,755,823}` 的 `H[:k]` 报告：
 
 1. `rank==k`；2. `zero_rows==0`；3. `zero_columns==0`；4. 每列 active degree `min/median/max`；
 5. `degree-1 count`；6. `degree-2 count`；7. `connected_component count`；
 8. `largest_component fraction`；9. `isolated==0`；10. check `row-degree histogram`；
-11. `4-cycle count`；12. `duplicate/projective-equivalent col count==0`；13. GF32 系数非零。
+11. `4-cycle count`（变量对共享 check 对计数）；12. `duplicate/projective-equivalent col count==0`；13. GF32 系数非零。
 
-最低 PASS（五项全过才算该 prefix PASS）：
-`zero_columns==0`，`isolated==0`，`largest_fraction==1.0`，`rank==k`，`duplicate==0`。
-`degree-1` 只披露不发明阈值；若大量 `degree-1` 则 G1 前标注结构风险，不自动 FAIL。
+最低 PASS（全过才算该 prefix PASS）：
+`zero_columns==0`，`isolated==0`，`largest_fraction==1.0`，`rank==k`，`duplicate==0`，
+新增硬门 `variable_degree_min>=2`（2 base 边保证），且随 `k` 增大非递减（前缀只加边不删边）。
+`degree-1` 只披露不发明阈值；R2 下 `variable_degree_min>=2` 通过则 `degree-1 count` 应为 0，
+仍如实报告 `degree-1/2/3 counts`；若 `variable_degree_min<2` 则该 prefix 直接 FAIL。
 
-### 4.2 行排序合同（row ordering，预注册一次）
+### 4.2 行排序合同（R2 已删除，无 live 路径）
 
-- 输入完整 1000 行 mother → 输出一个行置换，不改行内容/系数。
-- 优先级：新覆盖变量数 → rank 增量 → component 连接；tie-break 确定性。
-- 不得查看 decoder 结果 / Alice block / synthetic exact；一次排序用于 L1/L2 各自所有 prefix。
-- L1/L2 不同固定构造 seed 但算法相同。
-- 若实现前评估排序过复杂，可把 prefix 实测作实现前独立 feasibility gate，但不能假设自然行序合格。
+- 本节 live 合同已删除。自然序 = 构造序（base check 先、suffix 扩展后）；披露即 `H[:k]`。
+- 无 `order_rows_for_prefix_coverage`；无后构造重排；无 decoder 驱动重排。
+- 注：未来 R2 实现 delta 从代码中删除 row-ordering 实现，但本 plan-only 轮不碰任何 `.py`。
 
-### 4.3 稀疏度目标与披露 API
+### 4.3 dv3 support 构造（最小确定性贪心；R2 冻结）
 
-- 稀疏度目标：V31 基线下列重恒 2；行重目标 `2–4`（均值 `2n/M_max≈2.05`，允许 `±1` 波动带）；
-  零行/零列数为 0；`support occupancy ≤31`（构造器硬门）。
+- 每变量恰 3 边：`base1 in [0,k_min)`，`base2 in [0,k_min)` 且不同于 edge1，
+  `expansion in [k_min,1000)`（为行平衡允许必要 spill 到 base，但所有 suffix 行非零）。
+  `k_min`：L1 `782`，L2 `686`。
+- 要求：2 base 边（最早前缀内每变量度 >=2）；expansion 覆盖全部 suffix check；
+  每行度 >=2；无重复 `(check,variable)` 边；无两变量共享同一无序 check-support 三元组；
+  全确定性；L1 seed `2026090501`、L2 seed `2026090502`；无 seed search；失败 => `BLOCKED`。
+- 贪心（冻结）：变量 `0..1023` 顺序；edge1 取当前度最小 base check（最小索引决胜）；
+  edge2 取不同于 edge1 的 base check，按 (1) 不重复已有 base 对 → (2) 优先不同连通分支 →
+  (3) 当前度最小 → (4) 最小索引；edge3 优先覆盖未覆盖 suffix 行（最小索引），
+  否则取当前度最小（suffix 优先，平衡需要时 spill 到 base），最小索引决胜；
+  收尾对度 <2 的行做确定性边交换修复（保持列重 3、无重复边、无重复三元组），修不好 => `BLOCKED`。
+  无 PEG 库、无通用框架；构造期无 decoder/syndrome/Alice/Bob/exact 视图。
+
+### 4.4 GF32 系数合同（support/coeff 分离；R2 冻结）
+
+- support 先定（§4.3），系数后定：每非零系数 `1..31` 经冻结 seed 确定性 PRNG 恰生成一次；零 forbidden。
+- 无 rank-fail 重播种；无 decoder 引导搜索；无 support 追 rank。
+- 任一冻结 prefix 秩不足 => `G2_PREFIX_RANK_BLOCKED`，返回 planner，不自动重抽。
+
+### 4.5 4-cycle 合同（R2 冻结）
+
+- 计数：变量对共享 check 对，按 `sum_C(shared,2)` 机械计数；base 构造禁重复 base 对 => base-only 目标 0；
+  expansion 可能形成共享对，full prefix 机械计数如实报告。
+- 不发明绝对 PASS 阈值；报告必须含总数 / 每变量 incidence 分布 / 最大 incidence。
+- rank/覆盖/连通 PASS 但 cycle 非零 => `STRUCTURE_PASS_WITH_CYCLE_RISK`；
+  G1/G2 decoder 趋势裁判，不回头按结果调图。
+
+### 4.6 稀疏度目标与披露 API（R2）
+
+- 稀疏度目标：列重恰 3（2 base + 1 expansion）；行重均值 `3n/M_max≈3.07`；零行/零列数为 0；
+  每行度 >=2；`support occupancy ≤31` 方法复用（按 support 三元组计）。
 - 满秩验证方法（只定义步骤，不执行大矩阵验证）：
   `nonbinary_codebook.gf_rank(H[:k], GF2mField.create(32)) == k` 逐 `k in K` 断言
   （pinned 多项式基高斯消元）；tiny 规模（`m≤8,n≤16`）附手算可验示例；
@@ -277,7 +309,7 @@ Bob 边际用 CAL TRAIN 经验 `P(B)`（CAL-only，不碰 VAL）；`max_iter=90`
 ## 6. 最小分级实验（四态，唯一分级实验 = G2）
 
 - 实验：`n=256` matched synthetic（`B∼P_CAL(B)`，`A∼P_F(·|B)`，`lambda*` 真值表），真 prior，
-  V31 按 `n=256` 独立构建（行数与 §5 表一致：披露 §5 的 `m1/m2` 前缀；mother 行数实现冻结值覆盖 `f=1.2` 上界 235/206），
+  dv3 mother 按 `n=256` 同合同独立构建（行数与 §5 表一致：披露 §5 的 `m1/m2` 前缀；mother 行数实现冻结值覆盖 `f=1.2` 上界 235/206），
   `f∈{1.0,1.1,1.2}` 三点扫描，200 blocks，冻结种子（§5.1），`max90/damping1.0/cold`，L1-then-L2。
   （列数缩放依据：`rows=ceil(n*CE*f/5)` 同公式，`n=256` 行数见 §5 表。）
 - 四态（PASS 只用 APP-fed 端到端 exact；oracle 仅诊断）：
@@ -296,8 +328,8 @@ Bob 边际用 CAL TRAIN 经验 `P(B)`（CAL-only，不碰 VAL）；`max_iter=90`
   真实所需行数只会更多；G1/G2 用真 prior + oracle 对照显式度量该税（诊断口径，非硬门）。
 - R2（工程）：700–1000 行 FFT-QSPA 运行时未实测（每轮每 check `q=32` FWHT 卷积，
   `1000×1024` 稀疏图 ×90 轮）；P0 在 `n=64/2 blocks` 级先暴露趋势并外推，`n=1024` 预算另批。
-- R3（构造）：V31 前缀秩在 `k in K` 需逐个验证；M0 FAIL 后只允许一次预注册 row ordering，不换 seed 搜索，
-  不以每 `k` 独立矩阵冒充 nested；仍 FAIL 则 `V31_PREFIX_FAMILY_UNSUITABLE` 返回 planner。
+- R3（构造）：dv3 前缀秩/连通/度门禁在 `k in K` 需逐个验证；无 seed 搜索，
+  无每 `k` 独立矩阵冒充 nested，无 support 追 rank；秩不足则 `G2_PREFIX_RANK_BLOCKED` 返回 planner。
 - R4（语义）：`lambda*` 是 D4R2 outer-mean 单值；G2 synthetic 真值表直接采用它，
   不重做 inner 选择（synthetic 无估计问题）；n=1024 真实阶段的 λ 重拟合程序沿用 D4 口径，另批授权。
 - OQ1（R1 已决策）：per-layer `M_max=1000` 接受但限定为 synthetic 构造 cap（见 §2.3），不代表生产充分。

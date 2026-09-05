@@ -1,7 +1,7 @@
-# D5 Spec Delta R1：F 模型两层 GF32 码率与嵌套母矩阵合同（计划冻结）
+# D5 Spec Delta R2：F 模型两层 GF32 码率与嵌套母矩阵合同（计划冻结；PLAN_REVISE_REQUIRED）
 
-状态：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。本 delta 只冻结数学与接口合同，
-不合并、不替代 D1/D3/D4 行为。本周期不实现、不运行 decoder、不读 VAL、不创建输出。
+状态：`PLAN_REVISE_REQUIRED`（R2；R1 已被 `PLAN_CORRIGENDUM_R2.md` 宣告 superseded，仅作历史保留）。本 delta 只冻结数学与接口合同，
+不合并、不替代 D1/D3/D4 行为。本周期不实现、不运行 decoder、不读 VAL、不创建输出、不构建 full mother。
 `M_max=1000 is a D5 synthetic construction cap, not a production sufficiency claim.`
 
 ## S-PRIOR：F → 两层 prior 合同
@@ -45,29 +45,40 @@
   SHALL NOT 代表生产充分/传播税覆盖/worst-fold 或 finite-size margin 充分；
   SHALL NOT 授权 `n=1024` 真实；统一 total 解读 SHALL 维持 route C 不进入真实实验；实现阶段 SHALL NOT 重新解释。
 
-## S-MOTHER：嵌套母矩阵合同（含 M0 与 row ordering）
+## S-MOTHER：嵌套母矩阵合同（R2：单 dv3 mother，无 row ordering）
 
 - S-MOTHER-01：每层 mother SHALL 为一次性构建的单个 `(1000,1024)` uint8 矩阵（值域 `0..31`），
-  基线构造器 SHALL 为 V31 `build_layer(m,n=1024,*,family,field,require_full_rank)`（family 显式传参）；
+  SHALL 为单新家族 `G2_MINIMAL_NESTED_DV3_GF32`（列重恰 3，GF32 非零系数）；无并行家族；
   Lane-C SHALL 仅为备份（D5 内不并行）。
+  V31 degree-2 support SHALL NOT 作为 D5 嵌套 mother（状态 `EXIT_PREFIX_CONNECTIVITY_IMPOSSIBLE`）；
+  V31 field/rank/decoder 方法复用保留。
   `M_max=1000 is a D5 synthetic construction cap, not a production sufficiency claim.`
-- S-MOTHER-02：披露 SHALL 为行前缀 `H[:k]`，`k` SHALL 取自冻结集合
+- S-MOTHER-02：披露 SHALL 为行前缀 `H[:k]`（自然序 = 构造序：base 先、suffix 扩展后），`k` SHALL 取自冻结集合
   `L1 {782,821,860,938}` / `L2 {686,720,755,823}`；对一切已披露 `k` SHALL 有 `gf_rank(H[:k])==k`；
-  后增行 SHALL NOT 改动前缀行。`build_layer(1000,1024)` 自然前缀 SHALL NOT 假设为 nested（未验证假设）。
-- S-MOTHER-03：M0-STRUCTURE SHALL 为两阶段：只构建一次 `1000x1024` 候选 → 检查所有冻结 prefix → 全 PASS 才进 G0；
-  full PASS 但 prefix FAIL 时 SHALL NOT 换 seed 搜索、SHALL NOT 每 `k` 独立矩阵冒充 nested，
-  只允许一个预注册确定性 rank/coverage-aware row ordering 候选，一次冻结，后续 prefix 来自同一排序 mother；
-  排序后仍 FAIL SHALL 为 `V31_PREFIX_FAMILY_UNSUITABLE` 停止返回 planner，SHALL NOT 进 decoder。
+  后增行 SHALL NOT 改动前缀行。degree-2 自然前缀与重排修复路线 SHALL 关闭（corrigendum §2 不可能性证明）。
+- S-MOTHER-03：M0-STRUCTURE SHALL 为：只构建一次 `1000x1024` dv3 候选 → 检查所有冻结 prefix → 全 PASS 才进 G0；
+  SHALL NOT 换 seed 搜索、SHALL NOT 每 `k` 独立矩阵冒充 nested、SHALL NOT support 追 rank 重抽、SHALL NOT decoder 引导调图；
+  任一冻结 prefix 秩不足 SHALL 为 `G2_PREFIX_RANK_BLOCKED` 停止返回 planner，SHALL NOT 进 decoder。
 - S-MOTHER-04：每个 prefix SHALL 报告 13 项（rank==k / zero rows=0 / zero cols=0 / 列 active degree min-median-max /
   degree-1 count / degree-2 count / connected component count / largest component fraction /
   isolated==0 / check row-degree histogram / 4-cycle count / duplicate-projective-equivalent col count==0 / GF32 系数非零）。
-  最低 PASS SHALL 为五项全过：`zero_columns==0`，`isolated==0`，`largest_fraction==1.0`，`rank==k`，`duplicate==0`。
-  `degree-1` SHALL 只披露不设阈值；大量 `degree-1` SHALL 在 G1 前标注结构风险。
-- S-MOTHER-05：row ordering SHALL 为输入完整 1000 行 mother 输出一个行置换，不改行内容/系数；
-  优先级 SHALL 为新覆盖变量数 → rank 增量 → component 连接；tie-break SHALL 确定性；
-  SHALL NOT 查看 decoder 结果/Alice block/synthetic exact；一次排序 SHALL 用于 L1/L2 各自所有 prefix；
-  L1/L2 SHALL 用不同固定构造 seed 但算法相同。
-- S-MOTHER-06：稀疏度 SHALL 为列重恒 2、行重目标 2–4、零行/零列为 0、`support occupancy≤31`。
+  最低 PASS SHALL 为：`zero_columns==0`，`isolated==0`，`largest_fraction==1.0`，`rank==k`，`duplicate==0`，
+  新增硬门 `variable_degree_min>=2`（2 base 边保证），且随 `k` 非递减。
+  `degree-1` SHALL 只披露不设阈值（R2 下 PASS 要求隐含 `degree-1==0`，仍如实报告三档计数）；大量 `degree-1` SHALL 在 G1 前标注结构风险。
+- S-MOTHER-05：row ordering SHALL NOT 存在。SHALL NOT 有 `order_rows_for_prefix_coverage`；
+  SHALL NOT 有后构造重排；SHALL NOT 有 decoder 驱动重排。披露 SHALL 直接用构造序 `H[:k]`。
+- S-MOTHER-06：稀疏/支撑度 SHALL 为：每变量恰 3 边（`base1 in [0,k_min)`、`base2 in [0,k_min)` 不同于 edge1、`expansion in [k_min,1000)` 允许必要 spill 但 suffix 行全非零；
+  `k_min` L1 `782` / L2 `686`）；每行度 SHALL >=2；SHALL 无重复 `(check,variable)` 边；
+  SHALL 无两变量共享同一无序 check-support 三元组；构造 SHALL 全确定性（L1 seed `2026090501`、L2 seed `2026090502`；SHALL NOT seed search）；
+  最小确定性贪心 SHALL 按 design §4.3（变量 `0..1023` 顺序；edge1 最小度 base；edge2 不重复 base 对→优先异分支→最小度→最小索引；
+  edge3 先覆盖未覆盖 suffix 行否则最小度；收尾确定性边交换保列重 3；修不好 => `BLOCKED`）；
+  SHALL NOT 用 PEG 库/通用框架；构造期 SHALL NOT 查看 decoder/syndrome/Alice/Bob/exact。
+- S-MOTHER-06b：GF32 系数 SHALL 与 support 分离：每非零系数 SHALL 为 `1..31` 经冻结 seed 确定性 PRNG 恰生成一次；
+  零 SHALL forbidden；SHALL NOT rank-fail 重播种；SHALL NOT decoder 引导搜索；SHALL NOT support 追 rank；
+  任一冻结 prefix 秩不足 SHALL 为 `G2_PREFIX_RANK_BLOCKED`（不自动重抽）。
+- S-MOTHER-06c：4-cycle SHALL 按变量对共享 check 对机械计数（`sum_C(shared,2)`）；base 禁重复 base 对 SHALL 使 base-only 目标为 0；
+  expansion 共享对 SHALL 如实计数报告（含总数 / 每变量 incidence / 最大 incidence）；SHALL NOT 发明绝对 PASS 阈值；
+  rank/覆盖/连通 PASS 但 cycle 非零 SHALL 为 `STRUCTURE_PASS_WITH_CYCLE_RISK`（G1/G2 趋势裁判，不回头调图）。
 - S-MOTHER-07：披露 API SHALL 为最小形状 `m_max: int + prefix_rows: int + extra_rows: list[int] | None`
   （默认 None = 前缀 `0..k-1`，生产恒 None）；SHALL NOT 引入通用框架/注册表/版本包装。
 - S-MOTHER-08：披露顺序 SHALL 为 L1 先收敛再开 L2（L1 APP `q` 恒喂 L2；L2 内 base→joint→total 短路）；
@@ -128,4 +139,6 @@
   歧义 SHALL 停下返回 planner/OpenSpec 修订（新 SHA 重审）。
 - S-STOP-04：本计划只可变为 `PLAN_ACCEPTED + implementation_authorized:false + synthetic_execution_authorized:false + real_execution_authorized:false`；
   Review PASS SHALL NOT 自动授权实现；后续 SHALL 分开 `implementation packet→review→M0/G0 auth→G0 review→P0/G1 auth→G1 review→G2 auth→G2 Pre-RESULT`，SHALL NOT 一次授权 G0/G1/G2。
-- S-STOP-05：修改文件 SHALL 仅为本目录 5 文件；SHALL NOT 触碰 `AGENT_PROJECT_MEMORY.md`、`docs/decision-log.md`、任何 `.py`、其它 untracked 文件。
+- S-STOP-05：R2 本轮修改文件 SHALL 仅为 5 计划文件 + `docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/PLAN_CORRIGENDUM_R2.md`（新）+ 同目录 `cycle_state.yaml`（改）；
+  SHALL NOT 触碰 3 `.py` 候选、`IMPLEMENTATION_REVIEW.md`、旧 `PLAN_REVIEW_VERDICT.md`、旧 `IMPLEMENTATION_PACKET.md`、
+  `AGENT_PROJECT_MEMORY.md`、`docs/decision-log.md`、任何其它代码/输出；SHALL NOT 新增 hash/checksum/tag 字段。
