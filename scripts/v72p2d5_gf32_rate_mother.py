@@ -32,7 +32,7 @@ _SPEC.loader.exec_module(_mod)
 
 _RUNNERS = {
     "structure": _mod.run_structure_sequence,
-    "g0": _mod.run_g0_phase,
+    "g0": _mod.run_g0_synthetic,
     "p0-cost": _mod.run_p0_cost_phase,
     "g1": _mod.run_g1_phase,
     "g2": _mod.run_g2_phase,

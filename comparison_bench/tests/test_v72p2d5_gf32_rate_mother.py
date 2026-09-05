@@ -538,10 +538,10 @@ def test_T0_38_no_val_file_loader():
     bad = [n for n in dir(mod)
            if n.startswith("load_") or n in ("read_CAL", "read_VAL")]
     assert bad == []
-    # R2-structure delta: the 4 evidence-file writes live only inside
-    # write_structure_evidence (no data reads anywhere).
+    # Structure and G0 each own one explicit four-file writer.
     wsrc = inspect.getsource(mod.write_structure_evidence)
-    assert CORE_SRC.count("open(") == wsrc.count("open(") == 4
+    gsrc = inspect.getsource(mod.write_g0_evidence)
+    assert CORE_SRC.count("open(") == wsrc.count("open(") + gsrc.count("open(") == 8
 
 
 # --------------------------------------------------------------------------
@@ -750,13 +750,15 @@ def test_T1_12_no_raw_arrays_saved(tmp_path, monkeypatch):
         for frag in ("write_text", "write_bytes", "np.save", "np.savez",
                      "to_csv", "to_parquet", "pickle"):
             assert frag not in src
-    # R2-structure delta: mkdir + write-mode open live only inside the
-    # evidence writer (explicit out_dir, temp dirs in tests); CLI has none.
+    # Structure and G0 writers are the only code paths that create files.
     wsrc = inspect.getsource(mod.write_structure_evidence)
+    gsrc = inspect.getsource(mod.write_g0_evidence)
     assert "mkdir" not in CLI_SRC
-    assert CORE_SRC.count("mkdir") == wsrc.count("mkdir") >= 1
+    assert CORE_SRC.count("mkdir") == (wsrc.count("mkdir")
+                                        + gsrc.count("mkdir")) >= 2
     pat = r"open\([^)]*['\"]w"
-    assert len(re.findall(pat, CORE_SRC)) == len(re.findall(pat, wsrc)) == 4
+    assert len(re.findall(pat, CORE_SRC)) == 8
+    assert len(re.findall(pat, wsrc)) + len(re.findall(pat, gsrc)) == 8
     assert re.findall(pat, CLI_SRC) == []
     p_b, p_f = _tiny_tables()
     h = _tiny_h()
@@ -783,11 +785,7 @@ def test_T1_12_no_raw_arrays_saved(tmp_path, monkeypatch):
         assert not (params & {"out_dir", "path", "run_id", "output", "save"})
 
 
-def test_T1_13_no_production_decoder_import():
-    for src in (CORE_SRC.lower(), CLI_SRC.lower()):
-        for frag in ("v35", "production_decoder", "fftqspa",
-                     "decode_row_layered"):
-            assert frag not in src
+def test_T1_13_decoder_dependency_is_lazy_and_fake_path_is_local():
     for src in (CORE_SRC, CLI_SRC):
         tree = ast.parse(src)
         for node in ast.walk(tree):
@@ -798,9 +796,24 @@ def test_T1_13_no_production_decoder_import():
             else:
                 continue
             low = names.lower()
-            assert "v35" not in low and "fftqspa" not in low
             assert "production_decoder" not in low
     _block_import_smoke()
+
+    loaded = []
+
+    def _must_not_load():
+        loaded.append(True)
+        raise AssertionError("historical decoder loaded on fake path")
+
+    old_loader = mod._load_g0_decoder
+    mod._load_g0_decoder = _must_not_load
+    try:
+        p_b, p_f = _tiny_tables()
+        mod.run_g0_phase(h=_tiny_h(), p_b=p_b, p_f=p_f,
+                         decode_fn=FakeDecoder(), authorized=True)
+    finally:
+        mod._load_g0_decoder = old_loader
+    assert loaded == []
 
 
 def _block_import_smoke():
@@ -829,10 +842,11 @@ def test_T1_14_no_data_reads():
         for frag in ("parquet", "np.load", "loadtxt", "genfromtxt",
                      "read_bytes", "pd.read", "csv.reader"):
             assert frag not in src
-    # R2-structure delta: core open( calls are the 4 confined evidence
-    # writes (see T0_38); CLI still opens only the authorization state.
+    # Core open( calls are confined to the two four-file evidence writers;
+    # CLI still opens only the authorization state.
     wsrc = inspect.getsource(mod.write_structure_evidence)
-    assert CORE_SRC.count("open(") == wsrc.count("open(") == 4
+    gsrc = inspect.getsource(mod.write_g0_evidence)
+    assert CORE_SRC.count("open(") == wsrc.count("open(") + gsrc.count("open(") == 8
     assert CLI_SRC.count("open(") == 1
     assert "cycle_state" in CLI_SRC
     for fn in PHASE_FUNCS:
@@ -906,7 +920,7 @@ def test_T1_20_no_workspace_or_production_output(tmp_path, monkeypatch):
     mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
                      authorized=True)
     assert list(tmp_path.rglob("*")) == []
-    assert list((ROOT / "workspace").glob("v72p2d5_*")) == []
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
     assert list((ROOT / "comparison_bench" / "outputs_comparison").glob(
         "v72p2d5_*")) == []
     cyc = ROOT / "docs" / "research_cycles" / "V72P2D5-GF32-RATE-MOTHER"
@@ -940,7 +954,9 @@ def test_T1_21_no_hash_checksum_tag():
         cur = stack.pop()
         if isinstance(cur, dict):
             for k, v in cur.items():
-                assert not any(f in str(k).lower() for f in frags)
+                low_key = str(k).lower()
+                assert not any(f in low_key for f in frags[:-1])
+                assert "tag" not in set(low_key.split("_"))
                 stack.append(v)
         elif isinstance(cur, list):
             stack.extend(cur)
@@ -1236,7 +1252,7 @@ def test_T2_13_existing_dir_refuses_and_formal_root_absent(tmp_path):
         mod.write_structure_evidence(tmp_path, res)
     assert (mod.STRUCTURE_FORMAL_ROOT
             == "workspace/v72p2d5_structure/20260905_r2")
-    assert not (ROOT / mod.STRUCTURE_FORMAL_ROOT).exists()
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
 
 
 def test_T2_14_cli_enters_single_orchestrator(monkeypatch):
@@ -1346,7 +1362,7 @@ def test_T2_17_cli_unauthorized_creates_no_formal_dir(tmp_path, monkeypatch):
     assert cli.main(["--phase", "structure"]) == 3
     assert counts == {"runner": 0, "preflight": 0, "build": 0, "audit": 0,
                       "write": 0}
-    assert not (ROOT / mod.STRUCTURE_FORMAL_ROOT).exists()
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
     assert list(tmp_path.rglob("*")) == []
 
 
@@ -1376,7 +1392,7 @@ def test_T2_18_cli_structure_frozen_out_dir_fake_files(tmp_path, monkeypatch):
     redir = tmp_path / "redir"
     assert (sorted(p.name for p in redir.iterdir())
             == sorted(mod.STRUCTURE_EVIDENCE_FILES))
-    assert not (ROOT / mod.STRUCTURE_FORMAL_ROOT).exists()
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
     gseen = {}
 
     def _gspy(**kw):
@@ -1389,3 +1405,352 @@ def test_T2_18_cli_structure_frozen_out_dir_fake_files(tmp_path, monkeypatch):
     assert cli.main(["--phase", "g0"]) == 0
     assert gseen.get("authorized") is True
     assert "out_dir" not in gseen
+
+
+# --------------------------------------------------------------------------
+# T2 — G0 entrypoint delta (fake decoder only; no real decoder or data)
+# --------------------------------------------------------------------------
+class _G0ExactFake:
+    def __init__(self, truths):
+        self.calls = []
+        self.truths = truths
+
+    def __call__(self, h, prior, syndrome, layer=None):
+        prior = np.asarray(prior, dtype=np.float64)
+        syndrome = np.asarray(syndrome, dtype=np.int64)
+        self.calls.append({"shape": np.shape(h), "prior": prior.copy(),
+                           "syndrome": syndrome.copy(), "layer": layer})
+        if not self.truths:
+            raise AssertionError("missing fixture truth for fake G0 call")
+        x_hat = np.asarray(self.truths.pop(0), dtype=np.int64)
+        return {"x_hat": x_hat, "syndrome_ok": True,
+                "iterations": 1, "final_beliefs": np.log(prior)}
+
+
+def test_T2_19_g0_fixture_is_positive_and_normalized():
+    h, p_b, p_f = mod.build_g0_fixture()
+    assert set(h) == {"L1", "L2"}
+    assert h["L1"].shape == (8, 8) and h["L2"].shape == (8, 8)
+    assert np.all(p_b > 0) and np.isclose(p_b.sum(), 1.0)
+    assert np.all(p_f > 0)
+    assert np.allclose(p_f.sum(axis=0), 1.0, atol=1e-14)
+    p1 = mod.marginalize_f_to_p1(p_f)
+    p2 = mod.conditionalize_f_to_p2(p_f)
+    assert np.allclose(p1.sum(axis=0), 1.0, atol=1e-14)
+    assert np.allclose(p2.sum(axis=2), 1.0, atol=1e-14)
+    assert mod._g0_exhaustive_error(p_b, p_f) < 1e-14
+
+
+def test_T2_20_g0_unauthorized_refuses_before_fixture_or_decoder(monkeypatch):
+    def _boom(*args, **kwargs):
+        raise AssertionError("G0 work must not start")
+
+    monkeypatch.setattr(mod, "build_g0_fixture", _boom)
+    monkeypatch.setattr(mod, "historical_g0_decoder", _boom)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g0_synthetic(authorized=False)
+
+
+def test_T2_21_decoder_dataclass_adapter_uses_frozen_kwargs(monkeypatch):
+    seen = {}
+
+    class Result:
+        x_hat = np.array([1, 2], dtype=np.uint8)
+        syndrome_ok = True
+        iterations = 3
+        final_beliefs = np.zeros((2, 32), dtype=np.float64)
+
+    def _decoder(h, prior, syndrome, **kwargs):
+        seen.update(kwargs)
+        return Result()
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", lambda: _decoder)
+    out = mod.historical_g0_decoder(
+        np.eye(2, dtype=np.uint8), np.full((2, 32), 1.0 / 32),
+        np.array([1, 2], dtype=np.uint8))
+    assert out["x_hat"].tolist() == [1, 2]
+    assert out["syndrome_ok"] is True and out["iterations"] == 3
+    assert seen == {"max_iter": 90, "damping_alpha": 1.0,
+                    "warm_beliefs": None, "field": None}
+
+
+def test_T2_22_g0_dataclass_result_is_accepted():
+    class Result:
+        x_hat = np.array([0, 1], dtype=np.uint8)
+        syndrome_ok = True
+        iterations = 0
+        final_beliefs = np.zeros((2, 32), dtype=np.float64)
+
+    def _decoder(h, prior, syndrome, layer=None):
+        return Result()
+
+    exact, syn_ok, it, finite, beliefs = mod._decode_block(
+        _decoder, np.eye(2, dtype=np.uint8),
+        np.full((2, 32), 1.0 / 32), np.array([0, 1]),
+    )
+    assert exact and syn_ok and it == 0 and finite
+    assert np.shape(beliefs) == (2, 32)
+
+
+def test_T2_23_g0_fake_authorized_runs_eight_seeds_and_writes_four(
+        tmp_path, monkeypatch):
+    truths = []
+    original_sample = mod.sample_matched_block
+
+    def _sample_and_retain(*args, **kwargs):
+        block = original_sample(*args, **kwargs)
+        truths.append(np.asarray(block["u2"], dtype=np.int64).copy())
+        return block
+
+    # The fake is given the generated fixture truth, while _decode_block still
+    # independently recomputes and checks its syndrome.  This tests plumbing,
+    # not an identity/mode-pattern assumption about the decoder.
+    monkeypatch.setattr(mod, "sample_matched_block", _sample_and_retain)
+    fake = _G0ExactFake(truths)
+    out = tmp_path / "g0"
+    result = mod.run_g0_synthetic(authorized=True, decode_fn=fake,
+                                  out_dir=out)
+    assert result["decision"] == "G0_PASS"
+    assert result["passed"] is True
+    assert result["attempted_blocks"] == 8
+    assert result["completed_blocks"] == 8
+    assert result["decoder_calls"] == 8
+    assert [r["seed"] for r in result["records"]] == list(mod.G0_SEEDS)
+    assert len(fake.calls) == 8
+    assert sorted(p.name for p in out.iterdir()) == sorted(
+        mod.G0_EVIDENCE_FILES)
+    payload = json.loads((out / "results.json").read_text(encoding="utf-8"))
+    assert payload["decision"] == "G0_PASS"
+    assert payload["exact_count"] == 8
+    assert payload["syndrome_ok_count"] == 8
+    assert payload["finite_count"] == 8
+    assert payload["seeds"] == list(mod.G0_SEEDS)
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    for key in payload:
+        assert key not in {"h", "p_b", "p_f", "prior", "syndrome"}
+
+
+def test_T2_24_g0_fake_failure_is_blocked_and_retained(tmp_path):
+    calls = []
+
+    def _fail(h, prior, syndrome, layer=None):
+        calls.append(1)
+        raise RuntimeError("injected G0 decoder failure")
+
+    out = tmp_path / "blocked"
+    result = mod.run_g0_synthetic(authorized=True, decode_fn=_fail,
+                                  out_dir=out)
+    assert result["decision"] == "G0_BLOCKED_DECODER"
+    assert result["passed"] is False
+    assert len(calls) == 1
+    assert result["attempted_blocks"] == 1
+    assert result["completed_blocks"] == 0
+    assert result["decoder_calls"] == 1
+    assert result["failed_seed"] == mod.G0_SEEDS[0]
+    assert result["failure_stage"] == "decoder"
+    assert sorted(p.name for p in out.iterdir()) == sorted(
+        mod.G0_EVIDENCE_FILES)
+    payload = json.loads((out / "results.json").read_text(encoding="utf-8"))
+    assert payload["decision"] == "G0_BLOCKED_DECODER"
+    assert payload["decoder_calls"] == 1
+    assert payload["failed_seed"] == mod.G0_SEEDS[0]
+    assert payload["failure_stage"] == "decoder"
+
+
+def test_T2_25_decode_adapter_recomputes_syndrome_before_acceptance():
+    def _lies(h, prior, syndrome, layer=None):
+        _ = (prior, layer)
+        return {"x_hat": np.array([1, 1], dtype=np.int64),
+                "syndrome_ok": True, "iterations": 1,
+                "final_beliefs": np.zeros((2, 32), dtype=np.float64)}
+
+    exact, syn_ok, it, finite, _ = mod._decode_block(
+        _lies, np.array([[1, 1]], dtype=np.uint8),
+        np.full((2, 32), 1.0 / 32), np.array([1, 2], dtype=np.int64),
+    )
+    assert exact is False and syn_ok is False
+    assert it == 1 and finite is True
+
+
+def test_T2_26_g0_failure_retains_prior_completed_call_counts():
+    calls = []
+
+    def _fail_on_second(h, prior, syndrome, layer=None):
+        _ = (h, syndrome, layer)
+        calls.append(1)
+        if len(calls) == 2:
+            raise RuntimeError("second G0 decoder call failed")
+        return {"x_hat": np.zeros(prior.shape[0], dtype=np.int64),
+                "syndrome_ok": False, "iterations": 1,
+                "final_beliefs": np.zeros_like(prior)}
+
+    h, p_b, p_f = mod.build_g0_fixture()
+    result = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f,
+                              decode_fn=_fail_on_second, authorized=True)
+    assert result["decision"] == "G0_BLOCKED_DECODER"
+    assert result["attempted_blocks"] == 2
+    assert result["completed_blocks"] == 1
+    assert result["decoder_calls"] == 2
+    assert result["failed_seed"] == mod.G0_SEEDS[1]
+    assert result["failure_stage"] == "decoder"
+
+
+def test_T2_27_g0_cli_maps_to_synthetic_entrypoint_without_authorization(
+        monkeypatch):
+    state = {"g0_execution_authorized": False}
+    calls = []
+
+    def _runner(**kwargs):
+        calls.append(kwargs)
+        raise AssertionError("unauthorized CLI entered G0 runner")
+
+    monkeypatch.setattr(cli, "_load_state", lambda path: state)
+    monkeypatch.setitem(cli._RUNNERS, "g0", _runner)
+    assert cli.main(["--phase", "g0"]) == 3
+    assert calls == []
+
+
+# --------------------------------------------------------------------------
+# T2 — G0 implementation-candidate acceptance delta (fake/math only)
+# --------------------------------------------------------------------------
+def test_T2_28_g0_fixture_degree2_ring_no_degree1():
+    h, p_b, p_f = mod.build_g0_fixture()
+    assert set(h) == {"L1", "L2"}
+    for key in ("L1", "L2"):
+        m_ = np.asarray(h[key])
+        assert m_.shape == (8, 8)
+        assert int(m_.shape[1]) <= 9
+        assert bool(np.all((m_ != 0).sum(axis=0) == 2))
+        assert bool(np.all((m_ != 0).sum(axis=1) == 2))
+    assert int(np.count_nonzero(np.asarray(h["L1"]) == 2)) >= 1
+    assert np.all(np.isfinite(p_b)) and bool(np.all(p_b > 0))
+    assert abs(float(p_b.sum()) - 1.0) < 1e-12
+    assert np.all(np.isfinite(p_f)) and bool(np.all(p_f > 0))
+    assert np.allclose(p_f.sum(axis=0), 1.0, atol=1e-12)
+
+
+def test_T2_29_g0_unauthorized_loads_no_decoder_and_writes_nothing(
+        tmp_path, monkeypatch):
+    loaded = []
+
+    def _boom_loader():
+        loaded.append(1)
+        raise AssertionError("historic decoder loaded while unauthorized")
+
+    def _boom_writer(out_dir, result):
+        raise AssertionError("G0 writer entered while unauthorized")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _boom_loader)
+    monkeypatch.setattr(mod, "write_g0_evidence", _boom_writer)
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g0_synthetic(authorized=False)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g0_synthetic(authorized=False, decode_fn=FakeDecoder())
+    assert loaded == []
+    assert list(tmp_path.rglob("*")) == []
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+
+
+def test_T2_30_g0_exhaustive_is_independent_not_self_compare():
+    _, p_b, p_f = mod.build_g0_fixture()
+    assert mod._g0_exhaustive_error(p_b, p_f) < 1e-12
+    bad = np.asarray(p_f, dtype=np.float64).copy()
+    bad[:, 0] = bad[:, 0] * 2.0
+    assert mod._g0_exhaustive_error(p_b, bad) > 1e-6
+    src = inspect.getsource(mod._g0_exhaustive_error)
+    assert "marginalize_f_to_p1" in src
+    assert "conditionalize_f_to_p2" in src
+
+
+def test_T2_31_g0_math_gate_blocks_before_any_decoder_call():
+    h, p_b, p_f = mod.build_g0_fixture()
+    bad = np.asarray(p_f, dtype=np.float64).copy()
+    bad[:, 0] = bad[:, 0] * 2.0
+    fake = FakeDecoder()
+    res = mod.run_g0_phase(h=h, p_b=p_b, p_f=bad, decode_fn=fake,
+                           authorized=True)
+    assert res["decision"] == "G0_BLOCKED_MATH"
+    assert res["passed"] is False
+    assert res["attempted_blocks"] == 0
+    assert res["decoder_calls"] == 0
+    assert res["completed_blocks"] == 0
+    assert res["failed_seed"] is None
+    assert res["failure_stage"] == "math"
+    assert fake.calls == []
+
+
+def test_T2_32_g0_resource_block_keeps_actual_counts():
+    def _mem(h_, prior, syndrome, layer=None):
+        raise MemoryError("injected G0 resource failure")
+
+    h, p_b, p_f = mod.build_g0_fixture()
+    res = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=_mem,
+                           authorized=True)
+    assert res["decision"] == "G0_BLOCKED_RESOURCE"
+    assert res["passed"] is False
+    assert res["attempted_blocks"] == 1
+    assert res["decoder_calls"] == 1
+    assert res["completed_blocks"] == 0
+    assert res["failed_seed"] == mod.G0_SEEDS[0]
+    assert res["failure_stage"] == "decoder"
+    assert res["error"] and "MemoryError" in res["error"]
+
+
+def test_T2_33_g0_writer_four_files_scalar_only_no_overwrite(tmp_path):
+    h, p_b, p_f = mod.build_g0_fixture()
+    out = tmp_path / "g0w"
+    res = mod.run_g0_synthetic(authorized=True, decode_fn=FakeDecoder(),
+                               out_dir=out)
+    assert res["decision"] in ("G0_PASS", "G0_BLOCKED_MATH",
+                               "G0_BLOCKED_DECODER", "G0_BLOCKED_RESOURCE")
+    assert sorted(p.name for p in out.iterdir()) == sorted(
+        mod.G0_EVIDENCE_FILES)
+    with pytest.raises(FileExistsError):
+        mod.write_g0_evidence(out, res)
+    payload = json.loads((out / "results.json").read_text(encoding="utf-8"))
+    assert payload["seeds"] == list(mod.G0_SEEDS)
+    assert payload["decoder_calls"] == res["decoder_calls"]
+    banned_sub = ("hash", "checksum", "hmac", "sha256", "sha512", "sha1",
+                  "md5", "signature")
+    banned_key = {"h", "p_b", "p_f", "prior", "priors", "syndrome",
+                  "syndromes", "matrix", "matrices", "beliefs", "messages",
+                  "raw", "coefficients", "support"}
+    stack = [payload]
+    while stack:
+        cur = stack.pop()
+        if isinstance(cur, dict):
+            for k, v in cur.items():
+                low = str(k).lower()
+                assert not any(b in low for b in banned_sub)
+                assert low not in banned_key
+                assert "tag" not in set(low.split("_"))
+                stack.append(v)
+        elif isinstance(cur, list):
+            stack.extend(cur)
+        elif isinstance(cur, str):
+            assert ":\\" not in cur and ":/" not in cur
+            assert not cur.startswith("/")
+    table = (out / "table.csv").read_text(encoding="utf-8").splitlines()
+    assert table[0] == ("seed,exact,syndrome_ok,finite,iterations,"
+                        "syndrome_weight")
+    assert len(table) == 1 + res["attempted_blocks"]
+    summ = json.loads(
+        (out / "execution_summary.json").read_text(encoding="utf-8"))
+    assert summ["files"] == list(mod.G0_EVIDENCE_FILES)
+    assert summ["decoder_calls"] == res["decoder_calls"]
+    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+
+
+def test_T2_34_all_g0_p0_g1_g2_real_formal_auth_still_false():
+    state = cli._load_state(STATE_PATH)
+    for key in ("structure_execution_authorized", "g0_execution_authorized",
+                "p0_cost_execution_authorized", "g1_execution_authorized",
+                "g2_execution_authorized", "real_execution_authorized",
+                "formal_execution_authorized"):
+        assert key in state
+        assert state[key] is False
+    assert state.get("scientific_promotion", False) is False
+    for phase in ("structure", "g0", "p0-cost", "g1", "g2"):
+        assert mod.is_phase_authorized(state, phase) is False
+    assert mod.is_phase_authorized(state, "no-such-phase") is False

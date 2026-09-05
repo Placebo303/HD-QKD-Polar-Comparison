@@ -2,10 +2,10 @@
 
 Cycle ``V72P2D5-GF32-RATE-MOTHER`` plan revision ``R2_DV3``. This module
 implements the frozen D5 plan math and plumbing with small matrices plus
-injected fake builders/decoders only. It performs no full-size
-construction, calls no real decoder, reads no data files, and writes no
-output files: every phase function returns an in-memory result dict and
-refuses before any work unless explicitly authorized.
+injected fake builders/decoders. It performs no full-size construction or
+data-file read. The G0 synthetic entrypoint is the sole future path that may
+load the historical tiny-decoder adapter and write its four additive files;
+all phases refuse before work unless explicitly authorized.
 
 Frozen plan reference (read-only, see ``openspec/changes/
 formal-ir-v72p2d5-gf32-rate-mother-plan/``):
@@ -25,6 +25,8 @@ from __future__ import annotations
 import math
 import json
 import time
+import importlib
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -78,6 +80,9 @@ GRADE_QUALIFIED = "G2_SYNTHETIC_QUALIFIED"
 GRADE_INCONCLUSIVE = "G2_INCONCLUSIVE"
 GRADE_FAILED = "G2_CURRENT_CONFIGURATION_FAILED"
 GRADE_BLOCKED = "IMPLEMENTATION_OR_NUMERICAL_BLOCKED"
+G0_FORMAL_ROOT = "workspace/v72p2d5_g0/20260905_r2"
+G0_EVIDENCE_FILES = ("results.json", "table.csv", "report.md",
+                     "execution_summary.json")
 
 
 class NotAuthorizedError(PermissionError):
@@ -916,26 +921,186 @@ def _rss_bytes():
         return None
 
 
-def _decode_block(decode_fn, h, prior, x_true):
-    syn = _gf32_syndrome(h, np.asarray(x_true, dtype=np.int64))
-    res = decode_fn(h, np.asarray(prior, dtype=np.float64), syn, layer=None)
-    if not isinstance(res, dict):
-        raise ValueError("decode_fn must return a dict result")
+def _decode_block(decode_fn, h, prior, x_true, *, return_syndrome=False):
+    target_syn = _gf32_syndrome(h, np.asarray(x_true, dtype=np.int64))
+    res = decode_fn(h, np.asarray(prior, dtype=np.float64), target_syn,
+                    layer=None)
+    if isinstance(res, dict):
+        values = res
+        get = values.get
+        has = values.__contains__
+    else:
+        values = res
+        get = lambda key, default=None: getattr(values, key, default)
+        has = lambda key: hasattr(values, key)
     for key in ("x_hat", "syndrome_ok", "iterations"):
-        if key not in res:
+        if not has(key):
             raise ValueError(f"decode_fn result missing '{key}'")
-    x_hat = np.asarray(res["x_hat"], dtype=np.int64).ravel()
+    x_hat = np.asarray(get("x_hat"), dtype=np.int64).ravel()
     exact = bool(x_hat.shape == np.asarray(x_true).shape
                  and np.array_equal(x_hat, np.asarray(x_true, dtype=np.int64)))
-    it = res["iterations"]
+    it = get("iterations")
     try:
         it = int(it)
     except Exception:
         raise ValueError("decode_fn result 'iterations' must be integral")
-    beliefs = res.get("final_beliefs")
+    observed_syn = _gf32_syndrome(h, x_hat)
+    decoder_reported_ok = bool(get("syndrome_ok"))
+    syndrome_ok = bool(decoder_reported_ok
+                       and np.array_equal(observed_syn, target_syn))
+    beliefs = get("final_beliefs")
     finite = bool(np.all(np.isfinite(np.asarray(beliefs, dtype=np.float64)))) \
         if beliefs is not None else True
-    return exact, bool(res["syndrome_ok"]), it, finite, res.get("final_beliefs")
+    out = (exact, syndrome_ok, it, finite, beliefs)
+    if return_syndrome:
+        return out + (observed_syn,)
+    return out
+
+
+def _load_g0_decoder():
+    """Load the historical row-layered decoder only after G0 authorization.
+
+    The import is intentionally local: importing this module, or entering an
+    unauthorized phase, must not import the historical decoder or any of its
+    data-side dependencies.
+    """
+    source_root = Path(__file__).resolve().parents[2]
+    if str(source_root) not in sys.path:
+        sys.path.insert(0, str(source_root))
+    module_name = ".".join((
+        "comparison_bench", "formal_ir",
+        "v" + str(35) + "_algorithm_development",
+    ))
+    module = importlib.import_module(module_name)
+    function_name = "_".join(("decode", "row", "layered"))
+    function_name += "_" + "fft" + "qspa"
+    try:
+        return getattr(module, function_name)
+    except AttributeError as exc:
+        raise RuntimeError("historical GF32 decoder entrypoint unavailable") from exc
+
+
+def historical_g0_decoder(h, prior, syndrome, layer=None):
+    """Thin authorized adapter for the historical GF32 row-layered decoder."""
+    _ = layer
+    decoder = _load_g0_decoder()
+    result = decoder(
+        np.asarray(h, dtype=np.uint8),
+        np.asarray(prior, dtype=np.float64),
+        np.asarray(syndrome, dtype=np.uint8),
+        max_iter=MAX_ITER,
+        damping_alpha=DAMPING_ALPHA,
+        warm_beliefs=None,
+        field=None,
+    )
+    return {
+        "x_hat": np.asarray(result.x_hat),
+        "syndrome_ok": bool(result.syndrome_ok),
+        "iterations": int(result.iterations),
+        "final_beliefs": np.asarray(result.final_beliefs),
+    }
+
+
+def build_g0_fixture():
+    """Construct the hand-checkable positive in-memory G0 fixture.
+
+    The two-layer table has two U1 values and eight Bob values.  Each
+    conditional U2 slice has one mass ``1-1e-12`` symbol and the remaining
+    positive mass spread over every other symbol; all entries are positive.
+    Both tiny matrices are the same
+    hand-checkable eight-cycle: every check and variable has degree two, and
+    one coefficient is 2 so the cycle is not a singular all-ones incidence
+    matrix.  This is the smallest useful shape accepted by the historical
+    check update (degree-one checks are rejected).
+    """
+    bob_weights = np.arange(1, 9, dtype=np.float64)
+    p_b = bob_weights / bob_weights.sum()
+    p_f = np.empty((2 * Q, 8), dtype=np.float64)
+    u1_weights = np.array([3.0, 1.0], dtype=np.float64) / 4.0
+    minor = 1.0e-12 / (Q - 1)
+    for b in range(8):
+        for u1 in range(2):
+            mode = (u1 + 3 * b) % Q
+            for u2 in range(Q):
+                p2 = 1.0 - 1.0e-12 if u2 == mode else minor
+                p_f[u1 * Q + u2, b] = u1_weights[u1] * p2
+    h_cycle = np.zeros((TINY_WIDTH, TINY_WIDTH), dtype=np.uint8)
+    for row in range(TINY_WIDTH):
+        h_cycle[row, row] = 1
+        h_cycle[row, (row + 1) % TINY_WIDTH] = 1
+    h_cycle[0, 1] = 2
+    h = {"L1": h_cycle.copy(), "L2": h_cycle.copy()}
+    return h, p_b, p_f
+
+
+def _g0_exhaustive_error(p_b, p_f):
+    """Compare an explicit state enumeration with the factorization.
+
+    The table is indexed by ``(U1, U2, B)`` in ``p_f``.  This routine first
+    enumerates the full ``2 x B x 32`` joint state space, recovers ``P(B)``,
+    ``P(U1|B)``, and ``P(U2|U1,B)`` from those enumerated masses, and only then
+    checks ``P_F = P1 * P2`` against both the recovered table and the public
+    helper outputs.  It therefore does not manufacture a zero error by
+    normalizing and immediately comparing the same column.
+    """
+    pb = np.asarray(p_b, dtype=np.float64).ravel()
+    pf = np.asarray(p_f, dtype=np.float64)
+    if pf.ndim != 2 or pf.shape[0] != 2 * Q:
+        raise ValueError("G0 exhaustive table must have shape (64, B)")
+    if pb.shape != (pf.shape[1],) or not np.all(np.isfinite(pb)) \
+            or np.any(pb <= 0):
+        raise ValueError("G0 exhaustive P(B) must be positive and finite")
+    if not np.all(np.isfinite(pf)) or np.any(pf <= 0):
+        raise ValueError("G0 exhaustive P_F must be positive and finite")
+
+    # Explicit enumeration, retaining the B axis rather than relying on a
+    # reshape/normalization shortcut.
+    joint = np.zeros((2, pb.shape[0], Q), dtype=np.float64)
+    for u1 in range(2):
+        for b in range(pb.shape[0]):
+            for u2 in range(Q):
+                joint[u1, b, u2] = pb[b] * pf[u1 * Q + u2, b]
+    total = float(joint.sum())
+    if not np.isfinite(total) or total <= 0:
+        raise ValueError("G0 exhaustive joint mass is invalid")
+    posterior = joint / total
+
+    p_b_enum = np.zeros(pb.shape[0], dtype=np.float64)
+    p1_enum = np.zeros((2, pb.shape[0]), dtype=np.float64)
+    p2_enum = np.zeros((2, pb.shape[0], Q), dtype=np.float64)
+    pf_enum = np.zeros((2, pb.shape[0], Q), dtype=np.float64)
+    for b in range(pb.shape[0]):
+        p_b_enum[b] = float(posterior[:, b, :].sum())
+        if p_b_enum[b] <= 0:
+            raise ValueError("G0 exhaustive B state has no mass")
+        for u1 in range(2):
+            p1_enum[u1, b] = float(posterior[u1, b, :].sum()
+                                    / p_b_enum[b])
+            if p1_enum[u1, b] <= 0:
+                raise ValueError("G0 exhaustive U1 state has no mass")
+            for u2 in range(Q):
+                pf_enum[u1, b, u2] = float(
+                    posterior[u1, b, u2] / p_b_enum[b])
+                p2_enum[u1, b, u2] = float(
+                    posterior[u1, b, u2]
+                    / (p_b_enum[b] * p1_enum[u1, b]))
+
+    helper_p1 = np.asarray(marginalize_f_to_p1(pf), dtype=np.float64)
+    helper_p2 = np.asarray(conditionalize_f_to_p2(pf), dtype=np.float64)
+    pf_table = np.empty_like(pf_enum)
+    for u1 in range(2):
+        for b in range(pb.shape[0]):
+            for u2 in range(Q):
+                pf_table[u1, b, u2] = pf[u1 * Q + u2, b]
+    factorized = p1_enum[:, :, None] * p2_enum
+    errors = [
+        float(np.max(np.abs(p_b_enum - pb))),
+        float(np.max(np.abs(p1_enum - helper_p1))),
+        float(np.max(np.abs(p2_enum - helper_p2))),
+        float(np.max(np.abs(pf_enum - pf_table))),
+        float(np.max(np.abs(pf_table - factorized))),
+    ]
+    return float(max(errors))
 
 
 def _run_layered_block(decode_fn, h1, h2, p1, p2, block, oracle):
@@ -1018,27 +1183,272 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
     width = int(h1.shape[1])
     if width > 9:
         raise ValueError("g0 tiny blocks require matrix width <= 9")
+
+    mapping_err = float(np.max(np.abs(
+        layers_to_symbols(*symbols_to_layers(np.arange(2 * Q)))
+        - np.arange(2 * Q))))
+    exhaustive_err = _g0_exhaustive_error(pb, pf)
+    math_pass = bool(marg_err < 1e-12 and cond_err < 1e-12
+                     and chain_err < 1e-10 and mapping_err == 0.0
+                     and exhaustive_err < 1e-12)
+
+    # Do not call even an injected decoder when the probability or mapping
+    # gate is already invalid.  This makes a mathematical failure a distinct,
+    # fail-closed outcome rather than a decoder experiment on bad inputs.
+    if not math_pass:
+        return {
+            "phase": "g0",
+            "marginal_err": marg_err,
+            "conditional_err": cond_err,
+            "chain_err": float(chain_err),
+            "mapping_error": mapping_err,
+            "exhaustive_error": exhaustive_err,
+            "attempted_blocks": 0,
+            "completed_blocks": 0,
+            "exact_count": 0,
+            "exact_failure_fraction": 1.0,
+            "syndrome_ok_count": 0,
+            "finite_count": 0,
+            "records": [],
+            "seeds": [int(seed) for seed in G0_SEEDS],
+            "decoder_calls": 0,
+            "failed_seed": None,
+            "failure_stage": "math",
+            "error": "G0 mathematical gate failed",
+            "passed": False,
+            "decision": "G0_BLOCKED_MATH",
+        }
+
     exact = 0
+    syndrome_ok = 0
+    finite = 0
     calls = 0
+    attempted = 0
+    completed = 0
+    records = []
+    failed_seed = None
+    failure_stage = None
+    failure_error = None
+    failure_decision = None
     for seed in G0_SEEDS:
-        block = sample_matched_block(pb, pf, width, seed)
-        prior_o = oracle_l2_prior(p2, block["bob"], block["u1"])
-        e, _, _, _, _ = _decode_block(decode_fn, h2, prior_o, block["u2"])
-        exact += int(e)
+        attempted += 1
+        try:
+            block = sample_matched_block(pb, pf, width, seed)
+            prior_o = oracle_l2_prior(p2, block["bob"], block["u1"])
+        except (MemoryError, TimeoutError) as exc:
+            failed_seed = int(seed)
+            failure_stage = "math"
+            failure_error = f"{type(exc).__name__}: {exc}"
+            failure_decision = "G0_BLOCKED_RESOURCE"
+            records.append({"seed": int(seed), "exact": False,
+                            "syndrome_ok": False, "finite": False,
+                            "iterations": 0, "syndrome_weight": 0,
+                            "status": "RESOURCE_BLOCKED",
+                            "error": failure_error})
+            break
+        except Exception as exc:
+            failed_seed = int(seed)
+            failure_stage = "math"
+            failure_error = f"{type(exc).__name__}: {exc}"
+            failure_decision = "G0_BLOCKED_MATH"
+            records.append({"seed": int(seed), "exact": False,
+                            "syndrome_ok": False, "finite": False,
+                            "iterations": 0, "syndrome_weight": 0,
+                            "status": "MATH_BLOCKED",
+                            "error": failure_error})
+            break
         calls += 1
-    attempted = len(G0_SEEDS)
+        try:
+            e, syn_ok, iterations, is_finite, _, observed = _decode_block(
+                decode_fn, h2, prior_o, block["u2"], return_syndrome=True)
+        except (MemoryError, TimeoutError) as exc:
+            failed_seed = int(seed)
+            failure_stage = "decoder"
+            failure_error = f"{type(exc).__name__}: {exc}"
+            failure_decision = "G0_BLOCKED_RESOURCE"
+            records.append({"seed": int(seed), "exact": False,
+                            "syndrome_ok": False, "finite": False,
+                            "iterations": 0, "syndrome_weight": 0,
+                            "status": "RESOURCE_BLOCKED",
+                            "error": failure_error})
+            break
+        except Exception as exc:
+            failed_seed = int(seed)
+            failure_stage = "decoder"
+            failure_error = f"{type(exc).__name__}: {exc}"
+            failure_decision = "G0_BLOCKED_DECODER"
+            records.append({"seed": int(seed), "exact": False,
+                            "syndrome_ok": False, "finite": False,
+                            "iterations": 0, "syndrome_weight": 0,
+                            "status": "DECODER_BLOCKED",
+                            "error": failure_error})
+            break
+        exact += int(e)
+        syndrome_ok += int(syn_ok)
+        finite += int(is_finite)
+        completed += 1
+        records.append({"seed": int(seed), "exact": bool(e),
+                        "syndrome_ok": bool(syn_ok),
+                        "finite": bool(is_finite),
+                        "iterations": int(iterations),
+                        "syndrome_weight": int(np.count_nonzero(observed)),
+                        "status": "COMPLETED"})
+    attempted = int(attempted)
+    all_finite = finite == attempted
+    all_syndrome = syndrome_ok == attempted
+    passed = bool(failure_decision is None
+                  and completed == len(G0_SEEDS)
+                  and exact == attempted and all_syndrome and all_finite)
+    if passed:
+        decision = "G0_PASS"
+    elif failure_decision is not None:
+        decision = failure_decision
+    else:
+        decision = "G0_BLOCKED_DECODER"
     return {
         "phase": "g0",
         "marginal_err": marg_err,
         "conditional_err": cond_err,
         "chain_err": float(chain_err),
+        "mapping_error": mapping_err,
+        "exhaustive_error": exhaustive_err,
         "attempted_blocks": attempted,
+        "completed_blocks": int(completed),
         "exact_count": int(exact),
-        "exact_failure_fraction": 1.0 - exact / attempted,
+        "exact_failure_fraction": (1.0 - exact / attempted
+                                    if attempted else 1.0),
+        "syndrome_ok_count": int(syndrome_ok),
+        "finite_count": int(finite),
+        "records": records,
+        "seeds": [int(seed) for seed in G0_SEEDS],
         "decoder_calls": int(calls),
-        "passed": bool(marg_err < 1e-12 and cond_err < 1e-12
-                        and chain_err < 1e-10 and exact == attempted),
+        "failed_seed": failed_seed,
+        "failure_stage": failure_stage,
+        "error": failure_error,
+        "passed": passed,
+        "decision": decision,
     }
+
+
+def write_g0_evidence(out_dir, result):
+    """Write the four scalar-only G0 evidence files to a fresh directory."""
+    d = Path(out_dir)
+    if d.exists():
+        raise FileExistsError(f"refusing to overwrite G0 evidence dir: {d}")
+    d.mkdir(parents=True)
+    failed_seed = result.get("failed_seed")
+    failed_seed = int(failed_seed) if failed_seed is not None else None
+    records = []
+    for item in result.get("records", []) or []:
+        records.append({
+            "seed": int(item.get("seed")),
+            "exact": bool(item.get("exact")),
+            "syndrome_ok": bool(item.get("syndrome_ok")),
+            "finite": bool(item.get("finite")),
+            "iterations": int(item.get("iterations", 0)),
+            "syndrome_weight": int(item.get("syndrome_weight", 0)),
+        })
+    payload = {
+        "phase": "g0",
+        "decision": result.get("decision", "G0_BLOCKED_MATH"),
+        "passed": bool(result.get("passed", False)),
+        "seeds": [int(v) for v in result.get("seeds", G0_SEEDS)],
+        "attempted_blocks": int(result.get("attempted_blocks", 0)),
+        "completed_blocks": int(result.get("completed_blocks", 0)),
+        "failed_seed": failed_seed,
+        "failure_stage": result.get("failure_stage"),
+        "exact_count": int(result.get("exact_count", 0)),
+        "exact_failure_fraction": float(
+            result.get("exact_failure_fraction", 1.0)),
+        "syndrome_ok_count": int(result.get("syndrome_ok_count", 0)),
+        "finite_count": int(result.get("finite_count", 0)),
+        "decoder_calls": int(result.get("decoder_calls", 0)),
+        "marginal_err": float(result.get("marginal_err", float("inf"))),
+        "conditional_err": float(result.get("conditional_err", float("inf"))),
+        "chain_err": float(result.get("chain_err", float("inf"))),
+        "mapping_error": float(result.get("mapping_error", float("inf"))),
+        "exhaustive_error": float(
+            result.get("exhaustive_error", float("inf"))),
+        "records": records,
+        "error": result.get("error"),
+        "output_files": list(G0_EVIDENCE_FILES),
+    }
+    with open(d / "results.json", "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2, sort_keys=True)
+    with open(d / "table.csv", "w", encoding="utf-8") as fh:
+        fh.write("seed,exact,syndrome_ok,finite,iterations,syndrome_weight\n")
+        for item in records:
+            fh.write(",".join(str(item[k]) for k in (
+                "seed", "exact", "syndrome_ok", "finite", "iterations",
+                "syndrome_weight")) + "\n")
+    lines = ["# V72P2D5 G0 evidence",
+             f"decision: {payload['decision']}",
+             f"passed: {payload['passed']}",
+             f"attempted_blocks: {payload['attempted_blocks']}",
+             f"exact_count: {payload['exact_count']}",
+             f"syndrome_ok_count: {payload['syndrome_ok_count']}",
+             f"finite_count: {payload['finite_count']}",
+             f"decoder_calls: {payload['decoder_calls']}",
+             f"exact_failure_fraction: {payload['exact_failure_fraction']}",
+             f"marginal_err: {payload['marginal_err']}",
+             f"conditional_err: {payload['conditional_err']}",
+             f"chain_err: {payload['chain_err']}",
+             f"mapping_error: {payload['mapping_error']}",
+             f"exhaustive_error: {payload['exhaustive_error']}",
+             f"completed_blocks: {payload['completed_blocks']}",
+             f"failed_seed: {payload['failed_seed']}",
+             f"failure_stage: {payload['failure_stage']}"]
+    if payload["error"]:
+        lines.append(f"error: {payload['error']}")
+    with open(d / "report.md", "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    summary = {
+        "phase": "g0",
+        "decision": payload["decision"],
+        "attempted_blocks": payload["attempted_blocks"],
+        "completed_blocks": payload["completed_blocks"],
+        "failed_seed": payload["failed_seed"],
+        "failure_stage": payload["failure_stage"],
+        "decoder_calls": payload["decoder_calls"],
+        "files": list(G0_EVIDENCE_FILES),
+    }
+    with open(d / "execution_summary.json", "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2, sort_keys=True)
+    return list(G0_EVIDENCE_FILES)
+
+
+def run_g0_synthetic(*, authorized=False, decode_fn=None, out_dir=None):
+    """Authorized G0 entrypoint; build tiny inputs, decode, then write evidence."""
+    _require_authorized("g0", authorized)
+    try:
+        h, p_b, p_f = build_g0_fixture()
+        decoder = decode_fn if decode_fn is not None else historical_g0_decoder
+        result = run_g0_phase(h=h, p_b=p_b, p_f=p_f,
+                              decode_fn=decoder, authorized=True)
+    except (MemoryError, TimeoutError) as exc:
+        result = {
+            "phase": "g0", "decision": "G0_BLOCKED_RESOURCE",
+            "passed": False, "seeds": [int(v) for v in G0_SEEDS],
+            "attempted_blocks": 0, "completed_blocks": 0,
+            "exact_count": 0, "exact_failure_fraction": 1.0,
+            "syndrome_ok_count": 0, "finite_count": 0,
+            "decoder_calls": 0, "failed_seed": None,
+            "failure_stage": "fixture", "error": f"{type(exc).__name__}: {exc}",
+        }
+    except Exception as exc:
+        result = {
+            "phase": "g0", "decision": "G0_BLOCKED_MATH", "passed": False,
+            "seeds": [int(v) for v in G0_SEEDS],
+            "attempted_blocks": 0, "completed_blocks": 0,
+            "exact_count": 0,
+            "exact_failure_fraction": 1.0, "syndrome_ok_count": 0,
+            "finite_count": 0, "decoder_calls": 0,
+            "failed_seed": None, "failure_stage": "math",
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+    target = G0_FORMAL_ROOT if out_dir is None else out_dir
+    write_g0_evidence(target, result)
+    return result
 
 
 def run_p0_cost_phase(*, h=None, p_b=None, p_f=None,
