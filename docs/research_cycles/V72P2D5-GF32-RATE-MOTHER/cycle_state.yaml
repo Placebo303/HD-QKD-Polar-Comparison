@@ -1,6 +1,7 @@
 cycle_id: V72P2D5-GF32-RATE-MOTHER
-state: PLAN_REVISE_REQUIRED
-plan_accepted: false
+state: PLAN_ACCEPTED_R2
+plan_revision: R2_DV3
+plan_accepted: true
 implementation_authorized: false
 implementation_candidate_accepted: false
 structure_execution_authorized: false
@@ -16,4 +17,5 @@ decoder_executed: false
 full_mother_built: false
 val_rows_read: 0
 reason: DEGREE2_PREFIX_CONNECTIVITY_IMPOSSIBLE
-next_gate: INDEPENDENT_R2_PLAN_REVIEW
+next_gate: R2_IMPLEMENTATION_PACKET_REVIEW
+# R1 history retained by reference as superseded for the mother path (do NOT delete): PLAN_REVIEW_VERDICT.md, IMPLEMENTATION_PACKET.md, IMPLEMENTATION_REVIEW.md.
