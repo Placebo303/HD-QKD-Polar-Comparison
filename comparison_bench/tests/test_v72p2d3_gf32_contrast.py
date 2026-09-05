@@ -1620,3 +1620,167 @@ def test_r9_no_execute_real_never_calls_decoder(tmp_path):
     assert not (tmp_path / "r9_nd_core").exists()
     assert not (tmp_path / "r9_nd_orch").exists()
     assert not _r9_prod_root().exists()
+
+
+# ---- R4 unified guard: zero-touch spy (CLI main validates before any
+# registry/parquet/prior/matrix/decoder/dir touch; no decoder without execute-real) ----
+def test_r4_zero_touch_spy(tmp_path, monkeypatch):
+    import json as _json
+
+    calls: list[str] = []
+    orig_loader = runner.load_contrast_module
+
+    def _spy_loader():
+        m = orig_loader()
+        orig_validate = m.validate_output_target
+
+        def _spy_validate(*a, **k):
+            calls.append("validate_output_target")
+            return orig_validate(*a, **k)
+
+        m.validate_output_target = _spy_validate  # type: ignore[attr-defined]
+        for _name in (
+            "validate_prepare_registry",
+            "load_and_validate_prepare_frames",
+            "fit_cal_prior_from_frames",
+            "assemble_block_frames",
+            "validate_nested_matrices",
+            "history_decode",
+            "history_decoder_fn",
+            "run_g_layer",
+            "run_l1_stage",
+            "run_l2_incremental_chain",
+            "prepare_real_input",
+            "run_real_contrast",
+            "write_contrast_outputs",
+            "build_prepare_summary",
+        ):
+            if hasattr(m, _name):
+                _orig = getattr(m, _name)
+
+                def _wrap(*a, _o=_orig, _n=_name, **k):
+                    calls.append(_n)
+                    return _o(*a, **k)
+
+                setattr(m, _name, _wrap)
+        return m
+
+    monkeypatch.setattr(runner, "load_contrast_module", _spy_loader)
+    orig_build = runner.build_prepare_inputs
+
+    def _spy_build(*a, **k):
+        calls.append("build_prepare_inputs")
+        return orig_build(*a, **k)
+
+    monkeypatch.setattr(runner, "build_prepare_inputs", _spy_build)
+    dummy_reg = tmp_path / "r4_dummy.json"
+    dummy_reg.write_text(_json.dumps({"note": "unread, guard rejects first"}), encoding="utf-8")
+    prod = _r9_prod_root()
+    assert not prod.exists()
+    # prepare-only to prod: guard rejects before registry/parquet/prior/matrix/decoder/dir.
+    calls.clear()
+    assert runner.main(["--phase", "real", "--prepare-only", "--registry", str(dummy_reg), "--out-dir", str(prod)]) == 2
+    assert calls == ["validate_output_target"]
+    assert not prod.exists()
+    # execute-real to workspace: guard rejects before any data/decoder/dir touch.
+    ws_bad = tmp_path / "r4_spy_ws_bad"
+    calls.clear()
+    assert runner.main(["--phase", "real", "--execute-real", "--registry", str(dummy_reg), "--out-dir", str(ws_bad)]) == 2
+    assert calls == ["validate_output_target"]
+    assert not ws_bad.exists()
+    # no execute-real never enters decoder (CLI without --execute-real, zero decoder touch).
+    ws_noexec = tmp_path / "r4_spy_noexec"
+    calls.clear()
+    assert runner.main(["--phase", "real", "--registry", str(dummy_reg), "--out-dir", str(ws_noexec)]) == 2
+    assert calls == ["validate_output_target"]
+    for _dec in ("history_decode", "history_decoder_fn", "run_g_layer", "run_l1_stage", "run_l2_incremental_chain"):
+        assert _dec not in calls
+    assert not ws_noexec.exists()
+    assert not prod.exists()
+
+
+# ---- R4 unified guard: final-write integration regression (7 items, no decoder) ----
+def test_r4_unified_guard_7_checks(tmp_path):
+    import json as _json
+    import shutil
+
+    prod = _r9_prod_root()
+    assert not prod.exists()
+    # r4_01 prepare-only workspace passes and consumes validated (single file, decoder0).
+    pq = tmp_path / "r4_pairs.parquet"
+    _prep_write_parquet(pq)
+    reg_path = tmp_path / "r4_registry.json"
+    reg_path.write_text(_json.dumps(_prep_registry_dict(pq), indent=2), encoding="utf-8")
+    out_prep = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r4prep_" + tmp_path.name)
+    if out_prep.exists():
+        shutil.rmtree(out_prep)
+    try:
+        validated = mod.validate_output_target(phase="real", prepare_only=True, execute_real=False, out_dir=out_prep)
+        assert Path(validated).resolve() == out_prep.resolve()
+        rep = runner.run_prepare_only(out_dir=validated, registry_path=reg_path)
+        assert rep["status"] == "READY" and rep["decoder_calls"] == 0 and rep["formal"] is False
+        assert {p.name for p in out_prep.iterdir()} == {"prepare_summary.json"}
+    finally:
+        if out_prep.exists():
+            shutil.rmtree(out_prep)
+    # r4_02 prepare-only prod rejects (no dir, no decoder).
+    with pytest.raises(ValueError):
+        mod.validate_output_target(phase="real", prepare_only=True, execute_real=False, out_dir=prod)
+    with pytest.raises(ValueError):
+        mod.validate_output_target(phase="real", prepare_only=True, execute_real=False, out_dir=prod / "x")
+    assert not prod.exists()
+    # r4_03 execute-real exact prod passes entry (absent, no mkdir, no decoder).
+    gate = mod.require_real_gate(
+        execute_real=True, authorized=True, preflight=_fake_e2e_preflight(),
+        out_dir=prod, allow_production_root=True,
+    )
+    assert gate == {"gate": "PASS"}
+    assert runner._resolve_execute_real_dir(prod) == runner.PRODUCTION_ROOT
+    assert runner._resolve_execute_real_dir("comparison_bench/outputs_comparison/v72p2d3_gf32_contrast_20260904") == runner.PRODUCTION_ROOT
+    assert not prod.exists()
+    # r4_04 execute-real workspace/other/outside all reject (no dir, no decoder).
+    with pytest.raises(ValueError):
+        mod.validate_output_target(phase="real", prepare_only=False, execute_real=True, out_dir=tmp_path / "r4_ws")
+    with pytest.raises(ValueError):
+        mod.validate_output_target(phase="real", prepare_only=False, execute_real=True, out_dir=prod / "x")
+    outside = Path(tmp_path.anchor) / ("r4_outside_" + tmp_path.name)
+    with pytest.raises(ValueError):
+        mod.validate_output_target(phase="real", prepare_only=False, execute_real=True, out_dir=outside)
+    assert not prod.exists()
+    # r4_05 synthetic workspace passes, prod/outside reject.
+    ws_syn = Path(runner.WORKSPACE_ROOT) / ("v72p2d3_r4syn_" + tmp_path.name)
+    assert mod.validate_output_target(phase="synthetic-only", prepare_only=False, execute_real=False, out_dir=ws_syn).resolve() == ws_syn.resolve()
+    with pytest.raises(ValueError):
+        mod.validate_output_target(phase="synthetic-only", prepare_only=False, execute_real=False, out_dir=prod)
+    with pytest.raises(ValueError):
+        mod.validate_output_target(phase="synthetic-only", prepare_only=False, execute_real=False, out_dir=outside)
+    assert not ws_syn.exists() and not prod.exists()
+    # r4_06 existence refuses + four-file retained (no overwrite, exactly four).
+    assert mod.validate_output_target(phase="synthetic-only", prepare_only=False, execute_real=False, out_dir=ws_syn).resolve() == ws_syn.resolve()
+    ws_syn.mkdir(parents=True, exist_ok=False)
+    try:
+        with pytest.raises(FileExistsError):
+            mod.validate_output_target(phase="synthetic-only", prepare_only=False, execute_real=False, out_dir=ws_syn)
+        with pytest.raises(FileExistsError):
+            mod.validate_output_target(phase="real", prepare_only=True, execute_real=False, out_dir=ws_syn)
+    finally:
+        shutil.rmtree(ws_syn)
+    arm_g = {"status": "LADDER_EXHAUSTED", "rows": 200, "iters": 0, "syndrome_satisfied": False, "bit_flips": 0, "symbol_flips": 0}
+    ws_four = tmp_path / "r4_four"
+    written = mod.write_contrast_outputs(ws_four, arm_g)
+    assert {p.name for p in written.iterdir()} == {"manifest.json", "results.json", "table.csv", "report.md"}
+    shutil.rmtree(written)
+    # r4_07 resolve comparison + no hash + orchestrator consumes validated (source probes).
+    rel_prod = Path("comparison_bench/outputs_comparison/v72p2d3_gf32_contrast_20260904")
+    assert mod.validate_output_target(phase="real", prepare_only=False, execute_real=True, out_dir=rel_prod).resolve() == prod.resolve()
+    src_core = MODULE_PATH.read_text(encoding="utf-8")
+    seg = src_core[src_core.index("def validate_output_target"):src_core.index("def write_contrast_outputs")]
+    assert ".resolve()" in seg and "relative_to" in seg
+    assert "hashlib" not in seg and "sha256" not in seg.lower() and "compute_tag" not in seg
+    assert "FileExistsError" in seg
+    rsrc = RUNNER_PATH.read_text(encoding="utf-8")
+    assert "validate_output_target" in rsrc
+    assert rsrc.index("validate_output_target") < rsrc.index("build_prepare_inputs")
+    assert rsrc.index("validate_output_target") < rsrc.index("construct_lane_c_prototype")
+    assert "decode_row_layered_fftqspa" not in rsrc[rsrc.index("def main"):rsrc.index("build_prepare_inputs", rsrc.index("def main"))]
+    assert not prod.exists()

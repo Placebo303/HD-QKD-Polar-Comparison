@@ -857,16 +857,85 @@ def _production_root() -> Path:
     ).resolve()
 
 
+def _workspace_root() -> Path:
+    return (_repo_root() / "workspace").resolve()
+
+
+def validate_output_target(
+    *,
+    phase: str,
+    prepare_only: bool,
+    execute_real: bool,
+    out_dir: str | Path,
+) -> Path:
+    """R4 unified output guard (sole path judge, resolve comparison, no hash).
+
+    Rules: prepare-only only ``workspace/`` (phase must be ``real``);
+    execute-real only the exact pre-registered production root
+    ``comparison_bench/outputs_comparison/v72p2d3_gf32_contrast_20260904/``;
+    otherwise (synthetic-only) only ``workspace/``. Existing paths refuse
+    (``FileExistsError``); all other paths refuse (``ValueError``); without
+    ``execute_real`` the caller must never enter the decoder; ``run_01``
+    is forbidden for workspace modes. Comparison is ``Path.resolve()``
+    equality/``relative_to`` only; no checksum/hash/tag is read or computed.
+    """
+    ph = str(phase)
+    prep = bool(prepare_only)
+    real = bool(execute_real)
+    raw = Path(out_dir)
+    if not raw.is_absolute():
+        cand = (_repo_root() / raw).resolve()
+    else:
+        cand = raw.resolve()
+    prod = _production_root()
+    ws = _workspace_root()
+    if cand.exists():
+        raise FileExistsError(f"output directory already exists: {cand}")
+    if prep:
+        if ph != "real":
+            raise ValueError("prepare-only requires --phase real")
+        if cand == prod or prod in cand.parents:
+            raise ValueError("prepare output must stay outside the production root")
+        try:
+            cand.relative_to(ws)
+        except ValueError as exc:
+            raise ValueError("prepare output must stay under workspace/") from exc
+        if cand.name == "run_01" or "run_01" in cand.parts:
+            raise ValueError("prepare output must not be run_01")
+        return cand
+    if real:
+        if ph != "real":
+            raise ValueError("execute-real requires --phase real")
+        if cand != prod:
+            raise ValueError(
+                "execute-real output must be exactly the pre-registered production root"
+            )
+        return cand
+    if cand == prod or prod in cand.parents:
+        raise ValueError("synthetic output must stay outside the production root")
+    try:
+        cand.relative_to(ws)
+    except ValueError as exc:
+        raise ValueError("synthetic output must stay under workspace/") from exc
+    if cand.name == "run_01" or "run_01" in cand.parts:
+        raise ValueError("synthetic output must not be run_01")
+    return cand
+
+
 def write_contrast_outputs(
     out_dir: str | Path, arm_g: dict[str, Any], arm_a: dict[str, Any] | None = None
 ) -> Path:
     import csv
     import json
 
-    out = Path(out_dir).resolve()
-    prod = _production_root()
-    if out == prod or prod in out.parents:
-        raise ValueError("synthetic outputs must stay outside the production root")
+    # R4: final-write consumes the unified validated output (workspace-only
+    # for synthetic/fake-E2E); existence + four-file rules retained below.
+    out = validate_output_target(
+        phase="synthetic-only",
+        prepare_only=False,
+        execute_real=False,
+        out_dir=out_dir,
+    )
     if not isinstance(arm_g, dict):
         raise ValueError("arm_g must be a mapping of scalars")
     arm_a = dict(arm_a) if isinstance(arm_a, dict) else a_baseline_record()
@@ -965,18 +1034,20 @@ def require_real_gate(
         raise PermissionError("synthetic preflight PASS artifact is required")
     if preflight.get("cycle") != CYCLE_ID and preflight.get("cycle_id") != CYCLE_ID:
         raise PermissionError("preflight belongs to another cycle")
-    out = Path(out_dir).resolve()
-    prod = _production_root()
-    prod_exact_allowed = bool(allow_production_root) and out == prod
-    if (out == prod or prod in out.parents) and not prod_exact_allowed:
-        raise ValueError("fake-E2E output must stay outside the production root")
-    if workspace_root is not None and not prod_exact_allowed:
-        try:
-            out.relative_to(Path(workspace_root).resolve())
-        except ValueError as exc:
-            raise ValueError("fake-E2E output must stay under workspace/") from exc
-    if out.exists():
-        raise FileExistsError(f"output directory already exists: {out}")
+    # R4: output part consumed from unified guard (resolve, no hash);
+    # existence refusal retained inside validate. Auth/preflight retained above.
+    # ponytail: single validate call replaces duplicated prod/workspace/exists branching.
+    if bool(allow_production_root):
+        validate_output_target(
+            phase="real", prepare_only=False, execute_real=True, out_dir=out_dir
+        )
+    else:
+        validate_output_target(
+            phase="synthetic-only",
+            prepare_only=False,
+            execute_real=False,
+            out_dir=out_dir,
+        )
     return {"gate": "PASS"}
 
 
@@ -1627,19 +1698,12 @@ def prepare_real_input(
 
     _sample()
     prep_start = float(now())
-    out = Path(out_dir).resolve()
-    prod = _production_root()
-    if out == prod or prod in out.parents:
-        raise ValueError("prepare output must stay outside the production root")
-    if workspace_root is not None:
-        try:
-            out.relative_to(Path(workspace_root).resolve())
-        except ValueError as exc:
-            raise ValueError("prepare output must stay under workspace/") from exc
-    if out.exists():
-        raise FileExistsError(f"output directory already exists: {out}")
-    if out.name == "run_01" or "run_01" in out.parts:
-        raise ValueError("prepare output must not be run_01")
+    # R4: prepare output consumed from unified guard (workspace-only);
+    # existence + run_01 refusal retained inside validate.
+    # ponytail: single validate call replaces duplicated prod/workspace/exists/run_01 branching.
+    out = validate_output_target(
+        phase="real", prepare_only=True, execute_real=False, out_dir=out_dir
+    )
     try:
         reg_raw = _json.loads(Path(registry_path).read_text(encoding="utf-8"))
     except FileNotFoundError as exc:

@@ -72,32 +72,19 @@ def load_contrast_module() -> Any:
 
 
 def _resolve_workspace_dir(path: str | Path) -> Path:
-    candidate = Path(path)
-    if not candidate.is_absolute():
-        candidate = REPO_ROOT / candidate
-    out = candidate.resolve()
-    try:
-        out.relative_to(WORKSPACE_ROOT)
-    except ValueError as exc:
-        raise ValueError("synthetic output must stay under workspace/") from exc
-    if out == PRODUCTION_ROOT or PRODUCTION_ROOT in out.parents:
-        raise ValueError("synthetic output must stay outside the production root")
-    return out
+    # R4: thin delegate to unified guard; duplicated workspace/prod branching deleted.
+    return load_contrast_module().validate_output_target(
+        phase="synthetic-only", prepare_only=False, execute_real=False, out_dir=path
+    )
 
 
 def _resolve_execute_real_dir(path: str | Path) -> Path:
-    """R3 execute-real entry guard: only the exact pre-registered root.
-
-    Workspace, any other production path, and outside paths are rejected.
-    An existing root is refused later by the core gate (no overwrite).
-    """
-    candidate = Path(path)
-    if not candidate.is_absolute():
-        candidate = REPO_ROOT / candidate
-    out = candidate.resolve()
-    if out != PRODUCTION_ROOT:
-        raise ValueError("execute-real output must be exactly the pre-registered production root")
-    return out
+    # R4: thin delegate to unified guard; duplicated exact-root branching deleted.
+    # Workspace, any other production path, and outside paths are rejected.
+    # An existing root is refused inside validate (no overwrite).
+    return load_contrast_module().validate_output_target(
+        phase="real", prepare_only=False, execute_real=True, out_dir=path
+    )
 
 
 def run_synthetic_contrast(
@@ -106,8 +93,11 @@ def run_synthetic_contrast(
     """Run a tiny synthetic contrast through the true history kernel (cold)."""
     if int(seed) != SEED:
         raise ValueError(f"synthetic seed is frozen at {SEED}")
-    out = _resolve_workspace_dir(out_dir)
     mod = load_contrast_module()
+    # R4: orchestrator consumes unified validated output (workspace-only).
+    out = mod.validate_output_target(
+        phase="synthetic-only", prepare_only=False, execute_real=False, out_dir=out_dir
+    )
     assert (
         mod.history_kernel_id() == "V35-decode_row_layered_fftqspa-via-V54-chain"
     ), "history kernel binding drift"
@@ -240,8 +230,11 @@ def run_prepare_only(
         raise ValueError(f"real-entry seed is frozen at {SEED}")
     if registry_path is None:
         raise ValueError("prepare-only requires --registry")
-    out = _resolve_workspace_dir(out_dir)
     mod = load_contrast_module()
+    # R4: orchestrator consumes unified validated output (prepare-only workspace-only).
+    out = mod.validate_output_target(
+        phase="real", prepare_only=True, execute_real=False, out_dir=out_dir
+    )
     assert mod.PREP_LIMIT_S == PREP_LIMIT_S, "prep budget drift"
     assert mod.G_LIMIT_S == G_LIMIT_S, "G budget drift"
     assert mod.INV_LIMIT_S == INV_LIMIT_S, "invocation budget drift"
@@ -282,13 +275,23 @@ def run_real_orchestration(
     """
     if int(seed) != SEED:
         raise ValueError(f"real-entry seed is frozen at {SEED}")
+    mod = load_contrast_module()
+    # R4: orchestrator consumes unified validated output; production exact-root
+    # only when allow_production_root, otherwise workspace fake-E2E (test-only
+    # fake decoder). Single validate function, no duplicated path branching.
     if bool(allow_production_root):
-        out = _resolve_execute_real_dir(out_dir)
+        out = mod.validate_output_target(
+            phase="real", prepare_only=False, execute_real=True, out_dir=out_dir
+        )
         gate_workspace_root = None
     else:
-        out = _resolve_workspace_dir(out_dir)
+        out = mod.validate_output_target(
+            phase="synthetic-only",
+            prepare_only=False,
+            execute_real=False,
+            out_dir=out_dir,
+        )
         gate_workspace_root = WORKSPACE_ROOT
-    mod = load_contrast_module()
     assert mod.PREP_LIMIT_S == PREP_LIMIT_S, "prep budget drift"
     assert mod.G_LIMIT_S == G_LIMIT_S, "G budget drift"
     assert mod.INV_LIMIT_S == INV_LIMIT_S, "invocation budget drift"
@@ -324,6 +327,25 @@ def _is_preregistered_production_root(path: str | Path) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # R4 unified guard FIRST, before registry/parquet/prior/matrix/decoder/dir creation.
+    # ponytail: single validate call; resolve comparison only, no hash; no decoder touched here.
+    try:
+        _guard = load_contrast_module()
+        if bool(getattr(args, "prepare_only", False)):
+            _guard.validate_output_target(
+                phase=args.phase, prepare_only=True, execute_real=False, out_dir=args.out_dir
+            )
+        elif bool(getattr(args, "execute_real", False)) or args.phase == "real":
+            _guard.validate_output_target(
+                phase="real", prepare_only=False, execute_real=True, out_dir=args.out_dir
+            )
+        else:
+            _guard.validate_output_target(
+                phase=args.phase, prepare_only=False, execute_real=False, out_dir=args.out_dir
+            )
+    except (ValueError, FileExistsError) as exc:
+        print(f"output guard rejected for V72P2D3-GF32: {exc}", file=sys.stderr)
+        return 2
     # R2-R6 prepare-only stops here: workspace READY, decoder 0, no auth.
     if bool(getattr(args, "prepare_only", False)):
         if args.phase != "real":
@@ -392,6 +414,7 @@ def main(argv: list[str] | None = None) -> int:
                 "h_joint": _np.vstack([h_base, h_inc1]).astype(_np.uint8),
                 "h_total": _np.vstack([h_base, h_inc1, h_inc2]).astype(_np.uint8),
             }
+            # R4: early guard already validated execute-real exact prod, so allow=True.
             run_real_orchestration(
                 out_dir=args.out_dir,
                 registry=registry_old,
@@ -400,7 +423,7 @@ def main(argv: list[str] | None = None) -> int:
                 preflight={"status": "PASS", "cycle": mod.CYCLE_ID},
                 authorized=authorized,
                 execute_real=True,
-                allow_production_root=_is_preregistered_production_root(args.out_dir),
+                allow_production_root=True,
             )
         except (PermissionError, FileExistsError, ValueError) as exc:
             print(f"real execution is not authorized for V72P2D3-GF32: {exc}", file=sys.stderr)
