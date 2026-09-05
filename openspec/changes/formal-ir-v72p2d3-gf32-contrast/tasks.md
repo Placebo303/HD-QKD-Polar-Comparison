@@ -82,3 +82,51 @@
 - **R2-T4**：`py_compile` + 47 项 focused 测试 PASS（含 R2-R6 prepare-only 与 R7 fake-E2E），
   `git diff --check` 干净，staged manifest 精确 11 文件（3 代码 + 4 openspec + cycle_state +
   CORRIGENDUM_R2 + PREP_ONLY_SUMMARY + R2_IMPLEMENTATION_REVIEW）。
+
+## R5：数学接口与码率审计（仅计划，禁止执行）
+
+- **R5-0 生命周期关闭**：记录 R4 `BLOCKED_FINAL_WRITE_MISMATCH`（入口放行、terminal
+  writer 拒绝、exit2、decoder/data/disclosure/output 全为0）；撤销 global/R4 real
+  authorization，保留 R2/R3/R4 历史，R5 不复用旧授权、不重试。
+- **R5-1 canonical counts**：冻结 `counts[a,b]=count(Alice=a,Bob=b)`；统一
+  `axis0=Alice/axis1=Bob`、变量命名和 V54 消费边界，禁止调用点隐式转置。
+- **R5-2 asymmetric prior test**：使用不对称、可手算联合分布核验 `P(U1|B)` 和
+  `P(U2|U1,B)`；转置输入必须失败；CLI 实际 CAL builder 必须被 spy/断言覆盖，
+  不能只测归一化。
+- **R5-3 historical H1**：恢复 V31/V54 QC-cyclic-projective rank-16 H1；验证
+  shape `(16,1024)`、nnz>0、每行非零、GF32 元素 `0..31`、rank=16；CLI 实际
+  组装输入必须捕获；全零 H1 必须拒绝。历史 builder 无法重建即 BLOCKED。
+- **R5-4 shared prior path**：prepare、fake E2E 和 production path 共用同一 prior
+  builder；L1 使用 `get_l1_prior_p_u1_given_b`，L2 使用
+  `get_l1_app_prior_l2(q@P)`；Alice/oracle/VAL 不得进入 prior。现有同 CAL custom
+  CE 若保留，只能写 `cal_resubstitution_nll_descriptive`。
+- **R5-5 CAL-only CV**：四折仅用 CAL；每 fold 三折拟合、留一折评估 L1/L2/joint
+  log2 CE；报告 fold/mean/n；VAL loader 调用必须为0；不得用 CV 自动改矩阵或
+  decoder 参数。
+- **R5-6 rate audit**：报告 `CE_L1`、`CE_L2_oracle`、`CE_joint` 及 margin。冻结
+  `available_L1=80`、`available_L2=1000`、`available_total=1080` bit、
+  `1080/1024=1.0546875 bit/symbol`。超出只能判 `MODEL_BUDGET_MISMATCH`，不得
+  写 information limit/GF32 failed；L1 不足不得只加 L2。
+- **R5-7 arbitrary-data boundary**：把“任意数据”拆为读入、先验估计、码率构造、
+  预算内纠错四层；目标为适用性识别和参数匹配，不保证普遍高效纠错。
+- **R5-8 generalization backlog**：暂停通用化；未来先 `d=256,[4,4],N=1024`，
+  再 `d=512,[5,4],N=1024`；三层 APP 需独立联合消息合同和微型枚举，不得重复
+  `q@P` 冒充完整联合信息。
+- **R5-9 deferred writer**：terminal writer 修复延后到数学/码率审计完成后另立
+  最小工程任务；本任务不改 writer/output guard，不授真实执行。
+
+### R5 验收层级与停止条件
+
+- **T0**：py_compile/import；canonical counts 轴；非对称手算 prior；转置反例；
+  H1 非零/逐行非零/rank16；全零 H1 拒绝；无 decoder/data/VAL 调用。
+- **T1**：CLI 实际 counts/H1 捕获；prepare/fake/production 共用 prior builder；
+  L1 APP 进入 L2 `q@P`；Alice 替换但 Bob/CAL 固定时 prior 不变；oracle 不进 prior；
+  PREP CE 改为描述性名称；正式输出根不存在。
+- **T2**：CAL-only 4-fold CV、fold 零重叠、VAL loader=0、CE 链式和预算复算、
+  标量审计输出；不得读 VAL、不得调用 decoder。
+- **停止**：counts 语义不唯一、历史 H1 无法可靠重建、CV 读 VAL、或任何 decoder
+  被调用，立即 `BLOCKED`；不猜测、不替代、不重试。
+
+完成条件：R5 文档/计划和 CAL-only 审计定义一致，`real_execution_authorized=false`、
+`formal_execution_authorized=false`、`decoder_executed=false`，然后停止在
+`NEXT_GATE: INDEPENDENT_R5_PLAN_REVIEW`。

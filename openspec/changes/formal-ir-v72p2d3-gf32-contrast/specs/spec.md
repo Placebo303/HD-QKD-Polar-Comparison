@@ -84,3 +84,46 @@
   预算超限 SHALL 为 `BLOCKED`；输出 SHALL 恰一文件且 SHALL NOT 为 `run_01`，
   SHALL NOT 在生产根下。
 - **S-R2-04**：R3 SHALL 绑定 `r3_implementation_sha=1deb0fd8`（首次真核绑定，非 retry；`implementation_sha` 旧值与 R2 BLOCKED 不动）；`--execute-real` SHALL 仅放行精确预注册根，其余生产路径与 workspace 路由仍拒绝。
+
+## S-R5：数学接口、码率与路线修订（计划状态）
+
+- **S-R5-01 R4 closure**：R4 的入口放行/terminal writer 拒绝必须记录为
+  `BLOCKED_FINAL_WRITE_MISMATCH`、`exit=2`、decoder/data/disclosure/output 为0；不得
+  把它写成算法结果、重试或复用其授权。R5 SHALL 保持
+  `real_execution_authorized=false`、`formal_execution_authorized=false`、
+  `scientific_promotion=false`。
+- **S-R5-02 canonical counts**：生产统计 SHALL 唯一采用
+  `counts[a,b]=count(Alice symbol=a, Bob symbol=b)`，`axis0=Alice`、`axis1=Bob`；
+  SHALL NOT 在 V54 调用点隐式转置或同时保留相反生产约定。
+- **S-R5-03 asymmetric direction test**：测试 SHALL 使用非对称、可手算联合分布，
+  分别验证 `P(U1|B)` 与 `P(U2|U1,B)`；转置输入 SHALL 被捕获。只检查归一化或
+  对称数据 SHALL NOT 算作方向证据；CLI 实际 CAL builder SHALL 被覆盖。
+- **S-R5-04 historical H1**：真实 H1 SHALL 来自 V31/V54 QC-cyclic-projective
+  builder，`shape=(16,1024)`、nnz>0、每行非零、GF32 元素在 `0..31`、GF32 rank=16；
+  CLI 实际组装输入 SHALL 被验证，`zeros((16,1024))` SHALL 被拒绝。若历史 builder
+  无法可靠重建，状态 SHALL 为 `BLOCKED`，不得用替代矩阵。
+- **S-R5-05 shared production prior**：prepare、fake E2E 和 production SHALL 共用
+  一个 prior builder；L1 SHALL 使用 `get_l1_prior_p_u1_given_b`，L2 SHALL 使用
+  `get_l1_app_prior_l2`，`prior_l2=q@P` 且 `q=softmax(L1 final_beliefs)`。输入仅
+  physical Bob、当前 CAL 和冻结参数；Alice、oracle、旧 session、VAL 选参 SHALL
+  被排除。
+- **S-R5-06 CAL-only CV**：R5 的 CV SHALL 只读取 CAL；每 fold SHALL 用三折建立
+  canonical counts、在留出折计算 L1/L2/joint log2 CE；VAL loader 调用必须为0。
+  现有同 CAL custom P1/P2 重拟合数值如保留 SHALL 命名
+  `cal_resubstitution_nll_descriptive`，不得称 production validation。
+- **S-R5-07 rate audit**：SHALL 报告 `CE_L1=H(U1|B)`、
+  `CE_L2_oracle=H(U2|U1,B)`、`CE_joint=CE_L1+CE_L2_oracle`，单位 bit/symbol，
+  并分别与 `80`、`1000`、`1080` bit 比较；`1080/1024=1.0546875 bit/symbol`。
+  `CE_L2_oracle` 仅用于分层预算诊断。模型 CE 不是信息论下界；不足 SHALL 只记
+  `MODEL_BUDGET_MISMATCH`，不得称 information limit、GF32 failed 或 LDPC impossible；
+  L1 不足 SHALL NOT 只增加 L2。
+- **S-R5-08 arbitrary-data boundary**：路线 SHALL 区分读入、先验估计、码率构造和
+  预算内纠错四层；目标是适用性识别与参数匹配，不保证任意数据高效纠错。
+- **S-R5-09 generalization backlog**：通用化 SHALL 暂停；后续顺序为
+  `d=256,[4,4],N=1024` 后 `d=512,[5,4],N=1024`。三层以上 APP SHALL 另立联合
+  消息数学合同并经微型枚举验证，SHALL NOT 直接重复 `q@P`。
+- **S-R5-10 execution boundary**：R5 SHALL 只做文档、计划、代码审查定义和 CAL-only
+  标量审计；SHALL NOT 读取 VAL、调用 decoder、创建正式输出、修 terminal writer、
+  授权真实执行或实现扩维。
+- **S-R5-11 stop conditions**：counts 约定不唯一、历史 H1 无法可靠重建、CV 读取
+  VAL 或任何 decoder 被调用时，状态 SHALL 为 `BLOCKED`，不得猜测、替代或重试。

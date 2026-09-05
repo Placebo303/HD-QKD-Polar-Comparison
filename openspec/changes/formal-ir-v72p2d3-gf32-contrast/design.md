@@ -86,3 +86,91 @@ D7 全双层门禁：synthetic 全双层（low+high）`wall ≤ 300s`、`peak_rs
   短路历史文字，oracle 仅末端，禁 `protocol` 字段）；缺输入 `PREP_FAILED`，预算超限 `BLOCKED`。
 - Runner 共用 builder（prepare 与真实入口同一构建，生产不再传 None）；
   `--prepare-only` 不耗授权，`--phase real --execute-real` 仍需 registry+授权否则 fail-closed 2。
+
+## 10. R5 数学接口与码率审计（计划状态，不执行）
+
+R4 的最终写入不一致已经记录为工程 blocker：入口放行而 terminal writer 仍拒绝
+正式根，返回 `exit=2`，decoder/data/disclosure/output 均为 `0`。R5 不修该 writer，
+也不复用 R4 授权；R4 的历史记录保持不变。只有完成本节审计，才可重新设计后续
+执行 packet。
+
+### 10.1 Canonical counts 与 prior
+
+生产和审计的唯一统计约定为：
+
+```text
+counts[a, b] = count(Alice symbol=a, Bob symbol=b)
+```
+
+`axis0` 永远是 Alice，`axis1` 永远是 Bob。V54 的消费语义保持不变，不在调用点
+偷偷转置；CAL builder 必须直接生成该约定。两层 prior 固定为：
+
+```text
+P(U1|B)       = P(high|Bob_side)
+P(U2|U1,B)    = P(low|high,Bob_side)
+prior_l2      = q @ P
+q             = softmax(L1 final_beliefs)
+```
+
+生产、prepare、fake E2E 和未来真实 runner 必须共用同一个 prior builder；L1 复用
+V54 `get_l1_prior_p_u1_given_b`，L2 复用 V54 `get_l1_app_prior_l2`。只允许输入
+physical Bob、当前 CAL 和冻结参数，禁止 Alice、旧 session、VAL 选参或 oracle
+进入 prior。概率先正常归一，floor 只保护 log。
+
+R5 必须以刻意不对称且可手算的联合计数做单元测试：直接输入与转置输入的
+`P(U1|B)`、`P(U2|U1,B)` 必须不同并分别匹配手算值；对称或只检查归一化的测试不算
+证据。还必须通过 CLI 的真实 CAL builder 捕获 counts 轴顺序，不能只测孤立 helper。
+
+### 10.2 历史 H1 的真实重建
+
+真实 CLI 不得构造 `zeros((16,1024))` 作为 H1。H1 必须由 V31/V54 的
+QC-cyclic-projective 历史 builder 重建，满足 `shape=(16,1024)`、非零元素数大于
+零、每行非零、GF(32) 元素在 `0..31` 且 GF(32) rank 为 `16`。CLI 实际传入
+orchestrator/kernel 的 H1 必须用 spy 捕获并与该 builder 结果相符；全零 H1 必须
+被 `validate_nested_matrices` 拒绝。若历史 builder 无法可靠重建，R5 立即
+`BLOCKED`，不得用替代矩阵继续。
+
+### 10.3 PREP 与生产 prior、CAL-only CV
+
+已有 PREP 中同一 CAL 上的 custom P1/P2 CE 只能命名为
+`cal_resubstitution_nll_descriptive`，不能称 production validation。R5 需用
+上述 V54 prior 链执行 CAL-only 4-fold CV：每个 fold 只用另外三 fold 建立
+canonical counts，在 held-out fold 计算 L1、L2 和 joint 的 log2 loss；VAL loader
+调用必须为零。报告各 fold 值、均值和样本数；不把该审计自动转为矩阵或 decoder
+参数选择。
+
+报告：
+
+```text
+CE_L1          = H_model(U1 | B)
+CE_L2_oracle   = H_model(U2 | U1, B)   # 仅分层预算诊断，使用真实 U1
+CE_joint       = CE_L1 + CE_L2_oracle
+```
+
+三者单位为 bit/symbol，且报告链式关系的数值误差。`CE_L2_oracle` 不是生产
+decoder 性能。模型 CE 不是严格信息论下界；`required > available` 只能记为
+`MODEL_BUDGET_MISMATCH`，不能推出 information limit、GF32 failed 或 LDPC
+impossible。
+
+旧域预算固定为：`available_L1=16*5=80 bit`、`available_L2=200*5=1000 bit`、
+`available_total=1080 bit`，即 `1080/1024=1.0546875 bit/symbol`。分别报告
+`1024*CE_L1-80`、`1024*CE_L2_oracle-1000` 和
+`1024*CE_joint-1080` 的 margin；若 L1 不足，不得只增加 L2。
+
+### 10.4 路线边界与任意数据分层
+
+NB-LDPC 主线保留；D3 真实执行和通用化在 R5 完成前暂停。路线顺序为：数学接口
+修复 -> CAL-only 码率匹配 -> 匹配合成信道 -> 一个预注册真实诊断 -> 跨 session
+和扩维。所谓“任意数据”拆成四个不同层次：读入数据、估计匹配先验、构造适当码率、
+在预算内有效纠错；目标是识别适用性和匹配参数，不承诺所有数据高效纠错。
+
+扩维 backlog 先做 `d=256,[4,4]`、保持 `N=1024`，再做 `d=512,[5,4]`。三层以上
+APP 的相关性必须有独立数学合同和微型枚举；不得把两层 `q@P` 直接重复套用并
+宣称保留完整联合信息。
+
+### 10.5 R5 仅计划的执行边界
+
+R5 允许的内容仅是文档、代码审查计划、T0/T1/T2 测试定义和 CAL-only 标量审计。
+禁止 VAL 读取、decoder 调用、正式输出、真实执行授权、扩维实现和 writer 修复。
+停止条件为：counts 约定不能唯一确定、历史 H1 无法可靠重建、CV 读取 VAL、或
+任何 decoder 被调用；任一情况均为 `BLOCKED`，不得猜测、替代或重试。

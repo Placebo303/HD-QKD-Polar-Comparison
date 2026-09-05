@@ -79,3 +79,41 @@ G decoder 冻结：`max_iter=90` 为硬帽、`damping=1.0`、无 residual tolera
 - 证据：`docs/research_cycles/V72P2D3-GF32/PREP_ONLY_SUMMARY.json`、
   `CORRIGENDUM_R2_REAL_INPUT_ADAPTER.md`、`R2_IMPLEMENTATION_REVIEW.md`、
   `cycle_state.yaml`（`PREP_READY`，`real_execution_authorized=false`）。
+
+## R5 数学接口与码率审计修订（当前路线）
+
+R4 已关闭为 `BLOCKED_FINAL_WRITE_MISMATCH`：入口曾放行，但 terminal writer 仍以
+`synthetic-only` 规则拒绝正式根；命令返回 `exit=2`，未读取本轮真实数据，未进入
+GF32 kernel，`decoder_attempts=0`、披露 `0`、正式输出 `0`，Pre-RESULT 为
+`FAIL/BLOCKED`。该事实由现有 `OPERATOR_RETURN_R4.md` 保留；不重试、不把它写成
+算法结果。terminal writer 是后续工程 blocker，延后到数学/码率审计之后处理。
+
+在重新开放任何 D3 真实执行以前，必须先闭合以下三个科学 blocker：
+
+1. **Prior 轴方向**：当前审查发现 CAL 统计按 `counts[Bob,Alice]` 填充，而 V54
+   消费方按 `counts[Alice,Bob]` reshape/解释，生产 prior 因而可能发生转置。R5
+   冻结唯一约定 `counts[a,b] = count(Alice=a, Bob=b)`，并用刻意不对称、可手算的
+   联合分布同时验证 `P(U1|B)` 与 `P(U2|U1,B)`；转置输入必须被反例捕获。
+2. **H1 输入**：当前真实 CLI 组装路径发现使用了 `zeros((16,1024))` 的风险，不能
+   作为历史方法的 H1。R5 必须恢复 V31/V54 的 QC-cyclic-projective rank-16 H1，
+   验证非零、每行非零、GF(32) 元素范围 `0..31`、GF(32) rank `16`，并验证 CLI
+   实际传入的矩阵来自该 builder；全零 H1 必须拒绝。
+3. **码率匹配**：旧 GF32 预算为 H1 `16*5=80` bit、L2 最多 `200*5=1000`
+   bit、总 `1080` bit，即 `1.0546875 bit/symbol`（`N=1024`）。当前数据域必须
+   用与生产完全相同的 prior 链做 CAL-only 4-fold CV，分别审计
+   `CE_L1`、`CE_L2_oracle`、`CE_joint` 及其预算 margin。模型 CE 不是信息论下界；
+   只能标记 `MODEL_BUDGET_MISMATCH`，禁止写成 information limit、GF32 failed
+   或 LDPC impossible。若 L1 不足，不能只增加 L2 冗余。
+
+R5 只允许文档/计划和 CAL-only 审计状态：不读 VAL、不运行 decoder、不创建正式
+输出、不修 writer、不授权。NB-LDPC 主线保留，但 D3 真实执行和通用化暂停。顺序
+冻结为：数学接口修复 -> CAL-only 码率匹配 -> 匹配合成信道 -> 一个预注册真实诊断
+-> 有真实信号后再做跨 session/扩维。目标是识别数据适用性并匹配参数，不保证任意
+数据都能高效纠错。
+
+未来扩维仍是 backlog：先以 `d=256,[4,4]`、`N=1024` 验证，再考虑
+`d=512,[5,4]`；三层以上 APP 相关性必须另立数学合同并用微型枚举验证，不能直接
+重复套用两层 `q@P`。
+
+R5 的详细任务、停止条件和验收矩阵见 `design.md`、`tasks.md`、`specs/spec.md`
+以及 `docs/research_cycles/V72P2D3-GF32/R5_MATH_INTERFACE_AND_RATE_AUDIT.md`。

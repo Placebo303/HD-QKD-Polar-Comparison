@@ -58,3 +58,19 @@ r4_formal_execution_authorized: false
 r4_scientific_promotion: false
 # R4 auth 2026-09-05: Pre-EXECUTE PASS at HEAD cabecc21 (HEAD==origin, r4 bound ed7277da code-identical, prod absent, 53 passed, READY, r4 pending); authorize one real invocation (global+r4 real=true, formal=false, promotion=false); r4_attempts=0.
 # R4 close 2026-09-05 (additive; R2/R3 untouched): BLOCKED_FINAL_WRITE_MISMATCH, entry-passed final-write refused, exit2; decoder0/data0/disclosure0, r4_attempts=0/r4_completed=0 retained, global real=false/r4_real=false, formal=false, promotion=false; pre_result FAIL; state PLAN_REVISE_REQUIRED, next R5_MATH_INTERFACE_AND_RATE_AUDIT; no retry, no conclusion.
+# R4 authorization is revoked for the current route. The historical r4_authorized=1
+# above records the old one-shot grant only; it is not permission for R5 or a retry.
+r4_authorization_revoked: true
+r4_revocation_reason: BLOCKED_FINAL_WRITE_MISMATCH
+r4_retry_allowed: false
+# Current route after R4 closure; no implementation or execution authorization.
+current_route: R5_MATH_INTERFACE_AND_RATE_AUDIT
+r5_plan_state: PLAN_REVISE_REQUIRED
+r5_implementation_authorized: false
+r5_real_execution_authorized: false
+r5_formal_execution_authorized: false
+r5_decoder_executed: false
+r5_decoder_attempts: 0
+r5_decoder_completed: 0
+r5_val_read: false
+r5_next_gate: INDEPENDENT_R5_PLAN_REVIEW
