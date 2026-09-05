@@ -94,6 +94,21 @@ LN2 = math.log(2.0)
 CYCLE_ID = "V72P2D3-GF32"
 BASE_SHA = "e094f7e548380db4bfcbc1fe73472e670c32379a"
 
+# R5 math interface + rate audit (CAL-only, no VAL, no decoder).
+# Canonical counts convention: counts[Alice,Bob], axis0 Alice 0..1023,
+# axis1 Bob 0..1023, shape (1024,1024). V54 semantics unchanged:
+# reshape(32,32,1024) maps to (U1,U2,Bob) with Alice=U1*32+U2
+# (U1=high/MSB, U2=low/LSB, symbol=low+32*high). Dual/transposed
+# matrices are banned; prepare/fake/real share one builder.
+R5_CANONICAL_COUNTS_SHAPE = (1024, 1024)
+R5_H1_BITS = 80
+R5_L2_TOTAL_BITS = 1000
+R5_TOTAL_BITS = 1080
+R5_N = 1024
+R5_RATE = 1080.0 / 1024.0
+R5_N_FOLDS = 4
+R5_CV_SEED = 20260905
+
 # Real-entry budgets and fixed block geometry (EXECUTION_PACKET section 6:
 # prep300 / G300 / invocation600 seconds, RSS 2GiB). Single VAL block only;
 # a nine-block loop SHALL NOT be added here.
@@ -280,22 +295,74 @@ def history_decode(
     )
 
 
+def build_canonical_counts(
+    alice_symbols: np.ndarray, bob_symbols: np.ndarray, q: int = Q
+) -> np.ndarray:
+    """Canonical joint counts counts[Alice,Bob], axis0 Alice axis1 Bob.
+
+    Shape (q,q) with q=1024. V54 semantics unchanged: reshape(32,32,1024)
+    maps to (U1,U2,Bob) with Alice=U1*32+U2 (U1=high/MSB, U2=low/LSB).
+    This is the sole builder for prepare/fake/real; transposed [Bob,Alice]
+    dual matrices are banned.
+    """
+    a = np.asarray(alice_symbols, dtype=np.int64).reshape(-1)
+    b = np.asarray(bob_symbols, dtype=np.int64).reshape(-1)
+    qq = int(q)
+    if qq <= 0:
+        raise ValueError("q must be positive")
+    if a.shape != b.shape or a.size == 0:
+        raise ValueError("CAL symbol arrays must be non-empty equal length")
+    if np.any(a < 0) or np.any(a >= qq) or np.any(b < 0) or np.any(b >= qq):
+        raise ValueError("symbols outside 0..q-1")
+    counts = np.zeros((qq, qq), dtype=np.float64)
+    np.add.at(counts, (a, b), 1.0)
+    if float(counts.sum()) <= 0:
+        raise ValueError("CAL counts are all zero")
+    return counts
+
+
 def get_l1_prior_production(counts: np.ndarray, bob: np.ndarray) -> np.ndarray:
-    """Production L1 prior P(U1|B) via exact V54 reuse (counts 1024x1024)."""
+    """Production L1 prior P(U1|B) via exact V54 reuse (canonical counts)."""
+    arr = np.asarray(counts, dtype=np.float64)
+    if arr.shape != R5_CANONICAL_COUNTS_SHAPE:
+        raise ValueError(f"counts shape must be {R5_CANONICAL_COUNTS_SHAPE}, got {arr.shape}")
     return _load_v54().get_l1_prior_p_u1_given_b(
-        np.asarray(counts, dtype=np.float64), np.asarray(bob, dtype=np.int64)
+        arr, np.asarray(bob, dtype=np.int64)
     )
+
+
+def get_l1_prior_canonical(counts: np.ndarray, bob: np.ndarray) -> np.ndarray:
+    """R5 alias: canonical counts[Alice,Bob] -> P(U1|B) via exact V54 reuse.
+
+    reshape(32,32,1024) = (U1,U2,Bob); V54 semantics unchanged.
+    """
+    return get_l1_prior_production(counts, bob)
 
 
 def build_l2_prior_from_l1(
     counts: np.ndarray, bob: np.ndarray, q: np.ndarray
 ) -> np.ndarray:
-    """Production L2 prior prior_l2=q@P via exact V54 reuse."""
+    """Production L2 prior prior_l2=q@P via exact V54 reuse.
+
+    q comes from the true L1 APP (softmax of L1 final_beliefs); Alice
+    symbols and oracle U1 are banned here (signature has no alice/oracle).
+    P(U2|U1,B) uses the same canonical reshape(32,32,1024)=(U1,U2,Bob).
+    """
+    arr = np.asarray(counts, dtype=np.float64)
+    if arr.shape != R5_CANONICAL_COUNTS_SHAPE:
+        raise ValueError(f"counts shape must be {R5_CANONICAL_COUNTS_SHAPE}, got {arr.shape}")
     return _load_v54().get_l1_app_prior_l2(
-        np.asarray(counts, dtype=np.float64),
+        arr,
         np.asarray(bob, dtype=np.int64),
         np.asarray(q, dtype=np.float64),
     )
+
+
+def get_l2_prior_from_true_l1_app(
+    counts: np.ndarray, bob: np.ndarray, q: np.ndarray
+) -> np.ndarray:
+    """R5 alias: L2 prior from true L1 APP only (no Alice/oracle)."""
+    return build_l2_prior_from_l1(counts, bob, q)
 
 
 def softmax_beliefs_history(beliefs: np.ndarray) -> np.ndarray:
@@ -1119,10 +1186,7 @@ def fit_cal_prior_from_frames(
     _, _ = symbols_to_layers(b_cal)
     p1 = build_stage1_P(b_cal, a_high, float(lam), n_b_states=Q, q_sub=Q_SUB)
     p2 = build_stage2_P(a_high, b_cal, a_low, float(lam), n_b_states=Q, q_sub=Q_SUB)
-    counts = np.zeros((Q, Q), dtype=np.float64)
-    np.add.at(counts, (b_cal.astype(np.int64), a_cal.astype(np.int64)), 1.0)
-    if float(counts.sum()) <= 0:
-        raise ValueError("CAL counts are all zero")
+    counts = build_canonical_counts(a_cal, b_cal, q=Q)
     return {
         "P1": p1,
         "P2": p2,
@@ -1165,6 +1229,10 @@ def validate_nested_matrices(
             raise ValueError(f"{name} holds values outside GF32")
         if int((mat != 0).sum(axis=1).max()) > 16:
             raise ValueError(f"{name} row weight exceeds 16")
+        if int((mat != 0).sum()) == 0:
+            raise ValueError(f"{name} is all zero")
+    if int((mats["h1"][0] != 0).sum(axis=1).min()) <= 0:
+        raise ValueError("h1 has an empty row")
     h1m, hbm = mats["h1"][0], mats["h_base"][0]
     hjm, htm = mats["h_joint"][0], mats["h_total"][0]
     if not (np.array_equal(hjm[:M_BASE], hbm) and np.array_equal(htm[:M_BASE], hbm)):
@@ -1802,4 +1870,158 @@ def prepare_real_input(
         "inv_wall_s": float(inv_wall),
         "peak_rss_bytes": peak,
         "output": str((out / "prepare_summary.json").resolve()),
+    }
+
+
+# ---------------------------------------------------------------------------
+# R5 math interface + rate audit (CAL-only, no VAL, no decoder, no writer,
+# no authorization). All functions take in-memory CAL arrays only; none
+# opens parquet, none reads VAL1726..1729, none calls the decoder.
+# ---------------------------------------------------------------------------
+
+def build_h1_historical(field: Any = None) -> tuple[np.ndarray, dict[str, Any]]:
+    """Historical H1 16x1024 QC-cyclic-projective poly37 via V31/V54 builder."""
+    fld = field if field is not None else get_gf32_field()
+    if int(fld.q) != Q_SUB or int(fld.primitive_polynomial) != POLY:
+        raise ValueError("H1 requires GF(32) poly37")
+    try:
+        from comparison_bench.formal_ir.nonbinary_v31 import build_layer as _v31_layer
+    except ImportError:  # pragma: no cover
+        from comparison_bench.src.comparison_bench.formal_ir.nonbinary_v31 import (  # type: ignore[no-redef]
+            build_layer as _v31_layer,
+        )
+    mat_tup, audit = _v31_layer(H1_ROWS, N, family="QC-cyclic-projective", field=fld)
+    h1 = np.asarray(mat_tup, dtype=np.uint8)
+    if h1.shape != (H1_ROWS, N):
+        raise ValueError(f"H1 shape must be {(H1_ROWS, N)}, got {h1.shape}")
+    if int((h1 != 0).sum()) == 0:
+        raise ValueError("H1 is all zero")
+    if int((h1 != 0).sum(axis=1).min()) <= 0:
+        raise ValueError("H1 has an empty row")
+    if int(h1.max()) >= Q_SUB or int(h1.min()) < 0:
+        raise ValueError("H1 holds values outside 0..31")
+    return h1, dict(audit)
+
+
+def cal_resubstitution_nll_descriptive(
+    p1: np.ndarray, p2: np.ndarray,
+    bob_cal: np.ndarray, high_cal: np.ndarray, low_cal: np.ndarray,
+) -> dict[str, float]:
+    """CAL resubstitution NLL, descriptive only (same CAL for fit+eval).
+
+    Renamed from PREP resubstitution; not a performance claim. Log2, bit/symbol.
+    """
+    ce_l1 = ce_stage1_log2(p1, bob_cal, high_cal)
+    ce_l2 = ce_stage2_log2(p2, high_cal, bob_cal, low_cal)
+    ce_joint = ce_joint_log2(p1, p2, bob_cal, high_cal, low_cal)
+    return {
+        "ce_l1": float(ce_l1),
+        "ce_l2_oracle": float(ce_l2),
+        "ce_joint": float(ce_joint),
+        "n": int(np.asarray(bob_cal).reshape(-1).shape[0]),
+        "kind": "cal_resubstitution_nll_descriptive",
+    }
+
+
+def cal_4fold_cv_heldout_nll(
+    alice_cal: np.ndarray, bob_cal: np.ndarray,
+    lam: float = FAKE_E2E_LAM, n_folds: int = R5_N_FOLDS,
+    seed: int = R5_CV_SEED,
+) -> dict[str, Any]:
+    """CAL-only 4-fold CV held-out L1/L2/joint log2 loss (no VAL).
+
+    Deterministic fold assignment via seed-shuffled indices; each fold fits
+    P1/P2 on 3/4 of CAL and evaluates held-out 1/4. Reports mean/fold/sample
+    counts. Never constructs matrices (ban auto new matrix).
+    """
+    a = np.asarray(alice_cal, dtype=np.int64).reshape(-1)
+    b = np.asarray(bob_cal, dtype=np.int64).reshape(-1)
+    if a.shape != b.shape or a.size == 0:
+        raise ValueError("CAL arrays must be non-empty equal length")
+    if int(n_folds) != 4:
+        raise ValueError("R5 CV uses exactly 4 folds")
+    n = int(a.size)
+    if n < 4:
+        raise ValueError("CAL too small for 4-fold CV")
+    rng = np.random.default_rng(int(seed))
+    perm = rng.permutation(n)
+    folds: list[dict[str, Any]] = []
+    for k in range(4):
+        # ponytail: modulo on shuffled order gives balanced held-out.
+        te_idx = perm[k::4]
+        tr_idx = np.setdiff1d(perm, te_idx, assume_unique=True)
+        a_tr, b_tr = a[tr_idx], b[tr_idx]
+        a_te, b_te = a[te_idx], b[te_idx]
+        ah_tr_lo, ah_tr_hi = symbols_to_layers(a_tr)
+        ah_te_lo, ah_te_hi = symbols_to_layers(a_te)
+        p1 = build_stage1_P(b_tr, ah_tr_hi, float(lam), n_b_states=Q, q_sub=Q_SUB)
+        p2 = build_stage2_P(ah_tr_hi, b_tr, ah_tr_lo, float(lam), n_b_states=Q, q_sub=Q_SUB)
+        ce1 = ce_stage1_log2(p1, b_te, ah_te_hi)
+        ce2 = ce_stage2_log2(p2, ah_te_hi, b_te, ah_te_lo)
+        cej = ce_joint_log2(p1, p2, b_te, ah_te_hi, ah_te_lo)
+        folds.append({
+            "fold": int(k),
+            "n_train": int(tr_idx.size),
+            "n_heldout": int(te_idx.size),
+            "ce_l1": float(ce1),
+            "ce_l2_oracle": float(ce2),
+            "ce_joint": float(cej),
+        })
+    return {
+        "n_cal": int(n),
+        "n_folds": 4,
+        "lam": float(lam),
+        "seed": int(seed),
+        "folds": folds,
+        "mean_ce_l1": float(sum(f["ce_l1"] for f in folds) / 4),
+        "mean_ce_l2_oracle": float(sum(f["ce_l2_oracle"] for f in folds) / 4),
+        "mean_ce_joint": float(sum(f["ce_joint"] for f in folds) / 4),
+        "kind": "cal_4fold_cv_heldout_nll",
+    }
+
+
+def rate_audit_r5(ce_l1: float, ce_l2_oracle: float, ce_joint: float) -> dict[str, Any]:
+    """R5 rate audit scalars (descriptive only, no matrix change).
+
+    Budgets: H1 80 bits, L2 total 1000 bits, total 1080 bits, N=1024,
+    rate 1.0546875 bit/symbol. required=CE*N, available=budget,
+    margin=available-required, ratio=required/available. Mismatch reports
+    MODEL_BUDGET_MISMATCH; it is not a lower bound and not a failure
+    verdict. L1 mismatch is reported only; never auto-creates a matrix.
+    """
+    for v in (ce_l1, ce_l2_oracle, ce_joint):
+        if not np.isfinite(float(v)) or float(v) < 0:
+            raise ValueError("CE must be finite nonnegative")
+    n = int(R5_N)
+    rows = [
+        ("l1", float(ce_l1), int(R5_H1_BITS)),
+        ("l2_oracle", float(ce_l2_oracle), int(R5_L2_TOTAL_BITS)),
+        ("joint", float(ce_joint), int(R5_TOTAL_BITS)),
+    ]
+    layers: dict[str, Any] = {}
+    mismatch = False
+    for name, ce, avail in rows:
+        req = float(ce) * n
+        margin = float(avail) - req
+        ratio = req / float(avail) if avail else float("inf")
+        if req > avail:
+            mismatch = True
+        layers[name] = {
+            "ce_bit_per_symbol": float(ce),
+            "required_bits": float(req),
+            "available_bits": float(avail),
+            "margin_bits": float(margin),
+            "ratio": float(ratio),
+        }
+    return {
+        "n": n,
+        "budget": {
+            "h1_bits": int(R5_H1_BITS),
+            "l2_total_bits": int(R5_L2_TOTAL_BITS),
+            "total_bits": int(R5_TOTAL_BITS),
+            "rate_bit_per_symbol": float(R5_RATE),
+        },
+        "layers": layers,
+        "status": "MODEL_BUDGET_MISMATCH" if mismatch else "WITHIN_BUDGET",
+        "note": "descriptive only; not a lower bound; not a failure verdict; L1 mismatch never auto-creates a matrix",
     }

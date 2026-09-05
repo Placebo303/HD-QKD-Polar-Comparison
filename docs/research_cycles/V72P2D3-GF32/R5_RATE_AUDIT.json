@@ -1,0 +1,114 @@
+{
+  "cycle": "V72P2D3-GF32",
+  "gate": "R5_MATH_INTERFACE_AND_RATE_AUDIT",
+  "synthetic_cal_only": true,
+  "seed": 20260905,
+  "n_cal": 4096,
+  "lam": 1.0,
+  "counts_shape": [
+    1024,
+    1024
+  ],
+  "counts_convention": "counts[Alice,Bob] axis0 Alice axis1 Bob; reshape(32,32,1024)=(U1,U2,Bob) V54 unchanged; dual banned",
+  "resub": {
+    "ce_l1": 2.3508801533977213,
+    "ce_l2_oracle": 1.0216312485768155,
+    "ce_joint": 3.3725114019745366,
+    "n": 4096,
+    "kind": "cal_resubstitution_nll_descriptive"
+  },
+  "cv": {
+    "n_cal": 4096,
+    "n_folds": 4,
+    "lam": 1.0,
+    "seed": 20260905,
+    "mean_ce_l1": 6.422161237462124,
+    "mean_ce_l2_oracle": 5.083351288530697,
+    "mean_ce_joint": 11.50551252599282,
+    "folds": [
+      {
+        "fold": 0,
+        "n_train": 3072,
+        "n_heldout": 1024,
+        "ce_l1": 6.416225370351329,
+        "ce_l2_oracle": 5.08565484116461,
+        "ce_joint": 11.501880211515939
+      },
+      {
+        "fold": 1,
+        "n_train": 3072,
+        "n_heldout": 1024,
+        "ce_l1": 6.476191770748271,
+        "ce_l2_oracle": 5.065703529549106,
+        "ce_joint": 11.541895300297375
+      },
+      {
+        "fold": 2,
+        "n_train": 3072,
+        "n_heldout": 1024,
+        "ce_l1": 6.42070775217085,
+        "ce_l2_oracle": 5.089343851091442,
+        "ce_joint": 11.510051603262294
+      },
+      {
+        "fold": 3,
+        "n_train": 3072,
+        "n_heldout": 1024,
+        "ce_l1": 6.375520056578047,
+        "ce_l2_oracle": 5.0927029323176285,
+        "ce_joint": 11.468222988895675
+      }
+    ]
+  },
+  "rate_audit": {
+    "n": 1024,
+    "budget": {
+      "h1_bits": 80,
+      "l2_total_bits": 1000,
+      "total_bits": 1080,
+      "rate_bit_per_symbol": 1.0546875
+    },
+    "layers": {
+      "l1": {
+        "ce_bit_per_symbol": 6.422161237462124,
+        "required_bits": 6576.293107161215,
+        "available_bits": 80.0,
+        "margin_bits": -6496.293107161215,
+        "ratio": 82.20366383951519
+      },
+      "l2_oracle": {
+        "ce_bit_per_symbol": 5.083351288530697,
+        "required_bits": 5205.351719455433,
+        "available_bits": 1000.0,
+        "margin_bits": -4205.351719455433,
+        "ratio": 5.205351719455433
+      },
+      "joint": {
+        "ce_bit_per_symbol": 11.50551252599282,
+        "required_bits": 11781.644826616648,
+        "available_bits": 1080.0,
+        "margin_bits": -10701.644826616648,
+        "ratio": 10.908930395015416
+      }
+    },
+    "status": "MODEL_BUDGET_MISMATCH",
+    "note": "descriptive only; not a lower bound; not a failure verdict; L1 mismatch never auto-creates a matrix"
+  },
+  "h1": {
+    "shape": [
+      16,
+      1024
+    ],
+    "nnz": 2048,
+    "row_nnz_min": 128,
+    "row_nnz_max": 128,
+    "rank": 16,
+    "values": "0..31",
+    "build_s": 21.11
+  },
+  "val_reads": 0,
+  "decoder_calls": 0,
+  "formal_root_exists": false,
+  "authorization_changed": false,
+  "writer_changed": false
+}

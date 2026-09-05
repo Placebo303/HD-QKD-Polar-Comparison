@@ -1784,3 +1784,226 @@ def test_r4_unified_guard_7_checks(tmp_path):
     assert rsrc.index("validate_output_target") < rsrc.index("construct_lane_c_prototype")
     assert "decode_row_layered_fftqspa" not in rsrc[rsrc.index("def main"):rsrc.index("build_prepare_inputs", rsrc.index("def main"))]
     assert not prod.exists()
+
+
+# ---- R5 math interface + rate audit (CAL-only, no VAL, no decoder, no formal root) ----
+def _r5_synth_cal(n=1024, seed=20260905):
+    rng = np.random.default_rng(seed)
+    a = rng.integers(0, 1024, size=n).astype(np.int64)
+    b = rng.integers(0, 1024, size=n).astype(np.int64)
+    return a, b
+
+
+def test_r5_t0_canonical_constants_and_r5_segment_is_cal_only():
+    assert mod.R5_CANONICAL_COUNTS_SHAPE == (1024, 1024)
+    assert mod.R5_H1_BITS == 80 and mod.R5_L2_TOTAL_BITS == 1000 and mod.R5_TOTAL_BITS == 1080
+    assert mod.R5_N == 1024 and abs(mod.R5_RATE - 1.0546875) < 1e-12
+    assert mod.R5_N_FOLDS == 4
+    src = MODULE_PATH.read_text(encoding="utf-8")
+    assert "def build_canonical_counts" in src
+    assert "def build_h1_historical" in src
+    assert "def cal_4fold_cv_heldout_nll" in src
+    assert "def rate_audit_r5" in src
+    assert "def cal_resubstitution_nll_descriptive" in src
+    seg = src[src.index("def build_h1_historical"):]
+    assert "VAL_FRAMES" not in seg and "val_bundle" not in seg and "assemble_block" not in seg
+    for banned in ("run_g_layer", "history_decode", "decode_row_layered_fftqspa", "read_parquet"):
+        assert banned not in seg
+    assert "v72p2d3_gf32_contrast_20260904" not in seg
+    assert not _r9_prod_root().exists()
+
+
+def test_r5_t1_counts_asymmetric_handcalc_1e12_transpose_fails():
+    a = np.array([10, 10, 10, 10, 42], dtype=np.int64)
+    b = np.array([20, 20, 20, 21, 10], dtype=np.int64)
+    c = mod.build_canonical_counts(a, b, q=1024)
+    assert c.shape == (1024, 1024)
+    assert c[10, 20] == 3.0 and c[10, 21] == 1.0 and c[42, 10] == 1.0
+    p_a_given_b = float(c[10, 20] / c[:, 20].sum())
+    p_b_given_a = float(c[10, 20] / c[10, :].sum())
+    assert abs(p_a_given_b - 1.0) < 1e-12
+    assert abs(p_b_given_a - 0.75) < 1e-12
+    assert abs(p_a_given_b - p_b_given_a) > 0.2
+    bob = np.array([20, 10], dtype=np.int64)
+    p = mod.get_l1_prior_canonical(c, bob)
+    assert p.shape == (2, 32)
+    assert int(np.argmax(p[0])) == 0 and int(np.argmax(p[1])) == 1
+    pt = mod.get_l1_prior_canonical(c.T, bob)
+    assert float(np.abs(p - pt).max()) > 1e-3
+    r = c.reshape(32, 32, 1024)
+    assert float(r[0, 10, 20]) == 3.0 and float(r[1, 10, 10]) == 1.0
+
+
+def test_r5_t1_cli_builder_direction_single_canonical():
+    src = MODULE_PATH.read_text(encoding="utf-8")
+    assert src.count("def build_canonical_counts") == 1
+    seg = src[src.index("def fit_cal_prior_from_frames"):src.index("def assemble_block_frames")]
+    assert "build_canonical_counts" in seg
+    assert "np.add.at(counts, (b_cal" not in src
+    rsrc = RUNNER_PATH.read_text(encoding="utf-8")
+    assert "build_h1_historical" in rsrc
+    assert "_np.zeros((mod.H1_ROWS" not in rsrc
+
+
+def test_r5_t1_h1_historical_shape_nnz_row_rank_range_syndrome_cli():
+    h1, audit = mod.build_h1_historical()
+    assert h1.shape == (16, 1024)
+    nnz = int((h1 != 0).sum())
+    assert nnz == 2048
+    rownnz = (h1 != 0).sum(axis=1)
+    assert int(rownnz.min()) > 0 and int(rownnz.min()) == 128
+    assert int(h1.min()) >= 0 and int(h1.max()) <= 31 and int(h1.max()) > 0
+    from comparison_bench.formal_ir.v35_algorithm_development import compute_gf32_rank
+    assert int(compute_gf32_rank(h1, mod.get_gf32_field())) == 16
+    field = mod.get_gf32_field()
+    e0 = np.zeros(1024, dtype=np.uint8)
+    e0[0] = 1
+    s0 = np.asarray(mod.gf32_syndrome(h1, np.zeros(1024, dtype=np.uint8), field))
+    s1 = np.asarray(mod.gf32_syndrome(h1, e0, field))
+    assert np.all(s0 == 0)
+    assert int(np.count_nonzero(s1)) > 0
+    rsrc = RUNNER_PATH.read_text(encoding="utf-8")
+    assert "build_h1_historical" in rsrc
+    assert "_np.zeros((mod.H1_ROWS" not in rsrc
+
+
+def test_r5_t1_h1_allzero_reject_and_fake_spy():
+    with pytest.raises(ValueError):
+        mod.validate_nested_matrices(
+            np.zeros((16, 1024), dtype=np.uint8),
+            np.zeros((184, 1024), dtype=np.uint8),
+            np.zeros((192, 1024), dtype=np.uint8),
+            np.zeros((200, 1024), dtype=np.uint8),
+        )
+    seen: list = []
+
+    def _spy(h_mat, prior_p, target):
+        seen.append((tuple(np.asarray(h_mat).shape), int((np.asarray(h_mat) != 0).sum())))
+        pp = np.asarray(prior_p, dtype=np.float64)
+        return {
+            "x_hat": np.argmax(pp, axis=1).astype(np.uint8),
+            "iterations_used": 1,
+            "syndrome_ok": False,
+            "runtime_s": 0.001,
+            "stop": "r5-spy",
+            "final_beliefs": np.log(np.maximum(pp, 1e-15)),
+        }
+
+    h_tiny = np.eye(4, 4, dtype=np.uint8)
+    out = mod.run_g_layer(
+        np.log(np.full((4, 32), 1.0 / 32.0)), np.zeros(4, dtype=np.uint8), h_tiny, max_iter=2, decode_fn=_spy
+    )
+    assert out["iterations_used"] == 1
+    assert seen and seen[0][0] == (4, 4) and seen[0][1] == 4
+
+
+def test_r5_t1_prior_chain_same_builder_l1_v54_l2_q_ban_alice_oracle():
+    import inspect as _inspect
+    a_cal, b_cal = _r5_synth_cal(512)
+    c1 = mod.build_canonical_counts(a_cal, b_cal)
+    fit = mod.fit_cal_prior_from_frames(
+        {0: {"alice_symbols": a_cal[:256], "bob_symbols": b_cal[:256]},
+         1: {"alice_symbols": a_cal[256:], "bob_symbols": b_cal[256:]}},
+        1.0,
+    )
+    assert np.array_equal(np.asarray(fit["counts"]), c1)
+    bob_blk = b_cal[:8]
+    assert np.allclose(mod.get_l1_prior_canonical(c1, bob_blk), mod._load_v54().get_l1_prior_p_u1_given_b(c1, bob_blk))
+    q = np.full((8, 32), 1.0 / 32.0)
+    assert np.allclose(mod.get_l2_prior_from_true_l1_app(c1, bob_blk, q), mod._load_v54().get_l1_app_prior_l2(c1, bob_blk, q))
+    for fn in (mod.build_l2_prior_from_l1, mod.get_l2_prior_from_true_l1_app):
+        params = set(_inspect.signature(fn).parameters)
+        assert "alice" not in params and "oracle" not in params and "u1" not in params
+    src = MODULE_PATH.read_text(encoding="utf-8")
+    assert src.count("def build_canonical_counts") == 1
+    assert "build_canonical_counts" in src[src.index("def fit_cal_prior_from_frames"):src.index("def assemble_block_frames")]
+
+
+def test_r5_t1_resubstitution_rename_descriptive_and_cv_no_val():
+    a_cal, b_cal = _r5_synth_cal(512)
+    ah_lo, ah_hi = mod.symbols_to_layers(a_cal)
+    p1 = mod.build_stage1_P(b_cal, ah_hi, 1.0, n_b_states=1024, q_sub=32)
+    p2 = mod.build_stage2_P(ah_hi, b_cal, ah_lo, 1.0, n_b_states=1024, q_sub=32)
+    resub = mod.cal_resubstitution_nll_descriptive(p1, p2, b_cal, ah_hi, ah_lo)
+    assert resub["kind"] == "cal_resubstitution_nll_descriptive"
+    assert np.isfinite(resub["ce_l1"]) and np.isfinite(resub["ce_l2_oracle"]) and np.isfinite(resub["ce_joint"])
+    assert abs(resub["ce_joint"] - resub["ce_l1"] - resub["ce_l2_oracle"]) < 1e-9
+    assert resub["n"] == 512
+    src = MODULE_PATH.read_text(encoding="utf-8")
+    seg = src[src.index("def cal_4fold_cv_heldout_nll"):src.index("def rate_audit_r5")]
+    assert "VAL_FRAMES" not in seg and "val_bundle" not in seg and "read_parquet" not in seg
+    assert "assemble_block" not in seg
+    assert "build_layer" not in seg and "construct_" not in seg
+    cv = mod.cal_4fold_cv_heldout_nll(a_cal, b_cal, lam=1.0)
+    assert cv["n_cal"] == 512 and cv["n_folds"] == 4 and len(cv["folds"]) == 4
+    assert sum(f["n_heldout"] for f in cv["folds"]) == 512
+    for f in cv["folds"]:
+        assert np.isfinite(f["ce_l1"]) and np.isfinite(f["ce_l2_oracle"]) and np.isfinite(f["ce_joint"])
+    assert abs(cv["mean_ce_joint"] - cv["mean_ce_l1"] - cv["mean_ce_l2_oracle"]) < 1e-9
+
+
+def test_r5_t1_rate_audit_scalars_mismatch_bans_no_matrix():
+    audit = mod.rate_audit_r5(0.5, 0.6, 1.1)
+    assert audit["n"] == 1024
+    assert audit["budget"]["h1_bits"] == 80
+    assert audit["budget"]["l2_total_bits"] == 1000
+    assert audit["budget"]["total_bits"] == 1080
+    assert abs(audit["budget"]["rate_bit_per_symbol"] - 1.0546875) < 1e-12
+    l1 = audit["layers"]["l1"]
+    assert abs(l1["required_bits"] - 512.0) < 1e-9
+    assert l1["available_bits"] == 80.0 and abs(l1["margin_bits"] - (-432.0)) < 1e-9
+    assert abs(l1["ratio"] - 6.4) < 1e-9
+    assert audit["status"] == "MODEL_BUDGET_MISMATCH"
+    assert "not a lower bound" in audit["note"] and "not a failure verdict" in audit["note"]
+    assert "never auto-creates a matrix" in audit["note"]
+    ok = mod.rate_audit_r5(0.01, 0.02, 0.03)
+    assert ok["status"] == "WITHIN_BUDGET"
+    src = MODULE_PATH.read_text(encoding="utf-8")
+    seg = src[src.index("def rate_audit_r5"):]
+    assert "build_layer" not in seg and "construct_" not in seg and "build_h1" not in seg
+
+
+def test_r5_t2_cal_only_integration_no_val_decoder_formal_absent():
+    calls: list = []
+    orig_g = mod.run_g_layer
+    orig_h = mod.history_decode
+
+    def _spy_g(*a, **k):
+        calls.append("run_g_layer")
+        return orig_g(*a, **k)
+
+    def _spy_h(*a, **k):
+        calls.append("history_decode")
+        return orig_h(*a, **k)
+
+    mod.run_g_layer = _spy_g
+    mod.history_decode = _spy_h
+    try:
+        a_cal, b_cal = _r5_synth_cal(512, seed=20260905)
+        counts = mod.build_canonical_counts(a_cal, b_cal)
+        assert counts.shape == (1024, 1024)
+        ah_lo, ah_hi = mod.symbols_to_layers(a_cal)
+        p1 = mod.build_stage1_P(b_cal, ah_hi, 1.0, n_b_states=1024, q_sub=32)
+        p2 = mod.build_stage2_P(ah_hi, b_cal, ah_lo, 1.0, n_b_states=1024, q_sub=32)
+        resub = mod.cal_resubstitution_nll_descriptive(p1, p2, b_cal, ah_hi, ah_lo)
+        cv = mod.cal_4fold_cv_heldout_nll(a_cal, b_cal, lam=1.0)
+        audit = mod.rate_audit_r5(cv["mean_ce_l1"], cv["mean_ce_l2_oracle"], cv["mean_ce_joint"])
+        assert set(audit["layers"]) == {"l1", "l2_oracle", "joint"}
+        for layer in audit["layers"].values():
+            for key in ("ce_bit_per_symbol", "required_bits", "available_bits", "margin_bits", "ratio"):
+                assert np.isfinite(layer[key])
+        fit = mod.fit_cal_prior_from_frames(
+            {0: {"alice_symbols": a_cal[:256], "bob_symbols": b_cal[:256]},
+             1: {"alice_symbols": a_cal[256:], "bob_symbols": b_cal[256:]}},
+            1.0,
+        )
+        assert np.array_equal(np.asarray(fit["counts"]), mod.build_canonical_counts(a_cal, b_cal))
+        rsrc = RUNNER_PATH.read_text(encoding="utf-8")
+        assert "build_h1_historical" in rsrc
+    finally:
+        mod.run_g_layer = orig_g
+        mod.history_decode = orig_h
+    assert calls == []
+    assert not _r9_prod_root().exists()
+    text = (ROOT.parent / "docs" / "research_cycles" / "V72P2D3-GF32" / "cycle_state.yaml").read_text(encoding="utf-8")
+    assert "r4_real_execution_authorized: false" in text

@@ -408,8 +408,10 @@ def main(argv: list[str] | None = None) -> int:
             h_base = _np.asarray(h_base, dtype=_np.uint8)
             h_inc1 = _np.asarray(h_inc1, dtype=_np.uint8)
             h_inc2 = _np.asarray(h_inc2, dtype=_np.uint8)
+            # R5: historical H1 via V31/V54 builder (nonzero, rank16); all-zero banned.
+            h1_hist, _ = mod.build_h1_historical(field=field)
             matrices_old = {
-                "h1": _np.zeros((mod.H1_ROWS, mod.N), dtype=_np.uint8),
+                "h1": _np.asarray(h1_hist, dtype=_np.uint8),
                 "h_base": h_base,
                 "h_joint": _np.vstack([h_base, h_inc1]).astype(_np.uint8),
                 "h_total": _np.vstack([h_base, h_inc1, h_inc2]).astype(_np.uint8),

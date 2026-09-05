@@ -141,3 +141,41 @@ decoder、创建正式输出、修 terminal writer、实现扩维或授予真实
 
 本 R5 完成后，下一门是 `INDEPENDENT_R5_PLAN_REVIEW`；未通过前不得恢复
 terminal writer 修复或真实执行。
+
+## R5 实现与审计结果（2026-09-05，CAL-only 合成，VAL0 decoder0）
+
+- 约束：禁 decoder 执行、禁读 VAL、可读 CAL；R4 授权已撤销
+  （`r4_real_execution_authorized: false`）；不改 writer（`write_contrast_outputs`
+  未动）、不授权（`cycle_state` 授权位未动）；正式根
+  `comparison_bench/outputs_comparison/v72p2d3_gf32_contrast_20260904/` 不存在。
+- 统一 counts：`counts[Alice,Bob]` axis0 Alice axis1 Bob，shape `(1024,1024)`；
+  V54 语义不动，`reshape(32,32,1024)=(U1,U2,Bob)`，`P(U1|B)`/`P(U2|U1,B)` 同约定；
+  禁双矩阵；`prepare`/`fake`/`real` 同一 `build_canonical_counts`（`fit` 已改
+  `(a_cal,b_cal)`，转置构造已删）。
+- 非对称手算：`counts[10,20]=3,[10,21]=1,[42,10]=1`，`P(A=10|B=20)=1.0`，
+  `P(B=20|A=10)=0.75`，差 `0.25`（误差 `1e-12`）；`V54 P(U1|B)` 在 `B=20->U1=0`、
+  `B=10->U1=1`，转置最大差 `~1.0` 必失败；CLI builder 同方向（`scripts` 用
+  `build_h1_historical`，无 `_np.zeros((mod.H1_ROWS`）。
+- 历史 H1：`16x1024 QC-cyclic-projective poly37 V31/V54 builder`，`nnz=2048`，
+  每行 `128` 非零，`rank16`，值 `0..31`，全零 syndrome、`e0` syndrome 非零，
+  CLI 捕获非零，全零 `validate_nested_matrices` 拒绝，fake spy 验证注入矩阵非零。
+- 生产 prior 链：canonical counts+Bob 块，`L1 V54 get_l1_prior`，
+  `L2 q` 来自真 L1 APP（`softmax(final_beliefs)`），禁 Alice/oracle；
+  PREP resubstitution 改名 `cal_resubstitution_nll_descriptive`；
+  CAL-only 4-fold CV held-out L1/L2/joint log2 loss，不读 VAL，报告均值/fold/样本数，
+  禁自动改矩阵。
+- 合成 CAL（`seed=20260905,n=4096,lam=1.0`，均匀独立最坏情形，描述性）：
+  resub `CE_L1=2.350880/CE_L2=1.021631/CE_joint=3.372511 bit/symbol`；
+  4-fold held-out均值 `CE_L1=6.422161/CE_L2_oracle=5.083351/CE_joint=11.505513`，
+  folds `6.416225/6.476192/6.420708/6.375520`（L1），样本 `3072/1024`。
+- 码率审计：预算 `H1 80/L2total 1000/total 1080 bit,N1024,1.0546875 bit/symbol`；
+  `required=CE*N`，`available=预算`，`margin=available-required`，
+  `ratio=required/available`；`L1 6576.29/80/-6496.29/82.20`，
+  `L2 5205.35/1000/-4205.35/5.21`，`joint 11781.64/1080/-10701.64/10.91`，
+  状态 `MODEL_BUDGET_MISMATCH`（禁下界/失败定论，L1 不匹配指出禁自动新矩阵）。
+  详见 `R5_RATE_AUDIT.json`（标量）。
+- 测试：`62 passed`（既有 `53` + R5 `9`：T0 `1`+T1 `7`+T2 `1`），VAL 读 `0`，
+  decoder `0`，正式根不存在。实现文件
+  `comparison_bench/src/comparison_bench/formal_ir/v72p2d3_gf32_contrast.py`、
+  `scripts/v72p2d3_gf32_contrast.py`、
+  `comparison_bench/tests/test_v72p2d3_gf32_contrast.py`。
