@@ -41,7 +41,19 @@ elapsed<=120s and RSS<2GiB; on exceed remaining seeds stop as
 plus obtained scalars preserved (never zeroed, never mislabeled as decoder
 failure/success). A single historic call that hangs needs an outer-process
 watchdog in the future Pre-EXECUTE packet; no extra-process machinery lives
-here. Four-file outputs carry scalars/seeds/status/counts/error-bounds only.
+ here. Four-file outputs carry scalars/seeds/status/counts/error-bounds only.
+
+R1 edge fix (resource post-check, candidate only): the post-call resource
+check (elapsed>120s OR RSS>=2GiB) now runs for EVERY seed including the
+last — the prior `pos + 1 < len(seeds_list)` restriction no longer skips
+the last-seed evaluation. A last-seed exceed records
+``G0_BLOCKED_RESOURCE`` with ``passed=false``, attempted/completed/calls
+all 8, exact/syndrome/finite counts preserved (never zeroed),
+``failed_seed`` set to the just-completed last seed and
+``failure_stage=resource``; it is never labeled ``G0_PASS`` or
+``G0_BLOCKED_DECODER``. Mid-seed stop semantics are unchanged. This grants
+no PASS and no execution authorization; stop gate remains
+``INDEPENDENT_G0_IMPLEMENTATION_R1_FINAL_REVIEW``.
 
 Implementation notes for review (not acceptance): the tiny fixture uses an
 eight-cycle with check and variable degree two; one coefficient is 2 so the

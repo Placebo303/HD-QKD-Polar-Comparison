@@ -1510,10 +1510,15 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
                         "status": "COMPLETED"})
         elapsed = float(time.perf_counter() - t_phase_start)
         rss = _rss_bytes()
-        if (elapsed > G0_WALL_BUDGET_S or (
-                rss is not None and rss >= G0_RSS_BUDGET_BYTES)) \
-                and pos + 1 < len(seeds_list):
-            failed_seed = int(seeds_list[pos + 1])
+        if elapsed > G0_WALL_BUDGET_S or (
+                rss is not None and rss >= G0_RSS_BUDGET_BYTES):
+            # Post-call resource check runs for EVERY seed including the
+            # last: mid-seed exceed names the next seed, last-seed exceed
+            # names the just-completed seed with counts preserved.
+            if pos + 1 < len(seeds_list):
+                failed_seed = int(seeds_list[pos + 1])
+            else:
+                failed_seed = int(seed)
             failure_stage = "resource"
             failure_error = (f"RESOURCE budget exceeded after seed "
                              f"{seed}: elapsed_s={elapsed:.3f} "

@@ -2019,6 +2019,47 @@ def test_R1_B2_cli_unauthorized_prework_all_zero(tmp_path, monkeypatch):
     assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
 
 
+def test_R1_B2_last_seed_resource_exceed_blocked_with_counts_preserved(
+        monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    base = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f,
+                            decode_fn=FakeDecoder(), authorized=True)
+    assert base["attempted_blocks"] == 8
+    assert base["completed_blocks"] == 8
+    assert base["decoder_calls"] == 8
+    n_last = len(mod.G0_SEEDS)
+    calls = {"n": 0}
+    orig_decode = FakeDecoder.__call__
+
+    def _counting(self, h_, prior, syndrome, layer=None):
+        calls["n"] += 1
+        return orig_decode(self, h_, prior, syndrome, layer)
+
+    monkeypatch.setattr(FakeDecoder, "__call__", _counting)
+    orig_rss = mod._rss_bytes
+
+    def _rss_after_last():
+        if calls["n"] >= n_last:
+            return 3 * 1024**3
+        return orig_rss()
+
+    monkeypatch.setattr(mod, "_rss_bytes", _rss_after_last)
+    fake = FakeDecoder()
+    res = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=fake,
+                           authorized=True)
+    assert len(fake.calls) == 8
+    assert res["decoder_calls"] == 8
+    assert res["attempted_blocks"] == 8
+    assert res["completed_blocks"] == 8
+    assert res["decision"] == "G0_BLOCKED_RESOURCE"
+    assert res["passed"] is False
+    assert res["exact_count"] == base["exact_count"]
+    assert res["syndrome_ok_count"] == base["syndrome_ok_count"]
+    assert res["finite_count"] == base["finite_count"]
+    assert res["failed_seed"] == mod.G0_SEEDS[-1]
+    assert res["failure_stage"] == "resource"
+
+
 def test_R1_B2_all_exec_false_formal_absent_and_budgets():
     state = cli._load_state(STATE_PATH)
     for key in ("structure_execution_authorized", "g0_execution_authorized",
