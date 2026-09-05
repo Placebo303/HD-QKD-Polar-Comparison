@@ -29,7 +29,7 @@ _mod = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(_mod)
 
 _RUNNERS = {
-    "structure": _mod.run_structure_phase,
+    "structure": _mod.run_structure_sequence,
     "g0": _mod.run_g0_phase,
     "p0-cost": _mod.run_p0_cost_phase,
     "g1": _mod.run_g1_phase,

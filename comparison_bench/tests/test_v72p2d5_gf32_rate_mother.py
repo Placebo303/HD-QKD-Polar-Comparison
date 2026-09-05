@@ -10,6 +10,7 @@ from __future__ import annotations
 import ast
 import importlib.util
 import inspect
+import json
 import math
 import re
 import subprocess
@@ -470,11 +471,16 @@ def test_T0_32_four_cycle_hand_calc():
 
 
 def test_T0_33_cycle_risk_not_auto_fail():
-    h = np.array([[1, 1, 0, 2],
-                  [1, 2, 1, 0],
-                  [0, 0, 1, 1]], dtype=np.uint8)
-    rep = mod.audit_prefix(h, 3)
-    assert rep["four_cycles"] == 1
+    # R2-structure delta: base/triple duplicates are hard BLOCKED, so the
+    # cycle-risk fixture must carry four-cycles with zero base/triple dups.
+    h = np.array([[28, 0, 13, 0],
+                  [25, 29, 0, 14],
+                  [2, 9, 0, 0],
+                  [0, 31, 17, 16]], dtype=np.uint8)
+    rep = mod.audit_prefix(h, 4)
+    assert rep["four_cycles"] == 2
+    assert rep["base_pair_duplicates"] == 0
+    assert rep["support_triple_duplicates"] == 0
     assert rep["passed"] is True
     assert rep["status"] == "STRUCTURE_PASS_WITH_CYCLE_RISK"
 
@@ -532,7 +538,10 @@ def test_T0_38_no_val_file_loader():
     bad = [n for n in dir(mod)
            if n.startswith("load_") or n in ("read_CAL", "read_VAL")]
     assert bad == []
-    assert CORE_SRC.count("open(") == 0
+    # R2-structure delta: the 4 evidence-file writes live only inside
+    # write_structure_evidence (no data reads anywhere).
+    wsrc = inspect.getsource(mod.write_structure_evidence)
+    assert CORE_SRC.count("open(") == wsrc.count("open(") == 4
 
 
 # --------------------------------------------------------------------------
@@ -739,9 +748,16 @@ def test_T1_11_phase_output_fields_complete(monkeypatch):
 def test_T1_12_no_raw_arrays_saved(tmp_path, monkeypatch):
     for src in (CORE_SRC, CLI_SRC):
         for frag in ("write_text", "write_bytes", "np.save", "np.savez",
-                     "to_csv", "to_parquet", "pickle", "mkdir"):
+                     "to_csv", "to_parquet", "pickle"):
             assert frag not in src
-        assert not re.search(r"open\([^)]*['\"]w", src)
+    # R2-structure delta: mkdir + write-mode open live only inside the
+    # evidence writer (explicit out_dir, temp dirs in tests); CLI has none.
+    wsrc = inspect.getsource(mod.write_structure_evidence)
+    assert "mkdir" not in CLI_SRC
+    assert CORE_SRC.count("mkdir") == wsrc.count("mkdir") >= 1
+    pat = r"open\([^)]*['\"]w"
+    assert len(re.findall(pat, CORE_SRC)) == len(re.findall(pat, wsrc)) == 4
+    assert re.findall(pat, CLI_SRC) == []
     p_b, p_f = _tiny_tables()
     h = _tiny_h()
     monkeypatch.chdir(tmp_path)
@@ -813,7 +829,10 @@ def test_T1_14_no_data_reads():
         for frag in ("parquet", "np.load", "loadtxt", "genfromtxt",
                      "read_bytes", "pd.read", "csv.reader"):
             assert frag not in src
-    assert CORE_SRC.count("open(") == 0
+    # R2-structure delta: core open( calls are the 4 confined evidence
+    # writes (see T0_38); CLI still opens only the authorization state.
+    wsrc = inspect.getsource(mod.write_structure_evidence)
+    assert CORE_SRC.count("open(") == wsrc.count("open(") == 4
     assert CLI_SRC.count("open(") == 1
     assert "cycle_state" in CLI_SRC
     for fn in PHASE_FUNCS:
@@ -950,3 +969,337 @@ def test_T1_22_openspec_history_zero_mod():
                 assert func.id != "open"
             elif isinstance(func, ast.Attribute):
                 assert func.attr not in banned_calls
+
+
+# --------------------------------------------------------------------------
+# T2 — structure runner delta (fake/small only, no full mother, no decoder)
+# --------------------------------------------------------------------------
+def _t2_pass_audits(prefixes, four=0):
+    out = []
+    for k in prefixes:
+        out.append({
+            "prefix_rows": int(k), "total_edges": 0,
+            "column_degree_full": 3, "rank": int(k), "zero_rows": 0,
+            "zero_columns": 0, "variable_degree_min": 2,
+            "variable_degree_median": 2.0, "variable_degree_max": 3,
+            "degree1_variables": 0, "degree2_variables": 0,
+            "degree3_variables": 0, "connected_components": 1,
+            "largest_component_fraction": 1.0, "isolated_variables": 0,
+            "row_degree_histogram": {2: 1}, "four_cycles": int(four),
+            "four_cycle_variable_incidence_max": 0,
+            "duplicate_projective_columns": 0, "base_pair_duplicates": 0,
+            "support_triple_duplicates": 0, "coefficients_nonzero": True,
+            "passed": True, "status": "STRUCTURE_PASS",
+        })
+    return out
+
+
+class _SeqFake:
+    def __init__(self, l1_pass=True, l2_pass=True, boom=None):
+        self.builds = []
+        self.audits = []
+        self.l1_pass = l1_pass
+        self.l2_pass = l2_pass
+        self.boom = boom
+
+    def build(self, n, m_max, k_min, seed):
+        self.builds.append((int(n), int(m_max), int(k_min), int(seed)))
+        layer = "L1" if int(seed) == mod.L1_GRAPH_SEED else "L2"
+        if self.boom == layer:
+            raise RuntimeError(f"injected {layer} boom")
+        return np.eye(2, dtype=np.uint8)
+
+    def audit(self, h, prefixes):
+        self.audits.append((tuple(int(v) for v in prefixes), np.shape(h)))
+        ok = self.l1_pass if len(self.audits) == 1 else self.l2_pass
+        audits = _t2_pass_audits(prefixes)
+        if not ok:
+            for a in audits:
+                a["passed"] = False
+                a["status"] = "STRUCTURE_BLOCKED"
+        passed = bool(all(a["passed"] for a in audits))
+        return {"prefix_rows": [int(v) for v in prefixes], "audits": audits,
+                "passed": passed,
+                "status": ("STRUCTURE_PASS" if passed
+                           else "STRUCTURE_BLOCKED")}
+
+    def preflight(self, *, authorized):
+        assert authorized is True
+        return {"proceed": True, "projection_blocked": False,
+                "decoder_calls": 0}
+
+
+def _t2_run(fake, **kw):
+    return mod.run_structure_sequence(
+        authorized=True, build_fn=fake.build, audit_fn=fake.audit,
+        preflight_fn=fake.preflight, **kw)
+
+
+def test_T2_01_l1_pass_calls_l2():
+    f = _SeqFake(l1_pass=True, l2_pass=True)
+    res = _t2_run(f)
+    assert [b[3] for b in f.builds] == [mod.L1_GRAPH_SEED,
+                                        mod.L2_GRAPH_SEED]
+    assert len(f.audits) == 2
+    assert res["l2_attempted"] is True
+    assert res["decision"] == "STRUCTURE_PASS"
+    assert res["attempts"] == 1 and res["completed"] == 1
+
+
+def test_T2_02_l1_fail_stops_l2():
+    f = _SeqFake(l1_pass=False)
+    res = _t2_run(f)
+    assert [b[3] for b in f.builds] == [mod.L1_GRAPH_SEED]
+    assert len(f.audits) == 1
+    assert res["decision"] == "STRUCTURE_BLOCKED"
+    assert res["l2_attempted"] is False
+    assert res["completed"] == 1
+
+
+def test_T2_03_each_layer_builds_exactly_once():
+    f = _SeqFake()
+    res = _t2_run(f)
+    seeds = [b[3] for b in f.builds]
+    assert seeds.count(mod.L1_GRAPH_SEED) == 1
+    assert seeds.count(mod.L2_GRAPH_SEED) == 1
+    assert len(f.builds) == 2
+    assert all(b[0] == 1024 and b[1] == 1000 for b in f.builds)
+    assert res["build_calls"] == {"L1": 1, "L2": 1}
+    src = inspect.getsource(mod.run_structure_sequence).lower()
+    for frag in ("retry", "reseed", "fallback", "reorder", "resample"):
+        assert frag not in src
+
+
+def test_T2_04_base_pair_dup_blocked():
+    rep = mod.audit_prefix(np.array([[1, 1], [1, 2]], dtype=np.uint8), 2)
+    assert rep["base_pair_duplicates"] == 1
+    assert rep["support_triple_duplicates"] == 0
+    assert rep["rank"] == 2
+    assert rep["passed"] is False
+    assert rep["status"] == "STRUCTURE_BLOCKED"
+
+
+def test_T2_05_support_triple_dup_blocked():
+    h = np.array([[1, 1, 1], [1, 2, 4], [1, 3, 5]], dtype=np.uint8)
+    rep = mod.audit_prefix(h, 3)
+    assert rep["support_triple_duplicates"] == 3
+    assert rep["passed"] is False
+    assert rep["status"] == "STRUCTURE_BLOCKED"
+
+
+def test_T2_06_cycle_only_risk():
+    h = np.array([[28, 0, 13, 0],
+                  [25, 29, 0, 14],
+                  [2, 9, 0, 0],
+                  [0, 31, 17, 16]], dtype=np.uint8)
+    rep = mod.audit_prefix(h, 4)
+    assert rep["four_cycles"] == 2
+    assert rep["base_pair_duplicates"] == 0
+    assert rep["support_triple_duplicates"] == 0
+    assert rep["rank"] == 4
+    assert rep["passed"] is True
+    assert rep["status"] == "STRUCTURE_PASS_WITH_CYCLE_RISK"
+
+
+def test_T2_07_projection_blocked_skips_full_build(tmp_path):
+    builds = []
+
+    def _build(n, m_max, k_min, seed):
+        builds.append((n, m_max, k_min, seed))
+        return np.eye(2, dtype=np.uint8)
+
+    def _preflight(*, authorized):
+        assert authorized is True
+        return {"proceed": False, "projection_blocked": True,
+                "decoder_calls": 0}
+
+    out = tmp_path / "blocked"
+    res = mod.run_structure_sequence(
+        authorized=True, build_fn=_build, preflight_fn=_preflight,
+        out_dir=str(out))
+    assert builds == []
+    assert res["decision"] == "STRUCTURE_RESOURCE_PROJECTION_BLOCKED"
+    assert res["attempts"] == 0 and res["completed"] == 0
+    assert (sorted(p.name for p in out.iterdir())
+            == sorted(mod.STRUCTURE_EVIDENCE_FILES))
+
+
+def test_T2_08_unauthorized_touches_nothing(tmp_path, monkeypatch):
+    calls = {"preflight": [], "build": [], "audit": [], "write": []}
+
+    def _preflight(*, authorized):
+        calls["preflight"].append(1)
+        return {"proceed": True}
+
+    def _build(n, m_max, k_min, seed):
+        calls["build"].append(1)
+        return np.eye(2, dtype=np.uint8)
+
+    def _audit(h, prefs):
+        calls["audit"].append(1)
+        return {}
+
+    def _write(d, r):
+        calls["write"].append(1)
+        return []
+
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(Exception):
+        mod.run_structure_sequence(
+            authorized=False, build_fn=_build, audit_fn=_audit,
+            preflight_fn=_preflight, writer_fn=_write,
+            out_dir=str(tmp_path / "x"))
+    assert calls == {"preflight": [], "build": [], "audit": [], "write": []}
+    assert list(tmp_path.rglob("*")) == []
+
+
+def test_T2_09_attempt_before_first_build():
+    f = _SeqFake()
+    res = _t2_run(f)
+    assert res["attempts"] == 1
+    ev = res["events"]
+    assert ev.index("attempt=1") < ev.index("L1_build")
+    assert ev.index("L1_build") < ev.index("L1_audit")
+    assert ev.index("L1_audit") < ev.index("L2_build")
+    assert ev.index("L2_build") < ev.index("L2_audit")
+    assert ev[0] == "auth_ok" and ev[1] == "preflight_done"
+
+
+def test_T2_10_mid_exception_completed_zero(tmp_path):
+    f = _SeqFake(boom="L2")
+    out = tmp_path / "exc"
+    res = mod.run_structure_sequence(
+        authorized=True, build_fn=f.build, audit_fn=f.audit,
+        preflight_fn=f.preflight, out_dir=out)
+    assert res["attempts"] == 1 and res["completed"] == 0
+    assert res["decision"] == "STRUCTURE_BLOCKED"
+    assert "boom" in (res["error"] or "")
+    assert (sorted(p.name for p in out.iterdir())
+            == sorted(mod.STRUCTURE_EVIDENCE_FILES))
+
+
+def test_T2_11_l2_hard_fail_completed_one():
+    f = _SeqFake(l2_pass=False)
+    res = _t2_run(f)
+    assert res["attempts"] == 1 and res["completed"] == 1
+    assert res["decision"] == "STRUCTURE_BLOCKED"
+    assert res["l2_attempted"] is True
+    assert len(f.builds) == 2 and len(f.audits) == 2
+
+
+def test_T2_12_writer_four_files_clean(tmp_path):
+    f = _SeqFake()
+    out = tmp_path / "cand"
+    res = mod.run_structure_sequence(
+        authorized=True, build_fn=f.build, audit_fn=f.audit,
+        preflight_fn=f.preflight, out_dir=out)
+    assert (sorted(p.name for p in out.iterdir())
+            == ["execution_summary.json", "report.md", "results.json",
+                "table.csv"])
+    for p in out.iterdir():
+        assert p.stat().st_size < 65536
+    payload = json.loads((out / "results.json").read_text(encoding="utf-8"))
+    assert payload["decision"] == "STRUCTURE_PASS"
+    assert payload["decoder_calls"] == 0
+    assert payload["cal_rows_read"] == 0 and payload["val_rows_read"] == 0
+    assert payload["formal_root"] == ("workspace/v72p2d5_structure/"
+                                      "20260905_r2")
+    bad_keys = ("hash", "checksum", "hmac", "sha256", "md5", "signature",
+                "tag")
+    stack = [payload]
+    while stack:
+        cur = stack.pop()
+        if isinstance(cur, dict):
+            for k, v in cur.items():
+                assert not any(b in str(k).lower() for b in bad_keys)
+                stack.append(v)
+        elif isinstance(cur, list):
+            assert len(cur) <= 16
+            stack.extend(cur)
+        elif isinstance(cur, str):
+            assert ":\\" not in cur and ":/" not in cur
+            assert not cur.startswith("/")
+    table = (out / "table.csv").read_text(encoding="utf-8").splitlines()
+    assert len(table) == 9 and table[0].startswith("layer,prefix_rows,rank")
+    rep = (out / "report.md").read_text(encoding="utf-8")
+    assert "STRUCTURE_PASS" in rep
+    summ = json.loads(
+        (out / "execution_summary.json").read_text(encoding="utf-8"))
+    assert summ["attempts"] == 1 and summ["completed"] == 1
+    assert summ["files"] == list(mod.STRUCTURE_EVIDENCE_FILES)
+
+
+def test_T2_13_existing_dir_refuses_and_formal_root_absent(tmp_path):
+    f = _SeqFake()
+    res = _t2_run(f)
+    with pytest.raises(FileExistsError):
+        mod.write_structure_evidence(tmp_path, res)
+    assert (mod.STRUCTURE_FORMAL_ROOT
+            == "workspace/v72p2d5_structure/20260905_r2")
+    assert not (ROOT / mod.STRUCTURE_FORMAL_ROOT).exists()
+
+
+def test_T2_14_cli_enters_single_orchestrator(monkeypatch):
+    assert "run_structure_phase" not in CLI_SRC
+    assert cli._RUNNERS["structure"].__name__ == "run_structure_sequence"
+    calls = []
+
+    def _spy(**kw):
+        calls.append(kw)
+        return {"phase": "structure", "decision": "STRUCTURE_BLOCKED"}
+
+    monkeypatch.setitem(cli._RUNNERS, "structure", _spy)
+    monkeypatch.setattr(cli, "_load_state",
+                        lambda path: {"structure_execution_authorized": True})
+    assert cli.main(["--phase", "structure"]) == 0
+    assert len(calls) == 1 and calls[0].get("authorized") is True
+
+
+def test_T2_15_preflight_formula_recomputable():
+    r = mod.extrapolate_structure_cost(
+        t_build_l1_s=1.0, t_build_l2_s=2.0, t_rank_proxy_s=0.5,
+        rss_probe_bytes=100000000)
+    assert r["edge_scale"] == pytest.approx(16.0)
+    assert r["rank_scale"] == pytest.approx(3906.25)
+    assert r["build_full_s"]["L1"] == pytest.approx(16.0)
+    assert r["build_full_s"]["L2"] == pytest.approx(32.0)
+    assert r["rank_full_per_prefix_s"] == pytest.approx(1953.125)
+    assert r["single_layer_s"] == pytest.approx(7844.5)
+    assert r["total_s"] == pytest.approx(15673.0)
+    assert r["rss_projected_bytes"] == 1600000000
+    assert r["projection_blocked"] is True
+    ok = mod.extrapolate_structure_cost(
+        t_build_l1_s=0.001, t_build_l2_s=0.001, t_rank_proxy_s=0.00001,
+        rss_probe_bytes=1000)
+    assert ok["projection_blocked"] is False
+    seen = []
+
+    def _build(n, m_max, k_min, seed):
+        seen.append(int(n))
+        return mod.build_dv3_nested_mother(n, m_max, k_min, seed, None)
+
+    pf = mod.run_structure_preflight(authorized=True, build_fn=_build)
+    assert seen and max(seen) <= 256
+    assert (set(pf) >= {"proceed", "projection_blocked", "build_wall_s",
+                        "rank_wall_s", "projected", "decoder_calls"})
+    assert pf["decoder_calls"] == 0
+
+
+def test_T2_16_prefix_schema_frozen_24():
+    h = np.array([[28, 0, 13, 0],
+                  [25, 29, 0, 14],
+                  [2, 9, 0, 0],
+                  [0, 31, 17, 16]], dtype=np.uint8)
+    rep = mod.audit_prefix(h, 4)
+    frozen = ["base_pair_duplicates", "coefficients_nonzero",
+              "column_degree_full", "connected_components",
+              "degree1_variables", "degree2_variables",
+              "degree3_variables", "duplicate_projective_columns",
+              "four_cycle_variable_incidence_max", "four_cycles",
+              "isolated_variables", "largest_component_fraction", "passed",
+              "prefix_rows", "rank", "row_degree_histogram", "status",
+              "support_triple_duplicates", "total_edges",
+              "variable_degree_max", "variable_degree_median",
+              "variable_degree_min", "zero_columns", "zero_rows"]
+    assert sorted(rep) == frozen
+    assert len(rep) == 24

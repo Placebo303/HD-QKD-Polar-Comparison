@@ -23,8 +23,10 @@ directly.
 from __future__ import annotations
 
 import math
+import json
 import time
 from collections import Counter
+from pathlib import Path
 
 import numpy as np
 
@@ -741,7 +743,7 @@ def audit_prefix(h, k, field=None):
     passed = bool(
         rank == k and zero_rows == 0 and zero_cols == 0 and isolated == 0
         and comp_count == 1 and largest_frac == 1.0 and dup == 0 and vals_ok
-        and deg_min >= 2
+        and deg_min >= 2 and base_dup == 0 and triple_dup == 0
     )
     if not passed:
         status = "STRUCTURE_BLOCKED"
@@ -1196,3 +1198,353 @@ def run_g2_phase(*, h=None, p_b=None, p_f=None,
         "grade": grade,
         "passed": bool(grade == GRADE_QUALIFIED),
     }
+
+
+# --------------------------------------------------------------------------
+# F7. Structure orchestration: preflight + L1->L2 sequence + evidence writer
+# (STRUCTURE_EXECUTION_PACKET frozen contract; small/fake only this round)
+# --------------------------------------------------------------------------
+STRUCTURE_FORMAL_ROOT = "workspace/v72p2d5_structure/20260905_r2"
+STRUCTURE_EVIDENCE_FILES = ("results.json", "table.csv", "report.md",
+                            "execution_summary.json")
+STRUCTURE_SINGLE_BUDGET_S = 900.0
+STRUCTURE_TOTAL_BUDGET_S = 1800.0
+STRUCTURE_RSS_BUDGET_BYTES = 2 * 1024**3
+PREFLIGHT_FIXTURE = (12, 10, 7, (7, 8, 9, 10))
+PREFLIGHT_PROXY = (64, 64, 48, (48, 54, 59, 64))
+PREFLIGHT_MAX_N = 256
+
+
+def extrapolate_structure_cost(*, t_build_l1_s, t_build_l2_s,
+                               t_rank_proxy_s, rss_probe_bytes,
+                               proxy_n=PREFLIGHT_PROXY[0],
+                               proxy_m=PREFLIGHT_PROXY[1]):
+    """Recomputable 2-layer cost projection (frozen formula).
+
+    edge_scale = N / proxy_n scales dv3 build work (3n edges, linear scan);
+    rank_scale = (M_MAX / proxy_m)^2 * (N / proxy_n) scales GF32 prefix-rank
+    elimination work (~k^2 n per prefix). Per-layer full build = measured
+    proxy build * edge_scale; per-prefix full rank = measured proxy rank *
+    rank_scale. single = max(per-layer build) + 4 prefixes * rank;
+    total = both builds + 8 prefixes * rank; rss scales linearly in edges.
+    Blocked when single > 900 s, total > 1800 s, or rss >= 2 GiB.
+    """
+    edge = N / float(proxy_n)
+    rank_scale = (M_MAX / float(proxy_m)) ** 2 * edge
+    b1 = float(t_build_l1_s) * edge
+    b2 = float(t_build_l2_s) * edge
+    rk = float(t_rank_proxy_s) * rank_scale
+    single = max(b1, b2) + 4.0 * rk
+    total = b1 + b2 + 8.0 * rk
+    rss = None if rss_probe_bytes is None else int(rss_probe_bytes * edge)
+    blocked = bool(single > STRUCTURE_SINGLE_BUDGET_S
+                   or total > STRUCTURE_TOTAL_BUDGET_S
+                   or (rss is not None and rss >= STRUCTURE_RSS_BUDGET_BYTES))
+    return {
+        "edge_scale": float(edge),
+        "rank_scale": float(rank_scale),
+        "build_full_s": {"L1": float(b1), "L2": float(b2)},
+        "rank_full_per_prefix_s": float(rk),
+        "single_layer_s": float(single),
+        "total_s": float(total),
+        "rss_projected_bytes": rss,
+        "budgets": {"single_s": float(STRUCTURE_SINGLE_BUDGET_S),
+                    "total_s": float(STRUCTURE_TOTAL_BUDGET_S),
+                    "rss_bytes": int(STRUCTURE_RSS_BUDGET_BYTES)},
+        "projection_blocked": blocked,
+    }
+
+
+def run_structure_preflight(*, authorized=False, build_fn=None,
+                            audit_fn=None):
+    """Cost preflight with small fixture + n<=256 proxy builds only.
+
+    Never builds the full 1000x1024 mother. Records per-layer proxy build
+    walls, per-prefix proxy audit (rank-dominated) walls, fixture walls,
+    and peak RSS, then projects via :func:`extrapolate_structure_cost`.
+    Returns an in-memory dict; a preflight never counts as an attempt.
+    """
+    _require_authorized("structure", authorized)
+    build = build_fn or build_dv3_nested_mother
+    audit = audit_fn or audit_prefix
+    fn, fm, fk, fprefs = PREFLIGHT_FIXTURE
+    pn, pm, pk, pprefs = PREFLIGHT_PROXY
+    for n in (fn, pn):
+        if int(n) > PREFLIGHT_MAX_N:
+            raise ValueError("preflight probes are capped at n<=256")
+    build_wall = {}
+    fixture_wall = {}
+    rank_wall = {}
+    for layer, seed in (("L1", L1_GRAPH_SEED), ("L2", L2_GRAPH_SEED)):
+        t0 = time.perf_counter()
+        build(fn, fm, fk, seed)
+        fixture_wall[layer] = time.perf_counter() - t0
+        t0 = time.perf_counter()
+        h = build(pn, pm, pk, seed)
+        build_wall[layer] = time.perf_counter() - t0
+        walls = []
+        for k in pprefs:
+            t1 = time.perf_counter()
+            audit(h, int(k))
+            walls.append(time.perf_counter() - t1)
+        rank_wall[layer] = [float(w) for w in walls]
+    pooled = [w for walls in rank_wall.values() for w in walls]
+    mean_rank = sum(pooled) / len(pooled) if pooled else 0.0
+    rss = _rss_bytes()
+    proj = extrapolate_structure_cost(
+        t_build_l1_s=build_wall["L1"], t_build_l2_s=build_wall["L2"],
+        t_rank_proxy_s=mean_rank, rss_probe_bytes=rss)
+    blocked = bool(proj["projection_blocked"])
+    return {
+        "phase": "structure_preflight",
+        "fixture": {"n": int(fn), "m_max": int(fm), "k_min": int(fk),
+                    "prefixes": [int(v) for v in fprefs]},
+        "proxy": {"n": int(pn), "m_max": int(pm), "k_min": int(pk),
+                  "prefixes": [int(v) for v in pprefs]},
+        "fixture_wall_s": {k: float(v) for k, v in fixture_wall.items()},
+        "build_wall_s": {k: float(v) for k, v in build_wall.items()},
+        "rank_wall_s": {k: list(v) for k, v in rank_wall.items()},
+        "rss_bytes": rss,
+        "projected": proj,
+        "proceed": not blocked,
+        "projection_blocked": blocked,
+        "decoder_calls": 0,
+    }
+
+
+def _structure_terminal(base, *, decision, attempts, completed, events,
+                        preflight, layers, l2_attempted, build_calls,
+                        error, out_dir, write):
+    res = dict(base)
+    res.update({"decision": decision, "attempts": int(attempts),
+                "completed": int(completed), "events": list(events),
+                "preflight": preflight, "layers": dict(layers),
+                "l2_attempted": bool(l2_attempted),
+                "build_calls": dict(build_calls), "error": error})
+    if out_dir is not None:
+        write(out_dir, res)
+    return res
+
+
+def run_structure_sequence(*, authorized=False, build_fn=None,
+                           audit_fn=None, preflight_fn=None,
+                           writer_fn=None, out_dir=None):
+    """Single structure orchestrator: preflight, then L1, then L2.
+
+    Authorization is checked before any preflight/builder/writer/dir work.
+    Preflight never counts as an attempt; attempts moves 0->1 immediately
+    before the first full L1 builder call. Each layer is built at most
+    once: an L1 hard fail stops the sequence with L2 never built. Failures
+    stop the sequence with seeds, order, family, and coefficients left
+    unchanged. Exceptions yield STRUCTURE_BLOCKED with completed=0;
+    audit-complete hard fails yield completed=1. With out_dir given, the
+    4-file evidence set is written for every terminal outcome. Returns the
+    in-memory result; never touches cycle_state.yaml.
+    """
+    if not authorized:
+        raise NotAuthorizedError(
+            "phase 'structure' is not authorized; refusing before any work")
+    build = build_fn or build_dv3_nested_mother
+    audit = audit_fn or audit_frozen_prefixes
+    preflight = preflight_fn or run_structure_preflight
+    write = writer_fn or write_structure_evidence
+    base = {"phase": "structure", "decoder_calls": 0, "cal_rows_read": 0,
+            "val_rows_read": 0, "formal_root": STRUCTURE_FORMAL_ROOT}
+    events = ["auth_ok"]
+    calls = {"L1": 0, "L2": 0}
+    try:
+        pf = preflight(authorized=True)
+    except Exception as exc:
+        return _structure_terminal(
+            base, decision="STRUCTURE_RESOURCE_PROJECTION_BLOCKED",
+            attempts=0, completed=0, events=events + ["preflight_error"],
+            preflight=None, layers={}, l2_attempted=False,
+            build_calls=calls, error=f"preflight: {exc}",
+            out_dir=out_dir, write=write)
+    events.append("preflight_done")
+    if not pf.get("proceed", False):
+        return _structure_terminal(
+            base, decision="STRUCTURE_RESOURCE_PROJECTION_BLOCKED",
+            attempts=0, completed=0, events=events, preflight=pf,
+            layers={}, l2_attempted=False, build_calls=calls, error=None,
+            out_dir=out_dir, write=write)
+    attempts = 1
+    events.append("attempt=1")
+    layers = {}
+    try:
+        h1 = build(N, M_MAX, L1_K_MIN, L1_GRAPH_SEED)
+    except Exception as exc:
+        return _structure_terminal(
+            base, decision="STRUCTURE_BLOCKED", attempts=attempts,
+            completed=0, events=events, preflight=pf, layers=layers,
+            l2_attempted=False, build_calls=calls,
+            error=f"L1 build: {exc}", out_dir=out_dir, write=write)
+    calls["L1"] = 1
+    events.append("L1_build")
+    try:
+        a1 = audit(h1, L1_PREFIXES)
+    except Exception as exc:
+        return _structure_terminal(
+            base, decision="STRUCTURE_BLOCKED", attempts=attempts,
+            completed=0, events=events, preflight=pf, layers=layers,
+            l2_attempted=False, build_calls=calls,
+            error=f"L1 audit: {exc}", out_dir=out_dir, write=write)
+    events.append("L1_audit")
+    layers["L1"] = {"graph_seed": int(L1_GRAPH_SEED), "m_max": int(M_MAX),
+                    "n": int(N), "k_min": int(L1_K_MIN),
+                    "prefix_rows": [int(v) for v in a1["prefix_rows"]],
+                    "audits": a1["audits"], "passed": bool(a1["passed"]),
+                    "status": a1["status"]}
+    if not a1.get("passed", False):
+        events.append("L1_blocked")
+        return _structure_terminal(
+            base, decision="STRUCTURE_BLOCKED", attempts=attempts,
+            completed=1, events=events, preflight=pf, layers=layers,
+            l2_attempted=False, build_calls=calls, error=None,
+            out_dir=out_dir, write=write)
+    events.append("L1_pass")
+    try:
+        h2 = build(N, M_MAX, L2_K_MIN, L2_GRAPH_SEED)
+    except Exception as exc:
+        return _structure_terminal(
+            base, decision="STRUCTURE_BLOCKED", attempts=attempts,
+            completed=0, events=events, preflight=pf, layers=layers,
+            l2_attempted=False, build_calls=calls,
+            error=f"L2 build: {exc}", out_dir=out_dir, write=write)
+    calls["L2"] = 1
+    events.append("L2_build")
+    try:
+        a2 = audit(h2, L2_PREFIXES)
+    except Exception as exc:
+        return _structure_terminal(
+            base, decision="STRUCTURE_BLOCKED", attempts=attempts,
+            completed=0, events=events, preflight=pf, layers=layers,
+            l2_attempted=True, build_calls=calls,
+            error=f"L2 audit: {exc}", out_dir=out_dir, write=write)
+    events.append("L2_audit")
+    layers["L2"] = {"graph_seed": int(L2_GRAPH_SEED), "m_max": int(M_MAX),
+                    "n": int(N), "k_min": int(L2_K_MIN),
+                    "prefix_rows": [int(v) for v in a2["prefix_rows"]],
+                    "audits": a2["audits"], "passed": bool(a2["passed"]),
+                    "status": a2["status"]}
+    if not a2.get("passed", False):
+        events.append("L2_blocked")
+        return _structure_terminal(
+            base, decision="STRUCTURE_BLOCKED", attempts=attempts,
+            completed=1, events=events, preflight=pf, layers=layers,
+            l2_attempted=True, build_calls=calls, error=None,
+            out_dir=out_dir, write=write)
+    events.append("L2_pass")
+    four_total = sum(int(a["four_cycles"])
+                     for info in (a1, a2) for a in info["audits"])
+    decision = ("STRUCTURE_PASS" if four_total == 0
+                else "STRUCTURE_PASS_WITH_CYCLE_RISK")
+    events.append("done")
+    return _structure_terminal(
+        base, decision=decision, attempts=attempts, completed=1,
+        events=events, preflight=pf, layers=layers, l2_attempted=True,
+        build_calls=calls, error=None, out_dir=out_dir, write=write)
+
+
+def write_structure_evidence(out_dir, result):
+    """Write exactly the 4 frozen evidence files under out_dir.
+
+    out_dir must not exist (no overwrite, no merge). Only scalars and the
+    small per-prefix row-degree histograms are stored; full mothers,
+    supports, coefficients, priors, syndromes, decoder messages, digests,
+    and absolute paths are never written. Every terminal outcome
+    (PASS, CYCLE_RISK, BLOCKED, projection-blocked, exception) yields the
+    same 4-file set.
+    """
+    d = Path(out_dir)
+    if d.exists():
+        raise FileExistsError(
+            f"refusing to overwrite existing evidence dir: {d}")
+    d.mkdir(parents=True)
+    layers = result.get("layers", {}) or {}
+    table_rows = []
+    for layer in ("L1", "L2"):
+        info = layers.get(layer, {}) or {}
+        for a in info.get("audits", []) or []:
+            table_rows.append([
+                layer, a.get("prefix_rows"), a.get("rank"),
+                a.get("zero_rows"), a.get("zero_columns"),
+                a.get("isolated_variables"),
+                a.get("connected_components"),
+                a.get("largest_component_fraction"),
+                a.get("duplicate_projective_columns"),
+                a.get("coefficients_nonzero"),
+                a.get("variable_degree_min"),
+                a.get("base_pair_duplicates"),
+                a.get("support_triple_duplicates"),
+                a.get("four_cycles"), a.get("status")])
+    payload = {
+        "phase": result.get("phase", "structure"),
+        "formal_root": STRUCTURE_FORMAL_ROOT,
+        "decision": result.get("decision"),
+        "attempts": result.get("attempts"),
+        "completed": result.get("completed"),
+        "decoder_calls": 0,
+        "cal_rows_read": 0,
+        "val_rows_read": 0,
+        "l2_attempted": result.get("l2_attempted"),
+        "build_calls": result.get("build_calls"),
+        "error": result.get("error"),
+        "events": result.get("events"),
+        "preflight": result.get("preflight"),
+        "layers": layers,
+    }
+    with open(d / "results.json", "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2, sort_keys=True)
+    head = ("layer,prefix_rows,rank,zero_rows,zero_columns,"
+            "isolated_variables,connected_components,"
+            "largest_component_fraction,duplicate_projective_columns,"
+            "coefficients_nonzero,variable_degree_min,"
+            "base_pair_duplicates,support_triple_duplicates,four_cycles,"
+            "status")
+    with open(d / "table.csv", "w", encoding="utf-8") as fh:
+        fh.write(head + "\n")
+        for row in table_rows:
+            fh.write(",".join(str(v) for v in row) + "\n")
+    rep = ["# V72P2D5 structure evidence",
+           f"decision: {result.get('decision')}",
+           f"attempts: {result.get('attempts')} (max 1)",
+           f"completed: {result.get('completed')}",
+           f"decoder_calls: 0",
+           f"cal_rows_read: 0",
+           f"val_rows_read: 0",
+           f"l2_attempted: {result.get('l2_attempted')}",
+           f"formal_root: {STRUCTURE_FORMAL_ROOT}"]
+    err = result.get("error")
+    if err:
+        rep.append(f"error: {err}")
+    for layer in ("L1", "L2"):
+        info = layers.get(layer, {}) or {}
+        if not info:
+            rep.append(f"{layer}: not attempted")
+            continue
+        rep.append(f"{layer}: seed {info.get('graph_seed')} "
+                   f"status {info.get('status')}")
+        for a in info.get("audits", []) or []:
+            rep.append(f"  k={a.get('prefix_rows')} rank={a.get('rank')} "
+                       f"four_cycles={a.get('four_cycles')} "
+                       f"{a.get('status')}")
+    with open(d / "report.md", "w", encoding="utf-8") as fh:
+        fh.write("\n".join(rep) + "\n")
+    summary = {
+        "phase": result.get("phase", "structure"),
+        "formal_root": STRUCTURE_FORMAL_ROOT,
+        "decision": result.get("decision"),
+        "attempts": result.get("attempts"),
+        "completed": result.get("completed"),
+        "decoder_calls": 0,
+        "cal_rows_read": 0,
+        "val_rows_read": 0,
+        "l2_attempted": result.get("l2_attempted"),
+        "build_calls": result.get("build_calls"),
+        "error": result.get("error"),
+        "files": list(STRUCTURE_EVIDENCE_FILES),
+    }
+    with open(d / "execution_summary.json", "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2, sort_keys=True)
+    return list(STRUCTURE_EVIDENCE_FILES)

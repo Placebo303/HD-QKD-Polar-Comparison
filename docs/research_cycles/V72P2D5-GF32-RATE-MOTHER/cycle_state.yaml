@@ -22,4 +22,7 @@ cal_rows_read: 0
 val_rows_read: 0
 reason: DEGREE2_PREFIX_CONNECTIVITY_IMPOSSIBLE
 next_gate: STRUCTURE_EXECUTION_PACKET_REVIEW
+# R2 structure-runner version binding (implementation-only round, no auth change).
+accepted_r2_implementation: d39b5caec5560d96991b8747bfc12f473e2fe776
+structure_runner_implementation: UNCOMMITTED_CANDIDATE
 # R1 history retained by reference as superseded for the mother path (do NOT delete): PLAN_REVIEW_VERDICT.md, IMPLEMENTATION_PACKET.md, IMPLEMENTATION_REVIEW.md.
