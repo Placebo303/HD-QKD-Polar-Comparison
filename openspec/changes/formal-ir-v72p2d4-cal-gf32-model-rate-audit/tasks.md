@@ -20,14 +20,14 @@
 
 - D4T1-1：canonical counts 轴测试：不对称可手算联合分布分别验证 `P(A|B)/P(U1|B)/P(U2|U1,B)`；转置输入必须失败；对称/只验归一化不算证据。
 - D4T1-2：链式测试：`|CE_joint-CE_L1-CE_L2|<1e-10`（log2，float64），自然 log/decorder 转换不进入本审计。
-- D4T1-3：M0 pin 为 train 边际（`P_M0(a)=count_TRAIN(A=a)/n_TRAIN`，均匀 `P=1/1024` 另记 `uniform_lower_bound_descriptive` 下界对照不参选）+ M1/M2 各有唯一估计子 + 平滑/回退声明（含 lambda 反泄漏统一口径：lambda（Laplace/回退/收缩系数）为冻结常量或仅由对应 TRAIN 统计确定，禁 TEST/VAL/held-out 调参、早停或选模，inner 若用 lambda 只看 inner TRAIN 拟合 + inner held-out CE，不得窥视 outer TEST）+ unseen 行为 + 手算小例 + floor 精确 `1e-300`（先归一再 `max(P,1e-300)`）；M3 本轮直接记录 `M3_EXIT_AMBIGUOUS` 并从比较中移除（有显式退出记录，不算 FAIL，M0–M2 闭合）。数学合同一致性：counts 轴 + 链式 + CE + 预算公式同口径。
+- D4T1-3：U 均匀参考（`P=1/1024`，`CE_L1/CE_L2/CE_joint=5/5/10` 精确，记 `uniform_reference_descriptive` 不参选）+ G pin 为 train 边际（`P_G(a)=count_TRAIN(A=a)/n_TRAIN`）+ F 全符号 `P(A|B)` 单 lambda 30 点 grid 仅 inner 选择 + L 两层 `P(U1|B)*P(U2|U1,B)` Ponytail 复用同折 F lambda（目标 mean joint）各有唯一估计子 + 平滑/回退声明（含 lambda 反泄漏统一口径：lambda 单系数 SHALL 为 30 点 grid 上仅由对应 inner TRAIN 拟合 + inner held-out CE 选中，F 选中、L 复用，禁 outer TEST/VAL/held-out 调参、早停或选模，grid30 outer 禁入，不得窥视 outer TEST）+ unseen 行为 + 手算小例 + floor 精确 `1e-300`（先归一再 `max(P,1e-300)`）；M3 本轮直接记录 `M3_EXIT_AMBIGUOUS`、circulant 直接记录 `CIRCULANT_DEFERRED` 并从比较中移除（有显式退出/DEFERRED 记录，不算 FAIL，G/F/L 闭合）。数学合同一致性：counts 轴 + 链式 + CE + 预算公式同口径。
 - D4T1-4：seen/unseen 划分测试：覆盖率 `seen_frac` 复算一致；unseen 不得删样本；`CE_seen/CE_unseen` 口径显式。
 
 ## D4T2：CV 审计、R5 复现、预算与路线（T2 级，CAL-only）
 
 - D4T2-1：CAL-only 4 折 CV：outer/inner fold 零重叠（帧级 disjoint 全覆盖，inner⊆TRAIN，3 inner folds两两互斥且并集=所属outer TRAIN（768帧））、counts 只用对应 train、test 只算 CE；报告每折 `CE_L1/CE_L2_oracle/CE_joint + n_train/n_test + seen_frac/seen/unseen CE` 及 mean/std/max-min；附机械断言（TEST256/四并全集/每帧256/inner互斥并=TRAIN）。
 - D4T2-2：R5 复现门：同 fixture 同口径复算 `6.422/5.083/11.505`，各 `|Δ|<1e-6` 且链式 `<1e-10`；`REAL_CAL_EXACT_MATCH=false`（R5 来源 synthetic，只核公式复现）；失败即 `BLOCKED`并记根因（口径/数据域/实现），不进选择。
-- D4T2-3：选择规则：`mean(CE_joint)` 最小 + `Δ<0.02 bit/symbol` 简单优先（R1冻结：按实现`SELECT_DELTA=0.02`冻结，不可调；M0<M1<M2，M3 已退出不参选）+ 稳定性数值门限（`std>0.10 或 max-min>0.20 bit/symbol` 即不稳定，降级并显式标记）；输出名次表，不自动改矩阵/decoder 参数。
+- D4T2-3：选择规则：G/F/L 间 `mean(CE_joint)` 最小 + `Δ<0.02 bit/symbol` 简单优先（实现前冻结：`SELECT_DELTA=0.02` 冻结不可调，纠正 R1 事后回写违规；G<F<L，U 参考、M3 退出、circulant DEFERRED 均不参选）+ 稳定性数值门限（`std>0.10 或 max-min>0.20 bit/symbol` 即不稳定，降级并显式标记）+ 科学分解 `U→G/G→F/F→L` 及 `U→选中`（同口径 bit/symbol）；输出名次表，不自动改矩阵/decoder 参数。
 - D4T2-4：预算表：`N=1024 symbols/block`，`f∈{1.0,1.1,1.2,1.3}`，`rows=ceil(N*CE*f/5)`；对照历史 `16/200/216` 行（`80/1000/1080` bit）；`required>available` 只记 `MODEL_BUDGET_MISMATCH`；L1 不足禁只加 L2。
 - D4T2-5：路线判定：按 design §8 输出 A/B/C 互斥穷尽唯一结论及依据（`A=fit@1.3，C=mismatch@1.0，B=fit@1.0∧mismatch@1.3`，典型 `f=1.0/1.1 fit 而 f=1.3 mismatch`，以选中模型 mean 计，分层 margin）；A 不授权真实诊断，B/C 暂停通用化。
 - D4T2-6：审计输出仅标量（fold 表 + mean/std + 预算表 + 路线结论）；无 VAL、无 decoder 调用（`decoder_calls=0`）、无正式输出根、`published_bits=0`。
@@ -35,4 +35,4 @@
 ## 完成与停止条件
 
 - 完成：4 计划文件一致、`REAL_EXECUTION_AUTHORIZED=false`、`DECODER_EXECUTED=false`、`VAL_LOADER_CALLS=0`，停于 `NEXT_GATE: INDEPENDENT_PLAN_REVIEW`。
-- 停止（任一即 `BLOCKED`）：counts 不唯一、M0–M2 不可手算验证、`M3_EXIT_AMBIGUOUS` 无显式退出记录、CV 读 VAL、任何 decoder 调用、R5 复现失败、链式超 `1e-10`；不猜测、不替代、不重试。
+- 停止（任一即 `BLOCKED`）：counts 不唯一、G/F/L 不可手算验证、`M3_EXIT_AMBIGUOUS` 无显式退出记录、`CIRCULANT_DEFERRED` 无显式 DEFERRED 记录、U 5/5/10 未声明、grid30 outer 命中、CV 读 VAL、任何 decoder 调用、R5 复现失败、链式超 `1e-10`；不猜测、不替代、不重试。

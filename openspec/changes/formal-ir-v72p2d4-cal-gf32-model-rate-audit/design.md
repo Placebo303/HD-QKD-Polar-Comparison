@@ -26,19 +26,21 @@ chain check : |CE_joint - CE_L1 - CE_L2_oracle| < 1e-10
 - 生产/V54 消费语义不变，不在调用点转置；本审计与未来生产共用同一 builder 口径。
 - Floor 精确 `1e-300`（非量级/非约数）只保护 log：概率先正常归一，再 `max(P,1e-300)` 后取 log；unseen Bob 回退由各模型显式声明（见 §3）。
 
-## 3. 模型 M0–M2 闭合 + 本轮 `M3_EXIT_AMBIGUOUS`（冻结）+ 数学合同与 lambda 反泄漏
+## 3. 模型 U/G/F/L 闭合 + 本轮 `M3_EXIT_AMBIGUOUS` + `CIRCULANT_DEFERRED`（冻结）+ 数学合同与 lambda 反泄漏
 
-M0<M1<M2 复杂度递增（M3 本轮已退出不参选），输入只允许对应 train counts + 冻结参数（禁 VAL/oracle/旧 session/TEST 回灌）：
+U 参考不参选，G/F/L 参选闭合（G<F<L 复杂度递增，M3 已退出、circulant 已 DEFERRED 均不参选），输入只允许对应 train counts + 冻结参数（禁 VAL/oracle/旧 session/TEST 回灌）：
 
-- M0（最简，pin）：train 边际基线（`P_M0(a)=count_TRAIN(A=a)/n_TRAIN`，与 B 无关），unseen 处理 trivial；均匀 `P=1/1024` 另记 `uniform_lower_bound_descriptive` 下界对照，不参选、不进选择与路线。
-- M1：全符号经验 `P(A|B)`（列归一 + 显式 Laplace/回退声明；lambda（Laplace/回退/收缩系数）为冻结常量或仅由对应 TRAIN 统计确定，禁 TEST/VAL/held-out 调参、早停或选模）。
-- M2：GF32 两层分解 `P(U1|B) * P(U2|U1,B)`（与 V54 `get_l1_prior_p_u1_given_b / get_l1_app_prior_l2(q@P)` 同口径，审计端 `CE_L2_oracle` 用真实 `U1`；lambda 同 M1 统一口径）。
-- M3（本轮直接退出，冻结）：无唯一定义，本轮直接记录 `M3_EXIT_AMBIGUOUS`，从审计中移除，审计在 M0–M2 上闭合，不得猜测替代；M3 不进选择、预算与路线。
+- U（均匀参考，描述性 pin）：`P=1/1024`，`CE_L1/CE_L2/CE_joint=5/5/10 bit/symbol` 精确（`log2 32=5/log2 1024=10`），另记 `uniform_reference_descriptive`，不参选、不进选择/预算/路线。
+- G（最简候选，pin）：train 边际基线（`P_G(a)=count_TRAIN(A=a)/n_TRAIN`，与 B 无关），unseen 处理 trivial。
+- F（全层候选）：全符号经验 `P(A|B)`（列归一）单 lambda（Laplace/回退/收缩单系数），lambda 从 30 点 grid 仅由对应 inner TRAIN 拟合 + inner held-out CE 选中（禁 outer TEST/VAL/held-out 调参、早停或选模；grid30 outer 禁入）。
+- L（两层候选，Ponytail）：GF32 两层分解 `P(U1|B) * P(U2|U1,B)`（与 V54 `get_l1_prior_p_u1_given_b / get_l1_app_prior_l2(q@P)` 同口径，审计端 `CE_L2_oracle` 用真实 `U1`；单 lambda Ponytail：复用同 outer 折 F 选定 lambda，无独立搜索，目标为 mean joint CE）。
+- M3（本轮直接退出，冻结）：无唯一定义，本轮直接记录 `M3_EXIT_AMBIGUOUS`，从审计中移除，审计在 G/F/L 上闭合，不得猜测替代；M3 不进选择、预算与路线。
+- Circulant（本轮直接 DEFERRED，冻结）：任何 circulant 结构变体本轮直接记录 `CIRCULANT_DEFERRED`，从审计中移除，不进选择、预算与路线；后继仅 backlog。
 
 数学合同（冻结）：counts 轴约定 + `P(A|B)→P(U1|B)/P(U2|U1,B)` 链式 + `CE=-mean(log2 P)` + 链式误差 `<1e-10` + 预算 `rows=ceil(N*CE*f/5)` 为同一合同；任一环节口径变更即 `REVISE`。
-lambda 反泄漏（冻结）：lambda（Laplace/回退/收缩系数）SHALL 为冻结常量或仅由对应 TRAIN 统计确定；SHALL NOT 用 TEST/VAL/held-out 调参、早停或选模；inner 选择若用 lambda，必须只看 inner TRAIN 拟合 + inner held-out CE，不得窥视 outer TEST。
+lambda 反泄漏（冻结）：lambda（Laplace/回退/收缩单系数）SHALL 为 30 点 grid 上仅由对应 inner TRAIN 拟合 + inner held-out CE 选中（F 选中、L 复用同折值）；SHALL NOT 用 outer TEST/VAL/held-out 调参、早停或选模（grid30 outer 禁入）；inner 选择 SHALL 只看 inner TRAIN 拟合 + inner held-out CE，不得窥视 outer TEST。
 
-每模型（M0–M2）必须声明：估计子、平滑/回退规则、unseen Bob 行为、与 counts 轴约定的绑定测试。
+每模型（G/F/L）必须声明：估计子、平滑/回退规则、unseen Bob 行为、与 counts 轴约定的绑定测试；U 声明均匀 5/5/10 精确值。
 
 ## 4. 指标（冻结）
 
@@ -52,14 +54,15 @@ lambda 反泄漏（冻结）：lambda（Laplace/回退/收缩系数）SHALL 为�
 - R5 来源为 synthetic，故 `REAL_CAL_EXACT_MATCH=false`：`6.422/5.083/11.505` 只作同 fixture 公式复现基准（同 counts 轴约定 + 同 V54 链 + 同 CE 定义 + CAL-only），不作真实 CAL 精确匹配断言。
 - 同口径（canonical counts + V54 链 + CAL-only）复算 R5：`CE_L1=6.422 / CE_L2_oracle=5.083 / CE_joint=11.505`。
 - 容差：各 `|CE-ref|<1e-6`，且链式 `<1e-10`（`6.422+5.083=11.505` 精确相加）。
-- 失败即 `BLOCKED`，不进入 M0–M2 比较、不做选择与路线判定；并记根因分类：口径偏离（轴/链式/CE）/ 数据域偏离（synthetic vs CAL702..1725）/ 实现偏离（平滑/回退/floor），不得调参凑数。
+- 失败即 `BLOCKED`，不进入 G/F/L 比较、不做选择与路线判定；并记根因分类：口径偏离（轴/链式/CE）/ 数据域偏离（synthetic vs CAL702..1725）/ 实现偏离（平滑/回退/floor），不得调参凑数。
 
 ## 6. 选择规则（冻结）
 
-1. 主键：`mean(CE_joint)` 最小。
-2. 简单优先：`Δmean<0.02` bit/symbol 视为接近（R1冻结：按实现`SELECT_DELTA=0.02`冻结，不可调），取更简（M0<M1<M2，M3 已退出不参选）。
+1. 主键：G/F/L 间 `mean(CE_joint)` 最小（U 仅 5/5/10 参考，不参选）。
+2. 简单优先：`Δmean<0.02` bit/symbol 视为接近（实现前冻结：`SELECT_DELTA=0.02` 冻结不可调，纠正 R1 事后回写违规），取更简（G<F<L，M3 已退出、circulant 已 DEFERRED 均不参选）。
 3. 稳定性数值门限（冻结）：`CE_joint` 跨外层折 `std>0.10 bit/symbol 或 max-min>0.20 bit/symbol` 即不稳定，显式标记并降级（不得仅凭单折最优选中）；报告 std 与 max-min。
-4. 选择不自动转为矩阵/decoder 参数；只输出审计名次与路线输入。
+4. 科学分解（冻结）：报告 `U→G / G→F / F→L` 三段增益及 `U→选中` 总增益（同口径 bit/symbol，描述性）。
+5. 选择不自动转为矩阵/decoder 参数；只输出审计名次与路线输入。
 
 ## 7. 预算（冻结）
 
@@ -87,4 +90,4 @@ rate_total = 1080/1024 = 1.0546875 bit/symbol
 
 - 允许：文档、计划、T0/T1/T2 测试定义、CAL-only 标量审计定义。
 - 禁止：读 VAL（含 loader 调用>0）、调用 decoder（含真核与生产路径）、构造新矩阵（含全零 H1 替代）、引入 checksum/hash/tag/签名、创建正式输出/`run_01`、修复 writer、授予执行。
-- 停止：counts 约定不唯一、M0–M2 任一不可手算验证、`M3_EXIT_AMBIGUOUS` 无显式退出记录、CV 读 VAL、任何 decoder 调用、R5 复现失败 → `BLOCKED`，不猜测、不替代、不重试。
+- 停止：counts 约定不唯一、G/F/L 任一不可手算验证、`M3_EXIT_AMBIGUOUS` 无显式退出记录、`CIRCULANT_DEFERRED` 无显式 DEFERRED 记录、U 5/5/10 未声明、CV 读 VAL、任何 decoder 调用、grid30 outer 命中、R5 复现失败 → `BLOCKED`，不猜测、不替代、不重试。

@@ -17,11 +17,12 @@
 - S-COUNTS-03：`P(A|B)` SHALL 为列归一；`P(U1|B)` SHALL 为按 `U2` 边际化；`P(U2|U1,B)` SHALL 为按 `(U1,B)` 条件化；`CE_L2_oracle` SHALL 用真实 `U1` 且仅作分层预算诊断。
 - S-COUNTS-04：测试 SHALL 用非对称可手算联合分布分别验证三者；转置输入 SHALL 被捕获；只验归一化/对称数据 SHALL NOT 算证据。
 
-## S-MODEL：M0–M2 闭合 + M3_EXIT_AMBIGUOUS
+## S-MODEL：U/G/F/L 闭合 + M3_EXIT_AMBIGUOUS + CIRCULANT_DEFERRED
 
-- S-MODEL-01：M0 SHALL 为 train 边际基线（`P_M0(a)=count_TRAIN(A=a)/n_TRAIN`，与 B 无关；均匀 `P=1/1024` SHALL 另记 `uniform_lower_bound_descriptive` 下界对照，不参选、不进选择与路线）；M1 SHALL 为全符号经验 `P(A|B)`；M2 SHALL 为 GF32 两层 `P(U1|B)*P(U2|U1,B)`（V54 口径）；输入 SHALL 仅为对应 train counts + 冻结参数；M3 SHALL 本轮直接退出（见 S-MODEL-03），审计在 M0–M2 上闭合。
-- S-MODEL-02：每模型（M0–M2）SHALL 声明估计子、平滑/回退（含 lambda 反泄漏统一口径：lambda（Laplace/回退/收缩系数）SHALL 为冻结常量或仅由对应 TRAIN 统计确定，SHALL NOT 用 TEST/VAL/held-out 调参、早停或选模，inner 若用 lambda SHALL 只看 inner TRAIN 拟合 + inner held-out CE，不得窥视 outer TEST）、unseen Bob 行为、floor 精确 `1e-300`（先归一再 `max(P,1e-300)`，只保护 log）；SHALL 有手算小例。数学合同 SHALL 一致：counts 轴 + 链式 + CE + `rows=ceil(N*CE*f/5)` 同口径。
-- S-MODEL-03：M3 无唯一定义，本轮 SHALL 直接记录 `M3_EXIT_AMBIGUOUS` 并从审计中移除，在 M0–M2 上闭合；SHALL NOT 猜测替代；M3 SHALL NOT 进选择、预算与路线。
+- S-MODEL-01：U SHALL 为均匀参考（`P=1/1024`，`CE_L1/CE_L2/CE_joint=5/5/10 bit/symbol` 精确，记 `uniform_reference_descriptive`，不参选、不进选择/预算/路线）；G SHALL 为 train 边际基线（`P_G(a)=count_TRAIN(A=a)/n_TRAIN`，与 B 无关）；F SHALL 为全符号经验 `P(A|B)` 单 lambda 30 点 grid 仅 inner 选择；L SHALL 为 GF32 两层 `P(U1|B)*P(U2|U1,B)`（V54 口径，`CE_L2_oracle` 用真实 `U1` 仅分层预算诊断）Ponytail 复用同折 F 选定 lambda（无独立搜索，目标 mean joint）；输入 SHALL 仅为对应 train counts + 冻结参数；M3 SHALL 本轮直接退出（见 S-MODEL-03），circulant SHALL 本轮直接 DEFERRED（见 S-MODEL-04），审计在 G/F/L 上闭合。
+- S-MODEL-02：每模型（G/F/L）SHALL 声明估计子、平滑/回退（含 lambda 反泄漏统一口径：lambda 单系数 SHALL 为 30 点 grid 上仅由对应 inner TRAIN 拟合 + inner held-out CE 选中，F 选中、L 复用同折值，SHALL NOT 用 outer TEST/VAL/held-out 调参、早停或选模，grid30 outer 禁入，不得窥视 outer TEST）、unseen Bob 行为、floor 精确 `1e-300`（先归一再 `max(P,1e-300)`，只保护 log）；U SHALL 声明 5/5/10 精确值；SHALL 有手算小例。数学合同 SHALL 一致：counts 轴 + 链式 + CE + `rows=ceil(N*CE*f/5)` 同口径。
+- S-MODEL-03：M3 无唯一定义，本轮 SHALL 直接记录 `M3_EXIT_AMBIGUOUS` 并从审计中移除，在 G/F/L 上闭合；SHALL NOT 猜测替代；M3 SHALL NOT 进选择、预算与路线。
+- S-MODEL-04：任何 circulant 结构变体本轮 SHALL 直接记录 `CIRCULANT_DEFERRED` 并从审计中移除；SHALL NOT 猜测替代；SHALL NOT 进选择、预算与路线。
 
 ## S-METRIC：指标
 
@@ -36,8 +37,8 @@
 
 ## S-SELECT：选择
 
-- S-SELECT-01：主键 SHALL 为 `mean(CE_joint)` 最小；`Δ<0.02` bit/symbol 时 SHALL 简单优先（R1冻结：按实现`SELECT_DELTA=0.02`冻结，不可调；M0<M1<M2，M3 已退出不参选）。
-- S-SELECT-02：稳定性数值门限 SHALL 为 `CE_joint` 跨外层折 `std>0.10 bit/symbol 或 max-min>0.20 bit/symbol` 即不稳定，SHALL 显式标记并降级，SHALL NOT 仅凭单折最优选中；选择 SHALL NOT 自动改矩阵/decoder 参数。
+- S-SELECT-01：主键 SHALL 为 G/F/L 间 `mean(CE_joint)` 最小（U 仅 5/5/10 参考不参选）；`Δ<0.02` bit/symbol 时 SHALL 简单优先（实现前冻结：`SELECT_DELTA=0.02` 冻结不可调，纠正 R1 事后回写违规；G<F<L，M3 已退出、circulant 已 DEFERRED 均不参选）。
+- S-SELECT-02：稳定性数值门限 SHALL 为 `CE_joint` 跨外层折 `std>0.10 bit/symbol 或 max-min>0.20 bit/symbol` 即不稳定，SHALL 显式标记并降级，SHALL NOT 仅凭单折最优选中；SHALL 报告 `U→G/G→F/F→L` 及 `U→选中` 分解（同口径 bit/symbol，描述性）；选择 SHALL NOT 自动改矩阵/decoder 参数。
 
 ## S-BUDGET：预算
 
@@ -54,4 +55,4 @@
 
 - S-STOP-01：R5/D4 SHALL 只做文档、计划、测试定义、CAL-only 标量审计；SHALL NOT 读 VAL、调用 decoder、构造新矩阵、修 writer、创建正式输出/`run_01`、授权执行。
 - S-STOP-02：SHALL NOT 引入 checksum/hash/tag/签名或内容校验字段。
-- S-STOP-03：counts 不唯一、M0–M2 手算验证失败、`M3_EXIT_AMBIGUOUS` 无显式退出记录、CV 读 VAL、任何 decoder 调用、R5/链式失败时状态 SHALL 为 `BLOCKED`，不得猜测、替代或重试。
+- S-STOP-03：counts 不唯一、G/F/L 手算验证失败、U 5/5/10 未声明、`M3_EXIT_AMBIGUOUS` 无显式退出记录、`CIRCULANT_DEFERRED` 无显式 DEFERRED 记录、grid30 outer 命中、CV 读 VAL、任何 decoder 调用、R5/链式失败时状态 SHALL 为 `BLOCKED`，不得猜测、替代或重试。

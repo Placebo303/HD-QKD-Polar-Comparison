@@ -1,11 +1,12 @@
 cycle_id: V72P2D4-CAL-RATE
-implementation_cycle: V72P2D4R1-CAL-GF32-MODEL-RATE
+implementation_cycle: V72P2D4R2-CAL-GF32-MODEL-RATE
 change: formal-ir-v72p2d4-cal-gf32-model-rate-audit
 state: READY_DESCRIPTIVE_ROUTE_C
+r1_verdict: CANDIDATE_NOT_ACCEPTED
 branch: formal-ir-v72p1-addendum-clean
-head_sha: a7a6ec625a5e6a0b5920054a3ad676209888f7af
-base_sha: a7a6ec625a5e6a0b5920054a3ad676209888f7af
-accepted_plan_sha: a7a6ec625a5e6a0b5920054a3ad676209888f7af
+head_sha: bd78a67de2959d1fd3c9d647a954bd901f64a8cd
+base_sha: bd78a67de2959d1fd3c9d647a954bd901f64a8cd
+accepted_plan_sha: bd78a67de2959d1fd3c9d647a954bd901f64a8cd
 implementation_sha: null
 plan_review: PASS
 implementation_review: PASS
@@ -18,19 +19,19 @@ syndrome_published_bits: 0
 scientific_promotion: false
 val_used_for_fitting: false
 select_delta_frozen: 0.02
-selected_model: M2
+selected_model: F
 ranking:
-  - M2
-  - M1
-  - M0
+  - F
+  - L
+  - G
 route: C
-output_root: comparison_bench/outputs_comparison/v72p2d4r1_cal_gf32_model_rate_audit_20260905
+output_root: comparison_bench/outputs_comparison/v72p2d4r2_cal_gf32_model_rate_audit_20260905
 output_files:
   - manifest.json
   - audit.json
   - table.csv
   - report.md
-tests: 30 passed
+tests: 32 passed
 next_gate: BACKLOG_ONLY
 old_attempt0_root: comparison_bench/outputs_comparison/v72p2d4_cal_gf32_model_rate_audit_20260905
 old_attempt0_status: INVALID_NON_EVIDENCE_UNTRACKED
