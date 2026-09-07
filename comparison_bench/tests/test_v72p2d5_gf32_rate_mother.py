@@ -3286,6 +3286,106 @@ def test_M21_param_missing_isolation(tmp_path, monkeypatch, runner_name,
     assert _snapshot_dir(real_g1) == g1_before
 
 
+MODEL_F_REL_TAIL = Path("workspace/v72p2d5_model_f_input/20260907_r1")
+
+
+# --------------------------------------------------------------------------
+# M22 — Model-F consumer path fix: script-launch condition (tmp only)
+# --------------------------------------------------------------------------
+def _mf_test_module():
+    path = (ROOT / "comparison_bench" / "src" / "comparison_bench"
+            / "formal_ir" / "v72p2d5_model_f_input.py")
+    spec = importlib.util.spec_from_file_location(
+        "v72p2d5_model_f_input_test_helper", str(path))
+    assert spec is not None and spec.loader is not None
+    fresh = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fresh)
+    return fresh
+
+
+def test_M22a_model_f_root_resolves_cwd_independent(tmp_path, monkeypatch):
+    # Resolved path only; the real artifact is never loaded here.
+    monkeypatch.chdir(tmp_path)
+    resolved = mod._resolve_model_f_input_root()
+    assert resolved.is_absolute()
+    assert resolved == mod._model_f_repo_root() / MODEL_F_REL_TAIL
+    assert resolved == (ROOT / MODEL_F_REL_TAIL).resolve()
+    assert list(tmp_path.rglob("*")) == []
+
+
+def test_M22b_model_f_loader_without_repo_root_on_path(tmp_path,
+                                                        monkeypatch):
+    # Simulate `python scripts/...`: repo root and src off sys.path and no
+    # comparison_bench package importable; the helper must still reach the
+    # loader by file path and load a tmp artifact (no loader-unavailable).
+    mf = _mf_test_module()
+    c, pb = _mffake_counts()
+    art = tmp_path / "mf_valid"
+    mf.write_model_f_input(art, c, pb)
+    keep_path = list(sys.path)
+    src_root = str(ROOT / "comparison_bench" / "src")
+    monkeypatch.setattr(
+        sys, "path",
+        [p for p in keep_path if p not in ("", str(ROOT), src_root)])
+    for name in [n for n in sys.modules
+                 if n == "comparison_bench"
+                 or n.startswith("comparison_bench.")
+                 or n == "v72p2d5_model_f_input_consumer"]:
+        monkeypatch.delitem(sys.modules, name, raising=False)
+    before_modules = set(sys.modules)
+    try:
+        monkeypatch.setattr(mod, "MODEL_F_INPUT_FORMAL_ROOT", str(art))
+        monkeypatch.chdir(tmp_path)
+        got_c, got_pb = mod._load_model_f_input_or_blocked(None, None)
+    finally:
+        for name in set(sys.modules) - before_modules:
+            del sys.modules[name]
+    assert np.array_equal(np.asarray(got_c), np.asarray(c))
+    assert abs(float(np.asarray(got_pb).sum()) - 1.0) < 1e-8
+
+
+def test_M22c_model_f_absent_reports_missing_with_absolute_path(
+        tmp_path, monkeypatch):
+    missing = tmp_path / "absent_model_f"
+    monkeypatch.setattr(mod, "MODEL_F_INPUT_FORMAL_ROOT", str(missing))
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(
+            ValueError,
+            match="MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS") as excinfo:
+        mod._load_model_f_input_or_blocked(None, None)
+    assert str(missing.resolve()) in str(excinfo.value)
+    assert list(tmp_path.rglob("*")) == []
+
+
+def test_M22d_model_f_invalid_not_reported_missing(tmp_path, monkeypatch):
+    # Present root with a wrong file set: loader validation rejects it, so
+    # the outcome is invalid, never missing-input.
+    mf = _mf_test_module()
+    c, pb = _mffake_counts()
+    mf.write_model_f_input(tmp_path / "mf_valid", c, pb)
+    monkeypatch.setattr(mod, "MODEL_F_INPUT_FORMAL_ROOT", str(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(ValueError,
+                        match=mod.MODEL_F_INPUT_INVALID) as excinfo:
+        mod._load_model_f_input_or_blocked(None, None)
+    assert "MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS" not in str(
+        excinfo.value)
+
+
+def test_M22e_model_f_injected_tables_short_circuit(tmp_path, monkeypatch):
+    c, pb = _mffake_counts()
+    monkeypatch.chdir(tmp_path)
+
+    def _boom(*a, **k):
+        raise AssertionError("filesystem reached on injected path")
+
+    monkeypatch.setattr(mod, "_load_model_f_loader", _boom)
+    monkeypatch.setattr(mod, "_resolve_model_f_input_root", _boom)
+    got_c, got_pb = mod._load_model_f_input_or_blocked(c, pb)
+    assert got_c is c and got_pb is pb
+    assert list(tmp_path.rglob("*")) == []
+
+
 def test_TIS_static_authorized_synthetic_isolation():
     """Static (stdlib AST) guard: no implicit prod decoder/formal out_dir.
 

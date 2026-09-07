@@ -26,6 +26,7 @@ import math
 import json
 import time
 import importlib
+import importlib.util
 import sys
 from collections import Counter
 from pathlib import Path
@@ -79,6 +80,8 @@ G2_FORMAL_ROOT = "workspace/v72p2d5_g2/20260906_r1"
 STAGE_EVIDENCE_FILES = ("results.json", "table.csv", "report.md",
                         "execution_summary.json")
 MODEL_F_BLOCKED = "MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS"
+MODEL_F_LOADER_UNAVAILABLE = "MODEL_F_INPUT_LOADER_UNAVAILABLE"
+MODEL_F_INPUT_INVALID = "MODEL_F_INPUT_INVALID"
 MODEL_F_INPUT_FORMAL_ROOT = "workspace/v72p2d5_model_f_input/20260907_r1"
 G1_TOTAL_BUDGET_S = 900.0
 G2_TOTAL_BUDGET_S = 3600.0
@@ -2167,33 +2170,103 @@ def prepare_model_f_prior(counts_ab=None, p_b=None, lam=LAMBDA_STAR):
     return pb, pf
 
 
+def _model_f_repo_root():
+    """Repository root derived from this file (no sys.path, no cwd)."""
+    return Path(__file__).resolve().parents[4]
+
+
+def _resolve_model_f_input_root():
+    """Resolve the frozen Model-F root against the repository root.
+
+    Relative values anchor at the repository root; absolute values pass
+    through. Same root-anchoring contract as the prepare script's path
+    resolver. No cwd, no search.
+    """
+    cand = Path(MODEL_F_INPUT_FORMAL_ROOT)
+    if cand.is_absolute():
+        return cand.resolve()
+    return (_model_f_repo_root() / cand).resolve()
+
+
+def _load_model_f_loader():
+    """Load ``load_model_f_input`` from the sibling module by file path.
+
+    The CLI reaches this core module by file path because the repository
+    root is not on ``sys.path`` under ``python scripts/...``; the loader
+    is reached the same way. Its one package dependency (the contrast
+    builder module, stdlib/numpy only) is likewise loaded by file path
+    and registered under both names the sibling tries, so the sibling's
+    own import succeeds with no ``sys.path`` change.
+    """
+    here = Path(__file__).resolve().parent
+    contrast_names = (
+        "comparison_bench.formal_ir.v72p2d3_gf32_contrast",
+        "comparison_bench.src.comparison_bench.formal_ir.v72p2d3_gf32_contrast",
+    )
+    if contrast_names[0] not in sys.modules:
+        contrast_path = here / "v72p2d3_gf32_contrast.py"
+        contrast_spec = importlib.util.spec_from_file_location(
+            contrast_names[0], str(contrast_path))
+        if contrast_spec is None or contrast_spec.loader is None:
+            raise ValueError(
+                MODEL_F_LOADER_UNAVAILABLE + ": Model-F contrast "
+                f"module not loadable at {contrast_path}")
+        contrast_mod = importlib.util.module_from_spec(contrast_spec)
+        try:
+            contrast_spec.loader.exec_module(contrast_mod)
+        except Exception as exc:
+            raise ValueError(
+                MODEL_F_LOADER_UNAVAILABLE + ": Model-F contrast "
+                f"module failed at {contrast_path}: {exc}") from exc
+        sys.modules[contrast_names[0]] = contrast_mod
+    for _name in contrast_names:
+        sys.modules.setdefault(_name, sys.modules[contrast_names[0]])
+    sibling_path = here / "v72p2d5_model_f_input.py"
+    sibling_spec = importlib.util.spec_from_file_location(
+        "v72p2d5_model_f_input_consumer", str(sibling_path))
+    if sibling_spec is None or sibling_spec.loader is None:
+        raise ValueError(
+            MODEL_F_LOADER_UNAVAILABLE + ": Model-F input module "
+            f"not loadable at {sibling_path}")
+    sibling = importlib.util.module_from_spec(sibling_spec)
+    try:
+        sibling_spec.loader.exec_module(sibling)
+    except Exception as exc:
+        raise ValueError(
+            MODEL_F_LOADER_UNAVAILABLE + ": Model-F input module "
+            f"failed at {sibling_path}: {exc}") from exc
+    return sibling.load_model_f_input
+
+
 def _load_model_f_input_or_blocked(counts_ab=None, p_b=None):
     """Consume frozen Model-F input: injected tables or fixed-root load.
 
     Fixed root only (no new CLI flag per frozen spec). Unauthorized entry
-    still refuses before this helper. Missing artifact stays BLOCKED.
+    still refuses before this helper. Loader, absence, and validity
+    failures stay distinct: only a genuinely absent artifact reports the
+    missing-input BLOCKED; loader and validation faults name themselves
+    and chain the original cause.
     """
     if counts_ab is not None and p_b is not None:
         return counts_ab, p_b
-    try:
-        from comparison_bench.formal_ir.v72p2d5_model_f_input import (
-            load_model_f_input as _mf_load,
-        )
-    except ImportError:
-        try:
-            from comparison_bench.src.comparison_bench.formal_ir.v72p2d5_model_f_input import (  # type: ignore[no-redef]
-                load_model_f_input as _mf_load,
-            )
-        except ImportError as exc:
-            raise ValueError(
-                MODEL_F_BLOCKED + ": D4R2 F-model CAL-TRAIN canonical counts "
-                "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN") from exc
-    try:
-        _loaded = _mf_load(MODEL_F_INPUT_FORMAL_ROOT)
-    except Exception as exc:
+    _mf_load = _load_model_f_loader()
+    root = _resolve_model_f_input_root()
+    if not root.is_dir():
         raise ValueError(
             MODEL_F_BLOCKED + ": D4R2 F-model CAL-TRAIN canonical counts "
-            "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN") from exc
+            "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN; "
+            f"resolved artifact root absent: {root}")
+    try:
+        _loaded = _mf_load(root)
+    except (FileNotFoundError, NotADirectoryError) as exc:
+        raise ValueError(
+            MODEL_F_BLOCKED + ": D4R2 F-model CAL-TRAIN canonical counts "
+            "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN; "
+            f"artifact files missing under: {root}") from exc
+    except ValueError as exc:
+        raise ValueError(
+            MODEL_F_INPUT_INVALID + ": Model-F artifact validation "
+            f"failed at {root}: {exc}") from exc
     return _loaded["counts_ab"], _loaded["p_b"]
 
 
