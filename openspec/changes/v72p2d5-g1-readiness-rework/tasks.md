@@ -53,6 +53,21 @@ review file. No other file. No `cycle_state.yaml` change. No formal output.
     reads; real probe deferred.
   - Verify: contract tests green without touching the real Model-F root.
 
+- [x] T2-R1 — Windows RSS WinAPI ABI correction (I02, A02 follow-up)
+  - Declare `ctypes.wintypes` signatures on the existing Windows fallback:
+    `GetCurrentProcess.restype = HANDLE`,
+    `GetProcessMemoryInfo.argtypes = [HANDLE, POINTER(PROCESS_MEMORY_COUNTERS),
+    DWORD]`, `restype = BOOL`; keep `cb`/`PageFaultCount` as DWORD and the
+    remaining size fields as `c_size_t`; call with `cb = sizeof(...)`; return
+    the positive `WorkingSetSize` int only on a true API result, else `None`.
+    Unix `resource` path unchanged. Fake API objects now support and record
+    `argtypes`/`restype` so the signatures are proven assigned before the
+    call; added an unpatched live `_rss_bytes()` smoke asserting a positive
+    int on `win32`.
+  - Verify: focused RSS tests incl. unpatched live smoke green; full
+    three-file D5 suite zero failures; `sizeof(PROCESS_MEMORY_COUNTERS)`
+    evidenced live; pre/post formal-root stats identical; proposed G1/G2
+    roots absent; lifecycle unchanged.
 - [x] T8 — Focused + full suite, snapshots, commits (A07–A12)
   - Lifecycle-safe tests only (explicit fake decoder, injected arrays, tmp
     output); `py_compile` core + both D5 scripts; focused new+guards; full

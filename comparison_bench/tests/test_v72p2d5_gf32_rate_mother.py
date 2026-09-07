@@ -3630,43 +3630,95 @@ def test_G1R02_unix_rss_path_preserved():
 def test_G1R03_windows_rss_success_and_failure(monkeypatch, tmp_path):
     import ctypes as _ct
     import sys as _sys
+    from ctypes import wintypes as _wt
+    from types import SimpleNamespace as _NS
     formal_before = _snapshot_formal_roots()
     monkeypatch.chdir(tmp_path)
     monkeypatch.setitem(_sys.modules, "resource", None)
 
-    class _FakeKernelOk:
-        @staticmethod
-        def GetCurrentProcess():
-            return 999
+    class _SigFn:
+        """Callable fake supporting ctypes argtypes/restype inspection."""
 
-    class _FakePsapiOk:
-        @staticmethod
-        def GetProcessMemoryInfo(h, pref, cb):
-            pref._obj.WorkingSetSize = 12345678
-            return 1
+        def __init__(self, fn):
+            self._fn = fn
+            self.argtypes = None
+            self.restype = None
+            self.seen = {}
 
-    class _FakeWindllOk:
-        kernel32 = _FakeKernelOk()
-        psapi = _FakePsapiOk()
+        def __call__(self, *args):
+            self.seen["argtypes"] = self.argtypes
+            self.seen["restype"] = self.restype
+            return self._fn(*args)
 
-    monkeypatch.setattr(_ct, "windll", _FakeWindllOk(), raising=False)
+    def _gcp_ok():
+        return 999
+
+    _gcp_sig = _SigFn(_gcp_ok)
+    _seen_cb = {}
+
+    def _gpi_ok(h, pref, cb):
+        # Signatures must already be assigned when the API call runs.
+        assert _gpi_sig.argtypes is not None
+        assert _gpi_sig.restype is not None
+        assert _gcp_sig.restype is not None
+        _seen_cb["cb"] = cb
+        pref._obj.WorkingSetSize = 12345678
+        return 1
+
+    _gpi_sig = _SigFn(_gpi_ok)
+    monkeypatch.setattr(
+        _ct, "windll",
+        _NS(kernel32=_NS(GetCurrentProcess=_gcp_sig),
+            psapi=_NS(GetProcessMemoryInfo=_gpi_sig)),
+        raising=False)
     assert mod._rss_bytes() == 12345678
+    assert _gcp_sig.restype is _wt.HANDLE
+    assert _gpi_sig.restype is _wt.BOOL
+    assert isinstance(_gpi_sig.argtypes, list)
+    assert len(_gpi_sig.argtypes) == 3
+    assert _gpi_sig.argtypes[0] is _wt.HANDLE
+    assert _gpi_sig.argtypes[2] is _wt.DWORD
+    assert _gpi_sig.seen["argtypes"] is _gpi_sig.argtypes
+    assert _gpi_sig.seen["restype"] is _wt.BOOL
+    assert _gcp_sig.seen["restype"] is _wt.HANDLE
+    _ptr = _gpi_sig.argtypes[1]
+    _struct = getattr(_ptr, "_type_", None)
+    assert _struct is not None
+    _fields = dict(_struct._fields_)
+    assert _fields["cb"] is _wt.DWORD
+    assert _fields["PageFaultCount"] is _wt.DWORD
+    for _name in ("PeakWorkingSetSize", "WorkingSetSize",
+                  "QuotaPeakPagedPoolUsage", "QuotaPagedPoolUsage",
+                  "QuotaPeakNonPagedPoolUsage", "QuotaNonPagedPoolUsage",
+                  "PagefileUsage", "PeakPagefileUsage"):
+        assert _fields[_name] is _ct.c_size_t
+    assert _seen_cb["cb"] == _ct.sizeof(_struct)
 
-    class _FakePsapiFail:
-        @staticmethod
-        def GetProcessMemoryInfo(h, pref, cb):
-            return 0
+    def _gpi_fail(h, pref, cb):
+        return 0
 
-    class _FakeWindllFail:
-        kernel32 = _FakeKernelOk()
-        psapi = _FakePsapiFail()
-
-    monkeypatch.setattr(_ct, "windll", _FakeWindllFail(), raising=False)
+    _gpi_fail_sig = _SigFn(_gpi_fail)
+    monkeypatch.setattr(
+        _ct, "windll",
+        _NS(kernel32=_NS(GetCurrentProcess=_SigFn(_gcp_ok)),
+            psapi=_NS(GetProcessMemoryInfo=_gpi_fail_sig)),
+        raising=False)
     assert mod._rss_bytes() is None
     monkeypatch.delattr(_ct, "windll", raising=False)
     assert mod._rss_bytes() is None
     assert list(tmp_path.rglob("*")) == []
     _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R03R1_windows_rss_live_smoke():
+    import sys as _sys
+    if _sys.platform == "win32":
+        # Real Windows branch, deliberately unpatched: read-only, no decoder.
+        val = mod._rss_bytes()
+        assert isinstance(val, int) and val > 0
+    else:
+        val = mod._rss_bytes()
+        assert val is None or (isinstance(val, int) and val > 0)
 
 
 def test_G1R04_per_block_sampling_counts_and_peaks(tmp_path, monkeypatch):

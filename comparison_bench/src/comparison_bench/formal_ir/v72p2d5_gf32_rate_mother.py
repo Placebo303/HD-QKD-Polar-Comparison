@@ -949,6 +949,7 @@ def _rss_bytes():
     # claim), stdlib ctypes only.
     try:
         import ctypes
+        from ctypes import wintypes
 
         _windll = ctypes.windll
         _kernel32 = _windll.kernel32
@@ -956,8 +957,8 @@ def _rss_bytes():
 
         class _PMC(ctypes.Structure):
             _fields_ = [
-                ("cb", ctypes.c_ulong),
-                ("PageFaultCount", ctypes.c_ulong),
+                ("cb", wintypes.DWORD),
+                ("PageFaultCount", wintypes.DWORD),
                 ("PeakWorkingSetSize", ctypes.c_size_t),
                 ("WorkingSetSize", ctypes.c_size_t),
                 ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
@@ -967,6 +968,14 @@ def _rss_bytes():
                 ("PagefileUsage", ctypes.c_size_t),
                 ("PeakPagefileUsage", ctypes.c_size_t),
             ]
+
+        _kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        _psapi.GetProcessMemoryInfo.argtypes = [
+            wintypes.HANDLE,
+            ctypes.POINTER(_PMC),
+            wintypes.DWORD,
+        ]
+        _psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
 
         _pmc = _PMC()
         _pmc.cb = ctypes.sizeof(_PMC)
