@@ -27,7 +27,7 @@ g1_implementation_accepted: true
 g1_accepted_implementation: cf61ee63f5b76b0223838717b1344e0e7c3867ee
 g1_formal_root: workspace/v72p2d5_g1/20260907_r2
 p0_cost_execution_authorized: false
-g1_execution_authorized: true
+g1_execution_authorized: false
 g2_execution_authorized: false
 synthetic_execution_authorized: false
 real_execution_authorized: false
