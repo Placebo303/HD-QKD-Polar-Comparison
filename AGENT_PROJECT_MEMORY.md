@@ -3340,3 +3340,9 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   `scientific_promotion` false, G1 unauthorized/unexecuted, G2
   unauthorized; `next_gate` `INDEPENDENT_G1_PRE_EXECUTE_REVIEW`; next is
   independent Pre-EXECUTE review (no authorization flip, no G1 run).
+## 2026-09-07 V72P2D5 G1 result accepted as synthetic completed-no-signal failure (no pass, bounded attribution only)
+
+- Acceptance [decision]: sole frozen G1 root `workspace/v72p2d5_g1/20260907_r2` accepted (`docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/G1_RESULT_ACCEPTANCE_R1.md`) with scope `SYNTHETIC_COMPLETED_NO_SIGNAL_FAIL`, outcome `G1_COMPLETED_NO_SIGNAL_FAIL`, `passed: false`. Chain `cf61ee63 → 6494b623 → f4d577fb → 58c68961`; dual review Pre-EXECUTE PASS + Pre-RESULT `G1_PRE_RESULT_REVIEW_PASS` (internal coherence only).
+- Literals [repo-observed]: both f APP exact `0/100` (rate `0.0`, failure `1.0`), APP syndrome-ok `0`, oracle exact/syndrome `0`, `app_iterations_max 180`, APP `18000 = 100×180`, oracle `1800 = 20×90`, `decoder_calls 440 = 400 + 40`, crashes/nonfinite `0`; wall `238.86517630005255 s <= 900` (operator `239.110 s`), RSS `115142656 < 2147483648`. Resource-pass/signal-fail: signal FALSE (top exact `0`), terminal no-signal failure, `passed=false`.
+- Boundary [decision]: not trend pass, qualification, G2 readiness, method success, rerun permission, or reinterpretation; exact/syndrome/oracle isolated, stored zeros literal (no FER/undetected/correctness relabel). Single attempt consumed; no second G1, no G2, no real data.
+- Lifecycle [decision]: `g1_execution_attempts/completed 1/1`, `g1_result_accepted true` with scope/outcome/passed recorded; `next_gate` `G1_NO_SIGNAL_ATTRIBUTION_IN_PROGRESS`; nine authorizations false, promotion false. Next is bounded failure attribution only (no formal CLI phase, no formal-root write).

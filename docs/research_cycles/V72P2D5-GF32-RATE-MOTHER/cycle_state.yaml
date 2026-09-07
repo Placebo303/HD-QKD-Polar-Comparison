@@ -26,6 +26,12 @@ g1_implementation_candidate: true
 g1_implementation_accepted: true
 g1_accepted_implementation: cf61ee63f5b76b0223838717b1344e0e7c3867ee
 g1_formal_root: workspace/v72p2d5_g1/20260907_r2
+g1_execution_attempts: 1
+g1_execution_completed: 1
+g1_result_accepted: true
+g1_result_accepted_scope: SYNTHETIC_COMPLETED_NO_SIGNAL_FAIL
+g1_result_outcome: G1_COMPLETED_NO_SIGNAL_FAIL
+g1_result_passed: false
 p0_cost_execution_authorized: false
 g1_execution_authorized: false
 g2_execution_authorized: false
@@ -44,7 +50,7 @@ structure_reason: all_8_prefixes_passed_11_hard_gates; four_cycle_risk_carried
 g0_packet_review: PASS
 g0_implementation_candidate: true
 g0_implementation_accepted: true
-next_gate: INDEPENDENT_G1_PRE_EXECUTE_REVIEW
+next_gate: G1_NO_SIGNAL_ATTRIBUTION_IN_PROGRESS
 p0_cost_result_accepted: true
 p0_cost_accepted_scope: COST_MEASUREMENT_ONLY
 # R2 structure-runner version binding (implementation-only round, no auth change).
