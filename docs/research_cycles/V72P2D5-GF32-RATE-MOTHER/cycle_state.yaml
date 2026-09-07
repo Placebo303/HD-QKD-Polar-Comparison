@@ -21,7 +21,7 @@ model_f_input_accepted: true
 model_f_input_root: workspace/v72p2d5_model_f_input/20260907_r1
 model_f_input_artifact_status: MODEL_F_INPUT_CANDIDATE
 g1_unauthorized_output_disposition: VOID_RETAINED_IN_PLACE
-p0_cost_execution_authorized: false
+p0_cost_execution_authorized: true
 g1_execution_authorized: false
 g2_execution_authorized: false
 synthetic_execution_authorized: false
