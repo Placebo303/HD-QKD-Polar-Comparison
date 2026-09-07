@@ -3279,3 +3279,34 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - Lifecycle [decision]: nine `*_execution_authorized` false,
   `scientific_promotion` false, `next_gate` `P0_PACKET_REVIEW`; P0/G1/G2 each
   need their own packet review and separate explicit authorization.
+
+## 2026-09-07 V72P2D5 P0 cost preflight ACCEPTED as cost measurement only (docs-only, no authorization)
+
+- Acceptance [decision]: second authorized P0 invocation
+  `workspace/v72p2d5_p0_cost/20260906_r1/` accepted as `P0_RESULT_ACCEPTED`,
+  scope `COST_MEASUREMENT_ONLY`, recorded in `P0_RESULT_ACCEPTANCE_R1.md`;
+  cost acceptance is not scientific promotion and grants no G1 authorization.
+- Measured [repo-observed]: phase `p0-cost`, block_length 64, f_list 1.0/1.2,
+  frozen_rows 1.0 m1 49/m2 43 and 1.2 m1 59/m2 52, seeds 2026090510/2026090511,
+  decoder_calls 12, decode-attributed 8.064733600011096 s vs 1440 s cap (no
+  `RESOURCE_OVERRUN`), projected_g1_s 161.8241519993171, projected_g2_s
+  485.47245599795133, projection_blocked false, passed true, operator wall
+  8.6278899 s exit 0 empty stdout/stderr.
+- Not established [decision]: no correctness, no `exact_failure_fraction`, no
+  FER, no leakage, no key rate, no net rate, no qualification of NB-LDPC /
+  dv3 mother / rate points / Model-F, no statement G1/G2 will pass, no
+  authorization for anything.
+- Reviews [repo-observed]: Pre-EXECUTE PASS (five questions decided),
+  loader-fix PASS (`299416ae`), Pre-RESULT PASS with limitations, guard-rework
+  PASS with L1-L4; both P0 authorizations consumed, first
+  (`a71188fb`/`3ecaebb6`) produced no run (0.376 s false missing-input refusal
+  from consumer path defect), second (`f1cdf970`/`b4696273`) produced result.
+- Limitations [decision]: L1/L2/L3/L4/L-RSS/L-SCALE/L-ITER all
+  `MUST_CARRY_INTO_G1_PACKET`; `projected_g2_s` grants G2 nothing (no
+  width/row-count scaling); RSS null on Windows; all 12 decodes ran to
+  `MAX_ITER = 90` cap.
+- Lifecycle [decision]: nine `*_execution_authorized` false,
+  `scientific_promotion` false, `next_gate` `G1_PACKET_REVIEW`; G1 neither
+  frozen nor authorized; next is G1 packet freeze, then independent
+  Pre-EXECUTE review, then separate explicit G1 authorization, no
+  merge/reorder.

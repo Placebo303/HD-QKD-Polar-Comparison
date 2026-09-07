@@ -3171,3 +3171,64 @@ test-side only, so future P0/G1/G2 packets must re-verify isolation before any
 authorization; `R-R2` `M24`/`P12` no longer assert global formal-root absence,
 so an unexpected new formal output relies on per-test snapshot comparison
 rather than a global gate.
+
+---
+
+### 2026-09-07: V72P2D5 P0 cost preflight ACCEPTED as cost measurement only (docs only, no authorization)
+
+**Decision**: Accept the second authorized P0 invocation at
+`workspace/v72p2d5_p0_cost/20260906_r1/` as `P0_RESULT_ACCEPTED` with scope
+`COST_MEASUREMENT_ONLY`, recorded in
+`docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/P0_RESULT_ACCEPTANCE_R1.md`.
+Acceptance of a cost measurement is not scientific promotion and grants no G1
+authorization.
+
+**Context**: Measured scalars transcribed verbatim from `results.json`:
+phase `p0-cost`; block_length 64; f_list 1.0, 1.2; frozen_rows f=1.0 -> m1 49 /
+m2 43 and f=1.2 -> m1 59 / m2 52; seeds 2026090510, 2026090511; decoder_calls
+12; records 1.0 app 1.8862763999495655 / 360 / null, 1.0 oracle
+1.04731999989599 / 180 / null, 1.2 app 3.459295800072141 / 360 / null, 1.2
+oracle 1.671841400093399 / 180 / null; projected_g1_s 161.8241519993171;
+projected_g2_s 485.47245599795133; projection_blocked false; passed true; run
+wall (operator) 8.6278899 s, exit 0, stdout and stderr empty; decode-attributed
+total 8.064733600011096 s against the 1440 s cap, no `RESOURCE_OVERRUN`.
+Four-review chain landed by this packet: `P0_PRE_EXECUTE_REVIEW_R1.md`
+`PRE_EXECUTE_REVIEW_PASS` with five open questions decided;
+`LOADER_FIX_REVIEW_R1.md` `LOADER_FIX_REVIEW_PASS` for the Model-F consumer
+path fix (`299416ae`); `P0_PRE_RESULT_REVIEW_R1.md` `P0_PRE_RESULT_REVIEW_PASS`
+with limitations; `GUARD_REWORK_REVIEW_R1.md` `GUARD_REWORK_REVIEW_PASS` with
+L1-L4. Authorization history: two P0 authorizations were issued; the first
+(2026-09-07, `a71188fb`/`3ecaebb6`) was consumed with no run because the phase
+refused in 0.376 s on a false missing-input message caused by the consumer
+path defect; the second (`f1cdf970`/`b4696273`) produced this result; both are
+consumed and neither is reusable.
+
+**Alternatives considered**:
+- Accept P0 as a correctness or qualification result: rejected — P0 records
+  cost only; it grades nothing, and establishes no `exact_failure_fraction`,
+  no FER, no leakage, no key rate, no net rate, and no qualification of
+  NB-LDPC, the dv3 mother, the rate points, or Model-F.
+- Treat `projected_g2_s` or `projection_blocked: false` as G2 permission:
+  rejected — the projections are `per_call x {240, 720}` with no width or
+  row-count scaling, so they grant G2 nothing.
+- Create a G1 authorization in this packet: rejected — G1 stays unauthorized
+  and unfrozen; freezing, review, and authorization belong to later packets.
+
+**Consequences**: P0 establishes no correctness, no `exact_failure_fraction`,
+no FER, no leakage, no key rate, no net rate, and no qualification; no
+statement that G1 or G2 will pass, complete, or fit their budgets; no
+authorization for anything. Seven limitations carried into the G1 packet, each
+tagged `MUST_CARRY_INTO_G1_PACKET`: L1 (depth, top-level-only snapshot),
+L2 (T1_23 narrowness), L3 (T1_22 live-fire by logic reading, not live red),
+L4 (guard-rework `STATUS=63` superseded by 1969 porcelain lines / 1887
+modified paths / `numstat` content changes 0), L-RSS (`rss_bytes` null on
+Windows, 2 GiB reference unchecked), L-SCALE (projections carry no width or
+row-count scaling; `projected_g2_s` and `projection_blocked: false` grant G2
+nothing; `projected_g1_s` is a same-width call-count indication only), L-ITER
+(all 12 decodes ran the full `MAX_ITER = 90`, a saturated upper bound; G1 must
+budget at the cap and record exact/syndrome outcomes). All nine
+`*_execution_authorized` stay `false`; `scientific_promotion` stays `false`;
+`next_gate` moves `P0_PACKET_REVIEW -> G1_PACKET_REVIEW`; no authorization was
+created. Next: freeze the G1 execution packet carrying every limitation, then
+an independent Pre-EXECUTE review, then a separate explicit G1 authorization;
+these may not be merged or reordered.
