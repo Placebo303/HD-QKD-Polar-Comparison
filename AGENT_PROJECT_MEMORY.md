@@ -3257,3 +3257,25 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   `scientific_promotion=false`; `next_gate=P0_PACKET_REVIEW`; PR16 addressed by
   record only, clearance needs independent Pre-RESULT re-review; a future
   authorized G1 run needs a new output root, no reuse or comparison.
+
+## 2026-09-07 V72P2D5 Model-F input RESULT ACCEPTED (docs-only, no authorization)
+
+- Acceptance [decision]: Model-F CAL-TRAIN input
+  `workspace/v72p2d5_model_f_input/20260907_r1/` (2 files, `CAL702..1725`,
+  1024x256=262144 symbols, `counts_ab` int64 `(1024,1024)` axis `(Alice,Bob)`,
+  `p_b` derived from `axis0`, `lambda_star=137.3823795883264`) accepted as the
+  P0/G1/G2 prior input; recorded at cycle level, artifact `status` left
+  `MODEL_F_INPUT_CANDIDATE` (protected immutable root, loader accepts both).
+- Review chain [repo-observed]: implementation accepted; Pre-EXECUTE R2 PASS
+  post-PX11; one authorized prepare + one verify, authorization consumed;
+  Pre-RESULT R1 FAIL on PR16; disposition `VOID_RETAINED_IN_PLACE`;
+  Pre-RESULT R2 PASS, C01-C11 PASS, `195 passed`.
+- Caveat [decision]: PR16 cleared BY RECORD not by condition — the G1 root
+  still exists; R2 reinterpreted PR16 by intent. Do not later read this as a
+  physical clearance.
+- Residual [decision]: `R-R1` prod-side bare-authorized defaults unchanged,
+  test-side guard only, future P0/G1/G2 packets must re-verify isolation;
+  `R-R2` no global formal-root absence gate, per-test snapshots instead.
+- Lifecycle [decision]: nine `*_execution_authorized` false,
+  `scientific_promotion` false, `next_gate` `P0_PACKET_REVIEW`; P0/G1/G2 each
+  need their own packet review and separate explicit authorization.

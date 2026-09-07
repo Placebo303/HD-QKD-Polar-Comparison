@@ -3132,3 +3132,42 @@ repair is complete and evidenced (165 collected / 165 passed).
 `P0_PACKET_REVIEW`; no P0 authorization. PR16 is addressed by record only —
 clearance requires an independent Pre-RESULT re-review. A future authorized G1
 run must use a new output root and must not reuse or compare against this one.
+
+---
+
+### 2026-09-07: V72P2D5 Model-F input result ACCEPTED (docs only, no authorization)
+
+**Decision**: Accept the canonical Model-F CAL-TRAIN input at
+`workspace/v72p2d5_model_f_input/20260907_r1/` as the P0/G1/G2 prior input.
+Record acceptance at the cycle level; the artifact's own `status` stays
+`MODEL_F_INPUT_CANDIDATE` because rewriting a file inside a protected
+immutable root is forbidden and the loader accepts both values.
+
+**Context**: Implementation accepted; Pre-EXECUTE R2 PASS after the PX11 path
+fix; exactly one authorized `prepare` plus one `verify` executed 2026-09-07
+(authorization consumed); Pre-RESULT R1 FAILed on the single blocker PR16;
+the unauthorized G1 root was dispositioned `VOID_RETAINED_IN_PLACE`; the
+independent Pre-RESULT R2 returned PASS with C01-C11 all PASS and `195 passed`.
+
+**Material caveat**: PR16 was cleared BY RECORD, not by condition. R1's PR16
+was the formal check "formal roots absent"; that condition is still not met —
+`workspace/v72p2d5_g1/20260906_r1/` exists. R2 reinterpreted PR16 by its
+intent (unauthorized numbers must not enter the result chain) and judged that
+intent closed by the disposition. Deletion and quarantine-move were both
+explicitly rejected by the user.
+
+**Alternatives considered**:
+- Flip the artifact `status` to `ACCEPTED`: rejected — would require rewriting
+  inside a protected immutable root.
+- Hold acceptance until PR16 is physically cleared: rejected — that would
+  require reversing an explicit user decision and adds no scientific
+  protection to the Model-F claim.
+
+**Consequences**: All nine `*_execution_authorized` stay `false`;
+`scientific_promotion` stays `false`; `next_gate` stays `P0_PACKET_REVIEW`.
+P0 is not authorized. Residual risks carried into the P0 packet: `R-R1`
+production-side bare-authorized defaults unchanged, recurrence guard is
+test-side only, so future P0/G1/G2 packets must re-verify isolation before any
+authorization; `R-R2` `M24`/`P12` no longer assert global formal-root absence,
+so an unexpected new formal output relies on per-test snapshot comparison
+rather than a global gate.

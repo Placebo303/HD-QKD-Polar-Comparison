@@ -14,6 +14,13 @@ g0_recovery_attempts: 1
 g0_recovery_completed: 1
 g0_recovery_result: G0_RECOVERY_PASS
 g0_recovery_accepted: true
+model_f_input_prepared: true
+model_f_input_pre_execute_review: PASS_R2
+model_f_input_pre_result_review: PASS_R2
+model_f_input_accepted: true
+model_f_input_root: workspace/v72p2d5_model_f_input/20260907_r1
+model_f_input_artifact_status: MODEL_F_INPUT_CANDIDATE
+g1_unauthorized_output_disposition: VOID_RETAINED_IN_PLACE
 p0_cost_execution_authorized: false
 g1_execution_authorized: false
 g2_execution_authorized: false
@@ -39,3 +46,5 @@ structure_runner_implementation: 737f731702106bacff3c509a3f877a8b037f1434
 # R1 history retained by reference as superseded for the mother path (do NOT delete): PLAN_REVIEW_VERDICT.md, IMPLEMENTATION_PACKET.md, IMPLEMENTATION_REVIEW.md.
 # Addendum 20260905_r2: numerical evidence判定 NUMERICAL_PASS; no verifiable INDEPENDENT_G0_PRE_EXECUTE_REVIEW PASS record so lifecycle acceptance is PROCEDURAL_REVIEW_MISSING / RESULT_NOT_ACCEPTED.
 # Evidence dir workspace/v72p2d5_g0/20260905_r2/ four files retained pending review (results.json, table.csv, report.md, execution_summary.json).
+# Acceptance 20260907: MODEL_F_INPUT_RESULT_ACCEPTED per MODEL_F_INPUT_RESULT_ACCEPTANCE_R1.md; PR16 cleared BY RECORD not by condition (G1 root still present, dispositioned VOID_RETAINED_IN_PLACE).
+# Residual risks carried into P0: R-R1 prod-side bare-authorized defaults unchanged (test-side guard only); R-R2 no global formal-root absence gate (per-test snapshots instead).
