@@ -3310,3 +3310,33 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   frozen nor authorized; next is G1 packet freeze, then independent
   Pre-EXECUTE review, then separate explicit G1 authorization, no
   merge/reorder.
+
+## 2026-09-07 V72P2D5 G1 readiness implementation-only acceptance + Pre-EXECUTE packet frozen (docs-only, no authorization)
+
+- Acceptance [decision]: G1 readiness implementation `cf61ee63`
+  (predecessor `614aab9e`, spec/review `d47e7da1`) accepted as
+  implementation readiness only (`G1_IMPLEMENTATION_ACCEPTANCE_R1.md`);
+  scope excludes any decoder/G1 result, FER, leakage, key rate,
+  qualification, or G2 claim; acceptance grants no authorization.
+- Review chain [repo-observed]: packet review PASS, readiness code review
+  PASS (`G1_READINESS_CODE_REVIEW_PASS`), scope addendum PASS
+  (`G1_CODE_REVIEW_SCOPE_ADDENDUM_PASS`, exact frozen three pytest files,
+  `219 passed`), live Windows RSS positive without decoder execution.
+- Packet [repo-observed]: `G1_PRE_EXECUTE_PACKET_R1.md`
+  `G1_PRE_EXECUTE_PACKET_FROZEN / EXECUTE_NOT_AUTHORIZED`; phase `g1`,
+  root `workspace/v72p2d5_g1/20260907_r2`, width 64, f 1.0 then 1.2,
+  rows L1 49/59 L2 43/52, seeds graph 2026090501/2026090502 + blocks
+  2026090600..2026090699, oracle first 20 per f diagnostic-only, GF32 cold
+  max_iter 90 damping 1.0, 440 calls, outer wall `<=900 s`, watchdog
+  960 s + grace 30 s, RSS peak `<2147483648` / None fails, four
+  no-overwrite files, one attempt consuming authorization; exact frozen
+  `timeout.exe -k 30 960 ... --phase g1` command; 13 independent checks;
+  7 outcomes with `passed` iff `G1_TREND_PASS`; frozen signal; full
+  operator return; no result acceptance before Pre-RESULT review.
+- Boundaries [decision]: process-vs-entrypoint wall (outer controls 900 s);
+  `app_iterations_max<=180` asserted not clamped; exception/timeout/refusal
+  operator-side; G1 synthetic trend only, never real FER/qualification.
+- Lifecycle [decision]: nine `*_execution_authorized` false,
+  `scientific_promotion` false, G1 unauthorized/unexecuted, G2
+  unauthorized; `next_gate` `INDEPENDENT_G1_PRE_EXECUTE_REVIEW`; next is
+  independent Pre-EXECUTE review (no authorization flip, no G1 run).

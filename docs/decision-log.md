@@ -3232,3 +3232,13 @@ budget at the cap and record exact/syndrome outcomes). All nine
 created. Next: freeze the G1 execution packet carrying every limitation, then
 an independent Pre-EXECUTE review, then a separate explicit G1 authorization;
 these may not be merged or reordered.
+
+---
+
+### 2026-09-07: V72P2D5 G1 readiness implementation-only acceptance and Pre-EXECUTE packet freeze (docs only, no authorization)
+
+**Decision**: Accept the G1 readiness implementation at `cf61ee63` (predecessor `614aab9e`, spec/review `d47e7da1`) as implementation readiness only, recorded in `G1_IMPLEMENTATION_ACCEPTANCE_R1.md`; freeze `G1_PRE_EXECUTE_PACKET_R1.md` as `G1_PRE_EXECUTE_PACKET_FROZEN / EXECUTE_NOT_AUTHORIZED`; move `next_gate` to `INDEPENDENT_G1_PRE_EXECUTE_REVIEW`.
+
+**Context**: Review chain — packet review PASS, readiness code review PASS (`G1_READINESS_CODE_REVIEW_PASS`), scope addendum PASS (`G1_CODE_REVIEW_SCOPE_ADDENDUM_PASS`, exact frozen three pytest files, `219 passed`), live Windows RSS positive. Accepted functionality: new root `workspace/v72p2d5_g1/20260907_r2`, Windows RSS ABI with 200-sample peak semantics, aggregate exact/syndrome/iteration/RSS fields, prospective signal, outcome precedence (seven labels, `passed` iff `G1_TREND_PASS`), fail-loud writers, no-subdirectory guard, test-only reachability/isolation. Scope is implementation readiness only; no decoder/G1 result, FER, leakage, key rate, qualification, or G2 claim. Real external-file Model-F sentinel and watchdog semantics stay mandatory in Pre-EXECUTE; acceptance grants no authorization. Disclosed boundaries carried: process-vs-entrypoint wall (operator outer wall controls 900 s classification); `app_iterations_max<=180` asserted not clamped; exception/timeout/refusal are operator-side labels; G1 is synthetic trend only.
+
+**Consequences**: G1 remains unauthorized and unexecuted; G2 remains unauthorized. Frozen signal/outcomes/resources and the exact single-attempt command live in the packet. Next is the independent Pre-EXECUTE review (reviewer may not flip authorization or run G1), then a separate explicit user authorization. All nine authorizations stay false; promotion stays false.
