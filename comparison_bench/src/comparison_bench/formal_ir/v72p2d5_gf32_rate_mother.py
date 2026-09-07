@@ -53,6 +53,8 @@ L2_GRAPH_SEED = 2026090502
 L1_PREFIXES = (782, 821, 860, 938)
 L2_PREFIXES = (686, 720, 755, 823)
 G0_SEEDS = tuple(range(2026090510, 2026090518))
+G0_RECOVERY_SEEDS = (2026090620, 2026090621, 2026090622, 2026090623,
+                     2026090624, 2026090625, 2026090626, 2026090627)
 G1_SEEDS = tuple(range(2026090600, 2026090700))
 G2_SEEDS = tuple(range(2026091000, 2026091200))
 G1_F = (1.0, 1.2)
@@ -65,13 +67,29 @@ G2_ORACLE_SUBSET = 40
 G1_WIDTH = 64
 G2_WIDTH = 256
 P0_WIDTH = 64
+P0_L1_K_MIN = 59
+P0_L2_K_MIN = 52
+G1_L1_K_MIN = 59
+G1_L2_K_MIN = 52
+G2_L1_K_MIN = 235
+G2_L2_K_MIN = 206
+P0_FORMAL_ROOT = "workspace/v72p2d5_p0_cost/20260906_r1"
+G1_FORMAL_ROOT = "workspace/v72p2d5_g1/20260906_r1"
+G2_FORMAL_ROOT = "workspace/v72p2d5_g2/20260906_r1"
+STAGE_EVIDENCE_FILES = ("results.json", "table.csv", "report.md",
+                        "execution_summary.json")
+MODEL_F_BLOCKED = "MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS"
+MODEL_F_INPUT_FORMAL_ROOT = "workspace/v72p2d5_model_f_input/20260907_r1"
+G1_TOTAL_BUDGET_S = 900.0
+G2_TOTAL_BUDGET_S = 3600.0
 TINY_WIDTH = 8
 MAX_ITER = 90
 DAMPING_ALPHA = 1.0
-PHASES = ("structure", "g0", "p0-cost", "g1", "g2")
+PHASES = ("structure", "g0", "g0-recovery", "p0-cost", "g1", "g2")
 _PHASE_AUTH_KEYS = {
     "structure": "structure_execution_authorized",
     "g0": "g0_execution_authorized",
+    "g0-recovery": "g0_recovery_execution_authorized",
     "p0-cost": "p0_cost_execution_authorized",
     "g1": "g1_execution_authorized",
     "g2": "g2_execution_authorized",
@@ -81,6 +99,7 @@ GRADE_INCONCLUSIVE = "G2_INCONCLUSIVE"
 GRADE_FAILED = "G2_CURRENT_CONFIGURATION_FAILED"
 GRADE_BLOCKED = "IMPLEMENTATION_OR_NUMERICAL_BLOCKED"
 G0_FORMAL_ROOT = "workspace/v72p2d5_g0/20260905_r2"
+G0_RECOVERY_FORMAL_ROOT = "workspace/v72p2d5_g0_recovery/20260906_r1"
 G0_EVIDENCE_FILES = ("results.json", "table.csv", "report.md",
                      "execution_summary.json")
 G0_WALL_BUDGET_S = 120.0
@@ -1300,7 +1319,9 @@ def run_structure_phase(*, h=None, layer="L1", authorized=False):
 
 
 def run_g0_phase(*, h=None, p_b=None, p_f=None,
-                 decode_fn=None, authorized=False):
+                 decode_fn=None, authorized=False, _seeds=None,
+                 _phase=None, _dec_pass=None, _dec_math=None,
+                 _dec_decoder=None, _dec_resource=None):
     """G0 tiny math gate over the frozen G0 seeds (noiseless, oracle prior).
 
     Math gate (all must hold or ``G0_BLOCKED_MATH`` before any decoder
@@ -1310,9 +1331,19 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
     stop remaining seeds as ``G0_BLOCKED_RESOURCE`` with partial counts kept.
     A single historic call that hangs needs an outer-process watchdog in the
     future Pre-EXECUTE packet; no multiprocessing/retry here (ponytail-lite).
+    Private ``_seeds/_phase/_dec_*`` carry the frozen recovery sequence and
+    labels when the recovery entry delegates; defaults preserve G0 exactly.
     """
     _require_authorized("g0", authorized)
     _require_decode_fn("g0", decode_fn)
+    _seeds_resolved = G0_SEEDS if _seeds is None else _seeds
+    _phase_resolved = "g0" if _phase is None else _phase
+    _pass_resolved = "G0_PASS" if _dec_pass is None else _dec_pass
+    _math_resolved = "G0_BLOCKED_MATH" if _dec_math is None else _dec_math
+    _dec_resolved = ("G0_BLOCKED_DECODER" if _dec_decoder is None
+                     else _dec_decoder)
+    _res_resolved = ("G0_BLOCKED_RESOURCE" if _dec_resource is None
+                     else _dec_resource)
     t_phase_start = time.perf_counter()
     h1, h2 = _split_layers(h)
     if p_b is None or p_f is None:
@@ -1377,7 +1408,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
         wall_s = float(time.perf_counter() - t_phase_start)
         peak = _rss_bytes()
         return {
-            "phase": "g0",
+            "phase": _phase_resolved,
             "marginal_err": marg_err,
             "conditional_err": cond_err,
             "chain_err": float(chain_err),
@@ -1398,7 +1429,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             "syndrome_ok_count": 0,
             "finite_count": 0,
             "records": [],
-            "seeds": [int(seed) for seed in G0_SEEDS],
+            "seeds": [int(seed) for seed in _seeds_resolved],
             "decoder_calls": 0,
             "historical_decoder_invocations": 0,
             "wall_seconds": wall_s,
@@ -1407,7 +1438,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             "failure_stage": "math",
             "error": "G0 mathematical gate failed",
             "passed": False,
-            "decision": "G0_BLOCKED_MATH",
+            "decision": _math_resolved,
         }
 
     exact = 0
@@ -1425,7 +1456,103 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
     failure_stage = None
     failure_error = None
     failure_decision = None
-    seeds_list = [int(v) for v in G0_SEEDS]
+    seeds_list = [int(v) for v in _seeds_resolved]
+    if is_hist and _phase_resolved == "g0-recovery":
+        try:
+            _raw_hist = _load_g0_decoder()
+        except (MemoryError, TimeoutError) as exc:
+            wall_s = float(time.perf_counter() - t_phase_start)
+            peak = _rss_bytes()
+            return {
+                "phase": _phase_resolved,
+                "marginal_err": marg_err,
+                "conditional_err": cond_err,
+                "chain_err": float(chain_err),
+                "mapping_error": mapping_err,
+                "exhaustive_error": exhaustive_err,
+                "factorization_error": factorization_err,
+                "tree_exhaustive_posterior_error": tree_err,
+                "tree_map_equal": tree_map_eq,
+                "tree_finite": tree_finite,
+                "tree_prior_ok": tree_prior_ok,
+                "prior_norm_error": prior_norm_err,
+                "prior_positive": prior_positive,
+                "fixture_ok": fixture_ok,
+                "attempted_blocks": 0,
+                "completed_blocks": 0,
+                "exact_count": 0,
+                "exact_failure_fraction": 1.0,
+                "syndrome_ok_count": 0,
+                "finite_count": 0,
+                "records": [],
+                "seeds": seeds_list,
+                "decoder_calls": 0,
+                "historical_decoder_invocations": 0,
+                "wall_seconds": wall_s,
+                "peak_rss_bytes": peak,
+                "failed_seed": None,
+                "failure_stage": "resource",
+                "error": f"{type(exc).__name__}: {exc}",
+                "passed": False,
+                "decision": _res_resolved,
+            }
+        except Exception as exc:
+            wall_s = float(time.perf_counter() - t_phase_start)
+            peak = _rss_bytes()
+            return {
+                "phase": _phase_resolved,
+                "marginal_err": marg_err,
+                "conditional_err": cond_err,
+                "chain_err": float(chain_err),
+                "mapping_error": mapping_err,
+                "exhaustive_error": exhaustive_err,
+                "factorization_error": factorization_err,
+                "tree_exhaustive_posterior_error": tree_err,
+                "tree_map_equal": tree_map_eq,
+                "tree_finite": tree_finite,
+                "tree_prior_ok": tree_prior_ok,
+                "prior_norm_error": prior_norm_err,
+                "prior_positive": prior_positive,
+                "fixture_ok": fixture_ok,
+                "attempted_blocks": 0,
+                "completed_blocks": 0,
+                "exact_count": 0,
+                "exact_failure_fraction": 1.0,
+                "syndrome_ok_count": 0,
+                "finite_count": 0,
+                "records": [],
+                "seeds": seeds_list,
+                "decoder_calls": 0,
+                "historical_decoder_invocations": 0,
+                "wall_seconds": wall_s,
+                "peak_rss_bytes": peak,
+                "failed_seed": None,
+                "failure_stage": "decoder",
+                "error": f"{type(exc).__name__}: {exc}",
+                "passed": False,
+                "decision": _dec_resolved,
+            }
+        hist_inv = 1
+        # ponytail: local bind-once adapter; no cache/global/retry.
+        def _bound_hist(hh, prior, syndrome, layer=None):
+            _ = layer
+            _r = _raw_hist(
+                np.asarray(hh, dtype=np.uint8),
+                np.asarray(prior, dtype=np.float64),
+                np.asarray(syndrome, dtype=np.uint8),
+                max_iter=MAX_ITER,
+                damping_alpha=DAMPING_ALPHA,
+                warm_beliefs=None,
+                field=None,
+            )
+            return {
+                "x_hat": np.asarray(_r.x_hat),
+                "syndrome_ok": bool(_r.syndrome_ok),
+                "iterations": int(_r.iterations),
+                "final_beliefs": np.asarray(_r.final_beliefs),
+            }
+        decode_fn = _bound_hist
+        is_hist = False
     for pos, seed in enumerate(seeds_list):
         elapsed = float(time.perf_counter() - t_phase_start)
         rss = _rss_bytes()
@@ -1436,7 +1563,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             failure_error = (f"RESOURCE budget exceeded before seed "
                              f"{seed}: elapsed_s={elapsed:.3f} "
                              f"rss_bytes={rss}")
-            failure_decision = "G0_BLOCKED_RESOURCE"
+            failure_decision = _res_resolved
             attempted += 1
             records.append({"seed": int(seed), "exact": False,
                             "syndrome_ok": False, "finite": False,
@@ -1452,7 +1579,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             failed_seed = int(seed)
             failure_stage = "math"
             failure_error = f"{type(exc).__name__}: {exc}"
-            failure_decision = "G0_BLOCKED_RESOURCE"
+            failure_decision = _res_resolved
             records.append({"seed": int(seed), "exact": False,
                             "syndrome_ok": False, "finite": False,
                             "iterations": 0, "syndrome_weight": 0,
@@ -1463,7 +1590,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             failed_seed = int(seed)
             failure_stage = "math"
             failure_error = f"{type(exc).__name__}: {exc}"
-            failure_decision = "G0_BLOCKED_MATH"
+            failure_decision = _math_resolved
             records.append({"seed": int(seed), "exact": False,
                             "syndrome_ok": False, "finite": False,
                             "iterations": 0, "syndrome_weight": 0,
@@ -1480,7 +1607,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             failed_seed = int(seed)
             failure_stage = "decoder"
             failure_error = f"{type(exc).__name__}: {exc}"
-            failure_decision = "G0_BLOCKED_RESOURCE"
+            failure_decision = _res_resolved
             records.append({"seed": int(seed), "exact": False,
                             "syndrome_ok": False, "finite": False,
                             "iterations": 0, "syndrome_weight": 0,
@@ -1491,7 +1618,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             failed_seed = int(seed)
             failure_stage = "decoder"
             failure_error = f"{type(exc).__name__}: {exc}"
-            failure_decision = "G0_BLOCKED_DECODER"
+            failure_decision = _dec_resolved
             records.append({"seed": int(seed), "exact": False,
                             "syndrome_ok": False, "finite": False,
                             "iterations": 0, "syndrome_weight": 0,
@@ -1523,25 +1650,25 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             failure_error = (f"RESOURCE budget exceeded after seed "
                              f"{seed}: elapsed_s={elapsed:.3f} "
                              f"rss_bytes={rss}")
-            failure_decision = "G0_BLOCKED_RESOURCE"
+            failure_decision = _res_resolved
             break
     attempted = int(attempted)
     all_finite = finite == attempted and attempted == completed
     all_syndrome = syndrome_ok == attempted and attempted == completed
     passed = bool(failure_decision is None
-                  and completed == len(G0_SEEDS)
+                  and completed == len(_seeds_resolved)
                   and exact == attempted and all_syndrome and all_finite)
     if passed:
-        decision = "G0_PASS"
+        decision = _pass_resolved
     elif failure_decision is not None:
         # Never mislabel a resource stop as decoder failure/success.
         decision = failure_decision
     else:
-        decision = "G0_BLOCKED_DECODER"
+        decision = _dec_resolved
     wall_s = float(time.perf_counter() - t_phase_start)
     peak = _rss_bytes()
     return {
-        "phase": "g0",
+        "phase": _phase_resolved,
         "marginal_err": marg_err,
         "conditional_err": cond_err,
         "chain_err": float(chain_err),
@@ -1601,7 +1728,7 @@ def write_g0_evidence(out_dir, result):
         })
     _tree_def = float("inf")
     payload = {
-        "phase": "g0",
+        "phase": str(result.get("phase", "g0")),
         "decision": result.get("decision", "G0_BLOCKED_MATH"),
         "passed": bool(result.get("passed", False)),
         "seeds": [int(v) for v in result.get("seeds", G0_SEEDS)],
@@ -1683,7 +1810,7 @@ def write_g0_evidence(out_dir, result):
     with open(d / "report.md", "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     summary = {
-        "phase": "g0",
+        "phase": str(result.get("phase", "g0")),
         "decision": payload["decision"],
         "attempted_blocks": payload["attempted_blocks"],
         "completed_blocks": payload["completed_blocks"],
@@ -1749,12 +1876,88 @@ def run_g0_synthetic(*, authorized=False, decode_fn=None, out_dir=None):
     return result
 
 
+def run_g0_recovery_phase(*, h=None, p_b=None, p_f=None,
+                          decode_fn=None, authorized=False):
+    """G0 recovery confirmation gate over the frozen recovery seeds.
+
+    Delegates to the shared G0 gate with the frozen recovery seed sequence
+    and recovery decision labels. Ordinary G0 constants stay unchanged.
+    """
+    _require_authorized("g0-recovery", authorized)
+    _require_decode_fn("g0-recovery", decode_fn)
+    return run_g0_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=decode_fn, authorized=True,
+        _seeds=G0_RECOVERY_SEEDS, _phase="g0-recovery",
+        _dec_pass="G0_RECOVERY_PASS",
+        _dec_math="G0_RECOVERY_BLOCKED_MATH",
+        _dec_decoder="G0_RECOVERY_BLOCKED_DECODER",
+        _dec_resource="G0_RECOVERY_BLOCKED_RESOURCE")
+
+
+def run_g0_recovery_synthetic(*, authorized=False, decode_fn=None,
+                              out_dir=None):
+    """Authorized recovery entrypoint; frozen seeds and root only."""
+    _require_authorized("g0-recovery", authorized)
+    try:
+        h, p_b, p_f = build_g0_fixture()
+        decoder = decode_fn if decode_fn is not None else historical_g0_decoder
+        result = run_g0_recovery_phase(
+            h=h, p_b=p_b, p_f=p_f, decode_fn=decoder, authorized=True)
+    except (MemoryError, TimeoutError) as exc:
+        result = {
+            "phase": "g0-recovery",
+            "decision": "G0_RECOVERY_BLOCKED_RESOURCE",
+            "passed": False, "seeds": [int(v) for v in G0_RECOVERY_SEEDS],
+            "attempted_blocks": 0, "completed_blocks": 0,
+            "exact_count": 0, "exact_failure_fraction": 1.0,
+            "syndrome_ok_count": 0, "finite_count": 0,
+            "decoder_calls": 0, "historical_decoder_invocations": 0,
+            "wall_seconds": 0.0, "peak_rss_bytes": _rss_bytes(),
+            "factorization_error": float("inf"),
+            "tree_exhaustive_posterior_error": float("inf"),
+            "tree_map_equal": False, "tree_finite": False,
+            "tree_prior_ok": False, "prior_norm_error": float("inf"),
+            "prior_positive": False, "fixture_ok": False,
+            "failed_seed": None,
+            "failure_stage": "fixture", "error": f"{type(exc).__name__}: {exc}",
+        }
+    except Exception as exc:
+        result = {
+            "phase": "g0-recovery",
+            "decision": "G0_RECOVERY_BLOCKED_MATH", "passed": False,
+            "seeds": [int(v) for v in G0_RECOVERY_SEEDS],
+            "attempted_blocks": 0, "completed_blocks": 0,
+            "exact_count": 0,
+            "exact_failure_fraction": 1.0, "syndrome_ok_count": 0,
+            "finite_count": 0, "decoder_calls": 0,
+            "historical_decoder_invocations": 0,
+            "wall_seconds": 0.0, "peak_rss_bytes": _rss_bytes(),
+            "factorization_error": float("inf"),
+            "tree_exhaustive_posterior_error": float("inf"),
+            "tree_map_equal": False, "tree_finite": False,
+            "tree_prior_ok": False, "prior_norm_error": float("inf"),
+            "prior_positive": False, "fixture_ok": False,
+            "failed_seed": None, "failure_stage": "math",
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+    target = G0_RECOVERY_FORMAL_ROOT if out_dir is None else out_dir
+    write_g0_evidence(target, result)
+    return result
+
+
 def run_p0_cost_phase(*, h=None, p_b=None, p_f=None,
                       decode_fn=None, authorized=False):
     """P0 cost preflight: tiny wall/iteration footprint, APP plus oracle."""
     _require_authorized("p0-cost", authorized)
     _require_decode_fn("p0-cost", decode_fn)
+    if h is None:
+        h = {"L1": build_dv3_nested_mother(
+            P0_WIDTH, P0_L1_K_MIN, P0_L1_K_MIN, L1_GRAPH_SEED, None),
+            "L2": build_dv3_nested_mother(
+            P0_WIDTH, P0_L2_K_MIN, P0_L2_K_MIN, L2_GRAPH_SEED, None)}
     h1, h2 = _split_layers(h)
+    h1 = np.asarray(h1)
+    h2 = np.asarray(h2)
     if p_b is None or p_f is None:
         raise ValueError("p0-cost requires injected p_b and p_f tables")
     pf = np.asarray(p_f, dtype=np.float64)
@@ -1765,17 +1968,23 @@ def run_p0_cost_phase(*, h=None, p_b=None, p_f=None,
     calls = 0
     t0 = time.perf_counter()
     for f in P0_F:
+        m1 = _rows_required(CE_L1_MEAN, width, f)
+        m2 = _rows_required(CE_L2_ORACLE_MEAN, width, f)
+        h1_f = h1[:m1]
+        h2_f = h2[:m2]
         for kind in ("app", "oracle"):
             ws, its = [], []
             for seed in G0_SEEDS[:2]:
                 block = sample_matched_block(pb, pf, width, seed)
                 t1 = time.perf_counter()
                 if kind == "app":
-                    rec = _run_layered_block(decode_fn, h1, h2, p1, p2, block, False)
+                    rec = _run_layered_block(decode_fn, h1_f, h2_f, p1, p2,
+                                             block, False)
                     calls += 2
                 else:
                     prior_o = oracle_l2_prior(p2, block["bob"], block["u1"])
-                    eo, _, ito, _, _ = _decode_block(decode_fn, h2, prior_o, block["u2"])
+                    eo, _, ito, _, _ = _decode_block(decode_fn, h2_f, prior_o,
+                                                     block["u2"])
                     rec = {"oracle_exact": eo, "oracle_iterations": ito}
                     calls += 1
                 ws.append(time.perf_counter() - t1)
@@ -1808,12 +2017,18 @@ def _run_rate_scan(decode_fn, h1, h2, p1, p2, pb, pf, width, f_list,
     per_f = []
     calls = 0
     nonfinite = 0
+    h1 = np.asarray(h1)
+    h2 = np.asarray(h2)
     for f in f_list:
+        m1 = _rows_required(CE_L1_MEAN, width, f)
+        m2 = _rows_required(CE_L2_ORACLE_MEAN, width, f)
+        h1_f = h1[:m1]
+        h2_f = h2[:m2]
         app_ok = 0
         ora_ok = 0
         for t, seed in enumerate(seeds[:n_blocks]):
             block = sample_matched_block(pb, pf, width, seed)
-            rec = _run_layered_block(decode_fn, h1, h2, p1, p2, block,
+            rec = _run_layered_block(decode_fn, h1_f, h2_f, p1, p2, block,
                                      t < oracle_subset)
             app_ok += int(rec["app_exact"])
             calls += 2
@@ -1839,6 +2054,11 @@ def run_g1_phase(*, h=None, p_b=None, p_f=None,
     """G1 integration trend gate over the frozen G1 seeds (fake decoder only)."""
     _require_authorized("g1", authorized)
     _require_decode_fn("g1", decode_fn)
+    if h is None:
+        h = {"L1": build_dv3_nested_mother(
+            G1_WIDTH, G1_L1_K_MIN, G1_L1_K_MIN, L1_GRAPH_SEED, None),
+            "L2": build_dv3_nested_mother(
+            G1_WIDTH, G1_L2_K_MIN, G1_L2_K_MIN, L2_GRAPH_SEED, None)}
     h1, h2 = _split_layers(h)
     if p_b is None or p_f is None:
         raise ValueError("g1 requires injected p_b and p_f tables")
@@ -1866,11 +2086,26 @@ def run_g1_phase(*, h=None, p_b=None, p_f=None,
     }
 
 
+def _grade_g2(top_rate, mono, nonfinite):
+    if int(nonfinite) > 0:
+        return GRADE_BLOCKED
+    if float(top_rate) >= 0.9 and bool(mono):
+        return GRADE_QUALIFIED
+    if float(top_rate) >= 0.5:
+        return GRADE_INCONCLUSIVE
+    return GRADE_FAILED
+
+
 def run_g2_phase(*, h=None, p_b=None, p_f=None,
                  decode_fn=None, authorized=False):
     """G2 sole grading experiment over the frozen G2 seeds (fake decoder only)."""
     _require_authorized("g2", authorized)
     _require_decode_fn("g2", decode_fn)
+    if h is None:
+        h = {"L1": build_dv3_nested_mother(
+            G2_WIDTH, G2_L1_K_MIN, G2_L1_K_MIN, L1_GRAPH_SEED, None),
+            "L2": build_dv3_nested_mother(
+            G2_WIDTH, G2_L2_K_MIN, G2_L2_K_MIN, L2_GRAPH_SEED, None)}
     h1, h2 = _split_layers(h)
     if p_b is None or p_f is None:
         raise ValueError("g2 requires injected p_b and p_f tables")
@@ -1885,14 +2120,7 @@ def run_g2_phase(*, h=None, p_b=None, p_f=None,
                        "m2": _rows_required(CE_L2_ORACLE_MEAN, G2_WIDTH, f)}
               for f in G2_F}
     top = per_f[-1]["app_exact_rate"]
-    if nonfinite > 0:
-        grade = GRADE_BLOCKED
-    elif top >= 0.9 and mono:
-        grade = GRADE_QUALIFIED
-    elif top >= 0.5:
-        grade = GRADE_INCONCLUSIVE
-    else:
-        grade = GRADE_FAILED
+    grade = _grade_g2(top, mono, nonfinite)
     return {
         "phase": "g2",
         "block_length": width,
@@ -1906,6 +2134,325 @@ def run_g2_phase(*, h=None, p_b=None, p_f=None,
         "grade": grade,
         "passed": bool(grade == GRADE_QUALIFIED),
     }
+
+
+def prepare_model_f_prior(counts_ab=None, p_b=None, lam=LAMBDA_STAR):
+    """Prepare the P0/G1/G2 prior pair from injected counts only.
+
+    Sole production source of ``(p_b, p_f)`` for the rate stages. Reuses
+    :func:`build_f_model` with the frozen coefficient and keeps the
+    accepted axis contract (counts and P_F are ``(Alice, Bob)`` with
+    ``axis0`` Alice; every P_F column sums to 1). Injected tables only;
+    no file read. Absent input stops with the single BLOCKED decision
+    naming the outer-mean TRAIN counts plus marginal, before any
+    construction, decode, or write.
+    """
+    if counts_ab is None or p_b is None:
+        raise ValueError(
+            MODEL_F_BLOCKED + ": D4R2 F-model CAL-TRAIN canonical counts "
+            "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN")
+    p_f = build_f_model(counts_ab, lam)
+    pf = np.asarray(p_f, dtype=np.float64)
+    pb = np.asarray(p_b, dtype=np.float64).ravel()
+    if pf.ndim != 2 or pf.shape[1] != pb.shape[0]:
+        raise ValueError("counts/B shapes must satisfy P_F(A, B)")
+    if pf.shape[0] % Q != 0:
+        raise ValueError("P_F Alice dim must be a nonzero multiple of 32")
+    if not np.all(np.isfinite(pf)) or not np.all(np.isfinite(pb)):
+        raise ValueError("prior tables must be finite")
+    if abs(float(pb.sum()) - 1.0) > 1e-8:
+        raise ValueError("P(B) must sum to 1")
+    if np.any(np.abs(pf.sum(axis=0) - 1.0) > 1e-8):
+        raise ValueError("every P_F column must sum to 1")
+    return pb, pf
+
+
+def _load_model_f_input_or_blocked(counts_ab=None, p_b=None):
+    """Consume frozen Model-F input: injected tables or fixed-root load.
+
+    Fixed root only (no new CLI flag per frozen spec). Unauthorized entry
+    still refuses before this helper. Missing artifact stays BLOCKED.
+    """
+    if counts_ab is not None and p_b is not None:
+        return counts_ab, p_b
+    try:
+        from comparison_bench.formal_ir.v72p2d5_model_f_input import (
+            load_model_f_input as _mf_load,
+        )
+    except ImportError:
+        try:
+            from comparison_bench.src.comparison_bench.formal_ir.v72p2d5_model_f_input import (  # type: ignore[no-redef]
+                load_model_f_input as _mf_load,
+            )
+        except ImportError as exc:
+            raise ValueError(
+                MODEL_F_BLOCKED + ": D4R2 F-model CAL-TRAIN canonical counts "
+                "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN") from exc
+    try:
+        _loaded = _mf_load(MODEL_F_INPUT_FORMAL_ROOT)
+    except Exception as exc:
+        raise ValueError(
+            MODEL_F_BLOCKED + ": D4R2 F-model CAL-TRAIN canonical counts "
+            "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN") from exc
+    return _loaded["counts_ab"], _loaded["p_b"]
+
+
+def bind_historical_decoder():
+    """Bind the historical GF32 decoder once with frozen kwargs."""
+    raw = _load_g0_decoder()
+
+    def _bound(h, prior, syndrome, layer=None):
+        _ = layer
+        r = raw(
+            np.asarray(h, dtype=np.uint8),
+            np.asarray(prior, dtype=np.float64),
+            np.asarray(syndrome, dtype=np.uint8),
+            max_iter=MAX_ITER,
+            damping_alpha=DAMPING_ALPHA,
+            warm_beliefs=None,
+            field=None,
+        )
+        return {
+            "x_hat": np.asarray(r.x_hat),
+            "syndrome_ok": bool(r.syndrome_ok),
+            "iterations": int(r.iterations),
+            "final_beliefs": np.asarray(r.final_beliefs),
+        }
+
+    return _bound
+
+
+def _write_stage_evidence(out_dir, payload, table_head, table_rows,
+                          report_lines, summary):
+    d = Path(out_dir)
+    if d.exists():
+        raise FileExistsError(f"refusing to overwrite evidence dir: {d}")
+    d.mkdir(parents=True)
+    with open(d / "results.json", "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2, sort_keys=True)
+    with open(d / "table.csv", "w", encoding="utf-8") as fh:
+        fh.write(table_head + "\n")
+        for row in table_rows:
+            fh.write(",".join(str(v) for v in row) + "\n")
+    with open(d / "report.md", "w", encoding="utf-8") as fh:
+        fh.write("\n".join(report_lines) + "\n")
+    with open(d / "execution_summary.json", "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2, sort_keys=True)
+    return list(STAGE_EVIDENCE_FILES)
+
+
+def write_p0_cost_evidence(out_dir, result):
+    """Write the four scalar-only P0 cost files to a fresh directory."""
+    frozen = {str(f): {"m1": _rows_required(CE_L1_MEAN, P0_WIDTH, f),
+                       "m2": _rows_required(CE_L2_ORACLE_MEAN, P0_WIDTH, f)}
+              for f in P0_F}
+    records = []
+    for item in result.get("records", []) or []:
+        rss = item.get("rss_bytes")
+        records.append({
+            "f": float(item.get("f")),
+            "kind": str(item.get("kind")),
+            "wall_s": float(item.get("wall_s", 0.0)),
+            "iterations": int(item.get("iterations", 0)),
+            "rss_bytes": int(rss) if rss is not None else None,
+        })
+    payload = {
+        "phase": str(result.get("phase", "p0-cost")),
+        "formal_root": P0_FORMAL_ROOT,
+        "block_length": int(result.get("block_length", P0_WIDTH)),
+        "f_list": [float(v) for v in result.get("f_list", list(P0_F))],
+        "frozen_rows": frozen,
+        "seeds": [int(v) for v in G0_SEEDS[:2]],
+        "records": records,
+        "decoder_calls": int(result.get("decoder_calls", 0)),
+        "projected_g1_s": float(result.get("projected_g1_s", 0.0)),
+        "projected_g2_s": float(result.get("projected_g2_s", 0.0)),
+        "projection_blocked": bool(result.get("projection_blocked", False)),
+        "passed": bool(result.get("passed", False)),
+        "output_files": list(STAGE_EVIDENCE_FILES),
+    }
+    table_rows = [[r["f"], r["kind"], r["wall_s"], r["iterations"],
+                   r["rss_bytes"]] for r in records]
+    report = ["# V72P2D5 P0 cost evidence",
+              f"phase: {payload['phase']}",
+              f"passed: {payload['passed']}",
+              f"decoder_calls: {payload['decoder_calls']}",
+              f"projected_g1_s: {payload['projected_g1_s']}",
+              f"projected_g2_s: {payload['projected_g2_s']}",
+              f"projection_blocked: {payload['projection_blocked']}",
+              f"formal_root: {P0_FORMAL_ROOT}"]
+    summary = {
+        "phase": payload["phase"],
+        "formal_root": P0_FORMAL_ROOT,
+        "decoder_calls": payload["decoder_calls"],
+        "projection_blocked": payload["projection_blocked"],
+        "passed": payload["passed"],
+        "files": list(STAGE_EVIDENCE_FILES),
+    }
+    return _write_stage_evidence(
+        out_dir, payload, "f,kind,wall_s,iterations,rss_bytes",
+        table_rows, report, summary)
+
+
+def write_g1_evidence(out_dir, result):
+    """Write the four scalar-only G1 files to a fresh directory."""
+    per_f = []
+    for item in result.get("per_f", []) or []:
+        per_f.append({
+            "f": float(item.get("f")),
+            "attempted": int(item.get("attempted", 0)),
+            "app_exact_count": int(item.get("app_exact_count", 0)),
+            "app_exact_rate": float(item.get("app_exact_rate", 0.0)),
+            "app_failure_fraction": float(item.get(
+                "app_failure_fraction",
+                item.get("app_failure_fraction", 1.0))),
+            "oracle_exact_count": int(item.get("oracle_exact_count", 0)),
+        })
+    payload = {
+        "phase": str(result.get("phase", "g1")),
+        "formal_root": G1_FORMAL_ROOT,
+        "block_length": int(result.get("block_length", G1_WIDTH)),
+        "f_list": [float(v) for v in result.get("f_list", list(G1_F))],
+        "frozen_rows": {str(f): {
+            "m1": _rows_required(CE_L1_MEAN, G1_WIDTH, f),
+            "m2": _rows_required(CE_L2_ORACLE_MEAN, G1_WIDTH, f)}
+            for f in G1_F},
+        "seeds": [int(v) for v in G1_SEEDS],
+        "per_f": per_f,
+        "monotonic": bool(result.get("monotonic", False)),
+        "crashes": int(result.get("crashes", 0)),
+        "nonfinite": int(result.get("nonfinite", 0)),
+        "decoder_calls": int(result.get("decoder_calls", 0)),
+        "passed": bool(result.get("passed", False)),
+        "output_files": list(STAGE_EVIDENCE_FILES),
+    }
+    table_rows = [[r["f"], r["attempted"], r["app_exact_count"],
+                   r["app_exact_rate"], r["app_failure_fraction"],
+                   r["oracle_exact_count"]] for r in per_f]
+    report = ["# V72P2D5 G1 evidence",
+              f"phase: {payload['phase']}",
+              f"passed: {payload['passed']}",
+              f"monotonic: {payload['monotonic']}",
+              f"nonfinite: {payload['nonfinite']}",
+              f"decoder_calls: {payload['decoder_calls']}",
+              f"formal_root: {G1_FORMAL_ROOT}"]
+    summary = {
+        "phase": payload["phase"],
+        "formal_root": G1_FORMAL_ROOT,
+        "decoder_calls": payload["decoder_calls"],
+        "monotonic": payload["monotonic"],
+        "nonfinite": payload["nonfinite"],
+        "passed": payload["passed"],
+        "files": list(STAGE_EVIDENCE_FILES),
+    }
+    return _write_stage_evidence(
+        out_dir, payload,
+        "f,attempted,app_exact_count,app_exact_rate,"
+        "app_failure_fraction,oracle_exact_count",
+        table_rows, report, summary)
+
+
+def write_g2_evidence(out_dir, result):
+    """Write the four scalar-only G2 files to a fresh directory."""
+    per_f = []
+    for item in result.get("per_f", []) or []:
+        per_f.append({
+            "f": float(item.get("f")),
+            "attempted": int(item.get("attempted", 0)),
+            "app_exact_count": int(item.get("app_exact_count", 0)),
+            "app_exact_rate": float(item.get("app_exact_rate", 0.0)),
+            "app_failure_fraction": float(item.get(
+                "app_failure_fraction",
+                item.get("app_failure_fraction", 1.0))),
+            "oracle_exact_count": int(item.get("oracle_exact_count", 0)),
+        })
+    payload = {
+        "phase": str(result.get("phase", "g2")),
+        "formal_root": G2_FORMAL_ROOT,
+        "block_length": int(result.get("block_length", G2_WIDTH)),
+        "f_list": [float(v) for v in result.get("f_list", list(G2_F))],
+        "frozen_rows": {str(f): {
+            "m1": _rows_required(CE_L1_MEAN, G2_WIDTH, f),
+            "m2": _rows_required(CE_L2_ORACLE_MEAN, G2_WIDTH, f)}
+            for f in G2_F},
+        "seeds": [int(v) for v in G2_SEEDS],
+        "per_f": per_f,
+        "monotonic": bool(result.get("monotonic", False)),
+        "crashes": int(result.get("crashes", 0)),
+        "nonfinite": int(result.get("nonfinite", 0)),
+        "decoder_calls": int(result.get("decoder_calls", 0)),
+        "grade": str(result.get("grade", GRADE_FAILED)),
+        "passed": bool(result.get("passed", False)),
+        "output_files": list(STAGE_EVIDENCE_FILES),
+    }
+    table_rows = [[r["f"], r["attempted"], r["app_exact_count"],
+                   r["app_exact_rate"], r["app_failure_fraction"],
+                   r["oracle_exact_count"]] for r in per_f]
+    report = ["# V72P2D5 G2 evidence",
+              f"phase: {payload['phase']}",
+              f"grade: {payload['grade']}",
+              f"passed: {payload['passed']}",
+              f"monotonic: {payload['monotonic']}",
+              f"nonfinite: {payload['nonfinite']}",
+              f"decoder_calls: {payload['decoder_calls']}",
+              f"formal_root: {G2_FORMAL_ROOT}"]
+    summary = {
+        "phase": payload["phase"],
+        "formal_root": G2_FORMAL_ROOT,
+        "decoder_calls": payload["decoder_calls"],
+        "monotonic": payload["monotonic"],
+        "nonfinite": payload["nonfinite"],
+        "grade": payload["grade"],
+        "passed": payload["passed"],
+        "files": list(STAGE_EVIDENCE_FILES),
+    }
+    return _write_stage_evidence(
+        out_dir, payload,
+        "f,attempted,app_exact_count,app_exact_rate,"
+        "app_failure_fraction,oracle_exact_count",
+        table_rows, report, summary)
+
+
+def run_p0_cost_synthetic(*, authorized=False, decode_fn=None, out_dir=None,
+                          counts_ab=None, p_b=None):
+    """Authorized P0 entrypoint; prep first, then build, decode, write."""
+    _require_authorized("p0-cost", authorized)
+    _c, _b = _load_model_f_input_or_blocked(counts_ab, p_b)
+    pb, pf = prepare_model_f_prior(_c, _b)
+    decoder = decode_fn if decode_fn is not None else bind_historical_decoder()
+    result = run_p0_cost_phase(h=None, p_b=pb, p_f=pf, decode_fn=decoder,
+                               authorized=True)
+    target = P0_FORMAL_ROOT if out_dir is None else out_dir
+    write_p0_cost_evidence(target, result)
+    return result
+
+
+def run_g1_synthetic(*, authorized=False, decode_fn=None, out_dir=None,
+                     counts_ab=None, p_b=None):
+    """Authorized G1 entrypoint; prep first, then build, decode, write."""
+    _require_authorized("g1", authorized)
+    _c, _b = _load_model_f_input_or_blocked(counts_ab, p_b)
+    pb, pf = prepare_model_f_prior(_c, _b)
+    decoder = decode_fn if decode_fn is not None else bind_historical_decoder()
+    result = run_g1_phase(h=None, p_b=pb, p_f=pf, decode_fn=decoder,
+                          authorized=True)
+    target = G1_FORMAL_ROOT if out_dir is None else out_dir
+    write_g1_evidence(target, result)
+    return result
+
+
+def run_g2_synthetic(*, authorized=False, decode_fn=None, out_dir=None,
+                     counts_ab=None, p_b=None):
+    """Authorized G2 entrypoint; prep first, then build, decode, write."""
+    _require_authorized("g2", authorized)
+    _c, _b = _load_model_f_input_or_blocked(counts_ab, p_b)
+    pb, pf = prepare_model_f_prior(_c, _b)
+    decoder = decode_fn if decode_fn is not None else bind_historical_decoder()
+    result = run_g2_phase(h=None, p_b=pb, p_f=pf, decode_fn=decoder,
+                          authorized=True)
+    target = G2_FORMAL_ROOT if out_dir is None else out_dir
+    write_g2_evidence(target, result)
+    return result
 
 
 # --------------------------------------------------------------------------

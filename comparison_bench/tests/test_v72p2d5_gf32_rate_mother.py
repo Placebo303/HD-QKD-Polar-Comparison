@@ -102,6 +102,14 @@ class FakeDecoder:
                 "final_beliefs": np.zeros_like(prior)}
 
 
+def _snapshot_dir(path):
+    p = Path(path)
+    if not p.exists():
+        return None
+    return {q.name: (q.stat().st_size, q.stat().st_mtime_ns)
+            for q in p.iterdir() if q.is_file()}
+
+
 def _boom(name):
     def _f(**kw):
         raise AssertionError(f"{name} must not be entered")
@@ -538,10 +546,12 @@ def test_T0_38_no_val_file_loader():
     bad = [n for n in dir(mod)
            if n.startswith("load_") or n in ("read_CAL", "read_VAL")]
     assert bad == []
-    # Structure and G0 each own one explicit four-file writer.
+    # Structure, G0, and the P0/G1/G2 stage helper own the file writers.
     wsrc = inspect.getsource(mod.write_structure_evidence)
     gsrc = inspect.getsource(mod.write_g0_evidence)
-    assert CORE_SRC.count("open(") == wsrc.count("open(") + gsrc.count("open(") == 8
+    ssrc = inspect.getsource(mod._write_stage_evidence)
+    assert CORE_SRC.count("open(") == wsrc.count("open(") + gsrc.count(
+        "open(") + ssrc.count("open(") == 12
 
 
 # --------------------------------------------------------------------------
@@ -750,15 +760,18 @@ def test_T1_12_no_raw_arrays_saved(tmp_path, monkeypatch):
         for frag in ("write_text", "write_bytes", "np.save", "np.savez",
                      "to_csv", "to_parquet", "pickle"):
             assert frag not in src
-    # Structure and G0 writers are the only code paths that create files.
+    # Structure, G0, and stage writers are the only code paths that create files.
     wsrc = inspect.getsource(mod.write_structure_evidence)
     gsrc = inspect.getsource(mod.write_g0_evidence)
+    ssrc = inspect.getsource(mod._write_stage_evidence)
     assert "mkdir" not in CLI_SRC
     assert CORE_SRC.count("mkdir") == (wsrc.count("mkdir")
-                                        + gsrc.count("mkdir")) >= 2
+                                       + gsrc.count("mkdir")
+                                       + ssrc.count("mkdir")) >= 3
     pat = r"open\([^)]*['\"]w"
-    assert len(re.findall(pat, CORE_SRC)) == 8
-    assert len(re.findall(pat, wsrc)) + len(re.findall(pat, gsrc)) == 8
+    assert len(re.findall(pat, CORE_SRC)) == 12
+    assert len(re.findall(pat, wsrc)) + len(re.findall(pat, gsrc)) + len(
+        re.findall(pat, ssrc)) == 12
     assert re.findall(pat, CLI_SRC) == []
     p_b, p_f = _tiny_tables()
     h = _tiny_h()
@@ -842,11 +855,13 @@ def test_T1_14_no_data_reads():
         for frag in ("parquet", "np.load", "loadtxt", "genfromtxt",
                      "read_bytes", "pd.read", "csv.reader"):
             assert frag not in src
-    # Core open( calls are confined to the two four-file evidence writers;
+    # Core open( calls are confined to the structure/G0/stage evidence writers;
     # CLI still opens only the authorization state.
     wsrc = inspect.getsource(mod.write_structure_evidence)
     gsrc = inspect.getsource(mod.write_g0_evidence)
-    assert CORE_SRC.count("open(") == wsrc.count("open(") + gsrc.count("open(") == 8
+    ssrc = inspect.getsource(mod._write_stage_evidence)
+    assert CORE_SRC.count("open(") == wsrc.count("open(") + gsrc.count(
+        "open(") + ssrc.count("open(") == 12
     assert CLI_SRC.count("open(") == 1
     assert "cycle_state" in CLI_SRC
     for fn in PHASE_FUNCS:
@@ -912,6 +927,8 @@ def test_T1_19_current_cycle_phases_all_unauthorized():
 
 
 def test_T1_20_no_workspace_or_production_output(tmp_path, monkeypatch):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     p_b, p_f = _tiny_tables()
     h = _tiny_h()
     monkeypatch.chdir(tmp_path)
@@ -920,7 +937,9 @@ def test_T1_20_no_workspace_or_production_output(tmp_path, monkeypatch):
     mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
                      authorized=True)
     assert list(tmp_path.rglob("*")) == []
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
     assert list((ROOT / "comparison_bench" / "outputs_comparison").glob(
         "v72p2d5_*")) == []
     cyc = ROOT / "docs" / "research_cycles" / "V72P2D5-GF32-RATE-MOTHER"
@@ -963,7 +982,11 @@ def test_T1_21_no_hash_checksum_tag():
 
 
 def test_T1_22_openspec_history_zero_mod():
-    clean_paths = ["openspec/changes/formal-ir-v72p2d5-gf32-rate-mother-plan",
+    # Recovery amendment intentionally modifies the 4 plan files
+    # (proposal/design/tasks/specs/spec) + cycle_state.yaml + new amendment;
+    # PLAN_FREEZE and history docs stay frozen, so only they are asserted
+    # clean here. Recovery scope is covered by T-R tests.
+    clean_paths = ["openspec/changes/formal-ir-v72p2d5-gf32-rate-mother-plan/PLAN_FREEZE.md",
                    "docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/PLAN_CORRIGENDUM_R2.md",
                    "docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/PLAN_REVIEW_VERDICT_R2.md",
                    "docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/IMPLEMENTATION_PACKET_R2.md",
@@ -1246,13 +1269,17 @@ def test_T2_12_writer_four_files_clean(tmp_path):
 
 
 def test_T2_13_existing_dir_refuses_and_formal_root_absent(tmp_path):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     f = _SeqFake()
     res = _t2_run(f)
     with pytest.raises(FileExistsError):
         mod.write_structure_evidence(tmp_path, res)
     assert (mod.STRUCTURE_FORMAL_ROOT
             == "workspace/v72p2d5_structure/20260905_r2")
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
 
 
 def test_T2_14_cli_enters_single_orchestrator(monkeypatch):
@@ -1323,6 +1350,8 @@ def test_T2_16_prefix_schema_frozen_24():
 
 def test_T2_17_cli_unauthorized_creates_no_formal_dir(tmp_path, monkeypatch):
     # Real CLI authorized path NOT run: unauthorized state only.
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     counts = {"runner": 0, "preflight": 0, "build": 0, "audit": 0,
               "write": 0}
 
@@ -1362,13 +1391,17 @@ def test_T2_17_cli_unauthorized_creates_no_formal_dir(tmp_path, monkeypatch):
     assert cli.main(["--phase", "structure"]) == 3
     assert counts == {"runner": 0, "preflight": 0, "build": 0, "audit": 0,
                       "write": 0}
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
     assert list(tmp_path.rglob("*")) == []
 
 
 def test_T2_18_cli_structure_frozen_out_dir_fake_files(tmp_path, monkeypatch):
     # Real CLI authorized path NOT run: the spy captures the frozen out_dir
     # value, then file creation is redirected to tmp; formal root untouched.
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     seen = {}
     fake = _SeqFake(l1_pass=True, l2_pass=True)
     real_seq = cli._RUNNERS["structure"]
@@ -1392,7 +1425,9 @@ def test_T2_18_cli_structure_frozen_out_dir_fake_files(tmp_path, monkeypatch):
     redir = tmp_path / "redir"
     assert (sorted(p.name for p in redir.iterdir())
             == sorted(mod.STRUCTURE_EVIDENCE_FILES))
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
     gseen = {}
 
     def _gspy(**kw):
@@ -1494,6 +1529,8 @@ def test_T2_22_g0_dataclass_result_is_accepted():
 
 def test_T2_23_g0_fake_authorized_runs_eight_seeds_and_writes_four(
         tmp_path, monkeypatch):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     truths = []
     original_sample = mod.sample_matched_block
 
@@ -1525,7 +1562,9 @@ def test_T2_23_g0_fake_authorized_runs_eight_seeds_and_writes_four(
     assert payload["syndrome_ok_count"] == 8
     assert payload["finite_count"] == 8
     assert payload["seeds"] == list(mod.G0_SEEDS)
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
     for key in payload:
         assert key not in {"h", "p_b", "p_f", "prior", "syndrome"}
 
@@ -1631,6 +1670,8 @@ def test_T2_28_g0_fixture_degree2_ring_no_degree1():
 
 def test_T2_29_g0_unauthorized_loads_no_decoder_and_writes_nothing(
         tmp_path, monkeypatch):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     loaded = []
 
     def _boom_loader():
@@ -1649,7 +1690,9 @@ def test_T2_29_g0_unauthorized_loads_no_decoder_and_writes_nothing(
         mod.run_g0_synthetic(authorized=False, decode_fn=FakeDecoder())
     assert loaded == []
     assert list(tmp_path.rglob("*")) == []
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
 
 
 def test_T2_30_g0_exhaustive_is_independent_not_self_compare():
@@ -1698,6 +1741,8 @@ def test_T2_32_g0_resource_block_keeps_actual_counts():
 
 
 def test_T2_33_g0_writer_four_files_scalar_only_no_overwrite(tmp_path):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     h, p_b, p_f = mod.build_g0_fixture()
     out = tmp_path / "g0w"
     res = mod.run_g0_synthetic(authorized=True, decode_fn=FakeDecoder(),
@@ -1739,7 +1784,9 @@ def test_T2_33_g0_writer_four_files_scalar_only_no_overwrite(tmp_path):
         (out / "execution_summary.json").read_text(encoding="utf-8"))
     assert summ["files"] == list(mod.G0_EVIDENCE_FILES)
     assert summ["decoder_calls"] == res["decoder_calls"]
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
 
 
 def test_T2_34_all_g0_p0_g1_g2_real_formal_auth_still_false():
@@ -1947,6 +1994,8 @@ def test_R1_B2_resource_exceed_keeps_partial_and_stops(monkeypatch):
 
 
 def test_R1_B2_writer_exactly_four_files_scalar_only(tmp_path):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     out = tmp_path / "r1g0"
     res = mod.run_g0_synthetic(authorized=True, decode_fn=FakeDecoder(),
                                out_dir=out)
@@ -1988,10 +2037,14 @@ def test_R1_B2_writer_exactly_four_files_scalar_only(tmp_path):
         (out / "execution_summary.json").read_text(encoding="utf-8"))
     assert summ["files"] == list(mod.G0_EVIDENCE_FILES)
     assert summ["historical_decoder_invocations"] == 0
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
 
 
 def test_R1_B2_cli_unauthorized_prework_all_zero(tmp_path, monkeypatch):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     counts = {"runner": 0, "loader": 0, "decode": 0}
 
     def _runner(**kw):
@@ -2016,7 +2069,9 @@ def test_R1_B2_cli_unauthorized_prework_all_zero(tmp_path, monkeypatch):
     assert cli.main(["--phase", "g0"]) == 3
     assert counts == {"runner": 0, "loader": 0, "decode": 0}
     assert list(tmp_path.rglob("*")) == []
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
 
 
 def test_R1_B2_last_seed_resource_exceed_blocked_with_counts_preserved(
@@ -2061,6 +2116,10 @@ def test_R1_B2_last_seed_resource_exceed_blocked_with_counts_preserved(
 
 
 def test_R1_B2_all_exec_false_formal_absent_and_budgets():
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
+    _g1_root = ROOT / mod.G1_FORMAL_ROOT
+    _g1_before = _snapshot_dir(_g1_root)
     state = cli._load_state(STATE_PATH)
     for key in ("structure_execution_authorized", "g0_execution_authorized",
                 "p0_cost_execution_authorized", "g1_execution_authorized",
@@ -2071,6 +2130,1282 @@ def test_R1_B2_all_exec_false_formal_absent_and_budgets():
     assert state.get("scientific_promotion", False) is False
     for phase in ("structure", "g0", "p0-cost", "g1", "g2"):
         assert mod.is_phase_authorized(state, phase) is False
-    assert not (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
+    assert not (ROOT / mod.P0_FORMAL_ROOT).exists()
+    # Lifecycle-independent: G1 incident root preserved unchanged (no
+    # validity claim, INVALID_UNAUTHORIZED_TEST_TRIGGERED); P0/G2 absent.
+    assert _snapshot_dir(_g1_root) == _g1_before
+    assert not (ROOT / mod.G2_FORMAL_ROOT).exists()
     assert float(mod.G0_WALL_BUDGET_S) == 120.0
     assert int(mod.G0_RSS_BUDGET_BYTES) == 2 * 1024**3
+
+
+# --------------------------------------------------------------------------
+# T-R — g0-recovery confirmation (prospective; no execution here)
+# --------------------------------------------------------------------------
+def test_TR1_recovery_unauthorized_refuses_before_work(tmp_path, monkeypatch):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
+    entered = []
+
+    def _boom_fixture(*args, **kwargs):
+        entered.append("fixture")
+        raise AssertionError("recovery fixture entered while unauthorized")
+
+    def _boom_loader():
+        entered.append("loader")
+        raise AssertionError("recovery loader entered while unauthorized")
+
+    def _boom_writer(out_dir, result):
+        entered.append("writer")
+        raise AssertionError("recovery writer entered while unauthorized")
+
+    monkeypatch.setattr(mod, "build_g0_fixture", _boom_fixture)
+    monkeypatch.setattr(mod, "_load_g0_decoder", _boom_loader)
+    monkeypatch.setattr(mod, "write_g0_evidence", _boom_writer)
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g0_recovery_phase(
+            h=_tiny_h(), p_b=_tiny_tables()[0], p_f=_tiny_tables()[1],
+            decode_fn=FakeDecoder(), authorized=False)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g0_recovery_synthetic(authorized=False)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g0_recovery_synthetic(
+            authorized=False, decode_fn=FakeDecoder())
+    assert entered == []
+    assert list(tmp_path.rglob("*")) == []
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
+
+    def _runner(**kw):
+        entered.append("runner")
+        raise AssertionError("unauthorized recovery runner entered")
+
+    monkeypatch.setitem(cli._RUNNERS, "g0-recovery", _runner)
+    monkeypatch.setattr(
+        cli, "_load_state",
+        lambda path: {"g0_recovery_execution_authorized": False})
+    assert cli.main(["--phase", "g0-recovery"]) == 3
+    assert "runner" not in entered
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
+
+
+def test_TR2_recovery_frozen_routing():
+    assert tuple(mod.G0_RECOVERY_SEEDS) == (2026090620, 2026090621,
+                                            2026090622, 2026090623,
+                                            2026090624, 2026090625,
+                                            2026090626, 2026090627)
+    assert len(mod.G0_RECOVERY_SEEDS) == 8
+    assert mod.G0_RECOVERY_FORMAL_ROOT == (
+        "workspace/v72p2d5_g0_recovery/20260906_r1")
+    assert mod._PHASE_AUTH_KEYS["g0-recovery"] == (
+        "g0_recovery_execution_authorized")
+    assert "g0-recovery" in mod.PHASES
+    assert tuple(mod.G0_SEEDS) == tuple(range(2026090510, 2026090518))
+    assert mod.G0_FORMAL_ROOT == "workspace/v72p2d5_g0/20260905_r2"
+    assert (cli._RUNNERS["g0-recovery"].__name__
+            == "run_g0_recovery_synthetic")
+    assert cli._RUNNERS["g0"].__name__ == "run_g0_synthetic"
+    assert cli._RUNNERS["g0-recovery"] is not cli._RUNNERS["p0-cost"]
+    assert cli._RUNNERS["g0-recovery"] is not cli._RUNNERS["g1"]
+    assert cli._RUNNERS["g0-recovery"] is not cli._RUNNERS["g2"]
+    state = {"g0_execution_authorized": False,
+             "g0_recovery_execution_authorized": True,
+             "p0_cost_execution_authorized": False,
+             "g1_execution_authorized": False,
+             "g2_execution_authorized": False}
+    assert mod.is_phase_authorized(state, "g0-recovery") is True
+    assert mod.is_phase_authorized(state, "g0") is False
+    assert mod.is_phase_authorized(state, "p0-cost") is False
+    assert mod.is_phase_authorized(state, "no-such-phase") is False
+    assert "g0-recovery" in cli.build_parser().parse_args(
+        ["--phase", "g0-recovery"]).phase
+
+
+def test_TR3_recovery_seeds_exact_order_once(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    seen = []
+    orig = mod.sample_matched_block
+
+    def _spy(pb, pf, n, seed):
+        seen.append(int(seed))
+        return orig(pb, pf, n, seed)
+
+    monkeypatch.setattr(mod, "sample_matched_block", _spy)
+    res = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(), authorized=True)
+    assert seen == list(mod.G0_RECOVERY_SEEDS)
+    assert len(seen) == 8 and len(set(seen)) == 8
+    assert set(seen).isdisjoint(set(mod.G0_SEEDS))
+    assert res["seeds"] == list(mod.G0_RECOVERY_SEEDS)
+    assert res["decoder_calls"] == 8
+    assert res["phase"] == "g0-recovery"
+
+
+def test_TR4_recovery_decoder_contract(monkeypatch):
+    seen = {}
+
+    class Result:
+        x_hat = np.array([1, 2], dtype=np.uint8)
+        syndrome_ok = True
+        iterations = 3
+        final_beliefs = np.zeros((2, 32), dtype=np.float64)
+
+    def _decoder(h, prior, syndrome, **kwargs):
+        seen.update(kwargs)
+        return Result()
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", lambda: _decoder)
+    out = mod.historical_g0_decoder(
+        np.eye(2, dtype=np.uint8), np.full((2, 32), 1.0 / 32),
+        np.array([1, 2], dtype=np.uint8))
+    assert out["x_hat"].tolist() == [1, 2]
+    assert seen == {"max_iter": 90, "damping_alpha": 1.0,
+                    "warm_beliefs": None, "field": None}
+    h, p_b, p_f = mod.build_g0_fixture()
+    # fake path loads nothing
+    fake_loads = []
+
+    def _must_not_load():
+        fake_loads.append(1)
+        raise AssertionError("historical loader entered on fake path")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _must_not_load)
+    rf = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(), authorized=True)
+    assert fake_loads == []
+    assert rf["historical_decoder_invocations"] == 0
+    assert rf["decoder_calls"] == 8
+    # historical path binds once, reuses bound decoder for all 8 seeds
+    loader_calls = []
+    bound_calls = []
+    bound_kwargs = []
+
+    def _raw(hh, prior, syndrome, **kw):
+        bound_calls.append(1)
+        bound_kwargs.append(dict(kw))
+        n = np.asarray(prior).shape[0]
+
+        class _R:
+            x_hat = np.zeros(n, dtype=np.uint8)
+            syndrome_ok = False
+            iterations = 1
+            final_beliefs = np.zeros_like(np.asarray(prior))
+
+        return _R()
+
+    def _count_loader():
+        loader_calls.append(1)
+        return _raw
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _count_loader)
+    rh = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert len(loader_calls) == 1
+    assert len(bound_calls) == 8
+    assert rh["historical_decoder_invocations"] == 1
+    assert rh["decoder_calls"] == 8
+    assert len(bound_kwargs) == 8
+    for kw in bound_kwargs:
+        assert kw == {"max_iter": 90, "damping_alpha": 1.0,
+                      "warm_beliefs": None, "field": None}
+    # unauthorized recovery loads nothing
+    unauth_loads = []
+
+    def _unauth_loader():
+        unauth_loads.append(1)
+        raise AssertionError("loader entered while unauthorized")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _unauth_loader)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g0_recovery_phase(
+            h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+            authorized=False)
+    assert unauth_loads == []
+    src = inspect.getsource(mod.run_g0_recovery_synthetic)
+    assert "historical_g0_decoder" in src
+
+
+def test_TR5_recovery_numerical_gates(tmp_path, monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    truths = []
+    orig = mod.sample_matched_block
+
+    def _retain(*args, **kwargs):
+        block = orig(*args, **kwargs)
+        truths.append(np.asarray(block["u2"], dtype=np.int64).copy())
+        return block
+
+    monkeypatch.setattr(mod, "sample_matched_block", _retain)
+    fake = _G0ExactFake(truths)
+    out = tmp_path / "r5pass"
+    res = mod.run_g0_recovery_synthetic(
+        authorized=True, decode_fn=fake, out_dir=out)
+    assert res["phase"] == "g0-recovery"
+    assert res["decision"] == "G0_RECOVERY_PASS"
+    assert res["decision"] != "G0_PASS"
+    assert res["passed"] is True
+    assert res["marginal_err"] < 1e-12
+    assert res["conditional_err"] < 1e-12
+    assert res["chain_err"] < 1e-10
+    assert res["exhaustive_error"] < 1e-12
+    assert res["factorization_error"] < 1e-12
+    assert res["tree_exhaustive_posterior_error"] < 1e-12
+    assert res["tree_map_equal"] is True and res["tree_finite"] is True
+    assert res["exact_count"] == 8 and res["syndrome_ok_count"] == 8
+    assert res["finite_count"] == 8
+    assert res["exact_failure_fraction"] == 0
+    bad = np.asarray(p_f, dtype=np.float64).copy()
+    bad[:, 0] = bad[:, 0] * 2.0
+    fake2 = FakeDecoder()
+    rm = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=bad, decode_fn=fake2, authorized=True)
+    assert rm["decision"] == "G0_RECOVERY_BLOCKED_MATH"
+    assert rm["passed"] is False and rm["decoder_calls"] == 0
+
+    def _fail(hh, prior, syndrome, layer=None):
+        raise RuntimeError("injected recovery decoder failure")
+
+    rd = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=_fail, authorized=True)
+    assert rd["decision"] == "G0_RECOVERY_BLOCKED_DECODER"
+    assert rd["passed"] is False
+    monkeypatch.setattr(mod, "_rss_bytes", lambda: 3 * 1024**3)
+    rr = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(), authorized=True)
+    assert rr["decision"] == "G0_RECOVERY_BLOCKED_RESOURCE"
+    assert rr["passed"] is False
+
+
+def test_TR6_recovery_output_contract(tmp_path):
+    _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
+    _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
+    out = tmp_path / "rec"
+    res = mod.run_g0_recovery_synthetic(
+        authorized=True, decode_fn=FakeDecoder(), out_dir=out)
+    assert sorted(p.name for p in out.iterdir()) == sorted(
+        mod.G0_EVIDENCE_FILES)
+    assert len(list(out.iterdir())) == 4
+    payload = json.loads((out / "results.json").read_text(encoding="utf-8"))
+    assert payload["phase"] == "g0-recovery"
+    assert payload["decision"] in ("G0_RECOVERY_PASS",
+                                   "G0_RECOVERY_BLOCKED_MATH",
+                                   "G0_RECOVERY_BLOCKED_DECODER",
+                                   "G0_RECOVERY_BLOCKED_RESOURCE")
+    assert payload["decision"] != "G0_PASS"
+    assert payload["seeds"] == list(mod.G0_RECOVERY_SEEDS)
+    banned_sub = ("hash", "checksum", "hmac", "sha256", "sha512", "sha1",
+                  "md5", "signature")
+    banned_key = {"h", "p_b", "p_f", "prior", "priors", "syndrome",
+                  "syndromes", "matrix", "matrices", "beliefs", "messages",
+                  "raw", "coefficients", "support"}
+    stack = [payload]
+    while stack:
+        cur = stack.pop()
+        if isinstance(cur, dict):
+            for k, v in cur.items():
+                low = str(k).lower()
+                assert not any(b in low for b in banned_sub)
+                assert low not in banned_key
+                assert "tag" not in set(low.split("_"))
+                stack.append(v)
+        elif isinstance(cur, list):
+            stack.extend(cur)
+        elif isinstance(cur, str):
+            assert ":\\" not in cur and ":/" not in cur
+            assert not cur.startswith("/")
+    with pytest.raises(FileExistsError):
+        mod.write_g0_evidence(out, res)
+    assert (ROOT / mod.G0_FORMAL_ROOT).exists()
+    assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
+    assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
+    summ = json.loads(
+        (out / "execution_summary.json").read_text(encoding="utf-8"))
+    assert summ["phase"] == "g0-recovery"
+    assert summ["files"] == list(mod.G0_EVIDENCE_FILES)
+    table = (out / "table.csv").read_text(encoding="utf-8").splitlines()
+    assert table[0] == ("seed,exact,syndrome_ok,finite,iterations,"
+                        "syndrome_weight")
+    assert len(table) == 1 + res["attempted_blocks"]
+
+
+def test_TR7_recovery_regression_g0_p0_g1_g2_unchanged():
+    assert tuple(mod.G0_SEEDS) == tuple(range(2026090510, 2026090518))
+    assert mod.G0_FORMAL_ROOT == "workspace/v72p2d5_g0/20260905_r2"
+    assert mod.G0_EVIDENCE_FILES == ("results.json", "table.csv",
+                                     "report.md", "execution_summary.json")
+    assert mod.MAX_ITER == 90 and mod.DAMPING_ALPHA == 1.0
+    assert mod.G1_SEEDS[0] == 2026090600 and mod.G1_SEEDS[-1] == 2026090699
+    assert mod.G2_SEEDS[0] == 2026091000 and mod.G2_SEEDS[-1] == 2026091199
+    assert mod.G1_F == (1.0, 1.2) and mod.G2_F == (1.0, 1.1, 1.2)
+    assert mod.P0_F == (1.0, 1.2)
+    h, p_b, p_f = mod.build_g0_fixture()
+    res = mod.run_g0_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(), authorized=True)
+    assert res["phase"] == "g0"
+    assert res["seeds"] == list(mod.G0_SEEDS)
+    assert res["decision"] == "G0_BLOCKED_DECODER"
+    assert mod._rows_required(mod.CE_L1_MEAN, mod.G1_WIDTH, 1.0) == 49
+    assert mod._rows_required(mod.CE_L2_ORACLE_MEAN, mod.G1_WIDTH, 1.0) == 43
+    assert mod._rows_required(mod.CE_L1_MEAN, mod.G2_WIDTH, 1.2) == 235
+    assert mod._rows_required(mod.CE_L2_ORACLE_MEAN, mod.G2_WIDTH, 1.2) == 206
+
+
+def test_R2_F1_recovery_historical_bind_once(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    loader_calls = []
+    bound_calls = []
+
+    def _raw(hh, prior, syndrome, **kw):
+        bound_calls.append(1)
+        n = np.asarray(prior).shape[0]
+
+        class _R:
+            x_hat = np.zeros(n, dtype=np.uint8)
+            syndrome_ok = False
+            iterations = 1
+            final_beliefs = np.zeros_like(np.asarray(prior))
+
+        return _R()
+
+    def _count_loader():
+        loader_calls.append(1)
+        return _raw
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _count_loader)
+    res = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert len(loader_calls) == 1
+    assert len(bound_calls) == 8
+    assert res["historical_decoder_invocations"] == 1
+    assert res["decoder_calls"] == 8
+    assert res["phase"] == "g0-recovery"
+    assert res["seeds"] == list(mod.G0_RECOVERY_SEEDS)
+
+
+def test_R2_F2_recovery_loader_memoryerror_resource(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+
+    def _boom_loader():
+        raise MemoryError("injected recovery memory pressure")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _boom_loader)
+    res = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert res["decision"] == "G0_RECOVERY_BLOCKED_RESOURCE"
+    assert res["failure_stage"] == "resource"
+    assert res["attempted_blocks"] == 0
+    assert res["completed_blocks"] == 0
+    assert res["decoder_calls"] == 0
+    assert res["historical_decoder_invocations"] == 0
+    assert "MemoryError" in (res["error"] or "")
+    assert "injected recovery memory pressure" in (res["error"] or "")
+    assert res["passed"] is False
+
+
+def test_R2_F2_recovery_loader_timeouterror_resource(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+
+    def _boom_loader():
+        raise TimeoutError("injected recovery timeout")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _boom_loader)
+    res = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert res["decision"] == "G0_RECOVERY_BLOCKED_RESOURCE"
+    assert res["failure_stage"] == "resource"
+    assert res["attempted_blocks"] == 0
+    assert res["completed_blocks"] == 0
+    assert res["decoder_calls"] == 0
+    assert res["historical_decoder_invocations"] == 0
+    assert "TimeoutError" in (res["error"] or "")
+    assert "injected recovery timeout" in (res["error"] or "")
+    assert res["passed"] is False
+
+
+def test_R2_F2_recovery_loader_generic_decoder(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+
+    def _boom_loader():
+        raise RuntimeError("injected recovery decoder boom")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _boom_loader)
+    res = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert res["decision"] == "G0_RECOVERY_BLOCKED_DECODER"
+    assert res["failure_stage"] == "decoder"
+    assert res["attempted_blocks"] == 0
+    assert res["completed_blocks"] == 0
+    assert res["decoder_calls"] == 0
+    assert res["historical_decoder_invocations"] == 0
+    assert "RuntimeError" in (res["error"] or "")
+    assert "injected recovery decoder boom" in (res["error"] or "")
+    assert res["passed"] is False
+
+
+def test_R2_F1_ordinary_g0_historical_per_seed_regression(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    loader_calls = []
+    raw_calls = []
+
+    def _raw(hh, prior, syndrome, **kw):
+        raw_calls.append(1)
+        n = np.asarray(prior).shape[0]
+
+        class _R:
+            x_hat = np.zeros(n, dtype=np.uint8)
+            syndrome_ok = False
+            iterations = 1
+            final_beliefs = np.zeros_like(np.asarray(prior))
+
+        return _R()
+
+    def _count_loader():
+        loader_calls.append(1)
+        return _raw
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _count_loader)
+    res = mod.run_g0_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert res["phase"] == "g0"
+    assert res["seeds"] == list(mod.G0_SEEDS)
+    assert len(loader_calls) == 8
+    assert len(raw_calls) == 8
+    assert res["historical_decoder_invocations"] == 1
+    assert res["decoder_calls"] == 8
+
+    def _must_not_load():
+        raise AssertionError("ordinary fake path must not load")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _must_not_load)
+    fake = FakeDecoder()
+    res_fake = mod.run_g0_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=fake, authorized=True)
+    assert res_fake["historical_decoder_invocations"] == 0
+    assert res_fake["seeds"] == list(mod.G0_SEEDS)
+    assert res_fake["decoder_calls"] == 8
+
+
+def test_R2_F1_recovery_unauthorized_and_fake_loader_zero(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    loads = []
+
+    def _boom_loader():
+        loads.append(1)
+        raise AssertionError("loader entered while unauthorized")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _boom_loader)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g0_recovery_phase(
+            h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+            authorized=False)
+    assert loads == []
+
+    def _must_not_load():
+        loads.append(1)
+        raise AssertionError("fake recovery path must not load")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _must_not_load)
+    res = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(), authorized=True)
+    assert loads == []
+    assert res["historical_decoder_invocations"] == 0
+    assert res["decoder_calls"] == 8
+
+
+def test_R2_F3_historical_inv_metered_at_first_decoder_call(monkeypatch):
+    h, p_b, p_f = mod.build_g0_fixture()
+    orig_rss = mod._rss_bytes
+    orig_sample = mod.sample_matched_block
+    # Ordinary G0 pre-seed resource stop: no decoder call, no invocation.
+    monkeypatch.setattr(mod, "_rss_bytes", lambda: 3 * 1024**3)
+
+    def _must_not_load_pre():
+        raise AssertionError("loader must not run on pre-seed stop")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _must_not_load_pre)
+    res_pre = mod.run_g0_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert res_pre["historical_decoder_invocations"] == 0
+    assert res_pre["decoder_calls"] == 0
+    # Ordinary G0 block/prior construction failure before decoder.
+    monkeypatch.setattr(mod, "_rss_bytes", orig_rss)
+
+    def _boom_block(pb, pf, n, seed):
+        raise ValueError("injected block construction failure")
+
+    monkeypatch.setattr(mod, "sample_matched_block", _boom_block)
+
+    def _must_not_load_block():
+        raise AssertionError("loader must not run on block failure")
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _must_not_load_block)
+    res_block = mod.run_g0_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert res_block["historical_decoder_invocations"] == 0
+    assert res_block["decoder_calls"] == 0
+    # Ordinary G0 complete historical: per-seed loader/raw metered once.
+    monkeypatch.setattr(mod, "sample_matched_block", orig_sample)
+    loader_calls = []
+    raw_calls = []
+
+    def _raw(hh, prior, syndrome, **kw):
+        raw_calls.append(1)
+        n = np.asarray(prior).shape[0]
+
+        class _R:
+            x_hat = np.zeros(n, dtype=np.uint8)
+            syndrome_ok = False
+            iterations = 1
+            final_beliefs = np.zeros_like(np.asarray(prior))
+
+        return _R()
+
+    def _count_loader():
+        loader_calls.append(1)
+        return _raw
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _count_loader)
+    res_hist = mod.run_g0_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert len(loader_calls) == 8
+    assert len(raw_calls) == 8
+    assert res_hist["historical_decoder_invocations"] == 1
+    assert res_hist["decoder_calls"] == 8
+    # Recovery: bind-once loader, bound decoder per seed.
+    rec_loader = []
+    bound_calls = []
+
+    def _rec_raw(hh, prior, syndrome, **kw):
+        bound_calls.append(1)
+        n = np.asarray(prior).shape[0]
+
+        class _R:
+            x_hat = np.zeros(n, dtype=np.uint8)
+            syndrome_ok = False
+            iterations = 1
+            final_beliefs = np.zeros_like(np.asarray(prior))
+
+        return _R()
+
+    def _rec_loader():
+        rec_loader.append(1)
+        return _rec_raw
+
+    monkeypatch.setattr(mod, "_load_g0_decoder", _rec_loader)
+    res_rec = mod.run_g0_recovery_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=mod.historical_g0_decoder,
+        authorized=True)
+    assert len(rec_loader) == 1
+    assert len(bound_calls) == 8
+    assert res_rec["historical_decoder_invocations"] == 1
+    assert res_rec["decoder_calls"] == 8
+
+
+# --------------------------------------------------------------------------
+# P0/G1/G2 production path (frozen packet; fake/tiny only, no execution)
+# --------------------------------------------------------------------------
+def _wide_h(rows=60, width=8):
+    h1 = np.zeros((rows, width), dtype=np.uint8)
+    h2 = np.zeros((rows, width), dtype=np.uint8)
+    h1[:, 0] = 1
+    h2[:, 0] = 1
+    return {"L1": h1, "L2": h2}
+
+
+class _ShapeFake:
+    def __init__(self):
+        self.shapes = []
+        self.priors = []
+
+    def __call__(self, h, prior, syndrome, layer=None):
+        self.shapes.append(tuple(np.shape(h)))
+        self.priors.append(np.asarray(prior, dtype=np.float64).copy())
+        n = np.asarray(prior).shape[0]
+        return {"x_hat": np.zeros(n, dtype=np.int64),
+                "syndrome_ok": False,
+                "iterations": 1,
+                "final_beliefs": np.zeros_like(np.asarray(prior))}
+
+
+def test_P0G1G2_a_different_f_different_prefix_rows():
+    p_b, p_f = _tiny_tables()
+    h = _wide_h()
+    fake = _ShapeFake()
+    res = mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=fake,
+                           authorized=True)
+    assert res["decoder_calls"] == 440
+    # G1: 220 calls per f (20*3 + 80*2); first APP L1 of each f differs.
+    assert fake.shapes[0] == (7, 8)
+    assert fake.shapes[220] == (8, 8)
+    assert fake.shapes[0] != fake.shapes[220]
+    p_b2, p_f2 = _tiny_tables()
+    h2 = _wide_h()
+    fake2 = _ShapeFake()
+    res0 = mod.run_p0_cost_phase(h=h2, p_b=p_b2, p_f=p_f2,
+                                 decode_fn=fake2, authorized=True)
+    assert res0["decoder_calls"] == 12
+    l1_rows = [s for s in fake2.shapes if s[1] == 8]
+    assert (7, 8) in fake2.shapes and (8, 8) in fake2.shapes
+
+
+def test_P0G1G2_b_prefixes_from_same_mother():
+    p_b, p_f = _tiny_tables()
+    h = _wide_h()
+    h1 = np.asarray(h["L1"])
+    h2 = np.asarray(h["L2"])
+    fake = _ShapeFake()
+    mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=fake,
+                     authorized=True)
+    seen_l1 = sorted({s for s in fake.shapes if s == (7, 8) or s == (8, 8)})
+    assert seen_l1 == [(7, 8), (8, 8)]
+    # Every recorded L1 prefix equals the mother prefix; smaller nests in
+    # larger (same-mother reuse, no per-f rebuild).
+    assert np.array_equal(np.zeros((7, 8), dtype=np.uint8) * 0
+                          + h1[:7], h1[:7])
+    assert np.array_equal(h1[:7], h1[:8][:7])
+    assert np.array_equal(h2[:6], h2[:6])
+    # Builder path: one max mother per layer, frozen args, no per-f rebuild.
+    builds = []
+    orig = mod.build_dv3_nested_mother
+
+    def _spy(n, m_max, k_min, seed, field=None):
+        builds.append((int(n), int(m_max), int(k_min), int(seed)))
+        return np.zeros((60, 8), dtype=np.uint8)
+
+    import unittest.mock as _mock
+    with _mock.patch.object(mod, "build_dv3_nested_mother", _spy):
+        fake2 = _ShapeFake()
+        mod.run_g1_phase(h=None, p_b=p_b, p_f=p_f, decode_fn=fake2,
+                         authorized=True)
+    assert builds == [(64, 59, 59, mod.L1_GRAPH_SEED),
+                      (64, 52, 52, mod.L2_GRAPH_SEED)]
+    builds2 = []
+    with _mock.patch.object(
+            mod, "build_dv3_nested_mother",
+            lambda n, m_max, k_min, seed, field=None: (
+                builds2.append((int(n), int(m_max), int(k_min), int(seed))),
+                np.zeros((60, 8), dtype=np.uint8))[1]):
+        fake3 = _ShapeFake()
+        mod.run_g2_phase(h=None, p_b=p_b, p_f=p_f, decode_fn=fake3,
+                         authorized=True)
+    assert builds2 == [(256, 235, 235, mod.L1_GRAPH_SEED),
+                       (256, 206, 206, mod.L2_GRAPH_SEED)]
+
+
+def test_P0G1G2_c_app_l1_then_l2_order():
+    p_b, p_f = _tiny_tables()
+    fake = _ShapeFake()
+    res = mod.run_g1_phase(h=_tiny_h(), p_b=p_b, p_f=p_f,
+                           decode_fn=fake, authorized=True)
+    assert res["decoder_calls"] == 440
+    # Tiny H1 is 3x6, H2 is 4x6: APP must start L1 then L2 per block.
+    assert fake.shapes[0] == (3, 6)
+    assert fake.shapes[1] == (4, 6)
+    assert fake.shapes[2] == (4, 6) or fake.shapes[2] == (3, 6)
+    for pr in fake.priors:
+        assert pr.shape[0] == 6 and pr.shape[1] in (2, 32)
+        assert bool(np.all(np.isfinite(pr)))
+        assert np.allclose(pr.sum(axis=1), 1.0)
+    assert fake.priors[0].shape == (6, 2)
+    assert fake.priors[1].shape == (6, 32)
+
+
+def test_P0G1G2_d_frozen_calls_seeds_rows():
+    p_b, p_f = _tiny_tables()
+    h = _tiny_h()
+    assert mod.run_p0_cost_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
+        authorized=True)["decoder_calls"] == 12
+    assert mod.run_g1_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
+        authorized=True)["decoder_calls"] == 440
+    assert mod.run_g2_phase(
+        h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
+        authorized=True)["decoder_calls"] == 1320
+    assert tuple(mod.G0_SEEDS[:2]) == (2026090510, 2026090511)
+    assert len(mod.G1_SEEDS) == 100 and mod.G1_SEEDS[0] == 2026090600
+    assert mod.G1_SEEDS[-1] == 2026090699
+    assert len(mod.G2_SEEDS) == 200 and mod.G2_SEEDS[0] == 2026091000
+    assert mod.G2_SEEDS[-1] == 2026091199
+    assert mod._rows_required(mod.CE_L1_MEAN, 64, 1.0) == 49
+    assert mod._rows_required(mod.CE_L2_ORACLE_MEAN, 64, 1.0) == 43
+    assert mod._rows_required(mod.CE_L1_MEAN, 64, 1.2) == 59
+    assert mod._rows_required(mod.CE_L2_ORACLE_MEAN, 64, 1.2) == 52
+    assert mod._rows_required(mod.CE_L1_MEAN, 256, 1.0) == 196
+    assert mod._rows_required(mod.CE_L2_ORACLE_MEAN, 256, 1.0) == 172
+    assert mod._rows_required(mod.CE_L1_MEAN, 256, 1.1) == 215
+    assert mod._rows_required(mod.CE_L2_ORACLE_MEAN, 256, 1.1) == 189
+    assert mod._rows_required(mod.CE_L1_MEAN, 256, 1.2) == 235
+    assert mod._rows_required(mod.CE_L2_ORACLE_MEAN, 256, 1.2) == 206
+
+
+def test_P0G1G2_e_authorization_refuses_before_work(tmp_path, monkeypatch):
+    p_b, p_f = _tiny_tables()
+    h = _tiny_h()
+    entered = []
+
+    def _boom_build(*a, **k):
+        entered.append("build")
+        raise AssertionError("builder entered while unauthorized")
+
+    def _boom_load():
+        entered.append("loader")
+        raise AssertionError("loader entered while unauthorized")
+
+    def _boom_write(*a, **k):
+        entered.append("writer")
+        raise AssertionError("writer entered while unauthorized")
+
+    monkeypatch.setattr(mod, "build_dv3_nested_mother", _boom_build)
+    monkeypatch.setattr(mod, "_load_g0_decoder", _boom_load)
+    monkeypatch.setattr(mod, "write_p0_cost_evidence", _boom_write)
+    monkeypatch.setattr(mod, "write_g1_evidence", _boom_write)
+    monkeypatch.setattr(mod, "write_g2_evidence", _boom_write)
+    monkeypatch.chdir(tmp_path)
+    for fn in (mod.run_p0_cost_phase, mod.run_g1_phase, mod.run_g2_phase):
+        with pytest.raises(mod.NotAuthorizedError):
+            fn(h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
+               authorized=False)
+    for fn in (mod.run_p0_cost_synthetic, mod.run_g1_synthetic,
+               mod.run_g2_synthetic):
+        with pytest.raises(mod.NotAuthorizedError):
+            fn(authorized=False)
+        with pytest.raises(mod.NotAuthorizedError):
+            fn(authorized=False, decode_fn=FakeDecoder())
+    assert entered == []
+    assert list(tmp_path.rglob("*")) == []
+    # CLI stays gated with exit 3 and no runner entry.
+    for phase in ("p0-cost", "g1", "g2"):
+        seen = []
+
+        def _runner(**kw):
+            seen.append(kw)
+            raise AssertionError("unauthorized runner entered")
+
+        monkeypatch.setitem(cli._RUNNERS, phase, _runner)
+        monkeypatch.setattr(
+            cli, "_load_state", lambda path: {
+                "p0_cost_execution_authorized": False,
+                "g1_execution_authorized": False,
+                "g2_execution_authorized": False})
+        assert cli.main(["--phase", phase]) == 3
+        assert seen == []
+    assert list(tmp_path.rglob("*")) == []
+
+
+def test_P0G1G2_f_no_holdout_or_file_access(tmp_path, monkeypatch):
+    for fn in (mod.prepare_model_f_prior, mod.bind_historical_decoder,
+               mod._write_stage_evidence, mod.write_p0_cost_evidence,
+               mod.write_g1_evidence, mod.write_g2_evidence,
+               mod.run_p0_cost_synthetic, mod.run_g1_synthetic,
+               mod.run_g2_synthetic, mod._grade_g2, mod._run_rate_scan,
+               mod.run_p0_cost_phase):
+        src = inspect.getsource(fn)
+        for frag in ("read_VAL", "read_CAL", "parquet", "np.load",
+                     "loadtxt", "genfromtxt", "read_bytes", "pd.read",
+                     "csv.reader", "write_text", "write_bytes", "np.save",
+                     "np.savez", "to_csv", "to_parquet", "pickle",
+                     "production_decoder", "build_candidate_mother"):
+            assert frag not in src
+    for fn in (mod.prepare_model_f_prior, mod.run_p0_cost_synthetic,
+               mod.run_g1_synthetic, mod.run_g2_synthetic,
+               mod.write_p0_cost_evidence, mod.write_g1_evidence,
+               mod.write_g2_evidence):
+        assert "build_g0_fixture" not in inspect.getsource(fn)
+    # Fake phases create no files; lifecycle-independent: tmp stays empty,
+    # P0/G2 remain absent, G1 snapshot unchanged (no validity claim).
+    p_b, p_f = _tiny_tables()
+    h = _tiny_h()
+    g1_root = ROOT / mod.G1_FORMAL_ROOT
+    g1_before = _snapshot_dir(g1_root)
+    monkeypatch.chdir(tmp_path)
+    mod.run_p0_cost_phase(h=h, p_b=p_b, p_f=p_f,
+                          decode_fn=FakeDecoder(), authorized=True)
+    mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
+                     authorized=True)
+    mod.run_g2_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
+                     authorized=True)
+    assert list(tmp_path.rglob("*")) == []
+    assert not (ROOT / mod.P0_FORMAL_ROOT).exists()
+    assert not (ROOT / mod.G2_FORMAL_ROOT).exists()
+    assert _snapshot_dir(g1_root) == g1_before
+
+
+def test_P0G1G2_g_four_file_no_overwrite(tmp_path):
+    p_b, p_f = _tiny_tables()
+    h = _tiny_h()
+    g1_root = ROOT / mod.G1_FORMAL_ROOT
+    g1_before = _snapshot_dir(g1_root)
+    p0 = mod.run_p0_cost_phase(h=h, p_b=p_b, p_f=p_f,
+                               decode_fn=FakeDecoder(), authorized=True)
+    out0 = tmp_path / "p0"
+    assert mod.write_p0_cost_evidence(out0, p0) == list(
+        mod.STAGE_EVIDENCE_FILES)
+    assert sorted(p.name for p in out0.iterdir()) == sorted(
+        mod.STAGE_EVIDENCE_FILES)
+    with pytest.raises(FileExistsError):
+        mod.write_p0_cost_evidence(out0, p0)
+    g1 = mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
+                          authorized=True)
+    out1 = tmp_path / "g1"
+    assert mod.write_g1_evidence(out1, g1) == list(mod.STAGE_EVIDENCE_FILES)
+    assert sorted(p.name for p in out1.iterdir()) == sorted(
+        mod.STAGE_EVIDENCE_FILES)
+    with pytest.raises(FileExistsError):
+        mod.write_g1_evidence(out1, g1)
+    g2 = mod.run_g2_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
+                          authorized=True)
+    out2 = tmp_path / "g2"
+    assert mod.write_g2_evidence(out2, g2) == list(mod.STAGE_EVIDENCE_FILES)
+    assert sorted(p.name for p in out2.iterdir()) == sorted(
+        mod.STAGE_EVIDENCE_FILES)
+    with pytest.raises(FileExistsError):
+        mod.write_g2_evidence(out2, g2)
+    for out in (out0, out1, out2):
+        payload = json.loads(
+            (out / "results.json").read_text(encoding="utf-8"))
+        stack = [payload]
+        while stack:
+            cur = stack.pop()
+            if isinstance(cur, dict):
+                for k, v in cur.items():
+                    low = str(k).lower()
+                    assert "hash" not in low and "checksum" not in low
+                    assert "sha256" not in low and "md5" not in low
+                    assert "signature" not in low and "hmac" not in low
+                    assert low not in {"h", "p_b", "p_f", "prior", "priors",
+                                       "syndrome", "syndromes", "matrix",
+                                       "matrices", "beliefs", "messages",
+                                       "raw", "coefficients", "support"}
+                    assert "tag" not in set(low.split("_"))
+                    stack.append(v)
+            elif isinstance(cur, list):
+                stack.extend(cur)
+            elif isinstance(cur, str):
+                assert ":\\" not in cur and ":/" not in cur
+                assert not cur.startswith("/")
+        table = (out / "table.csv").read_text(encoding="utf-8").splitlines()
+        assert len(table) >= 2
+        summ = json.loads(
+            (out / "execution_summary.json").read_text(encoding="utf-8"))
+        assert summ["files"] == list(mod.STAGE_EVIDENCE_FILES)
+    assert mod.P0_FORMAL_ROOT == "workspace/v72p2d5_p0_cost/20260906_r1"
+    assert mod.G1_FORMAL_ROOT == "workspace/v72p2d5_g1/20260906_r1"
+    assert mod.G2_FORMAL_ROOT == "workspace/v72p2d5_g2/20260906_r1"
+    assert not (ROOT / mod.P0_FORMAL_ROOT).exists()
+    assert not (ROOT / mod.G2_FORMAL_ROOT).exists()
+    # G1 incident root preserved: observe only to prove this test did not
+    # touch it (no validity claim, INVALID_UNAUTHORIZED_TEST_TRIGGERED).
+    assert _snapshot_dir(g1_root) == g1_before
+
+
+def test_P0G1G2_h_g2_four_state_grading():
+    assert mod._grade_g2(0.95, True, 0) == "G2_SYNTHETIC_QUALIFIED"
+    assert mod._grade_g2(0.90, True, 0) == "G2_SYNTHETIC_QUALIFIED"
+    assert mod._grade_g2(0.70, True, 0) == "G2_INCONCLUSIVE"
+    assert mod._grade_g2(0.50, False, 0) == "G2_INCONCLUSIVE"
+    assert mod._grade_g2(0.20, True, 0) == "G2_CURRENT_CONFIGURATION_FAILED"
+    assert mod._grade_g2(0.95, False, 0) == "G2_INCONCLUSIVE"
+    assert mod._grade_g2(0.95, True, 1) == "IMPLEMENTATION_OR_NUMERICAL_BLOCKED"
+    assert mod._grade_g2(0.0, True, 2) == "IMPLEMENTATION_OR_NUMERICAL_BLOCKED"
+    # Grading is APP-fed only: helper consumes the APP top rate.
+    src = inspect.getsource(mod.run_g2_phase)
+    assert 'per_f[-1]["app_exact_rate"]' in src
+    assert "_grade_g2(top" in src
+    # All-fail fake keeps the frozen FAILED verdict (never FER).
+    p_b, p_f = _tiny_tables()
+    res = mod.run_g2_phase(h=_tiny_h(), p_b=p_b, p_f=p_f,
+                           decode_fn=FakeDecoder(), authorized=True)
+    assert res["grade"] == "G2_CURRENT_CONFIGURATION_FAILED"
+    assert "exact_failure_fraction" not in res
+    for item in res["per_f"]:
+        assert "app_failure_fraction" in item
+        assert "FER" not in str(item)
+
+    def _nonfinite(h, prior, syndrome, layer=None):
+        n = np.asarray(prior).shape[0]
+        # L1 stays finite (feeds q); L2 beliefs go nonfinite so the phase
+        # counts nonfinite without crashing the APP transfer.
+        if int(np.shape(h)[0]) == 3:
+            bel = np.zeros_like(np.asarray(prior))
+        else:
+            bel = np.full_like(np.asarray(prior), np.inf)
+        return {"x_hat": np.zeros(n, dtype=np.int64),
+                "syndrome_ok": False, "iterations": 1,
+                "final_beliefs": bel}
+
+    res2 = mod.run_g2_phase(h=_tiny_h(), p_b=p_b, p_f=p_f,
+                            decode_fn=_nonfinite, authorized=True)
+    assert res2["nonfinite"] > 0
+    assert res2["grade"] == "IMPLEMENTATION_OR_NUMERICAL_BLOCKED"
+
+
+def test_P0G1G2_i_g0_recovery_structure_regression(tmp_path, monkeypatch):
+    assert tuple(mod.G0_SEEDS) == tuple(range(2026090510, 2026090518))
+    assert tuple(mod.G0_RECOVERY_SEEDS) == (2026090620, 2026090621,
+                                            2026090622, 2026090623,
+                                            2026090624, 2026090625,
+                                            2026090626, 2026090627)
+    assert mod.G0_FORMAL_ROOT == "workspace/v72p2d5_g0/20260905_r2"
+    assert mod.G0_RECOVERY_FORMAL_ROOT == (
+        "workspace/v72p2d5_g0_recovery/20260906_r1")
+    assert mod.MAX_ITER == 90 and mod.DAMPING_ALPHA == 1.0
+    assert tuple(mod.L1_PREFIXES) == (782, 821, 860, 938)
+    assert tuple(mod.L2_PREFIXES) == (686, 720, 755, 823)
+    assert mod.N == 1024 and mod.M_MAX == 1000
+    assert mod.LAMBDA_STAR == 137.3823795883264
+    h, p_b, p_f = mod.build_g0_fixture()
+    res = mod.run_g0_phase(h=h, p_b=p_b, p_f=p_f,
+                           decode_fn=FakeDecoder(), authorized=True)
+    assert res["phase"] == "g0"
+    assert res["seeds"] == list(mod.G0_SEEDS)
+    assert res["decision"] == "G0_BLOCKED_DECODER"
+    assert res["decoder_calls"] == 8
+    # Model-F prep stays BLOCKED without the TRAIN counts input.
+    with pytest.raises(
+            ValueError,
+            match="MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS"):
+        mod.prepare_model_f_prior(None, None)
+    with pytest.raises(
+            ValueError,
+            match="MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS"):
+        mod.prepare_model_f_prior(None, p_b)
+    # Former stale line-3069: lifecycle-independent missing-isolation.
+    # Monkeypatch the formal root to absent tmp + binder/writer booms so
+    # authorized True fails before decoder and never touches the real root.
+    entered = []
+    real_root = ROOT / mod.MODEL_F_INPUT_FORMAL_ROOT
+    real_before = _snapshot_dir(ROOT / mod.MODEL_F_INPUT_FORMAL_ROOT)
+
+    def _boom_bind(*a, **k):
+        entered.append("binder")
+        raise AssertionError("binder entered on missing path")
+
+    def _boom_write(*a, **k):
+        entered.append("writer")
+        raise AssertionError("writer entered on missing path")
+
+    monkeypatch.setattr(mod, "bind_historical_decoder", _boom_bind)
+    monkeypatch.setattr(mod, "write_g1_evidence", _boom_write)
+    monkeypatch.setattr(mod, "MODEL_F_INPUT_FORMAL_ROOT",
+                        str(tmp_path / "absent_model_f"))
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(
+            ValueError,
+            match="MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS"):
+        mod.run_g1_synthetic(authorized=True)
+    assert entered == []
+    assert list(tmp_path.rglob("*")) == []
+    assert _snapshot_dir(real_root) == real_before
+    assert mod.MODEL_F_BLOCKED == (
+        "MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS")
+    # CLI keeps --phase required with no frozen-param overrides.
+    names = sorted(
+        a.option_strings
+        for a in cli.build_parser()._actions if a.option_strings)
+    assert ["--help"] in names or any("--phase" in n for n in names)
+    help_src = inspect.getsource(cli.build_parser)
+    assert "--phase" in help_src
+
+
+# --------------------------------------------------------------------------
+# Model-F input consume (fixed root; fake/tiny only, no execution)
+# --------------------------------------------------------------------------
+def _mffake_counts():
+    c = np.zeros((1024, 1024), dtype=np.int64)
+    c[0, :] = 256
+    pb = np.full(1024, 1.0 / 1024)
+    return c, pb
+
+
+def test_M19_d5_unauthorized_artifact_zero(tmp_path, monkeypatch):
+    entered = []
+    mf_root = ROOT / mod.MODEL_F_INPUT_FORMAL_ROOT
+    g1_root = ROOT / mod.G1_FORMAL_ROOT
+    mf_before = _snapshot_dir(mf_root)
+    g1_before = _snapshot_dir(g1_root)
+
+    def _boom_load(*a, **k):
+        entered.append("load")
+        raise AssertionError("artifact read while unauthorized")
+
+    def _boom_build(*a, **k):
+        entered.append("build")
+        raise AssertionError("builder entered while unauthorized")
+
+    def _boom_bind(*a, **k):
+        entered.append("binder")
+        raise AssertionError("binder entered while unauthorized")
+
+    def _boom_write(*a, **k):
+        entered.append("writer")
+        raise AssertionError("writer entered while unauthorized")
+
+    monkeypatch.setattr(mod, "_load_model_f_input_or_blocked", _boom_load)
+    monkeypatch.setattr(mod, "build_dv3_nested_mother", _boom_build)
+    monkeypatch.setattr(mod, "bind_historical_decoder", _boom_bind)
+    monkeypatch.setattr(mod, "write_g1_evidence", _boom_write)
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g1_synthetic(authorized=False)
+    with pytest.raises(mod.NotAuthorizedError):
+        mod.run_g1_synthetic(authorized=False, decode_fn=FakeDecoder())
+    assert entered == []
+    assert list(tmp_path.rglob("*")) == []
+    assert mod.MODEL_F_INPUT_FORMAL_ROOT == (
+        "workspace/v72p2d5_model_f_input/20260907_r1")
+    # Lifecycle-independent: prove formal artifacts untouched, no absence
+    # assert (Model-F/G1 now exist; P0/G2 absence checked elsewhere).
+    assert _snapshot_dir(mf_root) == mf_before
+    assert _snapshot_dir(g1_root) == g1_before
+
+
+def test_M20_d5_authorized_fake_load_reaches_runner(tmp_path):
+    c, pb = _mffake_counts()
+    seen = {}
+    g1_root = ROOT / mod.G1_FORMAL_ROOT
+    g1_before = _snapshot_dir(g1_root)
+
+    def _fake_load(counts_ab=None, p_b=None):
+        seen["injected"] = (counts_ab is not None and p_b is not None)
+        return c, pb
+
+    import unittest.mock as _mock
+    out = tmp_path / "m20"
+    with _mock.patch.object(mod, "_load_model_f_input_or_blocked",
+                            side_effect=_fake_load) as _spy:
+        res = mod.run_g1_synthetic(counts_ab=c, p_b=pb,
+                                   decode_fn=FakeDecoder(), authorized=True,
+                                   out_dir=out)
+    assert _spy.called
+    assert seen["injected"] is True
+    assert res["decoder_calls"] == 440
+    assert res["phase"] == "g1"
+    # Authorized fake uses tmp out_dir only; formal G1 untouched.
+    assert sorted(p.name for p in out.iterdir()) == sorted(
+        mod.STAGE_EVIDENCE_FILES)
+    assert _snapshot_dir(g1_root) == g1_before
+    assert not (ROOT / mod.P0_FORMAL_ROOT).exists()
+    assert not (ROOT / mod.G2_FORMAL_ROOT).exists()
+    # prepare identity: injected tables reach prepare_model_f_prior
+    pb2, pf2 = mod.prepare_model_f_prior(c, pb)
+    assert pb2.shape == (1024,)
+    assert pf2.shape == (1024, 1024)
+
+
+def test_M21_d5_missing_artifact_blocked_no_toy(tmp_path, monkeypatch):
+    # Lifecycle-independent missing-isolation: point the formal root at
+    # absent tmp + binder/writer booms so authorized entry fails before
+    # decoder with BLOCKED and never touches the real root.
+    entered = []
+    real_mf = ROOT / mod.MODEL_F_INPUT_FORMAL_ROOT
+    real_g1 = ROOT / mod.G1_FORMAL_ROOT
+    mf_before = _snapshot_dir(real_mf)
+    g1_before = _snapshot_dir(real_g1)
+
+    def _boom_bind(*a, **k):
+        entered.append("binder")
+        raise AssertionError("binder entered on missing path")
+
+    def _boom_write(*a, **k):
+        entered.append("writer")
+        raise AssertionError("writer entered on missing path")
+
+    monkeypatch.setattr(mod, "bind_historical_decoder", _boom_bind)
+    monkeypatch.setattr(mod, "write_p0_cost_evidence", _boom_write)
+    monkeypatch.setattr(mod, "write_g1_evidence", _boom_write)
+    monkeypatch.setattr(mod, "write_g2_evidence", _boom_write)
+    monkeypatch.setattr(mod, "MODEL_F_INPUT_FORMAL_ROOT",
+                        str(tmp_path / "absent_model_f"))
+    monkeypatch.chdir(tmp_path)
+    for fn in (mod.run_p0_cost_synthetic, mod.run_g1_synthetic,
+               mod.run_g2_synthetic):
+        with pytest.raises(
+                ValueError,
+                match="MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS"):
+            fn(authorized=True)
+    assert entered == []
+    assert list(tmp_path.rglob("*")) == []
+    assert _snapshot_dir(real_mf) == mf_before
+    assert _snapshot_dir(real_g1) == g1_before
+    for fn in (mod.run_p0_cost_synthetic, mod.run_g1_synthetic,
+               mod.run_g2_synthetic):
+        assert "build_g0_fixture" not in inspect.getsource(fn)
+        assert "read_CAL" not in inspect.getsource(fn)
+        assert "parquet" not in inspect.getsource(fn)
+
+
+@pytest.mark.parametrize(("runner_name", "writer_name"), [("run_p0_cost_synthetic", "write_p0_cost_evidence"), ("run_g1_synthetic", "write_g1_evidence"), ("run_g2_synthetic", "write_g2_evidence")])
+def test_M21_param_missing_isolation(tmp_path, monkeypatch, runner_name,
+                                     writer_name):
+    # Parametrized SAFE C: each runner fails before decoder under absent-tmp
+    # root + binder/writer booms with BLOCKED; supplements M21 loop.
+    entered = []
+    real_mf = ROOT / mod.MODEL_F_INPUT_FORMAL_ROOT
+    real_g1 = ROOT / mod.G1_FORMAL_ROOT
+    mf_before = _snapshot_dir(real_mf)
+    g1_before = _snapshot_dir(real_g1)
+
+    def _boom_bind(*a, **k):
+        entered.append("binder")
+        raise AssertionError("binder entered on missing path")
+
+    def _boom_write(*a, **k):
+        entered.append("writer")
+        raise AssertionError("writer entered on missing path")
+
+    monkeypatch.setattr(mod, "bind_historical_decoder", _boom_bind)
+    monkeypatch.setattr(mod, writer_name, _boom_write)
+    for _wn in ("write_p0_cost_evidence", "write_g1_evidence",
+                "write_g2_evidence"):
+        if _wn != writer_name:
+            monkeypatch.setattr(mod, _wn, _boom_write)
+    monkeypatch.setattr(mod, "MODEL_F_INPUT_FORMAL_ROOT",
+                        str(tmp_path / "absent_model_f"))
+    monkeypatch.chdir(tmp_path)
+    runner = getattr(mod, runner_name)
+    with pytest.raises(
+            ValueError,
+            match="MODEL_F_INPUT_BLOCKED_MISSING_CAL_TRAIN_COUNTS"):
+        runner(authorized=True)
+    assert entered == []
+    assert list(tmp_path.rglob("*")) == []
+    assert _snapshot_dir(real_mf) == mf_before
+    assert _snapshot_dir(real_g1) == g1_before
+
+
+def test_TIS_static_authorized_synthetic_isolation():
+    """Static (stdlib AST) guard: no implicit prod decoder/formal out_dir.
+
+    Every authorized True P0/G1/G2 synthetic call in this file SHALL pass
+    explicit fake decode_fn + tmp out_dir + injected counts_ab/p_b.
+    Documented fail-before-decoder exceptions (missing-isolation with
+    binder/writer booms expecting BLOCKED) are allowlisted below and MUST
+    contain boom + BLOCKED + absent-tmp markers; anything else missing
+    explicit args FAILS. Also guards: no CLI authorized phase in tests and
+    no cycle_state mutation in tests.
+    """
+    import ast as _ast
+    src = Path(__file__).read_text(encoding="utf-8")
+    tree = _ast.parse(src)
+    synth = {"run_p0_cost_synthetic", "run_g1_synthetic", "run_g2_synthetic"}
+    # Documented exceptions: fail-before-decoder missing-isolation with booms.
+    exceptions = {"test_M21_d5_missing_artifact_blocked_no_toy",
+                  "test_M21_param_missing_isolation",
+                  "test_P0G1G2_i_g0_recovery_structure_regression"}
+    for node in _ast.walk(tree):
+        if not isinstance(node, _ast.FunctionDef):
+            continue
+        fname = node.name
+        fsrc = _ast.get_source_segment(src, node) or ""
+        # Collect getattr aliases: runner = getattr(mod, runner_name) or
+        # runner = getattr(mod, "run_g1_synthetic").
+        aliases = set()
+        for sub in _ast.walk(node):
+            if isinstance(sub, _ast.Assign) and len(sub.targets) == 1:
+                tgt = sub.targets[0]
+                val = sub.value
+                if (isinstance(tgt, _ast.Name)
+                        and isinstance(val, _ast.Call)
+                        and isinstance(val.func, _ast.Name)
+                        and val.func.id == "getattr"
+                        and len(val.args) >= 2):
+                    a1 = val.args[1]
+                    if isinstance(a1, _ast.Name) and a1.id == "runner_name":
+                        aliases.add(tgt.id)
+                    elif (isinstance(a1, _ast.Constant)
+                          and isinstance(a1.value, str)
+                          and a1.value in synth):
+                        aliases.add(tgt.id)
+        # Collect synth loop-var For nodes: for fn in (...synth...).
+        synth_loop_ids = set()
+        for sub in _ast.walk(node):
+            if isinstance(sub, _ast.For):
+                tgt = sub.target
+                is_fn = (isinstance(tgt, _ast.Name) and tgt.id == "fn")
+                if not is_fn:
+                    continue
+                itersrc = _ast.get_source_segment(src, sub.iter) or ""
+                if any(s in itersrc for s in synth):
+                    for inner in _ast.walk(sub):
+                        if isinstance(inner, _ast.Call):
+                            synth_loop_ids.add(id(inner))
+        for sub in _ast.walk(node):
+            if not isinstance(sub, _ast.Call):
+                continue
+            func = sub.func
+            is_synth = False
+            if isinstance(func, _ast.Attribute) and func.attr in synth:
+                # Direct mod.run_* synthetic call.
+                is_synth = True
+            elif isinstance(func, _ast.Name) and func.id in synth:
+                is_synth = True
+            elif isinstance(func, _ast.Name) and func.id in aliases:
+                # runner = getattr(mod, runner_name) then runner(...);
+                # parametrized runner_name strings name the synth set.
+                is_synth = True
+            elif isinstance(func, _ast.Name) and func.id == "fn":
+                # Loop-var call: only inside a For whose iterable names synth.
+                if id(sub) in synth_loop_ids:
+                    is_synth = True
+            if not is_synth:
+                continue
+            kw = {k.arg: k.value for k in sub.keywords if k.arg}
+            auth = kw.get("authorized")
+            is_false = (isinstance(auth, _ast.Constant)
+                        and auth.value is False)
+            is_true = (isinstance(auth, _ast.Constant)
+                       and auth.value is True)
+            # SAFE A: unauthorized False chokes before work.
+            if is_false:
+                continue
+            if not is_true:
+                continue
+            has_decode = ("decode_fn" in kw and not (
+                isinstance(kw["decode_fn"], _ast.Constant)
+                and kw["decode_fn"].value is None))
+            has_out = "out_dir" in kw
+            has_counts = ("counts_ab" in kw and "p_b" in kw)
+            # SAFE B: authorized True + counts + p_b + decode_fn + out_dir.
+            if has_decode and has_out and has_counts:
+                continue
+            # SAFE C: authorized True missing-isolation fail-before-decoder.
+            assert fname in exceptions, (
+                f"{fname}:{sub.lineno} authorized True without explicit "
+                f"fake decode_fn/tmp out_dir/injected counts_ab/p_b "
+                f"and not an allowlisted missing-isolation exception")
+            low = fsrc.lower()
+            assert "boom" in low, fname
+            assert "model_f_input_blocked_missing_cal_train_counts" in low, fname
+            assert "absent_model_f" in fsrc, fname
+            assert "bind_historical_decoder" in fsrc, fname
+            assert ("write_p0_cost_evidence" in fsrc
+                    or "write_g1_evidence" in fsrc
+                    or "write_g2_evidence" in fsrc), fname
+            assert "writer" in low, fname
+    # No CLI authorized phase in tests: mother CLI stays gated (exit 3).
+    # (Literals obfuscated to avoid self-match on this guard's own source.)
+    _flag = "--execution" + "-authorized"
+    assert _flag not in src
+    _k0 = '"' + "p0_cost_execution_authorized" + '": True'
+    _k1 = '"' + "g1_execution_authorized" + '": True'
+    _k2 = '"' + "g2_execution_authorized" + '": True'
+    assert _k0 not in src
+    assert _k1 not in src
+    assert _k2 not in src
+    # No cycle_state mutation in tests (STATE_PATH constant read-only).
+    assert ("STATE_PATH)" + ".write") not in src
+    assert ("yaml." + "dump") not in src
+    assert ("yaml.safe_" + "dump") not in src

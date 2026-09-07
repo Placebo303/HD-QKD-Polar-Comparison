@@ -1,6 +1,6 @@
 """V72P2D5 GF32 rate-mother CLI — explicit phase only, no execution this round.
 
-Only ``--phase structure|g0|p0-cost|g1|g2`` is supported. ``--phase`` is
+Only ``--phase structure|g0|g0-recovery|p0-cost|g1|g2`` is supported. ``--phase`` is
 required. Every phase refuses before any work because the frozen
 ``cycle_state.yaml`` authorizes none of them. The single file read here is
 the authorization state itself; no data tables are read and no output is
@@ -11,6 +11,13 @@ G0 contract note: ``historical_decoder_invocations`` stays 0 for fake/test
 paths and 0->1 before the first real historic call (max 1 per whole G0). A
 single historic call that hangs needs an outer-process watchdog in the
 future Pre-EXECUTE packet; no extra-process machinery lives here.
+
+Recovery note: ``--phase g0-recovery`` is the sole production recovery
+command (frozen seeds/root inside the core); no seed/path options exist.
+
+Model-F note: P0/G1/G2 consume the fixed frozen root
+``workspace/v72p2d5_model_f_input/20260907_r1/`` inside the core; no
+``--model-input-root`` flag is added (frozen CLI allows no new flags).
 """
 
 from __future__ import annotations
@@ -38,9 +45,10 @@ _SPEC.loader.exec_module(_mod)
 _RUNNERS = {
     "structure": _mod.run_structure_sequence,
     "g0": _mod.run_g0_synthetic,
-    "p0-cost": _mod.run_p0_cost_phase,
-    "g1": _mod.run_g1_phase,
-    "g2": _mod.run_g2_phase,
+    "g0-recovery": _mod.run_g0_recovery_synthetic,
+    "p0-cost": _mod.run_p0_cost_synthetic,
+    "g1": _mod.run_g1_synthetic,
+    "g2": _mod.run_g2_synthetic,
 }
 
 
