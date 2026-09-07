@@ -334,3 +334,11 @@ Bob 边际用 CAL TRAIN 经验 `P(B)`（CAL-only，不碰 VAL）；`max_iter=90`
   不重做 inner 选择（synthetic 无估计问题）；n=1024 真实阶段的 λ 重拟合程序沿用 D4 口径，另批授权。
 - OQ1（R1 已决策）：per-layer `M_max=1000` 接受但限定为 synthetic 构造 cap（见 §2.3），不代表生产充分。
 - OQ2（R1 已决策）：90% 不作路线死亡线，改为 §6 四态；删除死亡线与 backlog 唯一后继表述。
+
+## 8. G0 recovery confirmation（prospective delta；未执行未授权）
+
+- Why：原 `workspace/v72p2d5_g0/20260905_r2/` 保持 `NUMERICAL_PASS / PROCEDURAL_REVIEW_MISSING / RESULT_NOT_ACCEPTED`；one-shot 已消耗；本节只增 recovery 路径，不改写历史 G0。
+- 冻结：`phase g0-recovery`；`key g0_recovery_execution_authorized`；seeds `2026090620..2026090627`；输出 `workspace/v72p2d5_g0_recovery/20260906_r1/`；命令 `python scripts/v72p2d5_gf32_rate_mother.py --phase g0-recovery`；4 文件同名。
+- 不变：§1 prior 数学、§1.6 decoder 接口（`max_iter=90`，`damping_alpha=1.0`，`warm_beliefs=None`，历史 `decode_row_layered_fftqspa`，8 calls，冷启动，无 CAL/VAL/real），§5.2 预算（`120s`，RSS`<2GiB` 否则 null，超时/资源 → `G0_BLOCKED_RESOURCE`），G0 数值门全量。
+- 判定映射：`G0_PASS→G0_RECOVERY_PASS`，`G0_BLOCKED_MATH→G0_RECOVERY_BLOCKED_MATH`，`G0_BLOCKED_DECODER→G0_RECOVERY_BLOCKED_DECODER`，`G0_BLOCKED_RESOURCE→G0_RECOVERY_BLOCKED_RESOURCE`；禁止 emit 普通 `G0_PASS`。
+- 顺序：`STRUCTURE accepted → G0 accepted → P0 cost preflight → G1 → G2`；recovery acceptance 为 P0 前置；P0/G1 不共享授权；G1/G2 另行设门；无自动推进；Pre-EXECUTE/Pre-RESULT 双门。

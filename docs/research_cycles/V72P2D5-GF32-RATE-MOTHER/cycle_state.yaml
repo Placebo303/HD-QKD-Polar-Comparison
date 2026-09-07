@@ -9,6 +9,11 @@ structure_execution_authorized: false
 structure_execution_attempts: 1
 structure_execution_completed: 1
 g0_execution_authorized: false
+g0_recovery_execution_authorized: false
+g0_recovery_attempts: 1
+g0_recovery_completed: 1
+g0_recovery_result: G0_RECOVERY_PASS
+g0_recovery_accepted: true
 p0_cost_execution_authorized: false
 g1_execution_authorized: false
 g2_execution_authorized: false
@@ -16,7 +21,7 @@ synthetic_execution_authorized: false
 real_execution_authorized: false
 formal_execution_authorized: false
 scientific_promotion: false
-decoder_executed: false
+decoder_executed: true
 full_mother_built: true
 cal_rows_read: 0
 val_rows_read: 0
@@ -27,8 +32,10 @@ structure_reason: all_8_prefixes_passed_11_hard_gates; four_cycle_risk_carried
 g0_packet_review: PASS
 g0_implementation_candidate: true
 g0_implementation_accepted: true
-next_gate: INDEPENDENT_G0_PRE_EXECUTE_REVIEW
+next_gate: P0_PACKET_REVIEW
 # R2 structure-runner version binding (implementation-only round, no auth change).
 accepted_r2_implementation: d39b5caec5560d96991b8747bfc12f473e2fe776
 structure_runner_implementation: 737f731702106bacff3c509a3f877a8b037f1434
 # R1 history retained by reference as superseded for the mother path (do NOT delete): PLAN_REVIEW_VERDICT.md, IMPLEMENTATION_PACKET.md, IMPLEMENTATION_REVIEW.md.
+# Addendum 20260905_r2: numerical evidence判定 NUMERICAL_PASS; no verifiable INDEPENDENT_G0_PRE_EXECUTE_REVIEW PASS record so lifecycle acceptance is PROCEDURAL_REVIEW_MISSING / RESULT_NOT_ACCEPTED.
+# Evidence dir workspace/v72p2d5_g0/20260905_r2/ four files retained pending review (results.json, table.csv, report.md, execution_summary.json).

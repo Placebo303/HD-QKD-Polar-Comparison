@@ -1,3 +1,33 @@
+## 2026-09-05 coder-fast → reviewer-go 必接规则持久化（一次性例外 R1 836e151c）
+
+- Rule [decision]: 每次 coder-fast 完成（COMPLETE 返回）后必须接 reviewer-go 独立只读复核，无默认跳过；plan-only / 零生产代码不是省略理由。
+- Exception [repo-observed]: V72P2D5 R1 push（commit `836e151c`）未做 post-commit reviewer 复核；用户 2026-09-05 显式特批跳过，记为一次性例外，下不为例。
+- SOP status [repo-observed]: `docs/research-cycle-sop.md` 全文无 coder-fast/reviewer-go 字样，仅有通用“independent review”（§6步骤7、§10 Pre-RESULT）；`AGENTS.md` 仅 §6 行180 `/implement-change` 描述 planner → coder-fast → reviewer-go → memory triage 流水线，无强制“必接”条款；均判为明确缺失，不直接改工作流文件，补写需走 OpenSpec change。
+- Follow-up [decision]: 后续每次 coder-fast COMPLETE 后调度 reviewer-go（push 前或 post-commit 补齐）；任何跳过需用户显式批准并在 `AGENT_PROJECT_MEMORY.md` + `docs/decision-log.md` 双记例外。
+## 2026-09-05 V72P2D5-R1 plan revision PASS (plan-only, no code, no execution)
+
+- Revision [repo-observed]: commit `836e151c` (`docs(v72p2d5-r1): revise GF32 rate-mother plan per review, no code no execution`), exactly 5 D5 plan files (`proposal.md`/`design.md`/`tasks.md`/`specs/spec.md`/`PLAN_FREEZE.md`); zero production `.py` modification; `REAL_EXECUTION_AUTHORIZED=false`, `DECODER_EXECUTED=false`, `VAL_LOADER_CALLS=0`, no `run_01`; Review PASS; `HEAD == origin`, ahead 0.
+- Cap scope [decision]: `M_max=1000` is D5 synthetic cap only, not production sufficiency evidence.
+- OQ2 verdicts [decision]: four-state `QUALIFIED / INCONCLUSIVE / CURRENT_CONFIGURATION_FAILED / BLOCKED`, replaces 90% death-line; `ROUTE_DEAD` deleted.
+- Probability axis [decision]: `(Alice,Bob)` with `axis0` summation.
+- Prefix gate [decision]: per-prefix 13-item structural gate + minimum 5-item PASS.
+- M0 [decision]: two-stage natural prefix, non-hypothesis + deterministic row ordering without decoder.
+- Seeds [decision]: frozen L1 `2026090501`, L2 `2026090502`, G0 `510..517`, G1 `600..699`, G2 `1000..1199`; search banned.
+- Oracle [decision]: non-hard-gate, diagnostic-only `ORACLE_APP_NONMONOTONIC_DIAGNOSTIC`.
+- Budget [decision]: P0 preflight n=64 2 blocks; G1 `<=900s`, G2 `<=3600s`, single call 120s, RSS `<2GiB`; calls G1 `APP100x2+oracle20x2`, G2 `APP200x3+oracle40x3`.
+- Metric [decision]: `exact_failure_fraction`, not FER.
+- Lifecycle [decision]: three-false, no single authorization across G0/G1/G2.
+- Residual [repo-observed]: `M AGENT_PROJECT_MEMORY.md`, `M docs/decision-log.md` + untracked baseline uncommitted.
+## 2026-09-05 V72P2D5 GF32 rate-mother PLAN_FREEZE (plan-only, no code, no execution)
+
+- Freeze [repo-observed]: change `formal-ir-v72p2d5-gf32-rate-mother-plan`, commit `c3499522` (`docs(v72p2d5): freeze GF32 rate-mother plan, no code, no execution`), 5 files +540 lines (`proposal.md`/`design.md`/`tasks.md`/`specs/spec.md`/`PLAN_FREEZE.md` 111 lines); zero production `.py` modification; `REAL_EXECUTION_AUTHORIZED=false`, `DECODER_EXECUTED=false`, `VAL_LOADER_CALLS=0`, no `run_01`.
+- Input [repo-observed]: `d=1024, U1/U2=[5,5], GF(32), N=1024`, model F, blocked outer-CV `CE_L1=3.814742 / CE_L2_oracle=3.347605 / CE_joint=7.162347` (worst `7.178766`, std `0.0158`, range `0.0423`), `lambda*=137.3823795883264` (D4R2 R2 audit); old `16/200/216` rows `MODEL_BUDGET_MISMATCH`, real use banned.
+- Baseline [decision]: V31 QC-cyclic-projective `build_layer` (`nonbinary_v31.py:624`) is the sole selected baseline; per-layer single `M_max=1000` build + row-prefix disclosure `H[:k]` (reinterpretation, no constructor change); Lane-C (`construct_lane_c_prototype`) backup only; V36 (+32 rows, row-weight 10-14) and V35 (hardcoded 224) vetoed.
+- Prior [decision]: `P1=sum_u2 P_F`, `P2=P_F/P1`; production `q@P` (`get_l1_app_prior_l2`), oracle-L2 (`get_conditional_posterior_l2`) diagnostic-only; sole adapter delta is frozen `lambda*` smoothing on `counts -> P_F`; floor dual-track audit `1e-300` / decoder `1e-15` with renormalization.
+- Budget [repo-observed]: `rows=ceil(N*CE*f/5)`; n=1024 `f=1.0 782/686 tot1468`, `f=1.05 821/720`, `f=1.1 860/755`, `f=1.2 938/823`; old-216 gap `6254` bits / `1251` rows / `6.79x` (L1 need 3906 vs old 80; L2 need 3428 vs old 1000; total need 7334 vs old 1080).
+- Gate [decision]: G0 tiny (marginal/conditional `<1e-12`, chain `<1e-10`, noiseless 100%) / G1 n=64 integration-trend (monotonic + oracle>=APP + zero crash, no kill) / G2 n=256 sole life-death (`f in {1.0,1.1,1.2}`, `m1={196,215,235}`, `m2={172,189,206}`, >=200 blocks; PASS = `f=1.2` end-to-end exact >=90% + monotonic + oracle>=APP; FAIL `<50%` route-dead / `50-90%` budget-insufficient both abandon n=1024 real).
+- Lifecycle [decision]: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`; no apply before D5-T8 independent Plan Review ACCEPT (incl OQ1 per-layer `M_max` interpretation / OQ2 90% PASS line) + independent `EXECUTE_AUTH` for any decoder/VAL/n=1024 real run.
+
 ## 2026-09-04 V72P2D2-R1 orthogonal one-block BLOCKED RESOURCE_BLOCKED (descriptive-only, non-fresh, no promotion)
 
 - Lifecycle [repo-observed]: base `e094f7e548380db4bfcbc1fe73472e670c32379a`, accepted-plan `4592bdad357a02f8f08a880ca0036beaed3ee900`, artifact `implementation_sha 580471cf` (R1 revision `a11cf239` in `cycle_state.yaml`) on `formal-ir-v72p1-addendum-clean`; single authorized R1 invocation consumed (`r1_execution_count_completed=1/1`); `r1_real_execution_authorized=false` after use, `scientific_promotion=false`, `no_run_01=true`; Pre-RESULT PASS; terminal `BLOCKED_RESOURCE_BLOCKED`, no rerun.
@@ -3185,3 +3215,45 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
   frozen plan. Proposed next diagnostic is one-block L/I/P orthogonal triage;
   three arms failing to escape would stop binary edge-level micro-tuning and
   permit proposing tiny exhaustive grouped-symbol-mask or GF32 comparison work.
+
+## 2026-09-04 双 PRIVATE 仓分离终态：拓扑/remote 布局（durable）
+
+- 终态 [decision]: 双 PRIVATE 仓分离：Release 仓为原 pipeline 仓改名，Comparison 仓为新建仓；各自 origin 已切换至自家新地址，legacy-origin 保留旧 URL 只读。
+- 分支与保护 [decision]: Release 默认分支 main，保护 main 与 polar-mainline；Comparison 默认分支 main，formal-ir 为受保护工作分支。
+- 发布前必检 [decision]: 两仓互不可见为发布前必检项；历史豁免仅放行已审计项。
+- 审计链 [repo-observed]: 唯一来源为 `openspec/changes/repo-remote-decoupling` 三件套（proposal/design/tasks）；脏态书面豁免已归档，不在此记录临时盘点数字。
+## 2026-09-06 — Simplified single-user research-cycle gate
+
+- Git commit IDs are provenance, not authorization tokens. Do not require
+  `HEAD == origin == implementation SHA`, stale-SHA grep, or a commit that
+  records its own ID for ordinary local research cycles.
+- Pre-EXECUTE checks the intended branch, scoped code/config/test/packet
+  cleanliness, frozen scientific contract, focused tests, explicit user
+  authorization, and absence of the target output.
+- Documentation-only commits after code acceptance do not invalidate accepted
+  code. Use exact revision locking only for a concrete multi-writer,
+  destructive, release, or evidence-integrity risk named in the packet.
+- Keep independent scientific review, no-overwrite outputs, honest partial and
+  failure states, and Pre-RESULT review for claim-bearing evidence.
+- Review by milestone, not by commit: docs-only and tiny unchanged-scope fixes
+  use focused checks and are batched into the next independent scientific
+  review. Active packets inherit this simplified Git rule.
+## 2026-09-07 V72P2D5 unauthorized G1 output VOID_RETAINED_IN_PLACE (docs-only disposition)
+
+- Disposition [decision]: `workspace/v72p2d5_g1/20260906_r1/` (4 files,
+  `decoder_calls=440`, app_exact 0, app_failure 1.0, oracle 0) is
+  `VOID_RETAINED_IN_PLACE` — retained unmodified as forensic evidence only,
+  barred from citation as a G1 result, performance measurement, or method
+  evidence; delete and quarantine-move both rejected (incident I08).
+- Blocker [repo-observed]: `MODEL_F_INPUT_PRE_RESULT_REVIEW_R1.md` =
+  `PRE_RESULT_REVIEW_FAIL`, sole blocker PR16 (G1 root exists while
+  `g1_execution_authorized=false`, `next_gate=P0_PACKET_REVIEW`); Model-F
+  artifact content PASS on PR01-PR15 and PR17-PR23.
+- Root cause [repo-observed]: incident I09 test-isolation defect; repair
+  complete per `TEST_ISOLATION_REWORK_EVIDENCE_R1.md` (SAFE A/B/C + AST static
+  guard, 165 collected / 165 passed, focused 10 passed, binder/writer entries 0,
+  P0/G2 roots absent).
+- Lifecycle [decision]: all `*_execution_authorized` stay false;
+  `scientific_promotion=false`; `next_gate=P0_PACKET_REVIEW`; PR16 addressed by
+  record only, clearance needs independent Pre-RESULT re-review; a future
+  authorized G1 run needs a new output root, no reuse or comparison.

@@ -77,3 +77,13 @@
 - [ ] 命名：`exact_failure_fraction=1-exact_count/attempted_blocks`，不称真实 FER；G2 单调 raw inequality + Wilson 区间并报。
 - [ ] 生命周期：`PLAN_ACCEPTED + implementation_authorized:false + synthetic_execution_authorized:false + real_execution_authorized:false`；Review PASS 不自动授权实现。
 - [ ] 独立 Plan Review（main thread）ACCEPT 前不进入 apply；`REAL_EXECUTION_AUTHORIZED=false`，`DECODER_EXECUTED=false`，`VAL_LOADER_CALLS=0`。
+
+## G0 Recovery Amendment（prospective，Option B；未执行未授权）
+
+- Why：`workspace/v72p2d5_g0/20260905_r2/` 数值 `NUMERICAL_PASS` 但 lifecycle `PROCEDURAL_REVIEW_MISSING / RESULT_NOT_ACCEPTED`（无可验证 `INDEPENDENT_G0_PRE_EXECUTE_REVIEW PASS` 即执行，一次性 one-shot 已消耗）。原证据字节级冻结保留，不覆盖/重放/重命名/复制/哈希/晋升；非 decoder/graph/FER/SKR/qualification/promotion 失败。
+- Recovery 目的：仅为在正确 lifecycle 下重复 tiny G0 数学/decoder 接口检查，恢复 G0 acceptance 后方可进 P0；非统计实验；不改 graph/prior/阈值/decoder 参数/roadmap。
+- 新 phase/key/seeds/path/command（冻结）：`phase: g0-recovery`；`key: g0_recovery_execution_authorized`；seeds `2026090620..2026090627`（8，新冻结，按序，无搜索/替换/重试/回退）；输出 `workspace/v72p2d5_g0_recovery/20260906_r1/`（授权执行前必须不存在）；命令 `python scripts/v72p2d5_gf32_rate_mother.py --phase g0-recovery`；输出恰 4 文件 `results.json, table.csv, report.md, execution_summary.json`。
+- 不变：G0 数学门（marginal/conditional `<1e-12`，chain `<1e-10`，mapping 精确，exhaustive/factorization `<1e-12`，tree-vs-exhaustive `<1e-12`，tree finite+MAP 一致，8 硬输出精确，8 syndrome pass，8 finite，`exact_failure_fraction=0`）；decoder 合同（历史 `decode_row_layered_fftqspa`，`max_iter=90`，`damping_alpha=1.0`，`warm_beliefs=None`，授权 recovery 无 fake，单调用单历史 adapter 初始化，8 calls 一 seed 一 call，无 CAL/VAL/real 读取）；预算（outer `<=120s`，RSS`<2GiB` 否则 null，超时/资源 → `G0_BLOCKED_RESOURCE`）。
+- 合法 recovery 判定仅 4 种：`G0_RECOVERY_PASS`，`G0_RECOVERY_BLOCKED_MATH`，`G0_RECOVERY_BLOCKED_DECODER`，`G0_RECOVERY_BLOCKED_RESOURCE`；禁止对 recovery 目录 emit 普通 `G0_PASS`。
+- Lifecycle 顺序纠正：权威 `STRUCTURE accepted → G0 accepted → P0 cost preflight → G1 integration trend → G2 grading experiment`；G0 recovery acceptance 为 P0 前置；本次不执行/不授权 P0；P0/G1 不共享授权；G1/G2 另行设门；无自动推进。
+- 门控：Pre-EXECUTE/Pre-RESULT 双门适用于 recovery 执行/固化；FAIL 阻断。

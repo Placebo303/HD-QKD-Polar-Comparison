@@ -64,7 +64,7 @@ D5-T8 由 `INDEPENDENT_R2_PLAN_REVIEW` 取代；本 agent 不得执行 review；
 - D5-I1：`lambda*` 平滑 adapter（单函数，V54 下游逐字复用）+ 转置反例测试（含轴合同 assert）。（R2 保留）
 - D5-I2-R2：最小 dv3 support 构建器（§4.3 贪心 + §4.4 系数合同；无 PEG 库/框架）+ M0 13 项 prefix 验证（含 `variable_degree_min>=2`）+ `gf_rank` 验证脚本（配预算）。删除项：degree-2 V31 adapter 作为生产候选路径；row-ordering 实现（含 `order_rows_for_prefix_coverage`）。
 - D5-I3：matched synthetic 生成器（`B∼P_CAL(B)` + `A∼P_F(·|B)`，冻结种子）+ P0/G0/G1/G2 runner 各一（P0 成本预检先行）。（R2 保留）
-- D5-I4：P0→G0→G1→G2 按冻结阈值/种子/调用数/预算执行（development only），失败进归因/停止规则，不调阈值不换 seed。（R2 保留；秩不足 => `G2_PREFIX_RANK_BLOCKED`）
+- D5-I4：【顺序已纠正】权威 `STRUCTURE accepted → G0 accepted → P0 cost preflight → G1 integration trend → G2 grading experiment`；旧措辞 `P0→G0→G1→G2` 作废，禁止 P0 先于已接受 G0。按冻结阈值/种子/调用数/预算执行（development only），失败进归因/停止规则，不调阈值不换 seed。（R2 保留；秩不足 => `G2_PREFIX_RANK_BLOCKED`）
 - D5-I5：分阶段授权链（如 G2 QUALIFIED 且 main thread 另批：R2 implementation packet→review→M0/G0 auth→G0 review→P0/G1 auth→G1 review→G2 auth→G2 Pre-RESULT；禁止一次授权 G0/G1/G2）。
 - R2 代码状态注记：当前未提交 3 `.py` 为部分候选（`UNCOMMITTED_NOT_ACCEPTED`），仅作历史；代码变更只在新 R2 implementation packet 接受后按 D5-I2-R2 delta 执行。
 
@@ -74,3 +74,9 @@ counts 轴不唯一、prior 与 decoder 形状失配且无显式 delta、行数�
 构造器无任意-m 证据、披露 API 引入框架、synthetic 用替代信道、阈值/种子/门禁被回写、
 seed search、f=1.3 synthetic、任何 decoder/VAL/`run_01` 执行、G2 projected 超 3600s 强行启动、
 一次授权 G0/G1/G2。
+
+## G0 Recovery 任务（prospective；未执行未授权；P0 前置）
+
+- [ ] D5-RC1：recovery 实现候选（`G0_RECOVERY_SEEDS` 8 冻结、`G0_RECOVERY_FORMAL_ROOT`、`g0-recovery→key` 映射；复用 G0 fixture/概率/tree-exhaustive/adapter/四文件 writer；仅参数化 seed 序列+判定标签；普通 G0 常量不变；thin `run_g0_recovery_synthetic` 未授权即拒；CLI `g0-recovery` 冻结命令；writer 拒已存在目录，scalar-only，phase `g0-recovery`）。
+- [ ] D5-RC2：recovery focused 测试（T-R1..T-R7）全过；regression 保持既有 G0+structure 通过；P0/G1/G2 无变化。
+- [ ] D5-RC3：独立实现评审 + 显式用户执行授权 + Pre-EXECUTE PASS 后方可执行 recovery；Pre-RESULT PASS 后方可接受；接受前 P0 不执行不授权。

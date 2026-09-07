@@ -3004,3 +3004,131 @@ A global PASS under the original both-n (n=1024 + n=2048) contract was impossibl
 **Verifier semantic guards (fix 3110cb0e, ACCEPT)**: `full_expected_nll="infinity"` iff q_mass_on_p_zero_cells>0, otherwise the JSON-safe finite analytic value; minimal explicit run-root guardrail (protected old roots/subpaths, repo/results/diagnostics roots rejected; frozen v2 root or fake-runner workspace roots allowed); verify_manifest field-level guards (schema/lifecycle/flags/implementation identity/output list/frozen-block equality) with execution-time binding (never compared against current HEAD/CLI).
 
 **Consequences**: Do not attribute B1 divergence to the fixed QC graph or V28R decoder; do not cite `finite_graph_decoder_mismatch` as an accepted root cause anywhere. The next authorized question is exactly: under the V25 empirical joint P(A,B), F03/A02 allocation, and V31 actual layer rates (L1 0.984375 ×3 sources; L2 0.8203125/0.814453125/0.8125), does the corresponding ensemble DE converge for all three sources and both layers? A candidate change (`formal-nonbinary-ldpc-v33-rate-aligned-empirical-channel-de-diagnostic`) exists as `DRAFT_PENDING_FREEZE_REVIEW` only; DE execution requires a frozen OpenSpec plus explicit authorization. Fixed-graph/decoder/NB-Polar successor selection remains undecided. No qualification, promotion, push, or sibling-checkout access occurred; all old evidence roots remain byte-identical.
+
+---
+
+### 2026-09-04: 双 PRIVATE 仓 remote 解耦采用 A 方案并冻结审计链
+
+**Decision**: 采用 A 方案：原仓改名成为 Release 仓，新建 Comparison 仓。白名单加 4 项残留 B1 扩展放行（短标识 1b7055c / df01f068 / 7d9a77f / 6a58adb，日期与保护态见审计链），两处待推 push 保持未推。PR#1 已 MERGED（be62938，2026-09-04）。历史内容不迁移验收。已批准的脏态书面豁免归档，保持不动。
+
+**Context**: 两仓分离前需冻结可审计的 remote 与分支终态，避免交叉可见与未授权迁移；残留项与待推项按白名单逐项审计放行。
+
+**Alternatives considered**:
+- 全量迁移历史内容：拒绝，不迁移验收。
+
+**Consequences**: 两仓各自 origin 指向自家新址，legacy-origin 只读保留旧 URL；互不可见列为发布前必检；审计链唯一源为 `openspec/changes/repo-remote-decoupling` 三件套；后续引用以审计链为准，不记录临时盘点数字。
+
+---
+
+### 2026-09-05: V72P2D5 GF32 rate-mother plan frozen, no implementation or execution
+
+**Decision**: Freeze `formal-ir-v72p2d5-gf32-rate-mother-plan` as `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` (commit `c3499522`, 5 docs +540 lines, zero production `.py` change). Select V31 QC-cyclic-projective `build_layer` (`nonbinary_v31.py:624`) as the sole baseline with per-layer single `M_max=1000` build + `H[:k]` prefix disclosure; keep Lane-C as backup; veto V36/V35. Freeze the prior contract (`P1=sum_u2 P_F`, `P2=P_F/P1`, production `q@P`, oracle-L2 diagnostic-only, `lambda*=137.3823795883264` as sole adapter delta, floor dual-track `1e-300/1e-15`), the `rows=ceil(N*CE*f/5)` table (n=1024: `f=1.0 782/686 tot1468`, `1.05 821/720`, `1.1 860/755`, `1.2 938/823`), and the G0/G1/G2 gates with G2 n=256 as the sole life-death experiment (PASS = `f=1.2` end-to-end >=90% + monotonic + oracle>=APP; FAIL `<50%` route-dead / `50-90%` budget-insufficient both abandon n=1024 real).
+
+**Context**: D4R2 selected model F (`d=1024, U=[5,5], GF32, N=1024`; `CE_L1=3.814742 / CE_L2_oracle=3.347605 / CE_joint=7.162347`) and proved `MODEL_BUDGET_MISMATCH` for the old 216 rows (gap 6254 bits / 1251 rows / 6.79x). D5 answers 6 frozen questions (prior/budget/constructor/mother/synthetic-gate/kill-experiment) without writing code, running any decoder, reading VAL, or creating `run_01`.
+
+**Alternatives considered**:
+- V36 incremental (+32 rows, row-weight 10-14) / V35 (192->224 hardcoded): rejected — too dense / hardcoded for 700-1000-row regime.
+- V28 small-m constructors / V54 PEG-like incremental without audit: rejected as baseline — unverified at large m / missing rank audit; V28 kept as small-matrix reference, Lane-C as backup only.
+- Old 216-row real experiment: prohibited — `MODEL_BUDGET_MISMATCH` ban stands.
+
+**Consequences**: No apply before D5-T8 independent Plan Review ACCEPT (incl OQ1 per-layer `M_max` interpretation / OQ2 90% line decision); any decoder/VAL/n=1024 real execution still needs an independent `EXECUTE_AUTH`. Frozen thresholds/row table must not be relaxed in apply; implementation ambiguity stops to planner/OpenSpec revision on a new SHA.
+
+---
+
+### 2026-09-05: V72P2D5-R1 plan revision PASS, no code no execution
+
+**Decision**: Revise `formal-ir-v72p2d5-gf32-rate-mother-plan` per review (commit `836e151c`, exactly 5 D5 plan files, zero production `.py` change, no `run_01`, Review PASS, `HEAD == origin` ahead 0). Durable deltas: `M_max=1000` is D5 synthetic cap only (not production sufficiency); OQ2 four-state `QUALIFIED/INCONCLUSIVE/CURRENT_CONFIGURATION_FAILED/BLOCKED`, `ROUTE_DEAD` deleted; probability axis `(Alice,Bob)` `axis0` summation; per-prefix 13-item structural gate + minimum 5-item PASS; M0 two-stage natural prefix (non-hypothesis) + deterministic row ordering without decoder; seeds frozen L1 `2026090501` / L2 `2026090502` / G0 `510..517` / G1 `600..699` / G2 `1000..1199`, search banned; oracle non-hard-gate diagnostic-only `ORACLE_APP_NONMONOTONIC_DIAGNOSTIC`; P0 preflight n=64 2 blocks, G1 `<=900s` / G2 `<=3600s` / single-call 120s / RSS `<2GiB`, calls G1 `APP100x2+oracle20x2` / G2 `APP200x3+oracle40x3`; metric `exact_failure_fraction` not FER; lifecycle three-false, no single authorization across G0/G1/G2.
+
+**Context**: R1 answers review OQ1/OQ2 without execution; residual is `M AGENT_PROJECT_MEMORY.md` + `M docs/decision-log.md` + untracked baseline, uncommitted by design.
+
+**Alternatives considered**:
+- 90% death-line / `ROUTE_DEAD`: rejected — replaced by four-state verdicts.
+- `M_max=1000` as production sufficiency: rejected — synthetic cap only.
+- Oracle as hard gate / FER metric: rejected — diagnostic-only / `exact_failure_fraction`.
+
+**Consequences**: Apply still gated by D5-T8 independent Plan Review ACCEPT + independent `EXECUTE_AUTH`; frozen seeds/budgets/call-counts/metric must not be relaxed in apply.
+
+---
+
+### 2026-09-05: coder-fast completion must chain reviewer-go (one-time exception R1 836e151c)
+
+**Decision**: Every coder-fast COMPLETE must be followed by an independent read-only reviewer-go review. Plan-only or zero-production-code is not a skip reason. Any skip requires explicit user approval and dual recording in `AGENT_PROJECT_MEMORY.md` + `docs/decision-log.md`.
+
+**Context**: V72P2D5 R1 push (commit `836e151c`) was pushed without post-commit reviewer review under explicit user approval on 2026-09-05. Read-only check confirms neither `docs/research-cycle-sop.md` (only generic "independent review" in §6 step 7 / §10 Pre-RESULT, zero coder-fast/reviewer-go mentions) nor `AGENTS.md` (only §6 line 180 `/implement-change` pipeline description, no mandatory chaining clause) states the explicit rule.
+
+**Alternatives considered**:
+- Directly patch SOP/AGENTS.md now: rejected — workflow-rule changes must go through an OpenSpec change; this entry only persists the rule and proposes wording.
+
+**Consequences**: Schedule reviewer-go after every coder-fast COMPLETE (pre-push or post-commit make-up). Future skips without user approval are violations, not precedents. Proposed SOP patch (via OpenSpec): add mandatory "coder-fast → reviewer-go 必接" clause to `docs/research-cycle-sop.md` §6/§10 and mirror in `AGENTS.md` §3/§10.
+## 2026-09-06 — Git identity removed from the default execution gate
+
+- Decision: for this single-user local research repository, commit IDs are
+  provenance and recovery aids, not execution capabilities.
+- Default Pre-EXECUTE now checks intended branch, scoped file cleanliness,
+  frozen scientific inputs/thresholds/command, focused tests, explicit user
+  authorization, and output non-overwrite state.
+- Rejected default: `HEAD == origin == implementation SHA`, stale-SHA grep,
+  self-referential acceptance commits, checksums, and generic watchdog systems.
+- Exact revision locking remains available only for a named concrete
+  multi-writer, destructive, release, or evidence-integrity risk.
+- Scientific review, failure retention, additive outputs, leakage/undetected
+  semantics, and independent Pre-RESULT review are unchanged.
+- Independent review is milestone-based, not required after every docs-only
+  commit or tiny unchanged-scope fix. Existing packets inherit this decision;
+  Git-identity clauses are non-binding absent a stated concrete risk.
+
+---
+
+### 2026-09-06: Main-plan roadmap shifted version-number → deliverable (docs only, no new decision)
+
+**Decision**: Record `openspec/project.md` § Roadmap as the durable main-plan
+roadmap (D1–D6 plus nearest milestone). No behavior, architecture, prompt,
+tool-semantic, or workflow rule is changed by this entry; no new OpenSpec
+change is opened for the project.md edit itself.
+
+**Context**: A 2026-09-06 read-only review (no code change, no decoder run,
+no CAL/VAL/raw read) found NB-LDPC kernels, layered decoding, and historical
+results reusable, but two different-natured gaps remaining: rate/finite-length
+validation in the new domain, and the full input→scan→report chain. The
+roadmap therefore organizes by six deliverables (D1 D5 input-to-result loop;
+D2 new-domain single-point NB-IR; D3 honest `reconciled_net` report interface;
+D4 fixed-`d` `tau` scan then `d`×`tau`; D5 parallel security qualification;
+D6 best-point plus holdout) instead of version numbers.
+
+**Nearest milestone**: one real ttbin session at fixed dimension producing a
+`tau` scan table backed by real NB-LDPC decoding; security-measurement
+interface advanced in parallel, dimension widened after.
+
+**Consequences**: Frozen order STRUCTURE → G0 → P0 → G1 → G2 and all V72
+scopes/thresholds unchanged; P0/G1/G2 remain unexecuted. Future work cites
+`openspec/project.md` for roadmap placement; this entry adds no freeze,
+authorization, or scientific verdict.
+
+---
+
+### 2026-09-07: V72P2D5 unauthorized G1 output disposed VOID_RETAINED_IN_PLACE (docs only)
+
+**Decision**: Dispose `workspace/v72p2d5_g1/20260906_r1/` (4 files,
+`decoder_calls=440`) as `VOID_RETAINED_IN_PLACE`. Retained unmodified as
+forensic evidence of a test-isolation defect; permanently barred from citation
+as a G1 result, a performance measurement, or evidence about the NB-LDPC
+method. No delete, no move, no rename, no rerun, no authorization change.
+
+**Context**: `MODEL_F_INPUT_PRE_RESULT_REVIEW_R1.md` returned
+`PRE_RESULT_REVIEW_FAIL` on the single blocker PR16 — the G1 formal root existed
+while `g1_execution_authorized=false` and `next_gate=P0_PACKET_REVIEW`. Cause is
+incident I09 (tests called `run_g1_synthetic(authorized=True)` without fake
+decoder / injected arrays / tmp `out_dir`, so once the Model-F artifact existed
+the production decoder bound and the default writer hit the formal root).
+Model-F artifact content itself passed PR01-PR15 and PR17-PR23. The isolation
+repair is complete and evidenced (165 collected / 165 passed).
+
+**Alternatives considered**:
+- Delete the four files: rejected — irreversible, breaks the evidence chain.
+- Move to a quarantine directory: rejected — violates incident I08
+  (no move/rename/copy).
+
+**Consequences**: All `*_execution_authorized` stay false; `next_gate` stays
+`P0_PACKET_REVIEW`; no P0 authorization. PR16 is addressed by record only —
+clearance requires an independent Pre-RESULT re-review. A future authorized G1
+run must use a new output root and must not reuse or compare against this one.

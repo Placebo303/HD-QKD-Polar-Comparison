@@ -142,3 +142,13 @@
 - S-STOP-05：R2 本轮修改文件 SHALL 仅为 5 计划文件 + `docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/PLAN_CORRIGENDUM_R2.md`（新）+ 同目录 `cycle_state.yaml`（改）；
   SHALL NOT 触碰 3 `.py` 候选、`IMPLEMENTATION_REVIEW.md`、旧 `PLAN_REVIEW_VERDICT.md`、旧 `IMPLEMENTATION_PACKET.md`、
   `AGENT_PROJECT_MEMORY.md`、`docs/decision-log.md`、任何其它代码/输出；SHALL NOT 新增 hash/checksum/tag 字段。
+
+## S-G0-RECOVERY：recovery 确认合同（prospective）
+
+- S-G0R-01：原 `workspace/v72p2d5_g0/20260905_r2/` SHALL 保持 `NUMERICAL_PASS / PROCEDURAL_REVIEW_MISSING / RESULT_NOT_ACCEPTED`；SHALL NOT 覆盖/重放/重命名/复制/哈希/晋升。
+- S-G0R-02：recovery `phase` SHALL 为 `g0-recovery`；auth key SHALL 为 `g0_recovery_execution_authorized`；seeds SHALL 为 `2026090620..2026090627`（8，按序；SHALL NOT 搜索/替换/重试/回退）；输出 SHALL 为 `workspace/v72p2d5_g0_recovery/20260906_r1/`（授权执行前 SHALL NOT 存在）；命令 SHALL 为 `python scripts/v72p2d5_gf32_rate_mother.py --phase g0-recovery`；文件 SHALL 恰为 `results.json, table.csv, report.md, execution_summary.json`。
+- S-G0R-03：数学门 SHALL 与 G0 相同（marginal/conditional `<1e-12`；chain `<1e-10`；mapping 精确；exhaustive/factorization `<1e-12`；tree-vs-exhaustive `<1e-12`；tree finite+MAP 一致；8 硬输出精确；8 syndrome pass；8 finite；`exact_failure_fraction=0`）。
+- S-G0R-04：decoder SHALL 为历史 `decode_row_layered_fftqspa`（`max_iter=90`，`damping_alpha=1.0`，`warm_beliefs=None`；单调用单历史 adapter 初始化；8 calls；SHALL NOT 在授权 recovery 用 fake；fake 仅测试注入；SHALL NOT 读 CAL/VAL/real）。
+- S-G0R-05：预算 SHALL 为 outer `<=120s`，RSS`<2GiB`（不可用则 null），超时/资源 SHALL 为 `G0_RECOVERY_BLOCKED_RESOURCE`。
+- S-G0R-06：判定 SHALL 仅为 `G0_RECOVERY_PASS / G0_RECOVERY_BLOCKED_MATH / G0_RECOVERY_BLOCKED_DECODER / G0_RECOVERY_BLOCKED_RESOURCE`；SHALL NOT 对 recovery 目录 emit `G0_PASS`。
+- S-G0R-07：顺序 SHALL 为 `STRUCTURE accepted → G0 accepted → P0 cost preflight → G1 → G2`；recovery acceptance SHALL 为 P0 前置；SHALL NOT 一次授权 P0/G1/G2；SHALL NOT 自动推进；Pre-EXECUTE/Pre-RESULT FAIL SHALL 阻断。
