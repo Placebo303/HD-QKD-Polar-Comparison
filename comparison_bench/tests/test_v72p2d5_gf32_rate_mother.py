@@ -106,6 +106,10 @@ def _snapshot_dir(path):
     p = Path(path)
     if not p.exists():
         return None
+    for q in p.iterdir():
+        if q.is_dir():
+            raise AssertionError(
+                f"formal root contains subdirectory: {q.name} under {p}")
     return {q.name: (q.stat().st_size, q.stat().st_mtime_ns)
             for q in p.iterdir() if q.is_file()}
 
@@ -3036,7 +3040,7 @@ def test_P0G1G2_g_four_file_no_overwrite(tmp_path):
             (out / "execution_summary.json").read_text(encoding="utf-8"))
         assert summ["files"] == list(mod.STAGE_EVIDENCE_FILES)
     assert mod.P0_FORMAL_ROOT == "workspace/v72p2d5_p0_cost/20260906_r1"
-    assert mod.G1_FORMAL_ROOT == "workspace/v72p2d5_g1/20260906_r1"
+    assert mod.G1_FORMAL_ROOT == "workspace/v72p2d5_g1/20260907_r2"
     assert mod.G2_FORMAL_ROOT == "workspace/v72p2d5_g2/20260906_r1"
     # Formal roots untouched by this test (no absence assert; legitimate
     # artifacts may exist — no validity claim,
@@ -3584,3 +3588,309 @@ def test_T1_23_no_formal_root_absence_assertion():
                 assert not hit, (
                     f"{path.name}:{node.name}:{sub.lineno} asserts a formal "
                     f"root absent ({','.join(hit)}); {instead}")
+
+
+# --------------------------------------------------------------------------
+# G1 readiness rework (reviewed D1-D6/A01-A13; fake/injected/tmp only)
+# --------------------------------------------------------------------------
+def _g1r_tiny():
+    return _tiny_tables(), _tiny_h()
+
+
+def _g1r_passing_per_f(low=90, top=100, attempted=100):
+    return [{"app_exact_count": int(low), "attempted": int(attempted)},
+            {"app_exact_count": int(top), "attempted": int(attempted)}]
+
+
+def test_G1R01_fresh_root_literal_and_old_barred():
+    formal_before = _snapshot_formal_roots()
+    assert mod.G1_FORMAL_ROOT == "workspace/v72p2d5_g1/20260907_r2"
+    assert "20260906_r1" not in mod.G1_FORMAL_ROOT
+    assert mod.P0_FORMAL_ROOT == "workspace/v72p2d5_p0_cost/20260906_r1"
+    assert mod.G2_FORMAL_ROOT == "workspace/v72p2d5_g2/20260906_r1"
+    void_root = ROOT / "workspace" / "v72p2d5_g1" / "20260906_r1"
+    void_snap = _snapshot_dir(void_root)
+    assert isinstance(void_snap, dict) and len(void_snap) == 4
+    _assert_formal_roots_unchanged(formal_before)
+    assert _snapshot_dir(ROOT / mod.G1_FORMAL_ROOT) is None
+
+
+def test_G1R02_unix_rss_path_preserved():
+    src = inspect.getsource(mod._rss_bytes)
+    assert "import resource" in src
+    assert "ctypes" in src
+    assert "GetCurrentProcess" in src
+    assert "GetProcessMemoryInfo" in src
+    assert "psutil" not in src.lower()
+    assert "PROCESS_MEMORY_COUNTERS" in src or "_PMC" in src
+    val = mod._rss_bytes()
+    assert val is None or (isinstance(val, int) and val > 0)
+
+
+def test_G1R03_windows_rss_success_and_failure(monkeypatch, tmp_path):
+    import ctypes as _ct
+    import sys as _sys
+    formal_before = _snapshot_formal_roots()
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setitem(_sys.modules, "resource", None)
+
+    class _FakeKernelOk:
+        @staticmethod
+        def GetCurrentProcess():
+            return 999
+
+    class _FakePsapiOk:
+        @staticmethod
+        def GetProcessMemoryInfo(h, pref, cb):
+            pref._obj.WorkingSetSize = 12345678
+            return 1
+
+    class _FakeWindllOk:
+        kernel32 = _FakeKernelOk()
+        psapi = _FakePsapiOk()
+
+    monkeypatch.setattr(_ct, "windll", _FakeWindllOk(), raising=False)
+    assert mod._rss_bytes() == 12345678
+
+    class _FakePsapiFail:
+        @staticmethod
+        def GetProcessMemoryInfo(h, pref, cb):
+            return 0
+
+    class _FakeWindllFail:
+        kernel32 = _FakeKernelOk()
+        psapi = _FakePsapiFail()
+
+    monkeypatch.setattr(_ct, "windll", _FakeWindllFail(), raising=False)
+    assert mod._rss_bytes() is None
+    monkeypatch.delattr(_ct, "windll", raising=False)
+    assert mod._rss_bytes() is None
+    assert list(tmp_path.rglob("*")) == []
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R04_per_block_sampling_counts_and_peaks(tmp_path, monkeypatch):
+    (p_b, p_f), h = _g1r_tiny()
+    formal_before = _snapshot_formal_roots()
+    monkeypatch.chdir(tmp_path)
+    seq = list(range(1, 201))
+    calls = []
+
+    def _seq_rss():
+        calls.append(1)
+        return int(seq[len(calls) - 1])
+
+    monkeypatch.setattr(mod, "_rss_bytes", _seq_rss)
+    res = mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f,
+                           decode_fn=FakeDecoder(), authorized=True)
+    assert len(calls) == 200
+    assert res["decoder_calls"] == 440
+    assert res["per_f"][0]["peak_rss_bytes"] == 100
+    assert res["per_f"][1]["peak_rss_bytes"] == 200
+    assert res["peak_rss_bytes"] == 200
+    assert list(tmp_path.rglob("*")) == []
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R05_rss_none_and_over_block_pass(tmp_path, monkeypatch):
+    per_f = _g1r_passing_per_f(90, 100)
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=10.0, peak_rss_bytes=None,
+        per_f=per_f, monotonic=True) == "G1_RESOURCE_OVERRUN"
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=10.0,
+        peak_rss_bytes=3 * 1024**3,
+        per_f=per_f, monotonic=True) == "G1_RESOURCE_OVERRUN"
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=10.0,
+        peak_rss_bytes=2 * 1024**3,
+        per_f=per_f, monotonic=True) == "G1_RESOURCE_OVERRUN"
+    (p_b, p_f), h = _g1r_tiny()
+    formal_before = _snapshot_formal_roots()
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(mod, "_rss_bytes", lambda: None)
+    res_none = mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f,
+                                decode_fn=FakeDecoder(), authorized=True)
+    assert res_none["peak_rss_bytes"] is None
+    assert res_none["outcome"] == "G1_RESOURCE_OVERRUN"
+    assert res_none["passed"] is False
+    monkeypatch.setattr(mod, "_rss_bytes", lambda: 3 * 1024**3)
+    res_over = mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f,
+                                decode_fn=FakeDecoder(), authorized=True)
+    assert res_over["peak_rss_bytes"] == 3 * 1024**3
+    assert res_over["outcome"] == "G1_RESOURCE_OVERRUN"
+    assert res_over["passed"] is False
+    assert list(tmp_path.rglob("*")) == []
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R06_all_zero_no_signal(tmp_path, monkeypatch):
+    per_f = _g1r_passing_per_f(0, 0)
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=5.0, peak_rss_bytes=1000,
+        per_f=per_f, monotonic=True) == "G1_COMPLETED_NO_SIGNAL_FAIL"
+    (p_b, p_f), h = _g1r_tiny()
+    formal_before = _snapshot_formal_roots()
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(mod, "_rss_bytes", lambda: 1000)
+
+    def _never_exact(hh, prior, syndrome, layer=None):
+        n = np.asarray(prior).shape[0]
+        return {"x_hat": np.full(n, 31, dtype=np.int64),
+                "syndrome_ok": False, "iterations": 1,
+                "final_beliefs": np.zeros_like(np.asarray(prior))}
+
+    res = mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f,
+                           decode_fn=_never_exact, authorized=True)
+    assert res["per_f"][0]["app_exact_count"] == 0
+    assert res["per_f"][1]["app_exact_count"] == 0
+    assert res["outcome"] == "G1_COMPLETED_NO_SIGNAL_FAIL"
+    assert res["passed"] is False
+    assert list(tmp_path.rglob("*")) == []
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R07_strict_improve_trend_pass():
+    per_f = _g1r_passing_per_f(10, 20)
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=5.0, peak_rss_bytes=1000,
+        per_f=per_f, monotonic=True) == "G1_TREND_PASS"
+
+
+def test_G1R08_saturated_pair_trend_pass():
+    per_f = _g1r_passing_per_f(100, 100)
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=5.0, peak_rss_bytes=1000,
+        per_f=per_f, monotonic=True) == "G1_TREND_PASS"
+
+
+def test_G1R09_positive_flat_below_one_fails():
+    per_f = _g1r_passing_per_f(50, 50)
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=5.0, peak_rss_bytes=1000,
+        per_f=per_f, monotonic=True) == "G1_COMPLETED_NO_SIGNAL_FAIL"
+
+
+def test_G1R10_outcome_precedence():
+    per_f = _g1r_passing_per_f(90, 100)
+    assert mod._classify_g1_outcome(
+        nonfinite=1, wall_seconds=5000.0, peak_rss_bytes=3 * 1024**3,
+        per_f=per_f, monotonic=True) == "G1_NONFINITE_OR_CRASH_BLOCKED"
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=901.0, peak_rss_bytes=3 * 1024**3,
+        per_f=per_f, monotonic=True) == "G1_OVERRUN_900S"
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=10.0, peak_rss_bytes=None,
+        per_f=per_f, monotonic=True) == "G1_RESOURCE_OVERRUN"
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=10.0, peak_rss_bytes=1000,
+        per_f=per_f, monotonic=True) == "G1_TREND_PASS"
+    flat = _g1r_passing_per_f(50, 50)
+    assert mod._classify_g1_outcome(
+        nonfinite=0, wall_seconds=10.0, peak_rss_bytes=1000,
+        per_f=flat, monotonic=True) == "G1_COMPLETED_NO_SIGNAL_FAIL"
+
+
+def test_G1R11_identities_and_440_calls(tmp_path, monkeypatch):
+    (p_b, p_f), h = _g1r_tiny()
+    formal_before = _snapshot_formal_roots()
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(mod, "_rss_bytes", lambda: 1000)
+    res = mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f,
+                           decode_fn=FakeDecoder(), authorized=True)
+    assert res["decoder_calls"] == 440
+    for item in res["per_f"]:
+        assert item["attempted"] == 100
+        assert 0 <= item["app_exact_count"] <= 100
+        assert 0 <= item["app_syndrome_ok_count"] <= 100
+        assert 0 <= item["oracle_exact_count"] <= 20
+        assert 0 <= item["oracle_syndrome_ok_count"] <= 20
+        assert item["app_failure_fraction"] == (
+            1.0 - item["app_exact_count"] / item["attempted"])
+        assert item["app_iterations_max"] <= 2 * mod.MAX_ITER
+        assert item["app_iterations_total"] >= 0
+        assert item["oracle_iterations_total"] >= 0
+        assert item["nonfinite_count"] >= 0
+    assert res["nonfinite"] == sum(
+        item["nonfinite_count"] for item in res["per_f"])
+    assert list(tmp_path.rglob("*")) == []
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R12_writers_fail_loud_on_missing_key(tmp_path):
+    formal_before = _snapshot_formal_roots()
+    bad_per_f = [{"f": 1.0, "attempted": 100, "app_exact_count": 0,
+                  "app_exact_rate": 0.0, "oracle_exact_count": 0}]
+    with pytest.raises(KeyError):
+        mod.write_g1_evidence(tmp_path / "bad_g1",
+                              {"phase": "g1", "per_f": bad_per_f})
+    with pytest.raises(KeyError):
+        mod.write_g2_evidence(tmp_path / "bad_g2",
+                              {"phase": "g2", "per_f": bad_per_f})
+    assert list(tmp_path.rglob("*")) == []
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R13_no_subdir_invariant_tmp_demo(tmp_path):
+    import os as _os
+    formal_before = _snapshot_formal_roots()
+    absent = tmp_path / "root_absent"
+    assert _snapshot_dir(absent) is None
+    _os.makedirs(str(absent / "nested"))
+    with pytest.raises(AssertionError):
+        _snapshot_dir(absent)
+    present = tmp_path / "root_present"
+    _os.makedirs(str(present))
+    assert _snapshot_dir(present) == {}
+    _os.makedirs(str(present / "nested_new"))
+    with pytest.raises(AssertionError):
+        _snapshot_dir(present)
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R14_safe_guards_remain_effective():
+    assert hasattr(mod, "NotAuthorizedError")
+    for name in ("test_M19_d5_unauthorized_artifact_zero",
+                 "test_M20_d5_authorized_fake_load_reaches_runner",
+                 "test_M21_d5_missing_artifact_blocked_no_toy",
+                 "test_TIS_static_authorized_synthetic_isolation",
+                 "test_T1_23_no_formal_root_absence_assertion"):
+        assert name in globals(), name
+    src = inspect.getsource(mod._rss_bytes)
+    assert "psutil" not in src.lower()
+
+
+def test_G1R16_sentinel_reaches_first_call_tmp_empty(tmp_path, monkeypatch):
+    c, pb = _mffake_counts()
+    formal_before = _snapshot_formal_roots()
+    real_mf = ROOT / mod.MODEL_F_INPUT_FORMAL_ROOT
+    mf_before = _snapshot_dir(real_mf)
+    monkeypatch.chdir(tmp_path)
+    seen = []
+    sentinel = "G1_SENTINEL_FIRST_CALL"
+
+    def _raising(h, prior, syndrome, layer=None):
+        seen.append((tuple(np.shape(h)), tuple(np.shape(prior))))
+        raise RuntimeError(sentinel)
+
+    out = tmp_path / "sentinel_out"
+    with pytest.raises(RuntimeError, match=sentinel):
+        mod.run_g1_synthetic(counts_ab=c, p_b=pb, decode_fn=_raising,
+                             authorized=True, out_dir=out)
+    assert len(seen) == 1
+    assert seen[0][0] == (49, 64)
+    assert seen[0][1][1] == 32
+    assert list(tmp_path.rglob("*")) == []
+    assert _snapshot_dir(real_mf) == mf_before
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R17_sentinel_static_contract_tmp_empty():
+    src = inspect.getsource(mod.run_g1_synthetic)
+    assert "_load_model_f_input_or_blocked" in src
+    assert "prepare_model_f_prior" in src
+    assert "run_g1_phase" in src
+    assert "write_g1_evidence" in src
+    assert src.index("run_g1_phase") < src.index("write_g1_evidence")
+    lsrc = inspect.getsource(mod._load_model_f_loader)
+    assert "spec_from_file_location" in lsrc

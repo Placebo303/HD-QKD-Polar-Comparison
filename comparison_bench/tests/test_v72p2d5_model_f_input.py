@@ -37,6 +37,10 @@ def _snapshot_dir(path):
     p = Path(path)
     if not p.exists():
         return None
+    for q in p.iterdir():
+        if q.is_dir():
+            raise AssertionError(
+                f"formal root contains subdirectory: {q.name} under {p}")
     return {q.name: (q.stat().st_size, q.stat().st_mtime_ns)
             for q in p.iterdir() if q.is_file()}
 
@@ -45,7 +49,7 @@ def _snapshot_dir(path):
 # the P0/G1/G2/G0/G0-recovery/structure constants; this module only defines
 # MODEL_F_FORMAL_ROOT). Literals for snapshotting only — never assert absence.
 _P0_FORMAL_REL = "workspace/v72p2d5_p0_cost/20260906_r1"
-_G1_FORMAL_REL = "workspace/v72p2d5_g1/20260906_r1"
+_G1_FORMAL_REL = "workspace/v72p2d5_g1/20260907_r2"
 _G2_FORMAL_REL = "workspace/v72p2d5_g2/20260906_r1"
 _G0_FORMAL_REL = "workspace/v72p2d5_g0/20260905_r2"
 _G0_RECOVERY_FORMAL_REL = "workspace/v72p2d5_g0_recovery/20260906_r1"
@@ -667,4 +671,23 @@ def test_P12_formal_roots_absent(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     formal_before = _snapshot_formal_roots()
     assert list(tmp_path.rglob("model_f_input.npz")) == []
+    _assert_formal_roots_unchanged(formal_before)
+
+
+def test_G1R13b_no_subdir_invariant_tmp_demo(tmp_path, monkeypatch):
+    import os as _os
+    monkeypatch.chdir(tmp_path)
+    formal_before = _snapshot_formal_roots()
+    assert _G1_FORMAL_REL == "workspace/v72p2d5_g1/20260907_r2"
+    absent = tmp_path / "mf_root_absent"
+    assert _snapshot_dir(absent) is None
+    _os.makedirs(str(absent / "nested"))
+    with pytest.raises(AssertionError):
+        _snapshot_dir(absent)
+    present = tmp_path / "mf_root_present"
+    _os.makedirs(str(present))
+    assert _snapshot_dir(present) == {}
+    _os.makedirs(str(present / "nested_new"))
+    with pytest.raises(AssertionError):
+        _snapshot_dir(present)
     _assert_formal_roots_unchanged(formal_before)

@@ -75,7 +75,7 @@ G1_L2_K_MIN = 52
 G2_L1_K_MIN = 235
 G2_L2_K_MIN = 206
 P0_FORMAL_ROOT = "workspace/v72p2d5_p0_cost/20260906_r1"
-G1_FORMAL_ROOT = "workspace/v72p2d5_g1/20260906_r1"
+G1_FORMAL_ROOT = "workspace/v72p2d5_g1/20260907_r2"
 G2_FORMAL_ROOT = "workspace/v72p2d5_g2/20260906_r1"
 STAGE_EVIDENCE_FILES = ("results.json", "table.csv", "report.md",
                         "execution_summary.json")
@@ -943,6 +943,39 @@ def _rss_bytes():
         import resource
 
         return int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024)
+    except Exception:
+        pass
+    # Windows fallback: current-process working set only (no process-tree
+    # claim), stdlib ctypes only.
+    try:
+        import ctypes
+
+        _windll = ctypes.windll
+        _kernel32 = _windll.kernel32
+        _psapi = _windll.psapi
+
+        class _PMC(ctypes.Structure):
+            _fields_ = [
+                ("cb", ctypes.c_ulong),
+                ("PageFaultCount", ctypes.c_ulong),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        _pmc = _PMC()
+        _pmc.cb = ctypes.sizeof(_PMC)
+        _handle = _kernel32.GetCurrentProcess()
+        _ok = _psapi.GetProcessMemoryInfo(
+            _handle, ctypes.byref(_pmc), _pmc.cb)
+        if not _ok:
+            return None
+        return int(_pmc.WorkingSetSize)
     except Exception:
         return None
 
@@ -2022,6 +2055,7 @@ def _run_rate_scan(decode_fn, h1, h2, p1, p2, pb, pf, width, f_list,
     nonfinite = 0
     h1 = np.asarray(h1)
     h2 = np.asarray(h2)
+    run_samples = []
     for f in f_list:
         m1 = _rows_required(CE_L1_MEAN, width, f)
         m2 = _rows_required(CE_L2_ORACLE_MEAN, width, f)
@@ -2029,27 +2063,92 @@ def _run_rate_scan(decode_fn, h1, h2, p1, p2, pb, pf, width, f_list,
         h2_f = h2[:m2]
         app_ok = 0
         ora_ok = 0
+        app_syn_ok = 0
+        app_it_total = 0
+        app_it_max = 0
+        ora_syn_ok = 0
+        ora_it_total = 0
+        nf_f = 0
+        samples_f = []
         for t, seed in enumerate(seeds[:n_blocks]):
             block = sample_matched_block(pb, pf, width, seed)
             rec = _run_layered_block(decode_fn, h1_f, h2_f, p1, p2, block,
                                      t < oracle_subset)
             app_ok += int(rec["app_exact"])
+            app_syn_ok += int(rec["app_syndrome_ok"])
+            _it = int(rec["iterations"])
+            app_it_total += _it
+            if _it > app_it_max:
+                app_it_max = _it
             calls += 2
-            nonfinite += int(not rec["finite"])
+            _nf = int(not rec["finite"])
+            nonfinite += _nf
+            nf_f += _nf
             if t < oracle_subset:
                 ora_ok += int(rec["oracle_exact"])
+                ora_syn_ok += int(rec["oracle_syndrome_ok"])
+                ora_it_total += int(rec["oracle_iterations"])
                 calls += 1
-                nonfinite += int(not rec.get("oracle_finite", True))
+                _onf = int(not rec.get("oracle_finite", True))
+                nonfinite += _onf
+                nf_f += _onf
+            _rss = _rss_bytes()
+            samples_f.append(_rss)
+            run_samples.append(_rss)
         rate = app_ok / n_blocks
+        _peak_f = None
+        _seen_f = [s for s in samples_f if s is not None]
+        if _seen_f:
+            _peak_f = int(max(_seen_f))
         per_f.append({"f": float(f),
                       "attempted": int(n_blocks),
                       "app_exact_count": int(app_ok),
                       "app_exact_rate": float(rate),
                       "app_failure_fraction": float(1.0 - rate),
-                      "oracle_exact_count": int(ora_ok)})
+                      "oracle_exact_count": int(ora_ok),
+                      "app_syndrome_ok_count": int(app_syn_ok),
+                      "app_iterations_total": int(app_it_total),
+                      "app_iterations_max": int(app_it_max),
+                      "oracle_syndrome_ok_count": int(ora_syn_ok),
+                      "oracle_iterations_total": int(ora_it_total),
+                      "nonfinite_count": int(nf_f),
+                      "peak_rss_bytes": _peak_f})
     rates = [r["app_exact_rate"] for r in per_f]
     mono = bool(all(b >= a for a, b in zip(rates, rates[1:])))
-    return per_f, mono, calls, nonfinite
+    if any(s is None for s in run_samples):
+        run_peak = None
+    else:
+        _seen_run = [int(s) for s in run_samples if s is not None]
+        run_peak = int(max(_seen_run)) if _seen_run else None
+        _per_peaks = [r["peak_rss_bytes"] for r in per_f
+                      if r["peak_rss_bytes"] is not None]
+        if _per_peaks:
+            run_peak = int(max(_per_peaks))
+    return per_f, mono, calls, nonfinite, run_peak
+
+
+def _classify_g1_outcome(*, nonfinite, wall_seconds, peak_rss_bytes,
+                         per_f, monotonic):
+    # Completed-path precedence only; PRE_EXECUTION_BLOCKED and
+    # WATCHDOG_TIMEOUT_VOID are operator-side labels (no normal return).
+    if int(nonfinite) > 0:
+        return "G1_NONFINITE_OR_CRASH_BLOCKED"
+    try:
+        _wall = float(wall_seconds)
+    except Exception:
+        _wall = float("inf")
+    if _wall > 900.0:
+        return "G1_OVERRUN_900S"
+    if peak_rss_bytes is None or int(peak_rss_bytes) >= 2 * 1024**3:
+        return "G1_RESOURCE_OVERRUN"
+    _low = int(per_f[0]["app_exact_count"])
+    _top = int(per_f[-1]["app_exact_count"])
+    _attempted = int(per_f[0]["attempted"])
+    _signal = bool(monotonic) and _top > 0 and (
+        _top > _low or (_low == _attempted and _top == _attempted))
+    if _signal:
+        return "G1_TREND_PASS"
+    return "G1_COMPLETED_NO_SIGNAL_FAIL"
 
 
 def run_g1_phase(*, h=None, p_b=None, p_f=None,
@@ -2057,6 +2156,7 @@ def run_g1_phase(*, h=None, p_b=None, p_f=None,
     """G1 integration trend gate over the frozen G1 seeds (fake decoder only)."""
     _require_authorized("g1", authorized)
     _require_decode_fn("g1", decode_fn)
+    t_start = time.perf_counter()
     if h is None:
         h = {"L1": build_dv3_nested_mother(
             G1_WIDTH, G1_L1_K_MIN, G1_L1_K_MIN, L1_GRAPH_SEED, None),
@@ -2069,12 +2169,16 @@ def run_g1_phase(*, h=None, p_b=None, p_f=None,
     pb = np.asarray(p_b, dtype=np.float64).ravel()
     _, _, _, p1, p2 = _ce_stats(pf, pb)
     width = int(h1.shape[1])
-    per_f, mono, calls, nonfinite = _run_rate_scan(
+    per_f, mono, calls, nonfinite, run_peak = _run_rate_scan(
         decode_fn, h1, h2, p1, p2, pb, pf, width, G1_F,
         G1_BLOCKS, G1_SEEDS, G1_ORACLE_SUBSET)
     frozen = {str(f): {"m1": _rows_required(CE_L1_MEAN, G1_WIDTH, f),
                        "m2": _rows_required(CE_L2_ORACLE_MEAN, G1_WIDTH, f)}
               for f in G1_F}
+    wall = float(time.perf_counter() - t_start)
+    outcome = _classify_g1_outcome(
+        nonfinite=nonfinite, wall_seconds=wall,
+        peak_rss_bytes=run_peak, per_f=per_f, monotonic=mono)
     return {
         "phase": "g1",
         "block_length": width,
@@ -2085,7 +2189,10 @@ def run_g1_phase(*, h=None, p_b=None, p_f=None,
         "crashes": 0,
         "nonfinite": int(nonfinite),
         "decoder_calls": int(calls),
-        "passed": bool(mono and nonfinite == 0),
+        "peak_rss_bytes": run_peak,
+        "wall_seconds": wall,
+        "outcome": outcome,
+        "passed": bool(outcome == "G1_TREND_PASS"),
     }
 
 
@@ -2116,7 +2223,7 @@ def run_g2_phase(*, h=None, p_b=None, p_f=None,
     pb = np.asarray(p_b, dtype=np.float64).ravel()
     _, _, _, p1, p2 = _ce_stats(pf, pb)
     width = int(h1.shape[1])
-    per_f, mono, calls, nonfinite = _run_rate_scan(
+    per_f, mono, calls, nonfinite, _run_peak = _run_rate_scan(
         decode_fn, h1, h2, p1, p2, pb, pf, width, G2_F,
         G2_BLOCKS, G2_SEEDS, G2_ORACLE_SUBSET)
     frozen = {str(f): {"m1": _rows_required(CE_L1_MEAN, G2_WIDTH, f),
@@ -2371,16 +2478,27 @@ def write_g1_evidence(out_dir, result):
     """Write the four scalar-only G1 files to a fresh directory."""
     per_f = []
     for item in result.get("per_f", []) or []:
+        _peak = item.get("peak_rss_bytes")
         per_f.append({
             "f": float(item.get("f")),
             "attempted": int(item.get("attempted", 0)),
             "app_exact_count": int(item.get("app_exact_count", 0)),
             "app_exact_rate": float(item.get("app_exact_rate", 0.0)),
-            "app_failure_fraction": float(item.get(
-                "app_failure_fraction",
-                item.get("app_failure_fraction", 1.0))),
+            "app_failure_fraction": float(item["app_failure_fraction"]),
             "oracle_exact_count": int(item.get("oracle_exact_count", 0)),
+            "app_syndrome_ok_count": int(item.get(
+                "app_syndrome_ok_count", 0)),
+            "app_iterations_total": int(item.get(
+                "app_iterations_total", 0)),
+            "app_iterations_max": int(item.get("app_iterations_max", 0)),
+            "oracle_syndrome_ok_count": int(item.get(
+                "oracle_syndrome_ok_count", 0)),
+            "oracle_iterations_total": int(item.get(
+                "oracle_iterations_total", 0)),
+            "nonfinite_count": int(item.get("nonfinite_count", 0)),
+            "peak_rss_bytes": int(_peak) if _peak is not None else None,
         })
+    _run_peak = result.get("peak_rss_bytes")
     payload = {
         "phase": str(result.get("phase", "g1")),
         "formal_root": G1_FORMAL_ROOT,
@@ -2396,18 +2514,29 @@ def write_g1_evidence(out_dir, result):
         "crashes": int(result.get("crashes", 0)),
         "nonfinite": int(result.get("nonfinite", 0)),
         "decoder_calls": int(result.get("decoder_calls", 0)),
+        "peak_rss_bytes": int(_run_peak) if _run_peak is not None else None,
+        "wall_seconds": float(result.get("wall_seconds", 0.0)),
+        "outcome": str(result.get("outcome",
+                                 "G1_COMPLETED_NO_SIGNAL_FAIL")),
         "passed": bool(result.get("passed", False)),
         "output_files": list(STAGE_EVIDENCE_FILES),
     }
     table_rows = [[r["f"], r["attempted"], r["app_exact_count"],
                    r["app_exact_rate"], r["app_failure_fraction"],
-                   r["oracle_exact_count"]] for r in per_f]
+                   r["oracle_exact_count"], r["app_syndrome_ok_count"],
+                   r["app_iterations_total"], r["app_iterations_max"],
+                   r["oracle_syndrome_ok_count"],
+                   r["oracle_iterations_total"], r["nonfinite_count"],
+                   r["peak_rss_bytes"]] for r in per_f]
     report = ["# V72P2D5 G1 evidence",
               f"phase: {payload['phase']}",
+              f"outcome: {payload['outcome']}",
               f"passed: {payload['passed']}",
               f"monotonic: {payload['monotonic']}",
               f"nonfinite: {payload['nonfinite']}",
               f"decoder_calls: {payload['decoder_calls']}",
+              f"peak_rss_bytes: {payload['peak_rss_bytes']}",
+              f"wall_seconds: {payload['wall_seconds']}",
               f"formal_root: {G1_FORMAL_ROOT}"]
     summary = {
         "phase": payload["phase"],
@@ -2415,13 +2544,19 @@ def write_g1_evidence(out_dir, result):
         "decoder_calls": payload["decoder_calls"],
         "monotonic": payload["monotonic"],
         "nonfinite": payload["nonfinite"],
+        "peak_rss_bytes": payload["peak_rss_bytes"],
+        "wall_seconds": payload["wall_seconds"],
+        "outcome": payload["outcome"],
         "passed": payload["passed"],
         "files": list(STAGE_EVIDENCE_FILES),
     }
     return _write_stage_evidence(
         out_dir, payload,
         "f,attempted,app_exact_count,app_exact_rate,"
-        "app_failure_fraction,oracle_exact_count",
+        "app_failure_fraction,oracle_exact_count,"
+        "app_syndrome_ok_count,app_iterations_total,app_iterations_max,"
+        "oracle_syndrome_ok_count,oracle_iterations_total,"
+        "nonfinite_count,peak_rss_bytes",
         table_rows, report, summary)
 
 
@@ -2434,9 +2569,7 @@ def write_g2_evidence(out_dir, result):
             "attempted": int(item.get("attempted", 0)),
             "app_exact_count": int(item.get("app_exact_count", 0)),
             "app_exact_rate": float(item.get("app_exact_rate", 0.0)),
-            "app_failure_fraction": float(item.get(
-                "app_failure_fraction",
-                item.get("app_failure_fraction", 1.0))),
+            "app_failure_fraction": float(item["app_failure_fraction"]),
             "oracle_exact_count": int(item.get("oracle_exact_count", 0)),
         })
     payload = {
@@ -2504,11 +2637,21 @@ def run_g1_synthetic(*, authorized=False, decode_fn=None, out_dir=None,
                      counts_ab=None, p_b=None):
     """Authorized G1 entrypoint; prep first, then build, decode, write."""
     _require_authorized("g1", authorized)
+    t_entry = time.perf_counter()
     _c, _b = _load_model_f_input_or_blocked(counts_ab, p_b)
     pb, pf = prepare_model_f_prior(_c, _b)
     decoder = decode_fn if decode_fn is not None else bind_historical_decoder()
     result = run_g1_phase(h=None, p_b=pb, p_f=pf, decode_fn=decoder,
                           authorized=True)
+    wall_outer = float(time.perf_counter() - t_entry)
+    result["wall_seconds"] = wall_outer
+    result["outcome"] = _classify_g1_outcome(
+        nonfinite=result.get("nonfinite", 0),
+        wall_seconds=wall_outer,
+        peak_rss_bytes=result.get("peak_rss_bytes"),
+        per_f=result.get("per_f", []),
+        monotonic=result.get("monotonic", False))
+    result["passed"] = bool(result["outcome"] == "G1_TREND_PASS")
     target = G1_FORMAL_ROOT if out_dir is None else out_dir
     write_g1_evidence(target, result)
     return result
