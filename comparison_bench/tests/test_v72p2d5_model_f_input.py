@@ -41,6 +41,38 @@ def _snapshot_dir(path):
             for q in p.iterdir() if q.is_file()}
 
 
+# Frozen formal-root relpaths mirrored from the rate-mother core (which owns
+# the P0/G1/G2/G0/G0-recovery/structure constants; this module only defines
+# MODEL_F_FORMAL_ROOT). Literals for snapshotting only — never assert absence.
+_P0_FORMAL_REL = "workspace/v72p2d5_p0_cost/20260906_r1"
+_G1_FORMAL_REL = "workspace/v72p2d5_g1/20260906_r1"
+_G2_FORMAL_REL = "workspace/v72p2d5_g2/20260906_r1"
+_G0_FORMAL_REL = "workspace/v72p2d5_g0/20260905_r2"
+_G0_RECOVERY_FORMAL_REL = "workspace/v72p2d5_g0_recovery/20260906_r1"
+_STRUCTURE_FORMAL_REL = "workspace/v72p2d5_structure/20260905_r2"
+
+
+def _formal_roots():
+    return [ROOT / _P0_FORMAL_REL, ROOT / _G1_FORMAL_REL,
+            ROOT / _G2_FORMAL_REL, ROOT / _G0_FORMAL_REL,
+            ROOT / _G0_RECOVERY_FORMAL_REL,
+            ROOT / mod.MODEL_F_FORMAL_ROOT,
+            ROOT / _STRUCTURE_FORMAL_REL]
+
+
+def _snapshot_formal_roots():
+    return {str(r): _snapshot_dir(r) for r in _formal_roots()}
+
+
+def _assert_formal_roots_unchanged(before):
+    for key, old in before.items():
+        now = _snapshot_dir(key)
+        assert now == old, (
+            f"formal root touched during test: {key} "
+            f"(before={old!r}, after={now!r}); tests must snapshot-and-compare "
+            f"formal roots, never assert their absence")
+
+
 def _valid_full(seed=11):
     rng = np.random.default_rng(seed)
     frames = np.repeat(np.arange(702, 1726, dtype=np.int64), 256)
@@ -413,19 +445,14 @@ def test_M18_verify_readonly(tmp_path, monkeypatch):
 
 
 def test_M24_formal_roots_absent(tmp_path, monkeypatch):
-    # Lifecycle-independent: tmp stays clean; real Model-F/G1 snapshots
-    # unchanged (no validity claim, INVALID_UNAUTHORIZED_TEST_TRIGGERED);
-    # P0/G2 remain absent; no new formal root created here.
+    # Lifecycle-aware invariance: this test touches no formal root.
+    # Absent-at-start + absent-at-end passes; present-at-start + identical
+    # passes; creation/deletion/modification fails loudly (no validity
+    # claim, INVALID_UNAUTHORIZED_TEST_TRIGGERED).
     monkeypatch.chdir(tmp_path)
-    mf_root = ROOT / mod.MODEL_F_FORMAL_ROOT
-    g1_root = ROOT / "workspace/v72p2d5_g1/20260906_r1"
-    mf_before = _snapshot_dir(mf_root)
-    g1_before = _snapshot_dir(g1_root)
-    assert not (ROOT / "workspace/v72p2d5_p0_cost/20260906_r1").exists()
-    assert not (ROOT / "workspace/v72p2d5_g2/20260906_r1").exists()
+    formal_before = _snapshot_formal_roots()
     assert list(tmp_path.rglob("model_f_input.npz")) == []
-    assert _snapshot_dir(mf_root) == mf_before
-    assert _snapshot_dir(g1_root) == g1_before
+    _assert_formal_roots_unchanged(formal_before)
 
 
 FROZEN_REL = "comparison_bench/outputs_comparison/v55_intake_20260828/pairs/20260123_1M_600k_0dB/pairs.parquet"
@@ -635,14 +662,9 @@ def test_P11_verify_unaffected(tmp_path, monkeypatch):
 
 
 def test_P12_formal_roots_absent(tmp_path, monkeypatch):
-    # Lifecycle-independent (see M24): no real Model-F/G1 absence assert.
+    # Lifecycle-aware invariance (see M24): prove no formal root touched,
+    # no absence assert (legitimate artifacts may exist).
     monkeypatch.chdir(tmp_path)
-    mf_root = ROOT / mod.MODEL_F_FORMAL_ROOT
-    g1_root = ROOT / "workspace/v72p2d5_g1/20260906_r1"
-    mf_before = _snapshot_dir(mf_root)
-    g1_before = _snapshot_dir(g1_root)
-    assert not (ROOT / "workspace/v72p2d5_p0_cost/20260906_r1").exists()
-    assert not (ROOT / "workspace/v72p2d5_g2/20260906_r1").exists()
+    formal_before = _snapshot_formal_roots()
     assert list(tmp_path.rglob("model_f_input.npz")) == []
-    assert _snapshot_dir(mf_root) == mf_before
-    assert _snapshot_dir(g1_root) == g1_before
+    _assert_formal_roots_unchanged(formal_before)

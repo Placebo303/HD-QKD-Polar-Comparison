@@ -110,6 +110,27 @@ def _snapshot_dir(path):
             for q in p.iterdir() if q.is_file()}
 
 
+def _formal_roots():
+    return [ROOT / mod.P0_FORMAL_ROOT, ROOT / mod.G1_FORMAL_ROOT,
+            ROOT / mod.G2_FORMAL_ROOT, ROOT / mod.G0_FORMAL_ROOT,
+            ROOT / mod.G0_RECOVERY_FORMAL_ROOT,
+            ROOT / mod.MODEL_F_INPUT_FORMAL_ROOT,
+            ROOT / mod.STRUCTURE_FORMAL_ROOT]
+
+
+def _snapshot_formal_roots():
+    return {str(r): _snapshot_dir(r) for r in _formal_roots()}
+
+
+def _assert_formal_roots_unchanged(before):
+    for key, old in before.items():
+        now = _snapshot_dir(key)
+        assert now == old, (
+            f"formal root touched during test: {key} "
+            f"(before={old!r}, after={now!r}); tests must snapshot-and-compare "
+            f"formal roots, never assert their absence")
+
+
 def _boom(name):
     def _f(**kw):
         raise AssertionError(f"{name} must not be entered")
@@ -986,16 +1007,32 @@ def test_T1_22_openspec_history_zero_mod():
     # (proposal/design/tasks/specs/spec) + cycle_state.yaml + new amendment;
     # PLAN_FREEZE and history docs stay frozen, so only they are asserted
     # clean here. Recovery scope is covered by T-R tests.
+    # Cleanliness means REAL CONTENT difference: a file counts as modified
+    # only when git diff --numstat reports nonzero added/deleted lines
+    # (binary "-/-" entries count as changed). Line-ending-only churn under
+    # core.autocrlf=true (no .gitattributes) yields empty numstat, so it
+    # passes; any genuine tracked-file content change still fails.
     clean_paths = ["openspec/changes/formal-ir-v72p2d5-gf32-rate-mother-plan/PLAN_FREEZE.md",
                    "docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/PLAN_CORRIGENDUM_R2.md",
                    "docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/PLAN_REVIEW_VERDICT_R2.md",
                    "docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/IMPLEMENTATION_PACKET_R2.md",
                    "src", "experiments", "tools", "results"]
-    r = subprocess.run(["git", "status", "--porcelain", "--"] + clean_paths,
-                       capture_output=True, text=True, timeout=120,
-                       cwd=str(ROOT))
-    assert r.returncode == 0
-    assert r.stdout.strip() == ""
+    changed = []
+    for args in (["git", "diff", "--numstat", "--"],
+                 ["git", "diff", "--cached", "--numstat", "--"]):
+        r = subprocess.run(args + clean_paths,
+                           capture_output=True, text=True, timeout=120,
+                           cwd=str(ROOT))
+        assert r.returncode == 0
+        for line in r.stdout.splitlines():
+            if not line.strip():
+                continue
+            added, deleted, _path = line.split("\t", 2)
+            if added == "-" or deleted == "-":
+                changed.append(line)
+            elif int(added) != 0 or int(deleted) != 0:
+                changed.append(line)
+    assert changed == []
     test_src = Path(__file__).read_text(encoding="utf-8")
     banned_calls = {"write_text", "write_bytes", "save", "savez", "to_csv",
                     "to_parquet", "dump", "mkdir", "remove", "unlink",
@@ -2116,6 +2153,7 @@ def test_R1_B2_last_seed_resource_exceed_blocked_with_counts_preserved(
 
 
 def test_R1_B2_all_exec_false_formal_absent_and_budgets():
+    formal_before = _snapshot_formal_roots()
     _rec_root = ROOT / mod.G0_RECOVERY_FORMAL_ROOT
     _rec_before = sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir())
     _g1_root = ROOT / mod.G1_FORMAL_ROOT
@@ -2133,11 +2171,11 @@ def test_R1_B2_all_exec_false_formal_absent_and_budgets():
     assert (ROOT / mod.G0_FORMAL_ROOT).exists()
     assert sorted(p.name for p in (ROOT / mod.G0_FORMAL_ROOT).iterdir()) == sorted(mod.G0_EVIDENCE_FILES)
     assert sorted((p.name, p.stat().st_size, p.stat().st_mtime_ns) for p in _rec_root.iterdir()) == _rec_before
-    assert not (ROOT / mod.P0_FORMAL_ROOT).exists()
-    # Lifecycle-independent: G1 incident root preserved unchanged (no
-    # validity claim, INVALID_UNAUTHORIZED_TEST_TRIGGERED); P0/G2 absent.
+    # Lifecycle-aware: no absence assert (legitimate P0/G1 output may exist);
+    # invariance proves this test touched no formal root (no validity claim,
+    # INVALID_UNAUTHORIZED_TEST_TRIGGERED).
+    _assert_formal_roots_unchanged(formal_before)
     assert _snapshot_dir(_g1_root) == _g1_before
-    assert not (ROOT / mod.G2_FORMAL_ROOT).exists()
     assert float(mod.G0_WALL_BUDGET_S) == 120.0
     assert int(mod.G0_RSS_BUDGET_BYTES) == 2 * 1024**3
 
@@ -2924,12 +2962,11 @@ def test_P0G1G2_f_no_holdout_or_file_access(tmp_path, monkeypatch):
                mod.write_p0_cost_evidence, mod.write_g1_evidence,
                mod.write_g2_evidence):
         assert "build_g0_fixture" not in inspect.getsource(fn)
-    # Fake phases create no files; lifecycle-independent: tmp stays empty,
-    # P0/G2 remain absent, G1 snapshot unchanged (no validity claim).
+    # Fake phases create no files; lifecycle-aware: tmp stays empty and no
+    # formal root is touched (no absence assert, no validity claim).
     p_b, p_f = _tiny_tables()
     h = _tiny_h()
-    g1_root = ROOT / mod.G1_FORMAL_ROOT
-    g1_before = _snapshot_dir(g1_root)
+    formal_before = _snapshot_formal_roots()
     monkeypatch.chdir(tmp_path)
     mod.run_p0_cost_phase(h=h, p_b=p_b, p_f=p_f,
                           decode_fn=FakeDecoder(), authorized=True)
@@ -2938,16 +2975,13 @@ def test_P0G1G2_f_no_holdout_or_file_access(tmp_path, monkeypatch):
     mod.run_g2_phase(h=h, p_b=p_b, p_f=p_f, decode_fn=FakeDecoder(),
                      authorized=True)
     assert list(tmp_path.rglob("*")) == []
-    assert not (ROOT / mod.P0_FORMAL_ROOT).exists()
-    assert not (ROOT / mod.G2_FORMAL_ROOT).exists()
-    assert _snapshot_dir(g1_root) == g1_before
+    _assert_formal_roots_unchanged(formal_before)
 
 
 def test_P0G1G2_g_four_file_no_overwrite(tmp_path):
     p_b, p_f = _tiny_tables()
     h = _tiny_h()
-    g1_root = ROOT / mod.G1_FORMAL_ROOT
-    g1_before = _snapshot_dir(g1_root)
+    formal_before = _snapshot_formal_roots()
     p0 = mod.run_p0_cost_phase(h=h, p_b=p_b, p_f=p_f,
                                decode_fn=FakeDecoder(), authorized=True)
     out0 = tmp_path / "p0"
@@ -3004,11 +3038,10 @@ def test_P0G1G2_g_four_file_no_overwrite(tmp_path):
     assert mod.P0_FORMAL_ROOT == "workspace/v72p2d5_p0_cost/20260906_r1"
     assert mod.G1_FORMAL_ROOT == "workspace/v72p2d5_g1/20260906_r1"
     assert mod.G2_FORMAL_ROOT == "workspace/v72p2d5_g2/20260906_r1"
-    assert not (ROOT / mod.P0_FORMAL_ROOT).exists()
-    assert not (ROOT / mod.G2_FORMAL_ROOT).exists()
-    # G1 incident root preserved: observe only to prove this test did not
-    # touch it (no validity claim, INVALID_UNAUTHORIZED_TEST_TRIGGERED).
-    assert _snapshot_dir(g1_root) == g1_before
+    # Formal roots untouched by this test (no absence assert; legitimate
+    # artifacts may exist — no validity claim,
+    # INVALID_UNAUTHORIZED_TEST_TRIGGERED).
+    _assert_formal_roots_unchanged(formal_before)
 
 
 def test_P0G1G2_h_g2_four_state_grading():
@@ -3175,8 +3208,7 @@ def test_M19_d5_unauthorized_artifact_zero(tmp_path, monkeypatch):
 def test_M20_d5_authorized_fake_load_reaches_runner(tmp_path):
     c, pb = _mffake_counts()
     seen = {}
-    g1_root = ROOT / mod.G1_FORMAL_ROOT
-    g1_before = _snapshot_dir(g1_root)
+    formal_before = _snapshot_formal_roots()
 
     def _fake_load(counts_ab=None, p_b=None):
         seen["injected"] = (counts_ab is not None and p_b is not None)
@@ -3193,12 +3225,11 @@ def test_M20_d5_authorized_fake_load_reaches_runner(tmp_path):
     assert seen["injected"] is True
     assert res["decoder_calls"] == 440
     assert res["phase"] == "g1"
-    # Authorized fake uses tmp out_dir only; formal G1 untouched.
+    # Authorized fake uses tmp out_dir only; formal roots untouched (no
+    # absence assert; legitimate artifacts may exist).
     assert sorted(p.name for p in out.iterdir()) == sorted(
         mod.STAGE_EVIDENCE_FILES)
-    assert _snapshot_dir(g1_root) == g1_before
-    assert not (ROOT / mod.P0_FORMAL_ROOT).exists()
-    assert not (ROOT / mod.G2_FORMAL_ROOT).exists()
+    _assert_formal_roots_unchanged(formal_before)
     # prepare identity: injected tables reach prepare_model_f_prior
     pb2, pf2 = mod.prepare_model_f_prior(c, pb)
     assert pb2.shape == (1024,)
@@ -3509,3 +3540,47 @@ def test_TIS_static_authorized_synthetic_isolation():
     assert ("STATE_PATH)" + ".write") not in src
     assert ("yaml." + "dump") not in src
     assert ("yaml.safe_" + "dump") not in src
+
+
+def test_T1_23_no_formal_root_absence_assertion():
+    """Static (stdlib AST) recurrence guard: no formal-root absence assert.
+
+    Absence was the proxy that broke the moment legitimate P0/G1 output
+    landed (the guard model that failed in the unauthorized-G1 incident).
+    Use snapshot-and-compare invariance instead:
+    _snapshot_formal_roots() at test start plus
+    _assert_formal_roots_unchanged() at test end.
+    """
+    root_names = ("P0_FORMAL_ROOT", "G1_FORMAL_ROOT", "G2_FORMAL_ROOT",
+                  "G0_FORMAL_ROOT", "G0_RECOVERY_FORMAL_ROOT",
+                  "MODEL_F_FORMAL_ROOT", "MODEL_F_INPUT_FORMAL_ROOT",
+                  "STRUCTURE_FORMAL_ROOT")
+    literal_frags = ("v72p2d5_p0_cost", "v72p2d5_g1", "v72p2d5_g2",
+                     "v72p2d5_g0", "v72p2d5_g0_recovery",
+                     "v72p2d5_model_f_input", "v72p2d5_structure")
+    instead = ("use _snapshot_formal_roots() + "
+               "_assert_formal_roots_unchanged() invariance instead of "
+               "absence assertions against formal roots")
+    files = [Path(__file__),
+             Path(__file__).with_name("test_v72p2d5_model_f_input.py")]
+    for path in files:
+        src = path.read_text(encoding="utf-8")
+        tree = ast.parse(src)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.FunctionDef):
+                continue
+            if node.name == "test_T1_23_no_formal_root_absence_assertion":
+                continue
+            for sub in ast.walk(node):
+                if not isinstance(sub, ast.Assert):
+                    continue
+                if not (isinstance(sub.test, ast.UnaryOp)
+                        and isinstance(sub.test.op, ast.Not)):
+                    continue
+                seg = ast.get_source_segment(src, sub) or ""
+                if ".exists()" not in seg:
+                    continue
+                hit = [t for t in root_names + literal_frags if t in seg]
+                assert not hit, (
+                    f"{path.name}:{node.name}:{sub.lineno} asserts a formal "
+                    f"root absent ({','.join(hit)}); {instead}")
