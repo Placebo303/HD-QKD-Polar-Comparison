@@ -157,8 +157,8 @@ def syndrome_of_gf32(matrix: np.ndarray, vector: np.ndarray, field: Optional[GF2
     return syndromes
 
 
-def compute_gf32_rank(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
-    """Compute exact row rank of matrix over GF(32) using Gaussian elimination."""
+def _compute_gf32_rank_loop(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
+    """Reference element-loop GF(32) elimination; P2 equality-gate对照, not the default path."""
     if field is None:
         field = GF2mField.create(FIELD_Q)
     mul_table, _, inv_table = _get_gf32_tables(field)
@@ -198,6 +198,117 @@ def compute_gf32_rank(matrix: np.ndarray, field: Optional[GF2mField] = None) -> 
         rank += 1
         col += 1
     return rank
+
+
+def _compute_gf32_rank_vectorized(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
+    """Vectorized GF(32) elimination; identical pivot choice/arithmetic to the loop."""
+    if field is None:
+        field = GF2mField.create(FIELD_Q)
+    mul_table, _, inv_table = _get_gf32_tables(field)
+    A = np.asarray(matrix, dtype=np.uint8).copy()
+    m, n = A.shape
+    rank = 0
+    col = 0
+    cols = np.arange(n)
+    for r in range(m):
+        if col >= n:
+            break
+        pivot_row = -1
+        while col < n:
+            nz = np.flatnonzero(A[r:, col])
+            if nz.size:
+                pivot_row = r + int(nz[0])
+                break
+            col += 1
+        if pivot_row < 0:
+            break
+        if pivot_row != r:
+            A[[r, pivot_row]] = A[[pivot_row, r]]
+        inv_val = inv_table[A[r, col]]
+        # scale pivot row
+        A[r, col:] = mul_table[A[r, col:], inv_val]
+        # eliminate column col in all other rows at once
+        factors = A[:, col].copy()
+        factors[r] = 0
+        rows = np.flatnonzero(factors)
+        if rows.size:
+            seg = cols[col:]
+            A[rows[:, None], seg] ^= mul_table[factors[rows, None], A[r, seg][None, :]]
+        rank += 1
+        col += 1
+    return rank
+
+
+_TABLE_LISTS_CACHE: dict[str, tuple[list[list[int]], list[int]]] = {}
+
+
+def _get_gf32_table_lists(field: GF2mField) -> tuple[list[list[int]], list[int]]:
+    """Cached (mul_table, inv_table) as nested Python lists for the tiny fast path."""
+    field_id = field.spec.field_id
+    cached = _TABLE_LISTS_CACHE.get(field_id)
+    if cached is None:
+        mul_table, _, inv_table = _get_gf32_tables(field)
+        cached = (mul_table.tolist(), inv_table.tolist())
+        _TABLE_LISTS_CACHE[field_id] = cached
+    return cached
+
+
+def _compute_gf32_rank_tiny(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
+    """Exact GF(32) elimination on plain Python lists; fastest for tiny matrices."""
+    if field is None:
+        field = GF2mField.create(FIELD_Q)
+    mul_rows, inv_vals = _get_gf32_table_lists(field)
+    A = [list(map(int, row)) for row in np.asarray(matrix, dtype=np.uint8).tolist()]
+    m = len(A)
+    n = len(A[0]) if m else 0
+    rank = 0
+    col = 0
+    for r in range(m):
+        if col >= n:
+            break
+        pivot_row = -1
+        while col < n:
+            for r2 in range(r, m):
+                if A[r2][col]:
+                    pivot_row = r2
+                    break
+            if pivot_row >= 0:
+                break
+            col += 1
+        if pivot_row < 0:
+            break
+        if pivot_row != r:
+            A[r], A[pivot_row] = A[pivot_row], A[r]
+        inv_val = inv_vals[A[r][col]]
+        prow = A[r]
+        for c in range(col, n):
+            if prow[c]:
+                prow[c] = mul_rows[prow[c]][inv_val]
+        for r2 in range(m):
+            if r2 != r and A[r2][col]:
+                factor = A[r2][col]
+                mrow = mul_rows[factor]
+                tgt = A[r2]
+                for c in range(col, n):
+                    if prow[c]:
+                        tgt[c] ^= mrow[prow[c]]
+        rank += 1
+        col += 1
+    return rank
+
+
+def compute_gf32_rank(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
+    """Compute exact row rank of matrix over GF(32) using Gaussian elimination.
+
+    Default path dispatches by size: tiny matrices use the list fast path
+    (numpy call overhead dominates there); larger ones use the vectorized form.
+    All forms share pivot choice and table arithmetic, gated to equal outputs.
+    """
+    A0 = np.asarray(matrix, dtype=np.uint8)
+    m, n = A0.shape
+    if m * n <= 48:
+        return _compute_gf32_rank_tiny(A0, field)
+    return _compute_gf32_rank_vectorized(A0, field)
 
 # ---------------------------------------------------------------------------
 # Channel Loading & Sampling
