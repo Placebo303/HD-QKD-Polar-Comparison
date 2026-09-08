@@ -85,6 +85,7 @@ def _fresh_workspace_test_root(label: str) -> Path:
 # T1 - T5: Foundations, Determinism & Cycle Degeneracy
 # ---------------------------------------------------------------------------
 
+@pytest.mark.slow
 def test_t1_construction_seed_determinism():
     """T1: Construction seed determinism across all 3 lanes."""
     H_a1, m_a1 = construct_lane_a_prototype("1M", TEST_SEED_1, max_sweeps=1)
@@ -256,6 +257,7 @@ def test_t5_cycle_submatrix_rank_classification():
 # T6 - T8, Lane A Tie Tests: Lane A Properties & Tie-Breaks
 # ---------------------------------------------------------------------------
 
+@pytest.mark.slow
 def test_t6_t7_t8_lane_a_support_and_search():
     """T6-T8: Lane A binary support identity, label-only modification, and sweep cap."""
     v31_mats = load_v31_qc_baseline_matrices()
@@ -741,6 +743,7 @@ def test_t29_lane_a_incremental_objective_matches_brute_force():
         assert inc_states == bf_states
 
 
+@pytest.mark.slow
 def test_t30_t31_lane_a_rank_semantics():
     """T30-T31: Support identity and sweep-1 rank diagnostic behavior."""
     H_a, metrics = construct_lane_a_prototype("1M", TEST_SEED_1, max_sweeps=2)
@@ -825,6 +828,7 @@ def test_production_orchestrator_guard():
         run_v38_development(development_execution_authorized=False)
 
 
+@pytest.mark.slow
 def test_production_orchestration_all_27_attempts_and_fail_closed():
     """Safety B-F: Orchestration completes all 27 attempts, manages NOT_READY lane decoder runs, and respects limits."""
     # Create a test-only seed dictionary with 3 test seeds per lane/source (seeds >= 938001)
@@ -874,6 +878,7 @@ def test_production_orchestration_all_27_attempts_and_fail_closed():
             assert len(LANE_PRODUCTION_SEEDS[lane][src]) == 3
 
 
+@pytest.mark.slow
 def test_orchestration_not_ready_lane_gets_zero_decoder_runs(monkeypatch):
     """Safety C & D: If one source in a lane lacks a winner, that lane gets 0 decoder runs while other READY lanes get 15."""
     test_seed_dict = {
