@@ -1,0 +1,112 @@
+{
+  "workstream": "W2",
+  "decoder_calls": 5,
+  "watchdog_s": 120,
+  "diagnostics": [
+    {
+      "id": "S0-DELTA@Hsq[:64]",
+      "decoder_calls": 1,
+      "changed_axis": "mother only (new square mother; signal prior)",
+      "input": "delta prior on rng(2026090701) word; square mother",
+      "exact": true,
+      "syndrome_ok": true,
+      "iterations": 0,
+      "nonfinite": false,
+      "wall_s": 0.0021208999678492546,
+      "rss_bytes": 112599040,
+      "watchdog_ok": true
+    },
+    {
+      "id": "SQ-ORACLE@2026090600",
+      "decoder_calls": 1,
+      "block_seed": 2026090600,
+      "changed_axis": "mother only (frozen H2[:43] -> square Hsq[:64]); prior unchanged (accepted oracle-L2)",
+      "input": "Model-F block seed 2026090600, n=64, square disclosure m=n=64",
+      "prior_mass_on_truth": 0.031245495554821028,
+      "exact": false,
+      "syndrome_ok": false,
+      "iterations": 90,
+      "nonfinite": false,
+      "wall_s": 0.5788969000568613,
+      "rss_bytes": 112758784,
+      "watchdog_ok": true
+    },
+    {
+      "id": "SQ-ORACLE@2026090601",
+      "decoder_calls": 1,
+      "block_seed": 2026090601,
+      "changed_axis": "mother only (frozen H2[:43] -> square Hsq[:64]); prior unchanged (accepted oracle-L2)",
+      "input": "Model-F block seed 2026090601, n=64, square disclosure m=n=64",
+      "prior_mass_on_truth": 0.031232257743145843,
+      "exact": false,
+      "syndrome_ok": false,
+      "iterations": 90,
+      "nonfinite": false,
+      "wall_s": 0.5770149000454694,
+      "rss_bytes": 112812032,
+      "watchdog_ok": true
+    },
+    {
+      "id": "SQ-ORACLE@2026090602",
+      "decoder_calls": 1,
+      "block_seed": 2026090602,
+      "changed_axis": "mother only (frozen H2[:43] -> square Hsq[:64]); prior unchanged (accepted oracle-L2)",
+      "input": "Model-F block seed 2026090602, n=64, square disclosure m=n=64",
+      "prior_mass_on_truth": 0.031246423401054504,
+      "exact": false,
+      "syndrome_ok": false,
+      "iterations": 90,
+      "nonfinite": false,
+      "wall_s": 0.5745212000329047,
+      "rss_bytes": 112816128,
+      "watchdog_ok": true
+    },
+    {
+      "id": "SQ-ORACLE@2026090603",
+      "decoder_calls": 1,
+      "block_seed": 2026090603,
+      "changed_axis": "mother only (frozen H2[:43] -> square Hsq[:64]); prior unchanged (accepted oracle-L2)",
+      "input": "Model-F block seed 2026090603, n=64, square disclosure m=n=64",
+      "prior_mass_on_truth": 0.03125349822908601,
+      "exact": false,
+      "syndrome_ok": false,
+      "iterations": 90,
+      "nonfinite": false,
+      "wall_s": 0.5721225999295712,
+      "rss_bytes": 112816128,
+      "watchdog_ok": true
+    }
+  ],
+  "square_mother": {
+    "seed": 2026090801,
+    "shape": [
+      64,
+      64
+    ],
+    "rank": 64,
+    "full_rank": true,
+    "audit_status": "STRUCTURE_BLOCKED",
+    "audit_passed": false,
+    "four_cycles": 7,
+    "duplicate_projective_columns": 0,
+    "base_pair_duplicates": 1,
+    "build_wall_s": 0.010816899943165481
+  },
+  "frontier_accepted_prior": {
+    "note": "paired frontier reuses R1 F3 frozen-row points (no repeat calls)",
+    "H2[:43]": {
+      "exact": "0/4 (R1 F2b)",
+      "source": "R1 diag03"
+    },
+    "H2[:52]": {
+      "exact": "0/4 (R1 F3)",
+      "source": "R1 diag03"
+    },
+    "Hsq[:64]": {
+      "exact": "0/4 (this script S1..S4)",
+      "source": "R2 W2"
+    }
+  },
+  "wall_s": 4.454450899967924,
+  "peak_rss_bytes": 112816128
+}

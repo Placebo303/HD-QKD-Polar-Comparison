@@ -50,7 +50,14 @@ structure_reason: all_8_prefixes_passed_11_hard_gates; four_cycle_risk_carried
 g0_packet_review: PASS
 g0_implementation_candidate: true
 g0_implementation_accepted: true
-next_gate: G1_ATTRIBUTION_ROUTE_DECISION
+next_gate: INDEPENDENT_G1_INFORMATION_RECOVERY_R2_REVIEW
+# R2 20260908: terminal class LAMBDA_APPLICATION_CONTRACT_DEFECT (supersedes
+# R1 bucket as primary; R1 carried secondary); review-ready candidate
+# build_f_model_concentration + prepare_model_f_prior_candidate (additive,
+# nonformal); evidence root
+# workspace/d5_g1_wide_attribution_r2_5c38a20ae60b41ceb0b6a0d7757aa2aa (53
+# dev calls, CAL-only); OpenSpec v72p2d5-g1-information-recovery-r2;
+# accepted G1/model-F artifacts and all authorizations unchanged.
 p0_cost_result_accepted: true
 p0_cost_accepted_scope: COST_MEASUREMENT_ONLY
 # R2 structure-runner version binding (implementation-only round, no auth change).
