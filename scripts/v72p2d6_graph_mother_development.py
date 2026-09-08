@@ -315,7 +315,8 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
            "prior_mass_on_truth": tm, "wall_s": wall,
            "rss_bytes": "" if rss is None else int(rss),
            "watchdog_ok": bool(wall <= WATCHDOG),
-           "worker_pid": state["worker"].pids[-1]}
+            "worker_pid": state["worker"].pids[-1],
+            "beliefs": res.get("beliefs")}
     state["records"].append(rec)
     return rec
 
