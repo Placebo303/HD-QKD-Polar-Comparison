@@ -3375,3 +3375,8 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 
 - Acceptance [decision]: `D5_ROUTE_STOP_REVIEW_PASS` accepted (`D5_ROUTE_STOP_ACCEPTANCE_R1.md`); terminal `D5_CURRENT_TWO_LAYER_RATE_MOTHER_BP_PATH_STOPPED`; reason `ACCEPTED_G1_NO_SIGNAL_PLUS_CAL_ONLY_L1_DISCRIMINATOR_NO_USEFUL_RECOVERY`; scope exactly the current fixed high-five/low-five two-layer rate-mother/BP path.
 - Lifecycle [decision]: GF32/NB-LDPC open; formal G1 accepted completed-no-signal unchanged; G2 unauthorized/absent; successor is the reversible 5+5 decomposition discriminator. `next_gate` `D5_ROUTE_STOP_REVIEW -> D5_DECOMPOSITION_SUCCESSOR_PREREG`. No push.
+
+## 2026-09-08 V72P2D5 decomposition successor R1 (no N64 recovery, graph/mother route next)
+
+- Result [repo-observed]: prereg `e4d3af7` before scores/calls; 252 CAL-only (chain ≤8.88e-16, joint invariant 7.162347, control CE_L1 3.814742 = c1 E1); rank-1 IS current mapping `(5,6,7,8,9)` m=(59,52). 192/600 calls: APP 0/8 everywhere; oracle-L2 6/8+8/8 rank-1 only (diagnostic); 0 crash/nonfinite/disagreement; four-file suite 259 passed. Evidence `workspace/d5_decomposition_successor_r1_c765e3010674/`.
+- Lifecycle [decision]: terminal `DECOMPOSITION_NO_N64_RECOVERY`; no code/OpenSpec (§4.6 not-strong). `next_gate` `-> D5_GRAPH_MOTHER_SUCCESSOR_PROPOSAL` (main-thread proposal, not authorized). Formal roots unchanged, authorizations false, no push.

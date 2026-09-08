@@ -50,11 +50,14 @@ structure_reason: all_8_prefixes_passed_11_hard_gates; four_cycle_risk_carried
 g0_packet_review: PASS
 g0_implementation_candidate: true
 g0_implementation_accepted: true
-next_gate: D5_DECOMPOSITION_SUCCESSOR_PREREG
+next_gate: D5_GRAPH_MOTHER_SUCCESSOR_PROPOSAL
 d5_route_stop_review: PASS_R1
 d5_current_path_stopped: true
 d5_stop_scope: CURRENT_TWO_LAYER_RATE_MOTHER_BP_PATH
 d5_stop_reason: ACCEPTED_G1_NO_SIGNAL_PLUS_CAL_ONLY_L1_DISCRIMINATOR_NO_USEFUL_RECOVERY
+d5_decomposition_successor_terminal: DECOMPOSITION_NO_N64_RECOVERY
+d5_decomposition_successor_rank1: 5-6-7-8-9
+d5_decomposition_successor_rank1_rows: 59-52
 g1_information_recovery_r2_review: PASS_R1
 g1_information_recovery_r2_candidate_accepted: true
 g1_information_recovery_r2_implementation: a93106f5

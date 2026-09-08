@@ -1,0 +1,109 @@
+{
+  "checks": {
+    "n252_unique": true,
+    "chain_all": true,
+    "rows_arith": true,
+    "elig_arith": true,
+    "top3_match": true,
+    "controls_present": true,
+    "dedup": true,
+    "seeds_frozen": true,
+    "no_dup_cells": true,
+    "call_total": true,
+    "no_crash": true,
+    "no_nonfinite": true,
+    "flags_agree": true,
+    "watchdog": true,
+    "rss_known": true
+  },
+  "all_pass": true,
+  "rank1": "5-6-7-8-9",
+  "rank1_rows": [
+    59,
+    52
+  ],
+  "rank1_app_nonsquare": 0,
+  "rank1_app_square": 0,
+  "terminal": "DECOMPOSITION_NO_N64_RECOVERY",
+  "per_candidate_geometry": {
+    "5-6-7-8-9@nonsquare": {
+      "app_e2e": 0,
+      "app_l1": 0,
+      "app_l2": 0,
+      "oracle_l2": 6,
+      "syn_e2e": 0,
+      "n": 8
+    },
+    "5-6-7-8-9@square": {
+      "app_e2e": 0,
+      "app_l1": 0,
+      "app_l2": 0,
+      "oracle_l2": 8,
+      "syn_e2e": 0,
+      "n": 8
+    },
+    "4-5-7-8-9@nonsquare": {
+      "app_e2e": 0,
+      "app_l1": 0,
+      "app_l2": 0,
+      "oracle_l2": 0,
+      "syn_e2e": 0,
+      "n": 8
+    },
+    "4-5-7-8-9@square": {
+      "app_e2e": 0,
+      "app_l1": 0,
+      "app_l2": 0,
+      "oracle_l2": 0,
+      "syn_e2e": 0,
+      "n": 8
+    },
+    "4-6-7-8-9@nonsquare": {
+      "app_e2e": 0,
+      "app_l1": 0,
+      "app_l2": 0,
+      "oracle_l2": 0,
+      "syn_e2e": 0,
+      "n": 8
+    },
+    "4-6-7-8-9@square": {
+      "app_e2e": 0,
+      "app_l1": 0,
+      "app_l2": 0,
+      "oracle_l2": 1,
+      "syn_e2e": 0,
+      "n": 8
+    },
+    "0-1-2-3-4@nonsquare": {
+      "app_e2e": 0,
+      "app_l1": 0,
+      "app_l2": 0,
+      "oracle_l2": 0,
+      "syn_e2e": 0,
+      "n": 8
+    },
+    "0-1-2-3-4@square": {
+      "app_e2e": 0,
+      "app_l1": 0,
+      "app_l2": 0,
+      "oracle_l2": 0,
+      "syn_e2e": 0,
+      "n": 8
+    }
+  },
+  "calls": 192,
+  "call_budget": 600,
+  "max_wall_s": 0.6233457999769598,
+  "max_rss_bytes": 124219392,
+  "decoder_config": "historical GF32 cold max_iter=90 damping=1.0",
+  "implementation_authorized": false,
+  "strongest_supported": "CAL-only-optimal partition is the current mapping; no tested partition yields nonzero-rate APP recovery at n=64 (development-only routing observation, not a formal result).",
+  "non_claims": [
+    "no FER/leakage/key-rate claim",
+    "no qualification/promotion",
+    "no real-data performance claim",
+    "no G2 readiness",
+    "no universal BP threshold",
+    "oracle-L2 counts are diagnostic only"
+  ]
+}
