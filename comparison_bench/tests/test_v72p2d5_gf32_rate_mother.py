@@ -3578,16 +3578,44 @@ def test_T1_23_no_formal_root_absence_assertion():
             for sub in ast.walk(node):
                 if not isinstance(sub, ast.Assert):
                     continue
-                if not (isinstance(sub.test, ast.UnaryOp)
-                        and isinstance(sub.test.op, ast.Not)):
-                    continue
                 seg = ast.get_source_segment(src, sub) or ""
-                if ".exists()" not in seg:
-                    continue
-                hit = [t for t in root_names + literal_frags if t in seg]
-                assert not hit, (
-                    f"{path.name}:{node.name}:{sub.lineno} asserts a formal "
-                    f"root absent ({','.join(hit)}); {instead}")
+                if (isinstance(sub.test, ast.UnaryOp)
+                        and isinstance(sub.test.op, ast.Not)):
+                    if ".exists()" not in seg:
+                        pass
+                    else:
+                        hit = [t for t in root_names + literal_frags
+                               if t in seg]
+                        assert not hit, (
+                            f"{path.name}:{node.name}:{sub.lineno} asserts a "
+                            f"formal root absent ({','.join(hit)}); {instead}")
+                # Escaped equivalent: _snapshot_dir(<formal-root expr>)
+                # is None / == None inside an assert (tmp_absent demo with
+                # no formal marker stays allowed).
+                if (isinstance(sub.test, ast.Compare)
+                        and len(sub.test.ops) == 1
+                        and isinstance(sub.test.ops[0], (ast.Is, ast.Eq))):
+                    sides = [sub.test.left] + list(sub.test.comparators)
+                    has_none = any(
+                        isinstance(c, ast.Constant) and c.value is None
+                        for c in sides)
+
+                    def _is_snap_call(n):
+                        if not isinstance(n, ast.Call):
+                            return False
+                        f = n.func
+                        if isinstance(f, ast.Name) and f.id == "_snapshot_dir":
+                            return True
+                        return (isinstance(f, ast.Attribute)
+                                and f.attr == "_snapshot_dir")
+
+                    if has_none and any(_is_snap_call(s) for s in sides):
+                        hit2 = [t for t in root_names + literal_frags
+                                + ("FORMAL_ROOT",) if t in seg]
+                        assert not hit2, (
+                            f"{path.name}:{node.name}:{sub.lineno} asserts a "
+                            f"formal root absent via _snapshot_dir is/== "
+                            f"None ({','.join(hit2)}); {instead}")
 
 
 # --------------------------------------------------------------------------
@@ -3604,6 +3632,8 @@ def _g1r_passing_per_f(low=90, top=100, attempted=100):
 
 def test_G1R01_fresh_root_literal_and_old_barred():
     formal_before = _snapshot_formal_roots()
+    _g1_root = ROOT / mod.G1_FORMAL_ROOT
+    _g1_before = _snapshot_dir(_g1_root)
     assert mod.G1_FORMAL_ROOT == "workspace/v72p2d5_g1/20260907_r2"
     assert "20260906_r1" not in mod.G1_FORMAL_ROOT
     assert mod.P0_FORMAL_ROOT == "workspace/v72p2d5_p0_cost/20260906_r1"
@@ -3612,7 +3642,7 @@ def test_G1R01_fresh_root_literal_and_old_barred():
     void_snap = _snapshot_dir(void_root)
     assert isinstance(void_snap, dict) and len(void_snap) == 4
     _assert_formal_roots_unchanged(formal_before)
-    assert _snapshot_dir(ROOT / mod.G1_FORMAL_ROOT) is None
+    assert _snapshot_dir(_g1_root) == _g1_before
 
 
 def test_G1R02_unix_rss_path_preserved():
