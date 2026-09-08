@@ -50,7 +50,7 @@ structure_reason: all_8_prefixes_passed_11_hard_gates; four_cycle_risk_carried
 g0_packet_review: PASS
 g0_implementation_candidate: true
 g0_implementation_accepted: true
-next_gate: G1_L1_ESTIMATOR_DISCRIMINATOR_IN_PROGRESS
+next_gate: D5_ROUTE_STOP_REVIEW
 g1_information_recovery_r2_review: PASS_R1
 g1_information_recovery_r2_candidate_accepted: true
 g1_information_recovery_r2_implementation: a93106f5

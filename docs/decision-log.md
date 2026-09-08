@@ -3279,3 +3279,11 @@ these may not be merged or reordered.
 **Context**: Chain `88053563→a93106f5→21576add→1d4fa912`; like-for-like same-counts `10.0 → 7.51` (MI `0.0004 → 2.48` bits, truth mass `0.031 → 0.254`); three-call square confirmation (old 0/4 vs candidate oracle-L2 4/4); C1 L1 mass `0.096` fails everywhere including square (binding L1 question); C1 L2 recovers only at 52–64 rows (near-zero rate, not an operating point).
 
 **Consequences**: Accepted Model-F/G1 artifacts, thresholds, seeds, authorizations unchanged; production keeps the frozen path. `next_gate` moves `INDEPENDENT_G1_INFORMATION_RECOVERY_R2_REVIEW -> G1_L1_ESTIMATOR_DISCRIMINATOR_IN_PROGRESS`. No G1 rerun, no G2, no qualification/promotion, no push.
+
+## 2026-09-08 V72P2D5 G1 L1 discriminator (BP-threshold terminal, route-stop)
+
+**Decision**: Close the L1 discriminator with terminal class `L1_BP_THRESHOLD_NOT_RECOVERABLE_AT_N64`, recorded in `docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/G1_L1_ESTIMATOR_DISCRIMINATOR_R1.md`; set `next_gate` to `D5_ROUTE_STOP_REVIEW`.
+
+**Context**: Prereg `f0e4a1c` before any score/call. CAL-only held-out L1 NLL selects E2 (`kap*≈62.10`, unanimous; mean 3.7717 vs E1/E3 3.8147); E1≡E3 bit-identical (backoff linearity under marginalization). Paired decoder (75 calls, 0 nonfinite, flags agree): n64 0/24 incl. square; n128/n256 nonzero-rate 0/4 everywhere; square-only partials 1/4, 2/4. Truth mass ~0.10–0.15 vs ~0.28 needed. No code justified; production untouched; four-file suite 259 passed.
+
+**Consequences**: Stop n64 two-layer L1 recovery and block scaling; no G2; any successor is a new decoder/matrix change, not estimator work. Formal G1 negative result unchanged; all authorizations false; no push.
