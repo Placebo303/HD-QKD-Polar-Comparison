@@ -3370,3 +3370,8 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 
 - Result [repo-observed]: prereg `f0e4a1c` before scores/calls; CAL-only winner E2 (`kap*≈62.10` unanimous, mean L1 NLL 3.7717 vs 3.8147); E1≡E3 bit-identical (backoff linearity). Paired decoder 75 calls: n64 0/24 incl. square; n128/n256 nonzero-rate 0/4; square-only 1/4, 2/4; mass ~0.10–0.15 vs ~0.28 needed; 0 nonfinite, flags agree, max call 2.41s, peak RSS 182894592 B. Evidence `workspace/d5_g1_l1_discriminator_r1_a9a6bcf3/`; report `G1_L1_ESTIMATOR_DISCRIMINATOR_R1.md`.
 - Lifecycle [decision]: terminal `L1_BP_THRESHOLD_NOT_RECOVERABLE_AT_N64`; `next_gate` `-> D5_ROUTE_STOP_REVIEW`. No code (not recoverable), production untouched, four-file suite 259 passed, formal G1 unchanged, authorizations false, G2 absent, no push.
+
+## 2026-09-08 V72P2D5 D5 route-stop acceptance (current-path stop, decomposition successor)
+
+- Acceptance [decision]: `D5_ROUTE_STOP_REVIEW_PASS` accepted (`D5_ROUTE_STOP_ACCEPTANCE_R1.md`); terminal `D5_CURRENT_TWO_LAYER_RATE_MOTHER_BP_PATH_STOPPED`; reason `ACCEPTED_G1_NO_SIGNAL_PLUS_CAL_ONLY_L1_DISCRIMINATOR_NO_USEFUL_RECOVERY`; scope exactly the current fixed high-five/low-five two-layer rate-mother/BP path.
+- Lifecycle [decision]: GF32/NB-LDPC open; formal G1 accepted completed-no-signal unchanged; G2 unauthorized/absent; successor is the reversible 5+5 decomposition discriminator. `next_gate` `D5_ROUTE_STOP_REVIEW -> D5_DECOMPOSITION_SUCCESSOR_PREREG`. No push.
