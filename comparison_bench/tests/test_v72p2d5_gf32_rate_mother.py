@@ -3946,3 +3946,118 @@ def test_G1R17_sentinel_static_contract_tmp_empty():
     assert src.index("run_g1_phase") < src.index("write_g1_evidence")
     lsrc = inspect.getsource(mod._load_model_f_loader)
     assert "spec_from_file_location" in lsrc
+
+
+# --------------------------------------------------------------------------
+# R2 information-recovery candidate (additive, nonformal; no decoder/files)
+# --------------------------------------------------------------------------
+def _r2_sparse_counts():
+    rng = np.random.default_rng(2026090801)
+    counts = np.zeros((64, 8))
+    counts[rng.integers(0, 64, size=40), rng.integers(0, 8, size=40)] += 1.0
+    counts *= 4.0
+    return counts
+
+
+def test_R2_concentration_matches_backoff_formula():
+    counts = _r2_sparse_counts()
+    lam = 7.5
+    got = mod.build_f_model_concentration(counts, lam)
+    n_b = counts.sum(axis=0)
+    p_g = counts.sum(axis=1) / float(counts.sum())
+    want = (counts + lam * p_g[:, None]) / (n_b[None, :] + lam)
+    assert np.max(np.abs(got - want)) == 0.0
+    assert np.max(np.abs(got.sum(axis=0) - 1.0)) <= 1e-12
+
+
+def test_R2_defect_per_cell_vs_concentration_split():
+    # Exact defect pin: same lam, same sparse counts; per-cell consumer must
+    # stay near-uniform while the concentration candidate tracks the counts.
+    counts = _r2_sparse_counts()
+    lam = 137.3823795883264
+    per_cell = mod.build_f_model(counts, lam)
+    conc = mod.build_f_model_concentration(counts, lam)
+    assert np.max(np.abs(per_cell.sum(axis=0) - 1.0)) <= 1e-12
+    ent_cell = float(np.mean(-np.sum(
+        per_cell * np.log2(np.maximum(per_cell, 1e-300)), axis=0)))
+    ent_conc = float(np.mean(-np.sum(
+        conc * np.log2(np.maximum(conc, 1e-300)), axis=0)))
+    assert ent_cell > 5.9  # ~uniform over 64 rows (log2 64 = 6)
+    assert ent_conc < ent_cell - 1.0  # candidate preserves count information
+    assert np.max(np.abs(per_cell - conc)) > 0.05
+
+
+def test_R2_frozen_consumer_pinned_per_cell():
+    counts = np.array([[3.0, 0.0], [1.0, 2.0]])
+    got = mod.build_f_model(counts, 1.0)
+    want = np.array([[4.0 / 6.0, 1.0 / 4.0], [2.0 / 6.0, 3.0 / 4.0]])
+    assert np.max(np.abs(got - want)) < 1e-12
+
+
+def test_R2_concentration_numerical_limits():
+    good = _r2_sparse_counts()
+    with pytest.raises(ValueError):
+        mod.build_f_model_concentration(good, 0.0)
+    with pytest.raises(ValueError):
+        mod.build_f_model_concentration(good, -2.0)
+    with pytest.raises(ValueError):
+        mod.build_f_model_concentration(-good, 1.0)
+    with pytest.raises(ValueError):
+        mod.build_f_model_concentration(np.zeros((4, 4)), 1.0)
+    with pytest.raises(ValueError):
+        mod.build_f_model_concentration(np.zeros(8), 1.0)
+
+
+def test_R2_concentration_zero_column_falls_back_to_global():
+    counts = _r2_sparse_counts()
+    counts[:, 3] = 0.0
+    got = mod.build_f_model_concentration(counts, 2.0)
+    p_g = counts.sum(axis=1) / float(counts.sum())
+    assert np.max(np.abs(got[:, 3] - p_g)) < 1e-12
+
+
+def test_R2_axis_chain_split_equivalence():
+    counts = _r2_sparse_counts()
+    pf = mod.build_f_model_concentration(counts, 3.0)
+    p1 = mod.marginalize_f_to_p1(pf)
+    p2 = mod.conditionalize_f_to_p2(pf)
+    assert p1.shape == (2, 8)
+    assert p2.shape == (2, 8, 32)
+    cube = pf.reshape(2, 32, 8)
+    assert np.max(np.abs(cube.sum(axis=1) - p1)) < 1e-12
+    assert np.max(np.abs(
+        np.moveaxis(p2, 2, 1).sum(axis=1) - 1.0)) < 1e-12
+
+
+def test_R2_candidate_cal_selection_basis_frozen_lam():
+    assert mod.LAMBDA_STAR == 137.3823795883264
+    assert inspect.signature(
+        mod.prepare_model_f_prior_candidate).parameters["lam"].default == \
+        mod.LAMBDA_STAR
+    assert inspect.signature(
+        mod.build_f_model_concentration).parameters["lam"].default == \
+        mod.LAMBDA_STAR
+
+
+def test_R2_candidate_prepare_contract_and_isolation(tmp_path,
+                                                    monkeypatch):
+    counts = _r2_sparse_counts()
+    p_b = counts.sum(axis=0) / float(counts.sum())
+    monkeypatch.chdir(tmp_path)
+    pb, pf = mod.prepare_model_f_prior_candidate(counts, p_b)
+    assert pb.shape == (8,)
+    assert pf.shape == (64, 8)
+    assert abs(float(pb.sum()) - 1.0) <= 1e-8
+    assert np.all(np.abs(pf.sum(axis=0) - 1.0) <= 1e-8)
+    assert list(tmp_path.rglob("*")) == []
+    for fn in (mod.build_f_model_concentration,
+               mod.prepare_model_f_prior_candidate):
+        src = inspect.getsource(fn)
+        assert "workspace" not in src
+        assert "FORMAL_ROOT" not in src
+        assert "open(" not in src
+    with pytest.raises(ValueError):
+        mod.prepare_model_f_prior_candidate(None, p_b)
+    # production wiring unchanged: frozen prepare still uses per-cell math
+    assert "build_f_model(" in inspect.getsource(mod.prepare_model_f_prior)
+    assert "concentration" not in inspect.getsource(mod.prepare_model_f_prior)

@@ -271,6 +271,40 @@ def build_f_model(counts_ab, lam=LAMBDA_STAR):
     return p
 
 
+def build_f_model_concentration(counts_ab, lam=LAMBDA_STAR):
+    """Candidate (nonformal) D4R2-F backoff: P_F(A|B) from total concentration.
+
+    R2 information-recovery candidate for the lambda-application contract
+    defect: the frozen ``LAMBDA_STAR`` was selected as a total per-Bob-column
+    concentration (D4R2 ``build_f``), not a per-cell pseudocount. Hence
+    ``P(a|b) = (counts[a,b] + lam * p_global[a]) / (n_b[b] + lam)`` with
+    ``n_b[b] = sum_a counts`` and ``p_global`` the full-table Alice marginal.
+    Every column sums to 1 within 1e-12 (asserted); an all-zero column falls
+    back to ``p_global`` (the lam-weighted limit). Injected tables only, no
+    file read, no decoder. Frozen ``build_f_model`` is untouched.
+    """
+    counts = np.asarray(counts_ab, dtype=np.float64)
+    if counts.ndim != 2 or counts.shape[0] < 1 or counts.shape[1] < 1:
+        raise ValueError("counts_ab must be a non-empty 2-D (Alice, Bob) table")
+    if not np.all(np.isfinite(counts)):
+        raise ValueError("counts_ab must be finite")
+    if np.any(counts < 0):
+        raise ValueError("counts_ab must be nonnegative")
+    lam = float(lam)
+    if not np.isfinite(lam) or lam <= 0:
+        raise ValueError("lam must be a finite positive concentration")
+    total = float(counts.sum())
+    if total <= 0:
+        raise ValueError("counts are all zero")
+    n_b = counts.sum(axis=0)
+    p_global = counts.sum(axis=1) / total
+    p = (counts + lam * p_global[:, None]) / (n_b[None, :] + lam)
+    col = p.sum(axis=0)
+    if not np.all(np.abs(col - 1.0) <= 1e-12):
+        raise ValueError("backoff P_F columns must sum to 1 within 1e-12")
+    return p
+
+
 def marginalize_f_to_p1(p_f):
     """Derive ``P1(U1|B)`` by summing the reshaped P_F over the U2 axis."""
     pf = np.asarray(p_f, dtype=np.float64)
@@ -2271,6 +2305,36 @@ def prepare_model_f_prior(counts_ab=None, p_b=None, lam=LAMBDA_STAR):
             MODEL_F_BLOCKED + ": D4R2 F-model CAL-TRAIN canonical counts "
             "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN")
     p_f = build_f_model(counts_ab, lam)
+    pf = np.asarray(p_f, dtype=np.float64)
+    pb = np.asarray(p_b, dtype=np.float64).ravel()
+    if pf.ndim != 2 or pf.shape[1] != pb.shape[0]:
+        raise ValueError("counts/B shapes must satisfy P_F(A, B)")
+    if pf.shape[0] % Q != 0:
+        raise ValueError("P_F Alice dim must be a nonzero multiple of 32")
+    if not np.all(np.isfinite(pf)) or not np.all(np.isfinite(pb)):
+        raise ValueError("prior tables must be finite")
+    if abs(float(pb.sum()) - 1.0) > 1e-8:
+        raise ValueError("P(B) must sum to 1")
+    if np.any(np.abs(pf.sum(axis=0) - 1.0) > 1e-8):
+        raise ValueError("every P_F column must sum to 1")
+    return pb, pf
+
+
+def prepare_model_f_prior_candidate(counts_ab=None, p_b=None,
+                                    lam=LAMBDA_STAR):
+    """Candidate (nonformal) prior pair via the backoff contract.
+
+    Same checks and return contract as :func:`prepare_model_f_prior`, but the
+    table comes from :func:`build_f_model_concentration` (D4R2-F backoff with
+    the frozen ``LAMBDA_STAR`` selection basis; no new search, no VAL).
+    Injected tables only; no file read, no formal-root reference, no decoder.
+    Production phases keep calling ``prepare_model_f_prior``.
+    """
+    if counts_ab is None or p_b is None:
+        raise ValueError(
+            MODEL_F_BLOCKED + ": D4R2 F-model CAL-TRAIN canonical counts "
+            "(1024,1024) + P(B) marginal on CAL702..1725 TRAIN")
+    p_f = build_f_model_concentration(counts_ab, lam)
     pf = np.asarray(p_f, dtype=np.float64)
     pb = np.asarray(p_b, dtype=np.float64).ravel()
     if pf.ndim != 2 or pf.shape[1] != pb.shape[0]:
