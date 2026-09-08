@@ -148,6 +148,32 @@ def test_formal_root_guard():
         # need to create minimal model_F artifact? script may fail before guard, but we check guard path uses helper
         pass
 
+def test_structural_rank_and_advancement():
+    # frozen §6 key ordering + §8.2 advancement truth table
+    def audits(four, inc, girth, rmax, sumsq):
+        a = {"four_cycles": four, "four_cycle_variable_incidence_max": inc,
+             "row_degree_max": rmax, "row_degree_sumsq": sumsq, "eligible": True}
+        if girth is not None:
+            a["girth"] = girth
+        return {"prefix_audits": [dict(a), dict(a), dict(a)]}
+    summary = {
+        "T1_PEG_DV3": {"L1": audits(10, 2, 8, 4, 200), "L2": audits(10, 2, 8, 4, 200)},
+        "T2_CYCLE_GREEDY_DV3": {"L1": audits(4, 1, 8, 4, 200), "L2": audits(4, 1, 8, 4, 200)},
+        "T3_SC_DV3_W4": {"L1": audits(4, 1, None, 4, 200), "L2": audits(4, 1, None, 4, 200)},
+    }
+    ranked = d6.structural_rank_list(summary, ["T1_PEG_DV3", "T2_CYCLE_GREEDY_DV3", "T3_SC_DV3_W4"])
+    assert ranked[0] == "T2_CYCLE_GREEDY_DV3"  # fewer four-cycles wins
+    assert ranked[-1] == "T1_PEG_DV3"
+    # T3 (NOT_COMPUTED girth, worst) ranks below identical T2
+    assert ranked.index("T2_CYCLE_GREEDY_DV3") < ranked.index("T3_SC_DV3_W4")
+    order = ["T2_CYCLE_GREEDY_DV3", "T3_SC_DV3_W4", "T1_PEG_DV3"]
+    can = {"T2_CYCLE_GREEDY_DV3": {"f12_exact": 2, "f12_iter": 500, "sq_exact": 3},
+           "T3_SC_DV3_W4": {"f12_exact": 2, "f12_iter": 400, "sq_exact": 0},
+           "T1_PEG_DV3": {"f12_exact": 0, "f12_iter": 0, "sq_exact": 4}}
+    adv = d6.select_advancement(can, order)
+    assert adv == ["T3_SC_DV3_W4", "T2_CYCLE_GREEDY_DV3"]  # tie 2=2 broken by iter asc
+    assert d6.select_advancement({"T1_PEG_DV3": {"f12_exact": 0, "f12_iter": 0, "sq_exact": 0}}, order) == []
+
 def test_budget_and_terminal_truth_table():
     # terminal table checks
     # strong requires >=12, partial 1..11, square-only etc

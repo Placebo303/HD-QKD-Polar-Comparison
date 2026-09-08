@@ -437,6 +437,19 @@ def _build_M_support(n, m_max, k_min, mode):
     # For remaining degree2 vars, support third column stays -1; caller must handle coefficient mapping (use first two vals)
     return support
 
+def support_window_overflow(arm, n, layer):
+    # Diagnostic replay of the T3/T4 window-overflow counter (0 for others).
+    # Rebuilds deterministically; caller compares with the primary build.
+    k_min=ROW_BUDGETS[int(n)]["k_min"][layer]
+    m_max=int(n)
+    if arm=="T3_SC_DV3_W4":
+        _, ov = _build_SC_support(int(n), m_max, k_min, 4)
+        return int(ov)
+    if arm=="T4_SC_DV3_W8":
+        _, ov = _build_SC_support(int(n), m_max, k_min, 8)
+        return int(ov)
+    return 0
+
 # Public builders
 def build_support(arm, n, layer):
     k_min=ROW_BUDGETS[int(n)]["k_min"][layer]
@@ -624,6 +637,55 @@ def assert_no_formal_write(out_root):
             except ValueError:
                 pass
 
+def _structural_key(structure_summary, arm):
+    # Frozen §6 key from the f1.2-prefix audits of both layers:
+    # (four_sum, incidence_max, -girth, row_max, sumsq, arm_id).
+    # NOT_COMPUTED girth acts as -1 (worst), i.e. key 1.
+    layers=structure_summary.get(arm, {})
+    total_four=0
+    max_inc=0
+    min_girth=10**9
+    max_rmax=0
+    sumsq=0
+    for layer, rec in layers.items():
+        audits=rec.get("prefix_audits", [])
+        if len(audits)>=2:
+            a=audits[1]
+        elif audits:
+            a=audits[0]
+        else:
+            a={}
+        total_four+=int(a.get("four_cycles",0))
+        max_inc=max(max_inc, int(a.get("four_cycle_variable_incidence_max",0)))
+        g=a.get("girth")
+        if g is not None and g!=-1:
+            if g < min_girth:
+                min_girth=g
+        else:
+            min_girth=-1  # NOT_COMPUTED sentinel, worst
+        max_rmax=max(max_rmax, int(a.get("row_degree_max",0)))
+        sumsq+=int(a.get("row_degree_sumsq",0))
+    girth_key = -min_girth if min_girth!=-1 and min_girth!=10**9 else 1
+    return (total_four, max_inc, girth_key, max_rmax, sumsq, arm)
+
+def structural_rank_list(structure_summary, arms):
+    # Frozen structural ordering over any arm subset (T finalists, M fallback).
+    return sorted(arms, key=lambda a: _structural_key(structure_summary, a))
+
+def select_advancement(canary, structural_order):
+    # Frozen §8.2 advancement: pool = new T/M finalists only (caller excludes
+    # B0/B1); advance on f1.2 end-to-end APP exact >= 1/4 (of 4 canary seeds),
+    # at most two, ordered by (f1.2 exact desc, f1.2 iter-total asc,
+    # square exact desc, structural rank, arm_id).
+    # canary: arm -> {"f12_exact":int, "f12_iter":int, "sq_exact":int}.
+    order_index = {a: i for i, a in enumerate(structural_order)}
+    cands = [a for a, s in canary.items() if int(s.get("f12_exact", 0)) >= 1]
+    cands.sort(key=lambda a: (-int(canary[a].get("f12_exact", 0)),
+                              int(canary[a].get("f12_iter", 0)),
+                              -int(canary[a].get("sq_exact", 0)),
+                              order_index.get(a, 10**9), a))
+    return cands[:2]
+
 def select_decoder_arms(structure_summary):
     # structure_summary: dict arm -> dict layer -> per-prefix metrics
     # Returns frozen selection per spec §6: B0+B1+best2 T + both M if eligible
@@ -643,49 +705,10 @@ def select_decoder_arms(structure_summary):
         # even if not eligible? spec says freeze B1 label control; but hard gate applies to all arms; if ineligible still recorded
         # keep it if built but ineligible? Still freeze per spec but eligible check will decide; we keep for decoder set only if eligible
         pass
-    # T ranking: eligible only, by (four_sum, incidence_max, -girth, row_max, sumsq, arm_id)
-    t_cands=[]
-    for arm in T_ARMS:
-        if not eligible.get(arm, False):
-            continue
-        layers=structure_summary.get(arm, {})
-        # gather f1.2 prefix metrics (second prefix): for n=64 f1.2 is 59/52, but for general we take second entry
-        total_four=0
-        max_inc=0
-        min_girth=10**9
-        max_rmax=0
-        sumsq=0
-        has_girth=False
-        for layer, rec in layers.items():
-            # per-prefix audits list length 3 (f1.0,f1.2,square) ; take index1 if exists
-            audits=rec.get("prefix_audits", [])
-            if len(audits)>=2:
-                a=audits[1]
-            elif audits:
-                a=audits[0]
-            else:
-                a={}
-            total_four+=int(a.get("four_cycles",0))
-            max_inc=max(max_inc, int(a.get("four_cycle_variable_incidence_max",0)))
-            g=a.get("girth")
-            if g is not None:
-                has_girth=True
-                if g < min_girth:
-                    min_girth=g
-            else:
-                # NOT_COMPUTED => treat as -1 worst per spec
-                min_girth = -1  # sentinel
-            max_rmax=max(max_rmax, int(a.get("row_degree_max",0)))
-            sumsq+=int(a.get("row_degree_sumsq",0))
-        # girth representation: per spec -girth where NOT_COMPUTED=-1 worst, so compute key as -min_girth if has else 1 (since -(-1)=1 worst larger)
-        # we sort by (four, incidence, -girth, rmax, sumsq, arm_id) ; -girth larger when girth smaller => we want larger girth better => smaller -girth better.
-        # for NOT_COMPUTED treat girth=-1 => -girth=1 large worst
-        girth_key = -min_girth if min_girth!=-1 and min_girth!=10**9 else 1
-        # if never has_girth, girth_key stays 1
-        t_cands.append((total_four, max_inc, girth_key, max_rmax, sumsq, arm, arm))
-    t_cands.sort(key=lambda x: (x[0], x[1], x[2], x[3], x[4], x[5]))
-    for entry in t_cands[:2]:
-        selected.append(entry[5])
+    # T ranking: eligible only, frozen §6 key via structural_rank_list.
+    t_elig = [arm for arm in T_ARMS if eligible.get(arm, False)]
+    for arm in structural_rank_list(structure_summary, t_elig)[:2]:
+        selected.append(arm)
     for arm in M_ARMS:
         if eligible.get(arm, False):
             selected.append(arm)
