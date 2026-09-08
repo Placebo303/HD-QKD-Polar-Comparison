@@ -9,8 +9,12 @@
   formal-root-isolation tests.
 - [x] T4 (validate): compile + focused tests + exact three-file D5 suite +
   candidate development diagnostics green; record evidence.
-- [ ] T5 (deliver): logical commits (proposal/evidence vs implementation
+- [x] T5 (deliver): logical commits (proposal/evidence vs implementation
   separated); no push; return review-ready candidate.
+  Evidence 20260908: acceptance `G1_INFORMATION_RECOVERY_R2_ACCEPTANCE_R1.md`
+  landed on review `G1_INFORMATION_RECOVERY_R2_REVIEW_PASS` (chain
+  `88053563→a93106f5→21576add→1d4fa912`); cycle `next_gate` moved to
+  `G1_L1_ESTIMATOR_DISCRIMINATOR_IN_PROGRESS`; scoped six-file commit, no push.
 - [x] T6 (D5_G1_R2_STALE_GUARD_FIX_R1): replaced stale
   `assert _snapshot_dir(ROOT / mod.G1_FORMAL_ROOT) is None` in
   `test_G1R01_fresh_root_literal_and_old_barred` with start-of-test snapshot

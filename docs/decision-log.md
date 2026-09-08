@@ -3271,3 +3271,11 @@ these may not be merged or reordered.
 **Context**: 53 development decoder calls (~51 s wall; peak RSS 240963584 B; CAL-only, no VAL): frozen `lambda*=137.38` was selected as total per-column concentration (D4R2 `build_f`) but the accepted consumer applies it per cell (140,680 added/column vs 256 observed, 99.82% prior, MI 0.0004 bits vs 2.48 backoff). Same-counts backoff returns to the D4 family (joint 7.51 vs 7.16; held-out C1 7.162347 reproduces D4R2 exactly). Square probe (rank-64 mother, seed 2026090801): C0 oracle 0/4, C1 oracle-L2 4/4; C1 L2 at H2[:52] 2/4; C1 L1 fails at every disclosure including square (mass 0.096 below BP threshold, binding constraint). C2 held-out catastrophic (504.7); C3 dominated (7.34).
 
 **Consequences**: Frozen functions/constants/seeds/thresholds/authorizations/accepted artifacts unchanged; production phases keep the frozen path. One pre-existing suite failure noted (`test_G1R01...` asserts absence of the accepted G1 root; stale since Sept-7 acceptance; untouched). No formal rerun, no G2, no push.
+
+## 2026-09-08 V72P2D5 G1 R2 acceptance (additive backoff-prior candidate, no formal change)
+
+**Decision**: Accept the independently reviewed R2 candidate (`G1_INFORMATION_RECOVERY_R2_REVIEW_PASS`) as `G1_INFORMATION_RECOVERY_R2_ACCEPTED` with scope `ADDITIVE_NONFORMAL_BACKOFF_PRIOR_CANDIDATE`, terminal class `LAMBDA_APPLICATION_CONTRACT_DEFECT`, `formal_g1_result_changed: false`, `production_wiring_changed: false`, recorded in `docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/G1_INFORMATION_RECOVERY_R2_ACCEPTANCE_R1.md`.
+
+**Context**: Chain `88053563→a93106f5→21576add→1d4fa912`; like-for-like same-counts `10.0 → 7.51` (MI `0.0004 → 2.48` bits, truth mass `0.031 → 0.254`); three-call square confirmation (old 0/4 vs candidate oracle-L2 4/4); C1 L1 mass `0.096` fails everywhere including square (binding L1 question); C1 L2 recovers only at 52–64 rows (near-zero rate, not an operating point).
+
+**Consequences**: Accepted Model-F/G1 artifacts, thresholds, seeds, authorizations unchanged; production keeps the frozen path. `next_gate` moves `INDEPENDENT_G1_INFORMATION_RECOVERY_R2_REVIEW -> G1_L1_ESTIMATOR_DISCRIMINATOR_IN_PROGRESS`. No G1 rerun, no G2, no qualification/promotion, no push.
