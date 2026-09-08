@@ -1044,9 +1044,13 @@ def evaluate_single_block(
     u1_alice, u2_alice, u1_bob, u2_bob = factorize_f03(alice, bob)
     prior = get_conditional_posterior_l2(counts, bob, u1_alice)
     raw_errors = int(np.sum(u2_alice != u2_bob))
-    syn_true = syndrome_of_gf32(H, u2_alice, field)
 
     if fake_runner:
+        # P3 (perf-v38-triage-test-cost): fake/test-only path skips the true-syndrome
+        # matvec (unused here) and the real decoder. Sampling + posterior + the
+        # errors_initial count keep their exact real-path values (pinned by R1-05/R1-06:
+        # posterior binding still receives complete Bob symbols); status stays
+        # non-ok ("max_iter") and the record remains fake-distinguishable.
         final_errors = max(0, raw_errors - 10)
         iters = 30
         runtime = 0.001
@@ -1054,6 +1058,7 @@ def evaluate_single_block(
         exact = bool(final_errors == 0)
         status = "max_iter"
     else:
+        syn_true = syndrome_of_gf32(H, u2_alice, field)
         dec_res = decode_row_layered_fftqspa(
             H, prior, syn_true, max_iter=max_iter, damping_alpha=damping_alpha, field=field
         )
