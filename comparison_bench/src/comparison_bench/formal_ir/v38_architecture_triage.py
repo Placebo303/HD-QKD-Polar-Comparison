@@ -18,6 +18,7 @@ from __future__ import annotations
 import math
 import json
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -205,12 +206,33 @@ def sample_uniform_gf32_nonzero(rng: np.random.Generator, size: int) -> np.ndarr
     return rng.integers(low=1, high=32, size=int(size), endpoint=False).astype(np.uint8)
 
 
+# P0 (perf-v38-triage-test-cost): bounded caches for support/cycle structures.
+# Keys capture the full varying input (adjacency mask bytes). Cached containers
+# hold only frozen CycleInfo / ints; every public call returns fresh list/dict
+# copies so callers can never pollute the cache. Any parameter change misses;
+# revert = restore the direct calls below. (Per-call cycle-rank caching was
+# measured at ~0.02% hit rate — sweep candidates are almost all distinct — and
+# removed; the rank hot path is instead accelerated by P2's tiny fast path.)
+_SUPPORT_CACHE_MAXSIZE = 64
+
+
+def _support_cache_key(binary_support: np.ndarray) -> tuple[tuple[int, int], bytes]:
+    arr = np.asarray(binary_support)
+    m, n = arr.shape
+    return ((int(m), int(n)), (arr != 0).tobytes(order="C"))
+
+
+@lru_cache(maxsize=_SUPPORT_CACHE_MAXSIZE)
+def _support_edges_cached(key: tuple[tuple[int, int], bytes]) -> tuple[tuple[int, int], ...]:
+    (m, n), blob = key
+    mask = np.frombuffer(blob, dtype=bool).reshape(m, n)
+    rows, cols = np.nonzero(mask)
+    return tuple(sorted((int(r), int(c)) for r, c in zip(rows, cols)))
+
+
 def get_canonical_support_edges(binary_support: np.ndarray) -> list[tuple[int, int]]:
     """Return support edges sorted lexicographically: (check_index, variable_index)."""
-    rows, cols = np.nonzero(binary_support)
-    edges = [(int(r), int(c)) for r, c in zip(rows, cols)]
-    edges.sort()
-    return edges
+    return list(_support_edges_cached(_support_cache_key(binary_support)))
 
 
 # ---------------------------------------------------------------------------
@@ -226,17 +248,19 @@ class CycleInfo:
     edges: tuple[tuple[int, int], ...]
 
 
-def enumerate_canonical_simple_cycles(
-    binary_support: np.ndarray,
-) -> tuple[list[CycleInfo], list[CycleInfo], list[CycleInfo], dict[tuple[int, int], list[int]]]:
-    """Enumerate canonical simple cycles of lengths 4, 6, and 8 without duplicates.
+@lru_cache(maxsize=_SUPPORT_CACHE_MAXSIZE)
+def _enumerate_cycles_cached(
+    key: tuple[tuple[int, int], bytes],
+) -> tuple[tuple[CycleInfo, ...], tuple[CycleInfo, ...], tuple[CycleInfo, ...], tuple[tuple[tuple[int, int], tuple[int, ...]], ...]]:
+    (m, n), blob = key
+    mask = np.frombuffer(blob, dtype=bool).reshape(m, n)
+    return _enumerate_cycles_uncached(mask)
 
-    Returns:
-        cycles_4: list of CycleInfo of length 4
-        cycles_6: list of CycleInfo of length 6
-        cycles_8: list of CycleInfo of length 8
-        edge_to_cycle_ids: mapping (c, v) -> list of global cycle indices in all_cycles
-    """
+
+def _enumerate_cycles_uncached(
+    binary_support: np.ndarray,
+) -> tuple[tuple[CycleInfo, ...], tuple[CycleInfo, ...], tuple[CycleInfo, ...], tuple[tuple[tuple[int, int], tuple[int, ...]], ...]]:
+    """Direct (uncached) canonical simple cycle enumeration; P0 revert path."""
     m, n = binary_support.shape
     adj_c = [np.nonzero(binary_support[i, :])[0].tolist() for i in range(m)]
     adj_v = [np.nonzero(binary_support[:, j])[0].tolist() for j in range(n)]
@@ -325,7 +349,27 @@ def enumerate_canonical_simple_cycles(
             else:
                 edge_to_cycle_ids[e] = [idx]
 
-    return cycles_4, cycles_6, cycles_8, edge_to_cycle_ids
+    return (
+        tuple(cycles_4),
+        tuple(cycles_6),
+        tuple(cycles_8),
+        tuple((edge, tuple(ids)) for edge, ids in edge_to_cycle_ids.items()),
+    )
+
+
+def enumerate_canonical_simple_cycles(
+    binary_support: np.ndarray,
+) -> tuple[list[CycleInfo], list[CycleInfo], list[CycleInfo], dict[tuple[int, int], list[int]]]:
+    """Enumerate canonical simple cycles of lengths 4, 6, and 8 without duplicates.
+
+    Returns:
+        cycles_4: list of CycleInfo of length 4
+        cycles_6: list of CycleInfo of length 6
+        cycles_8: list of CycleInfo of length 8
+        edge_to_cycle_ids: mapping (c, v) -> list of global cycle indices in all_cycles
+    """
+    c4, c6, c8, frozen_map = _enumerate_cycles_cached(_support_cache_key(binary_support))
+    return list(c4), list(c6), list(c8), {edge: list(ids) for edge, ids in frozen_map}
 
 
 def compute_cycle_submatrix_rank(
@@ -345,6 +389,12 @@ def compute_cycle_submatrix_rank(
         H_sub[j, j] = H[c_curr, v_curr]
         H_sub[(j + 1) % r, j] = H[c_next, v_curr]
     return compute_gf32_rank(H_sub, field)
+
+
+def v38_support_caches_clear() -> None:
+    """Test-isolation hook: drop all P0 support/cycle caches (revert = direct calls)."""
+    _support_edges_cached.cache_clear()
+    _enumerate_cycles_cached.cache_clear()
 
 
 def classify_cycle_algebraic_degeneracy(
