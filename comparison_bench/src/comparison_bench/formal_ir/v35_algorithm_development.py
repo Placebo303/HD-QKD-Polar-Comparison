@@ -14,6 +14,7 @@ import importlib.util
 import json
 import math
 import time
+from functools import lru_cache
 from dataclasses import asdict, dataclass
 from numbers import Integral
 from pathlib import Path
@@ -202,25 +203,72 @@ def compute_gf32_rank(matrix: np.ndarray, field: Optional[GF2mField] = None) -> 
 # Channel Loading & Sampling
 # ---------------------------------------------------------------------------
 
+# P1 (perf-v38-triage-test-cost): bounded stat-keyed caches for the V25/V31 loaders.
+# Key = (resolved_abs_path, mtime_ns, size): same file via relative/absolute/symlink
+# paths hits one entry; any content change misses. Cached payloads are immutable
+# (shape, bytes); every public call rebuilds fresh arrays so callers can never
+# pollute the cache by in-place mutation. Failures are never cached.
+_V31_CACHE_MAXSIZE = 4
+_V25_CACHE_MAXSIZE = 4
+
+
+def _stat_cache_key(resolved: Path) -> tuple[str, int, int]:
+    st = resolved.stat()
+    return (str(resolved), st.st_mtime_ns, st.st_size)
+
+
+@lru_cache(maxsize=_V25_CACHE_MAXSIZE)
+def _load_v25_payload_cached(key: tuple[str, int, int]) -> dict[str, tuple[tuple[int, ...], bytes]]:
+    data = np.load(key[0])
+    try:
+        out: dict[str, tuple[tuple[int, ...], bytes]] = {}
+        for src in SOURCES:
+            npz_key = NPZ_KEYS[src]
+            if npz_key not in data:
+                raise KeyError(f"Key {npz_key} not found in channel counts file")
+            arr = np.asarray(data[npz_key], dtype=np.float64)
+            if arr.shape != (DIMENSION, DIMENSION):
+                raise ValueError(f"Unexpected shape {arr.shape} for source {src}")
+            out[src] = (tuple(int(v) for v in arr.shape), arr.tobytes(order="C"))
+    finally:
+        data.close()
+    return out
+
+
 def load_v25_channel_counts(path: Optional[Path | str] = None) -> dict[str, np.ndarray]:
     """Load the V25 channel joint counts NPZ file."""
     if path is None:
         repo_root = Path(__file__).resolve().parents[4]
         path = repo_root / "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz"
-    path = Path(path)
-    if not path.is_file():
+    resolved = Path(path).resolve()
+    if not resolved.is_file():
         raise FileNotFoundError(f"V25 channel counts file not found: {path}")
-    data = np.load(path)
-    out: dict[str, np.ndarray] = {}
-    for src in SOURCES:
-        key = NPZ_KEYS[src]
-        if key not in data:
-            raise KeyError(f"Key {key} not found in channel counts file")
-        arr = np.asarray(data[key], dtype=np.float64)
-        if arr.shape != (DIMENSION, DIMENSION):
-            raise ValueError(f"Unexpected shape {arr.shape} for source {src}")
-        out[src] = arr
+    payload = _load_v25_payload_cached(_stat_cache_key(resolved))
+    return {
+        src: np.frombuffer(blob, dtype=np.float64).copy().reshape(shape)
+        for src, (shape, blob) in payload.items()
+    }
+
+
+@lru_cache(maxsize=_V31_CACHE_MAXSIZE)
+def _load_v31_payload_cached(key: tuple[str, int, int]) -> dict[str, tuple[tuple[int, ...], bytes]]:
+    with open(key[0], "r", encoding="utf-8") as fh:
+        doc = json.load(fh)
+    pkt = next((p for p in doc.get("packets", []) if p.get("packet_id") == "m1_16_n1024_n1024|QC-cyclic-projective"), None)
+    if pkt is None:
+        raise ValueError("QC-cyclic-projective packet not found in matrix payloads")
+    l2_mats = pkt.get("matrices", {}).get("L2", {})
+    out: dict[str, tuple[tuple[int, ...], bytes]] = {}
+    for src in ("1M", "1p5M", "2M"):
+        arr = np.asarray(l2_mats[src], dtype=np.uint8)
+        out[src] = (tuple(int(v) for v in arr.shape), arr.tobytes(order="C"))
     return out
+
+
+def load_v31_qc_baseline_matrices_cache_clear() -> None:
+    """Test-isolation hook: drop all cached V25/V31 loader payloads."""
+    _load_v25_payload_cached.cache_clear()
+    _load_v31_payload_cached.cache_clear()
 
 
 def load_v31_qc_baseline_matrices(path: Optional[Path | str] = None) -> dict[str, np.ndarray]:
@@ -234,19 +282,13 @@ def load_v31_qc_baseline_matrices(path: Optional[Path | str] = None) -> dict[str
     if path is None:
         repo_root = Path(__file__).resolve().parents[4]
         path = repo_root / "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/matrix_payloads.json"
-    path = Path(path)
-    if not path.is_file():
+    resolved = Path(path).resolve()
+    if not resolved.is_file():
         raise FileNotFoundError(f"V31 matrix payloads file not found: {path}")
-    with open(path, "r", encoding="utf-8") as fh:
-        doc = json.load(fh)
-    pkt = next((p for p in doc.get("packets", []) if p.get("packet_id") == "m1_16_n1024_n1024|QC-cyclic-projective"), None)
-    if pkt is None:
-        raise ValueError("QC-cyclic-projective packet not found in matrix payloads")
-    l2_mats = pkt.get("matrices", {}).get("L2", {})
+    payload = _load_v31_payload_cached(_stat_cache_key(resolved))
     return {
-        "1M": np.array(l2_mats["1M"], dtype=np.uint8),
-        "1p5M": np.array(l2_mats["1p5M"], dtype=np.uint8),
-        "2M": np.array(l2_mats["2M"], dtype=np.uint8),
+        src: np.frombuffer(blob, dtype=np.uint8).copy().reshape(shape)
+        for src, (shape, blob) in payload.items()
     }
 
 
