@@ -1,0 +1,191 @@
+D5 DECOMPOSITION SUCCESSOR CLOSEOUT A3 TEST EVIDENCE APPENDIX
+packet: docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/D5_DECOMPOSITION_SUCCESSOR_CLOSEOUT_A3_TASK_PACKET.md
+status: FINAL_AUTHOR_RULING / NO_PYTEST_RERUN / FRESH_METADATA_ALLOWED
+repo: D:\Code\HD-QKD_Polar_Comparison
+branch: formal-ir-v72p1-addendum-clean
+HEAD: b6326ad2a972f30dd4b75162949b8f068f7852d9
+baseline: git diff --name-only empty; git diff --cached --name-only empty; git diff HEAD --name-only empty (CRLF porcelain churn not cleaned per A1.1)
+A1 basetemp absent: workspace/d5_decomposition_successor_r1_tests_a1_ad26a4dd-0580-4f4a-a55a-0826d580083c Test-Path False; BASE_TEMP_REMOVED true by prior record
+authorizations: nine *_execution_authorized false per cycle_state.yaml; scientific_promotion false; next_gate D5_GRAPH_MOTHER_SUCCESSOR_PROPOSAL
+
+=== A3.1 Author-resupplied pytest evidence ===
+EVIDENCE_SOURCE AUTHOR_RESUPPLIED_FROM_PRIOR_OPERATOR_RETURN
+
+Exact command:
+```text
+python -m pytest comparison_bench/tests/test_v72p2d5_gf32_rate_mother.py comparison_bench/tests/test_v72p2d5_model_f_input.py comparison_bench/tests/test_v72p2d4_cal_gf32_model_rate_audit.py comparison_bench/tests/test_v72p2d4r2_cal_gf32_model_rate_audit.py -p no:cacheprovider --basetemp workspace/d5_decomposition_successor_r1_tests_a1_ad26a4dd-0580-4f4a-a55a-0826d580083c -q --tb=line
+```
+
+Complete captured output:
+```text
+The term '\START_LOCAL: \' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+The term '\START_UTC: \' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+........................................................................ [ 27%]
+........................................................................ [ 55%]
+........................................................................ [ 83%]
+...........................................                              [100%]
+============================== warnings summary ===============================
+..\..\software\Miniforge3\Lib\site-packages\_pytest\config\__init__.py:1434
+  D:\software\Miniforge3\Lib\site-packages\_pytest\config\__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+259 passed, 1 warning in 55.22s
+The term '\END_LOCAL: \' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+The term '\END_UTC: \' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+The term '\EXIT_CODE: \' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+```
+
+Required interpretation:
+```text
+EVIDENCE_SOURCE AUTHOR_RESUPPLIED_FROM_PRIOR_OPERATOR_RETURN
+START_LOCAL NOT_CAPTURED
+START_UTC NOT_CAPTURED
+END_LOCAL NOT_CAPTURED
+END_UTC NOT_CAPTURED
+PYTEST_EXIT_CODE NOT_CAPTURED
+PYTEST_REPORTED_DURATION_S 55.22
+PYTEST_ASSERTION_RESULT PASS
+VERIFICATION_INVOCATIONS 1
+RETRY_COUNT 0
+FAILING_IDS []
+BASE_TEMP_REMOVED true
+DS12 PASS_WITH_PROVENANCE_GAP
+```
+
+Do not infer exit 0 or timestamps.
+Original 22-file pre/post table values waived. Do not recreate them.
+
+=== A3.2 Revised final DS13 evidence ===
+Author-accepted prior operator attestation:
+```text
+A1_OPERATOR_ATTESTATION pre/post read-only metadata identical for 22 protected files; each protected root had DIRS []; G2 remained absent
+A1_PRE_POST_TABLE_VALUES_RETAINED false
+```
+
+Fresh post-only metadata collection (metadata only: resolved root, direct child directories, sorted direct-file name/size/mtime_ns; contents never opened; no hashes):
+cutoff: 2026-09-08 13:29:10 Asia/Shanghai = 2026-09-08 05:29:10Z (UTC)
+cutoff rule: every protected file mtime strictly earlier than cutoff
+
+ROOT workspace/v72p2d5_structure/20260905_r2
+RESOLVED D:\Code\HD-QKD_Polar_Comparison\workspace\v72p2d5_structure\20260905_r2
+DIRS []
+FILES_SORTED_BY_NAME
+execution_summary.json|447|1788615874939696800|2026-09-05T13:44:34.9396968Z
+report.md|793|1788615874938697300|2026-09-05T13:44:34.9386973Z
+results.json|10409|1788615874937697800|2026-09-05T13:44:34.9376978Z
+table.csv|746|1788615874938697300|2026-09-05T13:44:34.9386973Z
+ACCEPTED_INVENTORY results.json 10409 / table.csv 746 / report.md 793 / execution_summary.json 447 per STRUCTURE_RESULT_SUMMARY.md
+CUTOFF_CHECK all four mtimes 2026-09-05T13:44:34Z earlier than 2026-09-08T05:29:10Z PASS
+
+ROOT workspace/v72p2d5_g0/20260905_r2
+RESOLVED D:\Code\HD-QKD_Polar_Comparison\workspace\v72p2d5_g0\20260905_r2
+DIRS []
+FILES_SORTED_BY_NAME
+execution_summary.json|385|1788626074451921900|2026-09-05T16:34:34.4519219Z
+report.md|712|1788626074450889700|2026-09-05T16:34:34.4508897Z
+results.json|2512|1788626074450889700|2026-09-05T16:34:34.4508897Z
+table.csv|306|1788626074450889700|2026-09-05T16:34:34.4508897Z
+ACCEPTED_INVENTORY execution_summary.json 385 / report.md 712 / results.json 2512 / table.csv 306 per MODEL_F_INPUT_PRE_EXECUTE_REVIEW_R2.md
+CUTOFF_CHECK all four mtimes 2026-09-05T16:34:34Z earlier than 2026-09-08T05:29:10Z PASS
+
+ROOT workspace/v72p2d5_g0_recovery/20260906_r1
+RESOLVED D:\Code\HD-QKD_Polar_Comparison\workspace\v72p2d5_g0_recovery\20260906_r1
+DIRS []
+FILES_SORTED_BY_NAME
+execution_summary.json|404|1788634063474539400|2026-09-05T18:47:43.4745394Z
+report.md|722|1788634063474031500|2026-09-05T18:47:43.4740315Z
+results.json|2531|1788634063472847300|2026-09-05T18:47:43.4728473Z
+table.csv|306|1788634063473496200|2026-09-05T18:47:43.4734962Z
+ACCEPTED_INVENTORY execution_summary.json 404 / report.md 722 / results.json 2531 / table.csv 306 per MODEL_F_INPUT_PRE_EXECUTE_REVIEW_R2.md
+CUTOFF_CHECK all four mtimes 2026-09-05T18:47:43Z earlier than 2026-09-08T05:29:10Z PASS
+
+ROOT workspace/v72p2d5_p0_cost/20260906_r1
+RESOLVED D:\Code\HD-QKD_Polar_Comparison\workspace\v72p2d5_p0_cost\20260906_r1
+DIRS []
+FILES_SORTED_BY_NAME
+execution_summary.json|267|1788775757079071000|2026-09-07T10:09:17.0790710Z
+report.md|227|1788775757079071000|2026-09-07T10:09:17.0790710Z
+results.json|1197|1788775757078064900|2026-09-07T10:09:17.0780649Z
+table.csv|186|1788775757078064900|2026-09-07T10:09:17.0780649Z
+ACCEPTED_INVENTORY execution_summary.json 267 / report.md 227 / results.json 1197 / table.csv 186 per P0_PRE_RESULT_REVIEW_R1.md
+CUTOFF_CHECK all four mtimes 2026-09-07T10:09:17Z earlier than 2026-09-08T05:29:10Z PASS
+
+ROOT workspace/v72p2d5_model_f_input/20260907_r1
+RESOLVED D:\Code\HD-QKD_Polar_Comparison\workspace\v72p2d5_model_f_input\20260907_r1
+DIRS []
+FILES_SORTED_BY_NAME
+model_f_input.npz|208467|1788718027043698800|2026-09-06T18:07:07.0436988Z
+model_f_input_summary.json|752|1788718027043698800|2026-09-06T18:07:07.0436988Z
+ACCEPTED_INVENTORY model_f_input_summary.json 752 + model_f_input.npz 208467 per G1_AUTHORIZATION_RECORD_R1.md
+CUTOFF_CHECK both mtimes 2026-09-06T18:07:07Z earlier than 2026-09-08T05:29:10Z PASS
+
+ROOT workspace/v72p2d5_g1/20260907_r2
+RESOLVED D:\Code\HD-QKD_Polar_Comparison\workspace\v72p2d5_g1\20260907_r2
+DIRS []
+FILES_SORTED_BY_NAME
+execution_summary.json|384|1788806390516340700|2026-09-07T18:39:50.5163407Z
+report.md|246|1788806390515341700|2026-09-07T18:39:50.5153417Z
+results.json|3210|1788806390514342400|2026-09-07T18:39:50.5143424Z
+table.csv|330|1788806390515341700|2026-09-07T18:39:50.5153417Z
+ACCEPTED_INVENTORY execution_summary.json 384 / report.md 246 / results.json 3210 / table.csv 330 per G1_OPERATOR_RETURN_R1.md
+CUTOFF_CHECK all four mtimes 2026-09-07T18:39:50Z earlier than 2026-09-08T05:29:10Z PASS
+PARENT workspace/v72p2d5_g1 DIRS [20260906_r1, 20260907_r2]
+
+ROOT workspace/v72p2d5_g2
+RESOLVED ABSENT Test-Path False
+CHILD workspace/v72p2d5_g2/20260906_r1 Test-Path False
+FORMAL_CHILD workspace/v72p2d5_g2_20260907_r2 Test-Path False
+WILDCARD workspace/v72p2d5_g2* no directory entry
+G2_CHECK absent PASS
+
+GIT_DIFF d6fabf09..b6326ad2 --name-only (17 paths, no protected-root path):
+AGENT_PROJECT_MEMORY.md
+docs/decision-log.md
+docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/D5_DECOMPOSITION_SUCCESSOR_PREREG_R1.md
+docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/D5_DECOMPOSITION_SUCCESSOR_R1.md
+docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/D5_ROUTE_STOP_ACCEPTANCE_R1.md
+docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/D5_ROUTE_STOP_REVIEW_R1.md
+docs/research_cycles/V72P2D5-GF32-RATE-MOTHER/cycle_state.yaml
+workspace/d5_decomposition_successor_r1_c765e3010674/command_log.txt
+workspace/d5_decomposition_successor_r1_c765e3010674/decoder_records.csv
+workspace/d5_decomposition_successor_r1_c765e3010674/manifest.json
+workspace/d5_decomposition_successor_r1_c765e3010674/partition_scores.csv
+workspace/d5_decomposition_successor_r1_c765e3010674/s1_score_partitions.py
+workspace/d5_decomposition_successor_r1_c765e3010674/s2_freeze_selection.py
+workspace/d5_decomposition_successor_r1_c765e3010674/s3_run_decoder_matrix.py
+workspace/d5_decomposition_successor_r1_c765e3010674/s4_verify_from_scalars.py
+workspace/d5_decomposition_successor_r1_c765e3010674/selected_partitions.json
+workspace/d5_decomposition_successor_r1_c765e3010674/summary.json
+ZERO_PATH_TOUCH no protected-root path in diff PASS
+
+DEVELOPMENT_ROOT workspace/d5_decomposition_successor_r1_c765e3010674 distinct from every protected root PASS
+
+DS13 summary: all present protected roots flat DIRS []; names/sizes agree with accepted cycle documents; every mtime strictly earlier than cutoff; G2 absent; zero path touch; development root distinct.
+
+A3.2 record:
+```text
+ORIGINAL_PRE_SNAPSHOT_PERSISTED false
+A1_PRE_POST_EQUALITY_SOURCE operator_attestation_only
+FRESH_POST_METADATA_COLLECTED true
+DS13_CLOSURE_BASIS operator_attestation_plus_fresh_post_cutoff_plus_zero_path_touch
+DS13 PASS_WITH_DISCLOSED_MISSING_TABLE
+```
+
+=== A3.3 Sole appendix and commit ===
+```text
+DS12 PASS_WITH_PROVENANCE_GAP
+DS13 PASS_WITH_DISCLOSED_MISSING_TABLE
+DS15 PASS
+FORMAL_G1_RERUN false
+SCIENTIFIC_DECODER_CALLS 0
+G2_EXECUTED false
+G2_PRESENT false
+PUSHED false
+```
+NO_PYTEST_RERUN true; NO_DECODER true; NO_PHASE true; NO_PROTECTED_CONTENT_READ true; NO_PROTECTED_CONTENT_WRITE true; NO_PUSH true
+NO_GRAPH_MOTHER_START true; next_gate remains D5_GRAPH_MOTHER_SUCCESSOR_PROPOSAL
