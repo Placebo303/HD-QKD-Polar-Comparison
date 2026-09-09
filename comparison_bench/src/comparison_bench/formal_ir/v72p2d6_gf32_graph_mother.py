@@ -5,6 +5,7 @@ Graph/mother is the only axis; 8 arms frozen per prereg.
 """
 from __future__ import annotations
 import json
+import os
 import time
 from pathlib import Path
 from collections import Counter, deque
@@ -21,7 +22,7 @@ except ModuleNotFoundError:
     sys.modules["v72p2d5_gf32_rate_mother"] = d5
     _spec.loader.exec_module(d5)
 
-# Frozen identifiers
+# Frozen identifiers (R1c: unchanged; parallel-only revision, no semantic change)
 ARMS = ["B0_D5_DV3_NATIVE","B1_D5_DV3_COMMON_LABELS","T1_PEG_DV3","T2_CYCLE_GREEDY_DV3","T3_SC_DV3_W4","T4_SC_DV3_W8","M1_ACCUMULATOR_FOREST_MAX","M2_ACCUMULATOR_FOREST_HALF"]
 T_ARMS = ["T1_PEG_DV3","T2_CYCLE_GREEDY_DV3","T3_SC_DV3_W4","T4_SC_DV3_W8"]
 M_ARMS = ["M1_ACCUMULATOR_FOREST_MAX","M2_ACCUMULATOR_FOREST_HALF"]
@@ -59,10 +60,19 @@ SCALING_SEEDS = tuple(range(2026091100,2026091104))
 class D6StructureBlocked(ValueError):
     pass
 
+# R1c: read-only cache for the common coefficient stream (same array reused).
+_COMMON_COEFFS_CACHE = {}
+
 def _common_coeffs(n, layer):
+    # R1c: cache reused across arm×layer parallel tasks (same (n,layer) stream).
+    key = (int(n), str(layer))
+    hit = _COMMON_COEFFS_CACHE.get(key)
+    if hit is not None:
+        return hit
     seed = (COEFF_SEED_L1 if layer=="L1" else COEFF_SEED_L2) + int(n)
     rng = np.random.default_rng(seed)
     vals = rng.integers(1,32,size=(n,3), dtype=np.int64)
+    _COMMON_COEFFS_CACHE[key] = vals
     return vals
 
 def _assign_common_coeffs(support, n, layer, m_max):
@@ -198,6 +208,8 @@ def _build_T1_support(n, m_max, k_min):
 
 def _build_T2_support(n, m_max, k_min):
     # incremental greedy per spec — ponytail: incremental O(candidates * avg_affected) instead of brute O(candidates*n)
+    # R1c: adjacency bit-sets + support reuse; girth NOT computed inside loop
+    # (final audit per packet §6 only). Choice key identical to R1.
     support = np.full((n,3), -1, dtype=np.int64)
     deg = np.zeros(m_max, dtype=np.int64)
     used_pairs=set()
@@ -740,3 +752,8 @@ def write_structure_records(path, records):
         fh.write(header)
         for r in records:
             fh.write(",".join(str(r.get(k,"")) for k in ["arm","n","layer","prefix_rows","rank","zero_rows","zero_columns","connected_components","largest_component_fraction","four_cycles","four_cycle_variable_incidence_max","duplicate_projective_columns","base_pair_duplicates","support_triple_duplicates","row_degree_max","row_degree_sumsq","girth","girth_reason","m_cycle_rank","window_overflow","eligible","determinism_ok"])+"\n")
+        fh.flush()
+        try:
+            os.fsync(fh.fileno())
+        except Exception:
+            pass

@@ -193,3 +193,217 @@ def test_budget_and_terminal_truth_table():
     sel,elig=d6.select_decoder_arms(summary)
     assert len(sel)<=6
     assert "B0_D5_DV3_NATIVE" in sel
+
+def test_r1c_common_coeffs_cache_identity():
+    # R1c cache returns identical stream (no semantic change).
+    a = d6._common_coeffs(64, "L1")
+    b = d6._common_coeffs(64, "L1")
+    assert np.array_equal(a, b)
+    assert a.shape == (64, 3)
+    assert bool(((a >= 1) & (a <= 31)).all())
+
+def test_r1c_script_workers_flag_and_choice():
+    import subprocess, sys
+    r = subprocess.run([sys.executable, str(ROOT / "scripts" / "v72p2d6_graph_mother_development.py"), "--help"], capture_output=True, text=True, timeout=15)
+    out = r.stdout + r.stderr
+    assert "--workers" in out
+    # choice logic without spawning workers: 90MB*18<2GiB -> 18; huge -> floor 8
+    import importlib.util
+    for _k in [k for k in list(sys.modules) if k == "comparison_bench" or k.startswith("comparison_bench.")]:
+        del sys.modules[_k]
+    sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
+    sp = ROOT / "scripts" / "v72p2d6_graph_mother_development.py"
+    spec2 = importlib.util.spec_from_file_location("d6dev", str(sp))
+    dev = importlib.util.module_from_spec(spec2)
+    spec2.loader.exec_module(dev)
+    assert dev.choose_worker_count(18, 90 * 1024 ** 2, None) == 18
+    assert dev.choose_worker_count(18, 2 * 1024 ** 3, None) == 8
+    assert dev.R1C_CHUNK_WALL_MAX == 5400
+
+def _load_dev_module(name):
+    import importlib.util, sys
+    for _k in [k for k in list(sys.modules) if k == "comparison_bench" or k.startswith("comparison_bench.")]:
+        del sys.modules[_k]
+    sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
+    sp = ROOT / "scripts" / "v72p2d6_graph_mother_development.py"
+    spec = importlib.util.spec_from_file_location(name, str(sp))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_r1c_a1_worker_hard_ceiling():
+    # A1-1: requested is a hard ceiling, never upscaled.
+    dev = _load_dev_module("d6dev_a1_ceil")
+    tiny = 10 * 1024 ** 2
+    assert dev.choose_worker_count(8, tiny, 0) == 8
+    assert dev.choose_worker_count(12, tiny, 0) == 12
+    assert dev.choose_worker_count(14, tiny, 0) == 14
+    assert dev.choose_worker_count(18, tiny, 0) == 18
+    assert dev.choose_worker_count(1, tiny, 0) == 1
+    big = 120 * 1024 ** 2
+    assert dev.choose_worker_count(18, big, 0) == 14
+    assert dev.choose_worker_count(14, big, 0) == 14
+    assert dev.choose_worker_count(12, big, 0) == 12
+    assert dev.choose_worker_count(8, big, 0) == 8
+
+
+def test_r1c_a1_measured_sizing_and_aggregate():
+    # A1-2: measured startup RSS gates scale; pool+main aggregate recorded.
+    dev = _load_dev_module("d6dev_a1_rss")
+    mib = 1024 ** 2
+    assert dev.select_effective_workers(18, [100 * mib] * 18, 50 * mib) == 18
+    assert dev.select_effective_workers(18, [120 * mib] * 18, 50 * mib) == 14
+    assert dev.select_effective_workers(14, [None, None], None) == 14
+    assert dev.pool_aggregate_rss([10, 20, None], 5) == 35
+    assert dev.pool_aggregate_rss([], None) == 0
+
+
+def test_r1c_a1_atomic_reservation_budget_boundary():
+    # A1-3: concurrent dispatch never exceeds the call budget; idx 1..N unique.
+    import threading, time as _time
+    dev = _load_dev_module("d6dev_a1_budget")
+    old = dev.CALL_BUDGET
+    dev.CALL_BUDGET = 6
+    try:
+        class FakeWorker:
+            def __init__(self):
+                self.pids = [1234]
+            def call(self, task):
+                _time.sleep(0.01)
+                return {"exact": True, "syndrome_ok": True, "iterations": 5,
+                        "finite": True, "beliefs": None, "crash": False,
+                        "timeout": False, "wall_s": 0.01, "rss": 1000}
+        state = {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+                 "records": [], "peak_rss": 0, "budget_stop": False,
+                 "lock": threading.Lock()}
+        w = FakeWorker()
+        meta = {"arm": "A", "n": 64, "seed": 1, "point": "f1.2",
+                "r1": 59, "r2": 52, "matrix_id": "m"}
+        h = np.zeros((2, 2), dtype=np.uint8)
+        prior = np.full((2, 32), 1.0 / 32, dtype=np.float64)
+        xt = np.zeros(2, dtype=np.int64)
+        barrier = threading.Barrier(12)
+        results = [None] * 12
+        def one(i):
+            barrier.wait()
+            try:
+                r = dev.invoke(w, state, meta, "L1", h, prior, xt, 0.5, False)
+                results[i] = ("ok", int(r["call_idx"]))
+            except StopIteration:
+                results[i] = ("stop", None)
+        threads = [threading.Thread(target=one, args=(i,)) for i in range(12)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        oks = sorted(c for s, c in results if s == "ok")
+        stops = sum(1 for s, _ in results if s == "stop")
+        assert oks == [1, 2, 3, 4, 5, 6]
+        assert stops == 6
+        assert state["calls"] == 6
+        assert state["budget_stop"] is True
+        assert len(state["records"]) == 6
+    finally:
+        dev.CALL_BUDGET = old
+
+
+def test_r1c_a1_setup_plus_scientific_budget():
+    # A1-4: warmup setup calls share the 2500 total with scientific calls.
+    import threading, time as _time
+    dev = _load_dev_module("d6dev_a1_setup")
+    old = dev.CALL_BUDGET
+    dev.CALL_BUDGET = 3
+    try:
+        state = {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+                 "records": [], "peak_rss": 0, "budget_stop": False,
+                 "lock": threading.Lock()}
+        assert dev.reserve_setup_idx(state) == 1
+        assert dev.reserve_call_idx(state) == 1
+        assert dev.reserve_call_idx(state) == 2
+        with pytest.raises(StopIteration):
+            dev.reserve_call_idx(state)
+        assert state["budget_stop"] is True
+    finally:
+        dev.CALL_BUDGET = old
+
+
+def test_r1c_a1_reorder_stable_order():
+    # A1-6: out-of-order completion still assembles cells in frozen input order.
+    import queue, threading, time as _time
+    dev = _load_dev_module("d6dev_a1_order")
+    q = queue.Queue()
+    class FakeW:
+        def __init__(self, pid):
+            self.pids = [pid]
+    q.put(FakeW(101))
+    q.put(FakeW(102))
+    orig = dev.run_cell
+    def fake_run_cell(w, H1, H2, r1, r2, p1, p2, block, n, meta, state):
+        idx = int(meta["idx"])
+        _time.sleep(0.05 * (4 - idx))
+        return {"app_exact": bool(idx % 2 == 0), "iter_total": idx,
+                "idx": idx, "modes": [], "disagreement": False}
+    dev.run_cell = fake_run_cell
+    try:
+        state = {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+                 "records": [], "peak_rss": 0, "budget_stop": False,
+                 "chunk_wall_blocked": False,
+                 "lock": threading.Lock()}
+        specs = [(None, None, 0, 0, None, None, None, 64, {"idx": i})
+                 for i in range(5)]
+        cells, wall = dev.run_cells_parallel(specs, state, None, q, 2)
+        assert [int(c["idx"]) for c in cells] == [0, 1, 2, 3, 4]
+        assert wall >= 0
+    finally:
+        dev.run_cell = orig
+
+
+def test_r1c_a1_phase_flush_and_block(tmp_path):
+    # A1-5: frozen call_idx order flush; >=5400s is an explicit blocked state.
+    import threading, time as _time
+    dev = _load_dev_module("d6dev_a1_flush")
+    p = tmp_path / "decoder_records.csv"
+    recs = [{"call_idx": 3, "arm": "A"}, {"call_idx": 1, "arm": "A"},
+            {"call_idx": 2, "arm": "A"}, {"call_idx": -1, "arm": "A"}]
+    dev.flush_decoder_records(str(p), recs, None)
+    import csv
+    with open(str(p), newline="", encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    assert [int(r["call_idx"]) for r in rows] == [1, 2, 3]
+    state = {"chunk_wall_blocked": False, "budget_stop": False}
+    assert dev.note_chunk_wall("canary", 5399.9, None, state) is True
+    assert state["chunk_wall_blocked"] is False
+    assert dev.note_chunk_wall("canary", 5400.0, None, state) is False
+    assert state["chunk_wall_blocked"] is True
+    assert state["budget_stop"] is True
+    assert dev.R1C_CHUNK_WALL_BLOCKED_TERMINAL == "D6_GRAPH_CHUNK_WALL_BLOCKED"
+
+
+def test_r1c_a1_pair_to_mask_removed():
+    # A1-7: write-only mirror deleted; T2 determinism retained on tiny fixture.
+    src = (ROOT / "comparison_bench" / "src" / "comparison_bench"
+           / "formal_ir" / "v72p2d6_gf32_graph_mother.py").read_text(
+               encoding="utf-8")
+    assert "pair_to_mask" not in src
+    s1 = d6._build_T2_support(6, 6, 4)
+    s2 = d6._build_T2_support(6, 6, 4)
+    assert np.array_equal(s1, s2)
+
+def test_r1c_parallel_structure_unit_equivalence():
+    # Fast arm unit: parallel worker fn matches sequential builder.
+    import importlib.util, sys
+    for _k in [k for k in list(sys.modules) if k == "comparison_bench" or k.startswith("comparison_bench.")]:
+        del sys.modules[_k]
+    sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
+    sp = ROOT / "scripts" / "v72p2d6_graph_mother_development.py"
+    spec2 = importlib.util.spec_from_file_location("d6dev2", str(sp))
+    dev = importlib.util.module_from_spec(spec2)
+    spec2.loader.exec_module(dev)
+    arm, layer = "T3_SC_DV3_W4", "L1"
+    a_arm, a_layer, H_par, sup_par, ok = dev._build_one_arm_layer((arm, 64, layer))
+    assert (a_arm, a_layer) == (arm, layer)
+    assert bool(ok)
+    H_seq, sup_seq = d6.build_mother(arm, 64, layer)
+    assert np.array_equal(np.asarray(H_par), np.asarray(H_seq))
+    assert np.array_equal(np.asarray(sup_par), np.asarray(sup_seq))
