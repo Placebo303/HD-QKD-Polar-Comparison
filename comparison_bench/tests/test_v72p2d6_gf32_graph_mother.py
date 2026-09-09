@@ -782,3 +782,299 @@ def test_r1c_a2_seed_pollution_verify_fail(tmp_path):
         w.writerows(rows)
     # Seed outside canary/confirmation/scaling sets must FAIL (also calls mismatch).
     assert dev.verify_command(str(out)) is False
+
+
+# ---- R1c-A3 post-run verifier/terminal tests (fake/tmp only, no decoder) ----
+
+_B0 = "B0_D5_DV3_NATIVE"
+_T1 = "T1_PEG_DV3"
+
+
+def _a3_row(call_idx, arm, n, seed, point, mode, exact, crash=False,
+            error="", it=5):
+    finite = "False" if crash else "True"
+    return {"call_idx": call_idx, "arm": arm, "n": n, "seed": seed,
+            "point": point, "rows_l1": 59, "rows_l2": 52, "mode": mode,
+            "matrix_id": "m", "exact": "True" if exact else "False",
+            "syndrome_ok": "True" if exact else "False",
+            "iterations": -1 if crash else it, "finite": finite,
+            "crash": "True" if crash else "False",
+            "timeout": "False", "wall_timeout": "False",
+            "prior_mass_on_truth": 0.5, "wall_s": 0.5, "rss_bytes": 1000,
+            "watchdog_ok": "True", "worker_pid": "111", "respawn_pid": "",
+            "error": error}
+
+
+def _make_a3_root(tmp_path, dev, name, rows, canary, advancing, conf_counts,
+                  safety, width, terminal, selected, fb_t, fb_m,
+                  struct_rows=()):
+    import csv, json
+    out = tmp_path / name
+    out.mkdir()
+    elig = {a: True for a in selected}
+    sel = {"selected": list(selected), "eligible": elig,
+           "fallback_T": fb_t, "fallback_M": fb_m,
+           "structural_order_new": list(selected),
+           "freeze": "decoder-blind-from-structure-only"}
+    (out / "selected_arms.json").write_text(json.dumps(sel), encoding="utf-8")
+    header = ("arm,n,layer,prefix_rows,rank,zero_rows,zero_columns,"
+              "connected_components,largest_component_fraction,four_cycles,"
+              "four_cycle_variable_incidence_max,"
+              "duplicate_projective_columns,base_pair_duplicates,"
+              "support_triple_duplicates,row_degree_max,row_degree_sumsq,"
+              "girth,girth_reason,m_cycle_rank,window_overflow,eligible,"
+              "determinism_ok\n")
+    with open(str(out / "structure_records.csv"), "w", encoding="utf-8",
+              newline="") as fh:
+        fh.write(header)
+        for r in struct_rows:
+            fh.write(r + "\n")
+    (out / "command_log.txt").write_text("a3-fake\n", encoding="utf-8")
+    mib = 1024 ** 2
+    main_rss = 50 * mib
+    worker_rss = [100 * mib]
+    agg = int(main_rss) + int(worker_rss[0])
+    counted = [r for r in rows if int(r["call_idx"]) >= 0]
+    itmax = max([int(r["iterations"]) for r in counted] or [0])
+    mani = {"out_root": str(out), "arms": [], "revision": dev.R1C_REVISION,
+            "workers": 1, "workers_requested": 1, "workers_effective": 1,
+            "main_rss_bytes": int(main_rss),
+            "worker_rss_bytes": [int(worker_rss[0])],
+            "aggregate_rss_bytes": int(agg),
+            "peak_single_rss_bytes": int(worker_rss[0]),
+            "peak_aggregate_rss_bytes": int(agg),
+            "rss_semantics": dev.RSS_SEMANTICS, "deadline_s": 1e9,
+            "rss_block_terminal": None,
+            "chunk_wall_max_s": dev.R1C_CHUNK_WALL_MAX, "chunk_walls": {},
+            "chunk_wall_blocked": False, "canary_seeds": [2026091000],
+            "confirmation_seeds": [2026091010], "scaling_seeds": [2026091100],
+            "budgets": {"calls": 2500, "wall_s": 43200, "watchdog_s": 120,
+                        "rss_bytes": 2147483648},
+            "calls": len(counted), "setup_decoder_calls": 1,
+            "scientific_calls": len(counted),
+            "total_decoder_calls": 1 + len(counted), "wall_s": 10.0,
+            "peak_rss_bytes": int(worker_rss[0]), "worker_pids": [111],
+            "head_sha": "test", "budget_stop": False,
+            "oracle_never_upgrades_exact": True}
+    (out / "manifest.json").write_text(json.dumps(mani), encoding="utf-8")
+    summ = {"selected": list(selected), "canary": dict(canary),
+            "revision": dev.R1C_REVISION, "workers": 1,
+            "workers_requested": 1, "workers_effective": 1,
+            "setup_decoder_calls": 1, "scientific_calls": len(counted),
+            "total_decoder_calls": 1 + len(counted), "chunk_walls": {},
+            "chunk_wall_blocked": False, "rss_block_terminal": None,
+            "peak_single_rss_bytes": int(worker_rss[0]),
+            "peak_aggregate_rss_bytes": int(agg),
+            "rss_semantics": dev.RSS_SEMANTICS,
+            "advancing": list(advancing),
+            "confirmation_counts": dict(conf_counts),
+            "confirmation_safety": dict(safety),
+            "confirmation_width": width, "terminal": terminal,
+            "calls": len(counted), "wall_s": 10.0, "iterations_max": itmax,
+            "peak_rss_bytes": int(worker_rss[0]), "budget_stop": False,
+            "oracle_never_upgrades_exact": True}
+    (out / "summary.json").write_text(json.dumps(summ), encoding="utf-8")
+    with open(str(out / "decoder_records.csv"), "w", encoding="utf-8",
+              newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=dev.DECODER_FIELDNAMES)
+        w.writeheader()
+        w.writerows(rows)
+    return out
+
+
+def _a3_safety():
+    return {"crashes": 0, "nonfinite": 0, "disagreements": 0,
+            "rss_known_ok": True}
+
+
+def test_r1c_a3_n_identity(tmp_path):
+    # Same arm/seed/point/mode at n128+n256 is valid and unique with n.
+    dev = _load_dev_a2("d6dev_a3_identity")
+    rows = [_a3_row(1, _B0, 128, 2026091100, "f1.2", "L1", False),
+            _a3_row(2, _B0, 256, 2026091100, "f1.2", "L1", False)]
+    out = _make_a3_root(tmp_path, dev, "a3id", rows, {}, [], {},
+                        _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0],
+                        _B0, None)
+    assert dev.verify_command(str(out)) is True
+    old = [(r["arm"], r["seed"], r["point"], r["mode"]) for r in rows]
+    new = [(r["n"], r["arm"], r["seed"], r["point"], r["mode"]) for r in rows]
+    assert len(set(old)) == 1 and len(set(new)) == 2
+
+
+def test_r1c_a3_true_duplicate_fails(tmp_path, capsys):
+    # A true duplicate including identical n must fail.
+    dev = _load_dev_a2("d6dev_a3_dup")
+    rows = [_a3_row(1, _B0, 128, 2026091100, "f1.2", "L1", False),
+            _a3_row(2, _B0, 128, 2026091100, "f1.2", "L1", False)]
+    out = _make_a3_root(tmp_path, dev, "a3dup", rows, {}, [], {},
+                        _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0],
+                        _B0, None)
+    assert dev.verify_command(str(out)) is False
+    assert "FAIL semantic-key-no-dup" in capsys.readouterr().out
+
+
+def test_r1c_a3_canary_isolation(tmp_path):
+    # Scaling rows must not contaminate the canary recomputation.
+    dev = _load_dev_a2("d6dev_a3_iso")
+    rows = [_a3_row(1, _B0, 64, 2026091000, "f1.2", "L1", False, it=0),
+            _a3_row(2, _B0, 64, 2026091000, "f1.2", "L2-APP", False, it=0),
+            _a3_row(3, _T1, 64, 2026091000, "f1.2", "L1", True),
+            _a3_row(4, _T1, 64, 2026091000, "f1.2", "L2-APP", True),
+            _a3_row(5, _T1, 64, 2026091010, "f1.0", "L1", False),
+            _a3_row(6, _T1, 64, 2026091010, "f1.0", "L2-APP", False),
+            _a3_row(7, _T1, 64, 2026091010, "f1.2", "L1", False),
+            _a3_row(8, _T1, 64, 2026091010, "f1.2", "L2-APP", False),
+            _a3_row(9, _T1, 64, 2026091010, "square", "L1", False),
+            _a3_row(10, _T1, 64, 2026091010, "square", "L2-APP", False),
+            _a3_row(11, _T1, 128, 2026091100, "f1.2", "L1", False),
+            _a3_row(12, _T1, 128, 2026091100, "f1.2", "L2-APP", False),
+            _a3_row(13, _T1, 128, 2026091100, "square", "L1", False),
+            _a3_row(14, _T1, 128, 2026091100, "square", "L2-APP", False),
+            _a3_row(15, _T1, 256, 2026091100, "f1.2", "L1", False),
+            _a3_row(16, _T1, 256, 2026091100, "f1.2", "L2-APP", False),
+            _a3_row(17, _T1, 256, 2026091100, "square", "L1", False),
+            _a3_row(18, _T1, 256, 2026091100, "square", "L2-APP", False)]
+    canary = {_B0: {"f12_exact": 0, "f12_iter": 0, "sq_exact": 0},
+              _T1: {"f12_exact": 1, "f12_iter": 10, "sq_exact": 0}}
+    conf = {_T1: {"f1.0": 0, "f1.2": 0, "square": 0}}
+    out = _make_a3_root(tmp_path, dev, "a3iso", rows, canary, [_T1], conf,
+                        _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY",
+                        [_B0, _T1], _T1, None)
+    assert dev.verify_command(str(out)) is True
+    parts = dev.a3_stage_partitions(
+        [r for r in rows if int(r["call_idx"]) >= 0])
+    assert len(parts["canary"]) == 4 and len(parts["scaling"]) == 2
+    assert len(parts["confirmation"]) == 6 and len(parts["outside"]) == 0
+
+
+def test_r1c_a3_scaling_stages_ordered(tmp_path):
+    # n128/n256 scaling stages are independently reconstructed in order.
+    dev = _load_dev_a2("d6dev_a3_stages")
+    rows = [_a3_row(1, _T1, 128, 2026091100, "f1.2", "L1", False),
+            _a3_row(2, _T1, 128, 2026091100, "f1.2", "L2-APP", False),
+            _a3_row(3, _T1, 256, 2026091101, "square", "L1", False),
+            _a3_row(4, _T1, 256, 2026091101, "square", "L2-APP", False)]
+    audit = ("T1_PEG_DV3,%s,%s,%s,%s,0,0,1,1.0,10,3,0,0,0,4,1062,10,"
+             "exact,0,0,True,True")
+    struct = [audit % (n, layer, k, k)
+              for n in (128, 256) for layer in ("L1", "L2")
+              for k in ((118, 128) if layer == "L1" else (104, 128))]
+    out = _make_a3_root(tmp_path, dev, "a3stages", rows, {}, [], {},
+                        _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY",
+                        [_B0, _T1], _T1, None, struct_rows=struct)
+    assert dev.verify_command(str(out)) is True
+    parts = dev.a3_stage_partitions(
+        [r for r in rows if int(r["call_idx"]) >= 0])
+    assert sorted(parts["scaling"]) == ["128", "256"]
+
+
+def test_r1c_a3_empty_confirmation_not_safety(tmp_path, capsys):
+    # Empty confirmation is labeled EMPTY, never observed safety; a stored
+    # nonempty confirmation with zero rows must fail instead.
+    dev = _load_dev_a2("d6dev_a3_emptyconf")
+    rows = [_a3_row(1, _B0, 64, 2026091000, "f1.2", "L1", False, it=0)]
+    out = _make_a3_root(tmp_path, dev, "a3empty", rows,
+                        {_B0: {"f12_exact": 0, "f12_iter": 0,
+                               "sq_exact": 0}}, [], {}, _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0],
+                        None, None)
+    assert dev.verify_command(str(out)) is True
+    assert "EMPTY_NOT_EVIDENCE" in capsys.readouterr().out
+    out2 = _make_a3_root(tmp_path, dev, "a3fakempty", rows,
+                         {_B0: {"f12_exact": 0, "f12_iter": 0,
+                                "sq_exact": 0}}, [],
+                         {_B0: {"f1.0": 0}}, _a3_safety(), 64,
+                         "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0],
+                         None, None)
+    assert dev.verify_command(str(out2)) is False
+
+
+def test_r1c_a3_crash_overrides_topology(tmp_path, capsys):
+    # Attempted crash/nonfinite overrides topology-no-recovery (fail-closed
+    # report, mechanical checks still pass).
+    dev = _load_dev_a2("d6dev_a3_crash")
+    derr = "ValueError('Check node requires degree >= 2')"
+    rows = [_a3_row(1, _B0, 64, 2026091000, "f1.2", "L1", False,
+                    crash=True, error=derr),
+            _a3_row(2, _B0, 64, 2026091000, "f1.2", "L2-oracle", False,
+                    crash=True, error=derr)]
+    out = _make_a3_root(tmp_path, dev, "a3crash", rows,
+                        {_B0: {"f12_exact": 0, "f12_iter": 0,
+                               "sq_exact": 0}}, [], {}, _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0],
+                        None, None)
+    assert dev.verify_command(str(out)) is True
+    txt = capsys.readouterr().out
+    assert ("recomputed-terminal %s" % dev.A3_STRUCTURE_INVARIANT_TERMINAL
+            ) in txt
+    assert "terminal-agreement False" in txt
+    # Classifier unit seams: degree vs plain crash vs clean.
+    assert dev.a3_classify_evidence(rows)[0] == \
+        dev.A3_STRUCTURE_INVARIANT_TERMINAL
+    plain = [_a3_row(1, _B0, 64, 2026091000, "f1.2", "L1", False,
+                     crash=True, error="boom")]
+    assert dev.a3_classify_evidence(plain)[0] == \
+        dev.A3_ATTEMPTED_INVALID_TERMINAL
+    clean = [_a3_row(1, _B0, 64, 2026091000, "f1.2", "L1", False)]
+    assert dev.a3_classify_evidence(clean)[0] is None
+
+
+def test_r1c_a3_placeholders_ignored(tmp_path, capsys):
+    # call_idx=-1 placeholders are not crashes or calls.
+    dev = _load_dev_a2("d6dev_a3_ph")
+    rows = [_a3_row(1, _B0, 64, 2026091000, "f1.2", "L1", False),
+            _a3_row(-1, _B0, 64, 2026091000, "square", "L2-APP", False,
+                    crash=True)]
+    out = _make_a3_root(tmp_path, dev, "a3ph", rows,
+                        {_B0: {"f12_exact": 0, "f12_iter": 5,
+                               "sq_exact": 0}}, [], {}, _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0],
+                        None, None)
+    assert dev.verify_command(str(out)) is True
+    assert "terminal-agreement True" in capsys.readouterr().out
+
+
+def test_r1c_a3_disagreement_fail_closed():
+    # Stored/recomputed disagreement is fail-closed: recomputed governs.
+    dev = _load_dev_a2("d6dev_a3_dis")
+    agree, gov = dev.a3_compare_terminals("STORED", "RECOMPUTED")
+    assert agree is False and gov == "RECOMPUTED"
+    agree2, gov2 = dev.a3_compare_terminals("SAME", "SAME")
+    assert agree2 is True and gov2 == "SAME"
+
+
+def test_r1c_a3_a2_fixture_old_fail_new_classify(tmp_path):
+    # Faithful tiny A2 pattern: scaling seed reused across widths collides
+    # under the old n-agnostic key but verifies under the corrected key.
+    dev = _load_dev_a2("d6dev_a3_fixture")
+    rows = [_a3_row(1, _T1, 128, 2026091100, "f1.2", "L1", False),
+            _a3_row(2, _T1, 256, 2026091100, "f1.2", "L1", False)]
+    out = _make_a3_root(tmp_path, dev, "a3fix", rows, {}, [], {},
+                        _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY",
+                        [_B0, _T1], _T1, None)
+    old = [(r["arm"], r["seed"], r["point"], r["mode"]) for r in rows]
+    assert len(set(old)) == 1  # old verifier FAIL condition reproduced
+    assert dev.verify_command(str(out)) is True  # corrected classification
+
+
+def test_r1c_a3_verify_readonly(tmp_path):
+    # The verifier must not mutate its root (byte-identical six files).
+    dev = _load_dev_a2("d6dev_a3_ro")
+    rows = [_a3_row(1, _B0, 128, 2026091100, "f1.2", "L1", False),
+            _a3_row(2, _B0, 256, 2026091100, "f1.2", "L1", False)]
+    out = _make_a3_root(tmp_path, dev, "a3ro", rows, {}, [], {},
+                        _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0],
+                        _B0, None)
+    names = ("manifest.json", "structure_records.csv",
+             "selected_arms.json", "decoder_records.csv", "summary.json",
+             "command_log.txt")
+    before = {f: (out / f).read_bytes() for f in names}
+    assert dev.verify_command(str(out)) is True
+    for f in names:
+        assert (out / f).read_bytes() == before[f]

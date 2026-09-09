@@ -55,6 +55,11 @@ R1C_RSS_LIMIT_TERMINAL = "D6_RSS_LIMIT_BLOCKED"
 R1C_WALL_BLOCKED_TERMINAL = "D6_WALL_BUDGET_BLOCKED"
 RSS_SEMANTICS = ("fail-closed-strict-unknown-None-no-zero-substitution-"
                  "no-single-as-aggregate")
+# R1c-A3: post-run verifier/terminal corrections (verifier path only; zero
+# execution impact). Frozen by D6_GRAPH_MOTHER_PREREG_R1C_A3.
+A3_DEGREE_SUBSTR = "Check node requires degree"
+A3_STRUCTURE_INVARIANT_TERMINAL = "D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED"
+A3_ATTEMPTED_INVALID_TERMINAL = "D6_GRAPH_ATTEMPTED_CELL_INVALID"
 DECODER_FIELDNAMES = ["call_idx", "arm", "n", "seed", "point", "rows_l1",
                       "rows_l2", "mode", "matrix_id", "exact", "syndrome_ok",
                       "iterations", "finite", "crash", "timeout",
@@ -1034,6 +1039,105 @@ def tally_safety(cell, safety):
             safety["rss_known_ok"] = False
 
 
+def a3_stage_partitions(counted):
+    """Split counted rows into canary / scaling-per-n / confirmation.
+
+    Identity key (n,arm,seed,point,mode); frozen seed domains. Anything
+    outside the three domains (e.g. a canary seed at n!=64) lands in
+    'outside' and fails the stage check. Verifier path only."""
+    parts = {"canary": [], "scaling": {}, "confirmation": [], "outside": []}
+    for r in counted:
+        try:
+            seed = int(r.get("seed", -1))
+        except (TypeError, ValueError):
+            seed = -1
+        n = str(r.get("n", ""))
+        if seed in CONF_SEEDS:
+            parts["confirmation"].append(r)
+        elif seed in SCALING_SEEDS:
+            parts["scaling"].setdefault(n, []).append(r)
+        elif seed in CANARY_SEEDS and n == "64":
+            parts["canary"].append(r)
+        else:
+            parts["outside"].append(r)
+    return parts
+
+
+def a3_cell_app(modes):
+    """End-to-end APP exact for one cell's mode dict (pipeline rule)."""
+    if "L1" in modes and "L2-APP" in modes:
+        return bool(modes["L1"].get("exact") == "True"
+                    and modes["L2-APP"].get("exact") == "True")
+    return False
+
+
+def a3_ssum_from_structure(srecs, width):
+    """Rebuild {arm:{layer:{prefix_audits:[...]}}} for one width (A3 verify).
+
+    Uses only the frozen audit scalars in structure_records.csv, ordered by
+    prefix_rows, so per-width structural order is independently recomputed."""
+    ssum = {}
+    for r in srecs:
+        if str(r.get("n", "")) != str(width):
+            continue
+        arm = r.get("arm", "")
+        layer = r.get("layer", "")
+        try:
+            g = r.get("girth", "")
+            girth = int(g) if str(g) not in ("", "None") else None
+        except (TypeError, ValueError):
+            girth = None
+        try:
+            audit = {"four_cycles": int(r.get("four_cycles", 0) or 0),
+                     "four_cycle_variable_incidence_max": int(
+                         r.get("four_cycle_variable_incidence_max", 0) or 0),
+                     "girth": girth,
+                     "row_degree_max": int(r.get("row_degree_max", 0) or 0),
+                     "row_degree_sumsq": int(
+                         r.get("row_degree_sumsq", 0) or 0),
+                     "prefix_rows": int(r.get("prefix_rows", 0) or 0)}
+        except (TypeError, ValueError):
+            continue
+        ssum.setdefault(arm, {}).setdefault(
+            layer, {"prefix_audits": []})["prefix_audits"].append(audit)
+    for layers in ssum.values():
+        for rec in layers.values():
+            rec["prefix_audits"].sort(key=lambda a: a["prefix_rows"])
+    return ssum
+
+
+def a3_classify_evidence(counted):
+    """A3 crash-precedence classifier over counted rows.
+
+    Returns (recomputed_terminal_or_None, reason). None means no attempted
+    crash/nonfinite, so the stored terminal stands. Degree ValueError =>
+    STRUCTURE_INVARIANT; any other attempted crash/nonfinite =>
+    ATTEMPTED_INVALID. Neither supports a topology-no-recovery claim."""
+    deg = 0
+    other = 0
+    for r in counted:
+        crash = str(r.get("crash", "False")) == "True"
+        finite = str(r.get("finite", "True")) == "True"
+        if not crash and finite:
+            continue
+        if A3_DEGREE_SUBSTR in str(r.get("error", "")):
+            deg += 1
+        else:
+            other += 1
+    if deg:
+        return (A3_STRUCTURE_INVARIANT_TERMINAL, "degree-invariant:%d" % deg)
+    if other:
+        return (A3_ATTEMPTED_INVALID_TERMINAL,
+                "crash-or-nonfinite:%d" % other)
+    return (None, "no-attempted-crash")
+
+
+def a3_compare_terminals(stored, recomputed):
+    """Fail-closed comparison: the recomputed terminal always governs."""
+    agree = (str(stored) == str(recomputed))
+    return (agree, str(recomputed))
+
+
 def verify_command(out_root):
     """R1c-A2 independent scalar recomputation (15 independent rejections)."""
     out = pathlib.Path(out_root)
@@ -1096,10 +1200,10 @@ def verify_command(out_root):
               "n=%d idx=%s" % (len(idxs), str(idxs[:8])))
     except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
         check("call_idx-continuous", False, repr(ex)[:120])
-    # (3) semantic key no duplicate.
+    # (3) semantic key no duplicate (A3: identity includes n).
     try:
-        keys = [(r.get("arm"), r.get("seed"), r.get("point"), r.get("mode"))
-                for r in counted]
+        keys = [(r.get("n"), r.get("arm"), r.get("seed"), r.get("point"),
+                 r.get("mode")) for r in counted]
         check("semantic-key-no-dup", len(set(keys)) == len(keys),
               "n=%d" % len(keys))
     except Exception as ex:  # noqa: BLE001
@@ -1316,39 +1420,134 @@ def verify_command(out_root):
         check("coverage", bool(cov_ok and set_ok), str(sorted(selset)))
     except Exception as ex:  # noqa: BLE001
         check("coverage", False, repr(ex)[:160])
-    # (14) scaling recompute: canary replay + advancement + width.
+    # (14) stage-separated recompute (A3): canary uses n=64 + canary seeds
+    # only; scaling uses scaling seeds grouped per width; confirmation uses
+    # confirmation seeds at the selected width; empty confirmation is EMPTY,
+    # never observed safety.
     try:
-        by_cell = {}
-        for r in counted:
-            by_cell.setdefault(
+        sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
+        from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
+            select_advancement as _adv2, structural_rank_list as _rank2)
+        _blocking14 = {R1C_CHUNK_WALL_BLOCKED_TERMINAL,
+                       R1C_RSS_UNKNOWN_TERMINAL, R1C_RSS_LIMIT_TERMINAL,
+                       R1C_WALL_BLOCKED_TERMINAL}
+        parts = a3_stage_partitions(counted)
+        outside_ok = (len(parts["outside"]) == 0)
+        # Canary partition: per-cell app exact + f1.2 iter totals.
+        can_cells = {}
+        for r in parts["canary"]:
+            can_cells.setdefault(
                 (r["arm"], r["seed"], r["point"]), {})[r["mode"]] = r
-        canary_re = {}
-        for (arm, seed, point), modes in by_cell.items():
-            if int(seed) not in list(CANARY_SEEDS) + list(SCALING_SEEDS):
-                continue
-            if "L1" in modes and "L2-APP" in modes:
-                app = bool(modes["L1"]["exact"] == "True"
-                           and modes["L2-APP"]["exact"] == "True")
-                d = canary_re.setdefault(
-                    arm, {"f12_exact": 0, "sq_exact": 0})
-                if point == "f1.2":
-                    d["f12_exact"] += int(app)
-                elif point == "square":
-                    d["sq_exact"] += int(app)
+        can_re = {}
+        can_iter = {}
+        for (arm, seed, point), modes in can_cells.items():
+            d = can_re.setdefault(arm, {"f12_exact": 0, "sq_exact": 0})
+            it = sum(max(int(modes[m].get("iterations", -1)), 0)
+                     for m in ("L1", "L2-APP") if m in modes)
+            if point == "f1.2":
+                d["f12_exact"] += int(a3_cell_app(modes))
+                can_iter[arm] = can_iter.get(arm, 0) + it
+            elif point == "square":
+                d["sq_exact"] += int(a3_cell_app(modes))
         summ_can = {a: {"f12_exact": v["f12_exact"], "sq_exact": v["sq_exact"]}
                     for a, v in summ["canary"].items()}
-        can = summ["canary"]
-        stats = {a: {"f12_exact": v["f12_exact"], "f12_iter": v["f12_iter"],
-                     "sq_exact": v["sq_exact"]} for a, v in can.items()}
-        adv_ok = (_adv(stats, sel["structural_order_new"])
-                  == summ["advancing"])
+        can_exact_ok = (can_re == summ_can)
+        can_iter_ok = (set(can_iter) <= set(summ_can)) and all(
+            int(summ["canary"].get(a, {}).get("f12_iter", -1))
+            == can_iter.get(a, 0) for a in summ_can)
+        adv_ok = (_adv2({a: {"f12_exact": v["f12_exact"],
+                             "f12_iter": v["f12_iter"],
+                             "sq_exact": v["sq_exact"]}
+                        for a, v in summ["canary"].items()},
+                       sel.get("structural_order_new", []))
+                  == list(summ.get("advancing", [])))
+        # Scaling partitions: fallback dispatch + per-width sig/advancing.
+        fb = [x for x in (sel.get("fallback_T"), sel.get("fallback_M"))
+              if x is not None]
+        order_ok = True
+        if set(parts["scaling"]) - {"128", "256"}:
+            order_ok = False
+        first_sig_width = None
+        n64_adv = list(summ.get("advancing", []))
+        for width in ("128", "256"):
+            wrows = parts["scaling"].get(width, [])
+            if wrows and sorted({r["arm"] for r in wrows}) != sorted(fb):
+                order_ok = False
+            w_cells = {}
+            for r in wrows:
+                w_cells.setdefault(
+                    (r["arm"], r["seed"], r["point"]), {})[r["mode"]] = r
+            sig = {}
+            for (arm, seed, point), modes in w_cells.items():
+                s = sig.setdefault(arm, {"f12_exact": 0, "f12_iter": 0,
+                                         "sq_exact": 0})
+                it = sum(max(int(modes[m].get("iterations", -1)), 0)
+                         for m in ("L1", "L2-APP") if m in modes)
+                if point == "f1.2":
+                    s["f12_exact"] += int(a3_cell_app(modes))
+                    s["f12_iter"] += it
+                elif point == "square":
+                    s["sq_exact"] += int(a3_cell_app(modes))
+            try:
+                w_adv = _adv2(sig, _rank2(a3_ssum_from_structure(
+                    srecs, width), fb)) if fb else []
+            except Exception:  # noqa: BLE001 - order failure is check FAIL
+                w_adv = None
+                order_ok = False
+            if first_sig_width is None and w_adv:
+                first_sig_width = int(width)
+        # Confirmation partition: counts + safety at the selected width.
         width = int(summ.get("confirmation_width", 64))
+        conf_rows = parts["confirmation"]
+        conf_width_ok = all(int(r.get("n", -1)) == width for r in conf_rows)
+        conf_cells = {}
+        for r in conf_rows:
+            conf_cells.setdefault(
+                (r["arm"], r["seed"], r["point"]), {})[r["mode"]] = r
+        conf_re = {}
+        safety_re = {"crashes": 0, "nonfinite": 0, "disagreements": 0}
+        for (arm, seed, point), modes in conf_cells.items():
+            if point in POINTS:
+                arm_d = conf_re.setdefault(arm, {})
+                arm_d[point] = arm_d.get(point, 0) + int(a3_cell_app(modes))
+            if any(str(m.get("crash", "False")) == "True"
+                   for m in modes.values()):
+                safety_re["crashes"] += 1
+            elif any(str(m.get("finite", "True")) != "True"
+                     for m in modes.values()):
+                safety_re["nonfinite"] += 1
+            if "L1" in modes and "L2-APP" in modes:
+                syn = bool(modes["L1"].get("syndrome_ok") == "True"
+                           and modes["L2-APP"].get("syndrome_ok")
+                           == "True")
+                if bool(a3_cell_app(modes)) != syn:
+                    safety_re["disagreements"] += 1
+        if n64_adv:
+            width_exp_ok = (width == 64 and len(conf_rows) > 0)
+        elif first_sig_width is None:
+            width_exp_ok = (width == 64 and len(conf_rows) == 0)
+        else:
+            width_exp_ok = (width == first_sig_width and len(conf_rows) > 0)
         width_ok = (width in (64, 128, 256)) and (
             ("SCALING" in str(summ.get("terminal", ""))) == (width != 64)
-            or str(summ.get("terminal", "")) in blocking)
+            or str(summ.get("terminal", "")) in _blocking14)
+        conf_match_ok = (conf_re == dict(summ.get("confirmation_counts",
+                                                  {})))
+        try:
+            _safety_stored = summ.get("confirmation_safety", {})
+            safety_ok = all(int(_safety_stored.get(k, -1)) == safety_re[k]
+                            for k in ("crashes", "nonfinite",
+                                      "disagreements"))
+        except (TypeError, ValueError):
+            safety_ok = False
         check("scaling-recompute",
-              bool(canary_re == summ_can and adv_ok and width_ok),
-              str(summ.get("advancing")))
+              bool(outside_ok and can_exact_ok and can_iter_ok and adv_ok
+                   and order_ok and conf_width_ok and width_exp_ok
+                   and width_ok and conf_match_ok and safety_ok),
+              "adv=%s w=%s sig128=%s" % (
+                  str(summ.get("advancing")),
+                  str(summ.get("confirmation_width")),
+                  str(first_sig_width)))
     except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
         check("scaling-recompute", False, repr(ex)[:160])
     # (15) manifest consistent vs summary.
@@ -1369,6 +1568,22 @@ def verify_command(out_root):
               "itmax=%d" % itmax)
     except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
         check("manifest-consistent", False, repr(ex)[:160])
+    # A3-08 stored vs recomputed terminal (decision-layer INFO, non-gating:
+    # disagreement is fail-closed — recomputed governs, Pre-RESULT routes
+    # BLOCKED — while the mechanical VERIFY exit covers the 15 checks above).
+    try:
+        _stored = str(summ.get("terminal", ""))
+        _re, _reason = a3_classify_evidence(counted)
+        _recomputed = _re if _re is not None else _stored
+        _agree, _gov = a3_compare_terminals(_stored, _recomputed)
+        print("INFO stored-terminal %s" % _stored)
+        print("INFO recomputed-terminal %s %s" % (_recomputed, _reason))
+        print("INFO terminal-agreement %s governs=%s" % (
+            str(_agree), _gov))
+        if len(a3_stage_partitions(counted)["confirmation"]) == 0:
+            print("INFO confirmation-stage EMPTY_NOT_EVIDENCE")
+    except Exception as ex:  # noqa: BLE001 - reporting never gates
+        print("INFO terminal-report-unavailable %r" % (ex,))
     print("VERIFY %s" % ("PASS" if ok else "FAIL"))
     return ok
 
