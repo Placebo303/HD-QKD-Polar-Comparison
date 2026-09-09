@@ -77,7 +77,7 @@ same protocol/machine).
 
 Acceptance check:
 
-- Scaling wall: before-cold 10897.7 s → after-cold 2.5 s (**≈4359×**);
+- Scaling wall: before-cold 10897.7 s → after-cold 2.5 s (**≈4280×**);
   after-warm 2.7 s. Gate ≥3×: PASS with three orders of margin.
 - n64: outputs exactly equal (equivalence test); wall 21.0 vs 42.2 s
   (improvement, ≤110% gate vacuous). PASS.
