@@ -304,6 +304,148 @@ def _build_T2_support(n, m_max, k_min):
         incid_max = max(inc_per_col[:v+1]) if v>=0 else 0
     return support
 
+# R1c-A6: exact-equivalent T2 acceleration switch. Reference
+# _build_T2_support above is kept intact; production dispatches here.
+_T2_FAST_ENABLED = True
+
+def _build_T2_support_fast(n, m_max, k_min, trace=None):
+    # Same candidate set, same integer key
+    # (four, max_pair, incid_max, rmax, rsumsq, sorted_triple), same greedy
+    # variable order and state updates as _build_T2_support. The key's last
+    # field is the sorted triple, unique per candidate, so the lexicographic
+    # argmin is unique and order-independent: staged filtering (cheap `four`
+    # prefix first, later fields only for ties), vectorized enumeration,
+    # integer-encoded pair/triple membership, incremental maintenance, and
+    # skipping the affected rebuild for early-eliminated candidates all
+    # preserve the exact argmin. No float arithmetic anywhere. Grid/index
+    # arithmetic is int32 throughout: provably safe for m<=256 (pair ids
+    # <2^16, triple ids <2^24, pair counts/degrees/sumsq/four <<2^31).
+    n=int(n); m=int(m_max); k=int(k_min)
+    support = np.full((n,3), -1, dtype=np.int64)
+    deg = np.zeros(m, dtype=np.int32)
+    UB = bytearray(m*m)
+    UT = bytearray(m*m*m)
+    UBN = np.frombuffer(UB, dtype=np.uint8)
+    UTN = np.frombuffer(UT, dtype=np.uint8)
+    PC = np.zeros(m*m, dtype=np.int32)
+    cols_of_pair = [[] for _ in range(m*m)]
+    inc_per_col=[0]*n
+    total_four=0; max_pair=0; incid_max=0; old_rmax=0; old_sumsq=0
+    QA=[]; QB=[]
+    for _b1 in range(k):
+        for _b2 in range(_b1+1, k):
+            QA.append(_b1); QB.append(_b2)
+    QA=np.asarray(QA, dtype=np.int32); QB=np.asarray(QB, dtype=np.int32)
+    CVALS=np.arange(m, dtype=np.int32)
+    QIDX=(QA.astype(np.int32)*np.int32(m)+QB).astype(np.int64)
+    def _pid(a, b):
+        return int(a)*m+int(b) if a<b else int(b)*m+int(a)
+    for v in range(n):
+        _vp = np.nonzero(UBN[QIDX]==0)[0]
+        if _vp.size==0:
+            raise D6StructureBlocked("T2 no triple candidate")
+        _q1=QA[_vp]; _q2=QB[_vp]; _npairs=int(_q1.shape[0])
+        _B1=np.repeat(_q1, m); _B2=np.repeat(_q2, m); _E=np.tile(CVALS, _npairs)
+        _keep=(_E!=_B1)&(_E!=_B2)
+        _B1=_B1[_keep]; _B2=_B2[_keep]; _E=_E[_keep]
+        _i1=np.minimum(np.minimum(_B1, _B2), _E)
+        _i3=np.maximum(np.maximum(_B1, _B2), _E)
+        _i2=(_B1+_B2+_E-_i1-_i3)
+        _tids=(_i1*m+_i2)*m+_i3
+        _keep2=UTN[_tids]==0
+        if not bool(np.any(_keep2)):
+            raise D6StructureBlocked("T2 no triple candidate")
+        _B1=_B1[_keep2]; _B2=_B2[_keep2]; _E=_E[_keep2]; _tids=_tids[_keep2]
+        _b1i=_B1; _b2i=_B2; _ei=_E
+        _pA=_b1i*m+_b2i
+        _pB=np.where(_b1i<_ei, _b1i*m+_ei, _ei*m+_b1i)
+        _pC=np.where(_b2i<_ei, _b2i*m+_ei, _ei*m+_b2i)
+        _o1=PC[_pA]; _o2=PC[_pB]; _o3=PC[_pC]
+        _four=total_four+_o1+_o2+_o3
+        _F0=int(np.min(_four))
+        _S1=_four==_F0
+        _mp=np.maximum(np.maximum(_o1+1, _o2+1), _o3+1)
+        _mp=np.maximum(_mp, max_pair)
+        _M0=int(np.min(_mp[_S1]))
+        _idx=np.nonzero(_S1&(_mp==_M0))[0]
+        _base=np.maximum(incid_max, _o1[_idx]+_o2[_idx]+_o3[_idx])
+        _rmax=np.maximum(np.maximum(deg[_b1i[_idx]]+1, deg[_b2i[_idx]]+1),
+                         np.maximum(deg[_ei[_idx]]+1, old_rmax))
+        _rsq=(old_sumsq+(2*deg[_b1i[_idx]]+1)+(2*deg[_b2i[_idx]]+1)+(2*deg[_ei[_idx]]+1))
+        _order=np.lexsort((_tids[_idx], _rsq, _rmax, _base))
+        _best=None; _choice=None
+        for _t, _j in enumerate(_order):
+            _bb=int(_base[_j]); _rr=int(_rmax[_j]); _ss=int(_rsq[_j]); _tt=int(_tids[_idx[_j]])
+            if _best is not None:
+                _Kb=_best
+                if _bb>_Kb[2] or (_bb==_Kb[2] and (_rr>_Kb[3] or (_rr==_Kb[3] and (_ss>_Kb[4] or (_ss==_Kb[4] and _tt>=_Kb[5]))))):
+                    break  # lexsorted: every later candidate is worse
+            _lim=None if _best is None else int(_best[2])
+            _affmax=0; _seen=set()
+            _cb1=int(_b1i[_idx[_j]]); _cb2=int(_b2i[_idx[_j]]); _ce=int(_ei[_idx[_j]])
+            for _p in (_pid(_cb1, _cb2), _pid(_cb1, _ce), _pid(_cb2, _ce)):
+                for _col in cols_of_pair[_p]:
+                    if _col in _seen:
+                        continue
+                    _seen.add(_col)
+                    _qb1=int(support[_col,0]); _qb2=int(support[_col,1]); _qe=int(support[_col,2])
+                    _nv=inc_per_col[_col]+((_pid(_qb1, _qb2)==_p)+(_pid(_qb1, _qe)==_p)+(_pid(_qb2, _qe)==_p))
+                    if _nv>_affmax:
+                        _affmax=_nv
+                        if _lim is not None and _affmax>_lim:
+                            break
+                if _lim is not None and _affmax>_lim:
+                    break
+            _cur=_bb if _bb>_affmax else _affmax
+            if _cur<incid_max:
+                _cur=incid_max
+            _full=(_F0, _M0, _cur, _rr, _ss, _tt)
+            if _best is None or _full<_best:
+                _best=_full; _choice=(_cb1, _cb2, _ce)
+        b1,b2,e=_choice
+        if trace is not None:
+            trace.append((b1,b2,e))
+        support[v,0]=b1; support[v,1]=b2; support[v,2]=e
+        deg[b1]+=1; deg[b2]+=1; deg[e]+=1
+        UB[_pid(b1,b2)]=1
+        _lo=b1 if b1<b2 and b1<e else (b2 if b2<e else e)
+        _hi=b1 if b1>b2 and b1>e else (b2 if b2>e else e)
+        _mid=b1+b2+e-_lo-_hi
+        UT[(_lo*m+_mid)*m+_hi]=1
+        for _p in (_pid(b1,b2), _pid(b1,e), _pid(b2,e)):
+            _before=int(PC[_p])
+            PC[_p]=_before+1
+            if _before>0:
+                total_four+=_before
+            if _before+1>max_pair:
+                max_pair=_before+1
+            cols_of_pair[_p].append(v)
+        inc_per_col[v]=int(PC[_pid(b1,b2)]-1)+int(PC[_pid(b1,e)]-1)+int(PC[_pid(b2,e)]-1)
+        _aff=set()
+        for _p in (_pid(b1,b2), _pid(b1,e), _pid(b2,e)):
+            _aff.update(cols_of_pair[_p])
+        _aff.discard(v)
+        for _col in _aff:
+            _qb1=int(support[_col,0]); _qb2=int(support[_col,1]); _qe=int(support[_col,2])
+            _tot=0
+            for _pr in (_pid(_qb1,_qb2), _pid(_qb1,_qe), _pid(_qb2,_qe)):
+                _tot+=int(PC[_pr])-1
+                if _tot<0:
+                    _tot=0
+            inc_per_col[_col]=_tot
+            if _tot>incid_max:
+                incid_max=_tot
+        if inc_per_col[v]>incid_max:
+            incid_max=inc_per_col[v]
+        if int(deg[b1])>old_rmax:
+            old_rmax=int(deg[b1])
+        if int(deg[b2])>old_rmax:
+            old_rmax=int(deg[b2])
+        if int(deg[e])>old_rmax:
+            old_rmax=int(deg[e])
+        old_sumsq+=(2*(int(deg[b1])-1)+1)+(2*(int(deg[b2])-1)+1)+(2*(int(deg[e])-1)+1)
+    return support
+
 def _build_SC_support(n, m_max, k_min, w):
     support=np.full((n,3), -1, dtype=np.int64)
     deg=np.zeros(m_max, dtype=np.int64)
@@ -479,6 +621,8 @@ def build_support(arm, n, layer):
     elif arm=="T1_PEG_DV3":
         return _build_T1_support(int(n), int(m_max), int(k_min))
     elif arm=="T2_CYCLE_GREEDY_DV3":
+        if _T2_FAST_ENABLED:
+            return _build_T2_support_fast(int(n), int(m_max), int(k_min))
         return _build_T2_support(int(n), int(m_max), int(k_min))
     elif arm=="T3_SC_DV3_W4":
         sup,_ = _build_SC_support(int(n), int(m_max), int(k_min), 4)

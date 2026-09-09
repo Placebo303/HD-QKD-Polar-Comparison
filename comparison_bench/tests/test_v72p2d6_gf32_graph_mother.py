@@ -1500,3 +1500,163 @@ def test_r1c_a5_historical_verify_unchanged_and_schema_stable(tmp_path, capsys):
         fh.write("T3_SC_DV3_W4,64,L1,59,59,0,0,1,1.0,10,2,0,0,0,4,640,4,,0,2,True,True\n")
     assert dev.verify_command(str(out2)) is False
     assert "FAIL I1-check-degree" in capsys.readouterr().out
+
+
+# ---- R1c-A6 exact-equivalent T2 acceleration (structure-only, no decoder) ----
+# Reference fixtures: T2 support rows built by the intact reference
+# _build_T2_support at HEAD during the A5-01 slow stage (replay-verified
+# a/b halves); provenance in D6_GRAPH_MOTHER_VALIDITY_R1C_A5.md. They stand
+# in for reference rebuilds too slow for unit tests (n128 ~11 min,
+# n256 ~5 h); n64 reference is rebuilt live below. Mother arrays need no
+# fixture: coefficient assignment is untouched by the A6 diff, so support
+# equality implies mother equality (plus replay tests).
+
+_T2_FIX = ROOT / "comparison_bench" / "tests" / "fixtures" / "d6_r1c_t2_reference"
+
+
+def _t2_fixture(n, layer, half):
+    import csv
+    p = _T2_FIX / ("T2_CYCLE_GREEDY_DV3_%d_%s_%s.support.csv" % (n, layer, half))
+    with open(str(p), newline="", encoding="utf-8") as fh:
+        return np.asarray([[int(x) for x in row] for row in csv.reader(fh)],
+                          dtype=np.int64)
+
+
+def test_r1c_a6_t2_fast_equals_reference_n64():
+    # Gate 1 (n64) + gate 2 (trace): fast dispatch == intact reference,
+    # per-variable chosen triples identical, v=0 tie-break pinned.
+    assert d6._T2_FAST_ENABLED is True
+    for layer in ("L1", "L2"):
+        ref = d6._build_T2_support(64, 64, d6.ROW_BUDGETS[64]["k_min"][layer])
+        tr = []
+        fast = d6._build_T2_support_fast(
+            64, 64, d6.ROW_BUDGETS[64]["k_min"][layer], tr)
+        via_dispatch = d6.build_support(_T2, 64, layer)
+        assert np.array_equal(np.asarray(fast), np.asarray(ref))
+        assert np.array_equal(np.asarray(via_dispatch), np.asarray(ref))
+        assert len(tr) == 64
+        for v in range(64):
+            assert tuple(int(x) for x in tr[v]) == tuple(int(x) for x in ref[v])
+        assert [int(x) for x in ref[0]] == [0, 1, 2]
+
+
+def test_r1c_a6_t2_fast_equals_fixture_n128():
+    # Gate 1 (n128) + gate 2: fast == both replay halves.
+    for layer in ("L1", "L2"):
+        sa = _t2_fixture(128, layer, "a")
+        sb = _t2_fixture(128, layer, "b")
+        assert np.array_equal(sa, sb)
+        tr = []
+        fast = d6._build_T2_support_fast(
+            128, 128, d6.ROW_BUDGETS[128]["k_min"][layer], tr)
+        assert np.array_equal(np.asarray(fast), sa)
+        assert [int(x) for x in sa[0]] == [0, 1, 2]
+        for v in range(128):
+            assert tuple(int(x) for x in tr[v]) == tuple(int(x) for x in sa[v])
+
+
+@pytest.mark.slow
+def test_r1c_a6_t2_fast_equals_fixture_n256():
+    # Gate 1 (n256) + gate 2 (~10 min; slow lane, same assertions as n128).
+    for layer in ("L1", "L2"):
+        sa = _t2_fixture(256, layer, "a")
+        sb = _t2_fixture(256, layer, "b")
+        assert np.array_equal(sa, sb)
+        tr = []
+        fast = d6._build_T2_support_fast(
+            256, 256, d6.ROW_BUDGETS[256]["k_min"][layer], tr)
+        assert np.array_equal(np.asarray(fast), sa)
+        for v in range(256):
+            assert tuple(int(x) for x in tr[v]) == tuple(int(x) for x in sa[v])
+
+
+def test_r1c_a6_t2_committed_rows_and_selection_n64(tmp_path):
+    # Gates 3 (T2-specific) + 4: fresh n64 T2 rows == committed A2 rows all
+    # fields; eligible map + selection unchanged.
+    dev = _load_dev_a4("d6dev_a6_eq64")
+    rec, ssum, _ = dev.build_structures(64, None, arms=[_T2])
+    from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
+        write_structure_records, select_decoder_arms)
+    out = tmp_path / "eq64t2.csv"
+    write_structure_records(str(out), rec)
+    import csv
+    with open(str(out), newline="", encoding="utf-8") as fh:
+        new = {(r["arm"], r["n"], r["layer"], r["prefix_rows"]): r
+               for r in csv.DictReader(fh) if r["arm"] == _T2}
+    old = {(r["arm"], r["n"], r["layer"], r["prefix_rows"]): r
+           for r in _committed_structure_rows()
+           if r["arm"] == _T2 and r["n"] == "64"}
+    assert set(new) == set(old) and len(new) == 6
+    for k in new:
+        assert {x: v for x, v in new[k].items()} == dict(old[k]), k
+    rec8, ssum8, _ = dev.build_structures(64, None)
+    sel, elig = select_decoder_arms(ssum8)
+    # Gate 4: unchanged vs the I1 gate commit (frozen-A2 comparison lives in
+    # test_r1c_a4_equivalence_committed_n64, which pins every field flip).
+    assert elig == {"B0_D5_DV3_NATIVE": True,
+                    "B1_D5_DV3_COMMON_LABELS": True, "T1_PEG_DV3": True,
+                    "T2_CYCLE_GREEDY_DV3": False, "T3_SC_DV3_W4": False,
+                    "T4_SC_DV3_W8": False,
+                    "M1_ACCUMULATOR_FOREST_MAX": False,
+                    "M2_ACCUMULATOR_FOREST_HALF": False}
+    assert sel == ["B0_D5_DV3_NATIVE", "B1_D5_DV3_COMMON_LABELS",
+                   "T1_PEG_DV3"]
+
+
+def test_r1c_a6_t2_seq_par_replay():
+    # Gate 5 (T2 slice): sequential == parallel, replay True.
+    dev = _load_dev_a4("d6dev_a6_seqpar")
+    devr = _load_dev_real()
+    rec_s, _, _ = dev.build_structures(64, None, arms=[_T2])
+    rec_p, _, _ = devr.build_structures_parallel(64, None, max_workers=2,
+                                                 arms=[_T2])
+    key = lambda r: (r["arm"], r["n"], r["layer"], r["prefix_rows"])
+    ds = {key(r): r for r in rec_s}
+    dp = {key(r): r for r in rec_p}
+    assert set(ds) == set(dp)
+    for k in ds:
+        assert {x: v for x, v in ds[k].items()} == \
+               {x: v for x, v in dp[k].items()}, k
+        assert str(ds[k]["determinism_ok"]) == "True"
+
+
+def test_r1c_a6_key_candidate_greedy_pins_and_sandbox_vacuity():
+    # Any key/tie-break/candidate-set/greedy change moves these pins.
+    # Gate 7 vacuity: the repair study produced no sandbox T2 (prereg:
+    # T2 key frozen, no admissible rank rule) — premise locked by data.
+    # (n64 reference is rebuilt live in test_r1c_a6_t2_fast_equals_reference;
+    # fixtures cover the widths too slow to rebuild here.)
+    for n in (128, 256):
+        for layer in ("L1", "L2"):
+            sa = _t2_fixture(n, layer, "a")
+            assert sa.shape == (n, 3)
+            assert [int(x) for x in sa[0]] == [0, 1, 2]
+            seen = set(tuple(int(x) for x in row) for row in sa)
+            assert len(seen) == n  # triple uniqueness (argmin licence)
+    import csv
+    p = ROOT / "docs" / "research_cycles" / "V72P2D6-GF32-GRAPH-MOTHER" / \
+        "D6_GRAPH_MOTHER_REPAIR_MATRIX_R1C_A5.csv"
+    with open(str(p), newline="", encoding="utf-8") as fh:
+        fams = set(r["family"] for r in csv.DictReader(fh))
+    assert "T2" not in fams
+    # Non-T2 dispatch untouched by the A6 edit (all widths, both layers).
+    for arm, n, layer in [("B0_D5_DV3_NATIVE", 64, "L1"),
+                          ("B1_D5_DV3_COMMON_LABELS", 128, "L2"),
+                          ("T1_PEG_DV3", 256, "L2"),
+                          ("T3_SC_DV3_W4", 256, "L1"),
+                          ("T4_SC_DV3_W8", 128, "L1"),
+                          ("M1_ACCUMULATOR_FOREST_MAX", 256, "L2"),
+                          ("M2_ACCUMULATOR_FOREST_HALF", 64, "L1")]:
+        a = d6.build_support(arm, n, layer)
+        if arm.startswith("T3") or arm.startswith("T4"):
+            w = 4 if arm.endswith("W4") else 8
+            b, _ = d6._build_SC_support(n, n, d6.ROW_BUDGETS[n]["k_min"][layer], w)
+        elif arm.startswith("M"):
+            b = d6._build_M_support(n, n, d6.ROW_BUDGETS[n]["k_min"][layer],
+                                    "MAX" if "MAX" in arm else "HALF")
+        elif arm.startswith("T1"):
+            b = d6._build_T1_support(n, n, d6.ROW_BUDGETS[n]["k_min"][layer])
+        else:
+            b = d5.build_dv3_nested_support(n, n, d6.ROW_BUDGETS[n]["k_min"][layer],
+                                            d5.L1_GRAPH_SEED if layer == "L1" else d5.L2_GRAPH_SEED)
+        assert np.array_equal(np.asarray(a), np.asarray(b)), (arm, n, layer)
