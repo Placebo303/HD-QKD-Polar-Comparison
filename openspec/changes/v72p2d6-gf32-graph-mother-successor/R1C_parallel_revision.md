@@ -159,3 +159,39 @@ thresholds) unchanged. Nine items, else STOP:
   `workspace/<uuid>` basetemp, delete only own.
 - A2-09 land 1) A2 prereg/OpenSpec 2) implementation+tests 3) check A1/A2
   tasks then STOP for independent review (coder never writes review).
+
+## R1c-A3 post-run verifier and terminal rework (frozen delta, verifier only)
+
+Status: `FROZEN_PREREG_R1C_A3` (`D6_GRAPH_MOTHER_PREREG_R1C_A3.md` is the
+contract; eight rules frozen there). Science and execution mechanics
+unchanged; the A2 six-file root is immutable evidence. Two A2 verifier FAILs
+(n-agnostic semantic key; canary/scaling mixing) plus 64 attempted degree
+crashes under a stored `D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY` force this
+amendment via OpenSpec, not silent patch:
+
+- Identity key becomes `(n,arm,seed,point,mode)`; `call_idx` stays independent.
+- Canary recompute: `n=64` + canary seeds only, per-cell
+  `app=(L1.exact and L2-APP.exact)`, missing L2-APP ⇒ `app=False`.
+- Scaling recompute: scaling seeds only, grouped per `n=128`/`n=256`;
+  reproduces fallback dispatch, per-width sig/advancing (frozen
+  `select_advancement`, stop-at-first-width), confirmation width, terminal
+  inputs.
+- Confirmation recompute: confirmation seeds at selected width only; empty
+  stage labeled `EMPTY_NOT_EVIDENCE`, never observed safety.
+- Attempted crash/nonfinite precedence: any counted crash/nonfinite forces a
+  blocking recomputed terminal over recovery/no-recovery labels;
+  `call_idx=-1` placeholders excluded.
+- Degree `ValueError` ⇒ `D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED`; other
+  attempted crash/nonfinite ⇒ `D6_GRAPH_ATTEMPTED_CELL_INVALID`; neither
+  supports topology-no-recovery.
+- Verifier stays pure read-only over any supplied root (hash-proven).
+- Stored + recomputed terminals both printed with agreement flag;
+  disagreement is fail-closed at the decision layer (recomputed governs;
+  Pre-RESULT must route BLOCKED), while the mechanical VERIFY exit covers the
+  15 checks — so A3-05 stays mechanical, A3-06 stays semantic.
+
+Allowed paths: `scripts/v72p2d6_graph_mother_development.py` (verifier path
+only), `comparison_bench/tests/test_v72p2d6_gf32_graph_mother.py` (10 A3 fake
+tests), this addendum + prereg + tasks (commit 1), forensic report under the
+D6 cycle dir (commit 2 with implementation). Mother module, execution
+generation, historical artifacts: untouched.

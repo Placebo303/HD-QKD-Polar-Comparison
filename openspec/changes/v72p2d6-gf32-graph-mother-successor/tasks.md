@@ -91,3 +91,42 @@
   (no perf-v38 800s), fresh `workspace/<uuid>` basetemp.
 - [x] A2-09 land prereg/OpenSpec + implementation/tests, check A1/A2, STOP for
   independent review (no self-written review).
+
+## R1c-A3 post-run verifier and terminal rework (verifier only, zero decoder)
+
+- [ ] A3-01 freeze post-run contract: `D6_GRAPH_MOTHER_PREREG_R1C_A3.md` +
+  `R1C_parallel_revision.md` A3 delta + `tasks.md` A3/A4 tasks; commit
+  separately (commit 1). Eight rules frozen; no code before commit 1.
+- [ ] A3-02 forensic reconstruction (fresh non-formal root, read-only, no
+  decoder): 184-row table (old/new keys, duplicates, counts, partitions,
+  recomputation, stored-vs-recomputed, degree-source attribution or
+  `NOT_VERIFIABLE`) → `D6_GRAPH_MOTHER_FORENSIC_R1C_A3.md`.
+- [ ] A3-03 minimal verifier/classifier correction + 10 A3 fake tests
+  (identity/dup/isolation/stages/empty-confirm/crash-precedence/placeholders/
+  disagreement/a2-fixture/readonly); mother module + execution path untouched.
+- [ ] A3-04 `py_compile` + focused D6 + seven-file non-perf regression
+  (perf-v38 skipped, recorded); independent code review (own file only);
+  single rework max, else STOP. Commits: impl+tests+forensic, then review. No
+  push.
+- [ ] A3-05 single read-only `--verify` on the immutable A2 root (zero
+  decoder calls); capture output+exit. FAIL → STOP, no patch, no rerun.
+- [ ] A3-06 independent Pre-RESULT re-review
+  (`D6_GRAPH_MOTHER_PRE_RESULT_REVIEW_R1C_A3.md`):
+  `…_PASS_BLOCKED_RUN` (expected) / `…_PASS_SCIENTIFIC_RESULT` / `…_FAIL`.
+- [ ] A3-07 closeout: FAIL → stop, evidence uncommitted; PASS_* →
+  append-only operator-return correction + `D6_GRAPH_MOTHER_RESULT_R1C_A3.md`
+  + one scoped evidence commit (`-f` six files + docs); auth false, G2
+  absent, no accepted mark, no push.
+
+## R1c-A4 structure/scaling performance rework (after A3 closeout, zero decoder)
+
+- [ ] A4-01 structure-only profile first; frozen baseline table (no decoder).
+- [ ] A4-02 three equivalent optimizations (scaling-arm pruning; ≤2
+  constructions per `(n,arm,layer)`; no repeated audits).
+- [ ] A4-03 exact-equivalence gates (eight arms × two layers × n64; scaling
+  arms × n128/n256); reference path kept until gates pass.
+- [ ] A4-04 fresh structure-only benchmark (≤3h): scaling wall ≥3x, n64
+  equal ≤10% regress, RSS <2GiB, else `PERF_TARGET_NOT_MET`.
+- [ ] A4-05 deliverables (`…_PERFORMANCE_R1C_A4.md` + independent review),
+  separate scoped commits; final `READY_FOR_FUTURE_D6_PRE_EXECUTE_REVIEW` or
+  `PERF_TARGET_NOT_MET`; no new run authorized.
