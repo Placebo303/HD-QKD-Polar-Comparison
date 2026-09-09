@@ -109,3 +109,53 @@ selection/terminal thresholds) unchanged. Seven fixes, else STOP:
 7. Delete write-only `pair_to_mask` mirror (choice key uses
    `pair_counts`/`pair_to_cols` only); equivalence via unchanged key +
    T2 replay tests.
+
+## R1c-A2 execution-safety closeout (frozen delta, mechanics only)
+
+Status: `FROZEN_PREREG_R1C_A2`. Old A2 prompt void; this task text is the
+sole contract. `a16d3184`/`fc447e12` body retained; science
+(arms/seeds/rows/prior/decoder/mother/selection/scientific terminal
+thresholds) unchanged. Nine items, else STOP:
+
+- A2-01 three history roots verbatim `VOID_RETAINED_ZERO_REUSE`
+  (`923a25897087495ab4605870e561f3cc`,
+  `e8ee45a4669c4738bf7e96d926ba7e5c`,
+  `f15cfa29baa2458e804c80a9f1045140`); name-only, no read/delete/move/use;
+  fresh `workspace/d6_graph_mother_r1c_<uuid>/` only.
+- A2-02 RSS fail-closed: single pilot measures RSS then sizes pool (no
+  start-18-then-trim); main/pilot None → `D6_RSS_UNKNOWN_BLOCKED` before
+  scientific calls; candidates include 1; `1+main >= 2GiB` →
+  `D6_RSS_LIMIT_BLOCKED`; expansion re-samples each worker
+  (unknown/over-limit stops); per-call/per-barrier worker/main/sampled
+  aggregate + single/aggregate peaks; persist
+  main/worker/aggregate/peaks/semantics; unknown never 0, single never
+  masquerades as aggregate.
+- A2-03 12h `deadline=t0+12h`; atomic remaining check before dispatch;
+  `poll=min(120s,remaining)`; deadline arrival terminates task-owned with
+  `wall_timeout=true`, no respawn/dispatch, terminal
+  `D6_WALL_BUDGET_BLOCKED`; final wall overrun with other terminal → verify
+  FAIL.
+- A2-04 records carry
+  `worker_pid/respawn_pid/timeout/wall_timeout/error`;
+  `watchdog_ok=not timeout and not wall_timeout and wall<=120`; watchdog
+  timeout respawns (failure no retry, warmup counts setup); wall timeout
+  never respawns.
+- A2-05 semantics renamed to same-UUID phase checkpoint rewrite (never
+  append-only); each phase ordered rewrite + flush + fsync (fsync failure
+  fail-closed); canary/confirm/scaling + StopIteration/blocks share finally
+  checkpoint; `chunk>=5400s` → zero new dispatches.
+- A2-06 `workers=1` scaling-confirm indent: `cc[point]` inside point loop,
+  `conf_counts[arm]` inside arm loop outside point loop; fake proves
+  f1.0/f1.2/square retained, parallel-consistent.
+- A2-07 verify 15 independent rejections (call_idx continuity / semantic-key
+  duplicate / calls consistency / ≤2500 / effective≤requested / RSS / wall /
+  terminal / timeout-watchdog / PID / seed-domain / coverage / scaling
+  recompute / manifest consistency / six-file+set).
+- A2-08 fake/tmp-only coverage (RSS unknown / single-over-limit /
+  pilot-downcore / runtime-over-limit / deadline<120s / dual-timeout
+  separation / dual-PID / fsync-fail / StopIteration checkpoint / sequential
+  three-point / malformed verify FAIL / seed pollution); `py_compile` three
+  files + D6 focused + original seven-file suite (no perf-v38 800s); fresh
+  `workspace/<uuid>` basetemp, delete only own.
+- A2-09 land 1) A2 prereg/OpenSpec 2) implementation+tests 3) check A1/A2
+  tasks then STOP for independent review (coder never writes review).

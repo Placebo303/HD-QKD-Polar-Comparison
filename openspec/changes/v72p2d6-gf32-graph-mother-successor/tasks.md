@@ -62,11 +62,32 @@
 
 ## R1c-A1 parallel-contract tasks (mechanics only, science frozen)
 
-- [ ] A1-1 `--workers` hard ceiling (`w <= requested`; 8/12/14 never 18).
-- [ ] A1-2 measured pool sizing + main/each/aggregate RSS record (no hardcode).
-- [ ] A1-3 atomic dispatch reservation (lock-held `call_idx` + call/wall gate).
-- [ ] A1-4 warmup as `setup_decoder_calls`, `setup + scientific <= 2500`.
-- [ ] A1-5 per-phase incremental flush + `D6_GRAPH_CHUNK_WALL_BLOCKED` on
+- [x] A1-1 `--workers` hard ceiling (`w <= requested`; 8/12/14 never 18).
+- [x] A1-2 measured pool sizing + main/each/aggregate RSS record (no hardcode).
+- [x] A1-3 atomic dispatch reservation (lock-held `call_idx` + call/wall gate).
+- [x] A1-4 warmup as `setup_decoder_calls`, `setup + scientific <= 2500`.
+- [x] A1-5 per-phase incremental flush + `D6_GRAPH_CHUNK_WALL_BLOCKED` on
   `wall >= 5400s` (blocking terminal, not warning-only).
-- [ ] A1-6 fake-worker tests (ceiling/budget/reorder/aggregate/flush/block).
-- [ ] A1-7 delete write-only `pair_to_mask` (equivalence via T2 replay).
+- [x] A1-6 fake-worker tests (ceiling/budget/reorder/aggregate/flush/block).
+- [x] A1-7 delete write-only `pair_to_mask` (equivalence via T2 replay).
+
+## R1c-A2 execution-safety closeout (mechanics only, science frozen; old A2 void)
+
+- [x] A2-01 three history roots verbatim `VOID_RETAINED_ZERO_REUSE`
+  (923a25897087495ab4605870e561f3cc / e8ee45a4669c4738bf7e96d926ba7e5c /
+  f15cfa29baa2458e804c80a9f1045140); name-only, no read/delete/move/use.
+- [x] A2-02 RSS fail-closed pilot sizing + per-call/barrier aggregate+peaks +
+  strict persistence (unknown→`D6_RSS_UNKNOWN_BLOCKED`,
+  1+main over→`D6_RSS_LIMIT_BLOCKED`; unknown never 0).
+- [x] A2-03 12h `deadline=t0+12h`, atomic remaining, `poll=min(120s,remaining)`,
+  deadline `wall_timeout=true` no-respawn + `D6_WALL_BUDGET_BLOCKED`.
+- [x] A2-04 records `worker_pid/respawn_pid/timeout/wall_timeout/error`,
+  `watchdog_ok` separation, respawn rules.
+- [x] A2-05 checkpoint-rewrite semantics + ordered flush/fsync fail-closed +
+  unified finally + `chunk>=5400s` zero new dispatch.
+- [x] A2-06 `workers=1` scaling-confirm indent (`cc[point]` in point loop).
+- [x] A2-07 verify 15 independent rejections.
+- [x] A2-08 fake/tmp-only tests + `py_compile` + D6 focused + seven-file suite
+  (no perf-v38 800s), fresh `workspace/<uuid>` basetemp.
+- [x] A2-09 land prereg/OpenSpec + implementation/tests, check A1/A2, STOP for
+  independent review (no self-written review).
