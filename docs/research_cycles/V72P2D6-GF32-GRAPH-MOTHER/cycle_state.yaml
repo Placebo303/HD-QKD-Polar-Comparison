@@ -46,6 +46,6 @@ budget_calls: 2500
 budget_wall_s: 43200
 watchdog_s: 120
 rss_budget_bytes: 2147483648
-next_gate: D6_GRAPH_MOTHER_R1C_A3_BLOCKED_AWAITING_MAIN_THREAD_ROUTE
+next_gate: D6_GRAPH_MOTHER_R1C_A5_TRACK_A_COMPLETE_TRACK_B_PENDING
 evidence_root: null
 terminal: null
