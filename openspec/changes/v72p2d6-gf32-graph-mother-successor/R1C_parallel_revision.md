@@ -195,3 +195,30 @@ only), `comparison_bench/tests/test_v72p2d6_gf32_graph_mother.py` (10 A3 fake
 tests), this addendum + prereg + tasks (commit 1), forensic report under the
 D6 cycle dir (commit 2 with implementation). Mother module, execution
 generation, historical artifacts: untouched.
+
+## R1c-A4 structure/scaling performance (frozen delta, zero decoder)
+
+Status: `FROZEN_PREREG_R1C_A4` (`D6_GRAPH_MOTHER_PREREG_R1C_A4.md` is the
+contract). Starts after A3 closeout; science + A3 evidence frozen. Three
+equivalent optimizations, nothing more:
+
+- O1 scaling-arm pruning: `build_structures[_parallel](n, arms=None)` (None
+  = all 8, old call sites byte-identical); scaling passes frozen fallbacks
+  only; n64 keeps all 8; scaling-width `structure_records.csv` holds
+  fallback arms only; `selected_arms.json` identical.
+- O2 ≤2 support constructions per `(n,arm,layer)`: `build_mother` split
+  into support + pure `_assign_mother_from_support`; worker proves
+  determinism on both arrays (support AND H) with one replay, not three
+  builds. Guarantee not weakened.
+- O3 overflow passthrough: `build_support_with_overflow` surfaces the count
+  the primary SC build already makes; `build_support` stays a wrapper; the
+  worker-path `support_window_overflow` rebuild is deleted; per-`(H,prefix)`
+  once-only locked by test. No `d5` changes.
+- T2 builder (choice key + semantics) untouched; pruning removes it from
+  scaling dispatch only.
+
+Equivalence before reference-path deletion (exact equality; timing excuses
+nothing); benchmark fresh-root scaling makespan before/after (cold + warm,
+≤3 h, ≥3× or `PERF_TARGET_NOT_MET`, n64 equal ≤10%, RSS <2 GiB, zero decoder
+calls). Commits: prereg/spec, impl/tests, benchmark/report, review (+
+memory/log after PASS). Final READY or NOT_MET; no run authorized.
