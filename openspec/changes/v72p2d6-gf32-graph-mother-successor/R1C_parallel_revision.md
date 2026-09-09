@@ -70,3 +70,42 @@ push/reset/checkout/stash/clean/amend/rebase, decoder-dynamics.
   equivalence test, task-owned basetemp only).
 - Reviews (commit 3): `D6_GRAPH_MOTHER_IMPLEMENTATION_REVIEW_R1C.md`,
   `D6_GRAPH_MOTHER_PRE_EXECUTE_REVIEW_R1C.md` (self-written disclosure).
+
+## R1c-A1 parallel-contract revision (frozen delta, mechanics only)
+
+Status: `FROZEN_PREREG_R1C_A1`. Science (arms/seeds/rows/decoder/prior/
+selection/terminal thresholds) unchanged. Seven fixes, else STOP:
+
+1. `--workers` hard ceiling: effective `w <= requested` always; request
+   8/12/14 never becomes 18; 1 stays sequential. Gating only downgrades.
+2. Measured pool sizing: spawn `requested`, use startup actual RSS
+   (main via `d5._rss_bytes()` + per-worker hello `rss`); no 90MiB hardcode
+   (all-None stays at requested with `rss-unknown` logged). Effective is
+   largest `w <= requested` with `w*per_worker_max + main < 2GiB`, else
+   floor with over-budget logged; trim extras. Record requested/effective/
+   main/each-worker/aggregate (pool + main sum) in `command_log.txt` +
+   `manifest.json` via pure `select_effective_workers`.
+3. Atomic dispatch reservation: `invoke()` reserves `call_idx` + call/wall
+   budget inside the lock before dispatch (`setup + scientific + 1 <= 2500`
+   and `now - t0 <= 12h`, else `budget_stop` + `StopIteration`); release
+   lock only for the blocking call; re-acquire only to append with the
+   reserved index. No check-release-run; concurrency never exceeds budgets.
+   Skip placeholders (`call_idx=-1`) consume nothing.
+4. Warmup accounting: each worker spawn/respawn warmup counts 1
+   `setup_decoder_calls` under lock under the same total gate;
+   `manifest.json`/`summary.json`/`command_log.txt` carry
+   `setup_decoder_calls`/`scientific_calls`/`total`; `verify_command`
+   checks `total <= 2500`. Warmup never mixes into scientific rows.
+5. Per-phase incremental persistence: structure + every decoder chunk flush
+   in frozen `call_idx` order (`flush()` + `os.fsync()`).
+   `run_cells_parallel` returns `(cells, wall)`; any chunk `wall >= 5400s`
+   sets `chunk_wall_blocked`, stops further dispatch, flushes completed
+   phases, terminal `D6_GRAPH_CHUNK_WALL_BLOCKED` (blocking, overrides
+   science classification; `classify_terminal` unchanged). Warning-only
+   forbidden.
+6. Fake-worker tests (task-owned basetemp, no real decoder): requested
+   ceiling, budget-boundary concurrency, out-of-order stable order,
+   aggregate RSS, phase flush, chunk-wall block.
+7. Delete write-only `pair_to_mask` mirror (choice key uses
+   `pair_counts`/`pair_to_cols` only); equivalence via unchanged key +
+   T2 replay tests.

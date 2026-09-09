@@ -59,3 +59,14 @@
   `D6_GRAPH_MOTHER_PARTIAL_SIGNAL_ROUTE_REVIEW`, square-only/no-recovery →
   `D6_DECODER_DYNAMICS_SUCCESSOR_PROPOSAL`, blocked →
   `D6_GRAPH_MOTHER_REWORK_REQUIRED`. No decoder-dynamics work.
+
+## R1c-A1 parallel-contract tasks (mechanics only, science frozen)
+
+- [ ] A1-1 `--workers` hard ceiling (`w <= requested`; 8/12/14 never 18).
+- [ ] A1-2 measured pool sizing + main/each/aggregate RSS record (no hardcode).
+- [ ] A1-3 atomic dispatch reservation (lock-held `call_idx` + call/wall gate).
+- [ ] A1-4 warmup as `setup_decoder_calls`, `setup + scientific <= 2500`.
+- [ ] A1-5 per-phase incremental flush + `D6_GRAPH_CHUNK_WALL_BLOCKED` on
+  `wall >= 5400s` (blocking terminal, not warning-only).
+- [ ] A1-6 fake-worker tests (ceiling/budget/reorder/aggregate/flush/block).
+- [ ] A1-7 delete write-only `pair_to_mask` (equivalence via T2 replay).
