@@ -35,6 +35,8 @@ from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
     assign_mother_from_support, support_window_overflow, d5,
     assert_no_formal_write, write_structure_records, select_decoder_arms,
     select_advancement, structural_rank_list, classify_terminal, audit_extra,
+    I1_MIN_CHECK_DEGREE, check_I1_row_degree, assert_dispatchable_matrices,
+    execution_block_terminal,
 )
 
 CALL_BUDGET = 2500
@@ -47,7 +49,7 @@ MODES = ("L1", "L2-APP", "L2-oracle")
 R1C_FULL_WORKERS = 18  # 20 logical cores, leave 2
 R1C_FALLBACK_WORKERS = (14, 12, 8)
 R1C_CHUNK_WALL_MAX = int(1.5 * 3600)  # each chunk <1.5 h, same UUID root append
-R1C_REVISION = "R1c-A2"
+R1C_REVISION = "R1c-A5"
 # R1c-A1: chunk-wall overrun is an explicit blocking terminal (not warning-only).
 R1C_CHUNK_WALL_BLOCKED_TERMINAL = "D6_GRAPH_CHUNK_WALL_BLOCKED"
 # R1c-A2: fail-closed blocking terminals (mechanics only, override science).
@@ -61,6 +63,17 @@ RSS_SEMANTICS = ("fail-closed-strict-unknown-None-no-zero-substitution-"
 A3_DEGREE_SUBSTR = "Check node requires degree"
 A3_STRUCTURE_INVARIANT_TERMINAL = "D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED"
 A3_ATTEMPTED_INVALID_TERMINAL = "D6_GRAPH_ATTEMPTED_CELL_INVALID"
+# R1c-A5: historical six-file root predating the I1 gate (INFO, never rewritten).
+R1C_A5_HISTORICAL_ROOT = (
+    "workspace/d6_graph_mother_r1c_dd8c4defe67742a8b2bc1b634c116d6b")
+# R1c-A5: T2 groups whose frozen build cost exceeds verify feasibility
+# (mother packet section 1.3: ~650 s/layer at n128, ~2.85 h/layer at n256).
+# The historical INFO scan skips only these rebuilds and names them
+# NOT_RECOMPUTED (full per-cell status is in the A5-01 validity matrix);
+# post-packet roots always recompute every group (fail-closed, no skip).
+I1_VERIFY_INFO_SKIP = frozenset({
+    ("T2_CYCLE_GREEDY_DV3", 128, "L1"), ("T2_CYCLE_GREEDY_DV3", 128, "L2"),
+    ("T2_CYCLE_GREEDY_DV3", 256, "L1"), ("T2_CYCLE_GREEDY_DV3", 256, "L2")})
 DECODER_FIELDNAMES = ["call_idx", "arm", "n", "seed", "point", "rows_l1",
                       "rows_l2", "mode", "matrix_id", "exact", "syndrome_ok",
                       "iterations", "finite", "crash", "timeout",
@@ -605,6 +618,10 @@ def build_structures_parallel(n, logfh, max_workers=18, arms=None):
                 if arm in M_ARMS:
                     eligible = bool(
                         eligible and merged_extra["m_cycle_rank"] == 0)
+                # R1c-A5 I1 (frozen): check-degree invariant, fail-closed.
+                eligible = bool(
+                    eligible and int(merged_extra.get("row_degree_min", 0))
+                    >= int(I1_MIN_CHECK_DEGREE))
                 merged["eligible"] = eligible
                 merged["window_overflow"] = ov
                 merged["determinism_ok"] = replay_ok
@@ -679,6 +696,10 @@ def build_structures(n, logfh, arms=None):
                 if arm in M_ARMS:
                     eligible = bool(
                         eligible and merged_extra["m_cycle_rank"] == 0)
+                # R1c-A5 I1 (frozen): check-degree invariant, fail-closed.
+                eligible = bool(
+                    eligible and int(merged_extra.get("row_degree_min", 0))
+                    >= int(I1_MIN_CHECK_DEGREE))
                 merged["eligible"] = eligible
                 merged["window_overflow"] = ov
                 merged["determinism_ok"] = replay_ok
@@ -740,6 +761,8 @@ def run_cell(worker, H1, H2, r1, r2, p1, p2, block, n, meta, state):
     u2t = np.asarray(block["u2"], dtype=np.int64)
     h1 = np.asarray(H1[:r1], dtype=np.uint8)
     h2 = np.asarray(H2[:r2], dtype=np.uint8)
+    # R1c-A5 dispatch-time fail-closed I1 guard (no decoder cell from violation).
+    assert_dispatchable_matrices(h1, h2)
     pr1 = d5._floor_renorm(p1[:, bob].T, d5.DECODER_FLOOR)
     tm1 = float(np.mean(pr1[np.arange(n), u1t]))
     modes = []
@@ -1154,6 +1177,77 @@ def a3_compare_terminals(stored, recomputed):
     """Fail-closed comparison: the recomputed terminal always governs."""
     agree = (str(stored) == str(recomputed))
     return (agree, str(recomputed))
+
+
+def verify_I1_structure(srecs, skip_groups=frozenset()):
+    """R1c-A5 independent I1 recomputation (structure-only, zero decoder).
+
+    For each distinct (arm,n,layer) in structure_records.csv, rebuilds the
+    support/mother once via the frozen builder and checks every listed
+    prefix_rows for check-degree < 2. Returns (checked, violations, skipped)
+    where violations are rows with eligible True but recomputed min < 2 and
+    skipped names groups in skip_groups (deterministic, caller-stated). The
+    frozen six-file schema is never extended; this recomputes from builders.
+    """
+    try:
+        sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
+        from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
+            build_support, assign_mother_from_support, check_I1_row_degree)
+    except Exception as ex:  # noqa: BLE001
+        return (0, [{"error": "import-failed %r" % (ex,)}], [])
+    import numpy as _np
+    groups = {}
+    for _r in (srecs or []):
+        try:
+            _key = (str(_r.get("arm", "")), int(_r.get("n", -1)),
+                    str(_r.get("layer", "")))
+            _k = int(_r.get("prefix_rows", -1))
+        except (TypeError, ValueError):
+            continue
+        groups.setdefault(_key, set()).add(_k)
+    checked = 0
+    violations = []
+    skipped = sorted([list(_k) for _k in sorted(groups) if _k in skip_groups])
+    for (_arm, _n, _layer), _ks in sorted(groups.items()):
+        if (_arm, _n, _layer) in skip_groups:
+            continue
+        try:
+            _sup = build_support(_arm, int(_n), _layer)
+            _H = assign_mother_from_support(_arm, int(_n), _layer, _sup,
+                                            int(_n))
+        except Exception as ex:  # noqa: BLE001
+            violations.append({"arm": _arm, "n": _n, "layer": _layer,
+                               "error": "build-failed %r" % (ex,)})
+            continue
+        for _k in sorted(_ks):
+            checked += 1
+            try:
+                _rmin, _nbelow = check_I1_row_degree(_H, int(_k))
+            except (TypeError, ValueError) as ex:  # noqa: BLE001
+                violations.append({"arm": _arm, "n": _n, "layer": _layer,
+                                   "prefix_rows": _k,
+                                   "error": "check-failed %r" % (ex,)})
+                continue
+            # Find CSV eligibility for this cell (eligible True + min<2 is a
+            # gate violation for post-packet roots; historical root predates
+            # the gate and is reported INFO).
+            _elig = None
+            for _r in (srecs or []):
+                try:
+                    if str(_r.get("arm", "")) == str(_arm) \
+                            and int(_r.get("n", -2)) == int(_n) \
+                            and str(_r.get("layer", "")) == str(_layer) \
+                            and int(_r.get("prefix_rows", -2)) == int(_k):
+                        _elig = str(_r.get("eligible", "")) == "True"
+                        break
+                except (TypeError, ValueError):
+                    continue
+            if bool(_elig) and int(_rmin) < 2:
+                violations.append({"arm": _arm, "n": _n, "layer": _layer,
+                                   "prefix_rows": _k,
+                                   "row_degree_min": int(_rmin),
+                                   "rows_below_degree_2": int(_nbelow)})
+    return (checked, violations, skipped)
 
 
 def verify_command(out_root):
@@ -1602,6 +1696,35 @@ def verify_command(out_root):
             print("INFO confirmation-stage EMPTY_NOT_EVIDENCE")
     except Exception as ex:  # noqa: BLE001 - reporting never gates
         print("INFO terminal-report-unavailable %r" % (ex,))
+    # R1c-A5 I1 recomputation (structure-only, never rewrites the root).
+    # Historical root predating the gate: INFO only (mechanical exit unchanged).
+    # Post-packet roots: PASS/FAIL and gate the VERIFY exit.
+    try:
+        _rp = pathlib.Path(out_root).resolve()
+        _repo = pathlib.Path(__file__).resolve().parents[1]
+        _hist = (_repo / R1C_A5_HISTORICAL_ROOT).resolve()
+        _is_hist = (str(_rp) == str(_hist))
+    except Exception:  # noqa: BLE001
+        _is_hist = False
+    try:
+        _skip = I1_VERIFY_INFO_SKIP if _is_hist else frozenset()
+        _checked, _viol, _skipped = verify_I1_structure(srecs,
+                                                        skip_groups=_skip)
+        if _is_hist:
+            print("INFO I1-historical checked=%d violations=%d %s "
+                  "skippedNOT_RECOMPUTED=%s" % (
+                      int(_checked), len(_viol), str(_viol[:4]),
+                      str(_skipped)))
+        else:
+            _i1_ok = (len(_viol) == 0)
+            check("I1-check-degree", bool(_i1_ok),
+                  "checked=%d violations=%d %s" % (
+                      int(_checked), len(_viol), str(_viol[:4])))
+    except Exception as ex:  # noqa: BLE001
+        if _is_hist:
+            print("INFO I1-historical-unavailable %r" % (ex,))
+        else:
+            check("I1-check-degree", False, repr(ex)[:160])
     print("VERIFY %s" % ("PASS" if ok else "FAIL"))
     return ok
 
@@ -2333,6 +2456,18 @@ def main(argv=None):
                 terminal = "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY"
         if terminal is None:
             terminal = "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY"
+        # R1c-A5 execution-integrity precedence (overrides science labels;
+        # resource blocks RSS>WALL>CHUNK still govern above it).
+        try:
+            _exec_block = execution_block_terminal(
+                [r for r in state.get("records", [])
+                 if int(r.get("call_idx", -1)) >= 0])
+        except (TypeError, ValueError):
+            _exec_block = None
+        if _exec_block is not None:
+            terminal = str(_exec_block)
+            log("terminal-overridden execution-integrity %s" % terminal,
+                logfh)
         # R1c-A2 blocking precedence: RSS (pre-dispatch) > WALL > CHUNK.
         _rss_b = state.get("rss_block_terminal")
         try:

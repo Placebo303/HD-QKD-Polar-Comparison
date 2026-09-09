@@ -636,6 +636,9 @@ def audit_extra(H, k, arm=None):
     row_deg = (H[:k,:]!=0).sum(axis=1)
     rmax=int(row_deg.max()) if row_deg.size else 0
     rsumsq=int(np.sum(row_deg.astype(np.int64)**2))
+    # R1c-A5 I1: check-node degree invariant diagnostics (exposed, not persisted).
+    rmin=int(row_deg.min()) if row_deg.size else 0
+    nbelow=int((row_deg < 2).sum()) if row_deg.size else 0
     # M cycle rank if arm is M
     if arm in M_ARMS:
         k_min = k  # for current prefix, but spec says forest over first k_min checks at every relevant prefix; using current prefix k as k_min for that layer? We'll compute using k_min of that prefix? For simplicity use k (since prefix == k_min for f1.0)
@@ -644,7 +647,64 @@ def audit_extra(H, k, arm=None):
         cr=None
     # determinism replay: build twice already handled externally; here just flag
     # window overflow tracked elsewhere
-    return {"girth": girth, "girth_reason": reason, "row_degree_max": rmax, "row_degree_sumsq": rsumsq, "m_cycle_rank": cr}
+    return {"girth": girth, "girth_reason": reason, "row_degree_max": rmax, "row_degree_sumsq": rsumsq, "m_cycle_rank": cr, "row_degree_min": rmin, "rows_below_degree_2": nbelow}
+
+# R1c-A5 I1 (frozen): every dispatched check row has degree >= 2.
+I1_MIN_CHECK_DEGREE = 2
+
+def check_I1_row_degree(H, k):
+    """Structure-only I1 check: (row_degree_min, rows_below_degree_2) for H[:k]."""
+    import numpy as _np
+    _H = _np.asarray(H)
+    _rd = (_H[:int(k), :] != 0).sum(axis=1)
+    if _rd.size == 0:
+        return (0, 0)
+    return (int(_rd.min()), int((_rd < int(I1_MIN_CHECK_DEGREE)).sum()))
+
+def assert_dispatchable_matrices(h1, h2):
+    """Dispatch-time fail-closed I1 guard (structure-only, zero decoder).
+
+    Raises ValueError with a clear message if any check row of either slice
+    has degree < 2. Call before any decoder invocation.
+    """
+    import numpy as _np
+    for _name, _h in (("L1", h1), ("L2", h2)):
+        _a = _np.asarray(_h)
+        if _a.size == 0:
+            raise ValueError("D6 I1 dispatch guard: empty %s matrix" % _name)
+        _rd = (_a != 0).sum(axis=1)
+        if int(_rd.min()) < int(I1_MIN_CHECK_DEGREE):
+            raise ValueError("D6 I1 dispatch guard: %s check row degree < 2 (min=%d, rows_below=%d)" % (_name, int(_rd.min()), int((_rd < 2).sum())))
+
+def execution_block_terminal(counted_rows):
+    """R1c-A5 execution-integrity terminal override (verifier/runner shared rule).
+
+    Scans counted (call_idx>=0) decoder records for crash/nonfinite. None if
+    clean; else D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED for degree-ValueError,
+    else D6_GRAPH_ATTEMPTED_CELL_INVALID. Placeholders excluded by caller.
+    """
+    _deg = 0
+    _other = 0
+    for _r in (counted_rows or []):
+        try:
+            _ci = int(_r.get("call_idx", -1))
+        except (TypeError, ValueError):
+            continue
+        if _ci < 0:
+            continue
+        _crash = str(_r.get("crash", "False")) == "True"
+        _finite = str(_r.get("finite", "True")) == "True"
+        if (not _crash) and _finite:
+            continue
+        if "Check node requires degree" in str(_r.get("error", "")):
+            _deg += 1
+        else:
+            _other += 1
+    if _deg:
+        return "D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED"
+    if _other:
+        return "D6_GRAPH_ATTEMPTED_CELL_INVALID"
+    return None
 
 def assert_no_formal_write(out_root):
     rp = Path(out_root).resolve() if out_root else None

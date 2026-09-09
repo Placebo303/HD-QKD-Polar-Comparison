@@ -1203,8 +1203,26 @@ def test_r1c_a4_seq_par_equal():
         assert np.array_equal(np.asarray(mo_s[k]), np.asarray(mo_p[k]))
 
 
+def _d6m_a5():
+    # Production D6 module under its real file path (structure-only).
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "d6m_a5eq", str(ROOT / "comparison_bench" / "src" / "comparison_bench"
+                        / "formal_ir" / "v72p2d6_gf32_graph_mother.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def _i1_of_committed(d6m, arm, n, layer, prefix_rows):
+    H, _ = d6m.build_mother(arm, int(n), layer)
+    rmin, _ = d6m.check_I1_row_degree(np.asarray(H), int(prefix_rows))
+    return bool(int(rmin) >= 2)
+
+
 def test_r1c_a4_equivalence_committed_n64(tmp_path):
-    # Optimized full-n64 build reproduces the committed A2 evidence exactly.
+    # Optimized full-n64 build reproduces the committed A2 evidence exactly,
+    # except the R1c-A5 I1 gate flag (frozen): violating arms go True->False.
     dev = _load_dev_a4("d6dev_a4_eq64")
     rec, _, _ = _load_dev_real().build_structures_parallel(
         64, None, max_workers=8)
@@ -1222,16 +1240,43 @@ def test_r1c_a4_equivalence_committed_n64(tmp_path):
         old = [r for r in csv.DictReader(fh) if r["n"] == "64"]
     assert len(new) == len(old) == 8 * 2 * 3
     key = lambda r: (r["arm"], r["n"], r["layer"], r["prefix_rows"])
-    assert {key(r): r for r in new} == {key(r): r for r in old}
+    newk = {key(r): r for r in new}
+    oldk = {key(r): r for r in old}
+    assert set(newk) == set(oldk)
+    # Builders frozen: every non-eligible field byte-identical.
+    for k in newk:
+        assert {x: v for x, v in newk[k].items()
+                if x != "eligible"} == \
+               {x: v for x, v in oldk[k].items()
+                if x != "eligible"}, k
+    # A5-A08: B0/B1/T1 fully identical; T2 fully identical (I1-clean at n64,
+    # rank gates identically) — strict T2 byte-equality for A6 gate 3.
+    for k in newk:
+        if k[0] in (_B0, "B1_D5_DV3_COMMON_LABELS", _T1, _T2):
+            assert newk[k] == oldk[k], k
+    # Elsewhere only eligible may flip, True->False exactly on I1 violation
+    # (flip set independently documented in the A5-01 validity matrix).
+    d6m = _d6m_a5()
+    for k in newk:
+        if k[0] in (_B0, "B1_D5_DV3_COMMON_LABELS", _T1, _T2):
+            continue
+        i1 = _i1_of_committed(d6m, k[0], k[1], k[2], k[3])
+        assert newk[k]["eligible"] == str(
+            (oldk[k]["eligible"] == "True") and i1), k
+        assert not (oldk[k]["eligible"] == "False"
+                    and newk[k]["eligible"] == "True"), k
 
 
 def test_r1c_a4_equivalence_committed_scaling_fb():
-    # Scaling-reachable fallback arms reproduce committed rows at n128/n256.
+    # Scaling-reachable fallback arms reproduce committed rows at n128/n256,
+    # except the R1c-A5 I1 gate flag (frozen): T1 fully identical (A5-A08),
+    # M1 identical off eligible with True->False exactly on I1 violation.
     dev = _load_dev_a4("d6dev_a4_eqfb")
     devr = _load_dev_real()
     fb = [_T1, _M1]
     old = {(r["arm"], r["n"], r["layer"], r["prefix_rows"]): r
            for r in _committed_structure_rows()}
+    d6m = _d6m_a5()
     for n in (128, 256):
         rec, ssum, mothers = devr.build_structures_parallel(
             n, None, max_workers=2, arms=fb)
@@ -1239,7 +1284,18 @@ def test_r1c_a4_equivalence_committed_scaling_fb():
         for r in rec:
             key = (r["arm"], str(n), r["layer"], str(r["prefix_rows"]))
             assert key in old, key
-            assert {k: str(v) for k, v in r.items()} == old[key], key
+            newd = {k: str(v) for k, v in r.items()}
+            if r["arm"] == _T1:
+                assert newd == old[key], key
+            else:
+                assert {x: v for x, v in newd.items()
+                        if x != "eligible"} == \
+                       {x: v for x, v in old[key].items()
+                        if x != "eligible"}, key
+                i1 = _i1_of_committed(d6m, r["arm"], n, r["layer"],
+                                      r["prefix_rows"])
+                assert newd["eligible"] == str(
+                    (old[key]["eligible"] == "True") and i1), key
         from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
             structural_rank_list)
         assert structural_rank_list(ssum, fb) is not None
@@ -1287,3 +1343,160 @@ def test_r1c_a4_assign_split_equal():
             assert np.array_equal(np.asarray(H_old), np.asarray(H_new))
             assert np.array_equal(np.asarray(sup_old), np.asarray(sup))
             assert ov == d6m.support_window_overflow(arm, 64, layer)
+
+
+# ---- R1c-A5 check-degree invariant I1 + execution-integrity (fake/tmp only) ----
+
+def _load_dev_a5(name):
+    return _load_dev_a2(name)
+
+
+def test_r1c_a5_I1_detected_and_boundary():
+    # Degree-1 detected; degree-2 boundary accepted; degree-0 still zero-row gate.
+    dev = _load_dev_a5("d6dev_a5_i1")
+    d6m = dev.build_support.__self__ if hasattr(dev.build_support, "__self__") else None
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "d6m_a5", str(ROOT / "comparison_bench" / "src" / "comparison_bench"
+                      / "formal_ir" / "v72p2d6_gf32_graph_mother.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    # Known violating cell: T3 n64 L1 k59 has degree-1 rows.
+    H, _ = m.build_mother("T3_SC_DV3_W4", 64, "L1")
+    ex = m.audit_extra(np.asarray(H), 59, "T3_SC_DV3_W4")
+    assert int(ex["row_degree_min"]) == 1
+    assert int(ex["rows_below_degree_2"]) >= 1
+    rmin, nbelow = m.check_I1_row_degree(np.asarray(H), 59)
+    assert (rmin, nbelow) == (int(ex["row_degree_min"]), int(ex["rows_below_degree_2"]))
+    # Boundary: T1 n64 L1 k59 has min 2 (accepted by I1).
+    H1, _ = m.build_mother("T1_PEG_DV3", 64, "L1")
+    ex1 = m.audit_extra(np.asarray(H1), 59, "T1_PEG_DV3")
+    assert int(ex1["row_degree_min"]) >= 2
+    assert int(ex1["rows_below_degree_2"]) == 0
+    # Degree-0 still blocked by zero-row gate (hand fixture).
+    Hz = np.zeros((4, 4), dtype=np.uint8)
+    Hz[0, 0] = 1
+    exz = m.audit_extra(Hz, 4, None)
+    assert int(exz["row_degree_min"]) == 0
+    assert int(exz["rows_below_degree_2"]) >= 1
+
+
+def test_r1c_a5_ineligibility_propagates_to_selection():
+    # Violating dispatched prefix makes the arm ineligible and drops it from selection.
+    dev = _load_dev_a5("d6dev_a5_sel")
+    rec, ssum, _ = dev.build_structures(64, None, arms=[_B0, _T1])
+    # T1 n64 is I1-clean, so both eligible; selection keeps B0.
+    sel, elig = dev.select_decoder_arms(ssum) if hasattr(dev, "select_decoder_arms") else (None, None)
+    # Runner path uses d6.select_decoder_arms; emulate via structure summary:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "d6m_a5s", str(ROOT / "comparison_bench" / "src" / "comparison_bench"
+                       / "formal_ir" / "v72p2d6_gf32_graph_mother.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    # Direct: T3 n64 summary must be fully ineligible under I1 (f1.2+square violate).
+    rec3, ssum3, _ = dev.build_structures(64, None, arms=["T3_SC_DV3_W4"])
+    assert all(r["eligible"] is False or r["eligible"] == False for r in rec3 if int(r["prefix_rows"]) in (59, 64))
+    # T3 drops out of a T-pool containing T1+T3.
+    recB, ssumB, _ = dev.build_structures(64, None, arms=[_T1, "T3_SC_DV3_W4"])
+    # Build eligible map the frozen way (all prefixes must be eligible).
+    eligB = {}
+    for arm, layers in ssumB.items():
+        ok = True
+        for layer, rec_ in layers.items():
+            for pref in rec_.get("prefix_audits", []):
+                if not pref.get("eligible", False):
+                    ok = False
+        eligB[arm] = ok
+    assert eligB.get("T1_PEG_DV3", False) is True
+    assert eligB.get("T3_SC_DV3_W4", True) is False
+
+
+def test_r1c_a5_dispatch_guard_refuses():
+    # Guard fails closed on a violating matrix; passes on a clean one. No decoder.
+    dev = _load_dev_a5("d6dev_a5_guard")
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "d6m_a5g", str(ROOT / "comparison_bench" / "src" / "comparison_bench"
+                       / "formal_ir" / "v72p2d6_gf32_graph_mother.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    HT3, _ = m.build_mother("T3_SC_DV3_W4", 64, "L1")
+    HT3b, _ = m.build_mother("T3_SC_DV3_W4", 64, "L2")
+    import pytest as _pt
+    with _pt.raises(ValueError, match="I1 dispatch guard"):
+        m.assert_dispatchable_matrices(np.asarray(HT3[:59, :]), np.asarray(HT3b[:52, :]))
+    # run_cell guard path refuses before any fake decoder call.
+    HT1, _ = m.build_mother("T1_PEG_DV3", 64, "L1")
+    HT1b, _ = m.build_mother("T1_PEG_DV3", 64, "L2")
+    m.assert_dispatchable_matrices(np.asarray(HT1[:59, :]), np.asarray(HT1b[:52, :]))
+    class _NoCall:
+        pids = ["1"]
+        def call(self, task, state=None):
+            raise AssertionError("decoder must not be called on violation")
+    import threading, time as _time
+    state = {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+             "deadline": float(_time.perf_counter()) + 3600,
+             "records": [], "peak_rss": 0, "budget_stop": False,
+             "chunk_wall_blocked": False, "lock": threading.Lock()}
+    blk = {"bob": np.zeros(64, dtype=np.int64), "u1": np.zeros(64, dtype=np.int64),
+           "u2": np.zeros(64, dtype=np.int64)}
+    p = np.full((64, 32), 1.0 / 32, dtype=np.float64)
+    meta = {"arm": "T3_SC_DV3_W4", "n": 64, "seed": 2026091000, "point": "f1.2",
+            "r1": 59, "r2": 52, "matrix_id": "m"}
+    with _pt.raises(ValueError, match="I1 dispatch guard"):
+        dev.run_cell(_NoCall(), np.asarray(HT3), np.asarray(HT3b), 59, 52,
+                     p, p, blk, 64, meta, state)
+    assert state["calls"] == 0 and len(state["records"]) == 0
+
+
+def test_r1c_a5_execution_terminal_precedence():
+    # Canary/scaling/confirmation branches: crash forces blocked terminals.
+    dev = _load_dev_a5("d6dev_a5_exec")
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "d6m_a5e", str(ROOT / "comparison_bench" / "src" / "comparison_bench"
+                       / "formal_ir" / "v72p2d6_gf32_graph_mother.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert m.execution_block_terminal([]) is None
+    assert m.execution_block_terminal([{"call_idx": -1, "crash": "True",
+                                        "finite": "False", "error": "boom"}]) is None
+    deg = [{"call_idx": 1, "crash": "True", "finite": "False",
+            "error": "ValueError('Check node requires degree >= 2')"}]
+    assert m.execution_block_terminal(deg) == "D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED"
+    other = [{"call_idx": 1, "crash": "True", "finite": "True", "error": "boom"}]
+    assert m.execution_block_terminal(other) == "D6_GRAPH_ATTEMPTED_CELL_INVALID"
+    nonfinite = [{"call_idx": 2, "crash": "False", "finite": "False", "error": ""}]
+    assert m.execution_block_terminal(nonfinite) == "D6_GRAPH_ATTEMPTED_CELL_INVALID"
+    # Degree takes precedence over other when both present.
+    assert m.execution_block_terminal(deg + other) == "D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED"
+
+
+def test_r1c_a5_historical_verify_unchanged_and_schema_stable(tmp_path, capsys):
+    # Historical six-file root verifies unchanged; new diagnostic not in schema.
+    dev = _load_dev_a5("d6dev_a5_hist")
+    hist = ROOT / "workspace" / "d6_graph_mother_r1c_dd8c4defe67742a8b2bc1b634c116d6b"
+    names = ("manifest.json", "structure_records.csv", "selected_arms.json",
+             "decoder_records.csv", "summary.json", "command_log.txt")
+    before = {f: (hist / f).read_bytes() for f in names}
+    assert dev.verify_command(str(hist)) is True
+    for f in names:
+        assert (hist / f).read_bytes() == before[f]
+    out = capsys.readouterr().out
+    assert "INFO I1-historical" in out
+    assert "terminal-agreement False" in out
+    # Frozen schema: no new I1 column persisted.
+    import csv
+    with open(str(hist / "structure_records.csv"), newline="", encoding="utf-8") as fh:
+        hdr = next(csv.reader(fh))
+    assert "row_degree_min" not in hdr and "rows_below_degree_2" not in hdr
+    # Fresh post-packet root with a violating eligible row FAILs I1.
+    out2 = _make_a3_root(tmp_path, dev, "a5i1", [_a3_row(1, _B0, 64, 2026091000, "f1.2", "L1", False)], {}, [], {}, _a3_safety(), 64, "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0], _B0, None, struct_rows=("B0_D5_DV3_NATIVE,64,L1,49,49,0,0,1,1.0,0,0,0,0,0,3,441,6,,0,0,True,True",))
+    # Inject an eligible True row whose rebuild is degree-1 (T3 k59) to force FAIL.
+    import csv as _csv
+    with open(str(out2 / "structure_records.csv"), "w", encoding="utf-8", newline="") as fh:
+        fh.write("arm,n,layer,prefix_rows,rank,zero_rows,zero_columns,connected_components,largest_component_fraction,four_cycles,four_cycle_variable_incidence_max,duplicate_projective_columns,base_pair_duplicates,support_triple_duplicates,row_degree_max,row_degree_sumsq,girth,girth_reason,m_cycle_rank,window_overflow,eligible,determinism_ok\n")
+        fh.write("T3_SC_DV3_W4,64,L1,59,59,0,0,1,1.0,10,2,0,0,0,4,640,4,,0,2,True,True\n")
+    assert dev.verify_command(str(out2)) is False
+    assert "FAIL I1-check-degree" in capsys.readouterr().out
