@@ -3384,3 +3384,7 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 
 - Result [repo-observed]: A3 repaired the A2 verifier by OpenSpec amendment (key +`n`, stage-separated recompute, crash precedence, EMPTY confirmation, stored+recomputed fail-closed report); corrected `--verify` once on the immutable root: exit 0, 15/15 PASS, `stored D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY` vs `recomputed D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED degree-invariant:64`, agreement False. 184 rows reconcile; 64 attempted degree crashes from degree-1 check rows in frozen T3/M1 graphs. Focused 42/42; seven-file non-perf 323/323.
 - Lifecycle [decision]: Pre-RESULT `PASS_BLOCKED_RUN` (blocked attempt, never topology evidence); `next_gate` `-> D6_GRAPH_MOTHER_R1C_A3_BLOCKED_AWAITING_MAIN_THREAD_ROUTE`. Zero decoder calls in A3; authorizations false; G2 absent; no push.
+## 2026-09-09 V72P2D6 R1c-A4 structure performance (READY)
+
+- Result [repo-observed]: scaling structure 10897.7 s -> 2.5 s (≈4280x, T2 pruning + two-build replay + overflow passthrough; T2 semantics untouched); n64 outputs exactly equal (21.0 s vs 42.2 s); RSS ≈ 90 MB; zero decoder calls. Equivalence vs committed A2 evidence exact. Focused 51/51; seven-file non-perf 332/332.
+- Lifecycle [decision]: performance review `PASS` -> `READY_FOR_FUTURE_D6_PRE_EXECUTE_REVIEW` (structure path only). No execution authorized; authorizations false; G2 absent; no push.

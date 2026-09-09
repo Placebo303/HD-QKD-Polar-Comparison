@@ -3311,3 +3311,11 @@ these may not be merged or reordered.
 **Context**: A2 verifier FAILs repaired via OpenSpec amendment (identity key +`n`; stage-separated canary/scaling-per-width/confirmation recompute; crash precedence with degree→invariant class; EMPTY confirmation label; stored+recomputed reported fail-closed). Forensics (read-only, zero decoder): 184 rows reconcile 104/40/40/0; 64 attempted degree crashes from degree-1 check rows in frozen T3/M1 graphs (integer proof + structure-only rebuild with negative controls; transport/precondition excluded). Corrected `--verify` once on the immutable root: exit 0, 15/15 PASS + agreement False. Focused 42/42; seven-file non-perf 323/323; v38 skipped (recorded).
 
 **Consequences**: `next_gate` → `D6_GRAPH_MOTHER_R1C_A3_BLOCKED_AWAITING_MAIN_THREAD_ROUTE` (successor needs new OpenSpec + fresh authorization; nothing granted here). Exposed audit gap: structural eligibility gates `zero_rows` but never minimum check degree — candidate rule for any successor proposal. All authorizations false; G2 absent; no push.
+
+## 2026-09-09 V72P2D6 R1c-A4 structure performance (READY, no run authorized)
+
+**Decision**: Accept `D6_R1C_A4_PERFORMANCE_REVIEW_PASS`: scaling structure wall 10897.7 s → 2.5 s (≈4280×, pruned T2 + two-build replay, bit-identical science for dispatched arms); n64 outputs exactly equal at 21.0 s (was 42.2 s); RSS ≈ 90 MB; zero decoder calls. Final state `READY_FOR_FUTURE_D6_PRE_EXECUTE_REVIEW` (structure path only).
+
+**Context**: Profile-first (T2 ≥99.9% of scaling pools); three frozen optimizations (pruning, ≤2 constructions, overflow passthrough; T2 semantics untouched); equivalence proven against committed A2 evidence (n64 all-arms + T1/M1 at n128/n256 exact); fresh-root benchmark cold+warm after-side, cold before-side; before-warm-n256 disclosed unmeasured with seconds-level bound (zero gate impact at 1000×+ margin). Focused 51/51; seven-file non-perf 332/332.
+
+**Consequences**: Any future D6 execution still needs its own OpenSpec + Pre-EXECUTE + explicit authorization — nothing granted. T2 semantics at n64 unchanged. All authorizations false; G2 absent; no push.
