@@ -76,3 +76,40 @@
   VOID-G1 contents; SHALL NOT create `workspace/v72p2d5_g2*`; SHALL NOT
   modify D5 production wiring/constants/results/authorizations, formal roots,
   or `src/`/`experiments/`/`tools/`; SHALL NOT push or rewrite history.
+
+## R6 Check-degree invariant I1 (R1c-A5, fail-closed, zero decoder)
+
+- SHALL compute per `(arm,n,layer,prefix)` `row_degree_min` /
+  `rows_below_degree_2` in D6 `audit_extra` (no D5 edits) and expose them.
+- SHALL admit to decoding only arms with frozen R3 gates AND
+  `row_degree_min >= 2` at every dispatched prefix of every width/layer.
+- SHALL fail closed at build time (violating dispatched prefix =>
+  structurally ineligible, never dispatchable) and at dispatch time (no
+  decoder cell from a violating matrix; clear error).
+- SHALL recompute I1 independently in `--verify` over
+  `structure_records.csv` (INFO for the historical root predating the gate;
+  PASS/FAIL for post-packet roots) without rewriting the historical root.
+- SHALL keep production `build_support` byte-identical in this packet; repair
+  candidates live sandbox-only. If no R1-R5 rule exists, SHALL record
+  `STRUCTURALLY_INFEASIBLE_AS_FROZEN` + proof + <=3 redefinition menu marked
+  `REQUIRES_MAIN_THREAD_RULING` without landing it.
+- SHALL force any attempted non-placeholder crash/nonfinite cell to
+  `D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED` (degree) or
+  `D6_GRAPH_ATTEMPTED_CELL_INVALID` (other), overriding recovery labels;
+  `call_idx=-1` placeholders never count.
+- SHALL NOT persist a new six-file schema in this packet; schema changes are
+  proposed (approval-required) in the R1d readiness package only.
+
+## R7 Exact-equivalent T2 acceleration (R1c-A6, zero decoder)
+
+- SHALL NOT change the T2 choice key, field order, tie-breaks, candidate set,
+  or greedy order; SHALL NOT float-approximate the integer key; SHALL NOT use
+  an unproven shortlist or decoder-chosen speedup.
+- SHALL prove exact equivalence (support equality 8x2x3; per-variable trace;
+  committed n64 byte-identical; ordering/eligibility/selected unchanged;
+  replay equal; seq==par; two-builds + pruning intact; sandbox-T2 re-run if
+  applicable) before any speedup claim.
+- SHALL meet T2/layer n64<=5s / n128<=90s / n256<=600s, n64 all-8<=8s, non-T2
+  <=10%, scaling fb-only within 2x of A4 after-side, RSS<2GiB, zero decoder;
+  else SHALL return `PERF_TARGET_NOT_MET` with profile evidence and keep the
+  reference path intact.

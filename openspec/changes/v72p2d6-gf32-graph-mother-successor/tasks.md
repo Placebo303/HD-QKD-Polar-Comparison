@@ -130,3 +130,40 @@
 - [ ] A4-05 deliverables (`…_PERFORMANCE_R1C_A4.md` + independent review),
   separate scoped commits; final `READY_FOR_FUTURE_D6_PRE_EXECUTE_REVIEW` or
   `PERF_TARGET_NOT_MET`; no new run authorized.
+
+## R1c-A5 validity closure, admissible repair, R1d readiness (Track A, zero decoder)
+
+- [ ] A5-00 freeze contracts: `D6_GRAPH_MOTHER_PREREG_R1C_A5.md` +
+  `D6_GRAPH_MOTHER_PREREG_R1C_A6.md` + this OpenSpec delta; commit separately
+  (commit 1). No code before commit 1.
+- [ ] A5-01 independent validity matrix (own implementation; T2 n128/n256
+  structure-only): CSV + human table in `D6_GRAPH_MOTHER_VALIDITY_R1C_A5.md`;
+  frozen `eligible` + A2 five-arm selection reproduced exactly.
+- [ ] A5-02 per-family root-cause proofs + decoder precondition inventory
+  (T3/T4 window gap; M N2/two-zone/forest force; T2 n64 rank; B0/B1 bounds as
+  controls, unmodified).
+- [ ] A5-03 land I1 (audit_extra row_degree_min/rows_below_degree_2; eligible
+  AND; build/dispatch fail-closed; verify INFO vs PASS/FAIL) + fake-only
+  tests; production `build_support` unchanged; historical root unchanged.
+- [ ] A5-04 sandbox repair study (≤3 preregistered rules/family; R1–R5 +
+  frozen order; byte-identical production) or
+  `STRUCTURALLY_INFEASIBLE_AS_FROZEN` + ≤3 menu (`REQUIRES_MAIN_THREAD_RULING`,
+  not landed) → `D6_GRAPH_MOTHER_REPAIR_STUDY_R1C_A5.md` + CSV.
+- [ ] A5-06 land crash-precedence terminal + fake tests (canary/scaling/
+  confirmation); no historical change.
+- [ ] A5-10 structure-cost projection vs chunk 5400s / 12h wall; breach routed
+  to Track B or width-inadmissible.
+- [ ] A5-08 R1d readiness package (`NOT_AUTHORIZED`) + `cycle_state.yaml`
+  `next_gate` only (all auth false, evidence_root/terminal null; no R1d root).
+
+## R1c-A6 exact-equivalent T2 acceleration + slow-task inventory (Track B, zero decoder; starts after Track A gate commit)
+
+- [ ] A6-01 profile first, freeze baseline table (fresh roots, workers 18+1,
+  T2 candidate/affected/GC/RSS + A4-shape regression).
+- [ ] A6-02/A6-03 staged-filter + vectorize + incremental maintenance (key
+  frozen); seven equivalence gates incl. sandbox-T2 re-run; perf targets
+  (n64≤5s / n128≤90s / n256≤600s / all-8≤8s / non-T2≤10% / fb-only 2x /
+  RSS<2GiB / zero decoder) else `PERF_TARGET_NOT_MET` with profile, reference
+  intact.
+- [ ] A6-04 read-only slow-task menu with measured numbers (v38, orchestration,
+  D5/D6 helpers, V30R, others); no implementation.
