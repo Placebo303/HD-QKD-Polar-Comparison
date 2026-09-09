@@ -493,20 +493,36 @@ def build_support(arm, n, layer):
     else:
         raise ValueError(f"unknown arm {arm}")
 
+def assign_mother_from_support(arm, n, layer, sup, m_max):
+    # R1c-A4: pure coefficient assignment from an exact support (math moved
+    # verbatim from build_mother; outputs bit-identical to build_mother).
+    if arm=="B0_D5_DV3_NATIVE":
+        seed = d5.L1_GRAPH_SEED if layer=="L1" else d5.L2_GRAPH_SEED
+        return d5.assign_gf32_coefficients(sup, int(seed), None, int(m_max))
+    # Use common stream; handle M degree2 -1 sentinel
+    # Build H via helper that maps support to matrix
+    # For sup with -1 sentinel (M degree2), we call _assign_common_coeffs
+    return _assign_common_coeffs(sup, int(n), layer, int(m_max))
+
 def build_mother(arm, n, layer):
     sup = build_support(arm, n, layer)
     m_max=int(n)
-    # coefficient assignment: B0 uses native D5, others use common stream
-    if arm=="B0_D5_DV3_NATIVE":
-        seed = d5.L1_GRAPH_SEED if layer=="L1" else d5.L2_GRAPH_SEED
-        H = d5.assign_gf32_coefficients(sup, int(seed), None, int(m_max))
-        return H, sup
-    else:
-        # Use common stream; handle M degree2 -1 sentinel
-        # Build H via helper that maps support to matrix
-        # For sup with -1 sentinel (M degree2), we call _assign_common_coeffs
-        H = _assign_common_coeffs(sup, int(n), layer, int(m_max))
-        return H, sup
+    return assign_mother_from_support(arm, int(n), layer, sup, m_max), sup
+
+def build_support_with_overflow(arm, n, layer):
+    # R1c-A4: (support, window_overflow) from the single primary build.
+    # The SC builder already counts overflow; build_support discards it and
+    # support_window_overflow rebuilt it — this passthrough removes that
+    # diagnostic rebuild. Identical support to build_support.
+    k_min=ROW_BUDGETS[int(n)]["k_min"][layer]
+    m_max=int(n)
+    if arm=="T3_SC_DV3_W4":
+        sup, ov = _build_SC_support(int(n), m_max, k_min, 4)
+        return sup, int(ov)
+    if arm=="T4_SC_DV3_W8":
+        sup, ov = _build_SC_support(int(n), m_max, k_min, 8)
+        return sup, int(ov)
+    return build_support(arm, n, layer), 0
 
 # Girth via BFS from each variable node
 def compute_girth(H):

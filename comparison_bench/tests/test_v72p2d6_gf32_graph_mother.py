@@ -401,12 +401,14 @@ def test_r1c_parallel_structure_unit_equivalence():
     dev = importlib.util.module_from_spec(spec2)
     spec2.loader.exec_module(dev)
     arm, layer = "T3_SC_DV3_W4", "L1"
-    a_arm, a_layer, H_par, sup_par, ok = dev._build_one_arm_layer((arm, 64, layer))
+    a_arm, a_layer, H_par, sup_par, ok, ov_par = dev._build_one_arm_layer(
+        (arm, 64, layer))
     assert (a_arm, a_layer) == (arm, layer)
     assert bool(ok)
     H_seq, sup_seq = d6.build_mother(arm, 64, layer)
     assert np.array_equal(np.asarray(H_par), np.asarray(H_seq))
     assert np.array_equal(np.asarray(sup_par), np.asarray(sup_seq))
+    assert int(ov_par) == int(d6.support_window_overflow(arm, 64, layer))
 
 
 # ---- R1c-A2 fail-closed tests (fake/tmp only, no real decoder) ----
@@ -1078,3 +1080,210 @@ def test_r1c_a3_verify_readonly(tmp_path):
     assert dev.verify_command(str(out)) is True
     for f in names:
         assert (out / f).read_bytes() == before[f]
+
+
+def test_r1c_a3_verify_readonly(tmp_path):
+    # The verifier must not mutate its root (byte-identical six files).
+    dev = _load_dev_a2("d6dev_a3_ro")
+    rows = [_a3_row(1, _B0, 128, 2026091100, "f1.2", "L1", False),
+            _a3_row(2, _B0, 256, 2026091100, "f1.2", "L1", False)]
+    out = _make_a3_root(tmp_path, dev, "a3ro", rows, {}, [], {},
+                        _a3_safety(), 64,
+                        "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY", [_B0],
+                        _B0, None)
+    names = ("manifest.json", "structure_records.csv",
+             "selected_arms.json", "decoder_records.csv", "summary.json",
+             "command_log.txt")
+    before = {f: (out / f).read_bytes() for f in names}
+    assert dev.verify_command(str(out)) is True
+    for f in names:
+        assert (out / f).read_bytes() == before[f]
+
+
+# ---- R1c-A4 structure/scaling performance tests (structure-only, no decoder) ----
+
+_T2 = "T2_CYCLE_GREEDY_DV3"
+_M1 = "M1_ACCUMULATOR_FOREST_MAX"
+
+
+def _load_dev_a4(name):
+    return _load_dev_a2(name)
+
+
+def _load_dev_real():
+    # Real importable module name so pool workers can unpickle the worker
+    # function in spawned children (synthetic spec names cannot).
+    import sys
+    sp = str(ROOT / "scripts")
+    if sp not in sys.path:
+        sys.path.insert(0, sp)
+    for _k in [k for k in list(sys.modules)
+               if k == "v72p2d6_graph_mother_development"]:
+        del sys.modules[_k]
+    import v72p2d6_graph_mother_development as dev
+    return dev
+
+
+def _committed_structure_rows():
+    import csv
+    p = ROOT / "workspace" / "d6_graph_mother_r1c_dd8c4defe67742a8b2bc1b634c116d6b" / "structure_records.csv"
+    with open(str(p), newline="", encoding="utf-8") as fh:
+        return list(csv.DictReader(fh))
+
+
+def test_r1c_a4_scaling_prunes_nonfallback():
+    # Scaling builds only the requested fallback arms (seq + parallel).
+    dev = _load_dev_a4("d6dev_a4_prune")
+    rec, ssum, mothers = dev.build_structures(64, None, arms=[_B0])
+    assert {r["arm"] for r in rec} == {_B0}
+    assert len(rec) == 1 * 2 * 3
+    assert set(ssum) == {_B0} and set(mothers) == {(_B0, "L1"),
+                                                    (_B0, "L2")}
+    devr = _load_dev_real()
+    rec2, _, _ = devr.build_structures_parallel(64, None, max_workers=2,
+                                                arms=[_B0])
+    assert {r["arm"] for r in rec2} == {_B0}
+    assert len(rec2) == len(rec)
+
+
+def test_r1c_a4_t2_built_only_when_fallback():
+    # T2 is built at scaling widths iff it is a frozen fallback (inclusion
+    # path proven at n64; exclusion proven by the prune test + call sites).
+    rec, _, _ = _load_dev_real().build_structures_parallel(
+        64, None, max_workers=2, arms=[_T2])
+    assert {r["arm"] for r in rec} == {_T2}
+    assert all(r["determinism_ok"] is True for r in rec)
+
+
+def test_r1c_a4_two_constructions_max_once_only(monkeypatch):
+    # At most two support constructions per (n,arm,layer); audits once per
+    # (H,prefix); no worker-path overflow rebuild (sequential path).
+    dev = _load_dev_a4("d6dev_a4_counts")
+    counts = {}
+    real_bso = dev.build_support_with_overflow
+    real_ap = dev.d5.audit_prefix
+    real_ae = dev.audit_extra
+    ap_n = {"n": 0}
+    ae_n = {"n": 0}
+
+    def _bso(arm, n, layer):
+        counts[(arm, n, layer)] = counts.get((arm, n, layer), 0) + 1
+        return real_bso(arm, n, layer)
+
+    def _ap(H, k):
+        ap_n["n"] += 1
+        return real_ap(H, k)
+
+    def _ae(H, k, arm=None):
+        ae_n["n"] += 1
+        return real_ae(H, k, arm)
+
+    def _boom(*a, **k):
+        raise AssertionError("overflow rebuild must not run")
+
+    monkeypatch.setattr(dev, "build_support_with_overflow", _bso)
+    monkeypatch.setattr(dev.d5, "audit_prefix", _ap)
+    monkeypatch.setattr(dev, "audit_extra", _ae)
+    monkeypatch.setattr(dev, "support_window_overflow", _boom)
+    dev.build_structures(64, None, arms=[_B0])
+    assert counts == {(_B0, 64, "L1"): 2, (_B0, 64, "L2"): 2}
+    assert ap_n["n"] == 2 * 3 and ae_n["n"] == 2 * 3
+
+
+def test_r1c_a4_seq_par_equal():
+    # Sequential and parallel paths produce identical records + mothers.
+    dev = _load_dev_a4("d6dev_a4_seqpar")
+    devr = _load_dev_real()
+    rec_s, _, mo_s = dev.build_structures(64, None, arms=[_B0, _T1])
+    rec_p, _, mo_p = devr.build_structures_parallel(64, None, max_workers=2,
+                                                    arms=[_B0, _T1])
+    assert rec_s == rec_p
+    assert set(mo_s) == set(mo_p)
+    for k in mo_s:
+        assert np.array_equal(np.asarray(mo_s[k]), np.asarray(mo_p[k]))
+
+
+def test_r1c_a4_equivalence_committed_n64(tmp_path):
+    # Optimized full-n64 build reproduces the committed A2 evidence exactly.
+    dev = _load_dev_a4("d6dev_a4_eq64")
+    rec, _, _ = _load_dev_real().build_structures_parallel(
+        64, None, max_workers=8)
+    from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
+        write_structure_records)
+    out = tmp_path / "eq64.csv"
+    write_structure_records(str(out), rec)
+    import csv
+    with open(str(out), newline="", encoding="utf-8") as fh:
+        new = list(csv.DictReader(fh))
+    with open(str(ROOT / "workspace"
+                  / "d6_graph_mother_r1c_dd8c4defe67742a8b2bc1b634c116d6b"
+                  / "structure_records.csv"), newline="",
+              encoding="utf-8") as fh:
+        old = [r for r in csv.DictReader(fh) if r["n"] == "64"]
+    assert len(new) == len(old) == 8 * 2 * 3
+    key = lambda r: (r["arm"], r["n"], r["layer"], r["prefix_rows"])
+    assert {key(r): r for r in new} == {key(r): r for r in old}
+
+
+def test_r1c_a4_equivalence_committed_scaling_fb():
+    # Scaling-reachable fallback arms reproduce committed rows at n128/n256.
+    dev = _load_dev_a4("d6dev_a4_eqfb")
+    devr = _load_dev_real()
+    fb = [_T1, _M1]
+    old = {(r["arm"], r["n"], r["layer"], r["prefix_rows"]): r
+           for r in _committed_structure_rows()}
+    for n in (128, 256):
+        rec, ssum, mothers = devr.build_structures_parallel(
+            n, None, max_workers=2, arms=fb)
+        assert {r["arm"] for r in rec} == set(fb)
+        for r in rec:
+            key = (r["arm"], str(n), r["layer"], str(r["prefix_rows"]))
+            assert key in old, key
+            assert {k: str(v) for k, v in r.items()} == old[key], key
+        from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
+            structural_rank_list)
+        assert structural_rank_list(ssum, fb) is not None
+        assert set(mothers) == {(a, l) for a in fb for l in ("L1", "L2")}
+
+
+def test_r1c_a4_scaling_callsite_passes_fb():
+    # Scaling branch passes fb (both worker modes); n64 keeps the default.
+    src = (ROOT / "scripts" / "v72p2d6_graph_mother_development.py"
+           ).read_text(encoding="utf-8")
+    assert "build_structures(n, logfh, arms=fb)" in src
+    assert "n, logfh, max_workers=workers, arms=fb" in src
+    assert "build_structures(64, logfh)" in src
+    assert "build_structures_parallel(\n                64, logfh" in src
+
+
+def test_r1c_a4_pool_budget_unchanged():
+    # Pool worker-count default, structure-only footprint, no decoder refs.
+    import inspect
+    dev = _load_dev_a4("d6dev_a4_pool")
+    assert str(inspect.signature(
+        dev.build_structures_parallel)) == \
+        "(n, logfh, max_workers=18, arms=None)"
+    worker_src = inspect.getsource(dev._build_one_arm_layer)
+    assert "build_support_with_overflow" in worker_src
+    assert "assign_mother_from_support" in worker_src
+    assert "run_cell" not in worker_src and "invoke(" not in worker_src
+
+
+def test_r1c_a4_assign_split_equal():
+    # assign(split) == build_mother; overflow passthrough == separate rebuild.
+    dev = _load_dev_a4("d6dev_a4_split")
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "d6m_a4", str(ROOT / "comparison_bench" / "src" / "comparison_bench"
+                      / "formal_ir" / "v72p2d6_gf32_graph_mother.py"))
+    d6m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(d6m)
+    for arm in [_B0, "B1_D5_DV3_COMMON_LABELS", _T1, "T3_SC_DV3_W4",
+                "T4_SC_DV3_W8", _M1, "M2_ACCUMULATOR_FOREST_HALF"]:
+        for layer in ("L1", "L2"):
+            H_old, sup_old = d6m.build_mother(arm, 64, layer)
+            sup, ov = d6m.build_support_with_overflow(arm, 64, layer)
+            H_new = d6m.assign_mother_from_support(arm, 64, layer, sup, 64)
+            assert np.array_equal(np.asarray(H_old), np.asarray(H_new))
+            assert np.array_equal(np.asarray(sup_old), np.asarray(sup))
+            assert ov == d6m.support_window_overflow(arm, 64, layer)

@@ -31,7 +31,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
 from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
     ARMS, ROW_BUDGETS, CANARY_SEEDS, CONF_SEEDS, SCALING_SEEDS, T_ARMS, M_ARMS,
-    build_mother, build_support, support_window_overflow, d5,
+    build_mother, build_support, build_support_with_overflow,
+    assign_mother_from_support, support_window_overflow, d5,
     assert_no_formal_write, write_structure_records, select_decoder_arms,
     select_advancement, structural_rank_list, classify_terminal, audit_extra,
 )
@@ -540,7 +541,14 @@ def update_rss_barrier(state, worker_rss_list, main_rss):
 
 
 def _build_one_arm_layer(job):
-    """R1c: top-level picklable unit for arm×layer parallel structure."""
+    """R1c: top-level picklable unit for arm×layer parallel structure.
+
+    R1c-A4: at most two support constructions per (n,arm,layer) — primary
+    support, H from that exact support, one independent support replay, H2
+    from the replayed support; equality on both arrays plus the overflow
+    diagnostic (same guarantee as the old triple build, one build fewer;
+    the separate overflow rebuild is gone, reused from the primary build).
+    """
     import sys as _sys
     import pathlib as _pl
     import numpy as _np
@@ -548,37 +556,41 @@ def _build_one_arm_layer(job):
     _sys.path.insert(0, str(root / "comparison_bench" / "src"))
     from comparison_bench.formal_ir import v72p2d6_gf32_graph_mother as _d6
     arm, n, layer = job
-    _H, _sup = _d6.build_mother(arm, int(n), layer)
-    _sup2 = _d6.build_support(arm, int(n), layer)
-    _H2, _ = _d6.build_mother(arm, int(n), layer)
+    _sup, _ov = _d6.build_support_with_overflow(arm, int(n), layer)
+    _H = _d6.assign_mother_from_support(arm, int(n), layer, _sup, int(n))
+    _sup2, _ov2 = _d6.build_support_with_overflow(arm, int(n), layer)
+    _H2 = _d6.assign_mother_from_support(arm, int(n), layer, _sup2, int(n))
     replay_ok = bool(_np.array_equal(_np.asarray(_sup), _np.asarray(_sup2))
-                     and _np.array_equal(_np.asarray(_H), _np.asarray(_H2)))
+                     and _np.array_equal(_np.asarray(_H), _np.asarray(_H2))
+                     and int(_ov) == int(_ov2))
     return (arm, layer, _np.asarray(_H, dtype=_np.uint8),
-            _np.asarray(_sup), replay_ok)
+            _np.asarray(_sup), replay_ok, int(_ov))
 
 
-def build_structures_parallel(n, logfh, max_workers=18):
+def build_structures_parallel(n, logfh, max_workers=18, arms=None):
     """R1c: arm×layer parallel; deterministic ARMS-order assembly.
 
     Identical records/summary/mothers to build_structures (replay per task).
+    R1c-A4: arms=None builds all 8 (frozen default); scaling passes the
+    frozen fallback arms only.
     """
     import os as _os
-    jobs = [(arm, int(n), layer) for arm in ARMS for layer in ("L1", "L2")]
+    _arms = list(ARMS) if arms is None else [a for a in ARMS if a in arms]
+    jobs = [(arm, int(n), layer) for arm in _arms for layer in ("L1", "L2")]
     t0 = time.perf_counter()
     out = {}
     with concurrent.futures.ProcessPoolExecutor(
             max_workers=int(max_workers)) as ex:
-        for arm, layer, H, sup, replay_ok in ex.map(_build_one_arm_layer,
-                                                    jobs):
-            out[(arm, layer)] = (H, sup, replay_ok)
+        for arm, layer, H, sup, replay_ok, ov in ex.map(_build_one_arm_layer,
+                                                        jobs):
+            out[(arm, layer)] = (H, sup, replay_ok, ov)
     # Deterministic assembly in ARMS order (same as sequential).
     records = []
     summary = {}
     mothers = {}
-    for arm in ARMS:
+    for arm in _arms:
         for layer in ("L1", "L2"):
-            H, sup, replay_ok = out[(arm, layer)]
-            ov = support_window_overflow(arm, n, layer)
+            H, sup, replay_ok, ov = out[(arm, layer)]
             prefixes = (ROW_BUDGETS[n][layer][0], ROW_BUDGETS[n][layer][1], n)
             audits = []
             for k in prefixes:
@@ -628,25 +640,31 @@ def build_structures_parallel(n, logfh, max_workers=18):
             summary.setdefault(arm, {})[layer] = {"prefix_audits": audits}
             mothers[(arm, layer)] = np.asarray(H, dtype=np.uint8)
     log("structure-parallel n=%d workers=%d wall=%.1f arms=%d records=%d pid=%d"
-        % (n, int(max_workers), time.perf_counter() - t0, len(ARMS),
+        % (n, int(max_workers), time.perf_counter() - t0, len(_arms),
            len(records), _os.getpid()), logfh)
     return records, summary, mothers
 
 
-def build_structures(n, logfh):
+def build_structures(n, logfh, arms=None):
     """Build all arms/layers at width n with replay check; return records,
-    summary (f1.2-indexed prefix audits), mothers {(arm,layer): H}."""
+    summary (f1.2-indexed prefix audits), mothers {(arm,layer): H}.
+
+    R1c-A4: arms=None builds all 8 (frozen default); scaling passes the
+    frozen fallback arms only. At most two support constructions per
+    (n,arm,layer), overflow reused from the primary build."""
     records = []
     summary = {}
     mothers = {}
-    for arm in ARMS:
+    _arms = list(ARMS) if arms is None else [a for a in ARMS if a in arms]
+    for arm in _arms:
         for layer in ("L1", "L2"):
-            H, sup = build_mother(arm, n, layer)
-            sup2 = build_support(arm, n, layer)
-            H2, _ = build_mother(arm, n, layer)
+            sup, ov = build_support_with_overflow(arm, n, layer)
+            H = assign_mother_from_support(arm, n, layer, sup, n)
+            sup2, ov2 = build_support_with_overflow(arm, n, layer)
+            H2 = assign_mother_from_support(arm, n, layer, sup2, n)
             replay_ok = bool(np.array_equal(np.asarray(sup), np.asarray(sup2))
-                             and np.array_equal(np.asarray(H), np.asarray(H2)))
-            ov = support_window_overflow(arm, n, layer)
+                             and np.array_equal(np.asarray(H), np.asarray(H2))
+                             and int(ov) == int(ov2))
             prefixes = (ROW_BUDGETS[n][layer][0], ROW_BUDGETS[n][layer][1], n)
             audits = []
             for k in prefixes:
@@ -694,7 +712,7 @@ def build_structures(n, logfh):
                     "determinism_ok": replay_ok})
             summary.setdefault(arm, {})[layer] = {"prefix_audits": audits}
             mothers[(arm, layer)] = np.asarray(H, dtype=np.uint8)
-    log("structure n=%d arms=%d records=%d" % (n, len(ARMS), len(records)),
+    log("structure n=%d arms=%d records=%d" % (n, len(_arms), len(records)),
         logfh)
     return records, summary, mothers
 
@@ -2099,10 +2117,10 @@ def main(argv=None):
                 if state.get("chunk_wall_blocked"):
                     break
                 if workers == 1:
-                    srec, ssum, smothers = build_structures(n, logfh)
+                    srec, ssum, smothers = build_structures(n, logfh, arms=fb)
                 else:
                     srec, ssum, smothers = build_structures_parallel(
-                        n, logfh, max_workers=workers)
+                        n, logfh, max_workers=workers, arms=fb)
                 append_structure_records(out / "structure_records.csv", srec,
                                          logfh)
                 order_n = structural_rank_list(ssum, fb)
