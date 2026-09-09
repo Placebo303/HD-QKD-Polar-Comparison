@@ -755,5 +755,5 @@ def write_structure_records(path, records):
         fh.flush()
         try:
             os.fsync(fh.fileno())
-        except Exception:
-            pass
+        except Exception as ex:  # R1c-A2 fail closed
+            raise RuntimeError("fsync-failed structure_records: %r" % (ex,))

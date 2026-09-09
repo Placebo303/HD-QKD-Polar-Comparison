@@ -407,3 +407,378 @@ def test_r1c_parallel_structure_unit_equivalence():
     H_seq, sup_seq = d6.build_mother(arm, 64, layer)
     assert np.array_equal(np.asarray(H_par), np.asarray(H_seq))
     assert np.array_equal(np.asarray(sup_par), np.asarray(sup_seq))
+
+
+# ---- R1c-A2 fail-closed tests (fake/tmp only, no real decoder) ----
+
+def _load_dev_a2(name):
+    import importlib.util, sys
+    for _k in [k for k in list(sys.modules) if k == "comparison_bench" or k.startswith("comparison_bench.")]:
+        del sys.modules[_k]
+    sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
+    sp = ROOT / "scripts" / "v72p2d6_graph_mother_development.py"
+    spec = importlib.util.spec_from_file_location(name, str(sp))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_r1c_a2_rss_unknown_blocked():
+    dev = _load_dev_a2("d6dev_a2_unknown")
+    mib = 1024 ** 2
+    eff, st = dev.select_effective_workers_pilot(18, None, 50 * mib)
+    assert eff is None and st == "unknown"
+    eff, st = dev.select_effective_workers_pilot(18, 100 * mib, None)
+    assert eff is None and st == "unknown"
+    assert dev.aggregate_rss_strict([100 * mib], None) is None
+    assert dev.aggregate_rss_strict([None], 50 * mib) is None
+    assert dev.aggregate_rss_strict([10, None], 5) is None
+
+
+def test_r1c_a2_single_worker_over_limit():
+    dev = _load_dev_a2("d6dev_a2_limit")
+    gib = 1024 ** 3
+    # Even w=1 over budget -> limit (no effective).
+    eff, st = dev.select_effective_workers_pilot(1, int(1.5 * gib), int(0.6 * gib))
+    assert eff is None and st == "limit"
+    eff, st = dev.select_effective_workers_pilot(18, 2 * gib, 0)
+    assert eff is None and st == "limit"
+    # Strict aggregate over ceiling is detectable.
+    assert dev.aggregate_rss_strict([int(1.5 * gib), int(1.0 * gib)], 0) >= 2 * gib
+
+
+def test_r1c_a2_pilot_downcore():
+    dev = _load_dev_a2("d6dev_a2_downcore")
+    mib = 1024 ** 2
+    # 18*120MiB+50MiB over 2GiB -> down to 14.
+    eff, st = dev.select_effective_workers_pilot(18, 120 * mib, 50 * mib)
+    assert (eff, st) == (14, "ok")
+    # Tiny pilot keeps ceiling; request 8 never becomes 18; 1 stays 1.
+    tiny = 10 * mib
+    assert dev.select_effective_workers_pilot(8, tiny, 0) == (8, "ok")
+    assert dev.select_effective_workers_pilot(18, tiny, 0) == (18, "ok")
+    assert dev.select_effective_workers_pilot(1, tiny, 0) == (1, "ok")
+    # Candidates include 1: huge pilot with request 8 still yields limit, not 0 workers silently.
+    eff, st = dev.select_effective_workers_pilot(8, 2 * 1024 ** 3, 0)
+    assert eff is None and st == "limit"
+
+
+def test_r1c_a2_runtime_over_limit_barrier():
+    dev = _load_dev_a2("d6dev_a2_runtime")
+    gib = 1024 ** 3
+    state = {"peak_single_rss": None, "peak_aggregate_rss": None,
+             "rss_workers_last": {}, "rss_main_last": None,
+             "workers_effective": 2}
+    agg = dev.update_rss_barrier(state, [int(1.5 * gib), int(0.6 * gib)], 0)
+    assert agg is not None and int(agg) >= int(dev.RSS_CEIL)
+    # Single peak and aggregate peak tracked separately (no substitution).
+    assert state["peak_aggregate_rss"] is not None
+    assert state["peak_single_rss"] is not None
+    assert int(state["peak_aggregate_rss"]) > int(state["peak_single_rss"])
+
+
+def test_r1c_a2_deadline_poll_min():
+    import threading, time as _time
+    dev = _load_dev_a2("d6dev_a2_deadline")
+    state = {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+             "records": [], "peak_rss": 0, "budget_stop": False,
+             "lock": threading.Lock()}
+    state["deadline"] = float(state["t0"]) + 30.0
+    rem = dev._remaining_s(state)
+    assert 0 < rem <= 30.0
+    assert min(float(dev.WATCHDOG), float(rem)) < 120.0
+    # Past deadline reserves fail closed.
+    state["deadline"] = float(_time.perf_counter()) - 1.0
+    assert dev._remaining_s(state) <= 0
+    assert dev.can_dispatch(state) is False
+    with pytest.raises(StopIteration):
+        dev.reserve_call_idx(state)
+    assert state["budget_stop"] is True
+
+
+def test_r1c_a2_dual_timeout_separation():
+    import threading, time as _time
+    dev = _load_dev_a2("d6dev_a2_timeouts")
+    h = np.zeros((2, 2), dtype=np.uint8)
+    prior = np.full((2, 32), 1.0 / 32, dtype=np.float64)
+    xt = np.zeros(2, dtype=np.int64)
+    meta = {"arm": "A", "n": 64, "seed": 2026091000, "point": "f1.2",
+            "r1": 59, "r2": 52, "matrix_id": "m"}
+    # Watchdog timeout path.
+    class FakeTimeout:
+        pids = ["111"]
+        def call(self, task, state=None):
+            return {"exact": False, "syndrome_ok": False, "iterations": -1,
+                    "finite": False, "beliefs": None, "crash": True,
+                    "timeout": True, "wall_timeout": False, "wall_s": 120.0,
+                    "rss": 1000, "error": "watchdog-timeout"}
+    # Wall timeout path.
+    class FakeWall:
+        pids = ["222"]
+        def call(self, task, state=None):
+            return {"exact": False, "syndrome_ok": False, "iterations": -1,
+                    "finite": False, "beliefs": None, "crash": True,
+                    "timeout": False, "wall_timeout": True, "wall_s": 5.0,
+                    "rss": None, "error": "wall-budget-exhausted"}
+    for Fake, want_to, want_wt in ((FakeTimeout, True, False),
+                                   (FakeWall, False, True)):
+        state = {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+                 "deadline": float(_time.perf_counter()) + 3600,
+                 "records": [], "peak_rss": 0, "peak_single_rss": None,
+                 "peak_aggregate_rss": None, "rss_workers_last": {},
+                 "rss_main_last": None, "workers_effective": 1,
+                 "budget_stop": False, "chunk_wall_blocked": False,
+                 "lock": threading.Lock()}
+        r = dev.invoke(Fake(), state, meta, "L1", h, prior, xt, 0.5, False)
+        assert bool(r["timeout"]) is want_to
+        assert bool(r["wall_timeout"]) is want_wt
+        assert not (bool(r["timeout"]) and bool(r["wall_timeout"]))
+        assert r["watchdog_ok"] is False
+        assert str(r["error"]) != ""
+
+
+def test_r1c_a2_dual_pid():
+    import threading, time as _time
+    dev = _load_dev_a2("d6dev_a2_pid")
+    h = np.zeros((2, 2), dtype=np.uint8)
+    prior = np.full((2, 32), 1.0 / 32, dtype=np.float64)
+    xt = np.zeros(2, dtype=np.int64)
+    meta = {"arm": "A", "n": 64, "seed": 2026091000, "point": "f1.2",
+            "r1": 59, "r2": 52, "matrix_id": "m"}
+    class FakeRespawn:
+        def __init__(self):
+            self.pids = ["111"]
+        def call(self, task, state=None):
+            # Simulate watchdog respawn: new pid appears during the call.
+            self.pids.append("222")
+            return {"exact": True, "syndrome_ok": True, "iterations": 5,
+                    "finite": True, "beliefs": None, "crash": False,
+                    "timeout": True, "wall_timeout": False, "wall_s": 120.0,
+                    "rss": 1000, "error": "watchdog-timeout"}
+    class FakeNormal:
+        pids = ["333"]
+        def call(self, task, state=None):
+            return {"exact": True, "syndrome_ok": True, "iterations": 5,
+                    "finite": True, "beliefs": None, "crash": False,
+                    "timeout": False, "wall_timeout": False, "wall_s": 0.5,
+                    "rss": 1000, "error": ""}
+    state = {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+             "deadline": float(_time.perf_counter()) + 3600,
+             "records": [], "peak_rss": 0, "peak_single_rss": None,
+             "peak_aggregate_rss": None, "rss_workers_last": {},
+             "rss_main_last": None, "workers_effective": 1,
+             "budget_stop": False, "chunk_wall_blocked": False,
+             "lock": threading.Lock()}
+    r1 = dev.invoke(FakeRespawn(), state, meta, "L1", h, prior, xt, 0.5, False)
+    assert str(r1["worker_pid"]) == "111"
+    assert str(r1["respawn_pid"]) == "222"
+    r2 = dev.invoke(FakeNormal(), state, meta, "L1", h, prior, xt, 0.5, False)
+    assert str(r2["worker_pid"]) == "333"
+    assert str(r2["respawn_pid"]) == ""
+    assert r2["watchdog_ok"] is True
+
+
+def test_r1c_a2_fsync_fail_closed(tmp_path):
+    dev = _load_dev_a2("d6dev_a2_fsync")
+    p = tmp_path / "decoder_records.csv"
+    recs = [{"call_idx": 1, "arm": "A", "n": 64, "seed": 2026091000,
+             "point": "f1.2", "rows_l1": 59, "rows_l2": 52, "mode": "L1",
+             "matrix_id": "m", "exact": True, "syndrome_ok": True,
+             "iterations": 5, "finite": True, "crash": False,
+             "timeout": False, "wall_timeout": False,
+             "prior_mass_on_truth": 0.5, "wall_s": 0.5, "rss_bytes": 1000,
+             "watchdog_ok": True, "worker_pid": "1", "respawn_pid": "",
+             "error": ""}]
+    orig = dev.os.fsync
+    def _boom(fd):
+        raise OSError("injected-fsync-fail")
+    dev.os.fsync = _boom
+    try:
+        with pytest.raises(RuntimeError):
+            dev.flush_decoder_records(str(p), recs, None)
+        with pytest.raises(RuntimeError):
+            dev.append_structure_records(str(tmp_path / "s.csv"),
+                                         [{"arm": "A", "n": 64}], None)
+    finally:
+        dev.os.fsync = orig
+
+
+def test_r1c_a2_stopiteration_checkpoint(tmp_path):
+    import threading, time as _time
+    dev = _load_dev_a2("d6dev_a2_stop")
+    old = dev.CALL_BUDGET
+    dev.CALL_BUDGET = 2
+    try:
+        class FakeWorker:
+            def __init__(self):
+                self.pids = ["1"]
+            def call(self, task, state=None):
+                return {"exact": True, "syndrome_ok": True, "iterations": 5,
+                        "finite": True, "beliefs": None, "crash": False,
+                        "timeout": False, "wall_timeout": False,
+                        "wall_s": 0.5, "rss": 1000, "error": ""}
+        state = {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+                 "deadline": float(_time.perf_counter()) + 3600,
+                 "records": [], "peak_rss": 0, "peak_single_rss": None,
+                 "peak_aggregate_rss": None, "rss_workers_last": {},
+                 "rss_main_last": None, "workers_effective": 1,
+                 "budget_stop": False, "chunk_wall_blocked": False,
+                 "lock": threading.Lock()}
+        w = FakeWorker()
+        meta = {"arm": "A", "n": 64, "seed": 2026091000, "point": "f1.2",
+                "r1": 59, "r2": 52, "matrix_id": "m"}
+        h = np.zeros((2, 2), dtype=np.uint8)
+        prior = np.full((2, 32), 1.0 / 32, dtype=np.float64)
+        xt = np.zeros(2, dtype=np.int64)
+        dev.invoke(w, state, meta, "L1", h, prior, xt, 0.5, False)
+        dev.invoke(w, state, meta, "L2-APP", h, prior, xt, 0.5, False)
+        with pytest.raises(StopIteration):
+            dev.invoke(w, state, meta, "L2-oracle", h, prior, xt, 0.5, False)
+        # Unified finally checkpoint: completed records are persisted in order.
+        p = tmp_path / "decoder_records.csv"
+        dev.flush_decoder_records(str(p), state["records"], None)
+        import csv
+        with open(str(p), newline="", encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh))
+        assert [int(r["call_idx"]) for r in rows] == [1, 2]
+    finally:
+        dev.CALL_BUDGET = old
+
+
+def test_r1c_a2_sequential_three_point_consistent():
+    # A2-06: workers=1 scaling-confirm keeps f1.0/f1.2/square, parallel-consistent.
+    dev = _load_dev_a2("d6dev_a2_3pt")
+    # Functional equivalence: same fake app_exact matrix tallied both ways.
+    fake = {("f1.0", 0): 1, ("f1.0", 1): 0, ("f1.2", 0): 1, ("f1.2", 1): 1,
+            ("square", 0): 0, ("square", 1): 1}
+    # Sequential fixed loop (cc inside point loop).
+    cc_seq = {}
+    for point in ("f1.0", "f1.2", "square"):
+        ex = sum(fake[(point, s)] for s in (0, 1))
+        cc_seq[point] = ex
+    # Parallel loop ordering (point-major, seed-minor) tallied identically.
+    order = []
+    for point in ("f1.0", "f1.2", "square"):
+        for s in (0, 1):
+            order.append((point, fake[(point, s)]))
+    cc_par = {}
+    idx = 0
+    for point in ("f1.0", "f1.2", "square"):
+        ex = 0
+        for _ in (0, 1):
+            ex += int(order[idx][1])
+            idx += 1
+        cc_par[point] = ex
+    assert set(cc_seq) == {"f1.0", "f1.2", "square"}
+    assert cc_seq == cc_par == {"f1.0": 1, "f1.2": 2, "square": 1}
+    # Source indent: cc inside point loop, conf outside point loop.
+    src = (ROOT / "scripts" / "v72p2d6_graph_mother_development.py").read_text(
+        encoding="utf-8")
+    # The fixed sequential scaling-confirm block must contain the 36-space cc
+    # line followed by the 32-space conf line (parallel-consistent).
+    assert '                                    cc[point] = ex\n                                conf_counts[arm] = cc' in src
+
+
+def _make_a2_minimal_pass_root(tmp_path, dev):
+    import csv, json
+    out = tmp_path / "a2root"
+    out.mkdir()
+    sel = {"selected": ["B0_D5_DV3_NATIVE"], "eligible": {"B0_D5_DV3_NATIVE": True},
+           "fallback_T": None, "fallback_M": None, "structural_order_new": [],
+           "freeze": "decoder-blind-from-structure-only"}
+    (out / "selected_arms.json").write_text(json.dumps(sel), encoding="utf-8")
+    (out / "structure_records.csv").write_text(
+        "arm,n,layer,prefix_rows,rank,zero_rows,zero_columns,connected_components,"
+        "largest_component_fraction,four_cycles,four_cycle_variable_incidence_max,"
+        "duplicate_projective_columns,base_pair_duplicates,support_triple_duplicates,"
+        "row_degree_max,row_degree_sumsq,girth,girth_reason,m_cycle_rank,"
+        "window_overflow,eligible,determinism_ok\n", encoding="utf-8")
+    (out / "command_log.txt").write_text("a2-minimal\n", encoding="utf-8")
+    mib = 1024 ** 2
+    main_rss = 50 * mib
+    worker_rss = [100 * mib]
+    agg = int(main_rss) + int(worker_rss[0])
+    mani = {"out_root": str(out), "arms": dev.ARMS if hasattr(dev, "ARMS") else [],
+            "revision": dev.R1C_REVISION, "workers": 1, "workers_requested": 1,
+            "workers_effective": 1, "main_rss_bytes": int(main_rss),
+            "worker_rss_bytes": [int(worker_rss[0])], "aggregate_rss_bytes": int(agg),
+            "peak_single_rss_bytes": int(worker_rss[0]),
+            "peak_aggregate_rss_bytes": int(agg), "rss_semantics": dev.RSS_SEMANTICS,
+            "deadline_s": 1e9, "rss_block_terminal": None,
+            "chunk_wall_max_s": dev.R1C_CHUNK_WALL_MAX, "chunk_walls": {},
+            "chunk_wall_blocked": False, "canary_seeds": [2026091000],
+            "confirmation_seeds": [2026091010], "scaling_seeds": [2026091100],
+            "budgets": {"calls": 2500, "wall_s": 43200, "watchdog_s": 120,
+                        "rss_bytes": 2147483648},
+            "calls": 0, "setup_decoder_calls": 1, "scientific_calls": 0,
+            "total_decoder_calls": 1, "wall_s": 10.0, "peak_rss_bytes": int(worker_rss[0]),
+            "worker_pids": [111], "head_sha": "test", "budget_stop": False,
+            "oracle_never_upgrades_exact": True}
+    (out / "manifest.json").write_text(json.dumps(mani), encoding="utf-8")
+    summ = {"selected": ["B0_D5_DV3_NATIVE"], "canary": {},
+            "revision": dev.R1C_REVISION, "workers": 1, "workers_requested": 1,
+            "workers_effective": 1, "setup_decoder_calls": 1, "scientific_calls": 0,
+            "total_decoder_calls": 1, "chunk_walls": {}, "chunk_wall_blocked": False,
+            "rss_block_terminal": None, "peak_single_rss_bytes": int(worker_rss[0]),
+            "peak_aggregate_rss_bytes": int(agg), "rss_semantics": dev.RSS_SEMANTICS,
+            "advancing": [], "confirmation_counts": {},
+            "confirmation_safety": {"crashes": 0, "nonfinite": 0, "disagreements": 0,
+                                    "rss_known_ok": True},
+            "confirmation_width": 64, "terminal": "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY",
+            "calls": 0, "wall_s": 10.0, "iterations_max": 0,
+            "peak_rss_bytes": int(worker_rss[0]), "budget_stop": False,
+            "oracle_never_upgrades_exact": True}
+    (out / "summary.json").write_text(json.dumps(summ), encoding="utf-8")
+    with open(str(out / "decoder_records.csv"), "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=dev.DECODER_FIELDNAMES)
+        w.writeheader()
+    return out
+
+
+def test_r1c_a2_malformed_verify_fail(tmp_path):
+    import csv, json
+    dev = _load_dev_a2("d6dev_a2_malformed")
+    out = _make_a2_minimal_pass_root(tmp_path, dev)
+    assert dev.verify_command(str(out)) is True
+    # Malformed 1: call_idx gap (1,3) -> continuous FAIL.
+    rows = [{"call_idx": 1, "arm": "B0_D5_DV3_NATIVE", "n": 64, "seed": 2026091000,
+             "point": "f1.2", "rows_l1": 59, "rows_l2": 52, "mode": "L1",
+             "matrix_id": "m", "exact": "True", "syndrome_ok": "True",
+             "iterations": 5, "finite": "True", "crash": "False",
+             "timeout": "False", "wall_timeout": "False",
+             "prior_mass_on_truth": 0.5, "wall_s": 0.5, "rss_bytes": 1000,
+             "watchdog_ok": "True", "worker_pid": "111", "respawn_pid": "",
+             "error": ""},
+            {"call_idx": 3, "arm": "B0_D5_DV3_NATIVE", "n": 64, "seed": 2026091000,
+             "point": "f1.2", "rows_l1": 59, "rows_l2": 52, "mode": "L2-APP",
+             "matrix_id": "m", "exact": "True", "syndrome_ok": "True",
+             "iterations": 5, "finite": "True", "crash": "False",
+             "timeout": "False", "wall_timeout": "False",
+             "prior_mass_on_truth": 0.5, "wall_s": 0.5, "rss_bytes": 1000,
+             "watchdog_ok": "True", "worker_pid": "111", "respawn_pid": "",
+             "error": ""}]
+    with open(str(out / "decoder_records.csv"), "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=dev.DECODER_FIELDNAMES)
+        w.writeheader()
+        w.writerows(rows)
+    assert dev.verify_command(str(out)) is False
+
+
+def test_r1c_a2_seed_pollution_verify_fail(tmp_path):
+    import csv
+    dev = _load_dev_a2("d6dev_a2_seedpoll")
+    out = _make_a2_minimal_pass_root(tmp_path, dev)
+    rows = [{"call_idx": 1, "arm": "B0_D5_DV3_NATIVE", "n": 64, "seed": 999999999,
+             "point": "f1.2", "rows_l1": 59, "rows_l2": 52, "mode": "L1",
+             "matrix_id": "m", "exact": "True", "syndrome_ok": "True",
+             "iterations": 5, "finite": "True", "crash": "False",
+             "timeout": "False", "wall_timeout": "False",
+             "prior_mass_on_truth": 0.5, "wall_s": 0.5, "rss_bytes": 1000,
+             "watchdog_ok": "True", "worker_pid": "111", "respawn_pid": "",
+             "error": ""}]
+    with open(str(out / "decoder_records.csv"), "w", encoding="utf-8", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=dev.DECODER_FIELDNAMES)
+        w.writeheader()
+        w.writerows(rows)
+    # Seed outside canary/confirmation/scaling sets must FAIL (also calls mismatch).
+    assert dev.verify_command(str(out)) is False

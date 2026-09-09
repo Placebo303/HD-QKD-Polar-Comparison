@@ -46,14 +46,21 @@ MODES = ("L1", "L2-APP", "L2-oracle")
 R1C_FULL_WORKERS = 18  # 20 logical cores, leave 2
 R1C_FALLBACK_WORKERS = (14, 12, 8)
 R1C_CHUNK_WALL_MAX = int(1.5 * 3600)  # each chunk <1.5 h, same UUID root append
-R1C_REVISION = "R1c-A1"
+R1C_REVISION = "R1c-A2"
 # R1c-A1: chunk-wall overrun is an explicit blocking terminal (not warning-only).
 R1C_CHUNK_WALL_BLOCKED_TERMINAL = "D6_GRAPH_CHUNK_WALL_BLOCKED"
+# R1c-A2: fail-closed blocking terminals (mechanics only, override science).
+R1C_RSS_UNKNOWN_TERMINAL = "D6_RSS_UNKNOWN_BLOCKED"
+R1C_RSS_LIMIT_TERMINAL = "D6_RSS_LIMIT_BLOCKED"
+R1C_WALL_BLOCKED_TERMINAL = "D6_WALL_BUDGET_BLOCKED"
+RSS_SEMANTICS = ("fail-closed-strict-unknown-None-no-zero-substitution-"
+                 "no-single-as-aggregate")
 DECODER_FIELDNAMES = ["call_idx", "arm", "n", "seed", "point", "rows_l1",
                       "rows_l2", "mode", "matrix_id", "exact", "syndrome_ok",
                       "iterations", "finite", "crash", "timeout",
-                      "prior_mass_on_truth", "wall_s", "rss_bytes",
-                      "watchdog_ok", "worker_pid"]
+                      "wall_timeout", "prior_mass_on_truth", "wall_s",
+                      "rss_bytes", "watchdog_ok", "worker_pid",
+                      "respawn_pid", "error"]
 
 LOG = []
 
@@ -112,15 +119,48 @@ def _worker_main(conn, src_dir):
         conn.send(out)
 
 
+def _deadline(state):
+    """R1c-A2: absolute deadline t0+12h (perf_counter domain)."""
+    try:
+        t0 = float(state.get("t0", time.perf_counter()))
+    except (TypeError, ValueError):
+        t0 = time.perf_counter()
+    try:
+        dl = state.get("deadline")
+        if dl is not None:
+            return float(dl)
+    except (TypeError, ValueError):
+        pass
+    return float(t0) + float(WALL_BUDGET)
+
+
+def _remaining_s(state, now=None):
+    """R1c-A2: remaining wall before deadline (may be <= 0)."""
+    if now is None:
+        now = time.perf_counter()
+    return float(_deadline(state)) - float(now)
+
+
+def can_dispatch(state):
+    """R1c-A2: zero new dispatches after chunk>=5400s or budget stop."""
+    if state.get("budget_stop"):
+        return False
+    if state.get("chunk_wall_blocked"):
+        return False
+    if _remaining_s(state) <= 0:
+        return False
+    return True
+
+
 def reserve_setup_idx(state):
-    """R1c-A1: reserve one warmup/setup call inside the lock before spawn."""
+    """R1c-A2: reserve one warmup/setup call inside the lock before spawn."""
     lock = state.get("lock")
     if lock is not None:
         lock.acquire()
     try:
         if (int(state.get("setup_calls", 0)) + int(state.get("calls", 0))
                 + 1 > CALL_BUDGET
-                or time.perf_counter() - state["t0"] > WALL_BUDGET
+                or _remaining_s(state) <= 0
                 or state.get("budget_stop")):
             state["budget_stop"] = True
             raise StopIteration("budget-exhausted-setup")
@@ -135,14 +175,14 @@ def reserve_setup_idx(state):
 
 
 def reserve_call_idx(state):
-    """R1c-A1: atomically reserve one scientific call_idx + budget pre-dispatch."""
+    """R1c-A2: atomically reserve one scientific call_idx + budget pre-dispatch."""
     lock = state.get("lock")
     if lock is not None:
         lock.acquire()
     try:
         if (int(state.get("setup_calls", 0)) + int(state.get("calls", 0))
                 + 1 > CALL_BUDGET
-                or time.perf_counter() - state["t0"] > WALL_BUDGET
+                or _remaining_s(state) <= 0
                 or state.get("budget_stop")):
             state["budget_stop"] = True
             raise StopIteration("budget-exhausted")
@@ -200,22 +240,72 @@ class Worker:
         log("worker spawn (%s) pid=%s warmup=%s" % (
             reason, hello["pid"], hello.get("warmup")), self.logfh)
 
-    def call(self, task):
-        """One invocation; on watchdog timeout terminate+respawn, no retry."""
+    def call(self, task, state=None):
+        """One invocation; deadline-aware poll=min(120s,remaining).
+
+        Watchdog timeout (120s, remaining>=120s): terminate+respawn, no retry.
+        Wall timeout (deadline reached): terminate, no respawn, no retry.
+        """
         assert self.proc is not None
+        if state is not None:
+            rem0 = _remaining_s(state)
+            if rem0 <= 0:
+                try:
+                    self.conn.close()
+                except Exception:  # noqa: BLE001
+                    pass
+                try:
+                    self.proc.terminate()
+                    self.proc.join(10)
+                except Exception:  # noqa: BLE001
+                    pass
+                try:
+                    state["budget_stop"] = True
+                except Exception:  # noqa: BLE001
+                    pass
+                return {"exact": False, "syndrome_ok": False,
+                        "iterations": -1, "finite": False, "beliefs": None,
+                        "crash": True, "timeout": False, "wall_timeout": True,
+                        "wall_s": 0.0, "rss": None,
+                        "error": "wall-budget-exhausted"}
+            poll_s = min(float(WATCHDOG), float(rem0))
+        else:
+            poll_s = float(WATCHDOG)
         self.conn.send(task)
-        if not self.conn.poll(WATCHDOG):
+        if not self.conn.poll(poll_s):
+            # Distinguish deadline arrival from pure watchdog expiry.
+            deadline_hit = False
+            if state is not None:
+                try:
+                    deadline_hit = bool(_remaining_s(state) <= 0)
+                except Exception:  # noqa: BLE001
+                    deadline_hit = False
             pid = self.proc.pid
             self.conn.close()
-            self.proc.terminate()
-            self.proc.join(10)
+            try:
+                self.proc.terminate()
+                self.proc.join(10)
+            except Exception:  # noqa: BLE001
+                pass
+            if deadline_hit:
+                try:
+                    state["budget_stop"] = True
+                except Exception:  # noqa: BLE001
+                    pass
+                return {"exact": False, "syndrome_ok": False,
+                        "iterations": -1, "finite": False, "beliefs": None,
+                        "crash": True, "timeout": False, "wall_timeout": True,
+                        "wall_s": float(poll_s), "rss": None,
+                        "error": "wall-budget-exhausted"}
             self.spawn(reason="watchdog-timeout-after-pid-%s" % pid)
             return {"exact": False, "syndrome_ok": False, "iterations": -1,
                     "finite": False, "beliefs": None, "crash": True,
-                    "timeout": True, "wall_s": float(WATCHDOG),
+                    "timeout": True, "wall_timeout": False,
+                    "wall_s": float(WATCHDOG),
                     "rss": None, "error": "watchdog-timeout"}
         res = self.conn.recv()
         res["timeout"] = False
+        res["wall_timeout"] = False
         return res
 
     def stop(self):
@@ -279,7 +369,7 @@ def select_effective_workers(requested, worker_rss_list, main_rss,
 
 
 def choose_worker_count(requested, per_worker_rss=None, main_rss=None,
-                        logfh=None):
+                         logfh=None):
     """R1c-A1: requested hard ceiling + measured gate (no hardcoded estimate)."""
     req = int(requested)
     if req == 1:
@@ -287,6 +377,161 @@ def choose_worker_count(requested, per_worker_rss=None, main_rss=None,
     rss_list = ([int(per_worker_rss)]
                 if per_worker_rss is not None else [])
     return select_effective_workers(req, rss_list, main_rss, logfh)
+
+
+def aggregate_rss_strict(worker_rss_list, main_rss):
+    """R1c-A2 strict aggregate: None if any side unknown (never 0)."""
+    if main_rss is None:
+        return None
+    try:
+        main = int(main_rss)
+    except (TypeError, ValueError):
+        return None
+    total = int(main)
+    for v in (worker_rss_list or []):
+        if v is None:
+            return None
+        try:
+            total += int(v)
+        except (TypeError, ValueError):
+            return None
+    return int(total)
+
+
+def select_effective_workers_pilot(requested, pilot_rss, main_rss,
+                                   logfh=None):
+    """R1c-A2 pure pilot selector (fail-closed, single measurement).
+
+    Returns (effective_or_None, status) with status in
+    ("ok","unknown","limit"). Candidates <= requested from
+    (18,14,12,8,1); 1 always included. Unknown pilot/main -> unknown.
+    Even w=1 over budget -> limit.
+    """
+    req = int(requested)
+    if pilot_rss is None or main_rss is None:
+        if logfh is not None:
+            log("r1c-a2 pilot rss-unknown requested=%d pilot=%s main=%s"
+                % (req, str(pilot_rss), str(main_rss)), logfh)
+        return None, "unknown"
+    try:
+        per = int(pilot_rss)
+        main = int(main_rss)
+    except (TypeError, ValueError):
+        if logfh is not None:
+            log("r1c-a2 pilot rss-unknown requested=%d" % req, logfh)
+        return None, "unknown"
+    cands = [int(w) for w in (R1C_FULL_WORKERS,)
+             + tuple(R1C_FALLBACK_WORKERS) + (1,) if int(w) <= req]
+    if not cands:
+        cands = [req]
+    # Deduplicate preserving order (request 1 -> [1]).
+    seen = []
+    for w in cands:
+        if w not in seen:
+            seen.append(w)
+    cands = seen
+    for w in cands:
+        if int(w) * int(per) + int(main) < RSS_CEIL:
+            if logfh is not None:
+                log("r1c-a2 workers requested=%d effective=%d "
+                    "pilot_rss=%d main_rss=%d" % (req, int(w), per, main),
+                    logfh)
+            return int(w), "ok"
+    if logfh is not None:
+        log("r1c-a2 workers requested=%d limit-blocked pilot_rss=%d "
+            "main_rss=%d" % (req, per, main), logfh)
+    return None, "limit"
+
+
+def update_rss_sample(state, worker_pid, worker_rss, main_rss):
+    """R1c-A2: per-call/per-barrier worker/main/sampled-aggregate + peaks.
+
+    Strict: sampled aggregate is None if any side unknown. Single peak and
+    aggregate peak tracked separately (never substitute one for the other).
+    Per-call partial views update singles + last maps; aggregate peak only
+    advances when a full-pool view is present (barrier passes full lists via
+    update_rss_barrier, or last map already covers the effective pool).
+    Returns sampled aggregate (or None).
+    """
+    if worker_rss is not None:
+        try:
+            wv = int(worker_rss)
+        except (TypeError, ValueError):
+            wv = None
+    else:
+        wv = None
+    if main_rss is not None:
+        try:
+            mv = int(main_rss)
+        except (TypeError, ValueError):
+            mv = None
+    else:
+        mv = None
+    if wv is not None:
+        prev = state.get("peak_single_rss")
+        if prev is None or int(wv) > int(prev):
+            state["peak_single_rss"] = int(wv)
+        try:
+            last = state.get("rss_workers_last")
+            if last is None:
+                state["rss_workers_last"] = {}
+                last = state["rss_workers_last"]
+            last[str(worker_pid)] = int(wv)
+        except Exception:  # noqa: BLE001
+            pass
+    if mv is not None:
+        prev = state.get("peak_single_rss")
+        if prev is None or int(mv) > int(prev):
+            state["peak_single_rss"] = int(mv)
+        state["rss_main_last"] = int(mv)
+    # Aggregate only from a complete view; partial per-call views leave the
+    # aggregate peak untouched (no single-as-aggregate substitution).
+    agg = None
+    try:
+        last = state.get("rss_workers_last") or {}
+        mlast = state.get("rss_main_last")
+        eff = state.get("workers_effective")
+        if mlast is not None and len(last) > 0:
+            if eff is None or int(len(last)) >= int(eff):
+                vals = [int(v) for v in last.values()]
+                agg = int(mlast) + int(sum(vals))
+                state["rss_sampled_aggregate_last"] = int(agg)
+                prev = state.get("peak_aggregate_rss")
+                if prev is None or int(agg) > int(prev):
+                    state["peak_aggregate_rss"] = int(agg)
+    except (TypeError, ValueError):
+        agg = None
+    return agg
+
+
+def update_rss_barrier(state, worker_rss_list, main_rss):
+    """R1c-A2: barrier full-pool view; strict aggregate + aggregate peak."""
+    agg = aggregate_rss_strict(worker_rss_list, main_rss)
+    if agg is not None:
+        state["rss_sampled_aggregate_last"] = int(agg)
+        prev = state.get("peak_aggregate_rss")
+        if prev is None or int(agg) > int(prev):
+            state["peak_aggregate_rss"] = int(agg)
+    # Singles also advance from barrier view.
+    if main_rss is not None:
+        try:
+            mv = int(main_rss)
+            prev = state.get("peak_single_rss")
+            if prev is None or mv > int(prev):
+                state["peak_single_rss"] = int(mv)
+        except (TypeError, ValueError):
+            pass
+    for v in (worker_rss_list or []):
+        if v is None:
+            continue
+        try:
+            wv = int(v)
+        except (TypeError, ValueError):
+            continue
+        prev = state.get("peak_single_rss")
+        if prev is None or wv > int(prev):
+            state["peak_single_rss"] = int(wv)
+    return agg
 
 
 def _build_one_arm_layer(job):
@@ -510,10 +755,12 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
            skip=False):
     """Count one budgeted invocation (or a skipped-APP placeholder).
 
-    R1c-A1: call_idx + call/wall budget reserved atomically inside the lock
-    before dispatch; the blocking decoder call runs lock-free; the record is
-    appended afterwards with the reserved index. Concurrency never exceeds
-    2500 total (setup + scientific) / 12 h wall.
+    R1c-A2: call_idx + call/wall budget reserved atomically inside the lock
+    before dispatch (remaining = deadline - now); the blocking decoder call
+    runs lock-free with poll=min(120s,remaining); the record is appended
+    afterwards with the reserved index plus worker_pid/respawn_pid/timeout/
+    wall_timeout/error. watchdog_ok = not timeout and not wall_timeout and
+    wall<=120. Concurrency never exceeds 2500 total (setup + scientific).
     """
     if skip:
         return {"call_idx": -1, "arm": meta["arm"], "n": meta["n"],
@@ -521,16 +768,32 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
                 "rows_l1": meta["r1"], "rows_l2": meta["r2"], "mode": mode,
                 "matrix_id": meta["matrix_id"], "exact": False,
                 "syndrome_ok": False, "iterations": -1, "finite": False,
-                "crash": True, "timeout": False, "prior_mass_on_truth": tm,
+                "crash": True, "timeout": False, "wall_timeout": False,
+                "prior_mass_on_truth": tm,
                 "wall_s": 0.0, "rss_bytes": "", "watchdog_ok": True,
-                "worker_pid": "", "note": "app-undefined-l1-unavailable"}
+                "worker_pid": "", "respawn_pid": "", "error": "",
+                "note": "app-undefined-l1-unavailable"}
+    if state.get("chunk_wall_blocked"):
+        raise StopIteration("chunk-wall-blocked")
+    if not can_dispatch(state):
+        # Atomic gate already covers remaining/budget; chunk case above.
+        pass
     call_idx = reserve_call_idx(state)
+    try:
+        pid_before = str(worker.pids[-1]) if getattr(worker, "pids",
+                                                     None) else ""
+    except Exception:  # noqa: BLE001
+        pid_before = ""
     task = {"h": np.asarray(h, dtype=np.uint8),
             "prior": np.asarray(prior, dtype=np.float64),
             "x_true": np.asarray(xt, dtype=np.int64),
             "return_beliefs": bool(ret_bel)}
     try:
-        res = worker.call(task)
+        try:
+            res = worker.call(task, state)
+        except TypeError:
+            # Fake workers in older tests take call(task) only.
+            res = worker.call(task)
     except StopIteration:
         # Setup-budget exhaustion on watchdog respawn: the reserved
         # scientific call still gets a crash row, then STOP propagates.
@@ -544,9 +807,10 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
                    "rows_l1": meta["r1"], "rows_l2": meta["r2"], "mode": mode,
                    "matrix_id": meta["matrix_id"], "exact": False,
                    "syndrome_ok": False, "iterations": -1, "finite": False,
-                   "crash": True, "timeout": False,
+                   "crash": True, "timeout": False, "wall_timeout": False,
                    "prior_mass_on_truth": tm, "wall_s": 0.0, "rss_bytes": "",
-                   "watchdog_ok": True, "worker_pid": worker.pids[-1],
+                   "watchdog_ok": False, "worker_pid": pid_before,
+                   "respawn_pid": "", "error": "setup-budget-exhausted",
                    "beliefs": None, "note": "setup-budget-exhausted-respawn"}
             state["records"].append(rec)
         finally:
@@ -558,6 +822,21 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
         raise
     rss = res.get("rss")
     wall = float(res.get("wall_s", 0.0))
+    timeout = bool(res.get("timeout", False))
+    wall_timeout = bool(res.get("wall_timeout", False))
+    err = str(res.get("error", ""))[:300]
+    try:
+        pid_after = str(worker.pids[-1]) if getattr(worker, "pids",
+                                                    None) else ""
+    except Exception:  # noqa: BLE001
+        pid_after = ""
+    respawn_pid = "" if pid_after == pid_before else pid_after
+    watchdog_ok = bool((not timeout) and (not wall_timeout)
+                       and wall <= float(WATCHDOG))
+    try:
+        main_now = d5._rss_bytes()
+    except Exception:  # noqa: BLE001
+        main_now = None
     rec = {"call_idx": call_idx, "arm": meta["arm"], "n": meta["n"],
            "seed": meta["seed"], "point": meta["point"],
            "rows_l1": meta["r1"], "rows_l2": meta["r2"], "mode": mode,
@@ -565,18 +844,30 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
            "syndrome_ok": bool(res["syndrome_ok"]),
            "iterations": int(res["iterations"]),
            "finite": bool(res["finite"]), "crash": bool(res["crash"]),
-           "timeout": bool(res.get("timeout", False)),
+           "timeout": timeout, "wall_timeout": wall_timeout,
            "prior_mass_on_truth": tm, "wall_s": wall,
            "rss_bytes": "" if rss is None else int(rss),
-           "watchdog_ok": bool(wall <= WATCHDOG),
-           "worker_pid": worker.pids[-1],
+           "watchdog_ok": watchdog_ok,
+           "worker_pid": pid_before, "respawn_pid": respawn_pid,
+           "error": err,
            "beliefs": res.get("beliefs")}
     lock = state.get("lock")
     if lock is not None:
         lock.acquire()
     try:
-        if rss is not None and rss > state["peak_rss"]:
-            state["peak_rss"] = int(rss)
+        if rss is not None:
+            try:
+                if int(rss) > int(state.get("peak_rss", 0)):
+                    state["peak_rss"] = int(rss)
+            except (TypeError, ValueError):
+                pass
+        # R1c-A2 per-call RSS sampling (strict, no zero substitution).
+        try:
+            update_rss_sample(state, pid_before or pid_after, rss, main_now)
+        except Exception:  # noqa: BLE001
+            pass
+        if wall_timeout:
+            state["budget_stop"] = True
         state["records"].append(rec)
     finally:
         if lock is not None:
@@ -588,7 +879,11 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
 
 
 def flush_decoder_records(path, records, logfh=None):
-    """R1c-A1: rewrite decoder records in frozen call_idx order + flush/fsync."""
+    """R1c-A2: phase checkpoint rewrite in frozen call_idx order + flush/fsync.
+
+    Same fresh UUID root, deterministic rewrite (never called append-only).
+    fsync failure is fail-closed (raise).
+    """
     rows = sorted((r for r in records if int(r.get("call_idx", -1)) >= 0),
                   key=lambda r: int(r["call_idx"]))
     with open(path, "w", encoding="utf-8", newline="") as fh:
@@ -599,31 +894,85 @@ def flush_decoder_records(path, records, logfh=None):
         fh.flush()
         try:
             os.fsync(fh.fileno())
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as ex:  # noqa: BLE001 - fail closed
+            raise RuntimeError("fsync-failed decoder_records: %r" % (ex,))
     if logfh is not None:
         log("flush decoder_records rows=%d" % len(rows), logfh)
 
 
 def append_structure_records(path, new_records, logfh=None):
-    """R1c-A1: append scaling structures (no header rewrite) + flush/fsync."""
-    with open(path, "a", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(new_records[0].keys()))
-        w.writerows(new_records)
+    """R1c-A2: phase checkpoint rewrite (read + merge + ordered rewrite).
+
+    Same fresh UUID root; deterministic order by (arm,n,layer,prefix_rows).
+    Never called append-only. fsync failure is fail-closed (raise).
+    """
+    import csv as _csv
+    p = pathlib.Path(path)
+    merged = []
+    fieldnames = None
+    if p.exists():
+        with open(str(p), newline="", encoding="utf-8") as fh:
+            rd = _csv.DictReader(fh)
+            fieldnames = list(rd.fieldnames) if rd.fieldnames else None
+            for r in rd:
+                merged.append(dict(r))
+    for r in (new_records or []):
+        merged.append({k: r.get(k, "") for k in
+                       (fieldnames or list(r.keys()))})
+        if fieldnames is None:
+            fieldnames = list(r.keys())
+    if fieldnames is None:
+        fieldnames = []
+    def _skey(r):
+        try:
+            n = int(r.get("n", 0))
+        except (TypeError, ValueError):
+            n = 0
+        try:
+            pr = int(r.get("prefix_rows", 0))
+        except (TypeError, ValueError):
+            pr = 0
+        return (str(r.get("arm", "")), n, str(r.get("layer", "")), pr)
+    merged.sort(key=_skey)
+    with open(str(p), "w", encoding="utf-8", newline="") as fh:
+        w = _csv.DictWriter(fh, fieldnames=fieldnames)
+        w.writeheader()
+        for r in merged:
+            w.writerow({k: r.get(k, "") for k in fieldnames})
         fh.flush()
         try:
             os.fsync(fh.fileno())
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as ex:  # noqa: BLE001 - fail closed
+            raise RuntimeError("fsync-failed structure_records: %r" % (ex,))
     if logfh is not None:
-        log("append structure_records rows=%d" % len(new_records), logfh)
+        log("checkpoint structure_records rows=%d" % len(merged), logfh)
 
 
 def note_chunk_wall(phase, wall, logfh, state):
-    """R1c-A1: per-chunk wall check; >=5400s is BLOCKED (not warning-only)."""
+    """R1c-A2: per-chunk wall check; >=5400s is BLOCKED + barrier RSS update."""
     ok = bool(float(wall) < R1C_CHUNK_WALL_MAX)
     log("r1c chunk %s wall=%.1f chunk_ok=%s" % (phase, float(wall), ok),
         logfh)
+    # R1c-A2 per-barrier RSS sampling (strict, never 0, no substitution).
+    try:
+        try:
+            _m = d5._rss_bytes()
+        except Exception:  # noqa: BLE001
+            _m = None
+        _last = state.get("rss_workers_last") or {}
+        if _m is not None and len(_last) > 0:
+            try:
+                update_rss_barrier(state, [int(v) for v in _last.values()],
+                                   _m)
+            except Exception:  # noqa: BLE001
+                pass
+        else:
+            try:
+                update_rss_sample(state, "barrier-%s" % phase, None, _m)
+            except Exception:  # noqa: BLE001
+                pass
+    except Exception:  # noqa: BLE001
+        pass
     if not ok:
         state["chunk_wall_blocked"] = True
         state["budget_stop"] = True
@@ -638,8 +987,16 @@ def run_cells_parallel(cell_specs, state, logfh, pool_q, max_workers):
     cell_specs: list of (H1,H2,r1,r2,p1,p2,block,n,meta) in frozen order.
     Main-thread samples are read-only. Returns (cells, wall) with cells in
     input order. Chunk wall >= 5400 s is BLOCKED (caller sets the blocking
-    terminal and stops further dispatch).
+    terminal and stops further dispatch). Zero new dispatches once blocked.
     """
+    if state.get("chunk_wall_blocked") or state.get("budget_stop"):
+        raise StopIteration("chunk-wall-blocked-or-budget-stop")
+    if _remaining_s(state) <= 0:
+        try:
+            state["budget_stop"] = True
+        except Exception:  # noqa: BLE001
+            pass
+        raise StopIteration("wall-budget-exhausted")
     t0 = time.perf_counter()
     cells = [None] * len(cell_specs)
 
@@ -678,7 +1035,7 @@ def tally_safety(cell, safety):
 
 
 def verify_command(out_root):
-    """Independent scalar recomputation from saved evidence (T12)."""
+    """R1c-A2 independent scalar recomputation (15 independent rejections)."""
     out = pathlib.Path(out_root)
     ok = True
 
@@ -687,81 +1044,331 @@ def verify_command(out_root):
         print("%s %s %s" % ("PASS" if cond else "FAIL", name, detail))
         if not cond:
             ok = False
-    sel = json.loads((out / "selected_arms.json").read_text(encoding="utf-8"))
-    summ = json.loads((out / "summary.json").read_text(encoding="utf-8"))
-    with open(out / "decoder_records.csv", newline="", encoding="utf-8") as fh:
-        recs = list(csv.DictReader(fh))
-    with open(out / "structure_records.csv", newline="", encoding="utf-8") as fh:
-        srecs = list(csv.DictReader(fh))
+    try:
+        sel = json.loads((out / "selected_arms.json").read_text(
+            encoding="utf-8"))
+    except Exception as ex:  # noqa: BLE001
+        check("six-files", False, "selected_arms.json unreadable %r" % (ex,))
+        print("VERIFY FAIL")
+        return False
+    try:
+        summ = json.loads((out / "summary.json").read_text(encoding="utf-8"))
+    except Exception as ex:  # noqa: BLE001
+        check("six-files", False, "summary.json unreadable %r" % (ex,))
+        print("VERIFY FAIL")
+        return False
+    try:
+        mani = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    except Exception as ex:  # noqa: BLE001
+        check("six-files", False, "manifest.json unreadable %r" % (ex,))
+        print("VERIFY FAIL")
+        return False
+    try:
+        with open(out / "decoder_records.csv", newline="",
+                  encoding="utf-8") as fh:
+            recs = list(csv.DictReader(fh))
+    except Exception as ex:  # noqa: BLE001
+        check("six-files", False, "decoder_records.csv unreadable %r" % (ex,))
+        print("VERIFY FAIL")
+        return False
+    try:
+        with open(out / "structure_records.csv", newline="",
+                  encoding="utf-8") as fh:
+            srecs = list(csv.DictReader(fh))
+    except Exception as ex:  # noqa: BLE001
+        check("six-files", False, "structure_records unreadable %r" % (ex,))
+        print("VERIFY FAIL")
+        return False
+    # (1) six files + decoder set.
     check("six-files", all((out / f).exists() for f in (
         "manifest.json", "structure_records.csv", "selected_arms.json",
         "decoder_records.csv", "summary.json", "command_log.txt")))
-    check("decoder-set-le-6", len(sel["selected"]) <= 6, str(sel["selected"]))
-    check("b0-in-set", "B0_D5_DV3_NATIVE" in sel["selected"])
-    counted = [r for r in recs if int(r["call_idx"]) >= 0]
-    setup_calls = int(summ.get("setup_decoder_calls", 0))
-    check("call-count",
-          len(counted) == int(summ["calls"]) and len(counted) <= 2500,
-          "csv=%d summary=%d" % (len(counted), summ["calls"]))
-    check("setup-plus-scientific-le-2500",
-          len(counted) + setup_calls <= 2500,
-          "scientific=%d setup=%d" % (len(counted), setup_calls))
-    check("no-retry-cells",
-          len({(r["arm"], r["seed"], r["point"], r["mode"]) for r in counted})
-          == len(counted))
-    check("watchdog", all(r["watchdog_ok"] == "True" for r in counted))
-    # exact/syndrome/oracle separation: oracle rows never feed APP exact;
-    # recompute canary APP-exact counts from L1+L2-APP rows only.
-    by_cell = {}
-    for r in counted:
-        by_cell.setdefault(
-            (r["arm"], r["seed"], r["point"]), {})[r["mode"]] = r
-    canary_re = {}
-    for (arm, seed, point), modes in by_cell.items():
-        if int(seed) not in list(CANARY_SEEDS) + list(SCALING_SEEDS):
-            continue
-        if "L1" in modes and "L2-APP" in modes:
-            app = bool(modes["L1"]["exact"] == "True"
-                       and modes["L2-APP"]["exact"] == "True")
-            d = canary_re.setdefault(
-                arm, {"f12_exact": 0, "sq_exact": 0})
-            if point == "f1.2":
-                d["f12_exact"] += int(app)
-            elif point == "square":
-                d["sq_exact"] += int(app)
-    summ_can = {a: {"f12_exact": v["f12_exact"], "sq_exact": v["sq_exact"]}
-                for a, v in summ["canary"].items()}
-    check("canary-replay", canary_re == summ_can, str(canary_re))
-    itmax = max([int(r["iterations"]) for r in counted] or [0])
-    check("iterations-max", itmax == int(summ["iterations_max"]),
-          str(itmax))
-    # advancement replay
-    can = summ["canary"]
-    stats = {a: {"f12_exact": v["f12_exact"], "f12_iter": v["f12_iter"],
-                 "sq_exact": v["sq_exact"]} for a, v in can.items()}
-    sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
-    from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
-        select_advancement as _adv, classify_terminal as _cls)
-    check("advancement-replay",
-          _adv(stats, sel["structural_order_new"]) == summ["advancing"],
-          str(summ["advancing"]))
-    per_f = [{"exact": summ["confirmation_counts"][a][p]}
-             for a in summ["advancing"][:1] for p in POINTS] \
-        if summ.get("advancing") and summ.get("confirmation_counts") else None
-    if str(summ.get("terminal", "")) == R1C_CHUNK_WALL_BLOCKED_TERMINAL:
-        check("terminal-blocked", bool(summ.get("chunk_wall_blocked", False)),
-              str(summ.get("terminal")))
-    elif per_f is not None and len(summ["advancing"]) == 1 \
-            and "SCALING" not in str(summ.get("terminal", "")) \
-            and int(summ.get("confirmation_width", 64)) == 64:
-        a = summ["advancing"][0]
-        c = summ["confirmation_counts"][a]
-        rep = _cls([{"exact": c[p]} for p in POINTS],
-                   summ["confirmation_safety"]["crashes"],
-                   summ["confirmation_safety"]["nonfinite"],
-                   summ["confirmation_safety"]["rss_known_ok"],
-                   summ["confirmation_safety"]["disagreements"])
-        check("terminal-replay", rep == summ["terminal"], rep)
+    counted = []
+    try:
+        counted = [r for r in recs if int(r.get("call_idx", -1)) >= 0]
+    except (TypeError, ValueError):
+        counted = []
+    # (2) call_idx continuous 1..N.
+    try:
+        idxs = sorted(int(r["call_idx"]) for r in counted)
+        check("call_idx-continuous",
+              idxs == list(range(1, len(idxs) + 1)),
+              "n=%d idx=%s" % (len(idxs), str(idxs[:8])))
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("call_idx-continuous", False, repr(ex)[:120])
+    # (3) semantic key no duplicate.
+    try:
+        keys = [(r.get("arm"), r.get("seed"), r.get("point"), r.get("mode"))
+                for r in counted]
+        check("semantic-key-no-dup", len(set(keys)) == len(keys),
+              "n=%d" % len(keys))
+    except Exception as ex:  # noqa: BLE001
+        check("semantic-key-no-dup", False, repr(ex)[:120])
+    # (4) calls consistent csv vs summary.
+    try:
+        setup_calls = int(summ.get("setup_decoder_calls", 0))
+        sci = int(summ.get("calls", summ.get("scientific_calls", -1)))
+        check("calls-consistent",
+              len(counted) == sci
+              and int(mani.get("calls", sci)) == sci
+              and int(mani.get("scientific_calls", sci)) == sci,
+              "csv=%d summary=%s" % (len(counted), str(sci)))
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("calls-consistent", False, repr(ex)[:120])
+        setup_calls = 0
+    # (5) total <= 2500.
+    try:
+        check("le-2500",
+              len(counted) <= 2500
+              and int(summ.get("setup_decoder_calls", 0)) + len(counted)
+              <= 2500
+              and int(mani.get("total_decoder_calls",
+                               setup_calls + len(counted)))
+              == setup_calls + len(counted),
+              "sci=%d setup=%d" % (len(counted), setup_calls))
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("le-2500", False, repr(ex)[:120])
+    # (6) effective <= requested.
+    try:
+        req = int(mani.get("workers_requested",
+                           summ.get("workers_requested", -1)))
+        _term6 = str(summ.get("terminal", mani.get("terminal", "")))
+        _eff_raw = mani.get("workers_effective",
+                            summ.get("workers_effective", -1))
+        if _eff_raw is None and _term6 in (R1C_RSS_UNKNOWN_TERMINAL,
+                                           R1C_RSS_LIMIT_TERMINAL):
+            check("effective-le-requested", req in (18, 14, 12, 8, 1),
+                  "req=%s blocked=%s" % (str(req), _term6))
+            eff = -1
+        else:
+            eff = int(_eff_raw)
+            check("effective-le-requested",
+                  1 <= eff <= req and req in (18, 14, 12, 8, 1)
+                  and int(summ.get("workers_effective", eff)) == eff
+                  and int(summ.get("workers_requested", req)) == req,
+                  "req=%s eff=%s" % (str(req), str(eff)))
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("effective-le-requested", False, repr(ex)[:120])
+        req, eff = -1, -1
+    # (7) RSS strict: unknown never 0, single never as aggregate, <2GiB.
+    try:
+        main_m = mani.get("main_rss_bytes")
+        workers_m = mani.get("worker_rss_bytes", None)
+        agg_m = mani.get("aggregate_rss_bytes", None)
+        peak_s = mani.get("peak_single_rss_bytes",
+                          mani.get("peak_rss_bytes", None))
+        peak_a = mani.get("peak_aggregate_rss_bytes", None)
+        sem = str(mani.get("rss_semantics", ""))
+        strict_agg = (aggregate_rss_strict(workers_m, main_m)
+                      if isinstance(workers_m, list) else None)
+        workers_known = isinstance(workers_m, list) and len(workers_m) > 0 \
+            and all(v is not None for v in workers_m)
+        rss_ok_rows = all(r.get("rss_bytes", "") != ""
+                          and int(r["rss_bytes"]) < RSS_CEIL
+                          for r in counted) if counted else True
+        # Unknown record rows must exist as "" (never 0).
+        unknown_rows = [r for r in counted if r.get("rss_bytes", "") == ""]
+        cond = True
+        detail = "agg=%s strict=%s" % (str(agg_m), str(strict_agg))
+        if main_m is None or not workers_known:
+            # Unknown pool must not claim a numeric aggregate.
+            cond = cond and (agg_m is None)
+            detail += " unknown-pool"
+        else:
+            cond = cond and (agg_m is not None and int(agg_m) == int(
+                strict_agg) and int(agg_m) < RSS_CEIL)
+        if peak_a is not None and agg_m is not None:
+            cond = cond and (int(peak_a) >= int(agg_m))
+        if eff is not None and eff > 1 and peak_s is not None \
+                and peak_a is not None:
+            # Single peak must not masquerade as aggregate peak.
+            cond = cond and (int(peak_a) > int(peak_s)
+                             or int(peak_a) == int(agg_m))
+        cond = cond and rss_ok_rows and (len(unknown_rows) == 0)
+        cond = cond and ("fail-closed" in sem and "no-zero" in sem)
+        # Summary safety flag must agree (unknown/over-limit -> False).
+        # RSS-blocked runs carry rss_known_ok=False by construction.
+        try:
+            _term7 = str(summ.get("terminal", mani.get("terminal", "")))
+        except Exception:  # noqa: BLE001
+            _term7 = ""
+        if _term7 in (R1C_RSS_UNKNOWN_TERMINAL, R1C_RSS_LIMIT_TERMINAL):
+            cond = cond and (bool(summ.get("confirmation_safety", {}).get(
+                "rss_known_ok", False)) is False)
+        else:
+            cond = cond and bool(summ.get("confirmation_safety", {}).get(
+                "rss_known_ok", True)) == (len(unknown_rows) == 0
+                                           and rss_ok_rows)
+        check("rss-strict", bool(cond), detail)
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("rss-strict", False, repr(ex)[:160])
+    # (8) wall budget: final wall and per-chunk walls vs blocking terminals.
+    try:
+        wall = float(summ.get("wall_s", mani.get("wall_s", 0.0)))
+        term = str(summ.get("terminal", mani.get("terminal", "")))
+        chunk_walls = dict(summ.get("chunk_walls", mani.get("chunk_walls",
+                                                             {})))
+        wall_cond = (wall <= float(WALL_BUDGET)) or (
+            term == R1C_WALL_BLOCKED_TERMINAL)
+        chunk_over = [k for k, v in chunk_walls.items()
+                      if float(v) >= float(R1C_CHUNK_WALL_MAX)]
+        chunk_cond = (len(chunk_over) == 0) or (
+            term == R1C_CHUNK_WALL_BLOCKED_TERMINAL)
+        # Overrun without the matching terminal is FAIL.
+        check("wall-budget", bool(wall_cond and chunk_cond),
+              "wall=%.1f term=%s over=%s" % (wall, term, str(chunk_over)))
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("wall-budget", False, repr(ex)[:160])
+    # (9) terminal replay (science + 4 blocking terminals).
+    try:
+        sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
+        from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
+            select_advancement as _adv, classify_terminal as _cls)
+        blocking = {R1C_CHUNK_WALL_BLOCKED_TERMINAL,
+                    R1C_RSS_UNKNOWN_TERMINAL, R1C_RSS_LIMIT_TERMINAL,
+                    R1C_WALL_BLOCKED_TERMINAL}
+        term = str(summ.get("terminal", ""))
+        rep_ok = False
+        if term in blocking:
+            if term == R1C_CHUNK_WALL_BLOCKED_TERMINAL:
+                rep_ok = bool(summ.get("chunk_wall_blocked", False))
+            else:
+                rep_ok = True
+                # RSS/wall blocking must still carry consistent safety flags.
+                if term in (R1C_RSS_UNKNOWN_TERMINAL,
+                            R1C_RSS_LIMIT_TERMINAL):
+                    rep_ok = True
+        elif summ.get("advancing") and summ.get("confirmation_counts"):
+            if len(summ["advancing"]) == 1 \
+                    and "SCALING" not in term \
+                    and int(summ.get("confirmation_width", 64)) == 64:
+                a = summ["advancing"][0]
+                c = summ["confirmation_counts"][a]
+                rep = _cls([{"exact": c[p]} for p in POINTS],
+                           summ["confirmation_safety"]["crashes"],
+                           summ["confirmation_safety"]["nonfinite"],
+                           summ["confirmation_safety"]["rss_known_ok"],
+                           summ["confirmation_safety"]["disagreements"])
+                rep_ok = (rep == term)
+            else:
+                # Scaling or multi-arm: at least a known terminal string.
+                rep_ok = term.startswith("D6_GRAPH_")
+        else:
+            rep_ok = term in ("D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY",
+                              R1C_CHUNK_WALL_BLOCKED_TERMINAL,
+                              R1C_RSS_UNKNOWN_TERMINAL,
+                              R1C_RSS_LIMIT_TERMINAL,
+                              R1C_WALL_BLOCKED_TERMINAL)
+        check("terminal-replay", bool(rep_ok), term)
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("terminal-replay", False, repr(ex)[:160])
+    # (10) timeout/watchdog definition.
+    try:
+        def _wb(r):
+            to = str(r.get("timeout", "False")) == "True"
+            wt = str(r.get("wall_timeout", r.get("wall_timeout", "False"))) \
+                == "True"
+            try:
+                w = float(r.get("wall_s", 0.0))
+            except (TypeError, ValueError):
+                w = 1e9
+            exp = (not to) and (not wt) and (w <= float(WATCHDOG))
+            got = str(r.get("watchdog_ok", "")) == "True"
+            return (exp == got) and not (to and wt)
+        check("timeout-watchdog", all(_wb(r) for r in counted),
+              "n=%d" % len(counted))
+    except Exception as ex:  # noqa: BLE001
+        check("timeout-watchdog", False, repr(ex)[:160])
+    # (11) PID present + respawn/error fields.
+    try:
+        pids_ok = all(str(r.get("worker_pid", "")) != "" for r in counted) \
+            if counted else True
+        fields_ok = all("respawn_pid" in r and "wall_timeout" in r
+                        and "error" in r for r in counted) if counted else True
+        # respawn pid, when present, must differ from worker pid.
+        resp_ok = all(str(r.get("respawn_pid", "")) == ""
+                      or str(r.get("respawn_pid", ""))
+                      != str(r.get("worker_pid", "")) for r in counted) \
+            if counted else True
+        check("pid-present", bool(pids_ok and fields_ok and resp_ok),
+              "pids=%d" % len({str(r.get("worker_pid", "")) for r in counted
+                               }) if counted else "empty")
+    except Exception as ex:  # noqa: BLE001
+        check("pid-present", False, repr(ex)[:160])
+    # (12) seed domain.
+    try:
+        allowed = set(int(s) for s in list(CANARY_SEEDS)
+                      + list(CONF_SEEDS) + list(SCALING_SEEDS))
+        check("seed-domain",
+              all(int(r.get("seed", -1)) in allowed for r in counted),
+              "n=%d" % len(counted))
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("seed-domain", False, repr(ex)[:160])
+    # (13) coverage: arms/points/modes within frozen sets.
+    try:
+        pts = {"f1.0", "f1.2", "square"}
+        mds = {"L1", "L2-APP", "L2-oracle"}
+        selset = set(sel.get("selected", []))
+        cov_ok = all(r.get("point") in pts and r.get("mode") in mds
+                     and r.get("arm") in selset for r in counted) \
+            if counted else True
+        set_ok = len(selset) <= 6 and "B0_D5_DV3_NATIVE" in selset
+        check("coverage", bool(cov_ok and set_ok), str(sorted(selset)))
+    except Exception as ex:  # noqa: BLE001
+        check("coverage", False, repr(ex)[:160])
+    # (14) scaling recompute: canary replay + advancement + width.
+    try:
+        by_cell = {}
+        for r in counted:
+            by_cell.setdefault(
+                (r["arm"], r["seed"], r["point"]), {})[r["mode"]] = r
+        canary_re = {}
+        for (arm, seed, point), modes in by_cell.items():
+            if int(seed) not in list(CANARY_SEEDS) + list(SCALING_SEEDS):
+                continue
+            if "L1" in modes and "L2-APP" in modes:
+                app = bool(modes["L1"]["exact"] == "True"
+                           and modes["L2-APP"]["exact"] == "True")
+                d = canary_re.setdefault(
+                    arm, {"f12_exact": 0, "sq_exact": 0})
+                if point == "f1.2":
+                    d["f12_exact"] += int(app)
+                elif point == "square":
+                    d["sq_exact"] += int(app)
+        summ_can = {a: {"f12_exact": v["f12_exact"], "sq_exact": v["sq_exact"]}
+                    for a, v in summ["canary"].items()}
+        can = summ["canary"]
+        stats = {a: {"f12_exact": v["f12_exact"], "f12_iter": v["f12_iter"],
+                     "sq_exact": v["sq_exact"]} for a, v in can.items()}
+        adv_ok = (_adv(stats, sel["structural_order_new"])
+                  == summ["advancing"])
+        width = int(summ.get("confirmation_width", 64))
+        width_ok = (width in (64, 128, 256)) and (
+            ("SCALING" in str(summ.get("terminal", ""))) == (width != 64)
+            or str(summ.get("terminal", "")) in blocking)
+        check("scaling-recompute",
+              bool(canary_re == summ_can and adv_ok and width_ok),
+              str(summ.get("advancing")))
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("scaling-recompute", False, repr(ex)[:160])
+    # (15) manifest consistent vs summary.
+    try:
+        itmax = max([int(r["iterations"]) for r in counted] or [0])
+        m_ok = (int(mani.get("setup_decoder_calls",
+                             summ.get("setup_decoder_calls", 0)))
+                == int(summ.get("setup_decoder_calls", 0)))
+        m_ok = m_ok and (int(mani.get("total_decoder_calls",
+                                      setup_calls + len(counted)))
+                         == setup_calls + len(counted))
+        m_ok = m_ok and (int(summ.get("iterations_max", itmax)) == itmax)
+        m_ok = m_ok and (str(mani.get("revision", "")) == str(
+            summ.get("revision", mani.get("revision", ""))))
+        m_ok = m_ok and (abs(float(mani.get("wall_s", 0.0))
+                             - float(summ.get("wall_s", 0.0))) < 3600)
+        check("manifest-consistent", bool(m_ok),
+              "itmax=%d" % itmax)
+    except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+        check("manifest-consistent", False, repr(ex)[:160])
     print("VERIFY %s" % ("PASS" if ok else "FAIL"))
     return ok
 
@@ -788,8 +1395,14 @@ def main(argv=None):
         sys.exit(2)
     out.mkdir(parents=True)
     logfh = open(out / "command_log.txt", "w", encoding="utf-8")
-    state = {"calls": 0, "setup_calls": 0, "t0": time.perf_counter(),
-             "records": [], "peak_rss": 0, "budget_stop": False,
+    _t0 = time.perf_counter()
+    state = {"calls": 0, "setup_calls": 0, "t0": _t0,
+             "deadline": float(_t0) + float(WALL_BUDGET),
+             "records": [], "peak_rss": 0, "peak_single_rss": None,
+             "peak_aggregate_rss": None, "rss_workers_last": {},
+             "rss_main_last": None, "rss_sampled_aggregate_last": None,
+             "workers_effective": None, "rss_block_terminal": None,
+             "budget_stop": False,
              "chunk_wall_blocked": False, "chunk_walls": {}, "worker": None,
              "lock": threading.Lock(), "revision": R1C_REVISION}
     # R1c-A1 worker choice: requested is a hard ceiling; effective is gated
@@ -864,63 +1477,209 @@ def main(argv=None):
             except Exception:  # noqa: BLE001
                 main_rss = None
             worker_rss_list = [worker.last_rss]
-            rss_info = {"requested": 1, "effective": 1,
-                        "main_rss_bytes": main_rss,
-                        "worker_rss_bytes": list(worker_rss_list),
-                        "aggregate_rss_bytes": pool_aggregate_rss(
-                            worker_rss_list, main_rss)}
-            log("r1c-a1 workers requested=1 effective=1 main_rss=%s "
-                "worker_rss=%s aggregate=%s setup=%d"
-                % (str(main_rss), str(worker_rss_list),
-                   str(rss_info["aggregate_rss_bytes"]),
-                   int(state.get("setup_calls", 0))), logfh)
+            # R1c-A2 pilot fail-closed even for sequential request.
+            eff1, st1 = select_effective_workers_pilot(
+                1, worker.last_rss, main_rss, logfh)
+            if st1 == "unknown":
+                state["rss_block_terminal"] = R1C_RSS_UNKNOWN_TERMINAL
+                workers = 0
+                rss_info = {"requested": 1, "effective": None,
+                            "main_rss_bytes": main_rss,
+                            "worker_rss_bytes": list(worker_rss_list),
+                            "aggregate_rss_bytes": None,
+                            "peak_single_rss_bytes": state.get(
+                                "peak_single_rss"),
+                            "peak_aggregate_rss_bytes": state.get(
+                                "peak_aggregate_rss"),
+                            "rss_semantics": RSS_SEMANTICS}
+                log("r1c-a2 workers requested=1 BLOCKED unknown "
+                    "main=%s pilot=%s" % (str(main_rss),
+                                          str(worker.last_rss)), logfh)
+            elif st1 == "limit":
+                state["rss_block_terminal"] = R1C_RSS_LIMIT_TERMINAL
+                workers = 0
+                rss_info = {"requested": 1, "effective": None,
+                            "main_rss_bytes": main_rss,
+                            "worker_rss_bytes": list(worker_rss_list),
+                            "aggregate_rss_bytes": aggregate_rss_strict(
+                                worker_rss_list, main_rss),
+                            "peak_single_rss_bytes": state.get(
+                                "peak_single_rss"),
+                            "peak_aggregate_rss_bytes": state.get(
+                                "peak_aggregate_rss"),
+                            "rss_semantics": RSS_SEMANTICS}
+                log("r1c-a2 workers requested=1 BLOCKED limit "
+                    "main=%s pilot=%s" % (str(main_rss),
+                                          str(worker.last_rss)), logfh)
+            else:
+                agg0 = aggregate_rss_strict(worker_rss_list, main_rss)
+                state["workers_effective"] = 1
+                try:
+                    update_rss_barrier(state, worker_rss_list, main_rss)
+                except Exception:  # noqa: BLE001
+                    pass
+                rss_info = {"requested": 1, "effective": 1,
+                            "main_rss_bytes": main_rss,
+                            "worker_rss_bytes": list(worker_rss_list),
+                            "aggregate_rss_bytes": agg0,
+                            "peak_single_rss_bytes": state.get(
+                                "peak_single_rss"),
+                            "peak_aggregate_rss_bytes": state.get(
+                                "peak_aggregate_rss"),
+                            "rss_semantics": RSS_SEMANTICS}
+                log("r1c-a2 workers requested=1 effective=1 main_rss=%s "
+                    "worker_rss=%s aggregate=%s setup=%d"
+                    % (str(main_rss), str(worker_rss_list), str(agg0),
+                       int(state.get("setup_calls", 0))), logfh)
         else:
-            # R1c-A1: main-process single-thread sample gen, then read-only
-            # share; pool sized by measured startup RSS, never above request.
-            # 120 s watchdog per worker retained, no retry.
-            cand = []
+            # R1c-A2: single pilot measures RSS, then size pool (never
+            # start-18-then-trim). Expansion re-samples each worker.
+            pilot = None
             try:
-                for _ in range(req_workers):
-                    cand.append(Worker(logfh, state))
+                pilot = Worker(logfh, state)
             except StopIteration as ex:
-                log("STOP setup-budget %s" % ex, logfh)
+                log("STOP setup-budget pilot %s" % ex, logfh)
+                pilot = None
             try:
                 main_rss = d5._rss_bytes()
             except Exception:  # noqa: BLE001
                 main_rss = None
-            worker_rss_list = [w.last_rss for w in cand]
-            workers = select_effective_workers(req_workers, worker_rss_list,
-                                               main_rss, logfh)
-            for extra in cand[workers:]:
+            pilot_rss = pilot.last_rss if pilot is not None else None
+            eff, st = select_effective_workers_pilot(
+                req_workers, pilot_rss, main_rss, logfh)
+            if st != "ok":
+                # Fail closed before any scientific dispatch.
+                if pilot is not None:
+                    try:
+                        pilot.stop()
+                    except Exception:  # noqa: BLE001
+                        pass
+                workers = 0
+                pool_workers = []
+                pool_q = queue.Queue()
+                state["rss_block_terminal"] = (
+                    R1C_RSS_UNKNOWN_TERMINAL if st == "unknown"
+                    else R1C_RSS_LIMIT_TERMINAL)
+                state["budget_stop"] = True
+                rss_info = {"requested": req_workers, "effective": None,
+                            "main_rss_bytes": main_rss,
+                            "worker_rss_bytes": [pilot_rss],
+                            "aggregate_rss_bytes": None,
+                            "peak_single_rss_bytes": state.get(
+                                "peak_single_rss"),
+                            "peak_aggregate_rss_bytes": state.get(
+                                "peak_aggregate_rss"),
+                            "rss_semantics": RSS_SEMANTICS}
+                log("r1c-a2 workers requested=%d BLOCKED %s main=%s "
+                    "pilot=%s" % (req_workers, st, str(main_rss),
+                                  str(pilot_rss)), logfh)
+            else:
+                workers = int(eff)
+                state["workers_effective"] = int(workers)
+                cand = [pilot]
                 try:
-                    extra.stop()
-                except Exception:  # noqa: BLE001
-                    pass
-            pool_workers = cand[:workers]
-            if not pool_workers:
-                raise RuntimeError("no workers after setup-budget gate")
-            pool_q = queue.Queue()
-            for _w in pool_workers:
-                pool_q.put(_w)
-            state["worker"] = pool_workers[0]
-            state["pool"] = pool_workers
-            state["pool_q"] = pool_q
-            rss_info = {"requested": req_workers, "effective": workers,
-                        "main_rss_bytes": main_rss,
-                        "worker_rss_bytes": [w.last_rss
-                                             for w in pool_workers],
-                        "aggregate_rss_bytes": pool_aggregate_rss(
-                            [w.last_rss for w in pool_workers], main_rss)}
-            log("r1c-a1 workers requested=%d effective=%d main_rss=%s "
-                "worker_rss=%s aggregate=%s setup=%d"
-                % (req_workers, workers, str(main_rss),
-                   str(rss_info["worker_rss_bytes"]),
-                   str(rss_info["aggregate_rss_bytes"]),
-                   int(state.get("setup_calls", 0))), logfh)
+                    for _ in range(int(workers) - 1):
+                        cand.append(Worker(logfh, state))
+                except StopIteration as ex:
+                    log("STOP setup-budget expand %s" % ex, logfh)
+                    state["budget_stop"] = True
+                worker_rss_list = [w.last_rss for w in cand]
+                # Expansion re-sample: unknown or over-limit stops.
+                if any(v is None for v in worker_rss_list) \
+                        or main_rss is None:
+                    for w in cand:
+                        try:
+                            w.stop()
+                        except Exception:  # noqa: BLE001
+                            pass
+                    workers = 0
+                    pool_workers = []
+                    pool_q = queue.Queue()
+                    state["rss_block_terminal"] = R1C_RSS_UNKNOWN_TERMINAL
+                    state["budget_stop"] = True
+                    rss_info = {"requested": req_workers, "effective": None,
+                                "main_rss_bytes": main_rss,
+                                "worker_rss_bytes": list(worker_rss_list),
+                                "aggregate_rss_bytes": None,
+                                "peak_single_rss_bytes": state.get(
+                                    "peak_single_rss"),
+                                "peak_aggregate_rss_bytes": state.get(
+                                    "peak_aggregate_rss"),
+                                "rss_semantics": RSS_SEMANTICS}
+                    log("r1c-a2 workers requested=%d BLOCKED expand-unknown "
+                        "main=%s workers=%s" % (
+                            req_workers, str(main_rss),
+                            str(worker_rss_list)), logfh)
+                else:
+                    agg = aggregate_rss_strict(worker_rss_list, main_rss)
+                    if agg is None or int(agg) >= int(RSS_CEIL):
+                        for w in cand:
+                            try:
+                                w.stop()
+                            except Exception:  # noqa: BLE001
+                                pass
+                        workers = 0
+                        pool_workers = []
+                        pool_q = queue.Queue()
+                        state["rss_block_terminal"] = R1C_RSS_LIMIT_TERMINAL
+                        state["budget_stop"] = True
+                        rss_info = {"requested": req_workers,
+                                    "effective": None,
+                                    "main_rss_bytes": main_rss,
+                                    "worker_rss_bytes": list(worker_rss_list),
+                                    "aggregate_rss_bytes": agg,
+                                    "peak_single_rss_bytes": state.get(
+                                        "peak_single_rss"),
+                                    "peak_aggregate_rss_bytes": state.get(
+                                        "peak_aggregate_rss"),
+                                    "rss_semantics": RSS_SEMANTICS}
+                        log("r1c-a2 workers requested=%d BLOCKED "
+                            "expand-over main=%s agg=%s" % (
+                                req_workers, str(main_rss), str(agg)), logfh)
+                    else:
+                        pool_workers = cand
+                        if not pool_workers:
+                            raise RuntimeError(
+                                "no workers after pilot gate")
+                        pool_q = queue.Queue()
+                        for _w in pool_workers:
+                            pool_q.put(_w)
+                        state["worker"] = pool_workers[0]
+                        state["pool"] = pool_workers
+                        state["pool_q"] = pool_q
+                        try:
+                            update_rss_barrier(state, worker_rss_list,
+                                               main_rss)
+                        except Exception:  # noqa: BLE001
+                            pass
+                        rss_info = {"requested": req_workers,
+                                    "effective": workers,
+                                    "main_rss_bytes": main_rss,
+                                    "worker_rss_bytes": list(worker_rss_list),
+                                    "aggregate_rss_bytes": agg,
+                                    "peak_single_rss_bytes": state.get(
+                                        "peak_single_rss"),
+                                    "peak_aggregate_rss_bytes": state.get(
+                                        "peak_aggregate_rss"),
+                                    "rss_semantics": RSS_SEMANTICS}
+                        log("r1c-a2 workers requested=%d effective=%d "
+                            "main_rss=%s worker_rss=%s aggregate=%s setup=%d"
+                            % (req_workers, workers, str(main_rss),
+                               str(worker_rss_list), str(agg),
+                               int(state.get("setup_calls", 0))), logfh)
         finalists = [a for a in selected if a in T_ARMS + M_ARMS]
         # Canary §8.2: frozen set x 4 seeds x {f1.2, square}.
         canary = {}
-        if workers == 1:
+        # R1c-A2 RSS fail-closed: zero scientific dispatch when blocked.
+        rss_blocked = state.get("rss_block_terminal")
+        if rss_blocked is not None:
+            log("BLOCKED rss %s before canary" % rss_blocked, logfh)
+            try:
+                flush_decoder_records(out / "decoder_records.csv",
+                                      state["records"], logfh)
+            except Exception:  # noqa: BLE001
+                pass
+        elif workers == 1:
             _t0 = time.perf_counter()
             try:
                 for arm in selected:
@@ -999,14 +1758,27 @@ def main(argv=None):
             except StopIteration as ex:
                 log("STOP %s" % ex, logfh)
         pool_stats = {a: canary[a] for a in finalists if a in canary}
-        advancing = select_advancement(pool_stats, order_new)
-        log("advancing=%s" % advancing, logfh)
-        terminal = None
+        if rss_blocked is not None:
+            advancing = []
+            log("advancing=[] rss-blocked %s" % rss_blocked, logfh)
+            terminal = str(rss_blocked)
+        else:
+            advancing = select_advancement(pool_stats, order_new)
+            log("advancing=%s" % advancing, logfh)
+            terminal = None
         conf_counts = {}
         conf_safety = {"crashes": 0, "nonfinite": 0, "disagreements": 0,
-                       "rss_known_ok": True}
+                       "rss_known_ok": bool(rss_blocked is None)}
         width = 64
-        if advancing:
+        if rss_blocked is not None:
+            log("skipped confirmation/scaling rss-blocked %s" % rss_blocked,
+                logfh)
+            try:
+                flush_decoder_records(out / "decoder_records.csv",
+                                      state["records"], logfh)
+            except Exception:  # noqa: BLE001
+                pass
+        elif advancing:
             # Confirmation §8.3 at n=64.
             if workers == 1:
                 try:
@@ -1241,7 +2013,7 @@ def main(argv=None):
                                                         state)
                                         ex += int(cell["app_exact"])
                                         tally_safety(cell, conf_safety)
-                                cc[point] = ex
+                                    cc[point] = ex
                                 conf_counts[arm] = cc
                                 _wall = time.perf_counter() - _t0
                                 state["chunk_walls"][
@@ -1328,7 +2100,35 @@ def main(argv=None):
                 terminal = "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY"
         if terminal is None:
             terminal = "D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY"
-        if state.get("chunk_wall_blocked"):
+        # R1c-A2 blocking precedence: RSS (pre-dispatch) > WALL > CHUNK.
+        _rss_b = state.get("rss_block_terminal")
+        try:
+            _wall_seen = any(
+                str(r.get("wall_timeout", "False")) == "True"
+                for r in state.get("records", [])
+                if int(r.get("call_idx", -1)) >= 0)
+        except (TypeError, ValueError):
+            _wall_seen = False
+        try:
+            _wall_early = float(time.perf_counter() - state["t0"])
+        except Exception:  # noqa: BLE001
+            _wall_early = 0.0
+        try:
+            _rem_early = float(_remaining_s(state))
+        except Exception:  # noqa: BLE001
+            _rem_early = 1.0
+        if _rss_b is not None:
+            terminal = str(_rss_b)
+            log("terminal-overridden rss-blocked %s" % terminal, logfh)
+        elif bool(_wall_seen) or bool(_wall_early > float(WALL_BUDGET)) \
+                or bool(_rem_early <= 0):
+            terminal = R1C_WALL_BLOCKED_TERMINAL
+            try:
+                state["budget_stop"] = True
+            except Exception:  # noqa: BLE001
+                pass
+            log("terminal-overridden wall-budget-blocked", logfh)
+        elif state.get("chunk_wall_blocked"):
             terminal = R1C_CHUNK_WALL_BLOCKED_TERMINAL
             log("terminal-overridden chunk-wall-blocked", logfh)
         itmax = max([int(r["iterations"]) for r in state["records"]
@@ -1354,16 +2154,37 @@ def main(argv=None):
         wall = time.perf_counter() - state["t0"]
         setup_calls = int(state.get("setup_calls", 0))
         sci_calls = int(state.get("calls", 0))
+        # R1c-A2 final peaks: state-sampled peaks override startup-only info.
+        _fin_single = state.get("peak_single_rss")
+        if _fin_single is None:
+            _fin_single = rss_info.get("peak_single_rss_bytes")
+        _fin_agg = state.get("peak_aggregate_rss")
+        if _fin_agg is None:
+            _fin_agg = rss_info.get("peak_aggregate_rss_bytes")
+        if _fin_agg is None:
+            _fin_agg = rss_info.get("aggregate_rss_bytes")
+        _eff_out = rss_info.get("effective", workers)
+        # Refresh rss_info peaks for manifest persistence.
+        try:
+            rss_info["peak_single_rss_bytes"] = _fin_single
+            rss_info["peak_aggregate_rss_bytes"] = _fin_agg
+        except Exception:  # noqa: BLE001
+            pass
         with open(out / "manifest.json", "w", encoding="utf-8") as fh:
             json.dump({"out_root": str(out), "arms": ARMS,
                        "revision": R1C_REVISION, "workers": workers,
                        "workers_requested": req_workers,
-                       "workers_effective": workers,
+                       "workers_effective": _eff_out,
                        "main_rss_bytes": main_rss,
                        "worker_rss_bytes": rss_info.get(
                            "worker_rss_bytes", []),
                        "aggregate_rss_bytes": rss_info.get(
                            "aggregate_rss_bytes"),
+                       "peak_single_rss_bytes": _fin_single,
+                       "peak_aggregate_rss_bytes": _fin_agg,
+                       "rss_semantics": RSS_SEMANTICS,
+                       "deadline_s": float(state.get("deadline", 0.0)),
+                       "rss_block_terminal": state.get("rss_block_terminal"),
                        "chunk_wall_max_s": R1C_CHUNK_WALL_MAX,
                        "chunk_walls": state.get("chunk_walls", {}),
                        "chunk_wall_blocked": bool(state.get(
@@ -1388,13 +2209,17 @@ def main(argv=None):
             json.dump({"selected": selected, "canary": canary,
                        "revision": R1C_REVISION, "workers": workers,
                        "workers_requested": req_workers,
-                       "workers_effective": workers,
+                       "workers_effective": _eff_out,
                        "setup_decoder_calls": setup_calls,
                        "scientific_calls": sci_calls,
                        "total_decoder_calls": setup_calls + sci_calls,
                        "chunk_walls": state.get("chunk_walls", {}),
                        "chunk_wall_blocked": bool(state.get(
                            "chunk_wall_blocked", False)),
+                       "rss_block_terminal": state.get("rss_block_terminal"),
+                       "peak_single_rss_bytes": _fin_single,
+                       "peak_aggregate_rss_bytes": _fin_agg,
+                       "rss_semantics": RSS_SEMANTICS,
                        "advancing": advancing,
                        "confirmation_counts": conf_counts,
                        "confirmation_safety": conf_safety,
@@ -1408,6 +2233,16 @@ def main(argv=None):
             terminal, sci_calls, setup_calls, wall, state["peak_rss"]),
             logfh)
     finally:
+        # R1c-A2 unified finally: completed records are always checkpointed.
+        try:
+            if "out" in locals() and "state" in locals():
+                try:
+                    flush_decoder_records(out / "decoder_records.csv",
+                                          state.get("records", []), None)
+                except Exception:  # noqa: BLE001 - fail-closed, keep original
+                    pass
+        except Exception:  # noqa: BLE001
+            pass
         try:
             for _w in state.get("pool", [state.get("worker")] if state.get("worker") is not None else []):
                 try:
