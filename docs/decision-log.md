@@ -3319,3 +3319,19 @@ these may not be merged or reordered.
 **Context**: Profile-first (T2 ≥99.9% of scaling pools); three frozen optimizations (pruning, ≤2 constructions, overflow passthrough; T2 semantics untouched); equivalence proven against committed A2 evidence (n64 all-arms + T1/M1 at n128/n256 exact); fresh-root benchmark cold+warm after-side, cold before-side; before-warm-n256 disclosed unmeasured with seconds-level bound (zero gate impact at 1000×+ margin). Focused 51/51; seven-file non-perf 332/332.
 
 **Consequences**: Any future D6 execution still needs its own OpenSpec + Pre-EXECUTE + explicit authorization — nothing granted. T2 semantics at n64 unchanged. All authorizations false; G2 absent; no push.
+
+## 2026-09-10 V72P2D6 R1c-A5 validity closure, repair infeasibility, R1d readiness (eligible-only branch)
+
+**Decision**: Accept `D6_R1C_A5_REVIEW_PASS_ELIGIBLE_ONLY_BRANCH` (implementation + validity reviews): the I1 check-degree invariant defect is proven and gated; admissible repair is structurally infeasible as frozen; the R1d package is recorded `NOT_AUTHORIZED`.
+
+**Context**: Independent 144-cell matrix (own implementation; 132/132 main-thread cross-check, 51/51 recompute, replay all True): T3/T4/M1 carry degree-1 check rows at f1.2+square everywhere (M1 exactly at the zone-counting bound); T2 rank-deficient at every square (63/62, 123/122, 246/240); B0/B1 bounds recorded unmodified. Frozen eligible + A2 selection {B0,B1,T1,T3,M1} reproduced exactly. I1 landed (eligible-AND, dispatch guard, verify INFO/PASS-FAIL) with fake-only tests; builders byte-identical; historical root verify exit 0, 15/15 PASS, agreement False, mtimes intact. Repair study: 0/10 preregistered sandbox rules admissible (R3 fails everywhere; three identity non-repairs) with per-family infeasibility proofs + a 3-option `REQUIRES_MAIN_THREAD_RULING` menu, nothing landed. Focused 56/56; seven-file non-perf 90/90 (membership reconstructed and named).
+
+**Consequences**: `next_gate` → `D6_GRAPH_MOTHER_R1C_A5_TRACK_A_COMPLETE_TRACK_B_PENDING`. R1d viable without a ruling only on the eligible-only {B0,B1,T1} branch — itself unauthorized here. All authorizations false; G2 absent; no push.
+
+## 2026-09-10 V72P2D6 R1c-A6 exact-equivalent T2 acceleration (PASS, no NOT_MET)
+
+**Decision**: Accept `D6_R1C_A6_REVIEW_PASS`: staged/vectorized/integer-encoded T2 (`_build_T2_support_fast`, reference intact, key/order frozen, no float) proven exactly equal at all seven gates; all performance targets met with ≥10x factors; A4 gains not regressed.
+
+**Context**: Equivalence — T2 n64 live-vs-reference, n128/n256 vs replay-verified committed fixtures, per-variable traces, committed n64 rows byte-identical, eligible/selection unchanged, replay + seq==par, A4 guards green, sandbox-T2 gate vacuous (no sandbox T2 exists). Benchmark (fresh roots, cold+warm, A4 protocol): T2/layer n64 1.2 s (≤5, 34.5x), n128 26.6 s (≤90, 24.7x), n256 516.1/479.7 s (≤600, 19.9x); n64 all-8 1.5 s (≤8); fb-only 0.6/1.3 s vs A4 2.5/2.7 s; RSS ≈ 93 MB; zero decoder calls; no retry. Slow-task inventory measured (v38 T0 2.0 s, T1 812/810 s, orchestration 345/344 s, lane-A ≈40 s, helpers ≤46 ms; V30R 74.8/719.9 s cited, decoder-bound, not re-runnable). Focused 61/61 + slow n256 cell; seven-file non-perf 95/95.
+
+**Consequences**: `next_gate` → `D6_GRAPH_MOTHER_R1C_A5A6_COMPLETE_AWAITING_MAIN_THREAD_RULING`. T2-at-n256 no longer breaches the chunk block on structure cost. Any future D6 execution still needs its own OpenSpec + Pre-EXECUTE + explicit authorization — nothing granted. All authorizations false; G2 absent; no push.
