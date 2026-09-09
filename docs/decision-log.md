@@ -3303,3 +3303,11 @@ these may not be merged or reordered.
 **Context**: Prereg `e4d3af7` before scores/calls. 252 partitions CAL-only (chain err ≤ 8.88e-16; joint 7.162347 invariant; control reproduces c1 E1 3.814742); rank-1 IS the current mapping `(5,6,7,8,9)` m=(59,52). 192/600 dev calls (100.8 s, peak RSS 124219392 B, 0 crash/nonfinite/disagreement): APP exact 0/8 everywhere incl. square; oracle-L2 6/8 non-square + 8/8 square on rank-1 only (diagnostic). Evidence `workspace/d5_decomposition_successor_r1_c765e3010674/`; four-file suite 259 passed.
 
 **Consequences**: Decomposition family exhausted without APP signal; next route `D5_GRAPH_MOTHER_SUCCESSOR_PROPOSAL` by main-thread proposal (not authorized). Formal G1/Model-F/roots unchanged; all authorizations false; no push.
+
+## 2026-09-09 V72P2D6 R1c-A3 post-run verifier rework (blocked run, topology claim forbidden)
+
+**Decision**: Accept `D6_R1C_A3_PRE_RESULT_REVIEW_PASS_BLOCKED_RUN`: the R1c-A2 root solidifies as an implementation/structure-blocked development attempt with recomputed terminal `D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED`; stored `D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY` is preserved but unsupported and must not be cited.
+
+**Context**: A2 verifier FAILs repaired via OpenSpec amendment (identity key +`n`; stage-separated canary/scaling-per-width/confirmation recompute; crash precedence with degree→invariant class; EMPTY confirmation label; stored+recomputed reported fail-closed). Forensics (read-only, zero decoder): 184 rows reconcile 104/40/40/0; 64 attempted degree crashes from degree-1 check rows in frozen T3/M1 graphs (integer proof + structure-only rebuild with negative controls; transport/precondition excluded). Corrected `--verify` once on the immutable root: exit 0, 15/15 PASS + agreement False. Focused 42/42; seven-file non-perf 323/323; v38 skipped (recorded).
+
+**Consequences**: `next_gate` → `D6_GRAPH_MOTHER_R1C_A3_BLOCKED_AWAITING_MAIN_THREAD_ROUTE` (successor needs new OpenSpec + fresh authorization; nothing granted here). Exposed audit gap: structural eligibility gates `zero_rows` but never minimum check degree — candidate rule for any successor proposal. All authorizations false; G2 absent; no push.

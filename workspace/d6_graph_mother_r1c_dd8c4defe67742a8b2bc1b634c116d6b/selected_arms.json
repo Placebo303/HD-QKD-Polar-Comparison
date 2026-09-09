@@ -1,0 +1,27 @@
+{
+  "eligible": {
+    "B0_D5_DV3_NATIVE": true,
+    "B1_D5_DV3_COMMON_LABELS": true,
+    "M1_ACCUMULATOR_FOREST_MAX": true,
+    "M2_ACCUMULATOR_FOREST_HALF": false,
+    "T1_PEG_DV3": true,
+    "T2_CYCLE_GREEDY_DV3": false,
+    "T3_SC_DV3_W4": true,
+    "T4_SC_DV3_W8": true
+  },
+  "fallback_M": "M1_ACCUMULATOR_FOREST_MAX",
+  "fallback_T": "T1_PEG_DV3",
+  "freeze": "decoder-blind-from-structure-only",
+  "selected": [
+    "B0_D5_DV3_NATIVE",
+    "B1_D5_DV3_COMMON_LABELS",
+    "T1_PEG_DV3",
+    "T3_SC_DV3_W4",
+    "M1_ACCUMULATOR_FOREST_MAX"
+  ],
+  "structural_order_new": [
+    "T1_PEG_DV3",
+    "M1_ACCUMULATOR_FOREST_MAX",
+    "T3_SC_DV3_W4"
+  ]
+}
