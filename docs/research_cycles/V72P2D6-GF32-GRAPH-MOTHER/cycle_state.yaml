@@ -13,7 +13,7 @@ synthetic_execution_authorized: false
 real_execution_authorized: false
 formal_execution_authorized: false
 scientific_promotion: false
-development_decoder_authorized: false
+development_decoder_authorized: true
 development_authorization_basis: forwarded-prompt-after-independent-pre-execute-pass
 predecessor: V72P2D5-GF32-RATE-MOTHER
 predecessor_terminal: DECOMPOSITION_NO_N64_RECOVERY
