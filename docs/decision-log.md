@@ -3343,3 +3343,11 @@ these may not be merged or reordered.
 **Context**: 22 distinct R1d structure cells (26 role-cells; 4 T1-n64 cells shared by canary+confirmation) proven ⊆ A5 valid subset (CSV read, zero decoder, 22/22 frozen+I1 pass, 0 conflicts; worst-case 552 ≤ 2500 calls). New OpenSpec change `v72p2d6-gf32-graph-mother-r1d-option-c` + `D6_GRAPH_MOTHER_OPTION_C_ACCEPTANCE_R1.md` + `D6_GRAPH_MOTHER_R1D_EXECUTION_PACKET_R1.md` (exact `--r1d` command, budgets, stop rules, no-reuse, claim ceiling). R1d NOT authorized, NOT executed; no R1d root exists.
 
 **Consequences**: `next_gate` → `D6_GRAPH_MOTHER_R1D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION`. Eligible-only `--r1d` implementation + focused tests + independent reviews next. All authorizations false; G2 absent; no push.
+
+## 2026-09-10 V72P2D6 R1d Option C implementation + Pre-EXECUTE (PASS, awaiting explicit authorization)
+
+**Decision**: Accept `D6_R1D_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION` (implementation review `D6_R1D_IMPLEMENTATION_REVIEW_PASS` first, zero rework rounds; this review grants no authorization).
+
+**Context**: Eligible-only dispatch layer landed (mother module pure-append: `R1D_ARMS`, 22-cell `R1D_VALID_SUBSET`, arm/subset/live-I1 guard, T1-only fallback, schema-`r1d-v2` writer for new roots, 4-root named refusal; `--r1d` runner mode default-off with frozen default call shapes intact per the A4 pin). 13 focused R1d tests (all 12 packet properties + `--dry-structure` behavioral run) + full D6 file + seven-file non-perf suite: 356/356 green in a fresh task-owned basetemp. Perf-v38 skipped (scoped deps outside the v38 orchestration path; v38 file has zero v72p2d6 references). Independent subset re-derivation 22 == 22, 0 matrix-invalid, live spot-check pass. No R1d root exists; historical A2 header still old-schema, path git-clean; zero decoder calls throughout.
+
+**Consequences**: R1d stays NOT authorized, NOT executed (`next_gate` unchanged: `D6_GRAPH_MOTHER_R1D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION`). Execution needs a separate explicit main-thread grant; mandatory Pre-RESULT review before any solidification. All authorizations false; G2 absent; no push.
