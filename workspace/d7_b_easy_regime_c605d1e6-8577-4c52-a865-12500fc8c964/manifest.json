@@ -1,0 +1,83 @@
+{
+  "call_budget": 420,
+  "caps": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32,
+    90
+  ],
+  "change": "v72p2d7-gf32-easy-regime",
+  "contract": "R1+A1",
+  "outer_watchdog_s": 1800.0,
+  "per_call_watchdog_s": 120.0,
+  "post_tol": 1e-10,
+  "priors": [
+    "P99",
+    "P90",
+    "P60",
+    "PAIR"
+  ],
+  "rss_limit_bytes": 2147483648,
+  "run_wall_limit_s": 1500.0,
+  "seeds": [
+    2026091200,
+    2026091201,
+    2026091202,
+    2026091203
+  ],
+  "superseded_rejected": {
+    "edges": 7,
+    "proof": "7<8",
+    "rows": [
+      2,
+      3,
+      2
+    ]
+  },
+  "tiers": [
+    "SINGLE_CHECK_D3",
+    "TREE_6",
+    "CYCLE_8",
+    "FULL_RANK_64"
+  ],
+  "tree_6_active": {
+    "c0": [
+      0,
+      1,
+      2
+    ],
+    "c1": [
+      2,
+      3,
+      4
+    ],
+    "c2": [
+      4,
+      5
+    ],
+    "coeffs": [
+      [
+        1,
+        7,
+        13
+      ],
+      [
+        29,
+        1,
+        7
+      ],
+      [
+        13,
+        29
+      ]
+    ],
+    "rows": [
+      3,
+      3,
+      2
+    ]
+  }
+}

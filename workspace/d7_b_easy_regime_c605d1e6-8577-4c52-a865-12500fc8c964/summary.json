@@ -1,0 +1,19 @@
+{
+  "agg": {
+    "budget_exhausted": false,
+    "confirmed": false,
+    "crash_nonfinite": false,
+    "p99_fail": false,
+    "partial": false,
+    "pre_blocked": false,
+    "resource_overrun": true,
+    "tractable_violation": true,
+    "watchdog_timeout": false
+  },
+  "calls_invoked": 64,
+  "calls_not_needed": 384,
+  "cells_budget_not_reached": 0,
+  "cells_scheduled": 64,
+  "run_wall_s": 4.970117854000819,
+  "terminal": "D7_B_RESOURCE_OVERRUN"
+}

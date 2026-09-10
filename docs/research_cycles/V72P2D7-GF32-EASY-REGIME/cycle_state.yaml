@@ -4,10 +4,10 @@ plan_revision: R1_A1
 plan_accepted: false
 implementation_authorized: false
 d7b_execution_authorized: false
-d7b_execution_attempts: 0
-d7b_execution_completed: 0
-decoder_executed: false
-result_created: false
+d7b_execution_attempts: 1
+d7b_execution_completed: 1
+decoder_executed: true
+result_created: true
 formal_execution_authorized: false
 synthetic_execution_authorized: false
 real_execution_authorized: false
@@ -17,4 +17,7 @@ predecessor_verdict: D7_A_DECODER_CERTIFICATION_PASS
 r1d_state: R1D_PAUSED_PENDING_DECODER_CERTIFICATION_AND_EASY_REGIME
 g1_authorized: false
 g2_authorized: false
-next_gate: D7_B_WSL_READY_AWAITING_FRESH_EXPLICIT_AUTHORIZATION
+next_gate: INDEPENDENT_D7_B_RESULT_ACCEPTANCE_R2
+d7b_r2_uuid: c605d1e6-8577-4c52-a865-12500fc8c964
+d7b_r2_root: workspace/d7_b_easy_regime_c605d1e6-8577-4c52-a865-12500fc8c964
+d7b_r2_terminal: D7_B_RESOURCE_OVERRUN
