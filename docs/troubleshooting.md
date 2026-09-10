@@ -219,5 +219,45 @@ top-level module; ensure its package is importable first. Keep
 `except ModuleNotFoundError` fallbacks narrow so an internal dependency
 `ImportError` is never misreported as a merely absent package.
 
+---
+
+### Combined pytest across D7/formal_ir suites: `No module named 'comparison_bench.formal_ir'`
+
+**Observed** (2026-09-10/11, WSL): collecting the D7-A, D7-B and D7-C test files
+together in one pytest process yields `199 collected, 1 error` with
+`ModuleNotFoundError: No module named 'comparison_bench.formal_ir'`; the same
+combined run without the new module yields `179 collected, 1 error`. Each suite
+alone passes.
+
+**Root cause**: pre-existing `comparison_bench` package namespace collision when
+multiple `formal_ir` test modules are collected in a single process. It is not
+caused by the D7 modules.
+
+**Fix**: run each suite in its own pytest process (D7-C, D7-A, D7-B separately).
+Combined multi-file collection is not a supported qualification path.
+
+**Prevention**: treat per-suite process isolation as the baseline for D7
+qualification; do not read the combined-collection error as a new regression.
+
+---
+
+### `python: command not found` in the default WSL shell
+
+**Observed** (2026-09-10/11, WSL): bare `python` is absent from the default PATH
+(`/bin/bash: line 1: python: command not found`, exit 127) even though the
+project venv exists, so a frozen command that spells `python` fails before the
+script starts.
+
+**Root cause**: the WSL shell does not expose the project interpreter on PATH by
+default.
+
+**Fix**: prefix the accepted venv bin directory, e.g.
+`PATH="$HOME/.venvs/hd-qkd-polar-comparison/bin:$PATH" python ...` (the adapter
+documented for the D7-B R2 execution); review pytest runs may instead use the
+repo-local `.venv/bin/python`.
+
+**Prevention**: any future authorized D7-C run must declare the same
+venv-on-PATH adapter in its command record, so a bare `python` fails safely
+(exit 127) rather than silently binding a different interpreter.
 
 ---

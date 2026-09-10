@@ -1,25 +1,21 @@
 # D7-C bidirectional cross-layer oracle — tasks (R1 + A1)
 
-Status: plan `R1_A1`. This planning pass drafted the T1 documents (OpenSpec,
-`D7_C_PREREG_R1.md`, `D7_C_EXECUTION_PACKET_R1.md`, `cycle_state.yaml`) without
-any decoder call, Model-F content read, root, UUID or commit; the main thread
-commits them as the first scoped commit. T0/T2–T7 are not started. No
-authorization is granted.
+Status: plan `R1_A1` COMPLETE — T0–T7 done; reviews `D7_C_IMPLEMENTATION_REVIEW_PASS` and `D7_C_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION`; frozen awaiting explicit authorization. No D7-C execution; all authorization false; no UUID; no push.
 
-- [ ] T0 — Baseline/protected-state audit at the Phase-P descendant of
+- [x] T0 — Baseline/protected-state audit at the Phase-P descendant of
   `212f69ba`: branch `formal-ir-v72p1-addendum-clean`; D7-B audit PASS and A1.3
   proposal PASS present; D7-B R2 root UUID
   `c605d1e6-8577-4c52-a865-12500fc8c964` immutable; all authorization false;
   R1d/G2 absent; no `workspace/d7_c_bidirectional_oracle_*` root; protected
   roots inspected by names/sizes/mtime only; no VOID read; no Model-F content
   read
-- [ ] T1 — Freeze OpenSpec (proposal/design/tasks/spec) +
+- [x] T1 — Freeze OpenSpec (proposal/design/tasks/spec) +
   `D7_C_PREREG_R1.md` + `D7_C_EXECUTION_PACKET_R1.md` + `cycle_state.yaml`
   BEFORE any real artifact/decoder observation; H03 estimator trace confirmed
   (unique accepted concentration estimator; rejected per-cell alternative and
   reason recorded); mother expressions and geometry disambiguation frozen;
   scoped local commit (plan); no push
-- [ ] T2 — Minimal implementation: new module
+- [x] T2 — Minimal implementation: new module
   `comparison_bench/src/comparison_bench/formal_ir/v72p2d7_gf32_bidirectional_oracle.py`,
   new focused tests
   `comparison_bench/tests/test_v72p2d7_gf32_bidirectional_oracle.py`, new
@@ -27,14 +23,14 @@ authorization is granted.
   bind, DI for joint tensor/blocks/matrices/decoder/clock/RSS, six-file writer
   + verifier, fail-before-first-call guards, frozen 128-call loop; production
   v35/D5/D6/D7-A/D7-B read-only; no interface-rework import
-- [ ] T3 — Qualification C01–C20 (R1 §7, listed verbatim below): fake
+- [x] T3 — Qualification C01–C20 (R1 §7, listed verbatim below): fake
   tensors/blocks only; no real Model-F content, no production decoder calls;
   fresh task-owned basetemps; no perf-v38
-- [ ] T4 — Independent implementation review (source inspection + independent
+- [x] T4 — Independent implementation review (source inspection + independent
   recomputation of representative prior/pairing cases); verdict
   `D7_C_IMPLEMENTATION_REVIEW_PASS`; one scoped rework max; scientific
   ambiguity returns to the main thread
-- [ ] T5 — Independent Pre-EXECUTE review in the actual WSL environment with
+- [x] T5 — Independent Pre-EXECUTE review in the actual WSL environment with
   separate probe commands: branch/scoped commits and accepted D7-B/A1
   dependencies; exact 128 matrix and thresholds; accepted Model-F
   metadata/root presence without content read; external-cwd package/decode
@@ -46,13 +42,13 @@ authorization is granted.
   `final_beliefs -> other layer` data flow; exact future command; mandatory
   Pre-RESULT. Verdict
   `D7_C_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION`
-- [ ] T6 — Closeout: scoped local commits (plan → implementation → reviews →
+- [x] T6 — Closeout: scoped local commits (plan → implementation → reviews →
   closeout, append-only); record parallel states
   `D7_C_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION` and
   `LAYER_INTERFACE_IMPLEMENTATION_DEFERRED_BEFORE_CROSS_LAYER_APP` only after
   both reviews PASS; all authorization false; no attempts/results/completed
   fields; no push; STOP (no D7-C execution)
-- [ ] T7 — Memory triage: durable readiness facts only (estimator ID, frozen
+- [x] T7 — Memory triage: durable readiness facts only (estimator ID, frozen
   matrix/mother/disclosures, budgets, review verdicts, deferred interface);
   no speculative results
 
