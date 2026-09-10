@@ -15,6 +15,10 @@ from pathlib import Path
 
 _HERE = Path(__file__).resolve()
 ROOT = _HERE.parents[1]
+# ponytail: runner-local source only — derived from __file__, no cwd/PYTHONPATH/install assumption
+_SRC = str(ROOT / "comparison_bench" / "src")
+if _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
 CORE_PATH = (ROOT / "comparison_bench" / "src" / "comparison_bench"
              / "formal_ir" / "v72p2d7_gf32_easy_regime.py")
 STATE_PATH = (ROOT / "docs" / "research_cycles" / "V72P2D7-GF32-EASY-REGIME"

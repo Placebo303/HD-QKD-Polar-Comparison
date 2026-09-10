@@ -7,9 +7,13 @@ spot check; every other test injects a fake decode_fn.
 """
 
 import csv
+import glob
 import json
+import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -289,3 +293,293 @@ def test_cap_prefix_proxy_tiny():
             ref_post = eb._softmax_rows(ref_sweeps[-1])
             got_post = eb._softmax_rows(np.asarray(a["beliefs"]))
             assert float(np.max(np.abs(ref_post - got_post))) <= 1e-10
+
+
+# --------------------------------------------------------------------------
+# WSL local-source launch tests L01–L12 (zero-decoder; launch is the subject)
+#
+# Subprocess probes use the current interpreter (venv python) with PYTHONPATH
+# removed. No probe calls decode_row_layered_fftqspa; no probe creates a
+# workspace/d7_b_easy_regime_* root. All scratch files live under one
+# task-owned basetemp directory that is removed on teardown.
+# --------------------------------------------------------------------------
+
+REPO = Path(__file__).resolve().parents[2]
+RUNNER = REPO / "scripts" / "v72p2d7_gf32_easy_regime.py"
+WS = REPO / "workspace"
+D7B_FILE = Path(__file__).resolve()
+D7A_FILE = Path(__file__).resolve().parent / "test_v72p2d7_gf32_decoder_certification.py"
+SUB_TIMEOUT = 240
+
+
+def _clean_env(extra=None):
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    if extra:
+        env.update(extra)
+    return env
+
+
+def _run_cli(args, cwd, env=None):
+    return subprocess.run([sys.executable] + args, cwd=str(cwd), env=_clean_env(env),
+                          capture_output=True, text=True, timeout=SUB_TIMEOUT)
+
+
+def _run_probe(code, cwd, env=None):
+    return subprocess.run([sys.executable, "-c", code, str(RUNNER)], cwd=str(cwd),
+                          env=_clean_env(env), capture_output=True, text=True,
+                          timeout=SUB_TIMEOUT)
+
+
+def _launch_base():
+    base = Path(tempfile.mkdtemp(prefix="d7b_launch_")).resolve()
+    try:
+        yield base
+    finally:
+        shutil.rmtree(str(base), ignore_errors=True)
+
+
+launch_base = pytest.fixture(_launch_base)
+
+
+def test_launch_l01_prefixed_relative_import_fails_top_level(launch_base):
+    """L01: miniature capture of the ORIGINAL failure mechanism (tree stays fixed)."""
+    pkg = launch_base / "mini" / "mypkg"
+    pkg.mkdir(parents=True)
+    (pkg / "__init__.py").write_text("", encoding="utf-8")
+    (pkg / "sibling.py").write_text("VALUE = 7\n", encoding="utf-8")
+    (pkg / "mod_with_rel.py").write_text(
+        "from .sibling import VALUE\nRESULT = VALUE\n", encoding="utf-8")
+    code = (
+        "import importlib.util, sys\n"
+        "p = sys.argv[1] if len(sys.argv) > 1 else %r\n" % (str(pkg / "mod_with_rel.py"),) +
+        "spec = importlib.util.spec_from_file_location('mod_with_rel', p)\n"
+        "m = importlib.util.module_from_spec(spec)\n"
+        "try:\n"
+        "    spec.loader.exec_module(m)\n"
+        "    print('UNEXPECTED_SUCCESS')\n"
+        "except ImportError as e:\n"
+        "    assert 'no known parent package' in str(e), repr(e)\n"
+        "    print('L01_OK %r' % (e,))\n"
+    )
+    r = subprocess.run([sys.executable, "-c", code], cwd=str(launch_base),
+                       env=_clean_env(), capture_output=True, text=True,
+                       timeout=SUB_TIMEOUT)
+    assert r.returncode == 0, r.stderr
+    assert "L01_OK" in r.stdout and "UNEXPECTED_SUCCESS" not in r.stdout
+
+
+def test_launch_l02_help_from_repo_root(launch_base):
+    """L02: --help from repo root, package not installed, no PYTHONPATH."""
+    r = _run_cli([str(RUNNER), "--help"], cwd=REPO)
+    assert r.returncode == 0, r.stderr
+    assert "D7-B easy-regime" in r.stdout
+
+
+def test_launch_l03_help_from_external_cwd(launch_base):
+    """L03: --help from a non-repository cwd via the absolute runner path."""
+    ext = launch_base / "ext"
+    ext.mkdir()
+    r = _run_cli([str(RUNNER), "--help"], cwd=ext)
+    assert r.returncode == 0, r.stderr
+    assert "D7-B easy-regime" in r.stdout
+
+
+def test_launch_l04_dry_run_both_cwds_no_bind_no_root(launch_base):
+    """L04: --dry-run from both cwds prints exactly 64 cells, binds nothing."""
+    for cwd in (REPO, launch_base):
+        r = _run_cli([str(RUNNER), "--dry-run"], cwd=cwd)
+        assert r.returncode == 0, r.stderr
+        lines = [ln for ln in r.stdout.splitlines() if ln.strip()]
+        assert lines[0].startswith("cells=64"), lines[0]
+        assert len(lines) == 65, len(lines)
+    assert glob.glob(str(WS / "d7_b_easy_regime_*")) == []
+    probe = (
+        "import runpy, sys\n"
+        "g = runpy.run_path(sys.argv[1], run_name='d7b_l04')\n"
+        "assert g['main'](['--dry-run']) == 0\n"
+        "assert 'comparison_bench.formal_ir.v35_algorithm_development' not in sys.modules\n"
+        "assert 'v35_algorithm_development' not in sys.modules\n"
+        "print('L04_OK')\n"
+    )
+    r = _run_probe(probe, REPO)
+    assert r.returncode == 0, r.stderr
+    assert "L04_OK" in r.stdout
+
+
+def test_launch_l05_runner_adds_only_resolved_local_src(launch_base):
+    """L05: runner inserts exactly the resolved local src, nothing else."""
+    probe = (
+        "import runpy, sys, pathlib\n"
+        "before = list(sys.path)\n"
+        "assert not any('comparison_bench' in p for p in before), before[:5]\n"
+        "runpy.run_path(sys.argv[1], run_name='d7b_l05')\n"
+        "after = list(sys.path)\n"
+        "added = [p for p in after if p not in before]\n"
+        "expect = str(pathlib.Path(sys.argv[1]).resolve().parents[1] / 'comparison_bench' / 'src')\n"
+        "assert added == [expect], (added, expect)\n"
+        "assert after[0] == expect\n"
+        "print('L05_OK')\n"
+    )
+    ext = launch_base / "ext"
+    ext.mkdir()
+    r = _run_probe(probe, ext)
+    assert r.returncode == 0, r.stderr
+    assert "L05_OK" in r.stdout
+
+
+def test_launch_l06_bind_returns_exact_package_v35(launch_base):
+    """L06: bind_historical_decoder() returns the package-loaded v35 callable; never called."""
+    probe = (
+        "import runpy, sys\n"
+        "g = runpy.run_path(sys.argv[1], run_name='d7b_l06')\n"
+        "fn = g['_mod'].bind_historical_decoder()\n"
+        "from comparison_bench.formal_ir import v35_algorithm_development as v35\n"
+        "assert fn is v35.decode_row_layered_fftqspa, fn\n"
+        "assert fn.__name__ == 'decode_row_layered_fftqspa'\n"
+        "print('L06_OK', fn.__module__)\n"
+    )
+    ext = launch_base / "ext"
+    ext.mkdir()
+    r = _run_probe(probe, ext)
+    assert r.returncode == 0, r.stderr
+    assert "L06_OK" in r.stdout
+
+
+def test_launch_l07_v35_package_and_field_from_same_tree(launch_base):
+    """L07: v35 carries its package name; nonbinary_field resolves from the same tree."""
+    probe = (
+        "import runpy, sys, pathlib\n"
+        "g = runpy.run_path(sys.argv[1], run_name='d7b_l07')\n"
+        "g['_mod'].bind_historical_decoder()\n"
+        "from comparison_bench.formal_ir import v35_algorithm_development as v35\n"
+        "assert v35.__package__ == 'comparison_bench.formal_ir', v35.__package__\n"
+        "nb = sys.modules['comparison_bench.formal_ir.nonbinary_field']\n"
+        "src = (pathlib.Path(sys.argv[1]).resolve().parents[1] / 'comparison_bench' / 'src').resolve()\n"
+        "assert pathlib.Path(nb.__file__).resolve().is_relative_to(src), nb.__file__\n"
+        "print('L07_OK')\n"
+    )
+    ext = launch_base / "ext"
+    ext.mkdir()
+    r = _run_probe(probe, ext)
+    assert r.returncode == 0, r.stderr
+    assert "L07_OK" in r.stdout
+
+
+def test_launch_l08_unrelated_cwd_fake_never_shadows(launch_base):
+    """L08: a fake comparison_bench earlier via PYTHONPATH/cwd never wins."""
+    fake = launch_base / "fake" / "comparison_bench" / "formal_ir"
+    fake.mkdir(parents=True)
+    (fake.parent / "__init__.py").write_text("FAKE_TOP = True\n", encoding="utf-8")
+    (fake / "__init__.py").write_text("", encoding="utf-8")
+    (fake / "v35_algorithm_development.py").write_text(
+        "def decode_row_layered_fftqspa(*a, **k):\n"
+        "    raise AssertionError('fake decoder must never bind')\n", encoding="utf-8")
+    ext = launch_base / "unrelated"
+    ext.mkdir()
+    probe = (
+        "import runpy, sys\n"
+        "g = runpy.run_path(sys.argv[1], run_name='d7b_l08')\n"
+        "fn = g['_mod'].bind_historical_decoder()\n"
+        "assert 'fake' not in fn.__code__.co_filename, fn.__code__.co_filename\n"
+        "from comparison_bench.formal_ir import v35_algorithm_development as v35\n"
+        "assert fn is v35.decode_row_layered_fftqspa\n"
+        "assert not getattr(sys.modules['comparison_bench'], 'FAKE_TOP', False)\n"
+        "print('L08_OK')\n"
+    )
+    r = _run_probe(probe, ext, env={"PYTHONPATH": str(launch_base / "fake")})
+    assert r.returncode == 0, r.stderr
+    assert "L08_OK" in r.stdout
+
+
+def test_launch_l09_unauthorized_refuses_before_bind_and_root(launch_base):
+    """L09: unauthorized scientific CLI exits 3 with no root and no bind attempt."""
+    target = launch_base / "newroot"
+    r = _run_cli([str(RUNNER), "--out-root", str(target)], cwd=launch_base)
+    assert r.returncode == 3, (r.returncode, r.stdout, r.stderr)
+    assert "not authorized" in r.stdout
+    assert "D7-B refused:" not in r.stdout
+    assert not target.exists()
+
+
+def test_launch_l10_original_suites_still_green(launch_base):
+    """L10: the frozen 19 D7-B + 14 D7-A tests remain green (inner pytest runs).
+
+    The 19 include the one pre-existing frozen tiny production check
+    (SINGLE_CHECK_D3, max_iter<=2); that is prior qualification behavior, not
+    a D7-B scientific invocation (run_easy_regime is never called with
+    decode_fn=None there, and no root is created).
+    """
+    inner = launch_base / "inner"
+    inner.mkdir()
+    # Inner runs inherit the ambient environment (NOT the stripped launch
+    # env): they execute the test suites, not the launch path.
+    ambient = dict(os.environ)
+    r = subprocess.run(
+        [sys.executable, "-m", "pytest", str(D7B_FILE), "-k", "not test_launch_l",
+         "-q", "-o", "addopts=", "--basetemp", str(inner)],
+        cwd=str(REPO), env=ambient, capture_output=True, text=True,
+        timeout=SUB_TIMEOUT)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "19 passed" in r.stdout, r.stdout
+    r = subprocess.run(
+        [sys.executable, "-m", "pytest", str(D7A_FILE),
+         "-q", "-o", "addopts=", "--basetemp", str(inner)],
+        cwd=str(REPO), env=ambient, capture_output=True, text=True,
+        timeout=SUB_TIMEOUT)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "14 passed" in r.stdout, r.stdout
+
+
+def test_launch_l11_frozen_contract_untouched():
+    """L11: frozen scientific constants/schema hold; core file has no path hack."""
+    assert eb.Q == 32
+    assert eb.SEEDS == (2026091200, 2026091201, 2026091202, 2026091203)
+    assert eb.PRIOR_FAMILIES == ("P99", "P90", "P60", "PAIR")
+    assert eb.TIERS == ("SINGLE_CHECK_D3", "TREE_6", "CYCLE_8", "FULL_RANK_64")
+    assert eb.CAPS == (1, 2, 4, 8, 16, 32, 90)
+    assert eb.CALL_BUDGET == 420
+    assert eb.PER_CALL_WATCHDOG_S == 120.0
+    assert eb.RUN_WALL_LIMIT_S == 1500.0
+    assert eb.OUTER_WATCHDOG_S == 1800.0 and eb.OUTER_GRACE_S == 30.0
+    assert eb.RSS_LIMIT_BYTES == 2 * 1024**3
+    assert eb.POST_TOL == 1e-10 and eb.DETERM_TOL == 1e-12
+    assert eb.FIVE_FILES == ("manifest.json", "decoder_records.csv", "summary.json",
+                             "report.md", "command_log.txt")
+    assert eb.RECORD_FIELDS == ["tier", "prior", "seed", "n", "m", "rank", "deg_min",
+                                "deg_max", "cap", "invoked", "dispatch", "exact",
+                                "syndrome_ok", "iterations", "status", "unsat",
+                                "sym_err", "finite", "max_p", "mean_true_p",
+                                "min_true_rank", "mean_entropy", "post_err",
+                                "map_agree", "d_xhat", "d_post", "d_unsat",
+                                "proxy", "wall_s", "rss_bytes"]
+    assert (eb.T_PRE_EXEC, eb.T_WATCHDOG, eb.T_CRASH, eb.T_RESOURCE, eb.T_BUDGET,
+            eb.T_ALERT, eb.T_CONFIRMED, eb.T_PARTIAL, eb.T_NOREGION) == (
+        "D7_B_PRE_EXECUTION_BLOCKED", "D7_B_WATCHDOG_TIMEOUT_VOID",
+        "D7_B_NONFINITE_OR_CRASH_BLOCKED", "D7_B_RESOURCE_OVERRUN",
+        "D7_B_CALL_BUDGET_EXHAUSTED", "D7_B_NO_EASY_REGIME_CORRECTNESS_ALERT",
+        "D7_B_EASY_REGIME_CONFIRMED", "D7_B_PARTIAL_EASY_REGIME",
+        "D7_B_COMPLETED_NO_STABLE_REGION")
+    assert len(eb.cell_list()) == 64
+    core_src = Path(eb.__file__).read_text(encoding="utf-8")
+    assert "sys.path" not in core_src  # repair stayed runner-local
+
+
+def test_launch_l12_roots_and_authorization_unchanged():
+    """L12: no D7-B/R1d/G2 roots appeared; authorization still false."""
+    assert glob.glob(str(WS / "d7_b_easy_regime_*")) == []
+    assert glob.glob(str(WS / "*v72p2d7*")) == []
+    state = {}
+    with open(REPO / "docs" / "research_cycles" / "V72P2D7-GF32-EASY-REGIME"
+              / "cycle_state.yaml", encoding="utf-8") as fh:
+        for line in fh.read().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and ":" in line:
+                k, v = line.split(":", 1)
+                state[k.strip()] = v.strip().strip("'\"")
+    for k in ("d7b_execution_authorized", "decoder_executed", "result_created",
+              "formal_execution_authorized", "synthetic_execution_authorized",
+              "real_execution_authorized", "g1_authorized", "g2_authorized"):
+        assert state.get(k) == "false", (k, state.get(k))
+    assert state.get("d7b_execution_attempts") == "0"
+    assert state.get("d7b_execution_completed") == "0"
