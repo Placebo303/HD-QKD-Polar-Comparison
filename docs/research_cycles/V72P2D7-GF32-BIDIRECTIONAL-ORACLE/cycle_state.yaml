@@ -4,8 +4,8 @@ plan_revision: R1_A1
 plan_accepted: false
 implementation_authorized: false
 d7c_execution_authorized: false
-decoder_executed: false
-result_created: false
+decoder_executed: true
+result_created: true
 formal_execution_authorized: false
 synthetic_execution_authorized: false
 real_execution_authorized: false
@@ -19,8 +19,14 @@ r1d_state: R1D_PAUSED_PENDING_DECODER_CERTIFICATION_AND_EASY_REGIME
 g1_authorized: false
 g2_authorized: false
 layer_interface_implementation: DEFERRED_MANDATORY_BEFORE_CROSS_LAYER_APP
-next_gate: D7_C_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION
+next_gate: INDEPENDENT_D7_C_RESULT_ACCEPTANCE_R1
 d7c_implementation_review: D7_C_IMPLEMENTATION_REVIEW_PASS
 d7c_pre_execute_review: D7_C_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION
 d7c_readiness_state: D7_C_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION
 d7c_environment_note: VENV_PYTHON_ON_PATH_ADAPTER_REQUIRED_AT_EXECUTION_AUTHORIZATION
+d7c_execution_attempts: 1
+d7c_execution_completed: 1
+d7c_uuid: 94c0ea15-a786-4cb8-a991-6fec521cccae
+d7c_root: workspace/d7_c_bidirectional_oracle_94c0ea15-a786-4cb8-a991-6fec521cccae
+d7c_terminal: D7_C_BIDIRECTIONAL_DEPENDENCE
+d7c_pre_result_review: D7_C_PRE_RESULT_REVIEW_PASS_R1
