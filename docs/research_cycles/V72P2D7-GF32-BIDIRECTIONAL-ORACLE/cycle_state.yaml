@@ -19,7 +19,7 @@ r1d_state: R1D_PAUSED_PENDING_DECODER_CERTIFICATION_AND_EASY_REGIME
 g1_authorized: false
 g2_authorized: false
 layer_interface_implementation: DEFERRED_MANDATORY_BEFORE_CROSS_LAYER_APP
-next_gate: INDEPENDENT_D7_C_RESULT_ACCEPTANCE_R1
+next_gate: D7_D_SCHEDULE_DISCRIMINATOR_PACKET_FREEZE
 d7c_implementation_review: D7_C_IMPLEMENTATION_REVIEW_PASS
 d7c_pre_execute_review: D7_C_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION
 d7c_readiness_state: D7_C_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION
@@ -30,3 +30,6 @@ d7c_uuid: 94c0ea15-a786-4cb8-a991-6fec521cccae
 d7c_root: workspace/d7_c_bidirectional_oracle_94c0ea15-a786-4cb8-a991-6fec521cccae
 d7c_terminal: D7_C_BIDIRECTIONAL_DEPENDENCE
 d7c_pre_result_review: D7_C_PRE_RESULT_REVIEW_PASS_R1
+d7c_result_accepted: true
+d7c_accepted_scope: D7_C_RESULT_ACCEPTED_BIDIRECTIONAL_DEPENDENCE_DIAGNOSTIC
+d7c_acceptance_doc: docs/research_cycles/V72P2D7-GF32-BIDIRECTIONAL-ORACLE/D7_C_RESULT_ACCEPTANCE_R1.md
