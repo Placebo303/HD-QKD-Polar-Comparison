@@ -3383,3 +3383,11 @@ these may not be merged or reordered.
 **Context**: `D7_B_RESULT_ACCEPTANCE_R2.md` states packet §3's twelve points without reinterpretation; pre-result review `D7_B_PRE_RESULT_REVIEW_PASS_R2`; root read twice with identical names/sizes/mtimes (111/44743/1008/80/449); zero decoder calls, zero root/production edits, no VOID reads.
 
 **Consequences**: `next_gate` → `D7_B_EARLY_EXIT_SOFT_BELIEF_AUDIT` (zero-decoder soft-belief audit R1 next). All authorizations stay false; R1d/G1/G2 unauthorized; no push.
+
+## 2026-09-10 D7-B early-exit soft-belief audit classification + independent review PASS (next route interface correction)
+
+**Decision**: Classify the early-exit soft-belief evidence as `D7_B_MIXED_METRIC_AND_INTERFACE_DEFECT` (primary) + `D7_B_RSS_TELEMETRY_DEPENDENCY_GAP` (secondary); independent review `D7_B_EARLY_EXIT_SOFT_BELIEF_AUDIT_REVIEW_PASS`.
+
+**Context**: `D7_B_EARLY_EXIT_SOFT_BELIEF_AUDIT_R1.md` (E01–E12, zero decoder calls) with one review-§4 transcription correction (E06: 25 tractable it0 rows + 4 TREE PAIR it1 rows at 0.00689, total failures 29 unchanged; E05 stratification already correct); review `D7_B_EARLY_EXIT_SOFT_BELIEF_AUDIT_REVIEW_R1.md` re-verified 49/15 partition, v35 it0 return path, all consumers, and I1/I2/I3 split; R2 root five files unchanged; terminal stays `D7_B_RESOURCE_OVERRUN`.
+
+**Consequences**: `next_gate` → `D7_B_LAYER_INTERFACE_CORRECTION_PROPOSAL` (before D7-C) per §8 mixed/interface mapping. All authorizations stay false; R1d/D7-C/D/G1/G2 unauthorized; no push.
