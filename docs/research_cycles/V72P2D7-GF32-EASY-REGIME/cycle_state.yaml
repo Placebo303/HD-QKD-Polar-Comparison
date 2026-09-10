@@ -17,7 +17,11 @@ predecessor_verdict: D7_A_DECODER_CERTIFICATION_PASS
 r1d_state: R1D_PAUSED_PENDING_DECODER_CERTIFICATION_AND_EASY_REGIME
 g1_authorized: false
 g2_authorized: false
-next_gate: INDEPENDENT_D7_B_RESULT_ACCEPTANCE_R2
+next_gate: D7_B_EARLY_EXIT_SOFT_BELIEF_AUDIT
 d7b_r2_uuid: c605d1e6-8577-4c52-a865-12500fc8c964
 d7b_r2_root: workspace/d7_b_easy_regime_c605d1e6-8577-4c52-a865-12500fc8c964
 d7b_r2_terminal: D7_B_RESOURCE_OVERRUN
+d7b_r2_review: D7_B_PRE_RESULT_REVIEW_PASS_R2
+d7b_r2_accepted: true
+d7b_r2_accepted_scope: HARD_DECISION_EASY_REGION_OBSERVED_WITH_RESOURCE_AND_SOFT_BELIEF_LIMITATIONS
+d7b_r2_acceptance_doc: docs/research_cycles/V72P2D7-GF32-EASY-REGIME/D7_B_RESULT_ACCEPTANCE_R2.md
