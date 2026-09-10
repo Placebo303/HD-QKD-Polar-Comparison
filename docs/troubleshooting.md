@@ -191,3 +191,33 @@ Cross-check derived aggregates against each other (run counts must cover the
 error-symbol count) before trusting them in reports.
 
 ---
+
+### D7-B file-location fallback: top-level load of a relative-import module
+
+**Observed** (2026-09-10, WSL): the D7-B runner loads its core by file
+location (`spec_from_file_location`), and the core's
+`bind_historical_decoder()` fell back to file-loading
+`v35_algorithm_development.py` as a top-level module when the
+`comparison_bench` package was not importable. The bind then failed with
+`ImportError('attempted relative import with no known parent package')`
+before any decoder call and before output-root creation.
+
+**Root cause**: a module file-loaded under a top-level name has no parent
+package, so its explicit relative imports (here v35's
+`from .nonbinary_field import ...`) can never resolve. The fallback's
+`except ModuleNotFoundError` only proved the first import failed; it could
+not make the fallback context package-correct.
+
+**Fix**: derive `<repo>/comparison_bench/src` from the runner's own resolved
+`__file__` and insert it into the current process's `sys.path` (only if
+absent) before loading the core, so the core and v35 resolve through the
+normal package name `comparison_bench.formal_ir.*` against the local source
+tree. No hard-coded drive/mount/cwd/PYTHONPATH, no install, no copies.
+
+**Prevention**: never file-load a module that contains relative imports as a
+top-level module; ensure its package is importable first. Keep
+`except ModuleNotFoundError` fallbacks narrow so an internal dependency
+`ImportError` is never misreported as a merely absent package.
+
+
+---
