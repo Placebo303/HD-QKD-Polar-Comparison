@@ -3405,3 +3405,9 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 
 - Result [repo-observed]: eligible-only layer landed additive-only (mother +121 pure-append; dev `--r1d` default-off, A4 callsite pins green); 13 R1d tests cover all 12 packet properties; focused D6 + seven-file non-perf 356/356 green (fresh `workspace/d6_r1d_tests_*` basetemp; perf-v38 skipped, out-of-scope deps). Independent subset re-derivation 22 == 22, live spot-check pass. Reviews `D6_R1D_IMPLEMENTATION_REVIEW_PASS` (0 rework) then `D6_R1D_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION` (grants nothing). Zero decoder calls; no R1d root; A2 immutable git-clean old-schema; no A2/VOID/formal reuse.
 - Lifecycle [decision]: R1d NOT authorized, NOT executed; `next_gate` unchanged (`D6_GRAPH_MOTHER_R1D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION`). Separate explicit grant + mandatory Pre-RESULT review required. Authorizations false; G2 absent; no push.
+
+## 2026-09-10 D7-A GF32 decoder certification PASS (tiny-synthetic only, no production change)
+
+- Verdict [decision]: D7_A_DECODER_CERTIFICATION_PASS — historical decode_row_layered_fftqspa matches independent poly-37 oracle within tol 1e-10 (check-update <=3.3e-16, tree posterior <=6.7e-16, loopy per-sweep <=7.2e-13); final_beliefs is log-domain so _softmax_rows in _run_layered_block is correct (no double-exp); zero production diff, no trace hook.
+- Next [decision]: D7_B_EASY_REGIME_PACKET_FREEZE readiness only; D7-B/C/D execution, R1d, G1, G2 unauthorized. R1d stays R1D_PAUSED_PENDING_DECODER_CERTIFICATION.
+- Scope note [repo-observed]: D7-A oracle comparison_bench/src/comparison_bench/formal_ir/v72p2d7_gf32_decoder_certification.py + comparison_bench/tests/test_v72p2d7_gf32_decoder_certification.py (14/14); pre-existing unrelated failure test_qldpc_reference_source_is_not_mutated from CRLF churn, untouched.

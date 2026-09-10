@@ -3351,3 +3351,11 @@ these may not be merged or reordered.
 **Context**: Eligible-only dispatch layer landed (mother module pure-append: `R1D_ARMS`, 22-cell `R1D_VALID_SUBSET`, arm/subset/live-I1 guard, T1-only fallback, schema-`r1d-v2` writer for new roots, 4-root named refusal; `--r1d` runner mode default-off with frozen default call shapes intact per the A4 pin). 13 focused R1d tests (all 12 packet properties + `--dry-structure` behavioral run) + full D6 file + seven-file non-perf suite: 356/356 green in a fresh task-owned basetemp. Perf-v38 skipped (scoped deps outside the v38 orchestration path; v38 file has zero v72p2d6 references). Independent subset re-derivation 22 == 22, 0 matrix-invalid, live spot-check pass. No R1d root exists; historical A2 header still old-schema, path git-clean; zero decoder calls throughout.
 
 **Consequences**: R1d stays NOT authorized, NOT executed (`next_gate` unchanged: `D6_GRAPH_MOTHER_R1D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION`). Execution needs a separate explicit main-thread grant; mandatory Pre-RESULT review before any solidification. All authorizations false; G2 absent; no push.
+
+## 2026-09-10 D7-A GF32 decoder ground-truth certification PASS (no production change)
+
+**Decision**: Record D7_A_DECODER_CERTIFICATION_PASS. Historical row-layered FFT-QSPA kernel matches the independent oracle (tables exact; check-update worst 3.3e-16; tree posterior worst 6.7e-16; loopy per-sweep worst 7.2e-13; L1->L2 soft-APP bridge verified, final_beliefs log-domain, no double-softmax); all within tol 1e-10 with zero production diff and no trace hook.
+
+**Context**: New oracle comparison_bench/src/comparison_bench/formal_ir/v72p2d7_gf32_decoder_certification.py + 14 tests (14/14); related v35/D5 files 204/204 combined; D6/field files 88 pass + 1 pre-existing unrelated CRLF-churn hash-pin failure (qldpc_reference.py, untouched). Tiny synthetic in-memory calls only; R1d still paused, G2 absent, all auth keys false, no push.
+
+**Consequences**: next route D7_B_EASY_REGIME_PACKET_FREEZE readiness only (design, no execution). D7-B/C/D execution, R1d, G1, G2 all unauthorized. Evidence: docs/research_cycles/V72P2D7-GF32-DECODER-CERTIFICATION/ (PREREG/REPORT/REVIEW).
