@@ -36,7 +36,10 @@ from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
     assert_no_formal_write, write_structure_records, select_decoder_arms,
     select_advancement, structural_rank_list, classify_terminal, audit_extra,
     I1_MIN_CHECK_DEGREE, check_I1_row_degree, assert_dispatchable_matrices,
-    execution_block_terminal,
+    execution_block_terminal, R1D_ARMS, R1D_NEW_ARM, R1D_SCALING_FALLBACKS,
+    R1D_STRUCTURE_SCHEMA, R1D_ELIGIBLE_SEMANTICS, R1D_VALID_SUBSET,
+    R1D_STRUCTURE_HEADER, assert_r1d_arm, assert_r1d_dispatchable,
+    assert_r1d_out_root, enrich_r1d_records, write_structure_records_r1d,
 )
 
 CALL_BUDGET = 2500
@@ -761,6 +764,11 @@ def run_cell(worker, H1, H2, r1, r2, p1, p2, block, n, meta, state):
     u2t = np.asarray(block["u2"], dtype=np.int64)
     h1 = np.asarray(H1[:r1], dtype=np.uint8)
     h2 = np.asarray(H2[:r2], dtype=np.uint8)
+    # R1d Option C eligible-only dispatch (gated; frozen path untouched).
+    if state.get("r1d"):
+        assert_r1d_arm(meta["arm"])
+        assert_r1d_dispatchable(meta["arm"], int(meta["n"]), "L1", int(r1), h1)
+        assert_r1d_dispatchable(meta["arm"], int(meta["n"]), "L2", int(r2), h2)
     # R1c-A5 dispatch-time fail-closed I1 guard (no decoder cell from violation).
     assert_dispatchable_matrices(h1, h2)
     pr1 = d5._floor_renorm(p1[:, bob].T, d5.DECODER_FLOOR)
@@ -1250,6 +1258,59 @@ def verify_I1_structure(srecs, skip_groups=frozenset()):
     return (checked, violations, skipped)
 
 
+def verify_r1d_stored_i1_values(srecs):
+    """R1d schema-v2 agreement: stored I1 fields vs frozen-builder recompute.
+
+    Structure-only, zero decoder. Returns (checked, mismatches). Unmarked/old
+    roots never reach here (caller gates on the r1d-v2 marker).
+    """
+    try:
+        sys.path.insert(0, str(ROOT / "comparison_bench" / "src"))
+        from comparison_bench.formal_ir.v72p2d6_gf32_graph_mother import (
+            build_support, assign_mother_from_support, check_I1_row_degree)
+    except Exception as ex:  # noqa: BLE001
+        return (0, [{"error": "import-failed %r" % (ex,)}])
+    import numpy as _np
+    cache = {}
+    checked = 0
+    mis = []
+    for _r in (srecs or []):
+        try:
+            _key = (str(_r.get("arm", "")), int(_r.get("n", -1)),
+                    str(_r.get("layer", "")))
+            _k = int(_r.get("prefix_rows", -1))
+        except (TypeError, ValueError):
+            continue
+        if _key not in cache:
+            try:
+                _sup = build_support(_key[0], int(_key[1]), _key[2])
+                cache[_key] = _np.asarray(assign_mother_from_support(
+                    _key[0], int(_key[1]), _key[2], _sup, int(_key[1])))
+            except Exception as ex:  # noqa: BLE001
+                mis.append({"arm": _key[0], "n": _key[1], "layer": _key[2],
+                            "error": "build-failed %r" % (ex,)})
+                continue
+        try:
+            _rmin, _nbelow = check_I1_row_degree(cache[_key], int(_k))
+        except (TypeError, ValueError) as ex:  # noqa: BLE001
+            mis.append({"arm": _key[0], "n": _key[1], "layer": _key[2],
+                        "prefix_rows": _k, "error": "check-failed %r" % (ex,)})
+            continue
+        checked += 1
+        try:
+            _smin = int(_r.get("row_degree_min", ""))
+            _snbelow = int(_r.get("rows_below_degree_2", ""))
+        except (TypeError, ValueError):
+            mis.append({"arm": _key[0], "n": _key[1], "layer": _key[2],
+                        "prefix_rows": _k, "error": "stored-v2-unparseable"})
+            continue
+        if int(_smin) != int(_rmin) or int(_snbelow) != int(_nbelow):
+            mis.append({"arm": _key[0], "n": _key[1], "layer": _key[2],
+                        "prefix_rows": _k, "stored": (_smin, _snbelow),
+                        "recomputed": (int(_rmin), int(_nbelow))})
+    return (checked, mis)
+
+
 def verify_command(out_root):
     """R1c-A2 independent scalar recomputation (15 independent rejections)."""
     out = pathlib.Path(out_root)
@@ -1290,7 +1351,9 @@ def verify_command(out_root):
     try:
         with open(out / "structure_records.csv", newline="",
                   encoding="utf-8") as fh:
-            srecs = list(csv.DictReader(fh))
+            _srd = csv.DictReader(fh)
+            _sfields = list(_srd.fieldnames or [])
+            srecs = list(_srd)
     except Exception as ex:  # noqa: BLE001
         check("six-files", False, "structure_records unreadable %r" % (ex,))
         print("VERIFY FAIL")
@@ -1299,6 +1362,23 @@ def verify_command(out_root):
     check("six-files", all((out / f).exists() for f in (
         "manifest.json", "structure_records.csv", "selected_arms.json",
         "decoder_records.csv", "summary.json", "command_log.txt")))
+    # R1d schema-v2 gate (marked roots only; old roots keep exact behavior).
+    try:
+        _r1d_marked = (str(mani.get("structure_schema", "")) ==
+                       str(R1D_STRUCTURE_SCHEMA)
+                       or str(summ.get("structure_schema", "")) ==
+                       str(R1D_STRUCTURE_SCHEMA))
+    except Exception:  # noqa: BLE001
+        _r1d_marked = False
+    if _r1d_marked:
+        _has_v2 = ("row_degree_min" in _sfields
+                   and "rows_below_degree_2" in _sfields)
+        check("r1d-schema-v2", bool(_has_v2),
+              "fields=%d" % len(_sfields))
+        if _has_v2:
+            _vchecked, _vmis = verify_r1d_stored_i1_values(srecs)
+            check("r1d-schema-values", len(_vmis) == 0,
+                  "checked=%d mis=%s" % (int(_vchecked), str(_vmis[:4])))
     counted = []
     try:
         counted = [r for r in recs if int(r.get("call_idx", -1)) >= 0]
@@ -1739,6 +1819,9 @@ def main(argv=None):
     ap.add_argument("--workers", type=int, default=18,
                     choices=(18, 14, 12, 8, 1),
                     help="R1c decoder/structure workers (18 full, else RSS-gated)")
+    # R1d Option C eligible-only successor mode (default off; frozen path untouched).
+    ap.add_argument("--r1d", action="store_true",
+                    help="R1d Option C: B0/B1/T1 only, T1-only scaling, schema r1d-v2")
     args = ap.parse_args(argv)
     if args.verify:
         sys.exit(0 if verify_command(args.out_root) else 1)
@@ -1746,6 +1829,15 @@ def main(argv=None):
         ap.error("--model-f-root is required (no formal default)")
     out = pathlib.Path(args.out_root)
     assert_no_formal_write(str(out))
+    r1d = bool(args.r1d)
+    if r1d:
+        # Distinct R1d entrypoint: named historical roots refused (no
+        # overwrite, no ingestion as science input), before the exists-check.
+        try:
+            assert_r1d_out_root(str(out), str(ROOT))
+        except ValueError as ex:
+            print(str(ex), file=sys.stderr)
+            sys.exit(2)
     if out.exists():
         print("refusing to overwrite %s" % out, file=sys.stderr)
         sys.exit(2)
@@ -1753,14 +1845,15 @@ def main(argv=None):
     logfh = open(out / "command_log.txt", "w", encoding="utf-8")
     _t0 = time.perf_counter()
     state = {"calls": 0, "setup_calls": 0, "t0": _t0,
-             "deadline": float(_t0) + float(WALL_BUDGET),
-             "records": [], "peak_rss": 0, "peak_single_rss": None,
-             "peak_aggregate_rss": None, "rss_workers_last": {},
-             "rss_main_last": None, "rss_sampled_aggregate_last": None,
-             "workers_effective": None, "rss_block_terminal": None,
-             "budget_stop": False,
-             "chunk_wall_blocked": False, "chunk_walls": {}, "worker": None,
-             "lock": threading.Lock(), "revision": R1C_REVISION}
+              "deadline": float(_t0) + float(WALL_BUDGET),
+              "records": [], "peak_rss": 0, "peak_single_rss": None,
+              "peak_aggregate_rss": None, "rss_workers_last": {},
+              "rss_main_last": None, "rss_sampled_aggregate_last": None,
+              "workers_effective": None, "rss_block_terminal": None,
+              "budget_stop": False,
+              "chunk_wall_blocked": False, "chunk_walls": {}, "worker": None,
+              "lock": threading.Lock(), "revision": R1C_REVISION,
+              "r1d": r1d}
     # R1c-A1 worker choice: requested is a hard ceiling; effective is gated
     # by measured startup RSS after spawning (pool + main aggregate recorded).
     req_workers = int(args.workers)
@@ -1775,11 +1868,24 @@ def main(argv=None):
     try:
         # T9: structure + blind freeze (no decoder before this freeze).
         if workers == 1:
-            records, summary, mothers = build_structures(64, logfh)
+            if r1d:
+                # R1d Option C: eligible-only arms (frozen default otherwise).
+                records, summary, mothers = build_structures(
+                    64, logfh, arms=list(R1D_ARMS))
+            else:
+                records, summary, mothers = build_structures(64, logfh)
+        elif r1d:
+            records, summary, mothers = build_structures_parallel(
+                64, logfh, max_workers=workers, arms=list(R1D_ARMS))
         else:
             records, summary, mothers = build_structures_parallel(
                 64, logfh, max_workers=workers)
-        write_structure_records(out / "structure_records.csv", records)
+        if r1d:
+            records = enrich_r1d_records(records, mothers)
+            write_structure_records_r1d(out / "structure_records.csv",
+                                        records)
+        else:
+            write_structure_records(out / "structure_records.csv", records)
         selected, eligible = select_decoder_arms(summary)
         order_new = structural_rank_list(
             summary, [a for a in selected if a in T_ARMS + M_ARMS])
@@ -1787,6 +1893,15 @@ def main(argv=None):
                                     None),
                      "best_M": next((a for a in order_new if a in M_ARMS),
                                     None)}
+        if r1d:
+            # B0/B1 controls + T1 sole new arm; scaling fallback is T1 only.
+            if set(selected) != set(R1D_ARMS):
+                raise ValueError("D6 R1d selection must be %s, got %s"
+                                 % (str(R1D_ARMS), str(selected)))
+            if fallbacks.get("best_T") != R1D_NEW_ARM \
+                    or fallbacks.get("best_M") is not None:
+                raise ValueError("D6 R1d fallbacks must be T1-only, got %s"
+                                 % (str(fallbacks),))
         with open(out / "selected_arms.json", "w", encoding="utf-8") as fh:
             json.dump({"selected": selected, "eligible": eligible,
                        "fallback_T": fallbacks["best_T"],
@@ -2236,6 +2351,9 @@ def main(argv=None):
             # Scaling branch §8.4: fallbacks only, stop at first signal.
             fb = [x for x in (fallbacks["best_T"], fallbacks["best_M"])
                   if x is not None]
+            if r1d and list(fb) != list(R1D_SCALING_FALLBACKS):
+                raise ValueError("D6 R1d scaling fallback must be T1-only, "
+                                 "got %s" % (str(fb),))
             for n in (128, 256):
                 if state.get("chunk_wall_blocked"):
                     break
@@ -2244,6 +2362,8 @@ def main(argv=None):
                 else:
                     srec, ssum, smothers = build_structures_parallel(
                         n, logfh, max_workers=workers, arms=fb)
+                if r1d:
+                    srec = enrich_r1d_records(srec, smothers)
                 append_structure_records(out / "structure_records.csv", srec,
                                          logfh)
                 order_n = structural_rank_list(ssum, fb)
@@ -2570,9 +2690,13 @@ def main(argv=None):
                        "wall_s": wall,
                        "peak_rss_bytes": state["peak_rss"],
                        "worker_pids": all_pids,
-                       "head_sha": head,
-                       "budget_stop": state["budget_stop"],
-                       "oracle_never_upgrades_exact": True}, fh, indent=2)
+                        "head_sha": head,
+                        "budget_stop": state["budget_stop"],
+                        "oracle_never_upgrades_exact": True,
+                        **({"structure_schema": R1D_STRUCTURE_SCHEMA,
+                            "eligible_semantics": R1D_ELIGIBLE_SEMANTICS,
+                            "r1d_arms": list(R1D_ARMS)} if r1d else {})},
+                       fh, indent=2)
         with open(out / "summary.json", "w", encoding="utf-8") as fh:
             json.dump({"selected": selected, "canary": canary,
                        "revision": R1C_REVISION, "workers": workers,
@@ -2593,10 +2717,14 @@ def main(argv=None):
                        "confirmation_safety": conf_safety,
                        "confirmation_width": width, "terminal": terminal,
                        "calls": sci_calls, "wall_s": wall,
-                       "iterations_max": itmax,
-                       "peak_rss_bytes": state["peak_rss"],
-                       "budget_stop": state["budget_stop"],
-                       "oracle_never_upgrades_exact": True}, fh, indent=2)
+                        "iterations_max": itmax,
+                        "peak_rss_bytes": state["peak_rss"],
+                        "budget_stop": state["budget_stop"],
+                        "oracle_never_upgrades_exact": True,
+                        **({"structure_schema": R1D_STRUCTURE_SCHEMA,
+                            "eligible_semantics": R1D_ELIGIBLE_SEMANTICS,
+                            "r1d_arms": list(R1D_ARMS)} if r1d else {})},
+                       fh, indent=2)
         log("done terminal=%s calls=%d setup=%d wall=%.1f peak_rss=%d" % (
             terminal, sci_calls, setup_calls, wall, state["peak_rss"]),
             logfh)

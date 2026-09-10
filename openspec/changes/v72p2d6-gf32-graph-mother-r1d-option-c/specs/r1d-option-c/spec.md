@@ -5,7 +5,7 @@
 - R1d arms SHALL be exactly `B0_D5_DV3_NATIVE`, `B1_D5_DV3_COMMON_LABELS`,
   `T1_PEG_DV3`. No dynamic additions; any other arm in R1d config SHALL raise
   before any build or decoder binding.
-- R1d dispatch SHALL be allowed only for the 26 frozen
+- R1d dispatch SHALL be allowed only for the 22 distinct frozen
   `(arm,n,layer,prefix_rows)` cells proven in `D6_GRAPH_MOTHER_VALIDITY_R1C_A5.csv`
   (frozen eligible AND I1 pass). Any other cell SHALL fail closed before any
   decoder invocation (never a skipped observation).

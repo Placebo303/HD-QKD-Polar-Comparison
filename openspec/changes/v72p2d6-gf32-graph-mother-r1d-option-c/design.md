@@ -15,9 +15,10 @@ layer on top.
 
 - `R1D_ARMS = [B0, B1, T1]` — the exact arm inventory; `assert_r1d_arm`
   raises on any SC/M/T2 arm (structurally inadmissible as frozen).
-- `R1D_VALID_SUBSET` — frozen frozenset of the 26 `(arm,n,layer,prefix_rows)`
-  cells proven in the A5 matrix (canary n64 f1.2+square ×3 arms;
-  confirmation n64 f1.0/f1.2/square ×T1; scaling n128/n256 f1.2+square ×T1).
+- `R1D_VALID_SUBSET` — frozen frozenset of the 22 distinct
+  `(arm,n,layer,prefix_rows)` cells proven in the A5 matrix (canary n64
+  f1.2+square ×3 arms; confirmation n64 f1.0/f1.2/square ×T1, sharing 4 cells
+  with canary; scaling n128/n256 f1.2+square ×T1).
 - `assert_r1d_dispatchable(arm,n,layer,prefix_rows,h_slice=None)` — fail-closed:
   membership in `R1D_VALID_SUBSET` AND live `check_I1_row_degree >= 2` on the
   slice when provided. Any other cell is a pre-dispatch hard failure.

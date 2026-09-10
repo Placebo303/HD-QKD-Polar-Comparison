@@ -40,8 +40,9 @@ explicitly out of scope (rejected A/B reasons in the acceptance doc).
 - Cycle docs: `D6_GRAPH_MOTHER_OPTION_C_ACCEPTANCE_R1.md`,
   `D6_GRAPH_MOTHER_R1D_EXECUTION_PACKET_R1.md`; decision-log + memory appends;
   `cycle_state.yaml` `next_gate` only (all auth keys false, no authorization).
-- 26-cell R1d schedule proven ⊆ A5 valid subset before implementation
-  (acceptance doc table; any invalid cell would have been STOP, none found).
+- 26 role-cells over 22 distinct structure cells proven ⊆ A5 valid subset before
+  implementation (acceptance doc table; any invalid cell would have been STOP,
+  none found).
 
 ## 4. Non-goals (hard prohibitions)
 

@@ -977,3 +977,124 @@ def write_structure_records(path, records):
             os.fsync(fh.fileno())
         except Exception as ex:  # R1c-A2 fail closed
             raise RuntimeError("fsync-failed structure_records: %r" % (ex,))
+
+# ---------------------------------------------------------------------------
+# R1d Option C (eligible-only successor, frozen; no SC/M knob lift).
+# Additive only: every builder, gate, and writer above is untouched.
+# ---------------------------------------------------------------------------
+R1D_ARMS = ["B0_D5_DV3_NATIVE", "B1_D5_DV3_COMMON_LABELS", "T1_PEG_DV3"]
+R1D_NEW_ARM = "T1_PEG_DV3"  # sole new arm; B0/B1 are controls, never advance
+R1D_SCALING_FALLBACKS = ["T1_PEG_DV3"]  # T1-only scaling fallback; no M leg
+R1D_STRUCTURE_SCHEMA = "r1d-v2"
+R1D_ELIGIBLE_SEMANTICS = "frozen-AND-I1"
+# Frozen R1d dispatch subset: every distinct (arm,n,layer,prefix_rows) the
+# unchanged schedule can dispatch (22 distinct cells: canary n64 f1.2+square
+# x3 arms; confirmation n64 f1.0/f1.2/square xT1, sharing the 4 T1 f1.2/square
+# cells with canary; scaling n128/n256 f1.2+square xT1), proven
+# frozen-eligible AND I1-passing in D6_GRAPH_MOTHER_VALIDITY_R1C_A5.csv.
+R1D_VALID_SUBSET = frozenset([
+    ("B0_D5_DV3_NATIVE", 64, "L1", 59), ("B0_D5_DV3_NATIVE", 64, "L1", 64),
+    ("B0_D5_DV3_NATIVE", 64, "L2", 52), ("B0_D5_DV3_NATIVE", 64, "L2", 64),
+    ("B1_D5_DV3_COMMON_LABELS", 64, "L1", 59),
+    ("B1_D5_DV3_COMMON_LABELS", 64, "L1", 64),
+    ("B1_D5_DV3_COMMON_LABELS", 64, "L2", 52),
+    ("B1_D5_DV3_COMMON_LABELS", 64, "L2", 64),
+    ("T1_PEG_DV3", 64, "L1", 49), ("T1_PEG_DV3", 64, "L1", 59),
+    ("T1_PEG_DV3", 64, "L1", 64), ("T1_PEG_DV3", 64, "L2", 43),
+    ("T1_PEG_DV3", 64, "L2", 52), ("T1_PEG_DV3", 64, "L2", 64),
+    ("T1_PEG_DV3", 128, "L1", 118), ("T1_PEG_DV3", 128, "L1", 128),
+    ("T1_PEG_DV3", 128, "L2", 104), ("T1_PEG_DV3", 128, "L2", 128),
+    ("T1_PEG_DV3", 256, "L1", 236), ("T1_PEG_DV3", 256, "L1", 256),
+    ("T1_PEG_DV3", 256, "L2", 208), ("T1_PEG_DV3", 256, "L2", 256),
+])
+# Immutable history R1d must never overwrite or ingest as science input:
+# the R1c-A2 six-file root plus the three VOID_RETAINED_ZERO_REUSE roots.
+R1D_REFUSED_ROOTS = (
+    "workspace/d6_graph_mother_r1c_dd8c4defe67742a8b2bc1b634c116d6b",
+    "workspace/d6_graph_mother_r1c_923a25897087495ab4605870e561f3cc",
+    "workspace/d6_graph_mother_r1c_e8ee45a4669c4738bf7e96d926ba7e5c",
+    "workspace/d6_graph_mother_r1c_f15cfa29baa2458e804c80a9f1045140",
+)
+
+def assert_r1d_arm(arm):
+    """R1d arm-set gate: SC/M/T2 are structurally inadmissible as frozen."""
+    if str(arm) not in R1D_ARMS:
+        raise ValueError(
+            "D6 R1d inadmissible arm %r (eligible-only %s)"
+            % (str(arm), ",".join(R1D_ARMS)))
+
+def assert_r1d_dispatchable(arm, n, layer, prefix_rows, h_slice=None):
+    """R1d fail-closed dispatch guard: frozen-subset membership AND live I1.
+
+    Raises ValueError for any cell outside R1D_VALID_SUBSET or with a live
+    check row degree < 2. Call before any decoder invocation.
+    """
+    _key = (str(arm), int(n), str(layer), int(prefix_rows))
+    assert_r1d_arm(arm)
+    if _key not in R1D_VALID_SUBSET:
+        raise ValueError(
+            "D6 R1d dispatch refused (outside validity subset): %s" % (_key,))
+    if h_slice is not None:
+        _rmin, _nbelow = check_I1_row_degree(h_slice, int(prefix_rows))
+        if int(_rmin) < int(I1_MIN_CHECK_DEGREE):
+            raise ValueError(
+                "D6 R1d dispatch refused (live I1): %s min=%d below=%d"
+                % (_key, int(_rmin), int(_nbelow)))
+
+def assert_r1d_out_root(out_root, repo_root):
+    """Refuse the immutable A2/VOID roots as an R1d output root (by name)."""
+    import pathlib as _pl
+    try:
+        _rp = _pl.Path(out_root).resolve()
+    except Exception:  # noqa: BLE001 - unresolvable path refuses closed
+        raise ValueError("D6 R1d refusing unresolvable out_root %r" % (out_root,))
+    for _rel in R1D_REFUSED_ROOTS:
+        _cand = (_pl.Path(repo_root) / _rel).resolve()
+        if str(_rp) == str(_cand):
+            raise ValueError(
+                "D6 R1d refusing historical root %s" % (_cand,))
+
+def enrich_r1d_records(records, mothers):
+    """Add schema-v2 I1 fields to copies of the frozen record dicts.
+
+    Slices the in-memory mothers (no rebuild); the shared frozen dicts are
+    never mutated, so the old six-file writer output is unchanged.
+    """
+    import numpy as _np
+    out = []
+    for _r in (records or []):
+        _d = dict(_r)
+        try:
+            _H = _np.asarray(mothers[(str(_r.get("arm", "")),
+                                      str(_r.get("layer", "")))])
+            _rmin, _nbelow = check_I1_row_degree(
+                _H, int(_r.get("prefix_rows", -1)))
+        except (TypeError, ValueError, KeyError) as ex:  # noqa: BLE001
+            raise ValueError("D6 R1d enrich failed for %r: %r"
+                             % (str(_r.get("arm", "")), ex))
+        _d["row_degree_min"] = int(_rmin)
+        _d["rows_below_degree_2"] = int(_nbelow)
+        out.append(_d)
+    return out
+
+_R1D_STRUCTURE_FIELDS = ["arm", "n", "layer", "prefix_rows", "rank",
+    "zero_rows", "zero_columns", "connected_components",
+    "largest_component_fraction", "four_cycles",
+    "four_cycle_variable_incidence_max", "duplicate_projective_columns",
+    "base_pair_duplicates", "support_triple_duplicates", "row_degree_max",
+    "row_degree_sumsq", "girth", "girth_reason", "m_cycle_rank",
+    "window_overflow", "eligible", "determinism_ok",
+    "row_degree_min", "rows_below_degree_2"]
+R1D_STRUCTURE_HEADER = ",".join(_R1D_STRUCTURE_FIELDS) + "\n"
+
+def write_structure_records_r1d(path, records):
+    """Schema-v2 writer for NEW R1d roots only (historical roots untouched)."""
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(R1D_STRUCTURE_HEADER)
+        for r in (records or []):
+            fh.write(",".join(str(r.get(k, "")) for k in _R1D_STRUCTURE_FIELDS) + "\n")
+        fh.flush()
+        try:
+            os.fsync(fh.fileno())
+        except Exception as ex:  # R1c-A2 fail closed
+            raise RuntimeError("fsync-failed structure_records: %r" % (ex,))

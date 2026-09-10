@@ -23,7 +23,7 @@ python scripts/v72p2d6_graph_mother_development.py --r1d \
   over-limit→`D6_RSS_LIMIT_BLOCKED`).
 - No `--phase` flag exists. No G1/G2/VAL/real/raw contact.
 
-## 2. Dispatch set (26 structure cells, §4 proof table in the acceptance doc)
+## 2. Dispatch set (22 distinct structure cells, §4 proof table in the acceptance doc)
 
 - Canary (mandatory): `{B0,B1,T1}` × n64 × 4 canary seeds × {f1.2 (59,52),
   square (64,64)} × {L1 + APP-L2 + oracle-L2 diagnostic} = 72 invocations.
@@ -82,7 +82,7 @@ the snapshot (6 files, lengths/mtimes; path git-clean).
    this packet, branch, widths, arms, and budget; G2 absent.
 3. Protected-root metadata matches snapshot; historical files byte-identical.
 4. Focused D6 + seven-file non-perf suites green on the frozen HEAD.
-5. Dispatched set ⊆ §4 valid subset (26/26 proven; guard landed + tested).
+5. Dispatched set ⊆ §4 valid subset (22/22 proven; guard landed + tested).
 6. Exact command frozen (§1) with stop rules (§4); workers/budgets per §1/§4.
 7. T2 excluded (rank-bound record only); no Track B dependency for R1d
    (T1/B0/B1 structure builds ≤0.34 s at every width).

@@ -61,8 +61,9 @@ L2 (86,104,128); n256 L1 (196,236,256) / L2 (172,208,256).
 Every distinct `(arm,n,layer,prefix)` below is `frozen_eligible=True` AND
 `i1_pass=True` (`new_eligible=True`) in the accepted
 `D6_GRAPH_MOTHER_VALIDITY_R1C_A5.csv` (144 rows). Checked 2026-09-10 by direct
-CSV read (zero decoder): **26/26 pass, 0 conflicts** — no STOP, no dropped or
-replaced rows/seeds/gates.
+CSV read (zero decoder): **22/22 distinct structure cells pass, 0 conflicts**
+— no STOP, no dropped or replaced rows/seeds/gates. (26 role-cells: the 4
+T1-n64 f1.2/square cells serve both canary and confirmation roles.)
 
 | arm | n | layer | prefix_rows | role | frozen/I1 | new | rmin | nbelow |
 |---|---|---|---|---|---|---|---|---|
@@ -74,16 +75,12 @@ replaced rows/seeds/gates.
 | B1 | 64 | L1 | 64 | canary | True/True | True | 3 | 0 |
 | B1 | 64 | L2 | 52 | canary | True/True | True | 3 | 0 |
 | B1 | 64 | L2 | 64 | canary | True/True | True | 3 | 0 |
-| T1 | 64 | L1 | 59 | canary | True/True | True | 2 | 0 |
-| T1 | 64 | L1 | 64 | canary | True/True | True | 2 | 0 |
-| T1 | 64 | L2 | 52 | canary | True/True | True | 2 | 0 |
-| T1 | 64 | L2 | 64 | canary | True/True | True | 2 | 0 |
+| T1 | 64 | L1 | 59 | canary+conf | True/True | True | 2 | 0 |
+| T1 | 64 | L1 | 64 | canary+conf | True/True | True | 2 | 0 |
+| T1 | 64 | L2 | 52 | canary+conf | True/True | True | 2 | 0 |
+| T1 | 64 | L2 | 64 | canary+conf | True/True | True | 2 | 0 |
 | T1 | 64 | L1 | 49 | conf | True/True | True | 3 | 0 |
-| T1 | 64 | L1 | 59 | conf | True/True | True | 2 | 0 |
-| T1 | 64 | L1 | 64 | conf | True/True | True | 2 | 0 |
 | T1 | 64 | L2 | 43 | conf | True/True | True | 3 | 0 |
-| T1 | 64 | L2 | 52 | conf | True/True | True | 2 | 0 |
-| T1 | 64 | L2 | 64 | conf | True/True | True | 2 | 0 |
 | T1 | 128 | L1 | 118 | scal | True/True | True | 2 | 0 |
 | T1 | 128 | L1 | 128 | scal | True/True | True | 2 | 0 |
 | T1 | 128 | L2 | 104 | scal | True/True | True | 2 | 0 |

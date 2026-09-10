@@ -1,7 +1,7 @@
 # Tasks — V72P2D6 R1d Option C (eligible-only successor)
 
 - [x] D1 Freeze: this OpenSpec (proposal/design/tasks/spec) +
-  `D6_GRAPH_MOTHER_OPTION_C_ACCEPTANCE_R1.md` (ruling, A/B rejection, 26-cell
+  `D6_GRAPH_MOTHER_OPTION_C_ACCEPTANCE_R1.md` (ruling, A/B rejection, 22-cell
   proof) + `D6_GRAPH_MOTHER_R1D_EXECUTION_PACKET_R1.md` (schedule, budgets,
   command, stop rules, gates) + decision-log + memory appends +
   `cycle_state.yaml` `next_gate` only (all auth false). Commit separately
@@ -19,7 +19,7 @@
   old roots unchanged).
 - [ ] D4 Focused tests (new file, fake-only, fresh task-owned basetemps):
   exact arm set; SC/M/T2 non-dispatch; T1-only fallback + B0/B1 control
-  semantics; all 26 schedule cells eligible (live rebuild); one invalid cell
+  semantics; all 22 schedule cells eligible (live rebuild); one invalid cell
   fails pre-decoder-binding (`_NoCall`, zero calls); schema-v2 present +
   recomputable; old A2 schema readable + immutable; crash/nonfinite override;
   no A2/VOID/formal reuse; seq==par determinism; fake e2e produces + verifies
