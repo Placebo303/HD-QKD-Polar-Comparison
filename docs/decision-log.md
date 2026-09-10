@@ -3335,3 +3335,11 @@ these may not be merged or reordered.
 **Context**: Equivalence — T2 n64 live-vs-reference, n128/n256 vs replay-verified committed fixtures, per-variable traces, committed n64 rows byte-identical, eligible/selection unchanged, replay + seq==par, A4 guards green, sandbox-T2 gate vacuous (no sandbox T2 exists). Benchmark (fresh roots, cold+warm, A4 protocol): T2/layer n64 1.2 s (≤5, 34.5x), n128 26.6 s (≤90, 24.7x), n256 516.1/479.7 s (≤600, 19.9x); n64 all-8 1.5 s (≤8); fb-only 0.6/1.3 s vs A4 2.5/2.7 s; RSS ≈ 93 MB; zero decoder calls; no retry. Slow-task inventory measured (v38 T0 2.0 s, T1 812/810 s, orchestration 345/344 s, lane-A ≈40 s, helpers ≤46 ms; V30R 74.8/719.9 s cited, decoder-bound, not re-runnable). Focused 61/61 + slow n256 cell; seven-file non-perf 95/95.
 
 **Consequences**: `next_gate` → `D6_GRAPH_MOTHER_R1C_A5A6_COMPLETE_AWAITING_MAIN_THREAD_RULING`. T2-at-n256 no longer breaches the chunk block on structure cost. Any future D6 execution still needs its own OpenSpec + Pre-EXECUTE + explicit authorization — nothing granted. All authorizations false; G2 absent; no push.
+
+## 2026-09-10 V72P2D6 R1d Option C freeze (eligible-only {B0,B1,T1}, Pre-EXECUTE pending)
+
+**Decision**: Main-thread ruling Option C accepted and frozen: no SC/M knob lift (A rejected: R2 degree-profile lift + selection re-freeze; B rejected: M-over-B identity weakening + re-freeze; both reopen repair research); SC/accumulator structurally inadmissible as frozen; R1d = {B0,B1,T1} with T2 rank-bound recorded only; no A2 call/root reuse; schema `r1d-v2` approved for new roots (historical A2 immutable, old schema).
+
+**Context**: 26-cell R1d schedule proven ⊆ A5 valid subset (CSV read, zero decoder, 26/26 frozen+I1 pass, 0 conflicts; worst-case 552 ≤ 2500 calls). New OpenSpec change `v72p2d6-gf32-graph-mother-r1d-option-c` + `D6_GRAPH_MOTHER_OPTION_C_ACCEPTANCE_R1.md` + `D6_GRAPH_MOTHER_R1D_EXECUTION_PACKET_R1.md` (exact `--r1d` command, budgets, stop rules, no-reuse, claim ceiling). R1d NOT authorized, NOT executed; no R1d root exists.
+
+**Consequences**: `next_gate` → `D6_GRAPH_MOTHER_R1D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION`. Eligible-only `--r1d` implementation + focused tests + independent reviews next. All authorizations false; G2 absent; no push.
