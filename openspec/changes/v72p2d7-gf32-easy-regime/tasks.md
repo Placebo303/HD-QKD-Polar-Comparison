@@ -33,3 +33,10 @@
   decision-log/memory appends only if not already represented, no
   result/attempt/completed update; gate
   `D7_B_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION` only after both PASS; then STOP
+- [ ] T7 — WSL local-source launch rework (zero-decoder, no new UUID, no
+  execution): runner-local `comparison_bench/src` path setup from resolved
+  `__file__` (package-correct bind, no science change); L01–L12 launch tests;
+  independent code review (`D7_B_WSL_LAUNCH_REWORK_REVIEW_PASS`); renewed
+  independent Pre-EXECUTE on WSL
+  (`D7_B_PRE_EXECUTE_REVIEW_PASS_WSL_R2_AWAITING_FRESH_AUTHORIZATION`);
+  closeout gate `D7_B_WSL_READY_AWAITING_FRESH_EXPLICIT_AUTHORIZATION`
