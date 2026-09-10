@@ -4,8 +4,8 @@ plan_revision: R1
 plan_accepted: false
 implementation_authorized: false
 d7d_execution_authorized: false
-decoder_executed: false
-result_created: false
+decoder_executed: true
+result_created: true
 formal_execution_authorized: false
 synthetic_execution_authorized: false
 real_execution_authorized: false
@@ -16,9 +16,15 @@ r1d_state: R1D_PAUSED_PENDING_DECODER_CERTIFICATION_AND_EASY_REGIME
 g1_authorized: false
 g2_authorized: false
 layer_interface_implementation: DEFERRED_MANDATORY_BEFORE_CROSS_LAYER_APP
-next_gate: D7_D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION
+next_gate: INDEPENDENT_D7_D_RESULT_ACCEPTANCE_R1
 d7d_readiness_state: D7_D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION
 d7d_implementation_review: D7_D_IMPLEMENTATION_REVIEW_PASS
 d7d_pre_execute_review: D7_D_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION
 d7d_flooding_certification_doc: docs/research_cycles/V72P2D7-GF32-SCHEDULE-DISCRIMINATOR/D7_D_FLOODING_CERTIFICATION_R1.md
 d7d_environment_note: VENV_PYTHON_ON_PATH_ADAPTER_REQUIRED_AT_EXECUTION_AUTHORIZATION
+d7d_execution_attempts: 1
+d7d_execution_completed: 1
+d7d_uuid: 64660d16-397d-4ef3-8454-3066d27c12c7
+d7d_root: workspace/d7_d_schedule_discriminator_64660d16-397d-4ef3-8454-3066d27c12c7
+d7d_terminal: D7_D_SCHEDULE_EFFECT_INCONCLUSIVE
+d7d_pre_result_review: D7_D_PRE_RESULT_REVIEW_PASS_R1

@@ -1,0 +1,73 @@
+{
+  "calls_attempted": 256,
+  "calls_completed": 256,
+  "calls_remaining": 0,
+  "crash_count": 0,
+  "nonfinite_count": 0,
+  "peak_rss_bytes": 105304064,
+  "reruns": 0,
+  "resumes": 0,
+  "retries": 0,
+  "stop_terminal": "",
+  "stored_wall_s": 65.94506893705693,
+  "strata": [
+    {
+      "condition": "L1_MARGINAL",
+      "f": 1.0,
+      "layer": "L1",
+      "stratum_idx": 1,
+      "stratum_label": "EXACT_TIE_LOW"
+    },
+    {
+      "condition": "L1_ORACLE_U2",
+      "f": 1.0,
+      "layer": "L1",
+      "stratum_idx": 2,
+      "stratum_label": "MIXED_SCHEDULE_EFFECT"
+    },
+    {
+      "condition": "L2_MARGINAL",
+      "f": 1.0,
+      "layer": "L2",
+      "stratum_idx": 3,
+      "stratum_label": "EXACT_TIE_LOW"
+    },
+    {
+      "condition": "L2_ORACLE_U1",
+      "f": 1.0,
+      "layer": "L2",
+      "stratum_idx": 4,
+      "stratum_label": "EXACT_TIE_LOW"
+    },
+    {
+      "condition": "L1_MARGINAL",
+      "f": 1.2,
+      "layer": "L1",
+      "stratum_idx": 5,
+      "stratum_label": "EXACT_TIE_LOW"
+    },
+    {
+      "condition": "L1_ORACLE_U2",
+      "f": 1.2,
+      "layer": "L1",
+      "stratum_idx": 6,
+      "stratum_label": "EXACT_TIE_HIGH"
+    },
+    {
+      "condition": "L2_MARGINAL",
+      "f": 1.2,
+      "layer": "L2",
+      "stratum_idx": 7,
+      "stratum_label": "EXACT_TIE_LOW"
+    },
+    {
+      "condition": "L2_ORACLE_U1",
+      "f": 1.2,
+      "layer": "L2",
+      "stratum_idx": 8,
+      "stratum_label": "EXACT_TIE_HIGH"
+    }
+  ],
+  "terminal": "D7_D_SCHEDULE_EFFECT_INCONCLUSIVE",
+  "watchdog_timeouts": 0
+}

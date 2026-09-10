@@ -1,0 +1,9 @@
+stratum_idx,f,layer,condition,blocks,layered_exact_count,flooding_exact_count,layered_only_exact_count,flooding_only_exact_count,both_exact_count,neither_exact_count,layered_syndrome_ok_count,flooding_syndrome_ok_count,layered_only_syndrome_ok_count,flooding_only_syndrome_ok_count,both_syndrome_ok_count,neither_syndrome_ok_count,nonfinite_count,crash_count,layered_median_iterations,flooding_median_iterations,layered_median_check_updates,flooding_median_check_updates,layered_median_edge_updates,flooding_median_edge_updates,layered_median_wall_s,flooding_median_wall_s,stratum_label
+1,1.0,L1,L1_MARGINAL,16,0,0,0,0,0,16,0,0,0,0,0,16,0,0,90.0,90.0,4410.0,4410.0,13230.0,13230.0,0.355697594499361,0.3524609279993456,EXACT_TIE_LOW
+2,1.0,L1,L1_ORACLE_U2,16,10,8,2,0,8,6,10,8,2,0,8,6,0,0,9.0,57.0,441.0,2793.0,1323.0,8379.0,0.0353878980022273,0.21873456950197578,MIXED_SCHEDULE_EFFECT
+3,1.0,L2,L2_MARGINAL,16,0,0,0,0,0,16,0,0,0,0,0,16,0,0,90.0,90.0,3870.0,3870.0,11610.0,11610.0,0.3114623125002254,0.3101438479970966,EXACT_TIE_LOW
+4,1.0,L2,L2_ORACLE_U1,16,1,1,0,0,1,15,1,1,0,0,1,15,0,0,90.0,90.0,3870.0,3870.0,11610.0,11610.0,0.3129346519999672,0.3093763274991943,EXACT_TIE_LOW
+5,1.2,L1,L1_MARGINAL,16,3,2,1,0,2,13,3,2,1,0,2,13,0,0,90.0,90.0,5310.0,5310.0,15930.0,15930.0,0.4291683545052365,0.42125892200056114,EXACT_TIE_LOW
+6,1.2,L1,L1_ORACLE_U2,16,16,16,0,0,16,0,16,16,0,0,16,0,0,0,3.5,6.0,206.5,354.0,619.5,1062.0,0.01706109949736856,0.028888350494526094,EXACT_TIE_HIGH
+7,1.2,L2,L2_MARGINAL,16,0,0,0,0,0,16,0,0,0,0,0,16,0,0,90.0,90.0,4680.0,4680.0,14040.0,14040.0,0.3749403900037578,0.37120478650103905,EXACT_TIE_LOW
+8,1.2,L2,L2_ORACLE_U1,16,13,13,0,0,13,3,13,13,0,0,13,3,0,0,9.5,16.0,494.0,832.0,1482.0,2496.0,0.04022570899905986,0.06631262350128964,EXACT_TIE_HIGH
