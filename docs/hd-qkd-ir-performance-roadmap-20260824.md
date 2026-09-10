@@ -195,9 +195,11 @@ R3 只做低成本 P0，不与 V33 争夺主要计算预算：
 直接 GF(1024) NB-Polar 可能有 `q^2` 级 decoder 代价；在没有可靠性构造与小规模
 golden check 前不实现。现有两层 Law A 不能作为 NB-Polar 可行性证据。
 
-## 8. R4：HD-Cascade 性能锚点
+## 8. R4：HD-Cascade 性能锚点（未来独立旁线）
 
-HD-Cascade 可与主线并行，但使用独立 frozen validation/fresh blocks。报告：
+HD-Cascade 仍可作为未来系统级参考线，但不进入当前 NB-LDPC 诊断周期，也不与
+D7 争夺实现、评审和 decoder 预算。若以后单独立项，必须使用独立 frozen
+validation/fresh blocks，并报告：
 
 - exact FER/false accept；
 - 总公开 leakage（含认证/验证相关消息）；
@@ -257,3 +259,143 @@ longrun/minrerun、qualification、promotion、push、删除或覆盖旧 outputs
 
 本路线图取代 2026-08-23 文档中“V33 尚待 freeze”的陈旧当前状态，但不改写其
 历史审计内容。
+
+## 12. 2026-09-10 主线增量：停止 graph/mother 局部修补，进入 D7 decoder 与层接口诊断
+
+本节取代本文 §2、§6、§9、§11 中关于“当前阶段、当前优先级和当前授权边界”的
+陈旧表述；历史结果和当时判断继续保留，不回写。当前权威基线为分支
+`formal-ir-v72p1-addendum-clean`、Option C 冻结提交 `8e8e4aed`，D6 gate 为
+`D6_GRAPH_MOTHER_R1D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION`。所有 execution
+authorization 均为 false，R1d 尚未执行，G2 未授权。
+
+### 12.1 D5/D6 已经证明和未证明的边界
+
+D5 已修正 Model-F lambda application defect：lambda 是每个 Bob column 的总浓度，
+不是每个 cell 的 pseudocount。修正后的 CAL 模型恢复了明显 Alice--Bob 信息，因而
+“数据近独立、无信息可用”不是当前解释。但在当前两层 GF32 分解、mother-prefix
+disclosure 和 historical decoder 下，正式 G1 及后续 CAL-only discriminator 均未
+产生稳定恢复，当前 D5 rate-mother/BP operating path 已停止。
+
+D6 随后保持 E2 prior、两层分解、rows、decoder、schedule、seeds 和 thresholds
+不变，只测试 graph/mother topology。R1c-A2 的 stored
+`D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY` 不成立：64 个 attempted calls 使用了含
+check-degree 1 行的 T3/M1 矩阵并 crash/nonfinite。A3 独立重算终局为
+`D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED`，历史根 immutable、零复用，不能作为
+topology 阴性证据。
+
+A5 全矩阵审计后：T3/T4 和 M1/M2 按冻结定义存在结构资格缺陷，T2 存在 square
+prefix rank deficiency；只有 B0/B1 controls 和 T1 PEG 构成最小 eligible-only
+候选。I1（每个 dispatched check row degree >= 2）已 fail-closed 落地。A4/A6 已
+解决主要 structure wall 问题，但性能改善不等于科学恢复。
+
+因此当前可正式停止的是：
+
+`D5_D6_LOCAL_GRAPH_MOTHER_PATCHING_STOPPED`
+
+即不再投入 graph seed 搜索、SC window 微调、当前 accumulator placement 修补或
+当前 T2 choice-key 周边调整。这里没有证明 graph topology 普遍无效，也没有证明
+GF32、两层 NB-MLC 或 NB-LDPC 原理无效。
+
+### 12.2 R1d 的新地位：冻结但暂停授权
+
+Option C 已冻结 R1d `{B0_D5_DV3_NATIVE, B1_D5_DV3_COMMON_LABELS,
+T1_PEG_DV3}`：B0/B1 只作 controls，T1 是唯一新 graph 候选，T2 只保留 rank
+bound，SC/M 不进入。执行包最多 552 scientific calls，并非因构图加速就自动成为
+低成本运行。
+
+R1d 当前降级为认证后的条件性 closing experiment：
+
+- decoder certification 和 easy-regime calibration 通过后，若 T1 对 controls
+  仍有足够区分力，才重新评估是否请求一次 R1d 授权；
+- 若发现 decoder correctness 缺陷，原样 R1d 暂无信息价值，必须先修正并重新立项；
+- 若 D7 已把瓶颈明确定位到 schedule 或 layer interface，主线程可以取消 R1d，
+  无需为了完成旧路线而运行；
+- 即使 R1d 阴性，结论也仅限于冻结 T1/rate/degree/disclosure/decoder 范围。
+
+当前资源决策为：`R1D_PAUSED_PENDING_DECODER_CERTIFICATION`。已有冻结不构成执行
+授权，不创建 R1d 根。
+
+### 12.3 三个影响下一步设计的代码事实
+
+1. historical GF32 decoder 已是 row-layered FFT-QSPA；下一项 schedule 对照必须
+   是“现有 layered vs 独立 flooding”，不能把 layered 写成新算法。
+2. 当前 L1→L2 已传递 soft APP，并非简单硬判决串联；下一项应认证其 soft 信息
+   语义、channel evidence 是否重复计数，以及反向 extrinsic feedback 是否有价值。
+3. `max_iter=90` 跑满只表示停止条件未满足，不能单独区分实现错误、停滞、振荡、
+   错误 fixed point 或 finite-length threshold。
+
+### 12.4 D7 主线：四级诊断，逐级停止
+
+当前 NB-LDPC 主线转为 `D7_DECODER_AND_LAYER_INTERFACE_DIAGNOSIS`：
+
+| 阶段 | 最小内容 | 决策问题 | 授权边界 |
+|---|---|---|---|
+| D7-A ground-truth certification | GF32 运算/标签；独立 direct-SP 对 FFT check update；tree exact posterior；小型有环图逐轮消息对照 | historical kernel 是否实现了预期算法？ | 单元/数学认证；零 claim-bearing production run |
+| D7-B easy-regime calibration | 确定性正确 prior、少量可控歧义、tree/小图和高披露有限图 | decoder 是否存在明确可工作的 operating region？ | 冻结后独立评审；涉及 development decoder 时另行授权 |
+| D7-C bidirectional oracle | 同一 paired blocks 上比较 `P(U1|B)`、`P(U1|B,U2_true)`、`P(U2|B)`、`P(U2|B,U1_true)` | 单层 intrinsic difficulty 与跨层依赖在哪里？ | oracle 纯诊断，不计协议恢复、FER、泄漏或密钥率 |
+| D7-D schedule discriminator | prior/H/labels/syndrome/blocks 全同，只比较 independent flooding 与现有 row-layered | 更新顺序是否产生可重复的动力学改善？ | 不同时引入 damping、clipping、restart 或 min-sum |
+
+D7-A 的验收必须区分：tree graph 上 BP posterior 应与 exact enumeration 比较；
+loopy graph 上只能与独立实现的逐轮 message update 比较，不能要求有限轮 loopy BP
+等于 MAP。参考实现不得复用待认证核的关键置换、卷积或 syndrome-offset 代码。
+
+Easy regime 不能只用完全 delta 的真值 prior；至少要包含 single-check、tree graph、
+可控噪声和一个 direct-SP/MAP 已知可解的高披露有限图。通过只证明 decoder 存在
+工作区，不证明实际 CAL 条件可恢复。
+
+双向 oracle 与 schedule 诊断使用同一批 paired blocks 和冻结联合模型。建议规模如
+`16 blocks x 4 conditions x 2 schedules = 128` 仅是待 prereg 的预算候选，不是当前
+授权，也不含 certification/easy-regime calls。若以后实现 alternating/joint BP，
+必须定义 extrinsic message 并排除重复回灌原始 channel evidence。
+
+### 12.5 D7 结果分流
+
+- direct-SP/FFT-QSPA、tree exact posterior 或 easy-regime 失败：停止性能归因，先修
+  correctness；不运行原样 R1d。
+- L1 marginal 失败但 `L1|true L2` 明显恢复：优先 decomposition/labeling 或跨层
+  message-flow。
+- 两层 marginal 都弱、两层 oracle 都强：优先 alternating/joint two-layer BP，
+  但 oracle 本身不证明联合迭代会成功。
+- oracle 仍弱但 easy regime 正常：优先实际 equivalent channel、finite-length
+  ensemble 和 disclosure 匹配。
+- flooding 明显优于现有 layered：优先 schedule，并复查 layered implementation。
+- certification、easy regime、oracle 和 schedule 均不能恢复有用信号：停止当前
+  sequential two-layer historical-BP 配置，转向 channel-informed mapping/rate/degree
+  联合设计或新的 protograph/MET ensemble。
+
+当前诊断不应一次混入 adaptive damping、clipping、restart、min-sum 和多个 schedule。
+先隔离一个算法组件；除 exact/syndrome 外，记录 unsatisfied checks 轨迹、message/
+posterior change、first-syndrome iteration、symbol changes、confidence、实际更新工作量
+和 wall，区分停滞、振荡、错误 fixed point 与迭代不足。
+
+### 12.6 当前主线和旁线
+
+NB-LDPC 继续作为项目主线。停止的是“固定两层 + historical BP，仅靠外围
+graph/mother 局部修补”的假设，不是 NB-LDPC。若 D7 指向层接口，优先研究
+labeling/decomposition 和 alternating/joint GF32 BP；若指向 ensemble，再进入
+channel-informed rate/degree distribution、protograph/MET 或 rank-constrained
+construction，不再手工枚举 topology family。
+
+HD-Cascade/hybrid 本周期不并行建设、不占用 D7 预算。未来可单独立项为系统基线或
+rescue 机制，但不是当前 NB-LDPC 失败后的自动转向。
+
+### 12.7 当前执行顺序与授权边界
+
+当前顺序冻结为：
+
+```text
+D7-A decoder certification
+    -> D7-B easy-regime
+    -> D7-C bidirectional oracle
+    -> D7-D flooding vs current row-layered
+    -> main-thread route decision
+    -> conditional R1d OR decomposition/joint BP OR channel-informed ensemble
+```
+
+D7-A 应先形成独立任务包、实现、测试和 correctness review。D7-B/C/D 在任何
+development decoder call 前必须另有完整 prereg、独立 Pre-EXECUTE 和用户明确的一次
+授权；calls、paired blocks、thresholds、roots、budgets 和 stop rules 必须届时冻结。
+
+当前不授权：R1d、D7 development decoder、任何 `--phase`、正式 G1/G2、VAL、
+real/raw、qualification、promotion、旧根复用、rerun/resume 或 push。R1d 冻结提交
+`8e8e4aed` 仅为 provenance，不是执行锁或授权令牌。
