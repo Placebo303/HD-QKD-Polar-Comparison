@@ -3,7 +3,7 @@ state: D7_E_WSL_RSS_READY_AWAITING_FRESH_EXPLICIT_AUTHORIZATION
 plan_revision: R1
 plan_accepted: false
 implementation_authorized: false
-d7e_execution_authorized: true
+d7e_execution_authorized: false
 decoder_executed: false
 result_created: false
 formal_execution_authorized: false
