@@ -564,6 +564,98 @@ def belief_diagnostic_label(provenance):
     return provenance
 
 
+# Code-factor extrinsic contract (D7-G, frozen OpenSpec
+# `v72p2d7-code-factor-extrinsic-contract`). A cold decoder's outgoing
+# code-factor message is `L_code_ext = L_post - log(p_in)` (per-row additive
+# constant free), stored row-normalized by subtracting log-sum-exp so
+# `softmax(log(p_in) + L_code_ext) == softmax(L_post)` exactly. This is a BP
+# factor message, not a calibrated exact posterior and not MAP truth. Valid
+# only for cold start after >=1 completed check sweep with finite
+# shape-correct beliefs. Iteration 0 carries no check evidence (neutral zeros
+# + NO_CHECK_EVIDENCE, ineligible for transfer); warm start is fail-closed
+# (WARM_START_UNSPECIFIED, never inferred); nonfinite/shape mismatch fails
+# loud, never silently repaired. Existing final_beliefs/belief_provenance
+# semantics are unchanged; no consumer is wired to this field yet.
+EXTRINSIC_NO_CHECK_EVIDENCE = "NO_CHECK_EVIDENCE"
+EXTRINSIC_CHECK_EXTRINSIC = "CHECK_EXTRINSIC"
+EXTRINSIC_WARM_START_UNSPECIFIED = "WARM_START_UNSPECIFIED"
+EXTRINSIC_PROVENANCE_TOKENS = (
+    EXTRINSIC_NO_CHECK_EVIDENCE,
+    EXTRINSIC_CHECK_EXTRINSIC,
+    EXTRINSIC_WARM_START_UNSPECIFIED,
+)
+
+
+class UnusableExtrinsicError(RuntimeError):
+    """Cross-layer transfer refused: no usable CHECK_EXTRINSIC."""
+
+
+def _build_check_extrinsic_log_beliefs(final_beliefs, log_input_prior):
+    """Form the stored code-factor extrinsic message (D7-G producer rule).
+
+    Returns ``L_post - log(p_in)`` row-normalized by subtracting
+    log-sum-exp. Raises ``ValueError`` on ``None`` inputs, shape mismatch,
+    non-2-D input, or any nonfinite entry: fail-loud, never repaired.
+    """
+    if final_beliefs is None or log_input_prior is None:
+        raise ValueError("extrinsic needs finite final beliefs and input prior")
+    post = np.asarray(final_beliefs, dtype=np.float64)
+    pin = np.asarray(log_input_prior, dtype=np.float64)
+    if post.ndim != 2 or pin.ndim != 2 or post.shape != pin.shape:
+        raise ValueError(
+            "extrinsic shape mismatch: %r vs %r" % (post.shape, pin.shape))
+    if post.shape[0] < 1 or post.shape[1] < 2:
+        raise ValueError("extrinsic needs a nonempty (n, q>=2) belief matrix")
+    if not bool(np.all(np.isfinite(post))) or not bool(np.all(np.isfinite(pin))):
+        raise ValueError("extrinsic needs finite beliefs and input prior")
+    ext = post - pin
+    m = np.max(ext, axis=1, keepdims=True)
+    lse = m + np.log(np.sum(np.exp(ext - m), axis=1, keepdims=True))
+    return ext - lse
+
+
+def require_check_extrinsic_for_transfer(
+    extrinsic_log_beliefs, extrinsic_provenance, *, consumer,
+    expected_n=None, q=FIELD_Q,
+):
+    """Fail closed unless the extrinsic is explicit CHECK_EXTRINSIC.
+
+    Only a finite shape-correct ``(n, q)`` array with provenance exactly
+    ``CHECK_EXTRINSIC`` is stably softmaxed for transport. ``NO_CHECK_EVIDENCE``,
+    ``WARM_START_UNSPECIFIED``, missing/``None``/unknown provenance, missing
+    arrays, wrong shapes, and nonfinite values all raise
+    ``UnusableExtrinsicError`` before any cross-layer prior is computed.
+    Not wired into D5/D6/D7 production execution.
+    """
+    if extrinsic_provenance != EXTRINSIC_CHECK_EXTRINSIC:
+        raise UnusableExtrinsicError(
+            f"{consumer}: cross-layer transfer requires extrinsic_provenance="
+            f"'{EXTRINSIC_CHECK_EXTRINSIC}'; got {extrinsic_provenance!r}")
+    if extrinsic_log_beliefs is None:
+        raise UnusableExtrinsicError(
+            f"{consumer}: cross-layer transfer requires an extrinsic array; "
+            "got None")
+    try:
+        arr = np.asarray(extrinsic_log_beliefs, dtype=np.float64)
+    except (ValueError, TypeError) as exc:
+        raise UnusableExtrinsicError(
+            f"{consumer}: extrinsic array is not convertible: {exc}") from exc
+    if arr.ndim != 2 or arr.shape[0] < 1 or arr.shape[1] != int(q):
+        raise UnusableExtrinsicError(
+            f"{consumer}: extrinsic shape must be (n, {int(q)}); "
+            f"got {arr.shape!r}")
+    if expected_n is not None and arr.shape[0] != int(expected_n):
+        raise UnusableExtrinsicError(
+            f"{consumer}: extrinsic row count {arr.shape[0]} != "
+            f"expected {int(expected_n)}")
+    if not bool(np.all(np.isfinite(arr))):
+        raise UnusableExtrinsicError(
+            f"{consumer}: extrinsic array must be finite")
+    m = np.max(arr, axis=1, keepdims=True)
+    e = np.exp(arr - m)
+    return e / np.sum(e, axis=1, keepdims=True)
+
+
 @dataclass
 class DecoderResult:
     x_hat: np.ndarray
@@ -573,6 +665,8 @@ class DecoderResult:
     status: str
     final_beliefs: np.ndarray
     belief_provenance: Optional[str] = None
+    extrinsic_log_beliefs: Optional[np.ndarray] = None
+    extrinsic_provenance: Optional[str] = None
 
 
 def decode_flooding_fftqspa(
@@ -711,10 +805,15 @@ def decode_row_layered_fftqspa(
     warm_seeded = warm_beliefs is not None and warm_beliefs.shape == (n, q)
     if warm_seeded:
         beliefs = warm_beliefs.copy()
+        log_input_prior = None
     else:
         priors_clean = np.maximum(np.asarray(priors, dtype=np.float64), 1e-15)
         priors_clean /= np.sum(priors_clean, axis=1, keepdims=True)
         beliefs = np.log(priors_clean)
+        # Exact normalized input prior used internally (frozen floor/renorm
+        # rule above, untouched): retained for the additive D7-G extrinsic
+        # field only. Same array, no duplicated cleaning rule.
+        log_input_prior = beliefs.copy()
 
     # Check node structures
     check_edges: list[list[int]] = [[] for _ in range(m)]
@@ -734,6 +833,12 @@ def decode_row_layered_fftqspa(
 
     # Check initial syndrome
     if np.array_equal(syndrome_of_gf32(mat, best_x, field), syn):
+        if warm_seeded:
+            ext_beliefs, ext_prov = None, EXTRINSIC_WARM_START_UNSPECIFIED
+        else:
+            # Iteration 0: no check evidence yet; neutral zeros, ineligible.
+            ext_beliefs = np.zeros((n, q), dtype=np.float64)
+            ext_prov = EXTRINSIC_NO_CHECK_EVIDENCE
         return DecoderResult(
             x_hat=best_x,
             syndrome_ok=True,
@@ -744,6 +849,8 @@ def decode_row_layered_fftqspa(
             belief_provenance=(
                 BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
                 else BELIEF_PROVENANCE_PRIOR_ONLY),
+            extrinsic_log_beliefs=ext_beliefs,
+            extrinsic_provenance=ext_prov,
         )
 
     for it in range(1, max_iter + 1):
@@ -781,6 +888,12 @@ def decode_row_layered_fftqspa(
         best_x = np.argmax(beliefs, axis=1).astype(np.uint8)
         current_syn = syndrome_of_gf32(mat, best_x, field)
         if np.array_equal(current_syn, syn):
+            if warm_seeded:
+                ext_beliefs, ext_prov = None, EXTRINSIC_WARM_START_UNSPECIFIED
+            else:
+                ext_beliefs = _build_check_extrinsic_log_beliefs(
+                    beliefs, log_input_prior)
+                ext_prov = EXTRINSIC_CHECK_EXTRINSIC
             return DecoderResult(
                 x_hat=best_x,
                 syndrome_ok=True,
@@ -791,10 +904,22 @@ def decode_row_layered_fftqspa(
                 belief_provenance=(
                     BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
                     else BELIEF_PROVENANCE_CHECK_UPDATED),
+                extrinsic_log_beliefs=ext_beliefs,
+                extrinsic_provenance=ext_prov,
             )
 
     current_syn = syndrome_of_gf32(mat, best_x, field)
     syn_ok = bool(np.array_equal(current_syn, syn))
+    if warm_seeded:
+        ext_beliefs, ext_prov = None, EXTRINSIC_WARM_START_UNSPECIFIED
+    elif int(max_iter) >= 1:
+        ext_beliefs = _build_check_extrinsic_log_beliefs(
+            beliefs, log_input_prior)
+        ext_prov = EXTRINSIC_CHECK_EXTRINSIC
+    else:
+        # No sweep completed (max_iter < 1): no check evidence.
+        ext_beliefs = np.zeros((n, q), dtype=np.float64)
+        ext_prov = EXTRINSIC_NO_CHECK_EVIDENCE
     return DecoderResult(
         x_hat=best_x,
         syndrome_ok=syn_ok,
@@ -806,6 +931,8 @@ def decode_row_layered_fftqspa(
             BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
             else (BELIEF_PROVENANCE_CHECK_UPDATED if max_iter >= 1
                   else BELIEF_PROVENANCE_PRIOR_ONLY)),
+        extrinsic_log_beliefs=ext_beliefs,
+        extrinsic_provenance=ext_prov,
     )
 
 
