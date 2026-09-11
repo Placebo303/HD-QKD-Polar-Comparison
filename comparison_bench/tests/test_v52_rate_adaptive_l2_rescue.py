@@ -381,6 +381,9 @@ def test_l1_fifteen_true_bp_calls(tmp_path, monkeypatch, real_counts):
             self.runtime_s = 0.001
             # x_hat not used for L1 path beyond syndrome/exact_u1 derived via q
             self.x_hat = np.zeros(1024, dtype=np.uint8)
+            # BP-04: cross-layer APP guard requires explicit conditioned
+            # provenance on the mocked L1 return.
+            self.belief_provenance = "CHECK_UPDATED"
 
     orig_dec = v35.decode_row_layered_fftqspa
 

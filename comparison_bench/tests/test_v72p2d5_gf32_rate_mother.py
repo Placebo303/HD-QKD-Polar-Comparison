@@ -99,7 +99,9 @@ class FakeDecoder:
         return {"x_hat": np.zeros(n, dtype=np.int64),
                 "syndrome_ok": False,
                 "iterations": 1,
-                "final_beliefs": np.zeros_like(prior)}
+                "final_beliefs": np.zeros_like(prior),
+                # Test fake stands in for a swept decoder; explicit provenance.
+                "belief_provenance": "CHECK_UPDATED"}
 
 
 def _snapshot_dir(path):
@@ -1560,12 +1562,13 @@ def test_T2_22_g0_dataclass_result_is_accepted():
     def _decoder(h, prior, syndrome, layer=None):
         return Result()
 
-    exact, syn_ok, it, finite, beliefs = mod._decode_block(
+    exact, syn_ok, it, finite, beliefs, provenance = mod._decode_block(
         _decoder, np.eye(2, dtype=np.uint8),
         np.full((2, 32), 1.0 / 32), np.array([0, 1]),
     )
     assert exact and syn_ok and it == 0 and finite
     assert np.shape(beliefs) == (2, 32)
+    assert provenance is None  # legacy result without the field
 
 
 def test_T2_23_g0_fake_authorized_runs_eight_seeds_and_writes_four(
@@ -1644,12 +1647,13 @@ def test_T2_25_decode_adapter_recomputes_syndrome_before_acceptance():
                 "syndrome_ok": True, "iterations": 1,
                 "final_beliefs": np.zeros((2, 32), dtype=np.float64)}
 
-    exact, syn_ok, it, finite, _ = mod._decode_block(
+    exact, syn_ok, it, finite, _, provenance = mod._decode_block(
         _lies, np.array([[1, 1]], dtype=np.uint8),
         np.full((2, 32), 1.0 / 32), np.array([1, 2], dtype=np.int64),
     )
     assert exact is False and syn_ok is False
     assert it == 1 and finite is True
+    assert provenance is None  # legacy result without the field
 
 
 def test_T2_26_g0_failure_retains_prior_completed_call_counts():
@@ -2778,7 +2782,8 @@ class _ShapeFake:
         return {"x_hat": np.zeros(n, dtype=np.int64),
                 "syndrome_ok": False,
                 "iterations": 1,
-                "final_beliefs": np.zeros_like(np.asarray(prior))}
+                "final_beliefs": np.zeros_like(np.asarray(prior)),
+                "belief_provenance": "CHECK_UPDATED"}
 
 
 def test_P0G1G2_a_different_f_different_prefix_rows():
@@ -3081,7 +3086,8 @@ def test_P0G1G2_h_g2_four_state_grading():
             bel = np.full_like(np.asarray(prior), np.inf)
         return {"x_hat": np.zeros(n, dtype=np.int64),
                 "syndrome_ok": False, "iterations": 1,
-                "final_beliefs": bel}
+                "final_beliefs": bel,
+                "belief_provenance": "CHECK_UPDATED"}
 
     res2 = mod.run_g2_phase(h=_tiny_h(), p_b=p_b, p_f=p_f,
                             decode_fn=_nonfinite, authorized=True)
@@ -3820,7 +3826,8 @@ def test_G1R06_all_zero_no_signal(tmp_path, monkeypatch):
         n = np.asarray(prior).shape[0]
         return {"x_hat": np.full(n, 31, dtype=np.int64),
                 "syndrome_ok": False, "iterations": 1,
-                "final_beliefs": np.zeros_like(np.asarray(prior))}
+                "final_beliefs": np.zeros_like(np.asarray(prior)),
+                "belief_provenance": "CHECK_UPDATED"}
 
     res = mod.run_g1_phase(h=h, p_b=p_b, p_f=p_f,
                            decode_fn=_never_exact, authorized=True)

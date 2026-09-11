@@ -30,6 +30,7 @@ from comparison_bench.formal_ir.v35_algorithm_development import (
     compute_gf32_rank,
     factorize_f03,
     load_v25_channel_counts,
+    require_check_updated_provenance,
     syndrome_of_gf32,
 )
 from comparison_bench.formal_ir.v38_architecture_triage import (
@@ -1262,6 +1263,12 @@ def run_v53_diagnostic(
                 else:
                     from comparison_bench.formal_ir.v35_algorithm_development import decode_row_layered_fftqspa as _dec_l1
                     _res_l1 = _dec_l1(h1_full, p_i, s1, max_iter=MAX_ITER, damping_alpha=DAMPING_ALPHA, field=field)
+                    # BP-04 fail-closed dormant cross-layer APP entry: future
+                    # reactivation needs its own OpenSpec; only CHECK_UPDATED passes.
+                    require_check_updated_provenance(
+                        getattr(_res_l1, "belief_provenance", None),
+                        consumer="v53 L1->L2 APP prior",
+                    )
                     q = softmax_beliefs(_res_l1.final_beliefs)
                     ent, md = compute_entropy_and_diff(q, p_i)
                     # L1 diagnostics for records: derive from q vs u1a

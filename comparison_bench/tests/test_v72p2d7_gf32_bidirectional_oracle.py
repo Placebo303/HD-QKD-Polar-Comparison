@@ -994,14 +994,24 @@ print("C18_OK")
 def test_c19_protected_root_lifecycle_and_g2_r1d_absence(tmp_path):
     workspace_before = sorted(p.name for p in WS.iterdir())
     model_f_before = _dir_meta(MODEL_F_ROOT)
+
+    def _d7c_root_snapshot():
+        return sorted(
+            (p.name, tuple((q.name, int(q.stat().st_size))
+                           for q in sorted(p.iterdir()) if q.is_file()))
+            for p in WS.glob("d7_c_bidirectional_oracle_*"))
+
+    d7c_roots_before = _d7c_root_snapshot()
     _full_run(tmp_path, out_name=tmp_path / "c19")
     workspace_after = sorted(p.name for p in WS.iterdir())
     assert workspace_after == workspace_before
-    assert list(WS.glob(bo.OUT_ROOT_PREFIX + "*")) == []
+    # Lifecycle-aware snapshot invariance (D7-C accepted root may exist): any
+    # root present before the dry-run keeps its recorded names and sizes and
+    # is unchanged during this test; no new root is created.
+    assert _d7c_root_snapshot() == d7c_roots_before
     assert _dir_meta(MODEL_F_ROOT) == model_f_before
     assert not (WS / "v72p2d5_g2" / "20260906_r1").exists()
     assert list(WS.glob("d6_graph_mother_r1d_*")) == []
-    assert list(WS.glob("d7_c_bidirectional_oracle_*")) == []
     state = bo.read_cycle_state(CYCLE_STATE)
     for key in ("d7c_execution_authorized", "decoder_executed", "result_created",
                 "formal_execution_authorized", "synthetic_execution_authorized",

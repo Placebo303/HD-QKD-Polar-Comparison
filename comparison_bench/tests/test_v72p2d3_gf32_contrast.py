@@ -572,6 +572,9 @@ def _fake_e2e_decode_fn(h_mat, prior_p, target):
         "runtime_s": 0.001,
         "stop": "fake-e2e",
         "final_beliefs": np.log(np.maximum(pp, 1e-15)),
+        # Test fake stands in for a swept decoder; explicit conditioned
+        # provenance so the BP-04 recombination guard passes.
+        "belief_provenance": "CHECK_UPDATED",
     }
 
 
@@ -1238,6 +1241,8 @@ def _r7_counting_fake(iters, ok):
             "runtime_s": 0.001,
             "stop": "r7-fake",
             "final_beliefs": np.log(np.maximum(pp, 1e-15)),
+            # Explicit conditioned provenance for the BP-04 recombination guard.
+            "belief_provenance": "CHECK_UPDATED",
         }
 
     _fn.calls = calls  # type: ignore[attr-defined]

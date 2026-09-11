@@ -352,6 +352,9 @@ def test_run_layered_block_bridge_with_fake_decoder():
             self.syndrome_ok = True
             self.iterations = 1
             self.final_beliefs = beliefs
+            # Explicit conditioned provenance: this bridge test exercises the
+            # CHECK_UPDATED pass-through of the D7/BP interface.
+            self.belief_provenance = "CHECK_UPDATED"
 
     log_bel = np.log(np.array([[0.8] + [0.2 / 31] * 31, [0.2 / 31] * 31 + [0.8]]))
 

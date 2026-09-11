@@ -666,9 +666,12 @@ def run_g_layer(
         runtime_s = float(res.get("runtime_s", _time.perf_counter() - t0))
         stop = str(res.get("stop", res.get("status", "fake")))
         final_beliefs = res.get("final_beliefs", None)
+        provenance = res.get("belief_provenance", None)
         finite = bool(np.all(np.isfinite(final_beliefs))) if final_beliefs is not None else True
         if final_beliefs is None:
+            # By construction the untouched log-prior: prior-only, never APP.
             final_beliefs = np.log(prior_p)
+            provenance = _load_v35().BELIEF_PROVENANCE_PRIOR_ONLY
     else:
         dec = history_decoder_fn()
         out = dec(
@@ -686,6 +689,7 @@ def run_g_layer(
         runtime_s = float(out.runtime_s)
         stop = str(out.status)
         final_beliefs = np.asarray(out.final_beliefs, dtype=np.float64)
+        provenance = getattr(out, "belief_provenance", None)
         finite = bool(np.all(np.isfinite(final_beliefs)))
     if not 0 <= iterations_used <= int(max_iter):
         raise ValueError("history kernel returned out-of-range iterations")
@@ -719,6 +723,10 @@ def run_g_layer(
         "cold_start": bool(belief_warm is None),
         # L1->L2 recombination input: q=softmax(final_beliefs) via V54.
         "final_beliefs": np.asarray(final_beliefs, dtype=np.float64),
+        # BP provenance of the returned current belief state; PRIOR_ONLY must
+        # never be used as cross-layer APP evidence.
+        "belief_provenance": provenance,
+        "belief_label": _load_v35().belief_diagnostic_label(provenance),
         # Back-compat aliases for the frozen D6 contract: views of
         # x_hat/iterations_used/syndrome_ok, not separate measurements.
         "hard": x_hat.astype(np.int64),
@@ -1347,6 +1355,12 @@ def run_real_contrast(
     g_start = float(now())
     l1 = run_l1_stage(
         h1, prior_u1, s1, bob_u1=bob_high, field=field, decode_fn=decode_fn
+    )
+    # BP-04 fail-closed: q=softmax(L1 current beliefs) is cross-layer APP
+    # evidence only when L1 provenance is exactly CHECK_UPDATED.
+    _load_v35().require_check_updated_provenance(
+        l1.get("belief_provenance"),
+        consumer="v72p2d3 run_real_contrast L1->L2 recombination",
     )
     # Frozen recombination: q=softmax(L1 final_beliefs), then prior_l2=q@P.
     q = softmax_beliefs_history(np.asarray(l1["final_beliefs"], dtype=np.float64))

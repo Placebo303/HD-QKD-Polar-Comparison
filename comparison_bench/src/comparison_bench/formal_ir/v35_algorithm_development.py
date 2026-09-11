@@ -516,6 +516,54 @@ def _check_update_log_batch(
 # Stage A1: FFT-QSPA Decoders (Flooding, Row-Layered, Damped Row-Layered)
 # ---------------------------------------------------------------------------
 
+# Belief provenance contract (D7/BP Alternative A). Tokens are exact; the
+# field is additive and defaulted so legacy positional construction keeps
+# working. CHECK_UPDATED labels a BP APP approximation that incorporated check
+# messages -- not a calibrated exact posterior.
+BELIEF_PROVENANCE_PRIOR_ONLY = "PRIOR_ONLY"
+BELIEF_PROVENANCE_CHECK_UPDATED = "CHECK_UPDATED"
+BELIEF_PROVENANCE_WARM_START_UNSPECIFIED = "WARM_START_UNSPECIFIED"
+BELIEF_PROVENANCE_TOKENS = (
+    BELIEF_PROVENANCE_PRIOR_ONLY,
+    BELIEF_PROVENANCE_CHECK_UPDATED,
+    BELIEF_PROVENANCE_WARM_START_UNSPECIFIED,
+)
+# Diagnostic record label only (never a provenance token): a PRIOR_ONLY return
+# may be recorded as current belief, never as conditioned posterior/APP.
+PRIOR_ONLY_CURRENT_BELIEF = "PRIOR_ONLY_CURRENT_BELIEF"
+
+
+class UnconditionedBeliefProvenanceError(RuntimeError):
+    """Cross-layer APP refused: returned beliefs are not CHECK_UPDATED."""
+
+
+def require_check_updated_provenance(provenance, *, consumer):
+    """Fail closed unless ``provenance`` is exactly CHECK_UPDATED.
+
+    Cross-layer APP consumers call this before computing or forwarding a
+    conditioned prior; PRIOR_ONLY, WARM_START_UNSPECIFIED, None/absent and
+    unknown tokens are all refused.
+    """
+    if provenance != BELIEF_PROVENANCE_CHECK_UPDATED:
+        raise UnconditionedBeliefProvenanceError(
+            f"{consumer}: cross-layer APP requires belief_provenance="
+            f"'{BELIEF_PROVENANCE_CHECK_UPDATED}'; got {provenance!r}")
+    return provenance
+
+
+def belief_diagnostic_label(provenance):
+    """Record label for a returned current belief state (BP-05 seam).
+
+    PRIOR_ONLY may only be recorded as PRIOR_ONLY_CURRENT_BELIEF; the
+    hard decision is a separate field (x_hat/syndrome_ok) and never upgrades
+    this label. Other tokens pass through unchanged (CHECK_UPDATED is not an
+    exact-posterior claim).
+    """
+    if provenance == BELIEF_PROVENANCE_PRIOR_ONLY:
+        return PRIOR_ONLY_CURRENT_BELIEF
+    return provenance
+
+
 @dataclass
 class DecoderResult:
     x_hat: np.ndarray
@@ -524,6 +572,7 @@ class DecoderResult:
     runtime_s: float
     status: str
     final_beliefs: np.ndarray
+    belief_provenance: Optional[str] = None
 
 
 def decode_flooding_fftqspa(
@@ -613,6 +662,7 @@ def decode_flooding_fftqspa(
                 runtime_s=time.perf_counter() - t0,
                 status=status,
                 final_beliefs=beliefs,
+                belief_provenance=BELIEF_PROVENANCE_CHECK_UPDATED,
             )
 
         # Update V->C extrinsic messages for next iteration
@@ -630,6 +680,7 @@ def decode_flooding_fftqspa(
         runtime_s=time.perf_counter() - t0,
         status="converged_no_syndrome" if not syn_ok else "converged_exact",
         final_beliefs=beliefs,
+        belief_provenance=BELIEF_PROVENANCE_CHECK_UPDATED,
     )
 
 
@@ -657,7 +708,8 @@ def decode_row_layered_fftqspa(
     syn = np.asarray(syndromes, dtype=np.uint8)
 
     # Initial log-beliefs
-    if warm_beliefs is not None and warm_beliefs.shape == (n, q):
+    warm_seeded = warm_beliefs is not None and warm_beliefs.shape == (n, q)
+    if warm_seeded:
         beliefs = warm_beliefs.copy()
     else:
         priors_clean = np.maximum(np.asarray(priors, dtype=np.float64), 1e-15)
@@ -689,6 +741,9 @@ def decode_row_layered_fftqspa(
             runtime_s=time.perf_counter() - t0,
             status="converged_exact",
             final_beliefs=beliefs,
+            belief_provenance=(
+                BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
+                else BELIEF_PROVENANCE_PRIOR_ONLY),
         )
 
     for it in range(1, max_iter + 1):
@@ -733,6 +788,9 @@ def decode_row_layered_fftqspa(
                 runtime_s=time.perf_counter() - t0,
                 status="converged_exact",
                 final_beliefs=beliefs,
+                belief_provenance=(
+                    BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
+                    else BELIEF_PROVENANCE_CHECK_UPDATED),
             )
 
     current_syn = syndrome_of_gf32(mat, best_x, field)
@@ -744,6 +802,10 @@ def decode_row_layered_fftqspa(
         runtime_s=time.perf_counter() - t0,
         status="converged_no_syndrome" if not syn_ok else "converged_exact",
         final_beliefs=beliefs,
+        belief_provenance=(
+            BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
+            else (BELIEF_PROVENANCE_CHECK_UPDATED if max_iter >= 1
+                  else BELIEF_PROVENANCE_PRIOR_ONLY)),
     )
 
 

@@ -318,7 +318,7 @@ def test_l1_fortyfive_true_bp_calls(tmp_path, monkeypatch, real_counts):
     monkeypatch.setattr(v53,"load_heldout_block",_fake_load)
     l1_calls: list[dict]=[]
     class _MockL1:
-        def __init__(self, final_beliefs): self.final_beliefs=final_beliefs; self.iterations=5; self.syndrome_ok=True; self.status="converged_exact"; self.runtime_s=0.001; self.x_hat=np.zeros(1024,dtype=np.uint8)
+        def __init__(self, final_beliefs): self.final_beliefs=final_beliefs; self.iterations=5; self.syndrome_ok=True; self.status="converged_exact"; self.runtime_s=0.001; self.x_hat=np.zeros(1024,dtype=np.uint8); self.belief_provenance="CHECK_UPDATED"
     orig_dec=v35.decode_row_layered_fftqspa
     def _mock_dec(matrix, prior, syn, max_iter=90, damping_alpha=1.0, field=None):
         l1_calls.append({"shape":tuple(matrix.shape),"prior_shape":tuple(prior.shape)})

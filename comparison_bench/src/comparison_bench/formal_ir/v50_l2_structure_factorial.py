@@ -29,6 +29,7 @@ from comparison_bench.formal_ir.v35_algorithm_development import (
     compute_gf32_rank,
     factorize_f03,
     load_v25_channel_counts,
+    require_check_updated_provenance,
     syndrome_of_gf32,
 )
 from comparison_bench.formal_ir.v38_architecture_triage import (
@@ -1451,6 +1452,12 @@ def _run_workload_calls(
                 else:
                     t0 = time.perf_counter()
                     res = decode(h1_full, p_i, s1, max_iter=MAX_ITER, damping_alpha=DAMPING_ALPHA, field=field)
+                    # BP-04 fail-closed dormant cross-layer APP entry: future
+                    # reactivation needs its own OpenSpec; only CHECK_UPDATED passes.
+                    require_check_updated_provenance(
+                        getattr(res, "belief_provenance", None),
+                        consumer="v50 L1->L2 APP prior",
+                    )
                     q = softmax_beliefs(res.final_beliefs)
                     ent, mdiff = compute_entropy_and_diff(q, p_i)
                     x_hat_u1 = np.argmax(q, axis=1).astype(np.uint8)

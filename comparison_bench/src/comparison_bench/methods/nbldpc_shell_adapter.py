@@ -192,7 +192,7 @@ def _real_shell_run(batch: FrameBatch, source: str, hard_cap: int | None = None)
         hard_cap = SMOKE_HARD_CAP if n_frames <= 9 else DEV_HARD_CAP
     # Load frozen deps
     try:
-        from comparison_bench.formal_ir.v35_algorithm_development import GF2mField, syndrome_of_gf32, decode_row_layered_fftqspa
+        from comparison_bench.formal_ir.v35_algorithm_development import GF2mField, syndrome_of_gf32, decode_row_layered_fftqspa, require_check_updated_provenance
         from comparison_bench.formal_ir.v54_two_stage_incremental_l2_rescue import (
             get_l1_prior_p_u1_given_b,
             get_l1_app_prior_l2,
@@ -200,7 +200,7 @@ def _real_shell_run(batch: FrameBatch, source: str, hard_cap: int | None = None)
             compute_entropy_and_diff,
         )
     except ModuleNotFoundError:
-        from comparison_bench.src.comparison_bench.formal_ir.v35_algorithm_development import GF2mField, syndrome_of_gf32, decode_row_layered_fftqspa  # type: ignore
+        from comparison_bench.src.comparison_bench.formal_ir.v35_algorithm_development import GF2mField, syndrome_of_gf32, decode_row_layered_fftqspa, require_check_updated_provenance  # type: ignore
         from comparison_bench.src.comparison_bench.formal_ir.v54_two_stage_incremental_l2_rescue import (  # type: ignore
             get_l1_prior_p_u1_given_b,
             get_l1_app_prior_l2,
@@ -251,6 +251,12 @@ def _real_shell_run(batch: FrameBatch, source: str, hard_cap: int | None = None)
         s1 = syndrome_of_gf32(H1, u1_t, field)
         res_l1 = decode_row_layered_fftqspa(H1, p_i, s1, max_iter=90, damping_alpha=1.0, field=field)
         total_calls += 1  # L1
+        # BP-04 fail-closed: q=softmax(L1 beliefs) is cross-layer APP evidence
+        # only for an explicitly CHECK_UPDATED L1 return.
+        require_check_updated_provenance(
+            getattr(res_l1, "belief_provenance", None),
+            consumer="nbldpc_shell_adapter L1->L2 APP prior",
+        )
         q = softmax_beliefs(res_l1.final_beliefs)
         u1_hat = np.argmax(q, axis=1).astype(np.int64) % 32
         u1_hat_all[i] = u1_hat

@@ -1051,12 +1051,13 @@ def _decode_block(decode_fn, h, prior, x_true, *, return_syndrome=False):
     syndrome_ok = bool(decoder_reported_ok
                        and np.array_equal(observed_syn, target_syn))
     beliefs = get("final_beliefs")
+    provenance = get("belief_provenance")
     finite = bool(np.all(np.isfinite(np.asarray(beliefs, dtype=np.float64)))) \
         if beliefs is not None else True
     out = (exact, syndrome_ok, it, finite, beliefs)
     if return_syndrome:
-        return out + (observed_syn,)
-    return out
+        out = out + (observed_syn,)
+    return out + (provenance,)
 
 
 def _load_g0_decoder():
@@ -1108,6 +1109,7 @@ def historical_g0_decoder(h, prior, syndrome, layer=None):
         "syndrome_ok": bool(result.syndrome_ok),
         "iterations": int(result.iterations),
         "final_beliefs": np.asarray(result.final_beliefs),
+        "belief_provenance": getattr(result, "belief_provenance", None),
     }
 
 
@@ -1338,10 +1340,44 @@ def _is_historical_decoder(decode_fn):
                 or getattr(decode_fn, "_v72p2d5_historical_decoder", False))
 
 
+def _require_check_updated_provenance(provenance, consumer):
+    """Fail closed unless L1 beliefs carry CHECK_UPDATED provenance.
+
+    Lazy, layout-tolerant import of the shared guard: importing this module
+    must not import the historical decoder module (same discipline as
+    ``_load_g0_decoder``).
+    """
+    module = None
+    for name in (
+        "comparison_bench.formal_ir.v35_algorithm_development",
+        "comparison_bench.src.comparison_bench.formal_ir."
+        "v35_algorithm_development",
+    ):
+        try:
+            module = importlib.import_module(name)
+            break
+        except ModuleNotFoundError:
+            module = None
+    if module is None:
+        source_root = Path(__file__).resolve().parents[2]
+        if str(source_root) not in sys.path:
+            sys.path.insert(0, str(source_root))
+        module = importlib.import_module(
+            "comparison_bench.formal_ir.v35_algorithm_development")
+    return module.require_check_updated_provenance(
+        provenance, consumer=consumer)
+
+
 def _run_layered_block(decode_fn, h1, h2, p1, p2, block, oracle):
     n = block["bob"].shape[0]
     prior_l1 = _floor_renorm(p1[:, block["bob"]].T, DECODER_FLOOR)
-    e1, s1, it1, f1, bel1 = _decode_block(decode_fn, h1, prior_l1, block["u1"])
+    e1, s1, it1, f1, bel1, prov1 = _decode_block(
+        decode_fn, h1, prior_l1, block["u1"])
+    # BP-03 fail-closed boundary: the L2 APP prior P(U2|B,U1) may only be
+    # computed from L1 beliefs that consumed at least one disclosed-syndrome
+    # check sweep. PRIOR_ONLY/None/absent/unknown/WARM_START all refuse here.
+    _require_check_updated_provenance(
+        prov1, consumer="_run_layered_block L1->L2 APP prior")
     if bel1 is None:
         q = np.full_like(prior_l1, 1.0 / prior_l1.shape[1])
     else:
@@ -1350,7 +1386,7 @@ def _run_layered_block(decode_fn, h1, h2, p1, p2, block, oracle):
         if q.shape != prior_l1.shape:
             q = np.full_like(prior_l1, 1.0 / prior_l1.shape[1])
     prior_l2 = app_fed_l2_prior(p2, block["bob"], q)
-    e2, s2, it2, f2, _ = _decode_block(decode_fn, h2, prior_l2, block["u2"])
+    e2, s2, it2, f2, _, _ = _decode_block(decode_fn, h2, prior_l2, block["u2"])
     out = {
         "app_exact": bool(e1 and e2), "app_l1_exact": bool(e1),
         "app_syndrome_ok": bool(s1 and s2), "iterations": int(it1 + it2),
@@ -1358,7 +1394,7 @@ def _run_layered_block(decode_fn, h1, h2, p1, p2, block, oracle):
     }
     if oracle:
         prior_o = oracle_l2_prior(p2, block["bob"], block["u1"])
-        eo, so, ito, fo, _ = _decode_block(decode_fn, h2, prior_o, block["u2"])
+        eo, so, ito, fo, _, _ = _decode_block(decode_fn, h2, prior_o, block["u2"])
         out.update({"oracle_exact": bool(eo), "oracle_syndrome_ok": bool(so),
                     "oracle_iterations": int(ito), "oracle_finite": bool(fo)})
     return out
@@ -1629,6 +1665,8 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
                 "syndrome_ok": bool(_r.syndrome_ok),
                 "iterations": int(_r.iterations),
                 "final_beliefs": np.asarray(_r.final_beliefs),
+                "belief_provenance": getattr(
+                    _r, "belief_provenance", None),
             }
         decode_fn = _bound_hist
         is_hist = False
@@ -1680,7 +1718,7 @@ def run_g0_phase(*, h=None, p_b=None, p_f=None,
             hist_inv = 1
         calls += 1
         try:
-            e, syn_ok, iterations, is_finite, _, observed = _decode_block(
+            e, syn_ok, iterations, is_finite, _, observed, _ = _decode_block(
                 decode_fn, h2, prior_o, block["u2"], return_syndrome=True)
         except (MemoryError, TimeoutError) as exc:
             failed_seed = int(seed)
@@ -2062,8 +2100,8 @@ def run_p0_cost_phase(*, h=None, p_b=None, p_f=None,
                     calls += 2
                 else:
                     prior_o = oracle_l2_prior(p2, block["bob"], block["u1"])
-                    eo, _, ito, _, _ = _decode_block(decode_fn, h2_f, prior_o,
-                                                     block["u2"])
+                    eo, _, ito, _, _, _ = _decode_block(decode_fn, h2_f, prior_o,
+                                                        block["u2"])
                     rec = {"oracle_exact": eo, "oracle_iterations": ito}
                     calls += 1
                 ws.append(time.perf_counter() - t1)
@@ -2470,6 +2508,7 @@ def bind_historical_decoder():
             "syndrome_ok": bool(r.syndrome_ok),
             "iterations": int(r.iterations),
             "final_beliefs": np.asarray(r.final_beliefs),
+            "belief_provenance": getattr(r, "belief_provenance", None),
         }
 
     return _bound

@@ -141,11 +141,11 @@ def main(argv: Iterable[str] | None = None) -> int:
         from comparison_bench.formal_ir.v64_full_symbol_verification import decompose_symbols, recompose_symbols, compute_tag_l2, compute_tag_full
         # reuse V54 frozen matrices and TRAIN prior (same as nbldpc_shell_adapter)
         try:
-            from comparison_bench.formal_ir.v35_algorithm_development import GF2mField, syndrome_of_gf32, decode_row_layered_fftqspa
+            from comparison_bench.formal_ir.v35_algorithm_development import GF2mField, syndrome_of_gf32, decode_row_layered_fftqspa, require_check_updated_provenance
             from comparison_bench.formal_ir.v54_two_stage_incremental_l2_rescue import get_l1_prior_p_u1_given_b, get_l1_app_prior_l2, softmax_beliefs
             from comparison_bench.formal_ir.v35_algorithm_development import load_v25_channel_counts
         except ModuleNotFoundError:
-            from comparison_bench.src.comparison_bench.formal_ir.v35_algorithm_development import GF2mField, syndrome_of_gf32, decode_row_layered_fftqspa  # type: ignore
+            from comparison_bench.src.comparison_bench.formal_ir.v35_algorithm_development import GF2mField, syndrome_of_gf32, decode_row_layered_fftqspa, require_check_updated_provenance  # type: ignore
             from comparison_bench.src.comparison_bench.formal_ir.v54_two_stage_incremental_l2_rescue import get_l1_prior_p_u1_given_b, get_l1_app_prior_l2, softmax_beliefs  # type: ignore
             from comparison_bench.src.comparison_bench.formal_ir.v35_algorithm_development import load_v25_channel_counts  # type: ignore
         field = GF2mField.create(32)
@@ -185,6 +185,12 @@ def main(argv: Iterable[str] | None = None) -> int:
             s1 = syndrome_of_gf32(H1, u1_true, field)
             res_l1 = decode_row_layered_fftqspa(H1, p_i, s1, max_iter=90, damping_alpha=1.0, field=field)
             acct.register_complete("l1")
+            # BP-04 fail-closed: L1 beliefs feed the L2 APP prior only when
+            # explicitly CHECK_UPDATED; reruns must satisfy this guard.
+            require_check_updated_provenance(
+                getattr(res_l1, "belief_provenance", None),
+                consumer="execute_v64_fresh_verify L1->L2 APP prior",
+            )
             q = softmax_beliefs(res_l1.final_beliefs)
             u1_hat = np.argmax(q, axis=1).astype(np.int64) % 32
             syndrome_ok_l1 = bool(np.array_equal(syndrome_of_gf32(H1, u1_hat, field), s1))
