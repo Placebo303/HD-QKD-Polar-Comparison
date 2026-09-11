@@ -3467,3 +3467,23 @@ qualification, real-data, alternating-convergence proof, R1d/G1/G2 permission.
 **Consequences**: `next_gate` → `D7_F_REVERSE_ORDER_PACKET_FREEZE`; D7-F tests whether the lift
 survives as complete two-layer recovery in reverse order, with no feedback cycle yet
 (cavity/extrinsic still missing). All authorizations stay false; no push.
+
+## 2026-09-11 D7-F accepted as reverse-order regression diagnostic; route to D7-G extrinsic contract proposal
+
+**Decision**: Accept the immutable D7-F result under the narrow scope
+`D7_F_RESULT_ACCEPTED_REVERSE_ORDER_REGRESSION_DIAGNOSTIC`
+(`docs/research_cycles/V72P2D7-GF32-REVERSE-ORDER-DISCRIMINATOR/D7_F_RESULT_ACCEPTANCE_R1.md`).
+Phase-A independently recomputed the paired tables from committed scalars and confirmed the packet
+§1.1 ruling exactly: 128/128 calls with zero blocked/retry/crash/nonfinite/watchdog; f=1.0 forward
+and reverse both-exact 0/16; f=1.2 forward both-exact 2/16 (seeds 1302/1304), reverse 0/16;
+table candidate_only 0 / reference_only 2 / both 0 / neither 14; forward source exact 3 and target
+exact 3 overlapping on only 2 identities; reverse source L2 exact 0 while target L1 exact 7;
+terminal `D7_F_REVERSE_ORDER_REGRESSION` internally consistent.
+
+**Context**: Permitted inference is that a single sequential reversal does not convert the D7-E
+directional target lift into complete two-layer recovery under this frozen contract. Unsupported:
+L2→L1-useless claim, alternating-impossibility, general NB-LDPC failure, FER/leakage/key-rate,
+qualification, R1d/G1/G2 permission.
+
+**Consequences**: `next_gate` → `D7_G_EXTRINSIC_CONTRACT_PROPOSAL`; D7-G specifies a code-factor
+extrinsic-message contract next, feedback still out. All authorizations stay false; no push.

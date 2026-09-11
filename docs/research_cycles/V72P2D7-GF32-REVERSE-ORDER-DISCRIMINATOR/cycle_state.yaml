@@ -16,7 +16,7 @@ r1d_state: R1D_ABSENT_NOT_AUTHORIZED
 g1_authorized: false
 g2_authorized: false
 layer_interface_implementation: ALTERNATIVE_A_ACCEPTED_CURRENT_CONTRACT
-next_gate: INDEPENDENT_D7_F_RESULT_ACCEPTANCE_R1
+next_gate: D7_G_EXTRINSIC_CONTRACT_PROPOSAL
 d7f_readiness_state: D7_F_FROZEN_NOT_AUTHORIZED_NOT_EXECUTED
 d7f_implementation_review: D7_F_IMPLEMENTATION_REVIEW_PASS
 d7f_pre_execute_review: D7_F_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION
@@ -24,8 +24,9 @@ d7f_execution_attempts: 1
 d7f_execution_completed: 1
 d7f_terminal: D7_F_REVERSE_ORDER_REGRESSION
 d7f_pre_result_review: D7_F_PRE_RESULT_REVIEW_PASS_R1
-d7f_result_accepted: false
-d7f_accepted_scope: NONE
+d7f_result_accepted: true
+d7f_accepted_scope: D7_F_RESULT_ACCEPTED_REVERSE_ORDER_REGRESSION_DIAGNOSTIC
+d7f_acceptance_doc: docs/research_cycles/V72P2D7-GF32-REVERSE-ORDER-DISCRIMINATOR/D7_F_RESULT_ACCEPTANCE_R1.md
 d7f_prereg_doc: docs/research_cycles/V72P2D7-GF32-REVERSE-ORDER-DISCRIMINATOR/D7_F_PREREG_R1.md
 d7f_execution_packet_doc: docs/research_cycles/V72P2D7-GF32-REVERSE-ORDER-DISCRIMINATOR/D7_F_EXECUTION_PACKET_R1.md
 d7f_exact_interpreter: .venv/bin/python
