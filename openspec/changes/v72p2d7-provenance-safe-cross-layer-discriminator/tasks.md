@@ -53,3 +53,38 @@
   authorization, no D7-E run, no result acceptance in this change.
 - No scientific/budget/terminal/schema change beyond the frozen R08–R13;
   no V35/D5/D6/D7-C edits; no R1d/G1/G2 work.
+
+## A2 — RSS telemetry rework (frozen; implementation pending)
+
+> Authority: `.workbuddy/tasks/D7_E_RSS_TELEMETRY_REWORK_VENV_A2_TASK_PACKET.md`
+> §§5–7. Telemetry/environment compatibility correction only: `.venv/bin/python`,
+> the exact frozen command, all scientific constants, and the strict `<2GiB`
+> threshold are preserved. The renewed Pre-EXECUTE review becomes stale until
+> A2 implementation review + fresh E09 pass.
+
+- [ ] A2-01 — **VmHWM parser.** Pure parser over `/proc/self/status`-equivalent
+  text: exactly one ASCII `VmHWM: <positive integer> kB` line yields bytes
+  (`value * 1024`); all other cases yield `None`.
+- [ ] A2-02 — **File-read wrapper.** Production Linux/WSL read opens
+  `/proc/self/status` once per probe call; no subprocess/shell/psutil/
+  caching/retries/averaging/polling/env-switch/provider abstraction.
+- [ ] A2-03 — **Deterministic tests.** Injected-text fixtures covering valid
+  conversion, missing/duplicate/malformed/decimal/signed/zero/negative/
+  wrong-unit/non-ASCII/overflow (>18-digit) rejection, read failure, and
+  bogus-`ru_maxrss` independence (`_read_ru_maxrss` not called on the WSL path).
+- [ ] A2-04 — **Threshold boundaries.** Below-limit permits the existing path;
+  equal-to and above 2 GiB block; `None` blocks before the first scientific
+  decoder attempt and preserves existing resource-terminal behavior mid-run.
+- [ ] A2-05 — **Schema invariance.** Writers/verifier retain the same
+  `rss_bytes` schema; no new output field or schema revision.
+- [ ] A2-06 — **Implementation review.** Independent read-only review with the
+  unique verdict `D7_E_RSS_TELEMETRY_REWORK_REVIEW_PASS_A2` (or
+  `..._FAIL_A2`); FAIL means STOP.
+- [ ] A2-07 — **Renewed Pre-EXECUTE with single live E09.** Only after A2-06
+  PASS: ordinary D7-E Pre-EXECUTE checklist plus exactly one fresh live E09
+  (`.venv/bin/python`; positive finite `<2GiB`; raw `VmHWM` line captured);
+  no repeat-until-pass.
+- [ ] A2-08 — **Closeout.** For dual PASS only: mark A2 tasks complete with
+  evidence, update state to
+  `D7_E_WSL_RSS_READY_AWAITING_FRESH_EXPLICIT_AUTHORIZATION`, leave every
+  authorization false and attempts/completed zero, scoped local commit, no push.

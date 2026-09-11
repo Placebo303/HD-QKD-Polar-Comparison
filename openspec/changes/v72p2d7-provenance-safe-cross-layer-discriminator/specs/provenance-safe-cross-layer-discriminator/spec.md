@@ -138,3 +138,38 @@ beliefs/priors/symbols/syndromes/vectors/digests persisted.
 - **WHEN** the runner or its outputs are inspected
 - **THEN** call counts, walls, RSS bound, fresh-root/no-overwrite, the
   seven-file list, and scalar-only persistence all hold.
+
+### Requirement: D7-E RSS source is VmHWM-only on Linux/WSL (A2 telemetry delta)
+
+On Linux/WSL, D7-E SHALL read current-process peak RSS from
+`/proc/self/status`, field `VmHWM` with unit exactly `kB`, converting with
+`bytes = value * 1024`. `VmHWM` SHALL be authoritative: no comparison
+against and no fallback to `ru_maxrss` when `/proc/self/status` is present.
+Missing file/field, duplicate field, malformed/non-integer/non-positive
+value, wrong unit, read error, or overflow SHALL return `None` and block
+before scientific execution or at the first affected call under the existing
+resource terminal. D7-E SHALL NOT silently substitute `VmRSS`,
+`/proc/<pid>/statm`, psutil, shell commands, or another process. The limit
+SHALL remain strict `< 2 GiB` (equality or greater blocked); the stored
+scalar key SHALL remain `rss_bytes`. `resource.ru_maxrss` MAY remain only
+for non-Linux legacy code if already necessary, but the frozen WSL path
+SHALL NOT call it. A single fresh E09 probe after implementation is
+evidence; repeating probes until one passes is forbidden.
+
+#### Scenario: Strict VmHWM parsing
+
+- **WHEN** the status text holds exactly one ASCII
+  `VmHWM: <positive integer> kB` line with a digit string of at most 18 digits
+- **THEN** the probe yields `value * 1024` bytes.
+- **WHEN** the field is missing, duplicated, malformed, decimal, signed,
+  zero, negative, wrong-unit, non-ASCII-confusable, longer than 18 digits,
+  or the file is unreadable
+- **THEN** the probe yields `None` and the run blocks under the existing
+  resource terminal.
+
+#### Scenario: No ru_maxrss on the WSL path
+
+- **WHEN** `/proc/self/status` is present on Linux/WSL, even with a
+  conflicting bogus `ru_maxrss`
+- **THEN** the WSL result equals the `VmHWM` parse and `_read_ru_maxrss`
+  is not called.
