@@ -331,29 +331,87 @@ def _refuse_protected(out_root: Path, repo: Path) -> None:
 
 
 # --------------------------------------------------------------------------
-# RSS (stdlib resource only; explicit Linux KiB -> bytes)
+# RSS (Linux/WSL VmHWM only; fail closed, stdlib-only, no fallback)
 # --------------------------------------------------------------------------
+#
+# A2 telemetry rule: on Linux/WSL the current-process peak RSS comes from
+# ``VmHWM`` in ``/proc/self/status`` (unit exactly ``kB``;
+# ``bytes = value * 1024``).  ``VmHWM`` is authoritative: the WSL path never
+# falls back to the legacy stdlib peak counter (its reader is deleted, not
+# kept).  Anything else yields None and the callers block under the existing
+# resource terminal.
 
-def _read_ru_maxrss():
-    import resource
-    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+_PROC_SELF_STATUS_PATH = "/proc/self/status"
+
+
+def parse_vmhwm_rss_bytes(text):
+    """Peak RSS bytes from ``/proc/self/status``-equivalent text, or None.
+
+    Accepts exactly one ASCII ``VmHWM: <positive integer> kB`` line (only
+    the spaces/tabs Linux status formatting puts after the colon, exactly
+    one ASCII space before ``kB``).  Missing/duplicate/malformed/decimal/
+    signed/zero/wrong-unit/non-ASCII lines, digit strings longer than 18
+    digits (``>=1e18`` kB is physically impossible) and any non-text input
+    yield None.
+    """
+    try:
+        lines = text.split("\n")
+    except Exception:
+        return None
+    candidates = []
+    try:
+        for line in lines:
+            name, sep, _ = line.partition(":")
+            if sep and name.strip() == "VmHWM":
+                candidates.append(line)
+    except Exception:
+        return None
+    if len(candidates) != 1:
+        return None
+    line = candidates[0]
+    if not line.startswith("VmHWM:"):
+        return None
+    rest = line[len("VmHWM:"):]
+    pos = 0
+    while pos < len(rest) and rest[pos] in (" ", "\t"):
+        pos += 1
+    if pos == 0:
+        return None
+    end = pos
+    while end < len(rest) and "0" <= rest[end] <= "9":
+        end += 1
+    digits = rest[pos:end]
+    if not digits or len(digits) > 18:
+        return None
+    if rest[end:] != " kB":
+        return None
+    try:
+        value_kb = int(digits)
+    except Exception:
+        return None
+    if value_kb <= 0:
+        return None
+    return value_kb * 1024
+
+
+def _read_proc_self_status_text():
+    """Raw ``/proc/self/status`` text, read once per call; None on failure."""
+    try:
+        with open(_PROC_SELF_STATUS_PATH, "r", encoding="utf-8") as fh:
+            return fh.read()
+    except Exception:
+        return None
 
 
 def get_rss_bytes():
-    """Current-process RSS bytes from ``ru_maxrss`` KiB; None when unavailable.
+    """Current-process peak RSS bytes from ``VmHWM``; None when unavailable.
 
-    Explicit WSL/Linux conversion: ``ru_maxrss`` is KiB on Linux, so
-    ``bytes = ru_maxrss * 1024``.  Absence and non-numeric values return None
-    (the preflight then blocks); the probe is stdlib-only.
+    Fail-closed WSL/Linux probe: exactly one ASCII
+    ``VmHWM: <positive integer> kB`` line yields ``value * 1024`` bytes;
+    anything else yields None and the callers block under the existing
+    resource terminal.  Never consults the legacy stdlib peak counter.
     """
-    try:
-        raw = _read_ru_maxrss()
-    except Exception:
-        return None
-    try:
-        return int(raw) * 1024
-    except Exception:
-        return None
+    return parse_vmhwm_rss_bytes(_read_proc_self_status_text())
 
 
 def _probe_rss_valid(probe):

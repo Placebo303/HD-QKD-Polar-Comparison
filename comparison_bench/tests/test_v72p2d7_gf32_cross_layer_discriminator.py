@@ -1538,3 +1538,246 @@ def test_x06c_d7d_d5_regressions(tmp_path):
     result = _inner_pytest([str(D5_FILE)], basetemp=base / "d5")
     assert result.returncode == 0, result.stdout + result.stderr
     assert "165 passed" in result.stdout
+
+
+# ==========================================================================
+# A2: WSL VmHWM-only RSS telemetry (fail-closed; injected fixtures only)
+# ==========================================================================
+
+def _a2_status(*lines):
+    return ("Name:\tpython\n" + "".join(line + "\n" for line in lines)
+            + "VmRSS:\t    9999 kB\n")
+
+
+def test_a2_01_valid_vmhwm_conversion():
+    assert d7e.parse_vmhwm_rss_bytes(
+        _a2_status("VmHWM:\t   48256 kB")) == 48256 * 1024
+    assert d7e.parse_vmhwm_rss_bytes("VmHWM: 1 kB\n") == 1024
+    assert d7e.parse_vmhwm_rss_bytes(
+        _a2_status("VmHWM:\t123456 kB")) == 123456 * 1024
+    # Leading zeros still denote a positive integer.
+    assert d7e.parse_vmhwm_rss_bytes("VmHWM: 007 kB\n") == 7 * 1024
+
+
+def test_a2_02_whitespace_only_where_linux_requires():
+    for line in ("VmHWM: 123 kB", "VmHWM:\t123 kB", "VmHWM:\t   123 kB",
+                 "VmHWM: \t \t123 kB"):
+        assert d7e.parse_vmhwm_rss_bytes(line + "\n") == 123 * 1024, line
+    for line in (" VmHWM: 123 kB", "\tVmHWM: 123 kB", "VmHWM : 123 kB",
+                 "VmHWM:123 kB", "VmHWM: 123\tkB", "VmHWM: 123  kB",
+                 "VmHWM: 123 kB ", "VmHWM:\u00a0123 kB",
+                 "VmHWM: 123\u00a0kB"):
+        assert d7e.parse_vmhwm_rss_bytes(line + "\n") is None, repr(line)
+
+
+def test_a2_03_missing_field():
+    assert d7e.parse_vmhwm_rss_bytes("Name:\tpython\nVmRSS:\t 1 kB\n") is None
+    assert d7e.parse_vmhwm_rss_bytes("") is None
+    assert d7e.parse_vmhwm_rss_bytes(None) is None
+    assert d7e.parse_vmhwm_rss_bytes(b"VmHWM: 1 kB\n") is None
+    assert d7e.parse_vmhwm_rss_bytes("VmHWMExtra: 123 kB\n") is None
+
+
+def test_a2_04_duplicate_field():
+    assert d7e.parse_vmhwm_rss_bytes(
+        _a2_status("VmHWM:\t 123 kB", "VmHWM:\t 123 kB")) is None
+    # A valid line plus a malformed same-field line still blocks.
+    assert d7e.parse_vmhwm_rss_bytes(
+        _a2_status("VmHWM:\t 123 kB", "VmHWM: nope kB")) is None
+
+
+def test_a2_05_wrong_unit():
+    for unit in ("MB", "KB", "kb", "K", "k", "B", "bytes", "kBB"):
+        line = "VmHWM: 123 %s" % unit
+        assert d7e.parse_vmhwm_rss_bytes(line + "\n") is None, line
+    assert d7e.parse_vmhwm_rss_bytes("VmHWM: 123\n") is None
+
+
+def test_a2_06_malformed_signed_zero_negative():
+    for line in ("VmHWM: 12.5 kB", "VmHWM: 1e4 kB", "VmHWM: +123 kB",
+                 "VmHWM: -123 kB", "VmHWM: 0 kB", "VmHWM: 000 kB",
+                 "VmHWM: abc kB", "VmHWM:  kB", "VmHWM: kB",
+                 "VmHWM 123 kB", "VmHWM:", "VmHWM: 12,345 kB",
+                 "VmHWM: 0x10 kB", "VmHWM: \uff11\uff12\uff13 kB",
+                 "\uff36mHWM: 123 kB", "VmHWM: 123 \uff4bkB"):
+        assert d7e.parse_vmhwm_rss_bytes(line + "\n") is None, repr(line)
+
+
+def test_a2_07_read_failure_and_fresh_read_per_call(tmp_path, monkeypatch):
+    monkeypatch.setattr(d7e, "_PROC_SELF_STATUS_PATH",
+                        str(tmp_path / "does_not_exist"))
+    assert d7e.get_rss_bytes() is None
+    fixture = tmp_path / "status"
+    fixture.write_text("VmHWM: 100 kB\n", encoding="utf-8")
+    monkeypatch.setattr(d7e, "_PROC_SELF_STATUS_PATH", str(fixture))
+    assert d7e.get_rss_bytes() == 100 * 1024
+    # No caching: a rewritten file is re-read on the next probe call.
+    fixture.write_text("VmHWM: 200 kB\n", encoding="utf-8")
+    assert d7e.get_rss_bytes() == 200 * 1024
+
+
+def test_a2_08_overflow_rejection_without_wrapping():
+    assert d7e.parse_vmhwm_rss_bytes(
+        "VmHWM: 9999999999999999999 kB\n") is None  # 19 digits
+    assert d7e.parse_vmhwm_rss_bytes(
+        "VmHWM: %s kB\n" % ("9" * 100,)) is None
+    assert d7e.parse_vmhwm_rss_bytes(
+        "VmHWM: 1%s kB\n" % ("0" * 18,)) is None  # 19 digits
+    edge = "9" * 18
+    assert d7e.parse_vmhwm_rss_bytes(
+        "VmHWM: %s kB\n" % (edge,)) == int(edge) * 1024
+
+
+def test_a2_09_bogus_ru_maxrss_cannot_affect_wsl_result(tmp_path,
+                                                        monkeypatch):
+    assert not hasattr(d7e, "_read_ru_maxrss")  # legacy fallback deleted
+    for path in (CORE_PATH, RUNNER):
+        source = path.read_text(encoding="utf-8")
+        assert "ru_maxrss" not in source, path.name
+        assert "import resource" not in source, path.name
+    import resource
+    calls = []
+
+    def _bogus_ru(who):
+        calls.append(who)
+
+        class _Bogus(object):
+            ru_maxrss = 4026531  # ~3.84 GiB in KiB: implausible vs VmHWM
+
+        return _Bogus()
+
+    monkeypatch.setattr(resource, "getrusage", _bogus_ru)
+    fixture = tmp_path / "status"
+    fixture.write_text(_a2_status("VmHWM:\t 123456 kB"), encoding="utf-8")
+    monkeypatch.setattr(d7e, "_PROC_SELF_STATUS_PATH", str(fixture))
+    assert d7e.get_rss_bytes() == 123456 * 1024
+    assert calls == []
+
+
+def test_a2_10_below_limit_permits_existing_path(tmp_path, monkeypatch):
+    mib = 256 * 1024 * 1024
+    fixture = tmp_path / "status"
+    fixture.write_text(_a2_status("VmHWM:\t 262144 kB"), encoding="utf-8")
+    monkeypatch.setattr(d7e, "_PROC_SELF_STATUS_PATH", str(fixture))
+    assert d7e.get_rss_bytes() == mib
+    first = _full_run(tmp_path, rss_probe=d7e.get_rss_bytes,
+                      out_name=tmp_path / "a2below")
+    second = _full_run(tmp_path, rss_probe=lambda: mib,
+                       out_name=tmp_path / "a2below_ref")
+    assert first["terminal"] == second["terminal"]
+    assert first["records"] == second["records"] == 192
+
+
+def test_a2_11_limit_boundary_blocks(tmp_path, monkeypatch):
+    limit_kb = d7e.RSS_LIMIT_BYTES // 1024
+    fixture = tmp_path / "status"
+    monkeypatch.setattr(d7e, "_PROC_SELF_STATUS_PATH", str(fixture))
+    # One KiB below the strict <2 GiB limit permits a full run.
+    fixture.write_text(_a2_status("VmHWM: %d kB" % (limit_kb - 1,)),
+                       encoding="utf-8")
+    assert d7e.get_rss_bytes() == d7e.RSS_LIMIT_BYTES - 1024
+    result = _full_run(tmp_path, rss_probe=d7e.get_rss_bytes,
+                       out_name=tmp_path / "a2lim_ok")
+    assert result["records"] == 192 and result["terminal"] != d7e.T_RESOURCE
+    # Equal-to and above the limit block at the first call.
+    for kb in (limit_kb, limit_kb * 2):
+        fixture.write_text(_a2_status("VmHWM: %d kB" % (kb,)),
+                           encoding="utf-8")
+        out = tmp_path / ("a2lim_%d" % (kb,))
+        result = _full_run(tmp_path, rss_probe=d7e.get_rss_bytes,
+                           out_name=out)
+        assert result["terminal"] == d7e.T_RESOURCE, kb
+        assert result["records"] == 1, kb
+        assert d7e.verify_root(out)["ok"] is True
+
+
+def test_a2_12_none_blocks_preflight_before_first_decoder(tmp_path,
+                                                          monkeypatch):
+    events = []
+
+    def decoder(h, prior, syndrome):
+        events.append("decode")
+        return _argmax_target()(h, prior, syndrome)
+
+    out = tmp_path / "a2pre"
+    with pytest.raises(d7e.PreflightBlocked) as excinfo:
+        d7e.run_cross_layer_discriminator(
+            out_root=out, joint=_uniform_joint(),
+            block_sampler=_parity_sampler(),
+            decoder_fns={"SOURCE": decoder, "TARGET": decoder},
+            state={"d7e_execution_authorized": True},
+            rss_probe=lambda: None, repo_root=REPO)
+    assert excinfo.value.terminal == d7e.T_PRE_EXEC and events == []
+    assert not out.exists()
+    # A VmHWM-backed None (missing-field fixture) blocks identically.
+    fixture = tmp_path / "status"
+    fixture.write_text("Name:\tpython\nVmRSS:\t 1 kB\n", encoding="utf-8")
+    monkeypatch.setattr(d7e, "_PROC_SELF_STATUS_PATH", str(fixture))
+    out2 = tmp_path / "a2pre2"
+    with pytest.raises(d7e.PreflightBlocked):
+        d7e.run_cross_layer_discriminator(
+            out_root=out2, joint=_uniform_joint(),
+            block_sampler=_parity_sampler(),
+            decoder_fns={"SOURCE": decoder, "TARGET": decoder},
+            state={"d7e_execution_authorized": True},
+            rss_probe=d7e.get_rss_bytes, repo_root=REPO)
+    assert events == [] and not out2.exists()
+
+
+def test_a2_13_midrun_none_or_overlimit_keeps_resource_terminal(tmp_path):
+    ok = 256 * 1024 * 1024
+    for bad in (None, 3 * 1024**3):
+        state = {"n": 0}
+
+        def seq_probe(state=state, bad=bad):
+            state["n"] += 1
+            return ok if state["n"] <= 5 else bad
+
+        source = _scripted_source(["CHECK_UPDATED"] * 64)
+        target = _argmax_target()
+        out = tmp_path / ("a2mid_%s" % (bad,))
+        result = d7e.run_cross_layer_discriminator(
+            out_root=out, joint=_uniform_joint(),
+            block_sampler=_parity_sampler(),
+            decoder_fns={"SOURCE": source, "TARGET": target},
+            state={"d7e_execution_authorized": True},
+            rss_probe=seq_probe, command_str="fake qualification",
+            repo_root=REPO)
+        assert result["terminal"] == d7e.T_RESOURCE, bad
+        # Preflight plus slots 1-4 probe ok; the 5th slot's probe goes bad,
+        # is recorded once, and stops the run with no retry.
+        assert result["records"] == 5, bad
+        assert source.calls["k"] + target.calls["n"] == 5, bad
+        assert d7e.verify_root(out)["ok"] is True
+
+
+def test_a2_14_rss_bytes_schema_invariant(tmp_path, monkeypatch):
+    assert d7e.RECORD_FIELDS.count("rss_bytes") == 1
+    fixture = tmp_path / "status"
+    fixture.write_text(_a2_status("VmHWM:\t 262144 kB"), encoding="utf-8")
+    monkeypatch.setattr(d7e, "_PROC_SELF_STATUS_PATH", str(fixture))
+    out = tmp_path / "a2schema"
+    _full_run(tmp_path, rss_probe=d7e.get_rss_bytes, out_name=out)
+    rows = _read_csv(out / "decoder_records.csv")
+    assert list(rows[0].keys()) == d7e.RECORD_FIELDS
+    assert {row["rss_bytes"] for row in rows} == {str(256 * 1024 * 1024)}
+    assert d7e.verify_root(out)["ok"] is True
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["rss_limit_bytes"] == 2 * 1024**3
+
+
+def test_a2_15_cli_surface_zero_decoder_zero_root(tmp_path):
+    external = tmp_path / "ext"
+    external.mkdir()
+    result = _run_cli([str(RUNNER), "--help"], cwd=external)
+    assert result.returncode == 0 and "D7-E" in result.stdout
+    result = _run_cli([str(RUNNER), "--dry-run"], cwd=external)
+    assert result.returncode == 0
+    lines = [line for line in result.stdout.splitlines() if line.strip()]
+    assert lines[0].startswith("slots=192") and len(lines) == 193
+    target = WS / (d7e.OUT_ROOT_PREFIX + "a2_probe_testonly")
+    assert not target.exists()
+    result = _run_cli([str(RUNNER), "--model-f-root", d7e.MODEL_F_ROOT,
+                       "--out-root", str(target)], cwd=REPO)
+    assert result.returncode == 3 and "not authorized" in result.stdout
+    assert not target.exists()
