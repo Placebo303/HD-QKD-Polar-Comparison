@@ -1,13 +1,16 @@
-# Layer-interface belief provenance — tasks (activated for implementation (Delta R1))
+# Layer-interface belief provenance — tasks (implemented/reviewed (Delta R1))
 
 > Activated by the D7-D/BP interface-readiness R1 packet §4 A09–A10 after D7-D
 > bounded acceptance `D7_D_RESULT_ACCEPTED_SCHEDULE_EFFECT_INCONCLUSIVE`
 > (commit `ffb4e909`). Adopt alternative A; B is a separately frozen future
 > scientific decision, C is rejected.
-> **All BP-01…BP-08 checkboxes below remain unchecked.** Completion is marked
-> only at the packet's closeout gate A19, after the independent implementation
-> (A17) and readiness (A18) reviews PASS. No BP item is complete as of this
-> delta.
+> **BP-01…BP-08 are complete** at the packet's closeout gate A19, after the
+> independent implementation (A17, `D7_BP_INTERFACE_IMPLEMENTATION_REVIEW_PASS`)
+> and readiness (A18, `D7_BP_INTERFACE_READINESS_REVIEW_PASS`) reviews PASS.
+> BP-06 is complete only as a frozen non-implementation boundary
+> (`WARM_START_DEFERRED`). Any next scientific work (D7-E provenance-safe
+> cross-layer discriminator) requires a new prereg/packet and explicit
+> authorization.
 > The **PV-01–PV-14 acceptance matrix in `proposal.md` (~L243–274) is
 > authoritative for tests**; this file references it rather than restating it.
 > Authorization fields remain false; this folder performs no implementation,
@@ -71,44 +74,44 @@ Excluded (must not be touched): frozen `src/`, `experiments/`, `tools/`, the
 sibling `nonbinary_v10_fftqspa.py`, D7-A/C/D scientific logic, and all evidence
 roots.
 
-## Implementation tasks (activated Delta R1; ordered; not complete)
+## Implementation tasks (implemented/reviewed (Delta R1); ordered)
 
-- [ ] BP-01 — **Producer provenance (v35)** — activated (Delta R1) / not complete. Add the
+- [x] BP-01 — **Producer provenance (v35)** — complete (Delta R1). Add the
   additive defaulted `belief_provenance` field to `DecoderResult` and populate
   it at every return site: row-layered cold `iterations == 0` →
   `PRIOR_ONLY`; row-layered/flooding `iterations > 0` → `CHECK_UPDATED`;
   warm-seeded returns → `WARM_START_UNSPECIFIED`. Do not change hard-decision
   stopping or any existing field (ruling 1). Add PV-01–PV-05 tests; prove
   byte-identical hard-decision results on frozen fixtures.
-- [ ] BP-02 — **D5 plumbing** — activated (Delta R1) / not complete. Carry provenance
+- [x] BP-02 — **D5 plumbing** — complete (Delta R1). Carry provenance
   through `_decode_block` and the three adapter dicts
   (`historical_g0_decoder`, `_bound_hist`, `bind_historical_decoder`) without
   changing existing dict keys; add PV-11 tests.
-- [ ] BP-03 — **D5 fail-closed guard** — activated (Delta R1) / not complete. Migrate
+- [x] BP-03 — **D5 fail-closed guard** — complete (Delta R1). Migrate
   `_run_layered_block` so a conditioned L2 APP prior is computed only from
   L1 returns with `CHECK_UPDATED` provenance; `PRIOR_ONLY` / `None` / unknown
   fails closed before `app_fed_l2_prior`. Add PV-06–PV-09 tests. This is the
   minimum mandatory consumer migration.
-- [ ] BP-04 — **Remaining cross-layer APP consumers** — activated (Delta R1) / not complete.
+- [x] BP-04 — **Remaining cross-layer APP consumers** — complete (Delta R1).
   Before any rerun as a cross-layer route, migrate or fail-close:
   `v72p2d3` recombination (L1351–1352), `nbldpc_shell_adapter.py:254`, and the
   historical v45–v55 paths if ever rerun; `scripts/execute_v64_fresh_verify.py:188`
   follows the same rule. Historical results are not recomputed.
-- [ ] BP-05 — **Diagnostic labeling** — activated (Delta R1) / not complete. Where a future
+- [x] BP-05 — **Diagnostic labeling** — complete (Delta R1). Where a future
   diagnostic compares returned beliefs against an exact posterior (D7-B-style),
   record iteration-0/current beliefs only as `PRIOR_ONLY_CURRENT_BELIEF` and
   separate hard-decision success from belief calibration (E10). D7-B R2 remains
   immutable and is not rerun. Add PV-10 tests.
-- [ ] BP-06 — **Warm-start provenance design** — activated (Delta R1) / not
-  complete, out of scope until a route needs warm starts; must not be guessed
-  from `iterations` (ruling 7). Frozen non-implementation boundary; closeout
-  marker `WARM_START_DEFERRED`.
-- [ ] BP-07 — **Independent implementation review and Pre-EXECUTE** —
-  activated (Delta R1) / not complete. Independent review of the migration against the
-  frozen contract, then a separate Pre-EXECUTE before the first authorized
-  cross-layer APP run (frozen command, budgets, no-overwrite, focused tests,
-  authorization explicit). No execution is authorized by this change.
-- [ ] BP-08 — **D7-C independence check** — activated (Delta R1) / not complete. Import-graph
+- [x] BP-06 — **Warm-start provenance design** — complete (Delta R1) as a
+  frozen non-implementation boundary (`WARM_START_DEFERRED`); no warm-start
+  implementation. Out of scope until a route needs warm starts; must not be
+  guessed from `iterations` (ruling 7).
+- [x] BP-07 — **Independent implementation review and Pre-EXECUTE** —
+  implementation review complete (Delta R1); no cross-layer APP run was
+  executed. Any future authorized cross-layer run still needs its own
+  Pre-EXECUTE (frozen command, budgets, no-overwrite, focused tests, explicit
+  authorization). No execution is authorized by this change.
+- [x] BP-08 — **D7-C independence check** — complete (Delta R1). Import-graph
   test (PV-14): the future interface-rework implementation and the D7-C oracle
   implementation share no dependency; D7-C never feeds returned beliefs
   cross-layer.

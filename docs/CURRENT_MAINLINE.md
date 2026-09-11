@@ -1,6 +1,6 @@
 # Current Mainline
 
-## Formal-IR research mainline — current route ledger (through D7-D)
+## Formal-IR research mainline — current route ledger (through D7-D + BP provenance interface)
 
 This document is **status, not authorization**. The active gate and accepted
 cycle documents outrank aggregate checkbox counts; stale historical checkboxes
@@ -28,13 +28,19 @@ own cycle document; no new claim is added here):
 6. **D7-D — schedule effect inconclusive** (`D7_D_SCHEDULE_EFFECT_INCONCLUSIVE`,
    accepted as `D7_D_RESULT_ACCEPTED_SCHEDULE_EFFECT_INCONCLUSIVE`); no
    schedule-superiority claim.
-7. **Active gate — BP provenance implementation.** The next mainline action is
-   Alternative A of the accepted layer-interface proposal: explicit belief
-   provenance plus fail-closed cross-layer consumers.
-8. **After BP**, freeze a provenance-safe cross-layer mechanism discriminator
-   before any further cross-layer APP work.
-9. **Only then** consider dimension/bandwidth expansion. For more than two
-   layers, a separate mathematical/leakage contract is required.
+7. **Active gate — D7-E provenance-safe cross-layer discriminator packet
+   freeze.** BP provenance Alternative A is implemented and independently
+   reviewed (`D7_BP_INTERFACE_IMPLEMENTATION_REVIEW_PASS`,
+   `D7_BP_INTERFACE_READINESS_REVIEW_PASS`); the layer-interface rework is
+   `IMPLEMENTED_ALTERNATIVE_A_FAIL_CLOSED`. D7-E itself is **not yet frozen and
+   not authorized** (`NOT_FROZEN_NOT_AUTHORIZED`); R1d stays optional/paused and
+   G1/G2 remain unauthorized.
+8. **After D7-E is frozen and authorized**, run the provenance-safe cross-layer
+   mechanism discriminator before any further cross-layer APP work; that run
+   needs its own prereg/packet and explicit Pre-EXECUTE.
+9. **Only then** consider dimension/bandwidth expansion; expansion stays gated,
+   and for more than two layers a separate mathematical/leakage contract is
+   required.
 
 Earlier bounded V-series states superseded by the ledger above: V34 matched
 empirical-P fixed-packet bounded failure (ER1 accepted); V35R1 closed only the

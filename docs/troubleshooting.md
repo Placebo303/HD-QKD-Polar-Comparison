@@ -285,4 +285,24 @@ active report.
 do not promote an uncommitted rewrite whose numbers cannot be recomputed from
 accepted evidence.
 
+**Recurrence** (2026-09-11, WSL): the same rejected rewrite reappeared after the
+A06 restore, observed rewriting the working copy at ~10:28:58 and ~11:16:45; it
+was re-restored again to the entry-HEAD version and was not committed. The
+external writer remains unresolved.
+
+---
+
+### D6 dormant graph/mother script unpacks the pre-BP-02 `_decode_block` arity
+
+**Observed** (2026-09-11, WSL): BP-02 changed the D5 `_decode_block` return
+arity. `scripts/v72p2d6_graph_mother_development.py` is dormant and still
+unpacks the old return shape, so it will crash before its cross-layer use.
+
+**Root cause**: the D6 script was not migrated when the D5 return arity changed;
+it is currently reachable only by an unauthorized D6 rerun.
+
+**Fix / prevention**: D6 reruns are unauthorized. Fixing and migrating the
+script (and adding the fail-closed provenance guard) is required under a new
+scoped change before any D6 rerun. No code change is made in this packet.
+
 ---
