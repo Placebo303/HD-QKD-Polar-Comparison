@@ -3447,3 +3447,23 @@ these may not be merged or reordered.
 **Context**: WSL `ru_maxrss` disagreed with VmHWM by GiBs, making E09 non-deterministic; the frozen A2 rule reads peak RSS only from `/proc/self/status` VmHWM. The prior user authorization is not reusable — a later execution needs a fresh explicit authorization referencing RSS A2.
 
 **Consequences**: R1d stays paused/optional (not a mainline gate); G1/G2 unauthorized; no D7-E/R1d/G1/G2 execution authorized by this entry.
+
+## 2026-09-11 D7-E accepted as directional cross-layer transfer diagnostic; route to D7-F reverse-order freeze
+
+**Decision**: Accept the immutable D7-E result under the narrow scope
+`D7_E_RESULT_ACCEPTED_DIRECTIONAL_CROSS_LAYER_TRANSFER_DIAGNOSTIC`
+(`docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_RESULT_ACCEPTANCE_R1.md`).
+A01 independently recomputed the four strata from committed scalars and confirmed the packet §1
+ruling exactly: 192/192 calls, 64/64 transfer eligible+invoked, f=1.0 both directions 0/16–0/16,
+f=1.2 L1_TO_L2 control 0/16 transfer 3/16 (`AMBIGUOUS_TRANSFER_EFFECT`), f=1.2 L2_TO_L1 control 3/16
+transfer 7/16 with four transfer-only and zero control-only (`STRONG_TRANSFER_LIFT`), terminal
+`D7_E_L2_TO_L1_TRANSFER_LIFT`; integrity `PASS_WITH_DISCLOSED_VERIFY_PROVENANCE_GAP` with the
+original `BLOCKED` review retained.
+
+**Context**: Permitted inference is direction-dependent useful transfer, strongest L2_TO_L1 at f=1.2,
+for this frozen synthetic contract only. Unsupported: general success, FER/leakage/key-rate,
+qualification, real-data, alternating-convergence proof, R1d/G1/G2 permission.
+
+**Consequences**: `next_gate` → `D7_F_REVERSE_ORDER_PACKET_FREEZE`; D7-F tests whether the lift
+survives as complete two-layer recovery in reverse order, with no feedback cycle yet
+(cavity/extrinsic still missing). All authorizations stay false; no push.

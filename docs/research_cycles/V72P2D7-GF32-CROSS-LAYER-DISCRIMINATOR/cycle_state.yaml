@@ -16,7 +16,7 @@ r1d_state: R1D_PAUSED_OPTIONAL_LOCAL_CONFIRMATION_NOT_MAINLINE_GATE
 g1_authorized: false
 g2_authorized: false
 layer_interface_implementation: ALTERNATIVE_A_ACCEPTED_CURRENT_CONTRACT
-next_gate: INDEPENDENT_D7_E_RESULT_ACCEPTANCE_R1
+next_gate: D7_F_REVERSE_ORDER_PACKET_FREEZE
 d7e_readiness_state: D7_E_WSL_RSS_READY_AWAITING_FRESH_EXPLICIT_AUTHORIZATION
 d7e_implementation_review: D7_E_IMPLEMENTATION_REVIEW_PASS
 d7e_pre_execute_review: D7_E_PRE_EXECUTE_REVIEW_PASS_VENV_RSS_A2_AWAITING_FRESH_EXPLICIT_AUTHORIZATION
@@ -26,8 +26,9 @@ d7e_execution_attempts: 1
 d7e_execution_completed: 1
 d7e_terminal: D7_E_L2_TO_L1_TRANSFER_LIFT
 d7e_pre_result_review: PASS_WITH_DISCLOSED_VERIFY_PROVENANCE_GAP
-d7e_result_accepted: false
-d7e_accepted_scope: D7_E_NO_SCOPE_ACCEPTED
+d7e_result_accepted: true
+d7e_accepted_scope: D7_E_RESULT_ACCEPTED_DIRECTIONAL_CROSS_LAYER_TRANSFER_DIAGNOSTIC
+d7e_acceptance_doc: docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_RESULT_ACCEPTANCE_R1.md
 d7e_prereg_doc: docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_PREREG_R1.md
 d7e_execution_packet_doc: docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_EXECUTION_PACKET_R1.md
 d7e_execution_packet_addendum_doc: docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_EXECUTION_PACKET_ADDENDUM_RSS_A2.md
