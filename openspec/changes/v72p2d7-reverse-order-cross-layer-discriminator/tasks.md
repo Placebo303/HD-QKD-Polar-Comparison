@@ -17,14 +17,21 @@
   authorization/promotion/decoder/result false; no identifier/root;
   predecessor D7-E acceptance). Single scoped commit `docs(d7-f): freeze
   reverse-order cross-layer discriminator`.
-- [ ] C-impl — **Minimal implementation (later gate).** New files only at
+- [x] C-impl — **Minimal implementation (complete).** New files only at
   the frozen paths (module, one test file, one thin script); reuse D7-E
   loaders/estimator/transfer/provenance/RSS/scalar/verifier conventions
   via narrow imports, no predecessor-module copies; lazy binding, DI,
   dry-run, unauthorized refusal, exact arm order, transient q, fail-closed
   provenance, budgets, no-overwrite, read-only verify; seven scalar text
-  files only.
-- [ ] D-tests — **Tests (later gate).** At minimum cover the packet §7
+  files only. Evidence (Phase-F closeout): module
+  `comparison_bench/src/comparison_bench/formal_ir/v72p2d7_gf32_reverse_order_discriminator.py`
+  + test file
+  `comparison_bench/tests/test_v72p2d7_gf32_reverse_order_discriminator.py`
+  (41 tests) + script
+  `scripts/v72p2d7_gf32_reverse_order_discriminator.py`;
+  `D7_F_IMPLEMENTATION_REVIEW_PASS`
+  (`docs/research_cycles/V72P2D7-GF32-REVERSE-ORDER-DISCRIMINATOR/D7_F_IMPLEMENTATION_REVIEW_R1.md`).
+- [x] D-tests — **Tests (complete).** At minimum cover the packet §7
   list: exact 128-call matrix/order and cap; arm transitions and blocked
   non-calls; source exact not an eligibility gate; only exact
   `CHECK_UPDATED` transfers; each syndrome consumed once, no target
@@ -34,12 +41,21 @@
   cases; protected-root/no-overwrite refusal; external-cwd
   decoder/loader sentinel; dry-run and unauthorized refusal; D7-E/BP
   provenance regression. Focused tests plus one milestone regression; no
-  perf-v38 or scientific decoder.
-- [ ] E-reviews — **Independent reviews (later gate).** Implementation
-  verdict `D7_F_IMPLEMENTATION_REVIEW_PASS` or `...FAIL`, then fresh
+  perf-v38 or scientific decoder. Evidence (Phase-F closeout): 41/41
+  focused tests green (`41 passed, 1 warning in 29.03s`, warning only
+  `Unknown config option: cache_dir`); BP milestone regression green
+  (inner 23 passed); pre-execute repro `41 passed in 29.26s`; single live
+  VmHWM probe; no scientific decoder calls.
+- [x] E-reviews — **Independent reviews (complete).** Implementation
+  verdict `D7_F_IMPLEMENTATION_REVIEW_PASS`, then fresh
   Pre-EXECUTE verdict
-  `D7_F_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION` or
-  `...FAIL`. Neither grants authorization.
+  `D7_F_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION`.
+  Neither grants authorization. Evidence (Phase-F closeout):
+  `D7_F_IMPLEMENTATION_REVIEW_R1.md` carries
+  `D7_F_IMPLEMENTATION_REVIEW_PASS`;
+  `D7_F_PRE_EXECUTE_REVIEW_R1.md` carries
+  `D7_F_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION`;
+  no execution authorized or performed.
 
 ## Non-goals
 

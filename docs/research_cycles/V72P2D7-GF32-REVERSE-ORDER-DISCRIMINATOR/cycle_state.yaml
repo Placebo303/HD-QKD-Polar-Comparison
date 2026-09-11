@@ -16,10 +16,10 @@ r1d_state: R1D_ABSENT_NOT_AUTHORIZED
 g1_authorized: false
 g2_authorized: false
 layer_interface_implementation: ALTERNATIVE_A_ACCEPTED_CURRENT_CONTRACT
-next_gate: D7_F_IMPLEMENTATION_PENDING
+next_gate: D7_F_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION
 d7f_readiness_state: D7_F_FROZEN_NOT_AUTHORIZED_NOT_EXECUTED
-d7f_implementation_review: PENDING
-d7f_pre_execute_review: PENDING
+d7f_implementation_review: D7_F_IMPLEMENTATION_REVIEW_PASS
+d7f_pre_execute_review: D7_F_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION
 d7f_execution_attempts: 0
 d7f_execution_completed: 0
 d7f_terminal: NONE
