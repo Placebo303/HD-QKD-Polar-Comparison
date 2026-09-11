@@ -1,0 +1,4 @@
+scripts/v72p2d7_gf32_cross_layer_discriminator.py --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d7_e_cross_layer_discriminator_faa5dc1c-d2d6-4329-b88d-68f2c1f51d5c
+terminal: D7_E_L2_TO_L1_TRANSFER_LIFT
+calls_completed: 192
+stored_wall_s: 64.95356635501957
