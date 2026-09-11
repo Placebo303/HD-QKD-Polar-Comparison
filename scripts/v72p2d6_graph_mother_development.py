@@ -83,6 +83,10 @@ DECODER_FIELDNAMES = ["call_idx", "arm", "n", "seed", "point", "rows_l1",
                       "wall_timeout", "prior_mass_on_truth", "wall_s",
                       "rss_bytes", "watchdog_ok", "worker_pid",
                       "respawn_pid", "error"]
+# BP compat (R1d): named marker for provenance-blocked L2-APP slots.
+# In-memory note only (DECODER_FIELDNAMES unchanged); the persisted loud
+# marker is the rec2["error"] provenance-blocked string.
+PROVENANCE_BLOCKED_NOTE = "provenance-blocked-l1-not-check-updated"
 
 LOG = []
 
@@ -108,11 +112,21 @@ def _worker_main(conn, src_dir):
     try:
         hw = _np.eye(8, dtype=_np.uint8)
         pw = _np.full((8, 32), 1.0 / 32, dtype=_np.float64)
-        core._decode_block(dec, hw, pw, _np.zeros(8, dtype=_np.int64))
+        wres = core._decode_block(dec, hw, pw, _np.zeros(8, dtype=_np.int64))
+        # BP compat: the accepted decoder result is six values including
+        # provenance; any other shape is loudly not-ready, never silent ok.
+        wn = len(tuple(wres))
+        if wn != 6:
+            raise ValueError(
+                "decoder-result-shape-incompatible: want 6 (exact, "
+                "syndrome_ok, iterations, finite, beliefs, provenance), "
+                "got %d" % (wn,))
         warm = "ok"
+        ready = True
     except Exception as ex:  # noqa: BLE001
         warm = "fail:%r" % (ex,)
-    conn.send({"event": "ready", "pid": _os.getpid(),
+        ready = False
+    conn.send({"event": "ready", "ready": ready, "pid": _os.getpid(),
                "rss": core._rss_bytes(), "warmup": warm})
     while True:
         task = conn.recv()
@@ -123,11 +137,12 @@ def _worker_main(conn, src_dir):
             h = _np.asarray(task["h"], dtype=_np.uint8)
             prior = _np.asarray(task["prior"], dtype=_np.float64)
             xt = _np.asarray(task["x_true"], dtype=_np.int64)
-            e, s, it, f, bel = core._decode_block(dec, h, prior, xt)
+            e, s, it, f, bel, prov = core._decode_block(dec, h, prior, xt)
             out = {"exact": bool(e), "syndrome_ok": bool(s),
                    "iterations": int(it), "finite": bool(f),
                    "beliefs": _np.asarray(bel, dtype=_np.float64)
                    if task.get("return_beliefs") and bel is not None else None,
+                   "belief_provenance": prov,
                    "crash": False, "error": ""}
         except Exception as ex:  # noqa: BLE001 - crash consumes the cell
             out = {"exact": False, "syndrome_ok": False, "iterations": -1,
@@ -774,19 +789,40 @@ def run_cell(worker, H1, H2, r1, r2, p1, p2, block, n, meta, state):
     pr1 = d5._floor_renorm(p1[:, bob].T, d5.DECODER_FLOOR)
     tm1 = float(np.mean(pr1[np.arange(n), u1t]))
     modes = []
-    # L1 (beliefs needed for APP propagation; transient IPC only)
+    # L1 (beliefs/provenance needed for APP propagation; transient IPC only)
     rec = invoke(worker, state, meta, "L1", h1, pr1, u1t, tm1, True)
     modes.append(rec)
     bel = rec.pop("beliefs", None)
+    prov = rec.pop("belief_provenance", None)
+    q = None
+    prov_blocked_error = None
     if bel is not None and not rec["crash"]:
-        zz = bel - bel.max(axis=1, keepdims=True)
-        ee = np.exp(zz)
-        q = ee / ee.sum(axis=1, keepdims=True)
-    else:
-        q = None
+        # BP compat: only CHECK_UPDATED may feed conditioned APP mixing.
+        from comparison_bench.formal_ir.v35_algorithm_development import (
+            UnconditionedBeliefProvenanceError,
+            require_check_updated_provenance,
+        )
+        try:
+            require_check_updated_provenance(
+                prov, consumer="D6 run_cell L1->APP-L2")
+        except UnconditionedBeliefProvenanceError:
+            prov_blocked_error = (
+                "provenance-blocked:belief_provenance=%r:"
+                "want-CHECK_UPDATED:no-L2-APP-decode" % (prov,))[:300]
+        else:
+            zz = bel - bel.max(axis=1, keepdims=True)
+            ee = np.exp(zz)
+            q = ee / ee.sum(axis=1, keepdims=True)
     if q is None:
         rec2 = invoke(worker, state, meta, "L2-APP", h2, None, u2t,
                       float("nan"), False, skip=True)
+        if prov_blocked_error is not None:
+            # Fail-closed provenance refusal: named record, never a crash
+            # cell and never an L2 APP decode (call_idx stays -1).
+            rec2["crash"] = False
+            rec2["finite"] = True
+            rec2["error"] = prov_blocked_error
+            rec2["note"] = PROVENANCE_BLOCKED_NOTE
     else:
         pr2 = d5.app_fed_l2_prior(p2, bob, q)
         tm2 = float(np.mean(pr2[np.arange(n), u2t]))
@@ -904,7 +940,10 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
            "watchdog_ok": watchdog_ok,
            "worker_pid": pid_before, "respawn_pid": respawn_pid,
            "error": err,
-           "beliefs": res.get("beliefs")}
+           "beliefs": res.get("beliefs"),
+           # BP compat: transient IPC only; never reaches CSV
+           # (DECODER_FIELDNAMES unchanged).
+           "belief_provenance": res.get("belief_provenance")}
     lock = state.get("lock")
     if lock is not None:
         lock.acquire()
