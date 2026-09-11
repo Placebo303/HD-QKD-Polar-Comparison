@@ -28,13 +28,16 @@ own cycle document; no new claim is added here):
 6. **D7-D — schedule effect inconclusive** (`D7_D_SCHEDULE_EFFECT_INCONCLUSIVE`,
    accepted as `D7_D_RESULT_ACCEPTED_SCHEDULE_EFFECT_INCONCLUSIVE`); no
    schedule-superiority claim.
-7. **Active gate — D7-E provenance-safe cross-layer discriminator packet
-   freeze.** BP provenance Alternative A is implemented and independently
-   reviewed (`D7_BP_INTERFACE_IMPLEMENTATION_REVIEW_PASS`,
-   `D7_BP_INTERFACE_READINESS_REVIEW_PASS`); the layer-interface rework is
-   `IMPLEMENTED_ALTERNATIVE_A_FAIL_CLOSED`. D7-E itself is **not yet frozen and
-   not authorized** (`NOT_FROZEN_NOT_AUTHORIZED`); R1d stays optional/paused and
-   G1/G2 remain unauthorized.
+7. **Active gate — D7-E provenance-safe cross-layer discriminator frozen
+   awaiting explicit authorization.** BP provenance Alternative A is
+   implemented and dual-reviewed
+   (`D7_BP_INTERFACE_IMPLEMENTATION_REVIEW_PASS`,
+   `D7_BP_INTERFACE_READINESS_REVIEW_PASS`); D7-E is frozen at `f82804f6`
+   with implementation review `D7_E_IMPLEMENTATION_REVIEW_PASS` and
+   Pre-EXECUTE `D7_E_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION`
+   recorded — nothing executed, no UUID, no result root. D6 R1d
+   BP-provenance compat is repaired and re-reviewed but R1d stays
+   optional/paused; G1/G2 remain unauthorized.
 8. **After D7-E is frozen and authorized**, run the provenance-safe cross-layer
    mechanism discriminator before any further cross-layer APP work; that run
    needs its own prereg/packet and explicit Pre-EXECUTE.

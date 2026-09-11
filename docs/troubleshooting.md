@@ -306,3 +306,33 @@ script (and adding the fail-closed provenance guard) is required under a new
 scoped change before any D6 rerun. No code change is made in this packet.
 
 ---
+
+### D7-E R22 lifecycle-test debt: ten isolated baseline tripwires (no broad cleanup)
+
+**Observed** (2026-09-11, WSL): ten pre-existing test tripwires fail
+identically at baseline (committed leftover roots / accepted-state snapshots),
+unrelated to D7-E. Each was isolated with baseline proof; no skip/xfail/delete
+was used.
+
+**Inventory**:
+- D7-B `test_launch_l04_dry_run_both_cwds_no_bind_no_root` and
+  `test_launch_l12_roots_and_authorization_unchanged` — stale root-absence
+  assertions against the accepted D7-B root.
+- D7-D `test_f08_no_real_model_f_production_root_or_formal_root_read` and
+  `test_s21_protected_root_lifecycle_and_d7bc_immutability` — stale
+  root-absence assertions against the accepted D7-D root.
+- D7-C `test_c19_protected_root_lifecycle_and_g2_r1d_absence` — root part
+  already converted to snapshot invariance; residual is a stale authorization
+  snapshot (`decoder_executed`/`result_created` true after the legitimate
+  accepted run).
+- v45–v48 five CLI/overwrite-guard failures — group reference per
+  `D7_BP_INTERFACE_IMPLEMENTATION_REVIEW_R1.md` §5 (`test_t10_cli_no_fake_option`,
+  `test_t10_cli_sha_rejects`, `test_cli_guards` ×3; exact full IDs
+  unconfirmable from that doc and not invented here) — pre-existing accepted
+  `run_01` roots trigger overwrite refusal before the asserted message.
+
+**Rule**: repair only a test directly blocking a required scoped suite, using
+snapshot invariance rather than root absence; never weaken an authorization
+tripwire; no skip/xfail/delete.
+
+---
