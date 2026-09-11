@@ -1,0 +1,4 @@
+scripts/v72p2d7_gf32_reverse_order_discriminator.py --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d7_f_reverse_order_discriminator_b6d62184-fd15-483d-947e-01ea66ddc13c
+terminal: D7_F_REVERSE_ORDER_REGRESSION
+calls_completed: 128
+stored_wall_s: 41.2815843069402

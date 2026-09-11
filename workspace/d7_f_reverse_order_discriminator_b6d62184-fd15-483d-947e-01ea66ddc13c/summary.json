@@ -1,0 +1,31 @@
+{
+  "calls_attempted": 128,
+  "calls_completed": 128,
+  "calls_remaining": 0,
+  "crash_count": 0,
+  "mandatory_completed": 64,
+  "nonfinite_count": 0,
+  "peak_rss_bytes": 133021696,
+  "reruns": 0,
+  "resumes": 0,
+  "retries": 0,
+  "slots_scheduled": 128,
+  "stop_terminal": "",
+  "stored_wall_s": 41.2815843069402,
+  "strata": [
+    {
+      "f": 1.0,
+      "stratum_idx": 1,
+      "stratum_label": "NO_REVERSE_LIFT"
+    },
+    {
+      "f": 1.2,
+      "stratum_idx": 2,
+      "stratum_label": "REVERSE_REGRESSION"
+    }
+  ],
+  "terminal": "D7_F_REVERSE_ORDER_REGRESSION",
+  "transfer_blocked": 0,
+  "transfer_invoked": 64,
+  "watchdog_timeouts": 0
+}

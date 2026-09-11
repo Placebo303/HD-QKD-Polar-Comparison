@@ -1,0 +1,3 @@
+stratum_idx,f,blocks,forward_eligible_count,forward_blocked_count,reverse_eligible_count,reverse_blocked_count,forward_both_exact_count,reverse_both_exact_count,candidate_only,reference_only,both,neither,nonfinite_count,crash_count,stratum_label,coverage_status
+1,1.0,16,16,0,16,0,0,0,0,0,0,16,0,0,NO_REVERSE_LIFT,COVERAGE_OK
+2,1.2,16,16,0,16,0,2,0,0,2,0,14,0,0,REVERSE_REGRESSION,COVERAGE_OK

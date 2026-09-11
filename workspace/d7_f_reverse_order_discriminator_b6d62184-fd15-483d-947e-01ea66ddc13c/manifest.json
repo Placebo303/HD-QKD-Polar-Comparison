@@ -1,0 +1,110 @@
+{
+  "arms": [
+    "FORWARD_L1_TO_L2",
+    "REVERSE_L2_TO_L1"
+  ],
+  "authorization_consumed": true,
+  "block_seeds": [
+    2026091300,
+    2026091301,
+    2026091302,
+    2026091303,
+    2026091304,
+    2026091305,
+    2026091306,
+    2026091307,
+    2026091308,
+    2026091309,
+    2026091310,
+    2026091311,
+    2026091312,
+    2026091313,
+    2026091314,
+    2026091315
+  ],
+  "call_order": "for f in [1.0, 1.2]: for seed in 2026091300..2026091315: FORWARD_L1_TO_L2_SOURCE_L1_MARGINAL, FORWARD_L1_TO_L2_TARGET_L2_TRANSFER, REVERSE_L2_TO_L1_SOURCE_L2_MARGINAL, REVERSE_L2_TO_L1_TARGET_L1_TRANSFER",
+  "change": "v72p2d7-reverse-order-cross-layer-discriminator",
+  "command": "scripts/v72p2d7_gf32_reverse_order_discriminator.py --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d7_f_reverse_order_discriminator_b6d62184-fd15-483d-947e-01ea66ddc13c",
+  "contract": "R1",
+  "damping_alpha": 1.0,
+  "decoder_floor": 1e-15,
+  "decoder_ids": {
+    "SOURCE": "v35.decode_row_layered_fftqspa(h, prior, syndrome, max_iter=90, damping_alpha=1.0, warm_beliefs=None, field=None)",
+    "TARGET": "v35.decode_row_layered_fftqspa(h, prior, syndrome, max_iter=90, damping_alpha=1.0, warm_beliefs=None, field=None)"
+  },
+  "end_utc": "2026-09-11T14:57:26Z",
+  "estimator": "v72p2d5_gf32_rate_mother.prepare_model_f_prior_candidate(counts_ab, p_b)",
+  "f_values": [
+    1.0,
+    1.2
+  ],
+  "graph_seeds": {
+    "L1": 2026090501,
+    "L2": 2026090502
+  },
+  "l1_rows": {
+    "1.0": 49,
+    "1.2": 59
+  },
+  "l2_rows": {
+    "1.0": 43,
+    "1.2": 52
+  },
+  "lambda_star": 137.3823795883264,
+  "mandatory_calls": 64,
+  "max_calls": 128,
+  "max_iter": 90,
+  "model_f_files": [
+    [
+      "model_f_input.npz",
+      208467
+    ],
+    [
+      "model_f_input_summary.json",
+      752
+    ]
+  ],
+  "model_f_root": "workspace/v72p2d5_model_f_input/20260907_r1",
+  "mothers": {
+    "L1": "build_dv3_nested_support(64,64,49,2026090501)+assign_gf32_coefficients(sup,2026090501,None,64)",
+    "L2": "build_dv3_nested_support(64,64,43,2026090502)+assign_gf32_coefficients(sup,2026090502,None,64)"
+  },
+  "n": 64,
+  "out_root_name": "d7_f_reverse_order_discriminator_b6d62184-fd15-483d-947e-01ea66ddc13c",
+  "outer_grace_s": 30.0,
+  "outer_watchdog_s": 1800.0,
+  "per_call_watchdog_s": 120.0,
+  "pid": 805760,
+  "reruns": 0,
+  "resumes": 0,
+  "retries": 0,
+  "rss_limit_bytes": 2147483648,
+  "seven_files": [
+    "manifest.json",
+    "decoder_records.csv",
+    "arm_pairs.csv",
+    "stratum_summary.csv",
+    "summary.json",
+    "report.md",
+    "command_log.txt"
+  ],
+  "start_utc": "2026-09-11T14:56:44Z",
+  "stored_wall_limit_s": 1500.0,
+  "terminal_priority": [
+    "D7_F_PRE_EXECUTION_BLOCKED",
+    "D7_F_WATCHDOG_TIMEOUT_VOID",
+    "D7_F_NONFINITE_OR_CRASH_BLOCKED",
+    "D7_F_RESOURCE_OVERRUN",
+    "D7_F_INCOMPLETE_MATRIX_BLOCKED",
+    "D7_F_PROVENANCE_COVERAGE_BLOCKED",
+    "D7_F_REVERSE_ORDER_STRONG_LIFT",
+    "D7_F_REVERSE_ORDER_WEAK_LIFT",
+    "D7_F_REVERSE_ORDER_REGRESSION",
+    "D7_F_NO_USEFUL_REVERSE_ORDER_LIFT"
+  ],
+  "transfer_directions": [
+    "L1_TO_L2",
+    "L2_TO_L1"
+  ],
+  "uuid": "b6d62184-fd15-483d-947e-01ea66ddc13c"
+}
