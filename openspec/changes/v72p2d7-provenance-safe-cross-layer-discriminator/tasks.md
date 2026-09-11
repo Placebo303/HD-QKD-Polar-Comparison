@@ -54,7 +54,7 @@
 - No scientific/budget/terminal/schema change beyond the frozen R08–R13;
   no V35/D5/D6/D7-C edits; no R1d/G1/G2 work.
 
-## A2 — RSS telemetry rework (frozen; implementation pending)
+## A2 — RSS telemetry rework (complete; telemetry-only, no execution)
 
 > Authority: `.workbuddy/tasks/D7_E_RSS_TELEMETRY_REWORK_VENV_A2_TASK_PACKET.md`
 > §§5–7. Telemetry/environment compatibility correction only: `.venv/bin/python`,
@@ -62,29 +62,43 @@
 > threshold are preserved. The renewed Pre-EXECUTE review becomes stale until
 > A2 implementation review + fresh E09 pass.
 
-- [ ] A2-01 — **VmHWM parser.** Pure parser over `/proc/self/status`-equivalent
+- [x] A2-01 — **VmHWM parser (complete).** Pure parser over `/proc/self/status`-equivalent
   text: exactly one ASCII `VmHWM: <positive integer> kB` line yields bytes
-  (`value * 1024`); all other cases yield `None`.
-- [ ] A2-02 — **File-read wrapper.** Production Linux/WSL read opens
+  (`value * 1024`); all other cases yield `None`. Evidence: `parse_vmhwm_rss_bytes`
+  in implementation `9e09538` (frozen delta `becf60f`); T5 review §1 PASS.
+- [x] A2-02 — **File-read wrapper (complete).** Production Linux/WSL read opens
   `/proc/self/status` once per probe call; no subprocess/shell/psutil/
-  caching/retries/averaging/polling/env-switch/provider abstraction.
-- [ ] A2-03 — **Deterministic tests.** Injected-text fixtures covering valid
+  caching/retries/averaging/polling/env-switch/provider abstraction; legacy
+  `_read_ru_maxrss` deleted (zero `ru_maxrss` references in module and runner).
+  Evidence: implementation `9e09538`; T5 review §2 PASS.
+- [x] A2-03 — **Deterministic tests (complete).** Injected-text fixtures covering valid
   conversion, missing/duplicate/malformed/decimal/signed/zero/negative/
   wrong-unit/non-ASCII/overflow (>18-digit) rejection, read failure, and
   bogus-`ru_maxrss` independence (`_read_ru_maxrss` not called on the WSL path).
-- [ ] A2-04 — **Threshold boundaries.** Below-limit permits the existing path;
+  Evidence: 15 `test_a2_*` tests in `9e09538` (focused 15 passed; full D7-E file
+  40 passed); T5 review §6 PASS.
+- [x] A2-04 — **Threshold boundaries (complete).** Below-limit permits the existing path;
   equal-to and above 2 GiB block; `None` blocks before the first scientific
   decoder attempt and preserves existing resource-terminal behavior mid-run.
-- [ ] A2-05 — **Schema invariance.** Writers/verifier retain the same
-  `rss_bytes` schema; no new output field or schema revision.
-- [ ] A2-06 — **Implementation review.** Independent read-only review with the
-  unique verdict `D7_E_RSS_TELEMETRY_REWORK_REVIEW_PASS_A2` (or
-  `..._FAIL_A2`); FAIL means STOP.
-- [ ] A2-07 — **Renewed Pre-EXECUTE with single live E09.** Only after A2-06
+  Evidence: `RSS_LIMIT_BYTES == 2147483648`, strict `<2GiB`, `bytes=value*1024`
+  exact in `9e09538`; T5 review §§3–4 PASS.
+- [x] A2-05 — **Schema invariance (complete).** Writers/verifier retain the same
+  `rss_bytes` schema; no new output field or schema revision. Evidence:
+  `RECORD_FIELDS` byte-identical to `becf60f` baseline; T5 review §4 PASS.
+- [x] A2-06 — **Implementation review (complete).** Independent read-only review with the
+  unique verdict `D7_E_RSS_TELEMETRY_REWORK_REVIEW_PASS_A2` (no `..._FAIL_A2`;
+  FAIL would have meant STOP). Evidence:
+  `docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_RSS_TELEMETRY_REWORK_REVIEW_A2.md`.
+- [x] A2-07 — **Renewed Pre-EXECUTE with single live E09 (complete).** Only after A2-06
   PASS: ordinary D7-E Pre-EXECUTE checklist plus exactly one fresh live E09
   (`.venv/bin/python`; positive finite `<2GiB`; raw `VmHWM` line captured);
-  no repeat-until-pass.
-- [ ] A2-08 — **Closeout.** For dual PASS only: mark A2 tasks complete with
+  no repeat-until-pass. Evidence: verdict
+  `D7_E_PRE_EXECUTE_REVIEW_PASS_VENV_RSS_A2_AWAITING_FRESH_EXPLICIT_AUTHORIZATION`
+  in `docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_PRE_EXECUTE_REVIEW_VENV_RSS_A2.md`;
+  single live E09 `VmHWM 96484 kB → 98803712 B` (`96484*1024` exact).
+- [x] A2-08 — **Closeout (complete).** For dual PASS only: mark A2 tasks complete with
   evidence, update state to
   `D7_E_WSL_RSS_READY_AWAITING_FRESH_EXPLICIT_AUTHORIZATION`, leave every
   authorization false and attempts/completed zero, scoped local commit, no push.
+  Evidence: this T7 closeout commit `docs(d7-e): record RSS A2 reviews and readiness closeout`;
+  no execution consumed; prior authorization not reusable.

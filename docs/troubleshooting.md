@@ -336,3 +336,27 @@ snapshot invariance rather than root absence; never weaken an authorization
 tripwire; no skip/xfail/delete.
 
 ---
+
+### WSL `ru_maxrss` vs `/proc` VmHWM disagreement makes one-shot RSS gates non-deterministic (D7-E E09)
+
+**Observed** (WSL, 2026-09-11): `resource.getrusage(...).ru_maxrss` intermittently
+disagreed with `/proc/self/status` VmHWM by several GiB, making the one-shot
+pre-execution RSS gate (E09) non-deterministic.
+
+**Root cause**: `ru_maxrss` is not a stable peak-RSS source on WSL; the
+kernel-reported VmHWM is authoritative for the WSL execution path.
+
+**Fix (frozen rule)**: on Linux/WSL read current-process peak RSS only from
+`/proc/self/status` field `VmHWM` (unit exactly `kB`, `bytes = value * 1024`);
+never compare against or fall back to `ru_maxrss` when the status file is
+present. Missing file/field, duplicate field, malformed/non-integer/
+non-positive value, wrong unit, read error, or overflow returns `None` and
+blocks fail-closed before scientific execution (or at the first affected call
+under the existing resource terminal). Strict `< 2 GiB` limit unchanged
+(equality blocks); stored key stays `rss_bytes`. Do not substitute `VmRSS`,
+`statm`, psutil, or shell commands.
+
+**Prevention**: single-probe discipline — exactly one fresh live E09 probe as
+evidence; repeating probes until one passes is forbidden. Cover all parser and
+edge cases with deterministic injected-text fixtures; sample the live kernel at
+most once as context.

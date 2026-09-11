@@ -3439,3 +3439,11 @@ these may not be merged or reordered.
 **Context**: Track A repaired the five-vs-six `_decode_block` arity with fail-closed provenance and renewed readiness review; Track B froze the bidirectional single-pass transfer discriminator. No scientific conclusions; no FER/leakage/key-rate/qualification/promotion claim.
 
 **Consequences**: Next gate is explicit authorization of D7-E under a separate packet; no D7-E/R1d/G1/G2 execution is authorized by this entry; no push.
+
+## 2026-09-11 D7-E WSL RSS telemetry rework A2 complete (telemetry-only; no execution)
+
+**Decision**: Accept the telemetry-only RSS rework as complete: OpenSpec delta + addendum `D7_E_EXECUTION_PACKET_ADDENDUM_RSS_A2.md` (freeze `becf60f`), implementation `9e09538` (VmHWM-only fail-closed reader, 15 `test_a2_*`), dual-reviewed (`D7_E_RSS_TELEMETRY_REWORK_REVIEW_PASS_A2` + `D7_E_PRE_EXECUTE_REVIEW_PASS_VENV_RSS_A2_AWAITING_FRESH_EXPLICIT_AUTHORIZATION` with single live E09 `VmHWM 96484 kB → 98803712 B`). State → `D7_E_WSL_RSS_READY_AWAITING_FRESH_EXPLICIT_AUTHORIZATION`; all authorizations false; attempts/completed zero; no UUID/root; nothing executed; no push.
+
+**Context**: WSL `ru_maxrss` disagreed with VmHWM by GiBs, making E09 non-deterministic; the frozen A2 rule reads peak RSS only from `/proc/self/status` VmHWM. The prior user authorization is not reusable — a later execution needs a fresh explicit authorization referencing RSS A2.
+
+**Consequences**: R1d stays paused/optional (not a mainline gate); G1/G2 unauthorized; no D7-E/R1d/G1/G2 execution authorized by this entry.
