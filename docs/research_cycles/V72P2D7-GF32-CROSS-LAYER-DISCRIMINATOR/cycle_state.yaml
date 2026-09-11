@@ -19,7 +19,7 @@ layer_interface_implementation: ALTERNATIVE_A_ACCEPTED_CURRENT_CONTRACT
 next_gate: D7_E_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION
 d7e_readiness_state: D7_E_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION
 d7e_implementation_review: D7_E_IMPLEMENTATION_REVIEW_PASS
-d7e_pre_execute_review: D7_E_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION
+d7e_pre_execute_review: D7_E_PRE_EXECUTE_REVIEW_PASS_VENV_A1_AWAITING_EXPLICIT_AUTHORIZATION
 d7e_execution_attempts: 0
 d7e_execution_completed: 0
 d7e_terminal: D7_E_NOT_EXECUTED
@@ -28,3 +28,5 @@ d7e_result_accepted: false
 d7e_accepted_scope: D7_E_NO_SCOPE_ACCEPTED
 d7e_prereg_doc: docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_PREREG_R1.md
 d7e_execution_packet_doc: docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_EXECUTION_PACKET_R1.md
+d7e_execution_packet_addendum_doc: docs/research_cycles/V72P2D7-GF32-CROSS-LAYER-DISCRIMINATOR/D7_E_EXECUTION_PACKET_ADDENDUM_VENV_A1.md
+d7e_exact_interpreter: .venv/bin/python

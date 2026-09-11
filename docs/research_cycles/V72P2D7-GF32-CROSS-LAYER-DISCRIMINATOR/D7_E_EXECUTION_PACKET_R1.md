@@ -16,8 +16,15 @@
 ## Exact future WSL command (do not run in this task)
 
 ```bash
-timeout -k 30 1800 python scripts/v72p2d7_gf32_cross_layer_discriminator.py --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d7_e_cross_layer_discriminator_<uuid>
+timeout -k 30 1800 .venv/bin/python scripts/v72p2d7_gf32_cross_layer_discriminator.py --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d7_e_cross_layer_discriminator_<uuid>
 ```
+
+- Operational precondition: cwd is the repository root; `.venv/bin/python`
+  is executable (`test -x .venv/bin/python`) and imports the project
+  dependencies (`.venv/bin/python -c "import numpy, pytest;
+  print(numpy.__version__)"`). Do not activate another venv, use bare
+  `python`/`python3`, add `PYTHONPATH`, or alter child argv through a
+  wrapper. GNU timeout and every scientific parameter remain unchanged.
 
 - `<uuid>` is a fresh identifier for the one authorized invocation
   (generated only at authorization time, not here). The outer `timeout` is
