@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Explicit decoder belief provenance
-Every return of the certified GF32 row-layered/flooding decoder SHALL carry an explicit `belief_provenance` token on the returned result (v35 `DecoderResult` field and adapter result dicts), using exactly `PRIOR_ONLY`, `CHECK_UPDATED`, or `WARM_START_UNSPECIFIED`. The field SHALL be additive with a default of `None` (unspecified/legacy); `None` SHALL never be upgraded to `CHECK_UPDATED`.
+Every return of the certified GF32 row-layered/flooding decoder SHALL carry an explicit `belief_provenance` token on the returned result (v35 `DecoderResult` field and adapter result dicts), using exactly `PRIOR_ONLY`, `CHECK_UPDATED`, or `WARM_START_UNSPECIFIED`. The field SHALL be additive with a default of `None` (unspecified/legacy); `None` SHALL never be upgraded to `CHECK_UPDATED`. `CHECK_UPDATED` denotes a BP APP approximation incorporating check messages, not a calibrated exact posterior.
 
 #### Scenario: Cold row-layered return with zero completed check sweeps
 - **WHEN** the row-layered decoder returns at the initial-syndrome check with `iterations == 0`

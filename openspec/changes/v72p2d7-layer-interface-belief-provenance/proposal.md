@@ -1,10 +1,43 @@
-# Layer-interface belief provenance — proposal (correction; implementation deferred)
+# Layer-interface belief provenance — proposal (correction; implementation activated Delta R1)
 
 > Status: proposal only. This change folder adds no production code and no
-> execution. Implementation is deferred and gated (see "Gating rules"). All
-> execution/promotion authorizations remain false. Source of the frozen
+> execution. Implementation is activated (Delta R1) and gated (see "Gating
+> rules" and "Activation after D7-D"). All execution/promotion authorizations
+> remain false. Source of the frozen
 > architecture rulings: D7-C heavy readiness Addendum A1 §A1.1 (A1 takes
 > precedence over R1 on conflict). D7-C R1 itself is not started here.
+
+## Activation after D7-D (Delta R1)
+
+D7-D was accepted as `D7_D_RESULT_ACCEPTED_SCHEDULE_EFFECT_INCONCLUSIVE`
+(commit `ffb4e909`; acceptance document
+`docs/research_cycles/V72P2D7-GF32-SCHEDULE-DISCRIMINATOR/D7_D_RESULT_ACCEPTANCE_R1.md`).
+The accepted scope is *schedule effect inconclusive*: the frozen matrix
+establishes no preregistered flooding or layered advantage, and the observed
+`43 vs 40` counts plus three layered-only pairs are reported, **not** promoted
+into a schedule-superiority claim. D7-D therefore does **not** change the
+provenance contract, and this change now activates Alternative A for
+implementation (Delta R1).
+
+Activated frozen points (additive to the contract above):
+
+- Exact enum unchanged: `PRIOR_ONLY`, `CHECK_UPDATED`,
+  `WARM_START_UNSPECIFIED`. `None`/absent stays unspecified/legacy.
+- Missing/`None`/unknown provenance fails closed for **any** conditioned
+  cross-layer APP, before the mixer, the L2 prior construction, or the L2
+  decode (`WARM_START_UNSPECIFIED` is likewise refused there).
+- Alternative A only. Alternative B remains a separate future scientific
+  decision (not activated here); Alternative C remains rejected.
+- `CHECK_UPDATED` means a BP APP approximation that incorporates check
+  messages — **not** a calibrated exact posterior. This keeps the D7-B
+  hard-decision versus belief-calibration distinction (E10) from being
+  re-opened.
+- No v35 hard-decision stopping change and no historical-result
+  reinterpretation.
+
+The active implementation subset is BP-01…BP-08 per the D7-D/BP R1 packet §5
+(mapping, PV matrix authority, and the behavioral-edit allowlist are recorded
+in `tasks.md`).
 
 ## What
 

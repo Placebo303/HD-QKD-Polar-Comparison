@@ -1,7 +1,10 @@
-# Layer-interface belief provenance — design (correction; implementation deferred)
+# Layer-interface belief provenance — design (correction; implementation activated Delta R1)
 
-> Status: design freeze for a future implementation. No code, no decoder call,
-> no root, no execution. All authorizations false.
+> Status: design freeze, **activated for implementation (Delta R1)** after
+> D7-D bounded acceptance `D7_D_RESULT_ACCEPTED_SCHEDULE_EFFECT_INCONCLUSIVE`
+> (commit `ffb4e909`), which does not change this contract. Adopt alternative A
+> only; B stays a separate future scientific decision, C stays rejected. No
+> code, no decoder call, no root, no execution. All authorizations false.
 
 ## Frozen constants and semantics
 
@@ -51,7 +54,10 @@ Optional/unspecified representation for legacy or non-migrated results:
 syndrome-conditioned APP/conditioned posterior only when its provenance is
 `CHECK_UPDATED` (or stronger explicit provenance to be defined by a future
 warm-start design). A `PRIOR_ONLY` return may be recorded only as
-`PRIOR_ONLY_CURRENT_BELIEF`, never as posterior/APP.
+`PRIOR_ONLY_CURRENT_BELIEF`, never as posterior/APP. `CHECK_UPDATED` labels a
+BP APP approximation that incorporates check messages; it is **not** a
+calibrated exact posterior, and no exact-posterior tolerance may be applied to
+it.
 
 ### Fail-closed default (frozen)
 
@@ -66,7 +72,7 @@ A consumer that requires a conditioned APP input must:
 prior. The smallest candidate enforcement point is the migrated call site
 (e.g. D5 `_run_layered_block`); the pure math helper (`app_fed_l2_prior`)
 may keep its signature and docstring contract. The exact mechanism is an
-implementation decision for the deferred task, not a scientific parameter.
+implementation decision for the activated task, not a scientific parameter.
 
 ### Future-consumer migration rule (frozen)
 
@@ -119,10 +125,10 @@ be migrated (or fail closed) before being executed as a cross-layer APP route.
 Decision: adopt A; hold B as a separately frozen decision if a specific
 consumer requires it; do not implement any alternative here.
 
-## Deferred implementation outline (not started)
+## Implementation outline (activated Delta R1; not started here)
 
-Ordered tasks live in `tasks.md`, all marked
-"not started / deferred — must precede any cross-layer APP route". This design
+Ordered tasks live in `tasks.md`, all marked "activated (Delta R1) / not
+complete — must precede any cross-layer APP route". This design
 fixes only the semantics above; it deliberately does not choose the guard
 mechanism, storage representation of adapter provenance, or the exact
 fail-closed error type — those are implementation decisions inside the frozen
