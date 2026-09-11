@@ -17,7 +17,7 @@ root; no push.
   `[ROW_LAYERED, FLOODING]`, work-normalized metrics, five classifications, ten
   terminals, budgets, seven-file root, F01–F08 gate and reuse contract frozen;
   scoped local commit (plan); no push
-- [ ] T2 — Flooding certification F01–F08 against the accepted D7-A independent
+- [x] T2 — Flooding certification F01–F08 against the accepted D7-A independent
   oracle on tiny synthetic fixtures, recorded in
   `D7_D_FLOODING_CERTIFICATION_R1.md`; failure terminal
   `D7_D_FLOODING_CERTIFICATION_FAIL` with minimal counterexample, no flooding
@@ -29,15 +29,15 @@ root; no push.
   bind, DI for joint tensor/blocks/matrices/dual decoders/clock/RSS, seven-file
   writer + verifier, fail-before-first-call guards, frozen 256-call loop;
   production D7-C/v35/D5/D6/D7-A/D7-B read-only; no interface-rework import
-- [ ] T3 — Qualification S01–S22 (listed verbatim below): fake Model-F and fake
+- [x] T3 — Qualification S01–S22 (listed verbatim below): fake Model-F and fake
   decoders only; no real artifact content, no production decoder calls; fresh
   task-owned basetemps; skip perf-v38
-- [ ] T4 — Independent implementation review (source inspection + independent
+- [x] T4 — Independent implementation review (source inspection + independent
   recomputation of representative schedule pairing, work arithmetic and
   classification cases); verdict `D7_D_IMPLEMENTATION_REVIEW_PASS`; one scoped
   rework max; scientific ambiguity returns to the main thread; record in
   `D7_D_IMPLEMENTATION_REVIEW_R1.md`
-- [ ] T5 — Independent Pre-EXECUTE review in the actual WSL environment:
+- [x] T5 — Independent Pre-EXECUTE review in the actual WSL environment:
   branch/scoped commits; exact 256 matrix and thresholds; accepted Model-F
   metadata/root presence without content read; dual external-cwd decoder
   sentinel reachability; live stdlib RSS positive with correct units; GNU
@@ -47,13 +47,13 @@ root; no push.
   future command; mandatory Pre-RESULT. Verdict
   `D7_D_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION`; record in
   `D7_D_PRE_EXECUTE_REVIEW_R1.md`
-- [ ] T6 — Closeout: scoped local commits (plan → certification/implementation →
+- [x] T6 — Closeout: scoped local commits (plan → certification/implementation →
   reviews → closeout, append-only); record parallel states
   `D7_D_FROZEN_AWAITING_EXPLICIT_AUTHORIZATION` and
   `LAYER_INTERFACE_IMPLEMENTATION_DEFERRED_BEFORE_CROSS_LAYER_APP` only after
   both reviews PASS; all authorization false; no UUID; no root; no push; STOP
   (no D7-D execution)
-- [ ] T7 — Memory triage: durable readiness facts only (schedule matrix,
+- [x] T7 — Memory triage: durable readiness facts only (schedule matrix,
   metrics/classification/terminal rules, budgets, certification and review
   verdicts, deferred interface); no speculative results
 

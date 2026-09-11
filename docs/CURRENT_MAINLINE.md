@@ -1,19 +1,47 @@
 # Current Mainline
 
-## Formal-IR research mainline (2026-08-24)
+## Formal-IR research mainline — current route ledger (through D7-D)
+
+This document is **status, not authorization**. The active gate and accepted
+cycle documents outrank aggregate checkbox counts; stale historical checkboxes
+are bookkeeping, not execution authorization.
 
 The strict first principle is high-performance error correction for actual
 HD-QKD data. The frozen Polar line below is a comparison baseline; active
 algorithm work lives under `comparison_bench/`, OpenSpec, and the NB-LDPC
-research documents.
+research cycle documents.
 
-Current bounded state:
+Current route ledger (each item is a bounded conclusion already accepted in its
+own cycle document; no new claim is added here):
 
-- V34: matched empirical-P fixed-packet bounded failure, ER1 accepted.
-- V35R1: no candidate for the tested hand-designed NB configuration.
-- V36: real exploratory residual decrease on 15 paired development blocks,
-  but no exact recovery and no finite-graph advance. Its DE-selection gate is
-  not accepted and its realized graphs violate the frozen zero-cycle gate.
+1. **D5 — fixed rate-mother path stopped within tested scope.** The two-layer
+   rate-mother BP path is accepted as stopped for the tested configuration.
+2. **D6 — graph/mother successor structurally blocked.** The graph/mother A2
+   path is structurally blocked; R1d Option C is frozen but optional/paused
+   (`PAUSED_OPTIONAL_LOCAL_CONFIRMATION_NOT_MAINLINE_GATE`) and is not a
+   mainline gate.
+3. **D7-A — decoder certification PASS.**
+4. **D7-B — hard-decision easy region observed**, with RSS/belief limitations
+   recorded; no belief-calibration claim.
+5. **D7-C — bounded bidirectional dependence accepted** as a diagnostic; it
+   does not prove that alternating/joint BP can bootstrap.
+6. **D7-D — schedule effect inconclusive** (`D7_D_SCHEDULE_EFFECT_INCONCLUSIVE`,
+   accepted as `D7_D_RESULT_ACCEPTED_SCHEDULE_EFFECT_INCONCLUSIVE`); no
+   schedule-superiority claim.
+7. **Active gate — BP provenance implementation.** The next mainline action is
+   Alternative A of the accepted layer-interface proposal: explicit belief
+   provenance plus fail-closed cross-layer consumers.
+8. **After BP**, freeze a provenance-safe cross-layer mechanism discriminator
+   before any further cross-layer APP work.
+9. **Only then** consider dimension/bandwidth expansion. For more than two
+   layers, a separate mathematical/leakage contract is required.
+
+Earlier bounded V-series states superseded by the ledger above: V34 matched
+empirical-P fixed-packet bounded failure (ER1 accepted); V35R1 closed only the
+tested hand-designed NB configuration
+(`NO_NB_CANDIDATE_FOR_TESTED_HAND_DESIGNED_CONFIGURATION`,
+`PROTOCOL_PARTIAL_A4_NOT_EXECUTED`); V36 showed a real exploratory residual
+decrease with no exact recovery and no accepted finite-graph advance.
 
 Use `docs/research-cycle-sop.md` for the next plan -> ChatGPT review -> OpenCode
 implementation -> result-review loop. No successor or formal run is currently

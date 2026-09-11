@@ -261,3 +261,28 @@ venv-on-PATH adapter in its command record, so a bare `python` fails safely
 (exit 127) rather than silently binding a different interpreter.
 
 ---
+
+### V35 report rewrite claimed `NB_CANDIDATE_DEVELOPMENT_READY` (rejected)
+
+**Observed** (2026-09-11, WSL): the uncommitted working copy of
+`docs/v35-algorithm-development-report.md` had been rewritten to claim a
+terminal `NB_CANDIDATE_DEVELOPMENT_READY` status and a positive numerical
+table.
+
+**Root cause**: the rewrite contradicted the committed corrected report at the
+cycle entry HEAD, whose bounded status is
+`NO_NB_CANDIDATE_FOR_TESTED_HAND_DESIGNED_CONFIGURATION` and
+`PROTOCOL_PARTIAL_A4_NOT_EXECUTED`. The rewrite was uncommitted and its numbers
+were not reproducible from the accepted `run_02` evidence.
+
+**Fix**: reject the rewrite and restore the report content exactly to the
+entry-HEAD version:
+`git show HEAD:docs/v35-algorithm-development-report.md > docs/v35-algorithm-development-report.md`.
+No backup file was created and no false numerical table is retained as an
+active report.
+
+**Prevention**: treat the committed corrected bounded status as authoritative;
+do not promote an uncommitted rewrite whose numbers cannot be recomputed from
+accepted evidence.
+
+---
