@@ -16,7 +16,7 @@ r1d_state: R1D_ABSENT_NOT_AUTHORIZED
 g1_authorized: false
 g2_authorized: false
 layer_interface_implementation: ALTERNATIVE_A_ACCEPTED_CURRENT_CONTRACT
-next_gate: D7_G_IMPLEMENTATION_PENDING
+next_gate: D7_H_ALTERNATING_DISCRIMINATOR_PACKET_FREEZE
 d7g_readiness_state: D7_G_FROZEN_NOT_AUTHORIZED_NOT_EXECUTED
 d7g_implementation_review: NOT_PERFORMED
 d7g_pre_execute_review: NOT_PERFORMED
@@ -27,3 +27,6 @@ d7g_pre_result_review: NOT_PERFORMED
 d7g_result_accepted: false
 d7g_accepted_scope: NONE
 d7g_prereg_doc: docs/research_cycles/V72P2D7-GF32-EXTRINSIC-CONTRACT/D7_G_PREREG_R1.md
+d7g_contract_review: D7_G_EXTRINSIC_CONTRACT_REVIEW_PASS
+d7g_integration_readiness_review: D7_G_EXTRINSIC_INTEGRATION_READINESS_PASS
+d7g_acceptance_doc: docs/research_cycles/V72P2D7-GF32-EXTRINSIC-CONTRACT/D7_G_EXTRINSIC_CONTRACT_ACCEPTANCE_R1.md
