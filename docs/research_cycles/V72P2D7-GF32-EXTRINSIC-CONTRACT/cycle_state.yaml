@@ -30,3 +30,7 @@ d7g_prereg_doc: docs/research_cycles/V72P2D7-GF32-EXTRINSIC-CONTRACT/D7_G_PREREG
 d7g_contract_review: D7_G_EXTRINSIC_CONTRACT_REVIEW_PASS
 d7g_integration_readiness_review: D7_G_EXTRINSIC_INTEGRATION_READINESS_PASS
 d7g_acceptance_doc: docs/research_cycles/V72P2D7-GF32-EXTRINSIC-CONTRACT/D7_G_EXTRINSIC_CONTRACT_ACCEPTANCE_R1.md
+d7h_packet_frozen: true
+d7h_packet_doc: .workbuddy/tasks/D7_H_ALTERNATING_DISCRIMINATOR_PACKET_FREEZE_R1_TASK_PACKET.md
+d7h_prereg_doc: docs/research_cycles/V72P2D7-GF32-ALTERNATING-DISCRIMINATOR/D7_H_PREREG_R1.md
+d7h_state: D7_H_FROZEN_NOT_AUTHORIZED_NOT_EXECUTED
