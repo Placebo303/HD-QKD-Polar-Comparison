@@ -127,12 +127,21 @@ def test_pv_04_warm_start_is_unspecified_never_inferred_from_iterations():
 
 def test_pv_05_additive_field_and_numerical_equivalence():
     fields = dataclasses.fields(v35.DecoderResult)
-    assert [f.name for f in fields] == list(OLD_FIELDS) + ["belief_provenance"]
-    assert fields[-1].default is None
+    names = [f.name for f in fields]
+    # Legacy first six positional fields unchanged; belief_provenance stays
+    # in place; the additive D7-G extrinsic fields follow it as optional
+    # defaulted fields (accepted additive API).
+    assert names[:6] == list(OLD_FIELDS)
+    assert names[6] == "belief_provenance"
+    assert names[6:] == ["belief_provenance", "extrinsic_log_beliefs",
+                         "extrinsic_provenance"]
+    assert all(f.default is None for f in fields[6:])
     # Existing positional construction stays compatible.
     legacy = v35.DecoderResult(
         np.zeros(2, dtype=np.uint8), True, 0, 0.0, "legacy", np.zeros((2, 32)))
     assert legacy.belief_provenance is None
+    assert legacy.extrinsic_log_beliefs is None
+    assert legacy.extrinsic_provenance is None
     # Iteration-0 numeric identity against the documented floor/renorm path.
     res0 = _it0_result()
     clean = np.maximum(IT0_PRIOR, 1e-15)
