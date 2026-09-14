@@ -130,3 +130,38 @@ adjudication, not permission to edit thresholds or inputs.
 - Unchanged and still binding: thresholds/gates/terminals/seeds/rate-math/
   claim-ceiling, 288 calls, wall/CPU/RSS limits, root/command, pairing,
   prior/decoder/admission/provenance contract, metric isolation, L2 DV3 shape.
+
+## R2 authorized-path completion (normative deltas; retain + supersede, 2026-09-14)
+
+Authority: R2 packet; rationale and completion scope: `design.md` §9. Track:
+`EXPLORE` readiness planning (docs only; no execution, decoder calls 0).
+
+- APP transfer-source profile: `L2_APP` SHALL source the **L055 challenger L1
+  `CHECK_UPDATED` beliefs**, one per paired (pair, block) cell (72 calls, the
+  single shared stream). Each APP call SHALL decode the shared DV3 L2 graph on
+  the canonical forward-transfer prior mixed from that cell's L055 L1 belief.
+  Sourcing from CONTROL, from both profiles, per-cell best-of, or from the
+  oracle prior is FORBIDDEN (design §9.2). The fail-closed `CHECK_UPDATED`
+  guard is unchanged.
+- `L1-ADEQUATE` SHALL grade the **L055 challenger arm only** (exact ≥18/72 AND
+  ≥5/6 graphs with ≥2 exact AND no engineering/resource violation). L045 pooled
+  exact + paired discordances SHALL remain descriptive only and SHALL NOT gate.
+- JOINT `J` SHALL be the pooled APP joint-both-exact over the 72 L055-fed APP
+  cells (`L2-JOINT-GOOD` iff J ≥9/72, unchanged). ORACLE SHALL stay diagnostic
+  ungraded and EXCLUDED from all grading and routing gates.
+- CLI true branch: R204 SHALL replace the unconditional authorized-path
+  `SystemExit` (`scripts/v72p2d14_discriminator_development.py` `main()`) with
+  exactly one batch-orchestrator call + one never-overwrite writer. Unauthorized
+  refusal SHALL remain before root creation, decoder binding, and Model-F load.
+  The authorized launch form SHALL be the frozen command plus
+  `--execution-authorized`.
+- R202–R207 SHALL execute packet-exact per `design.md` §9.4 (narrow binder from
+  §-reuse-map helpers only; 288-plan-before-binding orchestration; fake-run
+  acceptance 288/288 + 32 setup + six files + verifier PASS + no-production-entry
+  proof; boundary probe without decoding or future-root creation; independent
+  re-review proving no `SystemExit`, 288/288, verifier PASS, future-root absent,
+  zero production calls).
+- Budgets unchanged: ≤288 decoder calls; ≤32 setup units; ≤1800 s wall total;
+  ≤120 s per call; RSS <2147483648 B; one process; CPU-only; no
+  retry/resume/repair/seed search/tuning. The future root SHALL remain absent
+  through R2 (fake runs use fresh scratch roots only).

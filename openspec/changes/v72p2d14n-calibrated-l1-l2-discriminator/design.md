@@ -56,8 +56,8 @@ Degree cells (frozen D12 cells for n128 — verified MATCH, proposal §verificat
 
 | arm | n2 | n3 | E | check allocation |
 |---|---|---|---|---|
-| L045 control | 71 | 57 | 313 | `2^41+3^77` |
-| L055 challenger | 83 | 45 | 301 | `2^53+3^65` |
+| L045 control | 71 | 57 | 313 | `2^41+3^77` (pre-A1 m=118 — SUPERSEDED by §8: `2^17+3^93` at m=110) |
+| L055 challenger | 83 | 45 | 301 | `2^53+3^65` (pre-A1 m=118 — SUPERSEDED by §8: `2^29+3^81` at m=110) |
 
 L2 DV3 (frozen D11 shape at n128 — verified MATCH): m=104, E=384, variables all
 degree 3, checks `3^32+4^72` (32+72=104=m; 32·3+72·4=384=E=128·3).
@@ -82,7 +82,7 @@ Call list (exact; total 288 decoder calls):
 | 4 | L2 ORACLE (true-L1 prior; diagnostic, ungraded) | 6 pairs × 12 blocks | 72 |
 | **Total** | | | **288** |
 
-- Setup units: ≤26 (= 12 graph constructions + 12 block samples + 2 plan/manifest).
+- Setup units: ≤26 (= 12 graph constructions + 12 block samples + 2 plan/manifest) (pre-A1 — SUPERSEDED by §8.4: ≤32 = 18 constructions + 12 block samples + 2 plan/manifest).
 - Metric isolation: exact primary; syndrome-valid separate; L1-source-exact /
   L2-target-exact / joint-both-exact distinct; `undetected` isolated, never merged
   into success/FER. Fail-close: every non-oracle transfer provenance must be
@@ -209,6 +209,7 @@ descriptive only (N205: unit-test every boundary and priority collision).
   no N code under this change's readiness scope beyond N201–N210 wiring) SHALL:
   default `--execution-authorized` false with refusal before root
   creation/decoder binding/Model-F load; offer `--profile-only` (all 12 graphs
+  — pre-A1 wording, SUPERSEDED by §8.4: 18 graphs / 12 seeds —
   A1–A6 + 288-identity plan + root-absent proof, zero decoder calls) and
   `--verify` (read-only fail-closed recomputation) paths; add `--n14-batch`.
   Default-false batch refusal MUST occur before output creation, decoder
@@ -227,7 +228,8 @@ descriptive only (N205: unit-test every boundary and priority collision).
 ```
 
 - Frozen budgets (within proposal N ceilings: 120 s/call, ≤3600 s, <2 GiB,
-  ≤720 calls, D10–D12 class): ≤288 decoder calls; ≤26 setup units; ≤1800 s wall
+  ≤720 calls, D10–D12 class): ≤288 decoder calls; ≤26 setup units (pre-A1 —
+  SUPERSEDED by §8.4: ≤32 = 18 + 12 + 2); ≤1800 s wall
   total; ≤120 s per call; RSS <2147483648 B; one process; CPU-only; no
   retry/resume/repair/seed search/tuning. Ceiling breach → STOP as out-of-scope,
   re-scope, never tune.
@@ -347,3 +349,134 @@ root/command, claim ceiling (synthetic diagnostic, no FER/leakage/SKR/
 real-data/qualification/promotion/optimality/route-closure claim, no
 execution), D7-H out of scope, n=128 only. N202–N210 retry on the amended
 freeze; no new seeds, no threshold edits.
+
+## 9. R2 Amendment — authorized-path completion + APP source freeze (2026-09-14)
+
+Authority: `.workbuddy/tasks/D14N_AUTHORIZED_PATH_COMPLETION_R2_TASK_PACKET.md`
+(R2 packet) §1 (blocking defect + completion scope), §2 (retained evidence),
+§3 (R201–R207). Track: `EXPLORE` readiness planning for this amendment (docs
+only; no code, no execution, decoder calls 0, no commit/push); the future batch
+remains `EXPLORE` per R2 packet §1. Retain + supersede: the accepted prereg is
+NOT edited; Amendment A1 (§8) stands; this section adds ONLY the R2 deltas.
+R201 [x] on merge of this amendment; R202–R207 are packet-exact [ ] (tasks.md).
+
+### 9.1 Blocking fall-through (R2 trigger)
+
+- Location (read-only evidence):
+  `scripts/v72p2d14_discriminator_development.py` `main()` — after the
+  unauthorized `--n14-batch` refusal (`return 2`, still before root creation,
+  decoder binding, or Model-F load) and the `--verify` return, the authorized
+  path reaches an unconditional `raise SystemExit("production --n14-batch
+  adapters (decoder/transfer/oracle/prior) belong to a later authorized
+  change; this readiness change supplies only --profile-only and --verify")`.
+- Effect: the frozen authorized launch (`--n14-batch --execution-authorized
+  --model-f-root <CAL-only> --out-root <fresh>`) can never bind, dispatch, or
+  write the frozen 288-call batch — it always exits via that `SystemExit`.
+- Self-declared: the module docstring states "The APP transfer source profile
+  is NOT frozen by this readiness change ... the authorized runner change must
+  freeze it explicitly" — the N210 FLAG. N code is source-agnostic with a
+  fail-closed `CHECK_UPDATED` injection guard, so the §9.2 freeze is a pure
+  contract narrowing, not a reinterpretation of behavior.
+- R2 scope (only this): R202 narrow production binder → R203 orchestrator →
+  R204 CLI true branch (exactly one orchestrator call + one never-overwrite
+  writer replacing the §9.1 `SystemExit`; refusal ordering unchanged) → R205
+  fake authorized-path test → R206 production-boundary probe (no decode, no
+  future root) → R207 independent re-review. No scientific row, degree table,
+  seed, arm, threshold, terminal, budget, prior, decoder parameter, output root,
+  or claim-boundary change (R2 packet §1); retained evidence (R2 packet §2:
+  n128, L1 m=110, L045 71/57/E313 `2^17+3^93`, L055 83/45/E301 `2^29+3^81`,
+  L2 DV3 m=104/E384 `3^32+4^72`, 18/18 A1–A6, 288 records, setup ceiling 32,
+  seeds/pairing/priors/GF32-poly37/max_iter-90/damping-1/cold/CHECK_UPDATED/
+  oracle-exclusion/gates/terminals/budgets) STANDS.
+
+### 9.2 APP transfer-source freeze (tasked freeze — DETERMINED, not a guess)
+
+- FROZEN: the 72-call `L2_APP` stream sources the **L055 challenger L1
+  `CHECK_UPDATED` beliefs**, one per paired (pair, block) cell — each APP call
+  decodes the shared DV3 L2 graph on the canonical forward-transfer prior mixed
+  from that cell's L055 L1 belief; fail-closed unless provenance is
+  `CHECK_UPDATED`; uniform/prior-only fallback forbidden (guard unchanged).
+- FROZEN (re-affirmed; already explicit in prereg §7): `L1-ADEQUATE` grades the
+  **L055 challenger arm only** (exact ≥18/72 AND ≥5/6 graphs with ≥2 exact AND
+  no engineering/resource violation). L045 pooled exact + paired
+  L055-only/L045-only discordances are descriptive only, never gating.
+- ORACLE stays diagnostic ungraded, EXCLUDED from all grading and routing gates
+  (unchanged). JOINT `J` is the pooled APP joint-both-exact over the 72
+  L055-fed APP cells (threshold `J ≥9/72` unchanged).
+- Rationale (from frozen materials only):
+  1. Gate coherence: routing branches 3–5 all require `L1-ADEQUATE` (L055) AND
+     a JOINT verdict; sourcing JOINT from L055 keeps the graded path single-arm
+     coherent (challenger L1 → challenger-fed joint). A CONTROL-fed JOINT would
+     grade L055 adequacy but test CONTROL transfer — an incoherent mixed-arm
+     gate.
+  2. D11 precedent: D11 ran L2 APP per branch (72 CONTROL L2 + 72 MIX L2 per
+     width) and anchored its forward gates on MIX (`J_M≥9`, `J_M−J_C≥6`;
+     transfer-bottleneck iff MIX L1 ≥18, `J_M≤3`, `O≥18`). N collapses the two
+     APP streams into one shared 72-call stream; the MIX-analog slot — the
+     challenger advantage under test ("re-tests L055-vs-L045 at the calibrated
+     rate") — is L055. CONTROL L1 is retained as the L1 reference/descriptive
+     comparator (paired discordances, D12 MATERIAL-style), exactly as the gate
+     text specifies.
+  3. Rejected: CONTROL-source (incoherent per (1), contradicts the D11
+     MIX-anchor, leaves challenger forward untested); dual/both-source (144 APP
+     calls or mixed per-cell semantics — violates the frozen 288 total and the
+     fully-paired per-cell joint definition); per-cell best-of (post-hoc
+     selection — violates no-tuning/no-seed-search and metric isolation);
+     ORACLE-fed (true-L1 conditional prior, explicitly ungraded/excluded).
+- Determinacy: the freeze is determined by (prereg §7 `L1-ADEQUATE(L055)` +
+  descriptive-only L045) × (D11 MIX-anchored JOINT) × (single 72-call stream).
+  No BLOCKED; nothing invented. If future evidence contradicts, STOP and
+  escalate to the main thread — R202+ SHALL NOT re-pick the source.
+
+### 9.3 Stale-statement corrections (execution-safety)
+
+- §3 degree table carried pre-A1 m=118 check strings — annotated inline above
+  as SUPERSEDED (normative: §8.3 `2^17+3^93` / `2^29+3^81` at m=110).
+- §3 setup "≤26" and §6 budgets "≤26 setup" — annotated inline as SUPERSEDED
+  (normative: §8.4 ≤32 = 18 constructions + 12 block samples + 2 plan/manifest).
+- `proposal.md` pre-A1 `≤26` / m=118 cells — annotated inline as SUPERSEDED
+  (same normative targets); the prereg file itself stays untouched per the
+  corrigendum pattern.
+- `tasks.md` N209 "12 graphs" wording — annotated as SUPERSEDED (normative: 18
+  graphs / 12 seeds, §8.4). All other budgets unchanged: ≤288 calls, ≤1800 s
+  wall, ≤120 s/call, RSS <2147483648 B, one process, CPU-only, no
+  retry/resume/repair/seed search/tuning.
+
+### 9.4 R202–R207 frozen contracts (packet-exact)
+
+- R202 production adapters: one narrow binder returning the accepted Model-F
+  loader/prior, L1 decoder, `CHECK_UPDATED` transfer, L2 APP, and true-L1 oracle
+  callables. Reuse donors: §4 verbatim (D5/D7 transfer/provenance/oracle/q/APP/
+  decoder-bind helpers; D12 construction/admission/coefficient; D14 rate-audit
+  provenance; R2 constants). No kernel copies, no alternate algorithms. Validate
+  callable signatures before root creation or decoder calls.
+- R203 batch orchestrator: build + validate the complete 288 plan before
+  binding; construct the frozen 18 graphs + 12 blocks once per §8.4 accounting;
+  dispatch in frozen order (L045, L055, L2-APP, L2-ORACLE; pairs/blocks
+  ascending; `call_idx` 0..287); collect distinct exact / syndrome /
+  source / target / joint / `undetected` fields; STOP on provenance, nonfinite,
+  admission, resource, or contract violation.
+- R204 CLI true branch: replace the §9.1 `SystemExit` with exactly one
+  orchestrator call + one never-overwrite writer. Unauthorized refusal stays
+  before root, binding, and Model-F load. Authorized launch form: the frozen
+  command (§6) plus `--execution-authorized`; the manifest may retain the
+  flag-free scientific command identity iff that precedent is made explicit.
+- R205 fake authorized-path test: injected fake adapters, true authorized
+  branch, fresh scratch root (never the future root). Acceptance: exactly 288
+  fake calls (72×4), 32 setup units, six files, deterministic identities,
+  expected fake gate/terminal, read-only verifier PASS, proof of zero
+  production-binder/Model-F entry. Failure tests: first contract error,
+  existing root, partial root, invalid APP provenance.
+- R206 production-boundary probe: resolve + inspect the real adapter
+  identities/signatures — including the §9.2 L055 APP transfer-source profile —
+  callable + accepted-helper check only; no scientific invocation, no decoding,
+  no future-root creation.
+- R207 independent re-review: reviewer with actual files, own-basetemp rerun of
+  focused tests, independent trace of both CLI branches; SHALL prove: the
+  authorized branch no longer reaches the old `SystemExit`; fake dispatch
+  288/288; verifier PASS; the future root
+  `workspace/v72p2d14_discriminator/20260914_r1` absent; production decoder
+  calls zero.
+- Return: `D14N_R2_EXECUTION_PATH_READY_AWAITING_EXPLICIT_AUTHORIZATION` with
+  the R2 packet §6 evidence bundle; on any mismatch STOP with raw evidence — no
+  real batch, no root creation, no authorization issuance.

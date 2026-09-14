@@ -96,3 +96,37 @@
   close; the N root remains absent and the N command remains a frozen
   unauthorized string.** Next gate: paired A1 execution packet after main-thread
   readiness acceptance (Pre-EXECUTE: APP-source freeze, d5-tree reconfirm).
+- 2026-09-15 main-thread acceptance audit: **BLOCKED**. The persisted runner
+  refuses unauthorized `--n14-batch` correctly, but an authorized invocation
+  reaches an unconditional `SystemExit("production --n14-batch adapters ...
+  belong to a later authorized change")`; it never binds adapters, dispatches
+  the 288 records, or writes a result. Therefore
+  `D14N_CALIBRATED_DISCRIMINATOR_READY_AWAITING_EXPLICIT_AUTHORIZATION` is not
+  accepted as operational readiness. N210 did not exercise the authorized
+  true branch. No scientific execution or root write occurred in this audit.
+  Next gate: minimal R2 authorized-path completion with fake-only true-branch
+  test and independent re-review; all scientific rows/seeds/arms/gates/budgets
+  remain frozen.
+
+## 2026-09-14 — D14N R2 authorized-path completion close (docs only)
+
+- Authority: `.workbuddy/tasks/D14N_AUTHORIZED_PATH_COMPLETION_R2_TASK_PACKET.md`
+  (§6 return); D14N-R207 (EVIDENCE_ACCESS VERIFIED, PASS_WITH_FINDINGS,
+  BLOCKING none — trusted, not rerun). Track: documentation-only (no code, no
+  execution, no decoder/scientific calls, no root creation, no commits/push).
+- R201 freeze + R202–R206 delta: authorized `SystemExit` replaced by exactly
+  one `run_authorized_batch` + one `write_batch_root`; refusal stays
+  pre-root/bind/load; narrow reuse binder; 288-plan-first orchestrator;
+  fake 288/288 scratch test + 4 failure tests; R206 inspect-only probe.
+- R207 (trusted): NO-SYSTEMEXIT PASS; FAKE-288 PASS (288 calls, 144/144,
+  SETUP=32, ROWS==PLAN, N_ROUTE_SCALE_VALIDATION); VERIFIER PASS (288/0);
+  ROOT-ABSENT PASS; ZERO-PRODUCTION PASS (V35_ABSENT, binder 0, probe 0/0);
+  REFUSAL PASS (rc=2 pre-load); ADAPTERS 14/14; AMENDMENT-INTACT;
+  TEST_RERUN 7/7 + calibrated 22/22 trusted. Non-blocking: (F1) d5 7+/5−
+  hunks EXCLUDED from R2 commit; (F2) R202–R207 boxes flipped here;
+  (F3) flag-free manifest precedent explicit, accepted. Detail:
+  `D14N_READINESS_R1.md` §7.
+- Terminal: `D14N_R2_EXECUTION_PATH_READY_AWAITING_EXPLICIT_AUTHORIZATION` —
+  path ready, batch NOT authorized. Pre-EXECUTE carried: APP-source frozen
+  L055; d5-tree reconfirm carried. No-execution-authorized statement:
+  **no D14N execution is authorized by this close.**

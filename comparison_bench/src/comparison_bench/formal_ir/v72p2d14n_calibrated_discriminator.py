@@ -36,8 +36,11 @@ Reuse contract (IMPORT — no duplication of construction/admission semantics):
 
 Added here (N deltas only): the amended L1 cells, fresh N seeds, the
 288-record four-arm plan, the N gate predicates plus six terminals with exact
-priority, the source-agnostic L2 dispatch skeleton (transfer/oracle priors
-are explicit injections; see ``run_l2_app_cell``), and the 18-object
+priority, the L2 dispatch skeleton with explicit injection (transfer/oracle
+priors and the provenance guard are caller inputs; the authorized runner
+binds the accepted canonical helpers — R2 freezes the shared APP stream to
+the L055 challenger CHECK_UPDATED beliefs, see the runner's
+``APP_SOURCE_PROFILE``), and the 18-object
 pre-decoder profile. There is no replacement-seed mechanism anywhere in this
 module: admission failure blocks with no seed change. This module never
 imports the production decoder and never loads Model-F content.
@@ -568,14 +571,20 @@ def run_l2_app_cell(l2_graph: Mapping[str, Any], block: Mapping[str, Any],
                     entry: Mapping[str, Any], *, belief,
                     provenance: str, source_exact: bool,
                     decode_fn, syndrome_fn, transfer_fn,
+                    provenance_guard_fn=None,
                     call_idx: int) -> dict[str, Any]:
     """One L2 APP call on forward-transfer beliefs (fail-closed, injected).
 
     ``belief``/``provenance``/``source_exact`` arrive as explicit caller
-    inputs: this readiness module freezes neither which L1 profile sources
-    the shared APP stream nor the transfer-prior construction — the future
-    authorized runner binds the accepted canonical transfer helper. The
-    only frozen rule enforced here: a non-``CHECK_UPDATED`` provenance
+    inputs: the R2 freeze sources the shared APP stream from the L055
+    challenger L1 ``CHECK_UPDATED`` beliefs (runner-side
+    ``APP_SOURCE_PROFILE``; sourcing from CONTROL, both profiles,
+    per-cell best-of, or the oracle prior is forbidden), and the
+    authorized runner binds the accepted canonical transfer helper for
+    ``transfer_fn``. ``provenance_guard_fn`` is an explicit injection
+    (single ``(provenance)`` positional contract); ``None`` selects the
+    accepted v35-backed ``require_check_updated`` (lazy bind, no decoder).
+    The only frozen rule enforced here: a non-``CHECK_UPDATED`` provenance
     raises ``ProvenanceRefused`` before any decoder contact (uniform/
     prior-only fallback forbidden). ``decode_fn``/``syndrome_fn``/
     ``transfer_fn`` must be explicitly injected; this module never imports
@@ -585,7 +594,9 @@ def run_l2_app_cell(l2_graph: Mapping[str, Any], block: Mapping[str, Any],
         raise StructureNotAdmitted(
             "refusing decoder binding for non-admitted L2 graph %r"
             % ({"graph_seed": l2_graph.get("graph_seed")},))
-    require_check_updated(str(provenance))
+    guard = require_check_updated \
+        if provenance_guard_fn is None else provenance_guard_fn
+    guard(str(provenance))
     if decode_fn is None or not callable(decode_fn):
         raise ValueError("decode_fn must be explicitly injected")
     if syndrome_fn is None or not callable(syndrome_fn):
@@ -726,11 +737,12 @@ def execute_plan(plan: Sequence[Mapping[str, Any]],
                  graphs_l1: Mapping[Any, Mapping[str, Any]],
                  graphs_l2: Mapping[int, Mapping[str, Any]],
                  blocks: Mapping[int, Mapping[str, Any]],
-                 decode_fn, syndrome_fn, *,
-                 transfer_fn=None, oracle_prior_fn=None,
-                 app_sources: Mapping[tuple[int, int], Mapping[str, Any]
-                                      ] | None = None,
-                 now=None, rss_fn=None,
+                  decode_fn, syndrome_fn, *,
+                  transfer_fn=None, oracle_prior_fn=None,
+                  app_sources: Mapping[tuple[int, int], Mapping[str, Any]
+                                       ] | None = None,
+                  provenance_guard_fn=None,
+                  now=None, rss_fn=None,
                  wall_budget_s: float = WALL_BUDGET_S,
                  per_call_budget_s: float = PER_CALL_BUDGET_S,
                  rss_budget_bytes: int = RSS_BUDGET_BYTES,
@@ -745,7 +757,9 @@ def execute_plan(plan: Sequence[Mapping[str, Any]],
     to ``{"belief", "provenance", "source_exact"}`` for the APP stream
     (explicit injection; no frozen default). A provenance refusal retains
     a refusal record and engineering-blocks with no decoder contact.
-    Decoder crashes are retained, never retried.
+    ``provenance_guard_fn`` (single-``(provenance)``-positional contract)
+    is forwarded to the APP cell; ``None`` selects the accepted v35-backed
+    guard (lazy bind). Decoder crashes are retained, never retried.
     """
     now = now or time.monotonic
     t0 = float(now())
@@ -807,7 +821,9 @@ def execute_plan(plan: Sequence[Mapping[str, Any]],
                         provenance=str(source["provenance"]),
                         source_exact=bool(source["source_exact"]),
                         decode_fn=decode_fn, syndrome_fn=syndrome_fn,
-                        transfer_fn=transfer_fn, call_idx=len(records))
+                        transfer_fn=transfer_fn,
+                        provenance_guard_fn=provenance_guard_fn,
+                        call_idx=len(records))
                 elif arm == ORACLE_ARM:
                     if oracle_prior_fn is None:
                         raise ValueError(

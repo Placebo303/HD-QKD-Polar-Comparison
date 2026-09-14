@@ -27,14 +27,19 @@ One fresh root per run; refuses overwrite and protected roots (single
 process, no retry, no resume, no seed search, no adaptive stop).
 Predecessor evidence is contextual only and can never enter the N gate:
 decoder records carry ``batch_id == d14-discriminator-v1`` and the gate
-constructor rejects anything else. The APP transfer source profile is NOT
-frozen by this readiness change: ``--n14-batch`` takes no default and the
-authorized runner change must freeze it explicitly.
+constructor rejects anything else. The APP transfer source profile is
+FROZEN to the L055 challenger L1 ``CHECK_UPDATED`` beliefs
+(``APP_SOURCE_PROFILE``; design §9.2): each of the 72 shared-stream APP
+calls decodes the DV3 L2 graph on the canonical forward-transfer prior
+mixed from its paired cell's L055 L1 belief; sourcing from CONTROL, both
+profiles, per-cell best-of, or the oracle prior is forbidden, and the
+verifier rejects any root whose manifest/summary names another profile.
 """
 from __future__ import annotations
 
 import argparse
 import csv
+import inspect
 import json
 import resource
 import sys
@@ -49,6 +54,14 @@ from comparison_bench.formal_ir import (  # noqa: E402
 
 EVIDENCE_FILES = n14.EVIDENCE_FILES
 FROZEN_COMMAND = n14.FROZEN_COMMAND
+
+#: Frozen APP transfer-source profile (design §9.2): the single shared
+#: 72-call L2 APP stream is fed exclusively by the L055 challenger L1
+#: CHECK_UPDATED beliefs, one per paired (pair, block) cell. The
+#: orchestrator derives APP sources from the dispatched L055 cells only
+#: and refuses any caller override naming another profile; the verifier
+#: rejects roots naming another profile. R202+ SHALL NOT re-pick this.
+APP_SOURCE_PROFILE = "L055"
 
 DECODER_RECORD_COLUMNS = (
     "call_idx", "arm", "pair_idx", "l1_graph_seed", "l2_graph_seed",
@@ -188,35 +201,319 @@ def _graph_row(graph, wall_s):
 
 
 # --------------------------------------------------------------------------- #
-# batch (frozen 288-call matrix; injected production adapters only)
+# R202 production binder (narrow; resolve + signature-validate only)
 # --------------------------------------------------------------------------- #
-def run_n14_batch(out_root, model_f_root, decode_fn, syndrome_fn, *,
-                  build_l1_fn=None, build_l2_fn=None, load_prior_fn=None,
-                  sample_fn=None, transfer_fn=None, oracle_prior_fn=None,
-                  app_sources=None, app_source_profile=None,
-                  now_fn=None, rss_fn=None):
-    """Execute and persist one authorized N batch (injected adapters).
+_R2_RUNNER_PATH = ROOT / "scripts" / "v72p2d10_mixed_degree_l1_development.py"
 
-    ``decode_fn``/``syndrome_fn``/``transfer_fn``/``oracle_prior_fn``/
-    ``load_prior_fn``/``sample_fn`` are explicit injections supplied by
-    the caller (the ``--n14-batch`` entrypoint constructs the production
-    adapters). ``app_sources`` maps ``(pair_idx, block_seed)`` to
-    ``{"belief", "provenance", "source_exact"}`` for the shared APP
-    stream and ``app_source_profile`` names the sourcing L1 profile for
-    the manifest; neither has a default — the authorized runner change
-    must freeze the APP source explicitly.
+
+def _load_r2_runner():
+    # Reuse: the accepted CAL-only Model-F prior chain lives in the R2
+    # runner; import it read-only by file path instead of copying (R2
+    # files untouched; same pattern as the D11 runner). Lazy so the
+    # fake/test path never enters this module (see R205 proof).
+    import importlib.util
+
+    key = "v72p2d10_r2_runner_reuse_n14"
+    loaded = sys.modules.get(key)
+    if loaded is not None:
+        return loaded
+    spec = importlib.util.spec_from_file_location(key, str(_R2_RUNNER_PATH))
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[key] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _require_signature(fn, required, name):
+    """Inspect-only contract check: ``fn`` callable with ``required`` params.
+
+    No call, no decode, no Model-F load — pure ``inspect.signature``.
+    Raises before any root creation or decoder contact on mismatch.
     """
-    resolved = n14.refuse_out_root(out_root)
+    if not callable(fn):
+        raise TypeError("production adapter %r is not callable" % (name,))
+    try:
+        params = inspect.signature(fn).parameters
+    except (TypeError, ValueError) as exc:
+        raise TypeError("production adapter %r has no valid signature: %s"
+                        % (name, exc)) from exc
+    missing = [p for p in required if p not in params]
+    if missing:
+        raise TypeError("production adapter %r signature %s lacks %s"
+                        % (name, sorted(params), missing))
+    return fn
+
+
+def bind_production_adapters():
+    """R202 narrow binder: accepted helpers only, validated, zero calls.
+
+    Returns the flat adapter dict consumed by :func:`run_authorized_batch`
+    (``decode_fn``/``syndrome_fn``/``load_prior_fn``/``sample_fn``/
+    ``provenance_guard_fn`` plus the ``transfer_parts`` composition kit and
+    the frozen ``app_source_profile``). Every entry reuses an accepted
+    D11/D12/D14/R2/D5/v35 helper — no kernel copies, no alternate
+    algorithms. Signatures are validated here, before any root creation,
+    Model-F load, or decoder call. Resolving never invokes: decoder calls
+    and Model-F content load happen only inside the authorized
+    orchestrator after plan validation.
+    """
+    from comparison_bench.formal_ir import (  # lazy production bind
+        v35_algorithm_development as v35)
+    from comparison_bench.formal_ir import (  # accepted canonical helpers
+        v72p2d5_gf32_rate_mother as d5)
+
+    decode_fn = _require_signature(
+        v35.decode_row_layered_fftqspa,
+        ["h_matrix", "priors", "syndromes", "max_iter", "damping_alpha",
+         "warm_beliefs", "field"], "decode_fn")
+    syndrome_fn = _require_signature(
+        v35.syndrome_of_gf32, ["matrix", "vector"], "syndrome_fn")
+    guard_fn = _require_signature(
+        n14.require_check_updated, ["provenance", "consumer"],
+        "provenance_guard_fn")
+    source_q_fn = _require_signature(
+        d5.canonical_source_q, ["log_beliefs"], "source_q_fn")
+    transfer_mixer_fn = _require_signature(
+        d5.canonical_transfer_l2_prior, ["p2", "bob_symbols", "q_l1"],
+        "transfer_mixer_fn")
+    oracle_mixer_fn = _require_signature(
+        d5.oracle_l2_prior, ["p2", "bob_symbols", "u1_true"],
+        "oracle_mixer_fn")
+    conditionalize_fn = _require_signature(
+        d5.conditionalize_f_to_p2, ["p_f"], "conditionalize_fn")
+
+    load_prior_fn = _require_signature(
+        _load_r2_runner().load_prior_chain, ["model_f_root"],
+        "load_prior_fn")
+
+    def sample_fn(p_b, p_f, p1, seed):
+        # One matched block plus the frozen L1 prior line, mirroring the
+        # accepted R2/D11 runner composition (sample_matched_block, then
+        # _floor_renorm(p1[:, bob].T, DECODER_FLOOR)); carries u2 for the
+        # APP/ORACLE target leg, which R2's block helper lacks.
+        import numpy as np
+
+        block = d5.sample_matched_block(p_b, p_f, int(n14.N), int(seed))
+        bob = np.asarray(block["bob"], dtype=np.int64)
+        prior = d5._floor_renorm(
+            np.asarray(p1)[:, bob].T, d5.DECODER_FLOOR)
+        return {
+            "bob": bob,
+            "u1": np.asarray(block["u1"], dtype=np.int64),
+            "u2": np.asarray(block["u2"], dtype=np.int64),
+            "prior": np.asarray(prior, dtype=np.float64),
+        }
+
+    _require_signature(sample_fn, ["p_b", "p_f", "p1", "seed"], "sample_fn")
+    if APP_SOURCE_PROFILE != "L055" \
+            or APP_SOURCE_PROFILE not in n14.L1_PROFILES:
+        raise ValueError("frozen APP source profile broken: %r"
+                         % (APP_SOURCE_PROFILE,))
+    return {
+        "decode_fn": decode_fn,
+        "syndrome_fn": syndrome_fn,
+        "load_prior_fn": load_prior_fn,
+        "sample_fn": sample_fn,
+        "provenance_guard_fn": guard_fn,
+        "transfer_parts": {
+            "source_q_fn": source_q_fn,
+            "transfer_mixer_fn": transfer_mixer_fn,
+            "oracle_mixer_fn": oracle_mixer_fn,
+            "conditionalize_fn": conditionalize_fn,
+        },
+        "app_source_profile": APP_SOURCE_PROFILE,
+    }
+
+
+# --------------------------------------------------------------------------- #
+# R203 plan validation, transfer composition, L055-fed APP derivation
+# --------------------------------------------------------------------------- #
+def _validate_call_plan(plan):
+    """Contract-check the complete 288 plan BEFORE binding/loading/decoding.
+
+    Frozen order (L045, L055, L2-APP, L2-ORACLE; pairs ascending; blocks
+    ascending; ``call_idx`` 0..287) with frozen seeds and pairing. Any
+    deviation raises before any adapter is bound, Model-F content loads,
+    or the root is touched.
+    """
+    if len(plan) != n14.SCIENTIFIC_CALL_CEILING:
+        raise ValueError("plan has %d calls, frozen %d"
+                         % (len(plan), n14.SCIENTIFIC_CALL_CEILING))
+    for arm in n14.ARMS:
+        if sum(1 for e in plan if e["arm"] == arm) != 72:
+            raise ValueError("plan arm %r does not carry 72 calls" % (arm,))
+    pos = 0
+    for arm in n14.ARMS:
+        for pair_idx, (l1_seed, l2_seed) in enumerate(
+                zip(n14.L1_GRAPH_SEEDS, n14.L2_GRAPH_SEEDS), start=1):
+            for block_seed in n14.BLOCK_SEEDS:
+                entry = plan[pos]
+                pos += 1
+                if entry.get("call_idx") != pos - 1 \
+                        or entry.get("arm") != arm \
+                        or int(entry.get("pair_idx", -1)) != pair_idx \
+                        or int(entry.get("l1_graph_seed", -1)) != l1_seed \
+                        or int(entry.get("l2_graph_seed", -1)) != l2_seed \
+                        or int(entry.get("block_seed", -1)) \
+                        != int(block_seed):
+                    raise ValueError(
+                        "plan identity/order violated at position %d: %r"
+                        % (pos - 1, entry))
+    if pos != len(plan):
+        raise ValueError("plan order check covered %d/%d entries"
+                         % (pos, len(plan)))
+    return plan
+
+
+def _compose_transfer_pair(transfer_parts, p_f):
+    """Compose the production transfer/oracle closures over the loaded p2.
+
+    Wiring only: ``q = canonical_source_q(belief)`` then the canonical
+    ``q @ P`` mixer (D5), exactly the accepted ``_run_layered_block``
+    composition; the oracle leg conditions on the true L1 symbols. No
+    decoder contact, no root, pure closures.
+    """
+    import numpy as np
+
+    p2 = transfer_parts["conditionalize_fn"](p_f)
+
+    def transfer_fn(belief, block):
+        q = transfer_parts["source_q_fn"](belief)
+        return transfer_parts["transfer_mixer_fn"](
+            p2, np.asarray(block["bob"], dtype=np.int64), q)
+
+    def oracle_prior_fn(block):
+        return transfer_parts["oracle_mixer_fn"](
+            p2, np.asarray(block["bob"], dtype=np.int64),
+            np.asarray(block["u1"], dtype=np.int64))
+
+    return transfer_fn, oracle_prior_fn
+
+
+def _derive_l055_app_sources(l1_entries, captured, l1_records):
+    """Derive the 72 shared-stream APP sources from dispatched L055 cells.
+
+    Frozen APP←L055 wiring (design §9.2): on a clean L1 phase
+    ``captured[i]`` is the decoder return of ``l1_entries[i]`` in order
+    (single-threaded, in-order, exactly one decoder call per L1 entry —
+    asserted here). Beliefs flow through with provenance untouched (the
+    Phase-B guard fail-closes on anything but ``CHECK_UPDATED``); a
+    nonfinite or malformed L055 belief STOPS before any APP dispatch.
+    """
+    import numpy as np
+
+    if len(captured) != len(l1_entries) \
+            or len(l1_records) != len(l1_entries):
+        raise RuntimeError("L1 phase lost calls: %d results for %d entries"
+                           % (len(captured), len(l1_entries)))
+    sources: dict = {}
+    for entry, result, record in zip(l1_entries, captured, l1_records):
+        if entry["arm"] != "L055":
+            continue
+        belief = getattr(result, "final_beliefs", None)
+        if belief is not None:
+            belief = np.asarray(belief, dtype=np.float64)
+            if belief.shape != (n14.N, n14.Q) \
+                    or not np.all(np.isfinite(belief)):
+                raise ValueError(
+                    "nonfinite/malformed L055 belief at pair=%d block=%d: "
+                    "refusing APP derivation"
+                    % (int(entry["pair_idx"]),
+                       int(entry["block_seed"])))
+        key = (int(entry["pair_idx"]), int(entry["block_seed"]))
+        sources[key] = {
+            "belief": belief,
+            "provenance": getattr(result, "belief_provenance", None),
+            "source_exact": bool(record["exact"]),
+        }
+    if len(sources) != 72:
+        raise RuntimeError("APP derivation covered %d/72 L055 cells"
+                           % len(sources))
+    return sources
+
+
+# --------------------------------------------------------------------------- #
+# R203 batch orchestrator (plan-first; L055-fed APP; no filesystem writes)
+# --------------------------------------------------------------------------- #
+def run_authorized_batch(out_root, model_f_root, *, adapters=None,
+                         build_l1_fn=None, build_l2_fn=None,
+                         app_sources=None, app_source_profile=None,
+                         now_fn=None, rss_fn=None):
+    """Execute the frozen N batch and return the evidence bundle (no writes).
+
+    ``adapters`` is a flat dict with ``decode_fn``/``syndrome_fn``/
+    ``load_prior_fn``/``sample_fn`` plus either the production
+    ``transfer_parts`` composition kit (binder-supplied) or direct
+    ``transfer_fn``/``oracle_prior_fn``; ``None`` production-binds inside,
+    AFTER plan validation and the refuse probe (R203 order). An optional
+    ``provenance_guard_fn`` overrides the accepted default guard
+    (test machinery only). ``app_sources`` given selects the legacy
+    single-phase dispatch (explicit sources + profile, as N202–N209);
+    ``None`` derives the 72 sources from the dispatched L055 cells
+    (frozen APP←L055, design §9.2) and refuses any profile override
+    naming another L1 arm. ``build_l1_fn``/``build_l2_fn`` may arrive
+    explicitly or inside ``adapters`` (fake builders travel with the
+    fake adapter dict on the R205 path); both default to the frozen
+    real builders. Returns the bundle consumed by
+    :func:`write_batch_root`; creates no files and no directories.
+    """
     plan = n14.build_call_plan()
-    build_l1_fn = build_l1_fn or n14.build_l1_graph
-    build_l2_fn = build_l2_fn or n14.build_l2_graph
-    if load_prior_fn is None or sample_fn is None:
-        raise ValueError("load_prior_fn and sample_fn must be explicitly "
-                         "injected (Model-F content is never loaded without "
-                         "them)")
-    if app_sources is None or app_source_profile not in n14.L1_PROFILES:
-        raise ValueError("app_sources and a frozen app_source_profile "
-                         "(an N L1 profile) must be explicitly injected")
+    _validate_call_plan(plan)
+    resolved = n14.refuse_out_root(out_root)  # probe only; creates nothing
+    if adapters is None:
+        inj = bind_production_adapters()
+    else:
+        inj = dict(adapters)
+    missing = [key for key in ("decode_fn", "syndrome_fn", "load_prior_fn",
+                               "sample_fn") if inj.get(key) is None]
+    if missing:
+        raise ValueError("adapters %s must be explicitly injected "
+                         "(Model-F content is never loaded and no decoder "
+                         "is bound without them)" % (missing,))
+    decode_fn = inj["decode_fn"]
+    syndrome_fn = inj["syndrome_fn"]
+    load_prior_fn = inj["load_prior_fn"]
+    sample_fn = inj["sample_fn"]
+    guard_fn = inj.get("provenance_guard_fn")
+    if app_sources is not None:
+        if inj.get("transfer_fn") is None \
+                or inj.get("oracle_prior_fn") is None:
+            raise ValueError(
+                "transfer_fn and oracle_prior_fn must be explicitly "
+                "injected for L2 APP/ORACLE (no frozen default)")
+        if app_source_profile not in n14.L1_PROFILES:
+            raise ValueError("app_sources and a frozen app_source_profile "
+                             "(an N L1 profile) must be explicitly injected")
+        derive_sources = False
+        transfer_fn = inj["transfer_fn"]
+        oracle_prior_fn = inj["oracle_prior_fn"]
+    else:
+        if app_source_profile is not None \
+                and app_source_profile != APP_SOURCE_PROFILE:
+            raise ValueError(
+                "refusing APP source re-pick %r: frozen to %r "
+                "(design §9.2)" % (app_source_profile,
+                                   APP_SOURCE_PROFILE))
+        app_source_profile = APP_SOURCE_PROFILE
+        derive_sources = True
+        transfer_fn = inj.get("transfer_fn")
+        oracle_prior_fn = inj.get("oracle_prior_fn")
+        transfer_parts = inj.get("transfer_parts")
+        if transfer_parts is not None and (
+                transfer_fn is not None or oracle_prior_fn is not None):
+            raise ValueError("transfer_parts and direct transfer_fn/ "
+                             "oracle_prior_fn are mutually exclusive")
+        if transfer_parts is None and (
+                transfer_fn is None or oracle_prior_fn is None):
+            raise ValueError(
+                "transfer_fn and oracle_prior_fn must be explicitly "
+                "injected for the L055-fed APP/ORACLE legs "
+                "(no frozen default)")
+    build_l1_fn = build_l1_fn or inj.pop("build_l1_fn", None) \
+        or n14.build_l1_graph
+    build_l2_fn = build_l2_fn or inj.pop("build_l2_fn", None) \
+        or n14.build_l2_graph
     now = now_fn or time.monotonic
     rss_fn = rss_fn or _peak_rss_bytes
     t0 = float(now())
@@ -230,6 +527,12 @@ def run_n14_batch(out_root, model_f_root, decode_fn, syndrome_fn, *,
     p_b, p_f, p1 = load_prior_fn(model_f_root)
     setup_calls = n14.SETUP_FIXED_UNITS
     log("prior chain loaded from %s" % model_f_root)
+    if derive_sources:
+        transfer_parts = inj.get("transfer_parts")
+        if transfer_parts is not None:
+            transfer_fn, oracle_prior_fn = _compose_transfer_pair(
+                transfer_parts, p_f)
+            log("composed L055-fed transfer/oracle closures over p2")
     blocks = {}
     for block_seed in n14.BLOCK_SEEDS:
         blocks[int(block_seed)] = sample_fn(p_b, p_f, p1, block_seed)
@@ -255,12 +558,62 @@ def run_n14_batch(out_root, model_f_root, decode_fn, syndrome_fn, *,
         raise RuntimeError("setup unit count %d != frozen %d"
                            % (setup_calls, n14.SETUP_CALL_CEILING))
 
-    outcome = n14.execute_plan(
-        plan, graphs_l1, graphs_l2, blocks, decode_fn, syndrome_fn,
-        transfer_fn=transfer_fn, oracle_prior_fn=oracle_prior_fn,
-        app_sources=app_sources, now=now, rss_fn=rss_fn)
-    records = outcome["records"]
-    engineering_reason = outcome["engineering_reason"]
+    engineering_reason = ""
+    if not derive_sources:
+        outcome = n14.execute_plan(
+            plan, graphs_l1, graphs_l2, blocks, decode_fn, syndrome_fn,
+            transfer_fn=transfer_fn, oracle_prior_fn=oracle_prior_fn,
+            app_sources=app_sources,
+            provenance_guard_fn=guard_fn, now=now, rss_fn=rss_fn)
+        records = outcome["records"]
+        engineering_reason = outcome["engineering_reason"]
+    else:
+        # Two-phase frozen dispatch: L1 arms first (capturing the L055
+        # decoder returns in call order), then the APP/ORACLE legs on
+        # sources derived from those L055 cells only. No extra decoder
+        # calls: 144 L1 + 144 APP/ORACLE = 288.
+        l1_entries = [e for e in plan if e["arm"] in n14.L1_PROFILES]
+        tail_entries = [e for e in plan
+                        if e["arm"] not in n14.L1_PROFILES]
+        captured: list = []
+
+        def capturing_decode(H, prior, syn, **kw):
+            result = decode_fn(H, prior, syn, **kw)
+            captured.append(result)
+            return result
+
+        outcome_a = n14.execute_plan(
+            l1_entries, graphs_l1, graphs_l2, blocks, capturing_decode,
+            syndrome_fn, transfer_fn=transfer_fn,
+            oracle_prior_fn=oracle_prior_fn, app_sources=None,
+            provenance_guard_fn=guard_fn, now=now, rss_fn=rss_fn)
+        engineering_reason = outcome_a["engineering_reason"]
+        if engineering_reason:
+            records = outcome_a["records"]
+        else:
+            app_sources = _derive_l055_app_sources(
+                l1_entries, captured, outcome_a["records"])
+            log("derived L055-fed APP sources count=%d" % len(app_sources))
+            outcome_b = n14.execute_plan(
+                tail_entries, graphs_l1, graphs_l2, blocks, decode_fn,
+                syndrome_fn, transfer_fn=transfer_fn,
+                oracle_prior_fn=oracle_prior_fn, app_sources=app_sources,
+                provenance_guard_fn=guard_fn, now=now, rss_fn=rss_fn)
+            engineering_reason = outcome_b["engineering_reason"]
+            records = outcome_a["records"] + outcome_b["records"]
+    # Frozen-order identity gate plus the global call index: each phase
+    # stamps its own 0-based positions, so re-stamp the concatenated
+    # records to the single frozen 0..287 order (identity for the
+    # single-phase path). Any order deviation is a contract STOP.
+    for pos, (record, entry) in enumerate(zip(records, plan)):
+        for key in ("arm", "pair_idx", "l1_graph_seed", "l2_graph_seed",
+                    "block_seed"):
+            if str(record[key]) != str(entry[key]):
+                raise RuntimeError(
+                    "dispatch order violated at position %d: %r != %r"
+                    % (pos, {k: record.get(k) for k in
+                             ("arm", "pair_idx", "block_seed")}, entry))
+        record["call_idx"] = pos
     log("dispatched=%d reason=%s"
         % (len(records), engineering_reason or "none"))
 
@@ -292,8 +645,11 @@ def run_n14_batch(out_root, model_f_root, decode_fn, syndrome_fn, *,
         budget_violations.append("RSS budget exceeded")
     log("terminal=%s" % terminal)
 
-    resolved.mkdir(parents=True)
-    _write_json(resolved / "manifest.json", {
+    # Manifest precedent (D11/D12): the manifest retains the flag-free
+    # scientific command identity (FROZEN_COMMAND carries no
+    # --execution-authorized flag); authorization lives in the CLI flag
+    # plus the separate explicit authorization, never in this string.
+    manifest = {
         "schema": "v72p2d14n_calibrated_discriminator_manifest_v1",
         "change_id": n14.CHANGE_ID, "cycle": n14.CYCLE_ID,
         "claim_ceiling": n14.CLAIM_CEILING,
@@ -333,13 +689,8 @@ def run_n14_batch(out_root, model_f_root, decode_fn, syndrome_fn, *,
                                  "the N gate accepts only batch_id=%s "
                                  "records" % n14.N14_BATCH_ID),
         "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-    })
-    _write_csv(resolved / "decoder_records.csv",
-               DECODER_RECORD_COLUMNS, records)
-    _write_csv(resolved / "graph_records.csv", GRAPH_RECORD_COLUMNS,
-               graph_rows)
-    _write_csv(resolved / "arm_summary.csv", ARM_SUMMARY_COLUMNS,
-               _arm_rows(records))
+    }
+    arm_rows = _arm_rows(records)
     summary = {
         "schema": "v72p2d14n_calibrated_discriminator_summary_v1",
         "change_id": n14.CHANGE_ID, "cycle": n14.CYCLE_ID,
@@ -372,23 +723,85 @@ def run_n14_batch(out_root, model_f_root, decode_fn, syndrome_fn, *,
         "model_f_root": str(model_f_root),
         "out_root": str(resolved), "budgets": _budget_meta(),
     }
-    _write_json(resolved / "summary.json", summary)
     log_lines.append(_log_line(
         "N terminal=%s calls=%d setup=%d wall_s=%.3f"
         % (terminal, len(records), setup_calls, wall_s)))
+    return {
+        "resolved": resolved,
+        "manifest": manifest,
+        "records": records,
+        "graph_rows": graph_rows,
+        "arm_rows": arm_rows,
+        "summary": summary,
+        "log_lines": log_lines,
+    }
+
+
+# --------------------------------------------------------------------------- #
+# R204 never-overwrite writer (one mkdir + six files; no computation)
+# --------------------------------------------------------------------------- #
+def write_batch_root(bundle):
+    """Persist one orchestrator bundle to its fresh root (never overwrite).
+
+    Creates the probed-fresh directory and writes exactly the six frozen
+    evidence files. An existing root raises ``FileExistsError`` here as
+    well as at the orchestrator probe — nothing is ever overwritten.
+    """
+    resolved = bundle["resolved"]
+    resolved.mkdir(parents=True)
+    _write_json(resolved / "manifest.json", bundle["manifest"])
+    _write_csv(resolved / "decoder_records.csv",
+               DECODER_RECORD_COLUMNS, bundle["records"])
+    _write_csv(resolved / "graph_records.csv", GRAPH_RECORD_COLUMNS,
+               bundle["graph_rows"])
+    _write_csv(resolved / "arm_summary.csv", ARM_SUMMARY_COLUMNS,
+               bundle["arm_rows"])
+    _write_json(resolved / "summary.json", bundle["summary"])
     with open(resolved / "command_log.txt", "w", encoding="utf-8") as fh:
-        fh.write("".join(line + "\n" for line in log_lines))
-    return summary
+        fh.write("".join(line + "\n" for line in bundle["log_lines"]))
+    return bundle["summary"]
+
+
+def run_n14_batch(out_root, model_f_root, decode_fn, syndrome_fn, *,
+                  build_l1_fn=None, build_l2_fn=None, load_prior_fn=None,
+                  sample_fn=None, transfer_fn=None, oracle_prior_fn=None,
+                  app_sources=None, app_source_profile=None,
+                  now_fn=None, rss_fn=None):
+    """Legacy injected batch entry (N202–N209 fake-runner contract).
+
+    Thin wrapper preserving the accepted single-phase behavior when
+    explicit ``app_sources`` are supplied: forwards the injections as an
+    adapter dict, then exactly one orchestrator call plus one
+    never-overwrite writer. Production and R205 paths go through
+    ``main()`` → :func:`run_authorized_batch` instead.
+    """
+    return write_batch_root(run_authorized_batch(
+        out_root, model_f_root,
+        adapters={"decode_fn": decode_fn, "syndrome_fn": syndrome_fn,
+                  "load_prior_fn": load_prior_fn, "sample_fn": sample_fn,
+                  "transfer_fn": transfer_fn,
+                  "oracle_prior_fn": oracle_prior_fn},
+        build_l1_fn=build_l1_fn, build_l2_fn=build_l2_fn,
+        app_sources=app_sources, app_source_profile=app_source_profile,
+        now_fn=now_fn, rss_fn=rss_fn))
 
 
 # --------------------------------------------------------------------------- #
 # verify (read-only; zero decoder calls; zero skip; fail-closed)
 # --------------------------------------------------------------------------- #
-def verify_root(out_root, build_l1_fn=None, build_l2_fn=None):
-    """Recompute a completed N root from its evidence; fail-closed."""
+def verify_root(out_root, build_l1_fn=None, build_l2_fn=None,
+                check_updated_token_value=None):
+    """Recompute a completed N root from its evidence; fail-closed.
+
+    ``check_updated_token_value`` overrides the accepted v35-backed token
+    lookup (test machinery only; ``None`` selects the lazy production
+    token, which binds the v35 module on first use).
+    """
     root = Path(out_root)
     build_l1_fn = build_l1_fn or n14.build_l1_graph
     build_l2_fn = build_l2_fn or n14.build_l2_graph
+    if check_updated_token_value is None:
+        check_updated_token_value = n14.check_updated_token()
     violations: list[str] = []
     if not root.is_dir():
         print("VERIFY root missing: %s" % root)
@@ -408,9 +821,11 @@ def verify_root(out_root, build_l1_fn=None, build_l2_fn=None):
         violations.append("batch_id tag mismatch (predecessor boundary)")
     if manifest.get("command") != FROZEN_COMMAND:
         violations.append("manifest command != frozen command")
-    if manifest.get("app_source_profile") not in n14.L1_PROFILES \
-            or summary.get("app_source_profile") not in n14.L1_PROFILES:
-        violations.append("app_source_profile missing or outside N L1 arms")
+    if manifest.get("app_source_profile") != APP_SOURCE_PROFILE \
+            or summary.get("app_source_profile") != APP_SOURCE_PROFILE:
+        violations.append("app_source_profile must be the frozen %r "
+                          "(design §9.2 forbids CONTROL/both/best-of/oracle)"
+                          % (APP_SOURCE_PROFILE,))
     if manifest.get("app_source_profile") != summary.get(
             "app_source_profile"):
         violations.append("app_source_profile manifest/summary mismatch")
@@ -471,7 +886,7 @@ def verify_root(out_root, build_l1_fn=None, build_l2_fn=None):
                 problems.append("provenance missing")
             elif row["arm"] == n14.L2_ARM and str(
                     row["belief_provenance"]).strip() != \
-                    n14.check_updated_token():
+                    str(check_updated_token_value):
                 problems.append("APP provenance must be CHECK_UPDATED")
         if crash:
             if iterations != -1 or residual != -1 or exact or syndrome_ok \
@@ -692,7 +1107,7 @@ def profile_only():
     }
 
 
-def main(argv=None):
+def main(argv=None, *, adapters_override=None):
     parser = build_parser()
     args = parser.parse_args(argv)
     selected = [name for name, flag in (("--n14-batch", args.n14_batch),
@@ -716,10 +1131,17 @@ def main(argv=None):
         parser.error("%s requires --out-root" % selected[0])
     if args.verify:
         return 0 if verify_root(args.out_root) else 1
-    raise SystemExit(
-        "production --n14-batch adapters (decoder/transfer/oracle/prior) "
-        "belong to a later authorized change; this readiness change "
-        "supplies only --profile-only and --verify")
+    # R204 authorized true branch: exactly one batch-orchestrator call
+    # plus one never-overwrite writer (replaces the readiness SystemExit).
+    # adapters_override carries test-machinery fakes only; None
+    # production-binds inside the orchestrator, after plan validation.
+    bundle = run_authorized_batch(
+        args.out_root, args.model_f_root, adapters=adapters_override)
+    summary = write_batch_root(bundle)
+    print("N terminal=%s calls=%d setup=%d"
+          % (summary["terminal"], summary["scientific_calls"],
+             summary["setup_calls"]))
+    return 0
 
 
 if __name__ == "__main__":

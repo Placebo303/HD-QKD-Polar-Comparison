@@ -108,3 +108,62 @@ named, no blocking inconsistency); main thread does not duplicate it.
   qualification/promotion/optimality/route-closure/publication claim. Real
   data, formal qualification, route-closing decisions and publication claims
   remain DECIDE-gated. D7-H NOT revived.
+
+## 7. R2 authorized-path completion close (2026-09-14, documentation-only)
+
+- Authority: `.workbuddy/tasks/D14N_AUTHORIZED_PATH_COMPLETION_R2_TASK_PACKET.md`
+  (§6 return); D14N-R207 review result (EVIDENCE_ACCESS VERIFIED, VERDICT
+  PASS_WITH_FINDINGS, BLOCKING none — trusted, not rerun).
+- Track: documentation-only (no code, no execution, no N batch, no
+  decoder/scientific calls, no root creation, no staging/commits, no push).
+  Future 288-call batch remains `EXPLORE`.
+- This call: documentation-only close (this section + one D14 log R2 append +
+  D14N OpenSpec `tasks.md` R202–R207 checkbox flip). No commit/push in this call.
+- R201 freeze (carried): blocking fall-through recorded (design §9.1);
+  APP transfer-source frozen to L055 challenger L1 `CHECK_UPDATED` beliefs
+  (design §9.2); stale pre-A1 ≤26/m=118 corrected (design §9.3); R202–R207
+  contracts frozen packet-exact (design §9.4).
+- R202–R206 delta (trusted VERIFIED): narrow production binder (accepted
+  Model-F/prior, L1 decoder, CHECK_UPDATED transfer, L2 APP, true-L1 oracle;
+  reuse, no kernel copies); 288-plan-first orchestrator (18 graphs + 12 blocks
+  per setup-32, frozen order, exact/syndrome/source/target/joint/undetected
+  separate, fail-closed STOP); CLI true branch = exactly one
+  `run_authorized_batch` + one never-overwrite `write_batch_root`;
+  unauthorized refusal stays pre-root/bind/load; fake 288/288 scratch test +
+  4 failure tests; R206 inspect-only probe (0 decodes/0 loads).
+- R207 verdict (trusted VERIFIED, not rerun): VERDICT PASS_WITH_FINDINGS,
+  BLOCKING none.
+  - NO-SYSTEMEXIT PASS: old raise deleted (diff-verified); grep hits only
+    comment + `__main__` boilerplate; `main` = exactly one
+    `run_authorized_batch` + one `write_batch_root`; direct fake run RC=0.
+  - FAKE-288 PASS: CALLS=288 (M110=144, M104=144), LOADS=1 (fake prior),
+    binder spy 0, SETUP=32, SCIENTIFIC=288, ROWS=288==PLAN, pools 72×4,
+    TERMINAL=N_ROUTE_SCALE_VALIDATION.
+  - VERIFIER PASS: `verify_root` True, checked 288 violations 0; failure paths
+    covered by 7-test rerun.
+  - ROOT-ABSENT PASS: future root absent pre/post/all probes; scratch cleaned;
+    no workspace leftover.
+  - ZERO-PRODUCTION PASS: V35_ABSENT=True every fresh proc; 7/7 rerun entails
+    PRODUCTION_ABSENT_KEYS; direct run binder 0 calls; R206 probe 0 decodes /
+    0 loads (inspect-only).
+  - REFUSAL PASS: code returns 2 before out-root check/binding/Model-F-load;
+    live probe rc=2, target absent, V35/R2-reuse absent.
+  - ADAPTERS PASS 14/14 is-identical (decode/syndrome/guard/source_q/
+    transfer_mixer/oracle_mixer/conditionalize/load_prior/sample_fn +
+    APP==L055 enforced at orchestrator re-pick→ValueError + manifest/summary
+    + verifier).
+  - AMENDMENT-INTACT PASS: cells/seeds/288/setup-32/budgets/gates/terminals/
+    H_L1/m110/root/batch_id/command unchanged; n14 diff additive +2 kwargs +
+    docstrings only.
+  - TEST_RERUN: authorized-path 7/7 reviewer own basetemp; calibrated 22/22
+    trusted (N210 + trust rule).
+- Non-blocking findings: (F1) d5 7+/5− hunks (P-impl scope) MUST BE EXCLUDED
+  from R2 commit; reused N14 helpers verified untouched. (F2) tasks R202–R207
+  boxes [ ] → flipped [x] in this call. (F3) manifest flag-free precedent
+  explicit, accepted.
+- Terminal: `D14N_R2_EXECUTION_PATH_READY_AWAITING_EXPLICIT_AUTHORIZATION` —
+  execution path ready; batch NOT authorized; no execution in this call.
+- Pre-EXECUTE notes carried: APP-source frozen L055 (fail-closed, no default);
+  d5-tree reconfirm carried; target-output absence re-verified; exact frozen
+  command + budgets + explicit user authorization recorded. No-execution-
+  authorized statement: **no D14N execution is authorized by this close.**
