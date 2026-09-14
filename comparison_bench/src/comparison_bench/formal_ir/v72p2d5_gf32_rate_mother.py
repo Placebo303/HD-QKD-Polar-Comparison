@@ -85,6 +85,7 @@ MODEL_F_INPUT_INVALID = "MODEL_F_INPUT_INVALID"
 MODEL_F_INPUT_FORMAL_ROOT = "workspace/v72p2d5_model_f_input/20260907_r1"
 G1_TOTAL_BUDGET_S = 900.0
 G2_TOTAL_BUDGET_S = 3600.0
+G2_RSS_BUDGET_BYTES = 2 * 1024**3
 TINY_WIDTH = 8
 MAX_ITER = 90
 DAMPING_ALPHA = 1.0
@@ -952,6 +953,33 @@ def _softmax_rows(z):
     return e / e.sum(axis=1, keepdims=True)
 
 
+# --------------------------------------------------------------------------
+# D7 root-cause R1 canonical transfer helpers (B01). One canonical
+# implementation of q and P(U2|B) that the legacy G1 layered path uses; the
+# frozen D7 chain is compared against it by the consistency harness.
+# --------------------------------------------------------------------------
+def canonical_source_q(log_beliefs):
+    """Canonical ``q`` from one source log-belief matrix, shape ``(n, q)``.
+
+    Validates a finite 2-D ``(n, q)`` matrix (``q >= 2``; the frozen contract
+    uses ``q = 32``) and returns the rowwise softmax. Same operation order as
+    the accepted D7 ``softmax_source_q`` / ``_softmax_rows``; never silently
+    repairs a malformed return.
+    """
+    bel = np.asarray(log_beliefs, dtype=np.float64)
+    if bel.ndim != 2 or bel.shape[1] < 2:
+        raise ValueError("source log belief must have shape (n, q>=2), got %r"
+                         % (bel.shape,))
+    if not np.all(np.isfinite(bel)):
+        raise ValueError("source log belief must be finite")
+    return _softmax_rows(bel)
+
+
+def canonical_transfer_l2_prior(p2, bob_symbols, q_l1):
+    """Canonical ``P(U2|B) = sum_u1 q_L1(u1) P2(u1,b,u2)`` with one floor."""
+    return app_fed_l2_prior(p2, bob_symbols, q_l1)
+
+
 def _rows_required(ce, width, f):
     return int(math.ceil(width * float(ce) * float(f) / 5.0))
 
@@ -1340,57 +1368,102 @@ def _is_historical_decoder(decode_fn):
                 or getattr(decode_fn, "_v72p2d5_historical_decoder", False))
 
 
-def _require_check_updated_provenance(provenance, consumer):
-    """Fail closed unless L1 beliefs carry CHECK_UPDATED provenance.
+def _load_v35_provenance_module():
+    """Lazy, layout-tolerant import of the shared v35 provenance guard.
 
-    Lazy, layout-tolerant import of the shared guard: importing this module
-    must not import the historical decoder module (same discipline as
+    Prefers the repository ``comparison_bench.src.comparison_bench`` layout so
+    the guard instance matches the one the test suite imports; falls back to
+    the flat layout with the source root on ``sys.path``. Importing this
+    module must not import the historical decoder module (same discipline as
     ``_load_g0_decoder``).
     """
-    module = None
     for name in (
-        "comparison_bench.formal_ir.v35_algorithm_development",
         "comparison_bench.src.comparison_bench.formal_ir."
         "v35_algorithm_development",
+        "comparison_bench.formal_ir.v35_algorithm_development",
     ):
         try:
-            module = importlib.import_module(name)
-            break
+            return importlib.import_module(name)
         except ModuleNotFoundError:
-            module = None
-    if module is None:
-        source_root = Path(__file__).resolve().parents[2]
-        if str(source_root) not in sys.path:
-            sys.path.insert(0, str(source_root))
-        module = importlib.import_module(
-            "comparison_bench.formal_ir.v35_algorithm_development")
+            continue
+    source_root = Path(__file__).resolve().parents[2]
+    if str(source_root) not in sys.path:
+        sys.path.insert(0, str(source_root))
+    return importlib.import_module(
+        "comparison_bench.formal_ir.v35_algorithm_development")
+
+
+def _require_check_updated_provenance(provenance, consumer):
+    """Fail closed unless L1 beliefs carry CHECK_UPDATED provenance."""
+    module = _load_v35_provenance_module()
     return module.require_check_updated_provenance(
         provenance, consumer=consumer)
 
 
-def _run_layered_block(decode_fn, h1, h2, p1, p2, block, oracle):
-    n = block["bob"].shape[0]
+def _run_layered_block(decode_fn, h1, h2, p1, p2, block, oracle, *,
+                       on_blocked_transfer="raise"):
+    """One L1->L2 layered block with per-layer counters (B05 additive schema).
+
+    ``on_blocked_transfer='raise'`` (default) preserves the accepted
+    fail-closed contract: a non-CHECK_UPDATED L1 return raises before any L2
+    prior construction or L2 decode. ``'record'`` is used only by the
+    evidence scan: the blocked transfer is recorded with
+    ``transfer_invoked=False`` and no mixer or L2 decoder call happens.
+    """
+    if on_blocked_transfer not in ("raise", "record"):
+        raise ValueError("on_blocked_transfer must be 'raise' or 'record'")
     prior_l1 = _floor_renorm(p1[:, block["bob"]].T, DECODER_FLOOR)
     e1, s1, it1, f1, bel1, prov1 = _decode_block(
         decode_fn, h1, prior_l1, block["u1"])
     # BP-03 fail-closed boundary: the L2 APP prior P(U2|B,U1) may only be
     # computed from L1 beliefs that consumed at least one disclosed-syndrome
     # check sweep. PRIOR_ONLY/None/absent/unknown/WARM_START all refuse here.
-    _require_check_updated_provenance(
-        prov1, consumer="_run_layered_block L1->L2 APP prior")
+    try:
+        _require_check_updated_provenance(
+            prov1, consumer="_run_layered_block L1->L2 APP prior")
+    except Exception as exc:
+        module = _load_v35_provenance_module()
+        if (on_blocked_transfer != "record"
+                or not isinstance(exc,
+                                  module.UnconditionedBeliefProvenanceError)):
+            raise
+        return {
+            "app_exact": False,
+            "app_l1_exact": bool(e1),
+            "app_l2_exact": False,
+            "app_l1_syndrome_ok": bool(s1),
+            "app_l2_syndrome_ok": False,
+            "app_syndrome_ok": False,
+            "app_l1_iterations": int(it1),
+            "app_l2_iterations": 0,
+            "iterations": int(it1),
+            "finite": bool(f1),
+            "app_l1_provenance": prov1 if isinstance(prov1, str) else None,
+            "transfer_invoked": False,
+            "transfer_blocked_reason": type(exc).__name__,
+        }
     if bel1 is None:
         q = np.full_like(prior_l1, 1.0 / prior_l1.shape[1])
     else:
         bel = np.asarray(bel1, dtype=np.float64)
-        q = _softmax_rows(bel) if bel.shape != prior_l1.shape else _softmax_rows(bel)
-        if q.shape != prior_l1.shape:
+        if bel.ndim == 2 and bel.shape == prior_l1.shape:
+            q = canonical_source_q(bel)
+        else:
+            # Accepted legacy fallback: a wrong-shape return uses uniform q.
             q = np.full_like(prior_l1, 1.0 / prior_l1.shape[1])
     prior_l2 = app_fed_l2_prior(p2, block["bob"], q)
     e2, s2, it2, f2, _, _ = _decode_block(decode_fn, h2, prior_l2, block["u2"])
     out = {
         "app_exact": bool(e1 and e2), "app_l1_exact": bool(e1),
-        "app_syndrome_ok": bool(s1 and s2), "iterations": int(it1 + it2),
+        "app_l2_exact": bool(e2),
+        "app_l1_syndrome_ok": bool(s1), "app_l2_syndrome_ok": bool(s2),
+        "app_syndrome_ok": bool(s1 and s2),
+        "app_l1_iterations": int(it1), "app_l2_iterations": int(it2),
+        "iterations": int(it1 + it2),
         "finite": bool(f1 and f2),
+        "app_l1_provenance": prov1 if isinstance(prov1, str) else None,
+        "transfer_invoked": True,
+        "transfer_blocked_reason": None,
     }
     if oracle:
         prior_o = oracle_l2_prior(p2, block["bob"], block["u1"])
@@ -2143,10 +2216,19 @@ def _run_rate_scan(decode_fn, h1, h2, p1, p2, pb, pf, width, f_list,
         h1_f = h1[:m1]
         h2_f = h2[:m2]
         app_ok = 0
-        ora_ok = 0
+        app_l1_ok = 0
+        app_l2_ok = 0
+        app_l1_syn_ok = 0
+        app_l2_syn_ok = 0
         app_syn_ok = 0
+        app_l1_it_total = 0
+        app_l2_it_total = 0
         app_it_total = 0
         app_it_max = 0
+        prov_ok = 0
+        transfer_invoked = 0
+        transfer_blocked = 0
+        ora_ok = 0
         ora_syn_ok = 0
         ora_it_total = 0
         nf_f = 0
@@ -2154,18 +2236,32 @@ def _run_rate_scan(decode_fn, h1, h2, p1, p2, pb, pf, width, f_list,
         for t, seed in enumerate(seeds[:n_blocks]):
             block = sample_matched_block(pb, pf, width, seed)
             rec = _run_layered_block(decode_fn, h1_f, h2_f, p1, p2, block,
-                                     t < oracle_subset)
+                                     t < oracle_subset,
+                                     on_blocked_transfer="record")
             app_ok += int(rec["app_exact"])
+            app_l1_ok += int(rec.get("app_l1_exact", False))
+            app_l2_ok += int(rec.get("app_l2_exact", False))
+            app_l1_syn_ok += int(rec.get("app_l1_syndrome_ok", False))
+            app_l2_syn_ok += int(rec.get("app_l2_syndrome_ok", False))
             app_syn_ok += int(rec["app_syndrome_ok"])
+            app_l1_it_total += int(rec.get("app_l1_iterations", 0))
+            app_l2_it_total += int(rec.get("app_l2_iterations", 0))
             _it = int(rec["iterations"])
             app_it_total += _it
             if _it > app_it_max:
                 app_it_max = _it
-            calls += 2
+            if rec.get("app_l1_provenance") == "CHECK_UPDATED":
+                prov_ok += 1
+            if rec.get("transfer_invoked"):
+                transfer_invoked += 1
+                calls += 2
+            else:
+                transfer_blocked += 1
+                calls += 1
             _nf = int(not rec["finite"])
             nonfinite += _nf
             nf_f += _nf
-            if t < oracle_subset:
+            if t < oracle_subset and rec.get("transfer_invoked"):
                 ora_ok += int(rec["oracle_exact"])
                 ora_syn_ok += int(rec["oracle_syndrome_ok"])
                 ora_it_total += int(rec["oracle_iterations"])
@@ -2186,10 +2282,19 @@ def _run_rate_scan(decode_fn, h1, h2, p1, p2, pb, pf, width, f_list,
                       "app_exact_count": int(app_ok),
                       "app_exact_rate": float(rate),
                       "app_failure_fraction": float(1.0 - rate),
+                      "app_l1_exact_count": int(app_l1_ok),
+                      "app_l2_exact_count": int(app_l2_ok),
+                      "app_l1_syndrome_ok_count": int(app_l1_syn_ok),
+                      "app_l2_syndrome_ok_count": int(app_l2_syn_ok),
+                      "provenance_check_updated_count": int(prov_ok),
+                      "transfer_invoked_count": int(transfer_invoked),
+                      "transfer_blocked_count": int(transfer_blocked),
                       "oracle_exact_count": int(ora_ok),
                       "app_syndrome_ok_count": int(app_syn_ok),
                       "app_iterations_total": int(app_it_total),
                       "app_iterations_max": int(app_it_max),
+                      "app_l1_iterations_total": int(app_l1_it_total),
+                      "app_l2_iterations_total": int(app_l2_it_total),
                       "oracle_syndrome_ok_count": int(ora_syn_ok),
                       "oracle_iterations_total": int(ora_it_total),
                       "nonfinite_count": int(nf_f),
@@ -2277,8 +2382,14 @@ def run_g1_phase(*, h=None, p_b=None, p_f=None,
     }
 
 
-def _grade_g2(top_rate, mono, nonfinite):
+def _grade_g2(top_rate, mono, nonfinite, *, wall_seconds=None,
+              peak_rss_bytes=None):
     if int(nonfinite) > 0:
+        return GRADE_BLOCKED
+    if wall_seconds is not None and float(wall_seconds) > G2_TOTAL_BUDGET_S:
+        return GRADE_BLOCKED
+    if (peak_rss_bytes is not None
+            and int(peak_rss_bytes) >= G2_RSS_BUDGET_BYTES):
         return GRADE_BLOCKED
     if float(top_rate) >= 0.9 and bool(mono):
         return GRADE_QUALIFIED
@@ -2292,6 +2403,7 @@ def run_g2_phase(*, h=None, p_b=None, p_f=None,
     """G2 sole grading experiment over the frozen G2 seeds (fake decoder only)."""
     _require_authorized("g2", authorized)
     _require_decode_fn("g2", decode_fn)
+    t_start = time.perf_counter()
     if h is None:
         h = {"L1": build_dv3_nested_mother(
             G2_WIDTH, G2_L1_K_MIN, G2_L1_K_MIN, L1_GRAPH_SEED, None),
@@ -2304,14 +2416,18 @@ def run_g2_phase(*, h=None, p_b=None, p_f=None,
     pb = np.asarray(p_b, dtype=np.float64).ravel()
     _, _, _, p1, p2 = _ce_stats(pf, pb)
     width = int(h1.shape[1])
-    per_f, mono, calls, nonfinite, _run_peak = _run_rate_scan(
+    per_f, mono, calls, nonfinite, run_peak = _run_rate_scan(
         decode_fn, h1, h2, p1, p2, pb, pf, width, G2_F,
         G2_BLOCKS, G2_SEEDS, G2_ORACLE_SUBSET)
     frozen = {str(f): {"m1": _rows_required(CE_L1_MEAN, G2_WIDTH, f),
                        "m2": _rows_required(CE_L2_ORACLE_MEAN, G2_WIDTH, f)}
               for f in G2_F}
+    wall = float(time.perf_counter() - t_start)
     top = per_f[-1]["app_exact_rate"]
-    grade = _grade_g2(top, mono, nonfinite)
+    grade = _grade_g2(top, mono, nonfinite, wall_seconds=wall,
+                      peak_rss_bytes=run_peak)
+    if run_peak is None:
+        grade = GRADE_BLOCKED
     return {
         "phase": "g2",
         "block_length": width,
@@ -2322,8 +2438,11 @@ def run_g2_phase(*, h=None, p_b=None, p_f=None,
         "crashes": 0,
         "nonfinite": int(nonfinite),
         "decoder_calls": int(calls),
+        "peak_rss_bytes": run_peak,
+        "wall_seconds": wall,
         "grade": grade,
         "passed": bool(grade == GRADE_QUALIFIED),
+        "runtime_status": "G2_RUNTIME_UNVERIFIED",
     }
 
 
@@ -2514,6 +2633,86 @@ def bind_historical_decoder():
     return _bound
 
 
+def _probe_fixture():
+    """Hand-checkable 2x2 GF32 parity fixture for the no-write probe.
+
+    Degree-two checks and degree-two variables so the historical row-layered
+    decoder accepts the shape; all entries are explicit and tiny.
+
+    The syndrome is intentionally nonzero: ``H @ x_true = (1, 2)`` with
+    ``x_true = [0, 1]``. The historical decoder's iteration-0 early return
+    fires only when ``H @ argmax(uniform prior) = H @ 0 = 0`` equals the
+    syndrome; a zero syndrome would therefore always return
+    ``iterations=0`` + ``PRIOR_ONLY`` and make the frozen X1 success contract
+    unsatisfiable by construction. With this nonzero consistent syndrome the
+    early return cannot fire (``0 != syndrome``), so at least one check sweep
+    runs; per the decoder's exit paths
+    (``v35_algorithm_development.py:856-936``) both the converged and the
+    non-converged outcome then carry ``CHECK_UPDATED`` with
+    ``iterations >= 1``.
+    """
+    h = np.array([[1, 1], [1, 2]], dtype=np.int64)
+    prior = np.full((2, Q), 1.0 / Q, dtype=np.float64)
+    syndrome = np.array([1, 2], dtype=np.int64)
+    x_true = np.array([0, 1], dtype=np.int64)
+    return {"h": h, "prior": prior, "syndrome": syndrome, "x_true": x_true}
+
+
+def probe_historical_decoder_provenance(*, decode_fn=None, h=None, prior=None,
+                                        syndrome=None):
+    """No-write probe of one decoder return's belief provenance.
+
+    Resolves the historical adapter only when ``decode_fn is None`` (the real
+    historical resolution is an X1 decision; A-F tests always inject a fake).
+    Performs at most one decode on the provided or tiny fixture and reports
+    the provenance token, its acceptance, iterations, and shape validity.
+    Never creates an output root, writes a file, reads authorization state,
+    or starts a phase.
+    """
+    resolved_is_historical = False
+    if decode_fn is None:
+        decode_fn = bind_historical_decoder()
+        resolved_is_historical = True
+    else:
+        resolved_is_historical = _is_historical_decoder(decode_fn)
+    fix = _probe_fixture()
+    if h is None:
+        h = fix["h"]
+    if prior is None:
+        prior = fix["prior"]
+    if syndrome is None:
+        syndrome = fix["syndrome"]
+    result = decode_fn(np.asarray(h), np.asarray(prior, dtype=np.float64),
+                       np.asarray(syndrome))
+    if isinstance(result, dict):
+        get = result.get
+    else:
+        get = lambda key, default=None: getattr(result, key, default)
+    provenance = get("belief_provenance")
+    iterations = get("iterations")
+    try:
+        iterations = int(iterations)
+    except Exception:
+        iterations = None
+    beliefs = get("final_beliefs")
+    shape_ok = False
+    finite = False
+    if beliefs is not None:
+        arr = np.asarray(beliefs, dtype=np.float64)
+        shape_ok = bool(arr.shape == np.asarray(prior).shape)
+        finite = bool(np.all(np.isfinite(arr)))
+    return {
+        "resolved_is_historical": bool(resolved_is_historical),
+        "provenance": provenance if isinstance(provenance, str) else None,
+        "accepted_check_updated": bool(provenance == "CHECK_UPDATED"),
+        "iterations": iterations,
+        "belief_shape_ok": shape_ok,
+        "beliefs_finite": finite,
+        "created_output_root": False,
+        "wrote_files": False,
+    }
+
+
 def _write_stage_evidence(out_dir, payload, table_head, table_rows,
                           report_lines, summary):
     d = Path(out_dir)
@@ -2609,6 +2808,22 @@ def write_g1_evidence(out_dir, result):
                 "oracle_iterations_total", 0)),
             "nonfinite_count": int(item.get("nonfinite_count", 0)),
             "peak_rss_bytes": int(_peak) if _peak is not None else None,
+            "app_l1_exact_count": int(item.get("app_l1_exact_count", 0)),
+            "app_l2_exact_count": int(item.get("app_l2_exact_count", 0)),
+            "app_l1_syndrome_ok_count": int(item.get(
+                "app_l1_syndrome_ok_count", 0)),
+            "app_l2_syndrome_ok_count": int(item.get(
+                "app_l2_syndrome_ok_count", 0)),
+            "app_l1_iterations_total": int(item.get(
+                "app_l1_iterations_total", 0)),
+            "app_l2_iterations_total": int(item.get(
+                "app_l2_iterations_total", 0)),
+            "provenance_check_updated_count": int(item.get(
+                "provenance_check_updated_count", 0)),
+            "transfer_invoked_count": int(item.get(
+                "transfer_invoked_count", 0)),
+            "transfer_blocked_count": int(item.get(
+                "transfer_blocked_count", 0)),
         })
     _run_peak = result.get("peak_rss_bytes")
     payload = {
@@ -2639,7 +2854,14 @@ def write_g1_evidence(out_dir, result):
                    r["app_iterations_total"], r["app_iterations_max"],
                    r["oracle_syndrome_ok_count"],
                    r["oracle_iterations_total"], r["nonfinite_count"],
-                   r["peak_rss_bytes"]] for r in per_f]
+                   r["peak_rss_bytes"], r["app_l1_exact_count"],
+                   r["app_l2_exact_count"], r["app_l1_syndrome_ok_count"],
+                   r["app_l2_syndrome_ok_count"],
+                   r["app_l1_iterations_total"],
+                   r["app_l2_iterations_total"],
+                   r["provenance_check_updated_count"],
+                   r["transfer_invoked_count"],
+                   r["transfer_blocked_count"]] for r in per_f]
     report = ["# V72P2D5 G1 evidence",
               f"phase: {payload['phase']}",
               f"outcome: {payload['outcome']}",
@@ -2668,7 +2890,11 @@ def write_g1_evidence(out_dir, result):
         "app_failure_fraction,oracle_exact_count,"
         "app_syndrome_ok_count,app_iterations_total,app_iterations_max,"
         "oracle_syndrome_ok_count,oracle_iterations_total,"
-        "nonfinite_count,peak_rss_bytes",
+        "nonfinite_count,peak_rss_bytes,app_l1_exact_count,"
+        "app_l2_exact_count,app_l1_syndrome_ok_count,"
+        "app_l2_syndrome_ok_count,app_l1_iterations_total,"
+        "app_l2_iterations_total,provenance_check_updated_count,"
+        "transfer_invoked_count,transfer_blocked_count",
         table_rows, report, summary)
 
 
@@ -2683,7 +2909,20 @@ def write_g2_evidence(out_dir, result):
             "app_exact_rate": float(item.get("app_exact_rate", 0.0)),
             "app_failure_fraction": float(item["app_failure_fraction"]),
             "oracle_exact_count": int(item.get("oracle_exact_count", 0)),
+            "app_l1_exact_count": int(item.get("app_l1_exact_count", 0)),
+            "app_l2_exact_count": int(item.get("app_l2_exact_count", 0)),
+            "app_l1_syndrome_ok_count": int(item.get(
+                "app_l1_syndrome_ok_count", 0)),
+            "app_l2_syndrome_ok_count": int(item.get(
+                "app_l2_syndrome_ok_count", 0)),
+            "provenance_check_updated_count": int(item.get(
+                "provenance_check_updated_count", 0)),
+            "transfer_invoked_count": int(item.get(
+                "transfer_invoked_count", 0)),
+            "transfer_blocked_count": int(item.get(
+                "transfer_blocked_count", 0)),
         })
+    _run_peak = result.get("peak_rss_bytes")
     payload = {
         "phase": str(result.get("phase", "g2")),
         "formal_root": G2_FORMAL_ROOT,
@@ -2699,13 +2938,22 @@ def write_g2_evidence(out_dir, result):
         "crashes": int(result.get("crashes", 0)),
         "nonfinite": int(result.get("nonfinite", 0)),
         "decoder_calls": int(result.get("decoder_calls", 0)),
+        "peak_rss_bytes": int(_run_peak) if _run_peak is not None else None,
+        "wall_seconds": float(result.get("wall_seconds", 0.0)),
         "grade": str(result.get("grade", GRADE_FAILED)),
         "passed": bool(result.get("passed", False)),
+        "runtime_status": str(result.get("runtime_status",
+                                         "G2_RUNTIME_UNVERIFIED")),
         "output_files": list(STAGE_EVIDENCE_FILES),
     }
     table_rows = [[r["f"], r["attempted"], r["app_exact_count"],
                    r["app_exact_rate"], r["app_failure_fraction"],
-                   r["oracle_exact_count"]] for r in per_f]
+                   r["oracle_exact_count"], r["app_l1_exact_count"],
+                   r["app_l2_exact_count"], r["app_l1_syndrome_ok_count"],
+                   r["app_l2_syndrome_ok_count"],
+                   r["provenance_check_updated_count"],
+                   r["transfer_invoked_count"],
+                   r["transfer_blocked_count"]] for r in per_f]
     report = ["# V72P2D5 G2 evidence",
               f"phase: {payload['phase']}",
               f"grade: {payload['grade']}",
@@ -2713,6 +2961,9 @@ def write_g2_evidence(out_dir, result):
               f"monotonic: {payload['monotonic']}",
               f"nonfinite: {payload['nonfinite']}",
               f"decoder_calls: {payload['decoder_calls']}",
+              f"wall_seconds: {payload['wall_seconds']}",
+              f"peak_rss_bytes: {payload['peak_rss_bytes']}",
+              f"runtime_status: {payload['runtime_status']}",
               f"formal_root: {G2_FORMAL_ROOT}"]
     summary = {
         "phase": payload["phase"],
@@ -2720,6 +2971,9 @@ def write_g2_evidence(out_dir, result):
         "decoder_calls": payload["decoder_calls"],
         "monotonic": payload["monotonic"],
         "nonfinite": payload["nonfinite"],
+        "wall_seconds": payload["wall_seconds"],
+        "peak_rss_bytes": payload["peak_rss_bytes"],
+        "runtime_status": payload["runtime_status"],
         "grade": payload["grade"],
         "passed": payload["passed"],
         "files": list(STAGE_EVIDENCE_FILES),
@@ -2727,7 +2981,10 @@ def write_g2_evidence(out_dir, result):
     return _write_stage_evidence(
         out_dir, payload,
         "f,attempted,app_exact_count,app_exact_rate,"
-        "app_failure_fraction,oracle_exact_count",
+        "app_failure_fraction,oracle_exact_count,app_l1_exact_count,"
+        "app_l2_exact_count,app_l1_syndrome_ok_count,"
+        "app_l2_syndrome_ok_count,provenance_check_updated_count,"
+        "transfer_invoked_count,transfer_blocked_count",
         table_rows, report, summary)
 
 
