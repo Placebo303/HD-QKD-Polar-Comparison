@@ -29,3 +29,25 @@
 ### Terminal
 
 `D16_MATCHED_BACKOFF_READY_AWAITING_EXPLICIT_AUTHORIZATION`. Next gate: separate explicit batch grant + Pre-EXECUTE (d5-tree reconfirm carried, R3-first test order carried). No route/investment/D7-H/FER claims.
+- 2026-09-15 main-thread readiness acceptance: accept D1601–D1609,
+  D16-R1608 VERIFIED PASS_WITH_FINDINGS and R1608A scoped PASS as
+  `D16_MATCHED_BACKOFF_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`.
+  The terminal-string drift is resolved; all remaining findings are
+  non-blocking. Acceptance grants no run, route choice or D7-H revival.
+- 2026-09-15 route amendment before execution: D16 Batch A1 authorization
+  packet withdrawn unused; official root remains absent. D16 is retained as a
+  held-out validation point whose prediction must be frozen before any run.
+  Immediate next route is D17 current-channel asymptotic DE plus explicit
+  finite-length scaling/backoff. The prior D16 readiness evidence remains valid,
+  but `D16_MATCHED_BACKOFF_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`
+  no longer means it is the next executable gate. D7-H remains closed.
+
+## 2026-09-15 — D17 pointer (D16 unchanged, held-out validation)
+
+- D17 readiness R1 closed as `D17_DE_SCALING_READY_AWAITING_EXPLICIT_AUTHORIZATION`
+  (D17-R207 VERIFIED `PASS_WITH_FINDINGS`, blocking none; detail:
+  `docs/research_cycles/V72P2D17-DESCALING/READINESS_R1.md`; log:
+  `docs/research_cycles/V72P2D17-DESCALING/EXPLORATION_LOG.md`).
+- D16 role: held-out validation only — cells/seeds/command/root unchanged;
+  official root still absent; banned seeds `2026094001..4012` + `2026094101..4108`
+  barred from D17 fitting and DE tuning. This pointer grants no D16 run.
