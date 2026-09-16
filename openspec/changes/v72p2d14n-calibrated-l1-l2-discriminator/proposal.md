@@ -55,6 +55,9 @@ scientific reinterpretation.
   disclosed = 550 bits; effective factor = 550/548.700215065776 = **1.00237**.
 - L045/L055 degree cells (frozen D12 cells for n128, verified MATCH §verification):
   L045 71/57/313 `2^41+3^77`; L055 83/45/301 `2^53+3^65`.
+  (Pre-A1 m=118 check strings — SUPERSEDED by Amendment A1, design §8:
+  normative targets are L045 71/57/E313 `2^17+3^93` and L055 83/45/E301
+  `2^29+3^81` at m_L1=110. Variable counts STAND; m_L1=118 rejected.)
 - L2 DV3 (frozen D11 shape at n128, verified MATCH §verification): m=104,
   E=384, check allocation `3^32+4^72`.
 - Seeds (fresh; absence re-confirmed §verification): L1 graphs `2026093401..06`
@@ -63,6 +66,9 @@ scientific reinterpretation.
   72 cells; same 12 blocks feed L045-L1, L055-L1, L2-APP, L2-ORACLE (fully paired).
 - Calls: 72 each for L045, L055, L2 APP and L2 ORACLE; exactly **288** planned.
   Setup units ≤26 (= 12 graph constructions + 12 block samples + 2 plan/manifest).
+  (Pre-A1 — SUPERSEDED by Amendment A1, design §8.4: normative setup is ≤32 =
+  18 constructions + 12 block samples + 2 plan/manifest; PROFILE scope 18
+  graphs / 12 seeds.)
 - Prior/decoder: candidate concentration-backoff prior only (P-switched
   entrypoints); GF32/poly37; row-layered cold decoder max_iter=90,
   damping=1.0; every non-oracle transfer requires `CHECK_UPDATED`; oracle is
@@ -78,7 +84,8 @@ scientific reinterpretation.
      `N_TRANSFER_BOTTLENECK_RECORDED`;
   5. `L1-ADEQUATE` AND `L2-JOINT-GOOD` → `N_ROUTE_SCALE_VALIDATION`;
   6. else → `N_ROUTE_AMBIGUOUS`.
-- Budgets: ≤288 decoder calls; ≤26 setup; ≤1800 s wall total; ≤120 s per call;
+- Budgets: ≤288 decoder calls; ≤26 setup (pre-A1 — SUPERSEDED by Amendment A1:
+  ≤32, design §8.4); ≤1800 s wall total; ≤120 s per call;
   RSS <2147483648 B (<2 GiB); one process; CPU-only;
   no retry/resume/repair/seed search/tuning.
 - Future root `workspace/v72p2d14_discriminator/20260914_r1` remains absent
@@ -112,3 +119,21 @@ scientific reinterpretation.
 - [x] `tasks.md`: N201 [x], N202–N210 packet-exact [ ].
 - [x] No ambiguity/mismatch found; else STOP (none triggered).
 - [x] Execution false, decoder calls 0, no commit/push.
+
+## Amendments A1 + R2 (supersede notes — prereg untouched, 2026-09-14)
+
+- Amendment A1 (design §8, spec A1 deltas): supersedes the pre-A1 m=118 check
+  strings and ≤26 setup annotated inline above. Normative: L045 71/57/E313
+  `2^17+3^93`, L055 83/45/E301 `2^29+3^81` at m_L1=110; setup ≤32 (18 + 12 + 2);
+  PROFILE scope 18 graphs / 12 seeds. All other frozen values above STAND.
+- Amendment R2 (design §9, spec R2 deltas, tasks R201–R207): records the
+  blocking fall-through (authorized `--n14-batch` → unconditional `SystemExit`
+  in `scripts/v72p2d14_discriminator_development.py` `main()` instead of
+  dispatch) and the authorized-path completion scope (R202 binder → R203
+  orchestrator → R204 CLI true branch → R205 fake test → R206 boundary probe →
+  R207 re-review). FREEZES the APP transfer-source profile: the 72-call
+  `L2_APP` stream sources L055 challenger L1 `CHECK_UPDATED` beliefs (one per
+  paired cell); `L1-ADEQUATE` grades L055 only; L045 descriptive-only; ORACLE
+  diagnostic ungraded/excluded (rationale: design §9.2). Budgets unchanged
+  (≤288 / ≤32 / ≤1800 s / ≤120 s / <2 GiB); future root stays absent through
+  R2. This call: docs only — execution false, decoder calls 0, no commit/push.

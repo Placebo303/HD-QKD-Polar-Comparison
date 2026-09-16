@@ -17,6 +17,11 @@
   manifest/summary markers `structure_schema=r1d-v2`,
   `eligible_semantics=frozen-AND-I1`. Historical A2 roots SHALL remain
   byte-identical with the old schema; `--verify` SHALL read both.
+- New R1d roots SHALL additionally carry the frozen 23 decoder columns plus an
+  additive trailing `residual_syndrome_weight` column (per-call unsatisfied
+  check rows vs the target syndrome, from the decoder's own hard decision;
+  `-1` for crash rows). Non-R1d roots and all historical roots SHALL keep the
+  frozen 23-column header unchanged.
 - Crash/nonfinite precedence SHALL follow `execution_block_terminal`
   (degree `ValueError` → `D6_GRAPH_STRUCTURE_INVARIANT_BLOCKED`, else
   `D6_GRAPH_ATTEMPTED_CELL_INVALID`; `call_idx<0` excluded), overriding

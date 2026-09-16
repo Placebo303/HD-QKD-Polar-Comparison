@@ -8,7 +8,8 @@
   (commit 1). No code before commit 1. No authorization change.
 - [x] D2 Implement R1d dispatch layer (mother module, additive only):
   `R1D_ARMS`, `R1D_SCALING_FALLBACKS`, `R1D_STRUCTURE_SCHEMA`,
-  `R1D_ELIGIBLE_SEMANTICS`, `R1D_VALID_SUBSET` (26 cells),
+  `R1D_ELIGIBLE_SEMANTICS`, `R1D_VALID_SUBSET` (22 distinct cells; 26
+  role-cells),
   `assert_r1d_arm`, `assert_r1d_dispatchable`, `enrich_r1d_records`,
   `write/append_structure_records_r1d`. A4/A6 builder path untouched.
 - [x] D3 Implement `--r1d` runner mode (dev script, default off): R1D arms at

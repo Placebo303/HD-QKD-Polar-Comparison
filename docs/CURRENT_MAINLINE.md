@@ -45,6 +45,19 @@ own cycle document; no new claim is added here):
    and for more than two layers a separate mathematical/leakage contract is
    required.
 
+## NB-Polar successor boundary (2026-09-11)
+
+An independent native q-ary NB-Polar plan is now initialized in the sibling
+worktree D:\Code\HD-QKD_Polar_Comparison-nbpolar. The canonical documents
+are docs/nbpolar/DOCUMENT_INDEX.md and OpenSpec change
+formal-ir-nbpolar-mvp. This is a plan candidate only: there is no production
+decoder, real-data execution, result root, or qualification claim.
+
+The old hybrid APP-transfer draft is archived under
+openspec/changes/archive/2026-09-11-formal-ir-future-nbpolar-app-transfer-superseded/.
+The active Comparison route remains D7-E; NB-Polar planning neither changes
+nor authorizes D7-E, D7-D, D7-C, D6, or D5 work.
+
 Earlier bounded V-series states superseded by the ledger above: V34 matched
 empirical-P fixed-packet bounded failure (ER1 accepted); V35R1 closed only the
 tested hand-designed NB configuration

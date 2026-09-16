@@ -1,0 +1,55 @@
+{
+  "run_id": "T3_longframe_proxy",
+  "n": 5120,
+  "q": 1024,
+  "ser": 0.02,
+  "grid": [
+    {
+      "n": 5120,
+      "verify": 32,
+      "block": 32,
+      "parity": 1
+    },
+    {
+      "n": 5120,
+      "verify": 64,
+      "block": 32,
+      "parity": 1
+    },
+    {
+      "n": 5120,
+      "verify": 32,
+      "block": 64,
+      "parity": 1
+    },
+    {
+      "n": 5120,
+      "verify": 64,
+      "block": 64,
+      "parity": 1
+    },
+    {
+      "n": 5120,
+      "verify": 32,
+      "block": 16,
+      "parity": 1
+    },
+    {
+      "n": 5120,
+      "verify": 32,
+      "block": 32,
+      "parity": 2
+    }
+  ],
+  "frames_per_point": {
+    "real": 50,
+    "synthetic": 50
+  },
+  "proxy": true,
+  "outputs": [
+    "ir_benchmark_results.csv",
+    "t3_leak_decomposition.csv",
+    "t3_longframe_report.md"
+  ],
+  "created": "2026-08-30T09:28:48"
+}

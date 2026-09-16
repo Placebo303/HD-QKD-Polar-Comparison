@@ -2449,7 +2449,8 @@ def run_g2_phase(*, h=None, p_b=None, p_f=None,
 def prepare_model_f_prior(counts_ab=None, p_b=None, lam=LAMBDA_STAR):
     """Prepare the P0/G1/G2 prior pair from injected counts only.
 
-    Sole production source of ``(p_b, p_f)`` for the rate stages. Reuses
+    Historical-reconstruction-only source of ``(p_b, p_f)``; production
+    P0/G1/G2 select ``prepare_model_f_prior_candidate``. Reuses
     :func:`build_f_model` with the frozen coefficient and keeps the
     accepted axis contract (counts and P_F are ``(Alice, Bob)`` with
     ``axis0`` Alice; every P_F column sums to 1). Injected tables only;
@@ -2485,7 +2486,8 @@ def prepare_model_f_prior_candidate(counts_ab=None, p_b=None,
     table comes from :func:`build_f_model_concentration` (D4R2-F backoff with
     the frozen ``LAMBDA_STAR`` selection basis; no new search, no VAL).
     Injected tables only; no file read, no formal-root reference, no decoder.
-    Production phases keep calling ``prepare_model_f_prior``.
+    Production selection for P0/G1/G2: ``run_p0_cost_synthetic``,
+    ``run_g1_synthetic``, and ``run_g2_synthetic`` call this estimator.
     """
     if counts_ab is None or p_b is None:
         raise ValueError(
@@ -2993,7 +2995,7 @@ def run_p0_cost_synthetic(*, authorized=False, decode_fn=None, out_dir=None,
     """Authorized P0 entrypoint; prep first, then build, decode, write."""
     _require_authorized("p0-cost", authorized)
     _c, _b = _load_model_f_input_or_blocked(counts_ab, p_b)
-    pb, pf = prepare_model_f_prior(_c, _b)
+    pb, pf = prepare_model_f_prior_candidate(_c, _b)
     decoder = decode_fn if decode_fn is not None else bind_historical_decoder()
     result = run_p0_cost_phase(h=None, p_b=pb, p_f=pf, decode_fn=decoder,
                                authorized=True)
@@ -3008,7 +3010,7 @@ def run_g1_synthetic(*, authorized=False, decode_fn=None, out_dir=None,
     _require_authorized("g1", authorized)
     t_entry = time.perf_counter()
     _c, _b = _load_model_f_input_or_blocked(counts_ab, p_b)
-    pb, pf = prepare_model_f_prior(_c, _b)
+    pb, pf = prepare_model_f_prior_candidate(_c, _b)
     decoder = decode_fn if decode_fn is not None else bind_historical_decoder()
     result = run_g1_phase(h=None, p_b=pb, p_f=pf, decode_fn=decoder,
                           authorized=True)
@@ -3031,7 +3033,7 @@ def run_g2_synthetic(*, authorized=False, decode_fn=None, out_dir=None,
     """Authorized G2 entrypoint; prep first, then build, decode, write."""
     _require_authorized("g2", authorized)
     _c, _b = _load_model_f_input_or_blocked(counts_ab, p_b)
-    pb, pf = prepare_model_f_prior(_c, _b)
+    pb, pf = prepare_model_f_prior_candidate(_c, _b)
     decoder = decode_fn if decode_fn is not None else bind_historical_decoder()
     result = run_g2_phase(h=None, p_b=pb, p_f=pf, decode_fn=decoder,
                           authorized=True)

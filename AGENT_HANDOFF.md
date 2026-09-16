@@ -11,6 +11,9 @@ existing data. See AGENTS.md §1.1 and
 ## 2026-08-24 COLLABORATION SOP — GITHUB / CHATGPT / OPENCODE
 
 - Durable protocol: `docs/research-cycle-sop.md`.
+- Current delivery decision (2026-09-12): handoffs are manual copy-paste only;
+  do not call the Codex/OpenCode interaction bridge or automatic callback
+  loop. Leave the global bridge/server/session installation untouched.
 - ChatGPT copy prompt: `docs/prompts/chatgpt-research-review.md`.
 - OpenCode copy prompt: `docs/prompts/opencode-research-execution.md`.
 - Git/PR contract: `.github/pull_request_template.md`; compact result template:
@@ -125,8 +128,11 @@ existing data. See AGENTS.md §1.1 and
   conversion still fails, move to
   informed NB-MLC/JRDO, protograph/MET, one Block-MDS/QC candidate, or a
   rate-adaptive mother code rather than more QC/PEG seed tuning.
-- Do not delete/overwrite historical outputs, rerun V33, start finite-control,
-  implement NB-Polar, push, or claim qualification/promotion.
+- Do not delete/overwrite historical outputs, rerun V33, or start finite-control.
+- Do not implement NB-Polar in this formal-IR checkout. The independent
+  plan and future code are documented in
+  D:/Code/HD-QKD_Polar_Comparison-nbpolar/docs/nbpolar/.
+- Do not push or claim qualification/promotion from the plan-only track.
 
 ## 2026-08-21 V31 — CLOSED finite_graph_fail (archived)
 

@@ -1,0 +1,2020 @@
+{
+  "head": "4914b56d8d353e7445a621fb142f340c37245f12",
+  "branch": "formal-ir-mainline",
+  "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
+  "metadata_audit": {
+    "v13": [
+      {
+        "source": "1M",
+        "sid": "type2_1M_20260121_184040",
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1M_20260121_184040\\sidecar_meta.json",
+        "fields": {
+          "dimension": 1024,
+          "bin_width_ps": 200,
+          "pairing": "nearest",
+          "processing_rule": "legacy_v1",
+          "channels": null,
+          "delay_used_ps": -50,
+          "peak_center_ps": -50,
+          "peak_sigma_ps": 74.67824103866093,
+          "corr_argmax": 8191,
+          "corr_bins": 16384,
+          "corr_max": 38086.0,
+          "peak_to_bg": 3808.6,
+          "peak_status": "ok",
+          "frame_start_ps": null,
+          "frame_anchor": null,
+          "mapping": null,
+          "wrap_rule": null,
+          "pairing_threshold_ps": 40000,
+          "gate_width_ps": 200,
+          "occupancy_filter": {
+            "dimension": 1024,
+            "bin_width_ps": 200,
+            "n_candidates_before": 525949,
+            "n_kept_after": 512151,
+            "n_dropped_occupancy": 132,
+            "drop_frac_occupancy": 0.00025097490441088397,
+            "n_dropped_multievent": 13666,
+            "drop_frac_multievent": 0.025983507906660153,
+            "filter_enabled": 1,
+            "frame_period_ps": 204800,
+            "pairing_mode": "nearest",
+            "threshold_ps": 200,
+            "frame_diag_available": 1,
+            "n_frames_total": 519219,
+            "n_frames_clean_single_single": 512144,
+            "n_frames_cross_frame": 257,
+            "n_frames_A_multi": 6,
+            "n_frames_B_multi": 1,
+            "n_frames_both_multi": 6811,
+            "n_pairs_in_clean_frames": 512144,
+            "n_pairs_in_ambiguous_frames": 13805
+          },
+          "frame_period_ps": 204800,
+          "raw": {
+            "created_at": "2026-08-16T00:44:07.035665",
+            "point": {
+              "d": 1024,
+              "bw": 200
+            },
+            "factor": 1,
+            "d_eff": 1024,
+            "q": 1024,
+            "m": 10,
+            "block_index": 0,
+            "n_symbols": 512151,
+            "source_point_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200",
+            "source_joint_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200\\results\\attempt_0\\ttbin_parsing\\ttbin_metrics.json#framed.joint_counts_sparse",
+            "source_sequence_path": "a_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy;b_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+            "sequence_source_mode": "strict",
+            "sequence_is_sampled": 0,
+            "joint_source_mode": "from_ttbin",
+            "joint_origin": "from_ttbin",
+            "joint_source_path": "a_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy;b_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+            "joint_fingerprint": {
+              "size": 179327,
+              "mtime": 1786812247.0336661,
+              "sha256": "b800f6e679e0c507f7ebcefea0cd7979ad80bb459c67fb163f9fd715f497cb30"
+            },
+            "fail_reason": "map_ser>=0.1",
+            "materialize_attempted": 1,
+            "materialize_ok": 1,
+            "materialize_origin": "materialized_from_ttbin",
+            "materialize_out_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0",
+            "materialize_error": null,
+            "materialize_params": {
+              "offset_override_ps": null,
+              "max_pairs": 0,
+              "frame_start_override_ps": null,
+              "coinc_window_override_ps": null,
+              "pairing_mode": "nearest",
+              "processing_rule_version": "legacy_v1",
+              "peak_gate_sigma": null,
+              "delay_override_ps": null,
+              "used_params": {
+                "dimension": 1024,
+                "bin_width_ps": 200,
+                "max_pairs": 512151,
+                "n_pairs_actual": 512151,
+                "coincidence_window_ps": null,
+                "coinc_window_override_ps": null,
+                "relative_delay_ps": null,
+                "delay_offset_ps": null,
+                "delay_override_ps": null,
+                "delay_used_ps": -50,
+                "frame_start_override_ps": null,
+                "frame_start_ps": null,
+                "frame_anchor": null,
+                "pairing_mode": "nearest",
+                "pairing_mode_requested": "nearest",
+                "pairing_mode_auto_forced": 0,
+                "frame_period_ps": 204800,
+                "nearest_threshold_ps": 40000,
+                "peak_gate_sigma": null,
+                "gate_width_ps": 200,
+                "effective_pairing_window_ps": null,
+                "pairing_window_source_tag": "legacy_not_applicable",
+                "gate_width_fallback": false,
+                "peak_center_ps": -50,
+                "peak_sigma_ps": 74.67824103866093,
+                "peak_to_bg": 3808.6,
+                "peak_status": "ok",
+                "corr_bins": 16384,
+                "corr_nonzero": 16362,
+                "corr_argmax": 8191,
+                "corr_max": 38086.0,
+                "peak_scan_range_ps": 819200,
+                "peak_bin_ps": 100,
+                "global_peak_center_ps": null,
+                "mapping": null,
+                "source_ttbin_paths": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.ttbin",
+                "source_point_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200",
+                "n_pairs_total_available": 512151,
+                "slice_start_pair": 0,
+                "slice_end_pair": 512151,
+                "processing_rule_version": "legacy_v1",
+                "pairing_path_tag": "time_pairs_nearest",
+                "occupancy_filter": {
+                  "dimension": 1024,
+                  "bin_width_ps": 200,
+                  "n_candidates_before": 525949,
+                  "n_kept_after": 512151,
+                  "n_dropped_occupancy": 132,
+                  "drop_frac_occupancy": 0.00025097490441088397,
+                  "n_dropped_multievent": 13666,
+                  "drop_frac_multievent": 0.025983507906660153,
+                  "filter_enabled": 1,
+                  "frame_period_ps": 204800,
+                  "pairing_mode": "nearest",
+                  "threshold_ps": 200,
+                  "frame_diag_available": 1,
+                  "n_frames_total": 519219,
+                  "n_frames_clean_single_single": 512144,
+                  "n_frames_cross_frame": 257,
+                  "n_frames_A_multi": 6,
+                  "n_frames_B_multi": 1,
+                  "n_frames_both_multi": 6811,
+                  "n_pairs_in_clean_frames": 512144,
+                  "n_pairs_in_ambiguous_frames": 13805
+                }
+              }
+            },
+            "real_sequence_resolve_debug": {
+              "ok": true,
+              "a_eff_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy",
+              "b_eff_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+              "a_symbols_path": null,
+              "b_symbols_path": null,
+              "chosen_kind": "eff_pair",
+              "tried_globs": [
+                "materialize_out_dir"
+              ],
+              "found_candidates": {
+                "a_eff": [
+                  "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy"
+                ],
+                "b_eff": [
+                  "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy"
+                ],
+                "a_symbols": [],
+                "b_symbols": []
+              }
+            },
+            "diagnostics": {
+              "enabled": 1,
+              "delta_hist_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1M_20260121_184040\\delta_hist.csv",
+              "seq_pair_stats_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1M_20260121_184040\\seq_pair_stats.json",
+              "n_pairs": 512151,
+              "n_pairs_actual": 512151,
+              "raw_ser": 0.23977303568674083,
+              "delta_mode": 0,
+              "delta_mode_frac": 0.7602269643132592,
+              "near_neighbor_frac": 1.0,
+              "n_unique_a": 1024,
+              "n_unique_b": 1024,
+              "top_a_frac": 0.0011168581141108775,
+              "top_b_frac": 0.0011129530158097904,
+              "occupancy_filter_summary_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1M_20260121_184040\\occupancy_filter_summary.csv"
+            },
+            "symbolization_snapshot": {
+              "bin_width_ps": 200,
+              "dimension": 1024,
+              "block_symbols": 512,
+              "mapping": "",
+              "bit_order": "",
+              "ttbin_file": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.ttbin",
+              "offset_ps": null,
+              "delay_ps": null,
+              "pairing_window_ps": null,
+              "coincidence_window_ps": null,
+              "scanfix_align": null,
+              "wrap_rule": "floor_div"
+            },
+            "source_fingerprints": {
+              "metrics_file": {
+                "path": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200\\results\\attempt_0\\ttbin_parsing\\ttbin_metrics.json",
+                "size": 263555,
+                "mtime": 1786812228.4984086,
+                "sha256": "376701956cfe6fa267847c74bc16fc1c58d9db5e5b1f1138702071b62999b80c"
+              }
+            },
+            "map_sanity": {
+              "map_ser": 0.23977303568674083,
+              "map_ber": 0.0477316260243561,
+              "verdict": "FAIL"
+            }
+          }
+        },
+        "status": {
+          "dimension": "PASS",
+          "dimension_value": 1024,
+          "bin_width_ps": "PASS",
+          "bin_width_ps_value": 200,
+          "pairing": "PASS",
+          "pairing_value": "nearest",
+          "processing_rule": "PASS",
+          "processing_rule_value": "legacy_v1",
+          "channels": "INCOMPLETE",
+          "delay_used_ps": "PASS",
+          "delay_used_ps_value": -50,
+          "peak_center_ps": "PASS",
+          "peak_center_ps_value": -50,
+          "peak_sigma_ps": "PASS",
+          "peak_sigma_ps_value": 74.67824103866093,
+          "corr_argmax": "PASS",
+          "corr_argmax_value": 8191,
+          "corr_bins": "PASS",
+          "corr_bins_value": 16384,
+          "corr_max": "PASS",
+          "corr_max_value": 38086.0,
+          "peak_to_bg": "PASS",
+          "peak_to_bg_value": 3808.6,
+          "peak_status": "PASS",
+          "peak_status_value": "ok",
+          "frame_start_ps": "INCOMPLETE",
+          "frame_anchor": "INCOMPLETE",
+          "mapping": "INCOMPLETE",
+          "wrap_rule": "INCOMPLETE",
+          "pairing_threshold_ps": "PASS",
+          "pairing_threshold_ps_value": 40000,
+          "gate_width_ps": "PASS",
+          "gate_width_ps_value": 200,
+          "occupancy_filter": "PASS",
+          "occupancy_filter_value": {
+            "dimension": 1024,
+            "bin_width_ps": 200,
+            "n_candidates_before": 525949,
+            "n_kept_after": 512151,
+            "n_dropped_occupancy": 132,
+            "drop_frac_occupancy": 0.00025097490441088397,
+            "n_dropped_multievent": 13666,
+            "drop_frac_multievent": 0.025983507906660153,
+            "filter_enabled": 1,
+            "frame_period_ps": 204800,
+            "pairing_mode": "nearest",
+            "threshold_ps": 200,
+            "frame_diag_available": 1,
+            "n_frames_total": 519219,
+            "n_frames_clean_single_single": 512144,
+            "n_frames_cross_frame": 257,
+            "n_frames_A_multi": 6,
+            "n_frames_B_multi": 1,
+            "n_frames_both_multi": 6811,
+            "n_pairs_in_clean_frames": 512144,
+            "n_pairs_in_ambiguous_frames": 13805
+          },
+          "frame_period_ps": "PASS",
+          "frame_period_ps_value": 204800
+        }
+      },
+      {
+        "source": "1p5M",
+        "sid": "type2_1p5M_20260121_183806",
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1p5M_20260121_183806\\sidecar_meta.json",
+        "fields": {
+          "dimension": 1024,
+          "bin_width_ps": 200,
+          "pairing": "nearest",
+          "processing_rule": "legacy_v1",
+          "channels": null,
+          "delay_used_ps": 50,
+          "peak_center_ps": 50,
+          "peak_sigma_ps": 87.97163589140699,
+          "corr_argmax": 8192,
+          "corr_bins": 16384,
+          "corr_max": 33661.0,
+          "peak_to_bg": 3366.1,
+          "peak_status": "ok",
+          "frame_start_ps": null,
+          "frame_anchor": null,
+          "mapping": null,
+          "wrap_rule": null,
+          "pairing_threshold_ps": 40000,
+          "gate_width_ps": 200,
+          "occupancy_filter": {
+            "dimension": 1024,
+            "bin_width_ps": 200,
+            "n_candidates_before": 735952,
+            "n_kept_after": 708443,
+            "n_dropped_occupancy": 206,
+            "drop_frac_occupancy": 0.000279909559319086,
+            "n_dropped_multievent": 27303,
+            "drop_frac_multievent": 0.037098886883927214,
+            "filter_enabled": 1,
+            "frame_period_ps": 204800,
+            "pairing_mode": "nearest",
+            "threshold_ps": 200,
+            "frame_diag_available": 1,
+            "n_frames_total": 722429,
+            "n_frames_clean_single_single": 708417,
+            "n_frames_cross_frame": 385,
+            "n_frames_A_multi": 15,
+            "n_frames_B_multi": 11,
+            "n_frames_both_multi": 13601,
+            "n_pairs_in_clean_frames": 708417,
+            "n_pairs_in_ambiguous_frames": 27535
+          },
+          "frame_period_ps": 204800,
+          "raw": {
+            "created_at": "2026-08-16T00:43:45.331198",
+            "point": {
+              "d": 1024,
+              "bw": 200
+            },
+            "factor": 1,
+            "d_eff": 1024,
+            "q": 1024,
+            "m": 10,
+            "block_index": 0,
+            "n_symbols": 708443,
+            "source_point_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200",
+            "source_joint_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200\\results\\attempt_0\\ttbin_parsing\\ttbin_metrics.json#framed.joint_counts_sparse",
+            "source_sequence_path": "a_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy;b_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+            "sequence_source_mode": "strict",
+            "sequence_is_sampled": 0,
+            "joint_source_mode": "from_ttbin",
+            "joint_origin": "from_ttbin",
+            "joint_source_path": "a_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy;b_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+            "joint_fingerprint": {
+              "size": 183825,
+              "mtime": 1786812225.3292005,
+              "sha256": "7f54c7a72fd4544af823ad5d4d900e8fb08998586c3ed503efcfbc42adb26e6e"
+            },
+            "fail_reason": "map_ser>=0.1",
+            "materialize_attempted": 1,
+            "materialize_ok": 1,
+            "materialize_origin": "materialized_from_ttbin",
+            "materialize_out_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0",
+            "materialize_error": null,
+            "materialize_params": {
+              "offset_override_ps": null,
+              "max_pairs": 0,
+              "frame_start_override_ps": null,
+              "coinc_window_override_ps": null,
+              "pairing_mode": "nearest",
+              "processing_rule_version": "legacy_v1",
+              "peak_gate_sigma": null,
+              "delay_override_ps": null,
+              "used_params": {
+                "dimension": 1024,
+                "bin_width_ps": 200,
+                "max_pairs": 708443,
+                "n_pairs_actual": 708443,
+                "coincidence_window_ps": null,
+                "coinc_window_override_ps": null,
+                "relative_delay_ps": null,
+                "delay_offset_ps": null,
+                "delay_override_ps": null,
+                "delay_used_ps": 50,
+                "frame_start_override_ps": null,
+                "frame_start_ps": null,
+                "frame_anchor": null,
+                "pairing_mode": "nearest",
+                "pairing_mode_requested": "nearest",
+                "pairing_mode_auto_forced": 0,
+                "frame_period_ps": 204800,
+                "nearest_threshold_ps": 40000,
+                "peak_gate_sigma": null,
+                "gate_width_ps": 200,
+                "effective_pairing_window_ps": null,
+                "pairing_window_source_tag": "legacy_not_applicable",
+                "gate_width_fallback": false,
+                "peak_center_ps": 50,
+                "peak_sigma_ps": 87.97163589140699,
+                "peak_to_bg": 3366.1,
+                "peak_status": "ok",
+                "corr_bins": 16384,
+                "corr_nonzero": 16265,
+                "corr_argmax": 8192,
+                "corr_max": 33661.0,
+                "peak_scan_range_ps": 819200,
+                "peak_bin_ps": 100,
+                "global_peak_center_ps": null,
+                "mapping": null,
+                "source_ttbin_paths": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.ttbin",
+                "source_point_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200",
+                "n_pairs_total_available": 708443,
+                "slice_start_pair": 0,
+                "slice_end_pair": 708443,
+                "processing_rule_version": "legacy_v1",
+                "pairing_path_tag": "time_pairs_nearest",
+                "occupancy_filter": {
+                  "dimension": 1024,
+                  "bin_width_ps": 200,
+                  "n_candidates_before": 735952,
+                  "n_kept_after": 708443,
+                  "n_dropped_occupancy": 206,
+                  "drop_frac_occupancy": 0.000279909559319086,
+                  "n_dropped_multievent": 27303,
+                  "drop_frac_multievent": 0.037098886883927214,
+                  "filter_enabled": 1,
+                  "frame_period_ps": 204800,
+                  "pairing_mode": "nearest",
+                  "threshold_ps": 200,
+                  "frame_diag_available": 1,
+                  "n_frames_total": 722429,
+                  "n_frames_clean_single_single": 708417,
+                  "n_frames_cross_frame": 385,
+                  "n_frames_A_multi": 15,
+                  "n_frames_B_multi": 11,
+                  "n_frames_both_multi": 13601,
+                  "n_pairs_in_clean_frames": 708417,
+                  "n_pairs_in_ambiguous_frames": 27535
+                }
+              }
+            },
+            "real_sequence_resolve_debug": {
+              "ok": true,
+              "a_eff_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy",
+              "b_eff_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+              "a_symbols_path": null,
+              "b_symbols_path": null,
+              "chosen_kind": "eff_pair",
+              "tried_globs": [
+                "materialize_out_dir"
+              ],
+              "found_candidates": {
+                "a_eff": [
+                  "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy"
+                ],
+                "b_eff": [
+                  "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy"
+                ],
+                "a_symbols": [],
+                "b_symbols": []
+              }
+            },
+            "diagnostics": {
+              "enabled": 1,
+              "delta_hist_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1p5M_20260121_183806\\delta_hist.csv",
+              "seq_pair_stats_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1p5M_20260121_183806\\seq_pair_stats.json",
+              "n_pairs": 708443,
+              "n_pairs_actual": 708443,
+              "raw_ser": 0.25447213113828493,
+              "delta_mode": 0,
+              "delta_mode_frac": 0.7455278688617151,
+              "near_neighbor_frac": 1.0,
+              "n_unique_a": 1024,
+              "n_unique_b": 1024,
+              "top_a_frac": 0.001092536731960087,
+              "top_b_frac": 0.001091125185794764,
+              "occupancy_filter_summary_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1p5M_20260121_183806\\occupancy_filter_summary.csv"
+            },
+            "symbolization_snapshot": {
+              "bin_width_ps": 200,
+              "dimension": 1024,
+              "block_symbols": 512,
+              "mapping": "",
+              "bit_order": "",
+              "ttbin_file": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.ttbin",
+              "offset_ps": null,
+              "delay_ps": null,
+              "pairing_window_ps": null,
+              "coincidence_window_ps": null,
+              "scanfix_align": null,
+              "wrap_rule": "floor_div"
+            },
+            "source_fingerprints": {
+              "metrics_file": {
+                "path": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200\\results\\attempt_0\\ttbin_parsing\\ttbin_metrics.json",
+                "size": 263897,
+                "mtime": 1786812203.562452,
+                "sha256": "1b55dcbfb7ae1791c2c929e5bf579f79dca1195de4353f7e5cc3ccdbb69c896d"
+              }
+            },
+            "map_sanity": {
+              "map_ser": 0.25447213113828493,
+              "map_ber": 0.05065036989567262,
+              "verdict": "FAIL"
+            }
+          }
+        },
+        "status": {
+          "dimension": "PASS",
+          "dimension_value": 1024,
+          "bin_width_ps": "PASS",
+          "bin_width_ps_value": 200,
+          "pairing": "PASS",
+          "pairing_value": "nearest",
+          "processing_rule": "PASS",
+          "processing_rule_value": "legacy_v1",
+          "channels": "INCOMPLETE",
+          "delay_used_ps": "PASS",
+          "delay_used_ps_value": 50,
+          "peak_center_ps": "PASS",
+          "peak_center_ps_value": 50,
+          "peak_sigma_ps": "PASS",
+          "peak_sigma_ps_value": 87.97163589140699,
+          "corr_argmax": "PASS",
+          "corr_argmax_value": 8192,
+          "corr_bins": "PASS",
+          "corr_bins_value": 16384,
+          "corr_max": "PASS",
+          "corr_max_value": 33661.0,
+          "peak_to_bg": "PASS",
+          "peak_to_bg_value": 3366.1,
+          "peak_status": "PASS",
+          "peak_status_value": "ok",
+          "frame_start_ps": "INCOMPLETE",
+          "frame_anchor": "INCOMPLETE",
+          "mapping": "INCOMPLETE",
+          "wrap_rule": "INCOMPLETE",
+          "pairing_threshold_ps": "PASS",
+          "pairing_threshold_ps_value": 40000,
+          "gate_width_ps": "PASS",
+          "gate_width_ps_value": 200,
+          "occupancy_filter": "PASS",
+          "occupancy_filter_value": {
+            "dimension": 1024,
+            "bin_width_ps": 200,
+            "n_candidates_before": 735952,
+            "n_kept_after": 708443,
+            "n_dropped_occupancy": 206,
+            "drop_frac_occupancy": 0.000279909559319086,
+            "n_dropped_multievent": 27303,
+            "drop_frac_multievent": 0.037098886883927214,
+            "filter_enabled": 1,
+            "frame_period_ps": 204800,
+            "pairing_mode": "nearest",
+            "threshold_ps": 200,
+            "frame_diag_available": 1,
+            "n_frames_total": 722429,
+            "n_frames_clean_single_single": 708417,
+            "n_frames_cross_frame": 385,
+            "n_frames_A_multi": 15,
+            "n_frames_B_multi": 11,
+            "n_frames_both_multi": 13601,
+            "n_pairs_in_clean_frames": 708417,
+            "n_pairs_in_ambiguous_frames": 27535
+          },
+          "frame_period_ps": "PASS",
+          "frame_period_ps_value": 204800
+        }
+      },
+      {
+        "source": "2M",
+        "sid": "type2_2M_20260121_183657",
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_2M_20260121_183657\\sidecar_meta.json",
+        "fields": {
+          "dimension": 1024,
+          "bin_width_ps": 200,
+          "pairing": "nearest",
+          "processing_rule": "legacy_v1",
+          "channels": null,
+          "delay_used_ps": 50,
+          "peak_center_ps": 50,
+          "peak_sigma_ps": 103.11167313717462,
+          "corr_argmax": 8192,
+          "corr_bins": 16384,
+          "corr_max": 33295.0,
+          "peak_to_bg": 3699.4444444444443,
+          "peak_status": "ok",
+          "frame_start_ps": null,
+          "frame_anchor": null,
+          "mapping": null,
+          "wrap_rule": null,
+          "pairing_threshold_ps": 40000,
+          "gate_width_ps": 200,
+          "occupancy_filter": {
+            "dimension": 1024,
+            "bin_width_ps": 200,
+            "n_candidates_before": 982410,
+            "n_kept_after": 933156,
+            "n_dropped_occupancy": 240,
+            "drop_frac_occupancy": 0.00024429718752862857,
+            "n_dropped_multievent": 49014,
+            "drop_frac_multievent": 0.04989159312303417,
+            "filter_enabled": 1,
+            "frame_period_ps": 204800,
+            "pairing_mode": "nearest",
+            "threshold_ps": 200,
+            "frame_diag_available": 1,
+            "n_frames_total": 957951,
+            "n_frames_clean_single_single": 933120,
+            "n_frames_cross_frame": 444,
+            "n_frames_A_multi": 23,
+            "n_frames_B_multi": 13,
+            "n_frames_both_multi": 24351,
+            "n_pairs_in_clean_frames": 933120,
+            "n_pairs_in_ambiguous_frames": 49290
+          },
+          "frame_period_ps": 204800,
+          "raw": {
+            "created_at": "2026-08-16T00:44:39.979490",
+            "point": {
+              "d": 1024,
+              "bw": 200
+            },
+            "factor": 1,
+            "d_eff": 1024,
+            "q": 1024,
+            "m": 10,
+            "block_index": 0,
+            "n_symbols": 933156,
+            "source_point_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200",
+            "source_joint_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200\\results\\attempt_0\\ttbin_parsing\\ttbin_metrics.json#framed.joint_counts_sparse",
+            "source_sequence_path": "a_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy;b_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+            "sequence_source_mode": "strict",
+            "sequence_is_sampled": 0,
+            "joint_source_mode": "from_ttbin",
+            "joint_origin": "from_ttbin",
+            "joint_source_path": "a_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy;b_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+            "joint_fingerprint": {
+              "size": 198343,
+              "mtime": 1786812279.9784746,
+              "sha256": "4ad79f5999689b949d22919b2e916187ec2bbd175d6a375665fe0849f6716b53"
+            },
+            "fail_reason": "map_ser>=0.1",
+            "materialize_attempted": 1,
+            "materialize_ok": 1,
+            "materialize_origin": "materialized_from_ttbin",
+            "materialize_out_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0",
+            "materialize_error": null,
+            "materialize_params": {
+              "offset_override_ps": null,
+              "max_pairs": 0,
+              "frame_start_override_ps": null,
+              "coinc_window_override_ps": null,
+              "pairing_mode": "nearest",
+              "processing_rule_version": "legacy_v1",
+              "peak_gate_sigma": null,
+              "delay_override_ps": null,
+              "used_params": {
+                "dimension": 1024,
+                "bin_width_ps": 200,
+                "max_pairs": 933156,
+                "n_pairs_actual": 933156,
+                "coincidence_window_ps": null,
+                "coinc_window_override_ps": null,
+                "relative_delay_ps": null,
+                "delay_offset_ps": null,
+                "delay_override_ps": null,
+                "delay_used_ps": 50,
+                "frame_start_override_ps": null,
+                "frame_start_ps": null,
+                "frame_anchor": null,
+                "pairing_mode": "nearest",
+                "pairing_mode_requested": "nearest",
+                "pairing_mode_auto_forced": 0,
+                "frame_period_ps": 204800,
+                "nearest_threshold_ps": 40000,
+                "peak_gate_sigma": null,
+                "gate_width_ps": 200,
+                "effective_pairing_window_ps": null,
+                "pairing_window_source_tag": "legacy_not_applicable",
+                "gate_width_fallback": false,
+                "peak_center_ps": 50,
+                "peak_sigma_ps": 103.11167313717462,
+                "peak_to_bg": 3699.4444444444443,
+                "peak_status": "ok",
+                "corr_bins": 16384,
+                "corr_nonzero": 15925,
+                "corr_argmax": 8192,
+                "corr_max": 33295.0,
+                "peak_scan_range_ps": 819200,
+                "peak_bin_ps": 100,
+                "global_peak_center_ps": null,
+                "mapping": null,
+                "source_ttbin_paths": "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.ttbin",
+                "source_point_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200",
+                "n_pairs_total_available": 933156,
+                "slice_start_pair": 0,
+                "slice_end_pair": 933156,
+                "processing_rule_version": "legacy_v1",
+                "pairing_path_tag": "time_pairs_nearest",
+                "occupancy_filter": {
+                  "dimension": 1024,
+                  "bin_width_ps": 200,
+                  "n_candidates_before": 982410,
+                  "n_kept_after": 933156,
+                  "n_dropped_occupancy": 240,
+                  "drop_frac_occupancy": 0.00024429718752862857,
+                  "n_dropped_multievent": 49014,
+                  "drop_frac_multievent": 0.04989159312303417,
+                  "filter_enabled": 1,
+                  "frame_period_ps": 204800,
+                  "pairing_mode": "nearest",
+                  "threshold_ps": 200,
+                  "frame_diag_available": 1,
+                  "n_frames_total": 957951,
+                  "n_frames_clean_single_single": 933120,
+                  "n_frames_cross_frame": 444,
+                  "n_frames_A_multi": 23,
+                  "n_frames_B_multi": 13,
+                  "n_frames_both_multi": 24351,
+                  "n_pairs_in_clean_frames": 933120,
+                  "n_pairs_in_ambiguous_frames": 49290
+                }
+              }
+            },
+            "real_sequence_resolve_debug": {
+              "ok": true,
+              "a_eff_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy",
+              "b_eff_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy",
+              "a_symbols_path": null,
+              "b_symbols_path": null,
+              "chosen_kind": "eff_pair",
+              "tried_globs": [
+                "materialize_out_dir"
+              ],
+              "found_candidates": {
+                "a_eff": [
+                  "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\a_eff.npy"
+                ],
+                "b_eff": [
+                  "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw200\\blk0\\b_eff.npy"
+                ],
+                "a_symbols": [],
+                "b_symbols": []
+              }
+            },
+            "diagnostics": {
+              "enabled": 1,
+              "delta_hist_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_2M_20260121_183657\\delta_hist.csv",
+              "seq_pair_stats_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_2M_20260121_183657\\seq_pair_stats.json",
+              "n_pairs": 933156,
+              "n_pairs_actual": 933156,
+              "raw_ser": 0.25574180522870776,
+              "delta_mode": 0,
+              "delta_mode_frac": 0.7442581947712923,
+              "near_neighbor_frac": 1.0,
+              "n_unique_a": 1024,
+              "n_unique_b": 1024,
+              "top_a_frac": 0.0010812768711769521,
+              "top_b_frac": 0.0010823485033584952,
+              "occupancy_filter_summary_path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_2M_20260121_183657\\occupancy_filter_summary.csv"
+            },
+            "symbolization_snapshot": {
+              "bin_width_ps": 200,
+              "dimension": 1024,
+              "block_symbols": 512,
+              "mapping": "",
+              "bit_order": "",
+              "ttbin_file": "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.ttbin",
+              "offset_ps": null,
+              "delay_ps": null,
+              "pairing_window_ps": null,
+              "coincidence_window_ps": null,
+              "scanfix_align": null,
+              "wrap_rule": "floor_div"
+            },
+            "source_fingerprints": {
+              "metrics_file": {
+                "path": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw200\\results\\attempt_0\\ttbin_parsing\\ttbin_metrics.json",
+                "size": 264009,
+                "mtime": 1786812251.2239604,
+                "sha256": "2c22c48c65f4408343e9f4bc81bd7fb56ecde2c28e1f64a5e5b1719f45f3ebc6"
+              }
+            },
+            "map_sanity": {
+              "map_ser": 0.25574180522870776,
+              "map_ber": 0.051013121064430816,
+              "verdict": "FAIL"
+            }
+          }
+        },
+        "status": {
+          "dimension": "PASS",
+          "dimension_value": 1024,
+          "bin_width_ps": "PASS",
+          "bin_width_ps_value": 200,
+          "pairing": "PASS",
+          "pairing_value": "nearest",
+          "processing_rule": "PASS",
+          "processing_rule_value": "legacy_v1",
+          "channels": "INCOMPLETE",
+          "delay_used_ps": "PASS",
+          "delay_used_ps_value": 50,
+          "peak_center_ps": "PASS",
+          "peak_center_ps_value": 50,
+          "peak_sigma_ps": "PASS",
+          "peak_sigma_ps_value": 103.11167313717462,
+          "corr_argmax": "PASS",
+          "corr_argmax_value": 8192,
+          "corr_bins": "PASS",
+          "corr_bins_value": 16384,
+          "corr_max": "PASS",
+          "corr_max_value": 33295.0,
+          "peak_to_bg": "PASS",
+          "peak_to_bg_value": 3699.4444444444443,
+          "peak_status": "PASS",
+          "peak_status_value": "ok",
+          "frame_start_ps": "INCOMPLETE",
+          "frame_anchor": "INCOMPLETE",
+          "mapping": "INCOMPLETE",
+          "wrap_rule": "INCOMPLETE",
+          "pairing_threshold_ps": "PASS",
+          "pairing_threshold_ps_value": 40000,
+          "gate_width_ps": "PASS",
+          "gate_width_ps_value": 200,
+          "occupancy_filter": "PASS",
+          "occupancy_filter_value": {
+            "dimension": 1024,
+            "bin_width_ps": 200,
+            "n_candidates_before": 982410,
+            "n_kept_after": 933156,
+            "n_dropped_occupancy": 240,
+            "drop_frac_occupancy": 0.00024429718752862857,
+            "n_dropped_multievent": 49014,
+            "drop_frac_multievent": 0.04989159312303417,
+            "filter_enabled": 1,
+            "frame_period_ps": 204800,
+            "pairing_mode": "nearest",
+            "threshold_ps": 200,
+            "frame_diag_available": 1,
+            "n_frames_total": 957951,
+            "n_frames_clean_single_single": 933120,
+            "n_frames_cross_frame": 444,
+            "n_frames_A_multi": 23,
+            "n_frames_B_multi": 13,
+            "n_frames_both_multi": 24351,
+            "n_pairs_in_clean_frames": 933120,
+            "n_pairs_in_ambiguous_frames": 49290
+          },
+          "frame_period_ps": "PASS",
+          "frame_period_ps_value": 204800
+        }
+      }
+    ],
+    "v55": [
+      {
+        "source": "1M",
+        "sid": "20260123_1M_600k_0dB",
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\v55_intake_20260828\\sidecars\\20260123_1M_600k_0dB\\sidecar_meta.json",
+        "fields": {
+          "dimension": 1024,
+          "bin_width_ps": 200,
+          "pairing": "nearest",
+          "processing_rule": "legacy_v1",
+          "channels": {
+            "A": 1,
+            "B": 5
+          },
+          "delay_used_ps": null,
+          "peak_center_ps": null,
+          "peak_sigma_ps": null,
+          "corr_argmax": null,
+          "corr_bins": null,
+          "corr_max": null,
+          "peak_to_bg": null,
+          "peak_status": null,
+          "frame_start_ps": null,
+          "frame_anchor": null,
+          "mapping": null,
+          "wrap_rule": null,
+          "pairing_threshold_ps": null,
+          "gate_width_ps": null,
+          "occupancy_filter": null,
+          "frame_period_ps": null,
+          "raw": {
+            "session_id": "20260123_1M_600k_0dB",
+            "stratum": "1M",
+            "label": "2026.1.23 1M 600k",
+            "date": "2026-01-23",
+            "provenance": [
+              {
+                "path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.ttbin",
+                "sha256": "ee79c5b8a26180ebaf4e18361cae4f7c3b44e7adcf8311ef9ed1e30e518aa780",
+                "size": 21264,
+                "mtime": 1769161534.1428883
+              },
+              {
+                "path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.1.ttbin",
+                "sha256": "d47832223f66234ef5dbd5f9d454e534934f1c424072f789257248eabe8d760a",
+                "size": 19698352,
+                "mtime": 1769161537.1728773
+              }
+            ],
+            "provenance_note": "main .ttbin + .1.ttbin same acquisition, FileReader auto-merge, recorded both",
+            "materialize_params": {
+              "dimension": 1024,
+              "bin_width_ps": 200,
+              "pairing": "nearest",
+              "processing_rule": "legacy_v1",
+              "channels": {
+                "A": 1,
+                "B": 5
+              },
+              "used_params": {
+                "dimension": 1024,
+                "bin_width_ps": 200,
+                "pairing_mode": "nearest",
+                "processing_rule_version": "legacy_v1"
+              }
+            },
+            "diagnostics": {
+              "n_pairs_raw": 545303,
+              "n_pairs_kept": 545280,
+              "n_frames": 2130,
+              "n_tail_dropped": 23,
+              "pairs_per_frame": 256,
+              "dropped_tail_pairs": 23
+            },
+            "checks": {
+              "structural_only": true,
+              "no_decoder": true,
+              "no_padding": true,
+              "no_resampling": true,
+              "no_cross_session": true
+            }
+          }
+        },
+        "status": {
+          "dimension": "PASS",
+          "dimension_value": 1024,
+          "bin_width_ps": "PASS",
+          "bin_width_ps_value": 200,
+          "pairing": "PASS",
+          "pairing_value": "nearest",
+          "processing_rule": "PASS",
+          "processing_rule_value": "legacy_v1",
+          "channels": "PASS",
+          "channels_value": {
+            "A": 1,
+            "B": 5
+          },
+          "delay_used_ps": "INCOMPLETE",
+          "peak_center_ps": "INCOMPLETE",
+          "peak_sigma_ps": "INCOMPLETE",
+          "corr_argmax": "INCOMPLETE",
+          "corr_bins": "INCOMPLETE",
+          "corr_max": "INCOMPLETE",
+          "peak_to_bg": "INCOMPLETE",
+          "peak_status": "INCOMPLETE",
+          "frame_start_ps": "INCOMPLETE",
+          "frame_anchor": "INCOMPLETE",
+          "mapping": "INCOMPLETE",
+          "wrap_rule": "INCOMPLETE",
+          "pairing_threshold_ps": "INCOMPLETE",
+          "gate_width_ps": "INCOMPLETE",
+          "occupancy_filter": "INCOMPLETE",
+          "frame_period_ps": "INCOMPLETE"
+        }
+      },
+      {
+        "source": "1p5M",
+        "sid": "20260107_PPLN_1p5M",
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\v55_intake_20260828\\sidecars\\20260107_PPLN_1p5M\\sidecar_meta.json",
+        "fields": {
+          "dimension": 1024,
+          "bin_width_ps": 200,
+          "pairing": "nearest",
+          "processing_rule": "legacy_v1",
+          "channels": {
+            "A": 1,
+            "B": 5
+          },
+          "delay_used_ps": null,
+          "peak_center_ps": null,
+          "peak_sigma_ps": null,
+          "corr_argmax": null,
+          "corr_bins": null,
+          "corr_max": null,
+          "peak_to_bg": null,
+          "peak_status": null,
+          "frame_start_ps": null,
+          "frame_anchor": null,
+          "mapping": null,
+          "wrap_rule": null,
+          "pairing_threshold_ps": null,
+          "gate_width_ps": null,
+          "occupancy_filter": null,
+          "frame_period_ps": null,
+          "raw": {
+            "session_id": "20260107_PPLN_1p5M",
+            "stratum": "1p5M",
+            "label": "2026.1.7 PPLN 1p5M",
+            "date": "2026-01-07",
+            "provenance": [
+              {
+                "path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.ttbin",
+                "sha256": "5e6fcb8f041ccc525d31a3ab74ed7c907c9e663c81ef3d3163095f1d54d3b800",
+                "size": 8640,
+                "mtime": 1767778942.9821193
+              },
+              {
+                "path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.1.ttbin",
+                "sha256": "576a299cf8859d3aa9ce330d8abd17449110a06d074bfef12e05b71e1b157591",
+                "size": 32530768,
+                "mtime": 1767778946.0162761
+              }
+            ],
+            "provenance_note": "main .ttbin + .1.ttbin same acquisition, FileReader auto-merge, recorded both",
+            "materialize_params": {
+              "dimension": 1024,
+              "bin_width_ps": 200,
+              "pairing": "nearest",
+              "processing_rule": "legacy_v1",
+              "channels": {
+                "A": 1,
+                "B": 5
+              },
+              "used_params": {
+                "dimension": 1024,
+                "bin_width_ps": 200,
+                "pairing_mode": "nearest",
+                "processing_rule_version": "legacy_v1"
+              }
+            },
+            "diagnostics": {
+              "n_pairs_raw": 1312028,
+              "n_pairs_kept": 1312000,
+              "n_frames": 5125,
+              "n_tail_dropped": 28,
+              "pairs_per_frame": 256,
+              "dropped_tail_pairs": 28
+            },
+            "checks": {
+              "structural_only": true,
+              "no_decoder": true,
+              "no_padding": true,
+              "no_resampling": true,
+              "no_cross_session": true
+            }
+          }
+        },
+        "status": {
+          "dimension": "PASS",
+          "dimension_value": 1024,
+          "bin_width_ps": "PASS",
+          "bin_width_ps_value": 200,
+          "pairing": "PASS",
+          "pairing_value": "nearest",
+          "processing_rule": "PASS",
+          "processing_rule_value": "legacy_v1",
+          "channels": "PASS",
+          "channels_value": {
+            "A": 1,
+            "B": 5
+          },
+          "delay_used_ps": "INCOMPLETE",
+          "peak_center_ps": "INCOMPLETE",
+          "peak_sigma_ps": "INCOMPLETE",
+          "corr_argmax": "INCOMPLETE",
+          "corr_bins": "INCOMPLETE",
+          "corr_max": "INCOMPLETE",
+          "peak_to_bg": "INCOMPLETE",
+          "peak_status": "INCOMPLETE",
+          "frame_start_ps": "INCOMPLETE",
+          "frame_anchor": "INCOMPLETE",
+          "mapping": "INCOMPLETE",
+          "wrap_rule": "INCOMPLETE",
+          "pairing_threshold_ps": "INCOMPLETE",
+          "gate_width_ps": "INCOMPLETE",
+          "occupancy_filter": "INCOMPLETE",
+          "frame_period_ps": "INCOMPLETE"
+        }
+      },
+      {
+        "source": "2M",
+        "sid": "20260123_2M_1p2M_0dB",
+        "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\v55_intake_20260828\\sidecars\\20260123_2M_1p2M_0dB\\sidecar_meta.json",
+        "fields": {
+          "dimension": 1024,
+          "bin_width_ps": 200,
+          "pairing": "nearest",
+          "processing_rule": "legacy_v1",
+          "channels": {
+            "A": 1,
+            "B": 5
+          },
+          "delay_used_ps": null,
+          "peak_center_ps": null,
+          "peak_sigma_ps": null,
+          "corr_argmax": null,
+          "corr_bins": null,
+          "corr_max": null,
+          "peak_to_bg": null,
+          "peak_status": null,
+          "frame_start_ps": null,
+          "frame_anchor": null,
+          "mapping": null,
+          "wrap_rule": null,
+          "pairing_threshold_ps": null,
+          "gate_width_ps": null,
+          "occupancy_filter": null,
+          "frame_period_ps": null,
+          "raw": {
+            "session_id": "20260123_2M_1p2M_0dB",
+            "stratum": "2M",
+            "label": "2026.1.23 2M 1.2M",
+            "date": "2026-01-23",
+            "provenance": [
+              {
+                "path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.ttbin",
+                "sha256": "e8c6f67b2e129c6109f45326b3c7cc207a6a7d0a3f3419b6074ca811ef2f669b",
+                "size": 21264,
+                "mtime": 1769161808.6574023
+              },
+              {
+                "path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.1.ttbin",
+                "sha256": "e00796306c9d2615dfaeb3d6fad0ad4c6c5dd8b335da77af2c84494a63cf54ae",
+                "size": 37376992,
+                "mtime": 1769161811.6868136
+              }
+            ],
+            "provenance_note": "main .ttbin + .1.ttbin same acquisition, FileReader auto-merge, recorded both",
+            "materialize_params": {
+              "dimension": 1024,
+              "bin_width_ps": 200,
+              "pairing": "nearest",
+              "processing_rule": "legacy_v1",
+              "channels": {
+                "A": 1,
+                "B": 5
+              },
+              "used_params": {
+                "dimension": 1024,
+                "bin_width_ps": 200,
+                "pairing_mode": "nearest",
+                "processing_rule_version": "legacy_v1"
+              }
+            },
+            "diagnostics": {
+              "n_pairs_raw": 1411434,
+              "n_pairs_kept": 1411328,
+              "n_frames": 5513,
+              "n_tail_dropped": 106,
+              "pairs_per_frame": 256,
+              "dropped_tail_pairs": 106
+            },
+            "checks": {
+              "structural_only": true,
+              "no_decoder": true,
+              "no_padding": true,
+              "no_resampling": true,
+              "no_cross_session": true
+            }
+          }
+        },
+        "status": {
+          "dimension": "PASS",
+          "dimension_value": 1024,
+          "bin_width_ps": "PASS",
+          "bin_width_ps_value": 200,
+          "pairing": "PASS",
+          "pairing_value": "nearest",
+          "processing_rule": "PASS",
+          "processing_rule_value": "legacy_v1",
+          "channels": "PASS",
+          "channels_value": {
+            "A": 1,
+            "B": 5
+          },
+          "delay_used_ps": "INCOMPLETE",
+          "peak_center_ps": "INCOMPLETE",
+          "peak_sigma_ps": "INCOMPLETE",
+          "corr_argmax": "INCOMPLETE",
+          "corr_bins": "INCOMPLETE",
+          "corr_max": "INCOMPLETE",
+          "peak_to_bg": "INCOMPLETE",
+          "peak_status": "INCOMPLETE",
+          "frame_start_ps": "INCOMPLETE",
+          "frame_anchor": "INCOMPLETE",
+          "mapping": "INCOMPLETE",
+          "wrap_rule": "INCOMPLETE",
+          "pairing_threshold_ps": "INCOMPLETE",
+          "gate_width_ps": "INCOMPLETE",
+          "occupancy_filter": "INCOMPLETE",
+          "frame_period_ps": "INCOMPLETE"
+        }
+      }
+    ],
+    "build_manifest_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\build_manifest.json",
+    "build_manifest": {
+      "schema": "nbldpc_v13r3_fresh_pairs_build_manifest_v1",
+      "run_id": "v13r3fresh_pairs_20260816",
+      "created_at": "2026-08-15T16:44:41.017446+00:00",
+      "release_head": "581cd0547855bfa91cff544095f9f12836e58b7c",
+      "comparison_head": "e31dedfaecc8fe4e526b321065b534a5c2518762",
+      "processing": {
+        "point": "1024,200",
+        "factor": 1,
+        "block_index": 0,
+        "pairing_mode": "nearest",
+        "processing_rule_version": "legacy_v1",
+        "occupancy_filter": 1,
+        "joint_source_mode": "from_ttbin",
+        "sequence_source_mode": "strict"
+      },
+      "sources": [
+        {
+          "source_tag": "type2_1p5M_20260121_183806",
+          "main_ttbin": {
+            "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.ttbin",
+            "size": 21264,
+            "sha256": "b3d308c3faa2da3c5a9efae27f9f9ba694566a689154ff3ba846c33a88dc8e5d"
+          },
+          "chunk_ttbin": {
+            "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1-5M_3s_2026-01-21_183806\\Type2_1-5M_3s_2026-01-21_183806.1.ttbin",
+            "size": 31014064,
+            "sha256": "d040a1a24ceab863175c6eca8f2e842fc2682cbb320fcb7358d36e3726d21410"
+          },
+          "sidecar_meta": {
+            "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1p5M_20260121_183806\\sidecar_meta.json",
+            "size": 6874,
+            "sha256": "532d08ffc19577f075dc2667ace5d8dfa269735078fe2029af24068d546ea695"
+          },
+          "pairs_parquet": {
+            "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_1p5M_20260121_183806\\pairs.parquet",
+            "size": 1869178,
+            "sha256": "ca351e5205e76600530121066af4e0e1e5278061745c0797368a49443570a06b"
+          }
+        },
+        {
+          "source_tag": "type2_1M_20260121_184040",
+          "main_ttbin": {
+            "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.ttbin",
+            "size": 21264,
+            "sha256": "505fcadb17587336b034e63298201466892e8862f330f163adbe4067ff0885f1"
+          },
+          "chunk_ttbin": {
+            "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_1M_3s_2026-01-21_184040\\Type2_1M_3s_2026-01-21_184040.1.ttbin",
+            "size": 22025840,
+            "sha256": "4282d95d1c07d3a9211cfeff9c15fcee300bef79d893a5a0cdda6205823eb04b"
+          },
+          "sidecar_meta": {
+            "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_1M_20260121_184040\\sidecar_meta.json",
+            "size": 6863,
+            "sha256": "59a24ccf58883b9470064962ee594d0c56db2929b8f6948ed3c4b99ca21b6f49"
+          },
+          "pairs_parquet": {
+            "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_1M_20260121_184040\\pairs.parquet",
+            "size": 1354289,
+            "sha256": "1b89728751bc3535ea5917fccb581ee446f411ba0cf38c6b3f1a23fd9081af93"
+          }
+        },
+        {
+          "source_tag": "type2_2M_20260121_183657",
+          "main_ttbin": {
+            "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.ttbin",
+            "size": 21264,
+            "sha256": "099259fbe79b70e116ac1fce1f39341e5896c97485f53d4a6c37937fa0395af7"
+          },
+          "chunk_ttbin": {
+            "path": "D:\\Data\\Raw Data\\2026.1.21\\Type2_2M_3s_2026-01-21_183657\\Type2_2M_3s_2026-01-21_183657.1.ttbin",
+            "size": 41768912,
+            "sha256": "b40b9b4f4b1661cd3ee6b7f75b99db056ae247d8d9c5a26da12eb96f414a3c94"
+          },
+          "sidecar_meta": {
+            "path": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v13r3fresh_20260816\\sidecars\\type2_2M_20260121_183657\\sidecar_meta.json",
+            "size": 6878,
+            "sha256": "4dd6f3b414429eb622244d1e3d497031e009d79f122bf4517394765abbf3a8fd"
+          },
+          "pairs_parquet": {
+            "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\v13r3fresh_pairs_20260816\\type2_2M_20260121_183657\\pairs.parquet",
+            "size": 2458335,
+            "sha256": "d5a36eec8a03ce7e801bba4fd4b2e62cf8aef13c1efe1166766db79364ffc307"
+          }
+        }
+      ]
+    }
+  },
+  "per_source": {
+    "1M": {
+      "ttbin_paths": [
+        "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.ttbin",
+        "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.1.ttbin"
+      ],
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1001
+        ],
+        "hist": {
+          "1": 3013420,
+          "5": 1886312,
+          "1001": 266728
+        },
+        "count_A": 3013420,
+        "count_B": 1886312,
+        "other": 266728,
+        "total_events": 5166460,
+        "frac_A": 0.5832659112816125,
+        "frac_B": 0.3651072494512684,
+        "frac_other": 0.05162683926711907,
+        "chan_A": 1,
+        "chan_B": 5,
+        "acquisition_duration_s": 2.999999852046,
+        "timetag_min_ps": 514398187428898,
+        "timetag_max_ps": 517398187280944,
+        "ttbin_merge": {
+          "main_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.ttbin",
+          "chunk_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.1.ttbin",
+          "main_size": 21264,
+          "chunk_size": 19698352,
+          "chunk_exists": true,
+          "total_events_after_load": 5166460,
+          "acquisition_duration_s": 2.999999852046,
+          "merge_verified": true,
+          "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+        }
+      },
+      "peak": {
+        "peak_idx": 8191,
+        "peak_center_ps": -50.0,
+        "peak_count": 133926,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 189.0,
+        "peak_to_bg": 708.6031746031746,
+        "delay_sign": -1,
+        "n_bins": 16384,
+        "bin_width_ps": 100,
+        "max_lag_ps": 819200,
+        "lag_convention": "t_B_minus_t_A"
+      },
+      "error": null,
+      "full": {
+        "channel": {
+          "unique_channels": [
+            1,
+            5,
+            1001
+          ],
+          "hist": {
+            "1": 3013420,
+            "5": 1886312,
+            "1001": 266728
+          },
+          "count_A": 3013420,
+          "count_B": 1886312,
+          "other": 266728,
+          "total_events": 5166460,
+          "frac_A": 0.5832659112816125,
+          "frac_B": 0.3651072494512684,
+          "frac_other": 0.05162683926711907,
+          "chan_A": 1,
+          "chan_B": 5,
+          "acquisition_duration_s": 2.999999852046,
+          "timetag_min_ps": 514398187428898,
+          "timetag_max_ps": 517398187280944,
+          "ttbin_merge": {
+            "main_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.ttbin",
+            "chunk_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.1.ttbin",
+            "main_size": 21264,
+            "chunk_size": 19698352,
+            "chunk_exists": true,
+            "total_events_after_load": 5166460,
+            "acquisition_duration_s": 2.999999852046,
+            "merge_verified": true,
+            "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+          }
+        },
+        "corr": {
+          "counts": [
+            160,
+            209,
+            212,
+            205,
+            182
+          ],
+          "counts_len": 16384,
+          "summary": {
+            "channel_A": 1,
+            "channel_B": 5,
+            "bin_width_ps": 100,
+            "max_lag_ps": 819200,
+            "lag_convention": "t_B_minus_t_A",
+            "count_A": 3013420,
+            "count_B": 1886312,
+            "total_pairs_in_window": 3357911,
+            "acquisition_duration_s": 2.999999852046,
+            "time_tag_only": true
+          }
+        },
+        "peak": {
+          "peak_idx": 8191,
+          "peak_center_ps": -50.0,
+          "peak_count": 133926,
+          "fwhm_ps": 300.0,
+          "sigma_ps": 127.38853503184714,
+          "bg_median": 189.0,
+          "peak_to_bg": 708.6031746031746,
+          "delay_sign": -1,
+          "n_bins": 16384,
+          "bin_width_ps": 100,
+          "max_lag_ps": 819200,
+          "lag_convention": "t_B_minus_t_A"
+        },
+        "full_summary": {
+          "channel_A": 1,
+          "channel_B": 5,
+          "bin_width_ps": 100,
+          "max_lag_ps": 819200,
+          "lag_convention": "t_B_minus_t_A",
+          "count_A": 3013420,
+          "count_B": 1886312,
+          "total_pairs_in_window": 3357911,
+          "acquisition_duration_s": 2.999999852046,
+          "time_tag_only": true
+        }
+      }
+    },
+    "1p5M": {
+      "ttbin_paths": [
+        "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.ttbin",
+        "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.1.ttbin"
+      ],
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1002
+        ],
+        "hist": {
+          "1": 4527332,
+          "5": 3615039,
+          "1002": 616882
+        },
+        "count_A": 4527332,
+        "count_B": 3615039,
+        "other": 616882,
+        "total_events": 8759253,
+        "frac_A": 0.5168627964051272,
+        "frac_B": 0.41271087842764675,
+        "frac_other": 0.07042632516722602,
+        "chan_A": 1,
+        "chan_B": 5,
+        "acquisition_duration_s": 2.999999561983,
+        "timetag_min_ps": 6942769211646894,
+        "timetag_max_ps": 6945769211208877,
+        "ttbin_merge": {
+          "main_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.ttbin",
+          "chunk_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.1.ttbin",
+          "main_size": 8640,
+          "chunk_size": 32530768,
+          "chunk_exists": true,
+          "total_events_after_load": 8759253,
+          "acquisition_duration_s": 2.999999561983,
+          "merge_verified": true,
+          "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+        }
+      },
+      "peak": {
+        "peak_idx": 8192,
+        "peak_center_ps": 50.0,
+        "peak_count": 342378,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 544.0,
+        "peak_to_bg": 629.3713235294117,
+        "delay_sign": 1,
+        "n_bins": 16384,
+        "bin_width_ps": 100,
+        "max_lag_ps": 819200,
+        "lag_convention": "t_B_minus_t_A"
+      },
+      "error": null,
+      "full": {
+        "channel": {
+          "unique_channels": [
+            1,
+            5,
+            1002
+          ],
+          "hist": {
+            "1": 4527332,
+            "5": 3615039,
+            "1002": 616882
+          },
+          "count_A": 4527332,
+          "count_B": 3615039,
+          "other": 616882,
+          "total_events": 8759253,
+          "frac_A": 0.5168627964051272,
+          "frac_B": 0.41271087842764675,
+          "frac_other": 0.07042632516722602,
+          "chan_A": 1,
+          "chan_B": 5,
+          "acquisition_duration_s": 2.999999561983,
+          "timetag_min_ps": 6942769211646894,
+          "timetag_max_ps": 6945769211208877,
+          "ttbin_merge": {
+            "main_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.ttbin",
+            "chunk_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.1.ttbin",
+            "main_size": 8640,
+            "chunk_size": 32530768,
+            "chunk_exists": true,
+            "total_events_after_load": 8759253,
+            "acquisition_duration_s": 2.999999561983,
+            "merge_verified": true,
+            "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+          }
+        },
+        "corr": {
+          "counts": [
+            571,
+            534,
+            570,
+            567,
+            570
+          ],
+          "counts_len": 16384,
+          "summary": {
+            "channel_A": 1,
+            "channel_B": 5,
+            "bin_width_ps": 100,
+            "max_lag_ps": 819200,
+            "lag_convention": "t_B_minus_t_A",
+            "count_A": 4527332,
+            "count_B": 3615039,
+            "total_pairs_in_window": 9514599,
+            "acquisition_duration_s": 2.999999561983,
+            "time_tag_only": true
+          }
+        },
+        "peak": {
+          "peak_idx": 8192,
+          "peak_center_ps": 50.0,
+          "peak_count": 342378,
+          "fwhm_ps": 300.0,
+          "sigma_ps": 127.38853503184714,
+          "bg_median": 544.0,
+          "peak_to_bg": 629.3713235294117,
+          "delay_sign": 1,
+          "n_bins": 16384,
+          "bin_width_ps": 100,
+          "max_lag_ps": 819200,
+          "lag_convention": "t_B_minus_t_A"
+        },
+        "full_summary": {
+          "channel_A": 1,
+          "channel_B": 5,
+          "bin_width_ps": 100,
+          "max_lag_ps": 819200,
+          "lag_convention": "t_B_minus_t_A",
+          "count_A": 4527332,
+          "count_B": 3615039,
+          "total_pairs_in_window": 9514599,
+          "acquisition_duration_s": 2.999999561983,
+          "time_tag_only": true
+        }
+      }
+    },
+    "2M": {
+      "ttbin_paths": [
+        "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.ttbin",
+        "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.1.ttbin"
+      ],
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1001
+        ],
+        "hist": {
+          "1": 5737278,
+          "5": 3569280,
+          "1001": 503506
+        },
+        "count_A": 5737278,
+        "count_B": 3569280,
+        "other": 503506,
+        "total_events": 9810064,
+        "frac_A": 0.5848359399082411,
+        "frac_B": 0.3638386049265326,
+        "frac_other": 0.05132545516522624,
+        "chan_A": 1,
+        "chan_B": 5,
+        "acquisition_duration_s": 2.999999625449,
+        "timetag_min_ps": 788915464505478,
+        "timetag_max_ps": 791915464130927,
+        "ttbin_merge": {
+          "main_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.ttbin",
+          "chunk_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.1.ttbin",
+          "main_size": 21264,
+          "chunk_size": 37376992,
+          "chunk_exists": true,
+          "total_events_after_load": 9810064,
+          "acquisition_duration_s": 2.999999625449,
+          "merge_verified": true,
+          "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+        }
+      },
+      "peak": {
+        "peak_idx": 8191,
+        "peak_center_ps": -50.0,
+        "peak_count": 258375,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 682.0,
+        "peak_to_bg": 378.84897360703815,
+        "delay_sign": -1,
+        "n_bins": 16384,
+        "bin_width_ps": 100,
+        "max_lag_ps": 819200,
+        "lag_convention": "t_B_minus_t_A"
+      },
+      "error": null,
+      "full": {
+        "channel": {
+          "unique_channels": [
+            1,
+            5,
+            1001
+          ],
+          "hist": {
+            "1": 5737278,
+            "5": 3569280,
+            "1001": 503506
+          },
+          "count_A": 5737278,
+          "count_B": 3569280,
+          "other": 503506,
+          "total_events": 9810064,
+          "frac_A": 0.5848359399082411,
+          "frac_B": 0.3638386049265326,
+          "frac_other": 0.05132545516522624,
+          "chan_A": 1,
+          "chan_B": 5,
+          "acquisition_duration_s": 2.999999625449,
+          "timetag_min_ps": 788915464505478,
+          "timetag_max_ps": 791915464130927,
+          "ttbin_merge": {
+            "main_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.ttbin",
+            "chunk_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.1.ttbin",
+            "main_size": 21264,
+            "chunk_size": 37376992,
+            "chunk_exists": true,
+            "total_events_after_load": 9810064,
+            "acquisition_duration_s": 2.999999625449,
+            "merge_verified": true,
+            "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+          }
+        },
+        "corr": {
+          "counts": [
+            652,
+            694,
+            707,
+            669,
+            749
+          ],
+          "counts_len": 16384,
+          "summary": {
+            "channel_A": 1,
+            "channel_B": 5,
+            "bin_width_ps": 100,
+            "max_lag_ps": 819200,
+            "lag_convention": "t_B_minus_t_A",
+            "count_A": 5737278,
+            "count_B": 3569280,
+            "total_pairs_in_window": 11649611,
+            "acquisition_duration_s": 2.999999625449,
+            "time_tag_only": true
+          }
+        },
+        "peak": {
+          "peak_idx": 8191,
+          "peak_center_ps": -50.0,
+          "peak_count": 258375,
+          "fwhm_ps": 300.0,
+          "sigma_ps": 127.38853503184714,
+          "bg_median": 682.0,
+          "peak_to_bg": 378.84897360703815,
+          "delay_sign": -1,
+          "n_bins": 16384,
+          "bin_width_ps": 100,
+          "max_lag_ps": 819200,
+          "lag_convention": "t_B_minus_t_A"
+        },
+        "full_summary": {
+          "channel_A": 1,
+          "channel_B": 5,
+          "bin_width_ps": 100,
+          "max_lag_ps": 819200,
+          "lag_convention": "t_B_minus_t_A",
+          "count_A": 5737278,
+          "count_B": 3569280,
+          "total_pairs_in_window": 11649611,
+          "acquisition_duration_s": 2.999999625449,
+          "time_tag_only": true
+        }
+      }
+    }
+  },
+  "shunt_evidence": {
+    "1M": {
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1001
+        ],
+        "hist": {
+          "1": 3013420,
+          "5": 1886312,
+          "1001": 266728
+        },
+        "count_A": 3013420,
+        "count_B": 1886312,
+        "other": 266728,
+        "total_events": 5166460,
+        "frac_A": 0.5832659112816125,
+        "frac_B": 0.3651072494512684,
+        "frac_other": 0.05162683926711907,
+        "chan_A": 1,
+        "chan_B": 5,
+        "acquisition_duration_s": 2.999999852046,
+        "timetag_min_ps": 514398187428898,
+        "timetag_max_ps": 517398187280944,
+        "ttbin_merge": {
+          "main_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.ttbin",
+          "chunk_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.1.ttbin",
+          "main_size": 21264,
+          "chunk_size": 19698352,
+          "chunk_exists": true,
+          "total_events_after_load": 5166460,
+          "acquisition_duration_s": 2.999999852046,
+          "merge_verified": true,
+          "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+        }
+      },
+      "peak": {
+        "peak_idx": 8191,
+        "peak_center_ps": -50.0,
+        "peak_count": 133926,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 189.0,
+        "peak_to_bg": 708.6031746031746,
+        "delay_sign": -1,
+        "n_bins": 16384,
+        "bin_width_ps": 100,
+        "max_lag_ps": 819200,
+        "lag_convention": "t_B_minus_t_A"
+      },
+      "contract_status": {
+        "delay_used_ps": "INCOMPLETE",
+        "peak_center_ps": "INCOMPLETE",
+        "peak_sigma_ps": "INCOMPLETE",
+        "corr_argmax": "INCOMPLETE",
+        "peak_to_bg": "INCOMPLETE",
+        "pairing_threshold_ps": "INCOMPLETE",
+        "gate_width_ps": "INCOMPLETE",
+        "frame_start_ps": "INCOMPLETE",
+        "mapping": "INCOMPLETE"
+      },
+      "parquet_rate": 0.4149299442488263,
+      "explicit_reasons": [
+        "channel_mismatch frac_A 0.583 frac_B 0.365 <0.40"
+      ],
+      "healthy": false,
+      "timing_contract_verified": false,
+      "timing_contract_reasons": [
+        "delay_used or peak unavailable -> timing_contract INCOMPLETE"
+      ],
+      "delay_declared_ps": null,
+      "thr_declared_ps": null,
+      "ttbin_merge": {
+        "main_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.ttbin",
+        "chunk_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.1.ttbin",
+        "main_size": 21264,
+        "chunk_size": 19698352,
+        "chunk_exists": true,
+        "total_events_after_load": 5166460,
+        "acquisition_duration_s": 2.999999852046,
+        "merge_verified": true,
+        "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+      },
+      "ttbin_merge_verified": true,
+      "per_source_decision": "PATH_A2_RAW_CONTRACT_ERROR",
+      "per_source_rationale": "channel_mismatch frac_A 0.583 frac_B 0.365 <0.40",
+      "corr_error": null,
+      "note": "lag = t_B - t_A, bin 100ps max_lag 819200 n_bins 16384; timing_contract_verified separate from peak healthy; A2 not excluded unless verified; 0-overlap calibration required if A2"
+    },
+    "1p5M": {
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1002
+        ],
+        "hist": {
+          "1": 4527332,
+          "5": 3615039,
+          "1002": 616882
+        },
+        "count_A": 4527332,
+        "count_B": 3615039,
+        "other": 616882,
+        "total_events": 8759253,
+        "frac_A": 0.5168627964051272,
+        "frac_B": 0.41271087842764675,
+        "frac_other": 0.07042632516722602,
+        "chan_A": 1,
+        "chan_B": 5,
+        "acquisition_duration_s": 2.999999561983,
+        "timetag_min_ps": 6942769211646894,
+        "timetag_max_ps": 6945769211208877,
+        "ttbin_merge": {
+          "main_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.ttbin",
+          "chunk_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.1.ttbin",
+          "main_size": 8640,
+          "chunk_size": 32530768,
+          "chunk_exists": true,
+          "total_events_after_load": 8759253,
+          "acquisition_duration_s": 2.999999561983,
+          "merge_verified": true,
+          "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+        }
+      },
+      "peak": {
+        "peak_idx": 8192,
+        "peak_center_ps": 50.0,
+        "peak_count": 342378,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 544.0,
+        "peak_to_bg": 629.3713235294117,
+        "delay_sign": 1,
+        "n_bins": 16384,
+        "bin_width_ps": 100,
+        "max_lag_ps": 819200,
+        "lag_convention": "t_B_minus_t_A"
+      },
+      "contract_status": {
+        "delay_used_ps": "INCOMPLETE",
+        "peak_center_ps": "INCOMPLETE",
+        "peak_sigma_ps": "INCOMPLETE",
+        "corr_argmax": "INCOMPLETE",
+        "peak_to_bg": "INCOMPLETE",
+        "pairing_threshold_ps": "INCOMPLETE",
+        "gate_width_ps": "INCOMPLETE",
+        "frame_start_ps": "INCOMPLETE",
+        "mapping": "INCOMPLETE"
+      },
+      "parquet_rate": 0.3754878048780488,
+      "explicit_reasons": [],
+      "healthy": false,
+      "timing_contract_verified": false,
+      "timing_contract_reasons": [
+        "delay_used or peak unavailable -> timing_contract INCOMPLETE"
+      ],
+      "delay_declared_ps": null,
+      "thr_declared_ps": null,
+      "ttbin_merge": {
+        "main_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.ttbin",
+        "chunk_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.1.ttbin",
+        "main_size": 8640,
+        "chunk_size": 32530768,
+        "chunk_exists": true,
+        "total_events_after_load": 8759253,
+        "acquisition_duration_s": 2.999999561983,
+        "merge_verified": true,
+        "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+      },
+      "ttbin_merge_verified": true,
+      "per_source_decision": "INCONCLUSIVE_METADATA_INCOMPLETE",
+      "per_source_rationale": "raw peak incomplete or unhealthy but not explicit error; missing ['delay_used_ps', 'peak_center_ps', 'peak_sigma_ps', 'corr_argmax', 'peak_to_bg', 'pairing_threshold_ps', 'gate_width_ps', 'frame_start_ps', 'mapping'] without sufficient error evidence",
+      "corr_error": null,
+      "note": "lag = t_B - t_A, bin 100ps max_lag 819200 n_bins 16384; timing_contract_verified separate from peak healthy; A2 not excluded unless verified; 0-overlap calibration required if A2"
+    },
+    "2M": {
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1001
+        ],
+        "hist": {
+          "1": 5737278,
+          "5": 3569280,
+          "1001": 503506
+        },
+        "count_A": 5737278,
+        "count_B": 3569280,
+        "other": 503506,
+        "total_events": 9810064,
+        "frac_A": 0.5848359399082411,
+        "frac_B": 0.3638386049265326,
+        "frac_other": 0.05132545516522624,
+        "chan_A": 1,
+        "chan_B": 5,
+        "acquisition_duration_s": 2.999999625449,
+        "timetag_min_ps": 788915464505478,
+        "timetag_max_ps": 791915464130927,
+        "ttbin_merge": {
+          "main_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.ttbin",
+          "chunk_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.1.ttbin",
+          "main_size": 21264,
+          "chunk_size": 37376992,
+          "chunk_exists": true,
+          "total_events_after_load": 9810064,
+          "acquisition_duration_s": 2.999999625449,
+          "merge_verified": true,
+          "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+        }
+      },
+      "peak": {
+        "peak_idx": 8191,
+        "peak_center_ps": -50.0,
+        "peak_count": 258375,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 682.0,
+        "peak_to_bg": 378.84897360703815,
+        "delay_sign": -1,
+        "n_bins": 16384,
+        "bin_width_ps": 100,
+        "max_lag_ps": 819200,
+        "lag_convention": "t_B_minus_t_A"
+      },
+      "contract_status": {
+        "delay_used_ps": "INCOMPLETE",
+        "peak_center_ps": "INCOMPLETE",
+        "peak_sigma_ps": "INCOMPLETE",
+        "corr_argmax": "INCOMPLETE",
+        "peak_to_bg": "INCOMPLETE",
+        "pairing_threshold_ps": "INCOMPLETE",
+        "gate_width_ps": "INCOMPLETE",
+        "frame_start_ps": "INCOMPLETE",
+        "mapping": "INCOMPLETE"
+      },
+      "parquet_rate": 0.2748666504171957,
+      "explicit_reasons": [
+        "channel_mismatch frac_A 0.585 frac_B 0.364 <0.40"
+      ],
+      "healthy": false,
+      "timing_contract_verified": false,
+      "timing_contract_reasons": [
+        "delay_used or peak unavailable -> timing_contract INCOMPLETE"
+      ],
+      "delay_declared_ps": null,
+      "thr_declared_ps": null,
+      "ttbin_merge": {
+        "main_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.ttbin",
+        "chunk_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.1.ttbin",
+        "main_size": 21264,
+        "chunk_size": 37376992,
+        "chunk_exists": true,
+        "total_events_after_load": 9810064,
+        "acquisition_duration_s": 2.999999625449,
+        "merge_verified": true,
+        "note": "FileReader auto-merge .1.ttbin when reading main; merge_verified requires chunk_exists and total_events>50000; compare with intake sidecar diagnostics counts"
+      },
+      "ttbin_merge_verified": true,
+      "per_source_decision": "PATH_A2_RAW_CONTRACT_ERROR",
+      "per_source_rationale": "channel_mismatch frac_A 0.585 frac_B 0.364 <0.40",
+      "corr_error": null,
+      "note": "lag = t_B - t_A, bin 100ps max_lag 819200 n_bins 16384; timing_contract_verified separate from peak healthy; A2 not excluded unless verified; 0-overlap calibration required if A2"
+    }
+  },
+  "per_source_decisions": {
+    "1M": "PATH_A2_RAW_CONTRACT_ERROR",
+    "1p5M": "INCONCLUSIVE_METADATA_INCOMPLETE",
+    "2M": "PATH_A2_RAW_CONTRACT_ERROR"
+  },
+  "overall_shunt": "MIXED_BY_SOURCE",
+  "rationale": "per-source decisions differ: {'1M': 'PATH_A2_RAW_CONTRACT_ERROR', '1p5M': 'INCONCLUSIVE_METADATA_INCOMPLETE', '2M': 'PATH_A2_RAW_CONTRACT_ERROR'} -> MIXED_BY_SOURCE",
+  "next_step": "handle per-source: A2 sources fix contract, B sources re-estimate entropy; calibrate independently with 0 overlap",
+  "avg_rate_v55_parquet": 0.3550947998480236,
+  "parquet_rates": {
+    "1M": 0.4149299442488263,
+    "1p5M": 0.3754878048780488,
+    "2M": 0.2748666504171957
+  },
+  "corr_params": {
+    "bin_width_ps": 100,
+    "max_lag_ps": 819200,
+    "n_bins": 16384,
+    "lag_convention": "t_B_minus_t_A",
+    "channels": {
+      "A": 1,
+      "B": 5
+    }
+  },
+  "domain_split": "A2=raw TTBin delay/peak/pairing contract (needs actual raw evidence), B=physical domain shift after excluding A2, A1 already excluded by V56D0 k*=0",
+  "forbidden": [
+    "DO NOT rerun corrected pipeline on original 90 blocks (already unblinded)",
+    "DO NOT tune H1/Lane C/Δ8/decoder 90/1.0",
+    "DO NOT claim LDPC falsification",
+    "MUST use independent calibration frames (0 overlap with 90) before freezing new blocks",
+    "Missing metadata alone -> INCONCLUSIVE, not auto Path A2",
+    "Zero decoder, zero code params"
+  ],
+  "notes": "decoder-free only; lag=t_B-t_A; peak width σ≈FWHM/2.355; p2bg=peak/bg_median; healthy p2bg>1000 σ 50-150ps; V56D0 A1 excluded k*=0"
+}

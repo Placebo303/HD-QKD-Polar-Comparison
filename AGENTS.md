@@ -19,6 +19,7 @@ These rules apply to all agents operating in this repository.
   caused a crosstalk incident (research content swept into the shared
   mainline, 2026-08-12..22). Keep research commits on this `main`; never
   sweep them into the sibling's branch again.
+- **All research work in this checkout declares exactly one track, `EXPLORE` or `DECIDE`, before execution (§1.2); the two-tier policy is the repository-wide workflow default.**
 
 ---
 
@@ -48,6 +49,65 @@ These rules apply to all agents operating in this repository.
   the smallest testable algorithm, measure it, and then decide the next method.
   Do not let research turns become packaging or adversarial-verifier projects.
 
+### 1.2 Research Tracks: EXPLORE vs DECIDE (repository-wide default)
+
+- Every new research task, packet, OpenSpec change, experiment and result
+  declares exactly one track before execution. `EXPLORE_HEAVY` is an EXPLORE
+  cost annotation, not a third lifecycle.
+- **EXPLORE eligibility (all five)**: synthetic or already-approved
+  non-sensitive development input; fresh additive `workspace/` root or no-write
+  probe; bounded and reversible; no FER/SKR/qualification/promotion/publication
+  claim; no destructive overwrite or new user-facing external action.
+- **DECIDE eligibility (any)**: frozen route/life-death gate; real/private/raw
+  data; expensive, formal, irreversible or claim-bearing execution; result
+  intended for report, publication, qualification or promotion. Real data,
+  formal qualification, route-closing decisions and publication claims are
+  always DECIDE.
+- **EXPLORE contract**: one packet+prompt pair (preregistration + authorization
+  boundary); one result root or no-write transcript; one append-only
+  `EXPLORATION_LOG.md` (or equivalent) carrying attempts, the preregistered
+  engineering correction, final evidence and the batch-end review; one
+  authorization covers the frozen conditional arm sequence; the operator
+  continues between arms while the preceding machine gate permits; at most one
+  preregistered repair+rerun with unchanged scientific inputs, seeds,
+  thresholds, data roles and tested hypothesis, failed attempt retained in the
+  same log; no per-arm authorization/return/failure-verification/repair-review/
+  rerun-review files; multi-graph/multi-seed default when variability could
+  confound.
+- **DECIDE contract**: accepted preregistration; Pre-EXECUTE with exact command,
+  budget, output absence and explicit user authorization; one execution/result
+  record; independent Pre-RESULT; main-thread acceptance. A compact
+  three-document form (`PREREG_AND_AUTH.md`, `RESULT.md`,
+  `INDEPENDENT_ACCEPTANCE.md`) plus machine artifacts is permitted; one
+  append-only record may replace per-state documents when unambiguous.
+- **Escalation**: EXPLORE must escalate to DECIDE before continuing on real
+  data, route-closing thresholds, publication claims, destructive output,
+  materially higher cost, or a change to scientific inputs/hypothesis.
+  Uncertainty defaults to DECIDE only when the concrete risk is named; calling a
+  decoder alone does not force DECIDE.
+- **Precedence**: the policy is repository-wide for every future route;
+  historical cycles unchanged; active work inherits at its next safe boundary;
+  old unexecuted conflicting packets — new policy governs process mechanics
+  while their frozen scientific inputs, thresholds, budgets, no-overwrite rules
+  and authorization boundaries stay binding; areas may add stricter scientific
+  requirements but may not reintroduce per-arm paperwork by renaming the
+  cycle/method family.
+
+**Applicability matrix (authoritative, W11):**
+
+| Work type | Track | Required process |
+|---|---|---|
+| Synthetic diagnostics | EXPLORE | packet+prompt, machine root, one log, one batch-end review |
+| Synthetic route gate (diagnostic/construction arms) | EXPLORE (`EXPLORE_HEAVY` if costly) | one authorization for frozen arms; the route-closing decision itself is DECIDE |
+| Real-data development/validation | DECIDE | prereg + explicit authorization + Pre-EXECUTE + result record + independent Pre-RESULT + main acceptance |
+| Parameter scans (synthetic) | EXPLORE | frozen grid/seeds, single log |
+| Parameter scans (real) | DECIDE | full DECIDE gate contract |
+| Formal qualification | DECIDE | full DECIDE gate contract |
+| Publication/report numbers | DECIDE | full DECIDE gate contract |
+| Security/leakage calculations supporting claims | DECIDE | full DECIDE gate contract |
+| Implementation-only changes (no execution) | — | no track gate, normal OpenSpec/agent rules |
+| Documentation-only changes | — | no track gate, normal review proportionality |
+
 ---
 
 ## 2. Source of Truth
@@ -66,9 +126,10 @@ These rules apply to all agents operating in this repository.
 - Every substantial task **must** end with memory triage (via the memory agent).
 - If implementation reveals requirement ambiguity, **stop** and return to planner or OpenSpec instead of guessing.
 - If a change modifies behavior, architecture, prompt rules, tool semantics, or workflow rules, **create or update an OpenSpec change first**.
+- Every task packet **must declare exactly one track** (`EXPLORE` or `DECIDE`, §1.2) before execution. `EXPLORE_HEAVY` is a cost annotation, not a third lifecycle.
 - Before modifying any file, read it first. Never write to a file without reading its current contents.
-- **Pre-EXECUTE review is mandatory before claim-bearing, real-data, expensive, irreversible, or formal decoder execution.** Verify the intended branch; scoped code/config/test/packet cleanliness; frozen inputs, thresholds, command, budget and stop rules; explicit user authorization; target-output absence; and focused tests. Git commit IDs are provenance, not execution locks: do not require `HEAD == origin == implementation SHA`, stale-SHA grep, hashes, or recursive self-binding by default. Documentation-only commits after code acceptance do not invalidate the code. Record the scoped checklist before execution.
-- **Pre-RESULT review is mandatory before every development-result output is published or committed** (`OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` solidification). An independent thread or reviewer must re-check the frozen plan thresholds, leakage-formula decomposition, `undetected` isolation (never merged into success/FER), per-source breakdown, disclosure accounting, and other plan-specified semantics against the actual artifacts. Issues trigger immediate rework; do not publish first and patch review later.
+- **Pre-EXECUTE review is mandatory before claim-bearing, real-data, expensive, irreversible, or formal decoder execution.** Verify the intended branch; scoped code/config/test/packet cleanliness; frozen inputs, thresholds, command, budget and stop rules; explicit user authorization; target-output absence; and focused tests. Git commit IDs are provenance, not execution locks: do not require `HEAD == origin == implementation SHA`, stale-SHA grep, hashes, or recursive self-binding by default. Documentation-only commits after code acceptance do not invalidate the code. Record the scoped checklist before execution. This gate applies to `DECIDE` work; `EXPLORE` batches use the batch-end review in §10.3.
+- **Pre-RESULT review is mandatory before every `DECIDE` development-result output is published or committed** (`OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` solidification). An independent thread or reviewer must re-check the frozen plan thresholds, leakage-formula decomposition, `undetected` isolation (never merged into success/FER), per-source breakdown, disclosure accounting, and other plan-specified semantics against the actual artifacts. Issues trigger immediate rework; do not publish first and patch review later. For an `EXPLORE` batch, one independent batch-end review replaces per-arm review; per-arm authorization, operator-return, failure-verification, repair-review and rerun-review files are not required — the single append-only exploration log records attempts, the preregistered engineering correction, final evidence and that review.
 - **If either applicable review FAILs, execution/solidification is blocked.** Enter `revise-required` / rework, fix the scoped root cause, and re-review. Never submit `run_01` with a known review failure. Root cause: V55 reused a V54 template constant instead of checking the actual plan content.
 
 ---
@@ -213,6 +274,8 @@ openspec/
 - **OS**: Windows host; WSL support via `wsl-env.sh`
 - **Python dependencies**: `numpy`, `pandas`, `numba`, `tqdm` (root `requirements.txt`)
 - **Optional comparison deps**: `pyyaml`, `pyarrow`, `pytest` (`comparison_bench/requirements-comparison.txt`)
+- **Interpreter**: use repo venv `.venv/` only — `source .venv/bin/activate` or `.venv/bin/python -m ...`; bare `python`/`python3` hits the system interpreter without project deps.
+- **Verify**: `.venv/bin/python -c "import numpy,pytest; print(numpy.__version__)"`
 - **Known constraints**:
   - PowerShell profile may emit execution-policy warnings (non-fatal)
   - `.git/index.lock` permission issues may block git operations
@@ -285,7 +348,9 @@ This workflow is the default for all substantial delegated implementation:
    execution. For low-risk algorithm iteration, use focused numerical review;
    do not let review ceremony displace algorithm work. Do not require an
    independent reviewer after every docs-only commit or tiny unchanged-scope
-   correction; batch them into the next milestone review.
+   correction; batch them into the next milestone review. For `EXPLORE`
+   batches, the single batch-end review in §10.3 is the applicable independent
+   review.
 5. **Reuse before rebuilding.** A successor starts from the nearest accepted
    predecessor contract and an explicit delta list. Preserve unchanged
    artifact, transcript, provenance, invalid-run, replay, and no-overwrite
@@ -326,6 +391,10 @@ pre-registered no-rerun/no-tuning rules intact.
 
 - Use `docs/research-cycle-sop.md` for every new research cycle. GitHub is the
   durable exchange surface; chat history is not project state.
+- Project handoffs are manual copy-paste only. Do not invoke
+  `codex_desktop_bridge`, `opencode_session`, or an automatic cross-agent
+  callback loop for this repository. The global bridge installation remains
+  untouched and may be used again only after an explicit user workflow change.
 - ChatGPT performs planning and read-only scientific review. OpenCode performs
   frozen implementation, focused tests, and only explicitly authorized
   development runs. Neither may grant its own acceptance, formal-execution
@@ -345,14 +414,15 @@ pre-registered no-rerun/no-tuning rules intact.
   incompatible Polar or sibling-checkout line, push a clearly named formal-IR
   branch instead of merging crosstalk or force-updating that branch.
 
-### 10.3 Pre-EXECUTE / Pre-RESULT Review Gates (Mandatory)
+### 10.3 DECIDE Review Gates and EXPLORE Batch-End Review (Mandatory)
 
-- **Pre-EXECUTE** (claim-bearing/costly/formal execution): verify intended branch, scoped code/config/test/packet cleanliness, frozen scientific contract, explicit user authorization, target-output absence, and focused tests. Do not require remote/SHA equality or stale-SHA searches unless a named concrete multi-writer, destructive, release, or evidence-integrity risk justifies that exception. Checklist recorded in cycle docs; FAIL blocks execution.
-- **Pre-RESULT** (development-result publication): independent thread/reviewer re-checks plan thresholds, leakage-formula decomposition, `undetected` isolation, per-source breakdown, disclosure accounting and plan-specified semantics against actual artifacts before any `OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` commit. Issues → immediate rework; never publish-then-patch. FAIL blocks solidification.
+- **Pre-EXECUTE** (`DECIDE`, claim-bearing/costly/formal execution): verify intended branch, scoped code/config/test/packet cleanliness, frozen scientific contract, explicit user authorization, target-output absence, and focused tests. Do not require remote/SHA equality or stale-SHA searches unless a named concrete multi-writer, destructive, release, or evidence-integrity risk justifies that exception. Checklist recorded in cycle docs; FAIL blocks execution.
+- **Pre-RESULT** (`DECIDE`, development-result publication): independent thread/reviewer re-checks plan thresholds, leakage-formula decomposition, `undetected` isolation, per-source breakdown, disclosure accounting and plan-specified semantics against actual artifacts before any `OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` commit. Issues → immediate rework; never publish-then-patch. FAIL blocks solidification.
 - Apply each gate where its scope above requires it. Existing packets inherit
   this rule: SHA/remote-equality clauses are non-binding unless a concrete
   exception risk is stated. Scientific scope, authorization, tests, stop rules,
   and no-overwrite checks remain binding.
+- **EXPLORE batch-end review** (synthetic bounded batches): one independent review at batch end covers the authorization boundary, machine gates, retained failures, the preregistered repair if used, final evidence and the claim ceiling. Per-arm review is not required when the single append-only log is unambiguous. FAIL blocks promotion of the batch evidence and triggers escalation review, not another unreviewed arm.
 
 ---
 

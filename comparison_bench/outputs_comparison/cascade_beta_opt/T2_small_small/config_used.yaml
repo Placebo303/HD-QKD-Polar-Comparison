@@ -1,0 +1,33 @@
+# T2 small grid 24 points: n=256/1024/2048 × verify=32/64 × block=16/32 × parity=1/2
+global:
+  output_dir: comparison_bench/outputs_comparison/cascade_beta_opt
+  run_id: T2_small
+
+dataset:
+  frame_batch_path: comparison_bench/outputs_comparison/real_sidecars_frame_batch.parquet
+  dimension: 1024
+  ser: 0.02
+  real_frames_per_point: 200
+  synthetic_frames_per_point: 1000
+  proxy_real_frames: 50
+  proxy_synthetic_frames: 50
+
+grid:
+  n: [256, 1024, 2048]
+  verify: [32, 64]
+  block: [16, 32]
+  parity: [1, 2]
+
+# For long-frame handling: q=1024 fixed, adaptive block policy
+cascade_single_kernel:
+  kernel: single
+  block_size_policy: adaptive
+  block_size_adaptive_coeff: 0.73
+  block_size_caps: {min: 8, max_factor: 0.5}
+  lookback: fifo
+  verification: toeplitz
+  seed_policy: domain-separated
+  q_handling: auto
+  num_passes: 4
+  base_seed: 20260830
+  caps: {per_frame_s: 5, max_events: 100000, max_corrections: 4096, max_queue_pops: 10000}

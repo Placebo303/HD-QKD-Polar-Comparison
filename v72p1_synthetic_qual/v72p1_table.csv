@@ -1,0 +1,2 @@
+case,k,n,trials,worst_delta,wall_s,peak_MiB,finite,maxLLR,residual,classification
+P1D_loopy,3,12,1,0.008958298305150495,1.25,68.30955123901367,True,0,0,descriptive

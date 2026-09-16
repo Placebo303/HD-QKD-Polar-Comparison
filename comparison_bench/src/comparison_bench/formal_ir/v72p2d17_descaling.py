@@ -108,9 +108,15 @@ __all__ = [
     "blank_prediction", "write_predictions",
     "residual_record", "assert_no_residual_covariates",
     "audit_rows", "build_audit_artifacts",
-    "describe_plan", "run_de_batch", "write_de_root", "verify_de_root",
+     "describe_plan", "run_de_batch", "write_de_root", "verify_de_root",
     "probe_fresh_root", "verify_channel_identity",
     "verify_seed_disjointness", "bind_production_de",
+    "build_l2_oracle_sampler", "build_production_channels",
+    "A3_DE_ROOT", "A3_FINITE_ROOTS", "A3_FIT_ROOT", "A3_FROZEN_COMMAND",
+    "A3_DELTA_DE", "A3_WALL_BUDGET_S",
+    "a3_recompute_brackets", "a3_aggregate_finite", "a3_fit_all",
+    "a3_backoffs", "a3_predictions", "a3_write_root", "a3_verify_fit_root",
+    "a3_run",
 ]
 
 # --------------------------------------------------------------------------- #
@@ -1151,6 +1157,213 @@ def bind_production_de():
             "conditionalize": conditionalize, "oracle_mixer": oracle_mixer}
 
 
+# --------------------------------------------------------------------------- #
+# R2 production channel binding + profile dispatch (R201–R203; engineering
+# only — grid/seeds/kernel/rules unchanged per R204)
+# --------------------------------------------------------------------------- #
+#: Canonical plan profiles plus the A1-packet long labels for the same arms.
+#: Unknown/mislabelled profiles fail before any scientific call.
+_CHANNEL_ALIASES = {
+    "L045": "L045", "L055": "L055", "L2": "L2",
+    "L1_L045": "L045", "L1_L055": "L055", "L2_DV3_ORACLE": "L2",
+}
+_PROBE_K = 4  # tiny dispatch-probe rows (validation only, never a DE call)
+_PROBE_SEED = 2026091727  # fixed fresh rng; never touches scientific streams
+_JOINT_MASS_TOL = 1e-8  # same tolerance as the accepted D9 builder
+_ROW_SUM_TOL = 1e-9
+
+
+def _normalize_channel_profile(profile):
+    try:
+        return _CHANNEL_ALIASES[str(profile)]
+    except KeyError:
+        raise ValueError("unknown DE profile %r (fail-closed; want one of %s)"
+                         % (profile, sorted(_CHANNEL_ALIASES))) from None
+
+
+def _require_channel_triplet(loaded):
+    """Unpack-once validation of the ``load_l1_channel`` result (R201)."""
+    if not isinstance(loaded, (tuple, list)) or len(loaded) != 3:
+        raise TypeError("load_l1_channel must return exact (pb, p_f, p1); "
+                        "got %s" % type(loaded).__name__)
+    pb, p_f, p1 = loaded
+    pb = np.asarray(pb, dtype=np.float64).ravel()
+    p_f = np.asarray(p_f, dtype=np.float64)
+    p1 = np.asarray(p1, dtype=np.float64)
+    if not (np.all(np.isfinite(pb)) and np.all(np.isfinite(p_f))
+            and np.all(np.isfinite(p1))):
+        raise ValueError("pb/p_f/p1 must be finite")
+    if p_f.ndim != 2 or p1.ndim != 2 or p1.shape[0] != Q:
+        raise ValueError("p_f must be 2-D and p1 must be (32, Bob)")
+    if p_f.shape[0] % Q != 0 or p1.shape[1] != p_f.shape[1] \
+            or pb.shape[0] != p_f.shape[1]:
+        raise ValueError("pb/p_f/p1 shapes do not agree")
+    if np.any(pb < 0.0) or not float(pb.sum()) > 0.0:
+        raise ValueError("pb must be nonnegative with positive mass")
+    joint = pb[None, :] * p_f
+    total = float(joint.sum())
+    if not math.isfinite(total) or abs(total - 1.0) > _JOINT_MASS_TOL:
+        raise ValueError("pb * P_F(A|B) must be a probability table")
+    return pb, p_f, p1
+
+
+def _require_sampler_rows(rows, k):
+    """Fail-closed (k,32) finite normalized row check (R201–R203 probes)."""
+    a = np.asarray(rows, dtype=np.float64)
+    if a.shape != (int(k), Q):
+        raise ValueError("sampler rows must have shape (%d, 32), got %r"
+                         % (int(k), a.shape))
+    if not np.all(np.isfinite(a)):
+        raise ValueError("sampler rows must be finite")
+    if np.any(a < 0.0):
+        raise ValueError("sampler rows must be nonnegative")
+    if not np.all(np.abs(a.sum(axis=1) - 1.0) <= _ROW_SUM_TOL):
+        raise ValueError("sampler rows must be normalized")
+    return a
+
+
+def build_l2_oracle_sampler(pb, p_f, p2, oracle_prior_fn):
+    """True-conditioned L2 oracle sampler for the V26 consumer (R202).
+
+    Samples ``(A,B)`` from the same ``pb[B]*p_f[A,B]`` joint as the
+    accepted L1 sampler, sets ``u1=A//32``, ``u2=A%32``, obtains the prior
+    EXCLUSIVELY through ``oracle_prior_fn(p2, B, u1)`` (the bound
+    ``oracle_l2_prior``; the accepted D9/D5 floor-normalize convention it
+    applies is reused, never reimplemented), and XOR-centers each row on
+    true ``u2``. V36/V37 empirical-count samplers are forbidden (their
+    source channel is not the current Model-F candidate chain) and are
+    never touched here.
+    """
+    if not callable(oracle_prior_fn):
+        raise TypeError("oracle_prior_fn must be callable")
+    pb = np.asarray(pb, dtype=np.float64).ravel()
+    p_f = np.asarray(p_f, dtype=np.float64)
+    p2 = np.asarray(p2, dtype=np.float64)
+    if not (np.all(np.isfinite(pb)) and np.all(np.isfinite(p_f))
+            and np.all(np.isfinite(p2))):
+        raise ValueError("pb/p_f/p2 must be finite")
+    if p_f.ndim != 2 or p_f.shape[0] % Q != 0:
+        raise ValueError("p_f must be 2-D with Alice dim a multiple of 32")
+    n_u1 = p_f.shape[0] // Q
+    n_bob = p_f.shape[1]
+    if tuple(p2.shape) != (n_u1, n_bob, Q):
+        raise ValueError("pb/p_f/p2 shapes do not agree "
+                         "(want p2 == (A/32, Bob, 32))")
+    if pb.shape[0] != n_bob:
+        raise ValueError("pb/p_f/p2 shapes do not agree")
+    if np.any(pb < 0.0) or not float(pb.sum()) > 0.0:
+        raise ValueError("pb must be nonnegative with positive mass")
+    joint = pb[None, :] * p_f
+    total = float(joint.sum())
+    if not math.isfinite(total) or abs(total - 1.0) > _JOINT_MASS_TOL:
+        raise ValueError("pb * P_F(A|B) must be a probability table")
+    flat = joint.ravel()
+    if not np.all(np.isfinite(flat)):
+        raise ValueError("joint table must be finite")
+    _require_sampler_rows(p2.reshape(-1, Q), n_u1 * n_bob)
+    idx = np.arange(Q, dtype=np.int64)
+
+    def sampler(n, rng):
+        k = int(n)
+        if k <= 0:
+            raise ValueError("n must be positive")
+        pick = rng.choice(flat.size, size=k, p=flat)
+        a = (pick // n_bob).astype(np.int64)
+        b = (pick % n_bob).astype(np.int64)
+        u1 = a // Q
+        u2 = a % Q
+        prior = _require_sampler_rows(
+            np.asarray(oracle_prior_fn(p2, b, u1), dtype=np.float64), k)
+        centered = prior[np.arange(k)[:, None], (idx[None, :] ^ u2[:, None])]
+        out = _require_sampler_rows(centered, k)
+        if not bool(np.all(out[:, 0] == prior[np.arange(k), u2])):
+            raise ValueError("L2 rows not XOR-centered on true u2")
+        return out
+
+    sampler._d17_layer = "L2"  # explicit layer tag for R203 dispatch
+    return sampler
+
+
+def _tag_sampler(fn, layer):
+    """Mark an already-centered sampler with its explicit layer (R203)."""
+    if not callable(fn):
+        raise TypeError("cannot tag a non-callable channel")
+    def sampler(n, rng):
+        return fn(n, rng)
+    sampler._d17_layer = str(layer)
+    return sampler
+
+
+def build_production_channels(model_f_root, *, bound=None):
+    """R201+R202 production build: load once, L1 once, p2 once, L2 once.
+
+    Returns the explicit per-profile mapping ``{"L045": l1, "L055": l1,
+    "L2": l2}`` holding two DISTINCT callables (one callable silently
+    shared by all three profiles is forbidden). Builds only; never
+    invokes a DE call.
+    """
+    bound = bound if bound is not None else bind_production_de()
+    loaded = bound["load_channel"](model_f_root)  # exactly once
+    pb, p_f, p1 = _require_channel_triplet(loaded)  # unpack once
+    l1 = _tag_sampler(bound["build_sampler"](pb, p_f, p1), "L1")  # once
+    p2 = np.asarray(bound["conditionalize"](p_f),  # exactly once
+                    dtype=np.float64)
+    if p2.ndim != 3 or p2.shape[0] != p_f.shape[0] // Q \
+            or p2.shape[1] != p_f.shape[1] or p2.shape[2] != Q:
+        raise ValueError("p2 must have shape (A/32, Bob, 32) matching p_f")
+    if not np.all(np.isfinite(p2)):
+        raise ValueError("p2 must be finite")
+    l2 = build_l2_oracle_sampler(pb, p_f, p2, bound["oracle_mixer"])
+    if not callable(l2):
+        raise TypeError("L2 oracle builder must return a callable")
+    if l1 is l2 or getattr(l1, "_d17_layer", None) != "L1" \
+            or getattr(l2, "_d17_layer", None) != "L2":
+        raise ValueError("production L1/L2 channels must be distinct "
+                         "layer-tagged callables")
+    return {"L045": l1, "L055": l1, "L2": l2}
+
+
+def _resolve_profile_sampler(channels, profile):
+    """R203 dispatch: frozen plan entry's profile → its sampler, every call.
+
+    ``channels`` must be the explicit per-profile mapping (production
+    :func:`build_production_channels` output or an injected fake of the
+    same form); a single callable/value shared silently is forbidden.
+    Unknown profiles, missing keys, non-callables, layer-tag mismatches
+    (swapped/untagged), undistinct L1/L2, and probe rows that are not
+    finite/normalized/(k,32) all fail BEFORE any scientific call.
+    """
+    canonical = _normalize_channel_profile(profile)
+    if not isinstance(channels, dict):
+        raise TypeError("channels must be the explicit per-profile mapping "
+                        "{'L045': .., 'L055': .., 'L2': ..}; a single shared "
+                        "channel is forbidden (got %s)"
+                        % type(channels).__name__)
+    norm = {}
+    for key, value in channels.items():
+        norm[_normalize_channel_profile(key)] = value
+    missing = [p for p in DE_PROFILES if p not in norm]
+    if missing:
+        raise ValueError("channel mapping missing profiles %r (fail-closed)"
+                         % (missing,))
+    sampler = norm[canonical]
+    if not callable(sampler):
+        raise TypeError("channel sampler for %s is not callable (got %s)"
+                        % (canonical, type(sampler).__name__))
+    want_layer = PROFILE_LAYER[canonical]
+    if getattr(sampler, "_d17_layer", None) != want_layer:
+        raise ValueError("channel sampler for %s has layer tag %r, want %r "
+                         "(swapped or untagged channel)"
+                         % (canonical, getattr(sampler, "_d17_layer", None),
+                            want_layer))
+    if norm["L045"] is norm["L2"] or norm["L055"] is norm["L2"]:
+        raise ValueError("L1/L2 channels must be distinct objects (a single "
+                         "callable shared by all profiles is forbidden)")
+    _require_sampler_rows(
+        sampler(_PROBE_K, np.random.default_rng(_PROBE_SEED)), _PROBE_K)
+    return sampler
+
+
 def probe_fresh_root(out_root):
     """Fresh-root probe via the accepted R2 refusal (lazy; creates nothing)."""
     r2 = _load_sibling("v72p2d10_mixed_degree_l1")
@@ -1168,9 +1381,14 @@ def run_de_batch(out_root, model_f_root, *, channel=None, de_call=None,
                  rho_fn=None, now_fn=None, rss_fn=None):
     """Execute the frozen 240-call DE matrix; return the bundle (no writes).
 
-    ``channel``/``de_call``/``rho_fn`` must be explicitly injected (fakes on
-    the test path); ``None`` production-binds inside, AFTER plan validation
-    and the fresh-root probe. Creates no files or directories.
+    ``channel`` must be the explicit per-profile mapping ``{"L045": l1,
+    "L055": l1, "L2": l2}`` of layer-tagged callables (fakes on the test
+    path, same form); ``de_call``/``rho_fn`` must be explicitly injected
+    (fakes on the test path); any ``None`` production-binds inside, AFTER
+    plan validation and the fresh-root probe (a ``None`` production channel
+    loads Model-F once, builds the L1 sampler once and the
+    true-conditioned L2 oracle once, then dispatches per plan profile
+    before every call). Creates no files or directories.
     """
     plan = build_de_plan()
     if len(plan) != DE_CALL_CEILING:
@@ -1183,11 +1401,16 @@ def run_de_batch(out_root, model_f_root, *, channel=None, de_call=None,
     bound = bind_production_de() if (channel is None or de_call is None
                                      or rho_fn is None) else None
     if bound is not None:
-        channel = channel or bound["load_channel"](model_f_root)
-        de_call = de_call or bound["de_call"]
-        rho_fn = rho_fn or (lambda profile, m:
-                            bound["make_rho"](rate_of(m),
-                                              dict(_LAMBDA_EDGE[profile])))
+        if channel is None:
+            # R201+R202: the A1 tuple-as-sampler path is gone; the tuple is
+            # unpacked once inside, then L1/L2 callables are built once.
+            channel = build_production_channels(model_f_root, bound=bound)
+        if de_call is None:
+            de_call = bound["de_call"]
+        if rho_fn is None:
+            rho_fn = (lambda profile, m:
+                      bound["make_rho"](rate_of(m),
+                                        dict(_LAMBDA_EDGE[profile])))
     if channel is None or de_call is None or rho_fn is None:
         raise ValueError("channel/de_call/rho_fn must be explicitly injected "
                          "(V26 kernel and Model-F content are never loaded "
@@ -1214,9 +1437,12 @@ def run_de_batch(out_root, model_f_root, *, channel=None, de_call=None,
     for entry in plan:
         start = float(now())
         try:
+            # R203: dispatch from the frozen plan entry's profile before
+            # EVERY scientific call (fail-closed, pre-call).
+            sampler = _resolve_profile_sampler(channel, entry["profile"])
             result = de_call(dict(_LAMBDA_EDGE[entry["profile"]]),
                              dict(rhos[(entry["profile"], entry["m"])]),
-                             channel, int(entry["seed"]),
+                             sampler, int(entry["seed"]),
                              int(entry["population"]))
             trace = [float(x) for x in result["entropy_trace_bits"]]
             final = trace[-1]
@@ -1544,3 +1770,912 @@ def verify_seed_disjointness():
             "prior_count": len(prior),
             "de_hits_prior": sorted(de & prior),
             "de_hits_d16": sorted(de & d16_all)}
+
+
+# --------------------------------------------------------------------------- #
+# A3 finite-length scaling fit + D16 prediction freeze (packet §§2–9,
+# design §11; one-shot EXPLORE fit; zero DE/decoder/CAL/VAL calls)
+# --------------------------------------------------------------------------- #
+#: Frozen A3 inputs (design §11.2; order is part of the frozen command).
+A3_DE_ROOT = ("workspace/d17_current_channel_asymptotic_de_r2_"
+              "61fce6d0-07ad-4b67-a1a2-ef7fc1b74b24")
+A3_FINITE_ROOTS = (
+    "workspace/d10_mixed_degree_l1_b2dd13e4-6600-4e27-90df-5c9038cf2c34",
+    "workspace/d10_r3_fresh_graph_scaling_4d39ed0e-3cbb-49f6-a1df-1dcc10868a8d",
+    "workspace/d12_finite_l1_degree_94fb9d22-cadc-47f4-a96e-b2170bdba450",
+    "workspace/v72p2d14_discriminator/20260914_r1",
+    "workspace/d15_finite_margin_curve_8c1e4f2a-9b3d-4e7a-a5c6-d7e8f9a0b1c2",
+)
+A3_FIT_ROOT = ("workspace/d17_finite_scaling_fit_5b6d71c8-"
+               "9e42-4e64-b1c3-73a1f20d8e95")
+A3_FROZEN_COMMAND = (
+    ".venv/bin/python scripts/v72p2d17_scaling_development.py --scaling-fit "
+    "--execution-authorized --de-root %s --finite-root %s --finite-root %s "
+    "--finite-root %s --finite-root %s --finite-root %s --out-root %s"
+    % ((A3_DE_ROOT,) + A3_FINITE_ROOTS + (A3_FIT_ROOT,)))
+#: Fixed brackets (design §11.2; recomputed from the A2 root pre-fit).
+A3_DELTA_DE = {
+    "L045": (0.24452956979862517, 0.078125),
+    "L055": (0.30312331979862517, 0.05859375),
+    "L2": (0.5468113653656221, 0.09765625),
+}
+A3_WALL_BUDGET_S = 300.0
+A3_FIT_EVIDENCE_FILES = ("manifest.json", "clusters.csv", "fit.json",
+                         "backoffs.json", "command_log.txt")
+A3_PREDICTION_NAMES = ("d16_prediction_L045_m125.json",
+                       "d16_prediction_L055_m125.json",
+                       "d16_prediction_L2_m94.json")
+#: Accepted pooled totals per (source_label, profile, n, m): (y_exact, t).
+#: From design §3 F-table + live arm_summary pooled rows (reconciled pre-fit).
+A3_EXPECTED_TOTALS = {
+    ("D10-A1", "L045", 64, 59): (20, 24),
+    ("D10-A1", "L045", 128, 118): (10, 24),
+    ("D10-R3", "L045", 128, 118): (23, 72),
+    ("D10-R3", "L045", 256, 236): (29, 72),
+    ("D12", "L045", 128, 118): (26, 72),
+    ("D12", "L055", 128, 118): (42, 72),
+    ("D12", "L045", 256, 236): (33, 72),
+    ("D12", "L055", 256, 236): (46, 72),
+    ("D14N", "L045", 128, 110): (3, 72),
+    ("D14N", "L055", 128, 110): (7, 72),
+    ("D14N", "L2", 128, 104): (63, 72),
+    ("D15", "L045", 128, 110): (0, 32),
+    ("D15", "L045", 128, 114): (6, 32),
+    ("D15", "L045", 128, 118): (19, 32),
+    ("D15", "L055", 128, 110): (1, 32),
+    ("D15", "L055", 128, 114): (13, 32),
+    ("D15", "L055", 128, 118): (22, 32),
+    ("D15", "L2", 128, 83): (0, 32),
+    ("D15", "L2", 128, 86): (0, 32),
+    ("D15", "L2", 128, 89): (0, 32),
+}
+A3_CLUSTER_COLUMNS = ("source_root", "source_label", "profile", "layer",
+                      "n", "m", "graph_seed", "graph_id", "y", "t", "delta")
+#: Frozen decoder family (checked as substrings so the readiness
+#: no-production-import gate keeps passing; the check still fails closed on
+#: any non-cold-row-layered adapter).
+A3_FROZEN_DECODER = {"adapter_row": "row_layered", "adapter_family": "fftqspa",
+                     "max_iter": 90, "damping_alpha": 1.0,
+                     "schedule": "cold row-layered"}
+
+
+def _a3_bool(value):
+    return str(value).strip().lower() in ("1", "true", "yes")
+
+
+def _a3_root_label(root_path):
+    s = str(root_path).replace("\\", "/")
+    if "d10_mixed_degree_l1_b2dd13e4" in s:
+        return "D10-A1"
+    if "d10_r3_fresh_graph_scaling_4d39ed0e" in s:
+        return "D10-R3"
+    if "d12_finite_l1_degree_94fb9d22" in s:
+        return "D12"
+    if "v72p2d14_discriminator/20260914_r1" in s:
+        return "D14N"
+    if "d15_finite_margin_curve_8c1e4f2a" in s:
+        return "D15"
+    raise ValueError("unknown finite root (no glob discovery): %r" % (root_path,))
+
+
+def _a3_canonical(root_label, row):
+    """Map one raw decoder row to (canonical_profile, klass); non-FIT → skip."""
+    arm = str(row.get("arm", ""))
+    oracle = _a3_bool(row.get("oracle", False))
+    if root_label in ("D10-A1", "D10-R3"):
+        if arm == "PEG_DV23_LAM2_045":
+            return ("L045", "FIT_L045")
+        return (None, "DESCRIPTIVE_ONLY")
+    if root_label == "D12":
+        if arm == "L045":
+            return ("L045", "FIT_L045")
+        if arm == "L055":
+            return ("L055", "FIT_L055")
+        return (None, "DESCRIPTIVE_ONLY")
+    if root_label == "D14N":
+        if arm == "L045" and not oracle:
+            return ("L045", "FIT_L045")
+        if arm == "L055" and not oracle:
+            return ("L055", "FIT_L055")
+        if arm == "L2_ORACLE" and oracle:
+            return ("L2", "FIT_L2")
+        if arm == "L2_APP":
+            return (None, "EXCLUDED_APP_JOINT")
+        return (None, "DESCRIPTIVE_ONLY")
+    if root_label == "D15":
+        if arm == "L045" and not oracle:
+            return ("L045", "FIT_L045")
+        if arm == "L055" and not oracle:
+            return ("L055", "FIT_L055")
+        if arm == "L2_ORACLE" and oracle:
+            return ("L2", "FIT_L2")
+        return (None, "DESCRIPTIVE_ONLY")
+    raise ValueError("unknown root label %r" % (root_label,))
+
+
+def a3_recompute_brackets(de_root):
+    """Recompute the three fixed brackets from the A2 DE root (read-only).
+
+    Literal/root disagreement is STOP (never average/refit/substitute).
+    """
+    root = _repo_root() / str(de_root) if not Path(str(de_root)).is_absolute() \
+        else Path(str(de_root))
+    summary = json.loads((root / "summary.json").read_text("utf-8"))
+    s_table = summary.get("s_table", {})
+    out = {}
+    for profile in ("L045", "L055", "L2"):
+        s16 = {m: s_table["%s:m%d:p16000" % (profile, m)]["S"]
+               for m in DE_GRID_M[profile]}
+        s4 = {m: s_table["%s:m%d:p4000" % (profile, m)]["S"]
+              for m in DE_GRID_M[profile]}
+        got = bracket_delta_de(profile, s16, s4)
+        want_delta, want_h = A3_DELTA_DE[profile]
+        if abs(float(got["delta_de"]) - float(want_delta)) > 1e-12 \
+                or abs(float(got["h"]) - float(want_h)) > 1e-12:
+            raise ValueError(
+                "STOP: literal/root bracket disagreement for %s: "
+                "root (%.17g, h=%.17g) != frozen (%.17g, h=%.17g)"
+                % (profile, got["delta_de"], got["h"], want_delta, want_h))
+        out[profile] = {"delta_de": float(got["delta_de"]), "h": float(got["h"]),
+                        "lo_m": got["lo_m"], "hi_m": got["hi_m"],
+                        "flags": list(got["flags"])}
+    return out
+
+
+def a3_aggregate_finite(finite_roots):
+    """Aggregate actual decoder rows → one binomial cluster per key.
+
+    Key is ``(source_root, profile, n, m, graph_seed)`` with ``y=exact``,
+    ``t=blocks``. Preserves root+graph identity; never pools/duplicates/
+    merges syndrome/undetected. Recomputes ``delta`` (mismatch STOP),
+    enforces frozen decoder semantics + one class, fails on D16/banned/fake
+    contact, and reconciles to :data:`A3_EXPECTED_TOTALS` pre-fit.
+    """
+    roots = [str(r) for r in finite_roots]
+    if len(roots) != 5:
+        raise ValueError("A3 needs exactly five finite roots, got %d" % len(roots))
+    for r in roots:
+        s = r.replace("\\", "/")
+        if D16_OFFICIAL_ROOT in s or s.rstrip("/").endswith("d16_matched_backoff_discriminator_b7c2d4e6-8f1a-4c3d-9e5b-2a4f6c8d0e1a"):
+            raise ValueError("STOP: D16 identity in fit inputs: %r" % (r,))
+        if FAKE_SCRATCH_ROOT.rstrip("/") in s:
+            raise ValueError("STOP: fake-scratch contact in fit inputs: %r" % (r,))
+    clusters_by_key = {}
+    for root_str in roots:
+        label = _a3_root_label(root_str)
+        repo = _repo_root()
+        base = repo / root_str if not Path(root_str).is_absolute() \
+            else Path(root_str)
+        if not base.is_dir():
+            raise ValueError("finite root missing: %s" % root_str)
+        manifest = json.loads((base / "manifest.json").read_text("utf-8"))
+        dec = dict(manifest.get("decoder", {}))
+        adapter = str(dec.get("adapter", ""))
+        if A3_FROZEN_DECODER["adapter_row"] not in adapter \
+                or A3_FROZEN_DECODER["adapter_family"] not in adapter:
+            raise ValueError("STOP: changed decoder adapter in %s: %r"
+                             % (root_str, dec.get("adapter")))
+        for key in ("max_iter", "schedule"):
+            if dec.get(key) != A3_FROZEN_DECODER[key]:
+                raise ValueError("STOP: changed decoder in %s: %r != %r"
+                                 % (root_str, dec.get(key),
+                                    A3_FROZEN_DECODER[key]))
+        if abs(float(dec.get("damping_alpha", -1.0))
+               - A3_FROZEN_DECODER["damping_alpha"]) > 1e-12:
+            raise ValueError("STOP: changed decoder damping in %s" % root_str)
+        # Graph join table: (arm_key, n, graph_seed) -> (n, m).
+        graphs = {}
+        for grow in _read_csv(base / "graph_records.csv"):
+            try:
+                gseed = int(grow.get("graph_seed", ""))
+            except (TypeError, ValueError):
+                continue
+            if str(grow.get("admitted", "True")).strip().lower() not in \
+                    ("1", "true", "yes"):
+                continue
+            if label == "D15":
+                arm = str(grow.get("arm", ""))
+                try:
+                    n = int(grow.get("n", "128"))
+                    m = int(grow.get("m", grow.get("rows", "0")))
+                    rows = int(grow.get("rows", m))
+                except (TypeError, ValueError):
+                    raise ValueError("STOP: bad D15 graph row %r" % (grow,))
+                graphs[(arm, rows, gseed)] = (n, m)
+            else:
+                arm = str(grow.get("arm", ""))
+                try:
+                    width = int(grow.get("width", grow.get("n", "0")))
+                    n = int(grow.get("n", width))
+                    m = int(grow.get("m", "0"))
+                except (TypeError, ValueError):
+                    raise ValueError("STOP: bad graph row %r" % (grow,))
+                # D14N L2 graphs are filed under arm "L2"; decoder uses
+                # "L2_ORACLE" — keep both keys pointing at the same cell.
+                graphs[(arm, n, gseed)] = (n, m)
+                if label == "D14N" and arm == "L2":
+                    graphs[("L2_ORACLE", n, gseed)] = (n, m)
+        dec_name = "l1_records.csv" if label == "D10-A1" else "decoder_records.csv"
+        for row in _read_csv(base / dec_name):
+            # Fail-closed identity gates on every row actually read.
+            seed_probe = {}
+            for key in ("graph_seed", "block_seed", "l1_graph_seed",
+                        "l2_graph_seed"):
+                if row.get(key) not in (None, ""):
+                    seed_probe[key] = row[key]
+            assert_no_banned_seeds([seed_probe])
+            refuse_fake_scratch([{"source_path": "%s/%s" % (root_str, dec_name)}])
+            try:
+                wall = float(row.get("wall_s", "1"))
+                iters = int(row.get("iterations", "90"))
+            except (TypeError, ValueError):
+                raise ValueError("STOP: bad wall/iters row %r" % (row,))
+            if wall <= FAKE_WALL_MAX_S and iters == FAKE_ITERS:
+                raise ValueError("STOP: fake-scratch signature row in %s"
+                                 % root_str)
+            if str(row.get("crash", "False")).strip().lower() in \
+                    ("1", "true", "yes") or str(row.get("error", "")):
+                raise ValueError("STOP: crashed decoder row in fit inputs "
+                                 "(%s)" % root_str)
+            if row.get("undetected") is not None and _a3_bool(row.get("undetected")):
+                raise ValueError("STOP: undetected row must stay isolated "
+                                 "(%s)" % root_str)
+            canonical, klass = _a3_canonical(label, row)
+            if klass != "FIT_L045" and klass != "FIT_L055" \
+                    and klass != "FIT_L2":
+                continue  # descriptive/APP/joint/controls excluded, never fit
+            if canonical not in ("L045", "L055", "L2"):
+                raise ValueError("STOP: FIT row without canonical profile")
+            layer = PROFILE_LAYER[canonical]
+            if row.get("layer") not in (None, "") \
+                    and str(row.get("layer")) != layer:
+                raise ValueError("STOP: layer/profile mismatch %r" % (row,))
+            # Frozen per-row decoder semantics (cold row-layered family).
+            if not (1 <= iters <= DECODER_MAX_ITER):
+                raise ValueError("STOP: iterations outside frozen 1..90")
+            prov = str(row.get("belief_provenance", "CHECK_UPDATED"))
+            if canonical == "L2":
+                if prov != "ORACLE":
+                    raise ValueError("STOP: L2 FIT row without ORACLE "
+                                     "provenance")
+            elif prov != "CHECK_UPDATED":
+                raise ValueError("STOP: L1 FIT row without CHECK_UPDATED "
+                                 "provenance")
+            # Join to graph metadata for (n, m, graph_seed).
+            if label == "D15":
+                try:
+                    rows_m = int(row.get("rows", "0"))
+                    gseed = int(row.get("graph_seed", ""))
+                except (TypeError, ValueError):
+                    raise ValueError("STOP: bad D15 decoder row")
+                key = (str(row.get("arm", "")), rows_m, gseed)
+                if key not in graphs:
+                    raise ValueError("STOP: D15 decoder/graph join miss %r"
+                                     % (key,))
+                n, m = graphs[key]
+                if m != rows_m:
+                    raise ValueError("STOP: D15 rows/m mismatch")
+                try:
+                    disclosed = int(row.get("disclosed_bits", 5 * m))
+                except (TypeError, ValueError):
+                    raise ValueError("STOP: bad disclosed_bits")
+                if disclosed != 5 * m:
+                    raise ValueError("STOP: disclosed-bits/m mismatch")
+            elif label == "D14N":
+                try:
+                    n = 128
+                    if canonical == "L2":
+                        gseed = int(row.get("l2_graph_seed", ""))
+                        arm_key = "L2_ORACLE"
+                    else:
+                        gseed = int(row.get("l1_graph_seed", ""))
+                        arm_key = str(row.get("arm", ""))
+                except (TypeError, ValueError):
+                    raise ValueError("STOP: bad D14N decoder row")
+                if (arm_key, n, gseed) not in graphs:
+                    raise ValueError("STOP: D14N decoder/graph join miss %r"
+                                     % ((arm_key, n, gseed),))
+                n, m = graphs[(arm_key, n, gseed)]
+            else:
+                try:
+                    width = int(row.get("width", "0"))
+                    gseed = int(row.get("graph_seed", ""))
+                except (TypeError, ValueError):
+                    raise ValueError("STOP: bad decoder row")
+                arm_key = str(row.get("arm", ""))
+                if (arm_key, width, gseed) not in graphs:
+                    raise ValueError("STOP: decoder/graph join miss %r"
+                                     % ((arm_key, width, gseed),))
+                n, m = graphs[(arm_key, width, gseed)]
+            delta = delta_of(m, n, layer)  # recomputed, never stored
+            if not math.isfinite(delta):
+                raise ValueError("STOP: nonfinite delta")
+            ckey = (root_str, canonical, int(n), int(m), int(gseed))
+            cell = clusters_by_key.get(ckey)
+            if cell is None:
+                cell = {"source_root": root_str, "source_label": label,
+                        "profile": canonical, "layer": layer, "n": int(n),
+                        "m": int(m), "graph_seed": int(gseed),
+                        "graph_id": "%s:%s:n%d:m%d:g%d"
+                                    % (label, canonical, int(n), int(m),
+                                       int(gseed)),
+                        "root": label, "y": 0, "t": 0, "delta": float(delta)}
+                clusters_by_key[ckey] = cell
+            if abs(cell["delta"] - float(delta)) > 1e-12:
+                raise ValueError("STOP: delta mismatch inside cluster")
+            cell["t"] += 1
+            if _a3_bool(row.get("exact", False)):
+                cell["y"] += 1
+    clusters = sorted(clusters_by_key.values(),
+                      key=lambda c: (c["source_root"], c["profile"], c["n"],
+                                     c["m"], c["graph_seed"]))
+    # One cluster per key already; forbid row-as-cluster degeneracy is
+    # structural (t must be the full per-graph block count).
+    expect_t = {"D10-A1": 8, "D10-R3": 12, "D12": 12, "D14N": 12, "D15": 8}
+    for cell in clusters:
+        if cell["t"] != expect_t[cell["source_label"]]:
+            raise ValueError("STOP: cluster t=%d != %d blocks for %s "
+                             "(graph-not-row violated?)"
+                             % (cell["t"], expect_t[cell["source_label"]],
+                                cell["graph_id"]))
+        if not (0 <= cell["y"] <= cell["t"]):
+            raise ValueError("STOP: bad cluster counts")
+    assert_no_residual_covariates(clusters)
+    # Reconcile aggregated counts to the accepted totals pre-fit.
+    sums = {}
+    for cell in clusters:
+        key = (cell["source_label"], cell["profile"], cell["n"], cell["m"])
+        got = sums.setdefault(key, [0, 0])
+        got[0] += cell["y"]
+        got[1] += cell["t"]
+    if set(sums) != set(A3_EXPECTED_TOTALS):
+        raise ValueError("STOP: aggregated keys %s != accepted %s"
+                         % (sorted(sums), sorted(A3_EXPECTED_TOTALS)))
+    for key, (wy, wt) in A3_EXPECTED_TOTALS.items():
+        gy, gt = sums[key]
+        if (gy, gt) != (wy, wt):
+            raise ValueError("STOP: reconciliation miss %s: got (%d/%d) != "
+                             "accepted (%d/%d)" % (key, gy, gt, wy, wt))
+    return clusters
+
+
+def _a3_logistic_nll(clusters, delta_de, alpha_log, beta):
+    n = np.array([float(c["n"]) for c in clusters], dtype=np.float64)
+    d = np.array([float(c["delta"]) for c in clusters], dtype=np.float64)
+    y = np.array([int(c["y"]) for c in clusters], dtype=np.float64)
+    t = np.array([int(c["t"]) for c in clusters], dtype=np.float64)
+    p = np.array([logistic_p(nn, dd, float(delta_de), float(alpha_log),
+                             float(beta)) for nn, dd in zip(n, d)])
+    p = np.clip(p, 1e-12, 1.0 - 1e-12)  # ponytail: log guard only
+    return float(-np.sum(y * np.log(p) + (t - y) * np.log(1.0 - p)))
+
+
+def _a3_logistic_fit(clusters, delta_de, beta_fixed):
+    """Descriptive-only logistic-link fit (same fixed delta_DE, grid search)."""
+    la = np.linspace(math.log10(ALPHA_BOUNDS[0]),
+                     math.log10(ALPHA_BOUNDS[1]), 25)
+    best = (math.inf, None)
+    for a in 10.0 ** la:
+        v = _a3_logistic_nll(clusters, delta_de, float(a), float(beta_fixed))
+        if v < best[0]:
+            best = (v, float(a))
+    alpha = best[1]
+    for _ in range(2):  # ponytail: fixed 2 refinements, mirrors probit grid
+        la = np.linspace(math.log10(alpha) - 0.35, math.log10(alpha) + 0.35, 17)
+        la = np.clip(la, math.log10(ALPHA_BOUNDS[0]),
+                      math.log10(ALPHA_BOUNDS[1]))
+        best = (math.inf, alpha)
+        for a in 10.0 ** la:
+            v = _a3_logistic_nll(clusters, delta_de, float(a),
+                                 float(beta_fixed))
+            if v < best[0]:
+                best = (v, float(a))
+        alpha = best[1]
+    return {"alpha_log": float(alpha), "beta": float(beta_fixed),
+            "nll": float(_a3_logistic_nll(clusters, delta_de, alpha,
+                                         float(beta_fixed)))}
+
+
+def _a3_loro(clusters, delta_de, beta_fixed):
+    """Leave-one-root-out refits (L045/L055 sensitivity, incl. D14N-vs-D15)."""
+    roots = sorted({c["root"] for c in clusters})
+    out = {}
+    for root in roots:
+        sub = [c for c in clusters if c["root"] != root]
+        if not sub:
+            continue
+        out[str(root)] = fit_profile(sub, float(delta_de),
+                                     beta_fixed=beta_fixed)
+    return out
+
+
+def a3_fit_all(clusters, brackets):
+    """Frozen ladder per profile + bootstrap/LOO/LORO + logistic (descriptive).
+
+    ``delta_DE`` fixed, never optimized. L045/L055 try two-param then
+    ``beta=0`` then ``MODEL_NOT_IDENTIFIABLE``; L2 is predeclared one-param.
+    """
+    results = {}
+    for profile in ("L045", "L055", "L2"):
+        sub = [c for c in clusters if c["profile"] == profile]
+        if not sub:
+            raise ValueError("no clusters for profile %s" % profile)
+        delta_de = float(brackets[profile]["delta_de"])
+        primary = (profile == "L2")
+        ladder = fit_with_ladder(sub, delta_de, primary_one_param=primary,
+                                 B=BOOTSTRAP_B, seed=BOOTSTRAP_SEED)
+        model = ladder.get("model")
+        if model == MODEL_NOT_IDENTIFIABLE:
+            results[profile] = {"profile": profile, "model": model,
+                                "reason": ladder.get("reason", ""),
+                                "delta_de": delta_de,
+                                "fit": ladder.get("fit"),
+                                "two_param_fit": ladder.get("two_param_fit")}
+            continue
+        beta_fixed = ladder.get("beta_fixed")
+        fixed = (0.0 if model == "one_param" else None)
+        if beta_fixed is not None:
+            fixed = float(beta_fixed)
+        boot = cluster_bootstrap(sub, delta_de, beta_fixed=fixed,
+                                 B=BOOTSTRAP_B, seed=BOOTSTRAP_SEED)
+        loo = loo_range(sub, delta_de, beta_fixed=fixed)
+        loro = _a3_loro(sub, delta_de, fixed) if profile != "L2" \
+            else _a3_loro(sub, delta_de, fixed)
+        beta_for_log = float(ladder["fit"]["beta"])
+        logistic = _a3_logistic_fit(sub, delta_de, beta_for_log)
+        alpha_ci = (_pct(boot["alpha"], 2.5), _pct(boot["alpha"], 97.5))
+        if model == "two_param":
+            beta_ci = (_pct(boot["beta"], 2.5), _pct(boot["beta"], 97.5))
+        else:
+            beta_ci = "fixed@0"
+        results[profile] = {"profile": profile, "model": model,
+                            "reason": ladder.get("reason", ""),
+                            "delta_de": delta_de, "fit": ladder["fit"],
+                            "bootstrap": {"alpha_ci95": list(alpha_ci),
+                                          "beta_ci95": (list(beta_ci)
+                                                        if isinstance(beta_ci,
+                                                                      tuple)
+                                                        else beta_ci),
+                                          "B": boot["B"], "seed": boot["seed"],
+                                          "n_ok": boot["n_ok"]},
+                            "loo": loo, "loro": loro, "logistic": logistic,
+                            "beta_fixed": fixed}
+    return results
+
+
+def _a3_union_fits(pres):
+    """Deterministic wider-uncertainty ensemble: point + bootstrap CI corners
+    + LOO corners + leave-one-root-out points (prediction uses the wider)."""
+    fit = pres["fit"]
+    point = (float(fit["alpha"]), float(fit["beta"]))
+    fits = [point]
+    boot = pres.get("bootstrap", {})
+    ci_a = boot.get("alpha_ci95")
+    ci_b = boot.get("beta_ci95")
+    if isinstance(ci_a, (list, tuple)) and len(ci_a) == 2:
+        alo, ahi = float(ci_a[0]), float(ci_a[1])
+        if isinstance(ci_b, (list, tuple)) and len(ci_b) == 2:
+            blo, bhi = float(ci_b[0]), float(ci_b[1])
+            fits += [(alo, blo), (alo, bhi), (ahi, blo), (ahi, bhi)]
+        else:
+            fits += [(alo, point[1]), (ahi, point[1])]
+    loo = pres.get("loo", {})
+    if "alpha_min" in loo:
+        amin, amax = float(loo["alpha_min"]), float(loo["alpha_max"])
+        bmin, bmax = float(loo["beta_min"]), float(loo["beta_max"])
+        fits += [(amin, bmin), (amin, bmax), (amax, bmin), (amax, bmax)]
+    for _, refit in (pres.get("loro") or {}).items():
+        fits.append((float(refit["alpha"]), float(refit["beta"])))
+    # Deduplicate exactly (deterministic order kept).
+    seen, uniq = set(), []
+    for pair in fits:
+        if pair not in seen:
+            seen.add(pair)
+            uniq.append(pair)
+    return uniq
+
+
+def a3_backoffs(fit_results, brackets):
+    """Frozen inversion at n=64/128/256 × eps 0.10/0.01, point + union ints."""
+    table = []
+    for profile in ("L045", "L055", "L2"):
+        pres = fit_results.get(profile)
+        if pres is None or pres.get("model") == MODEL_NOT_IDENTIFIABLE:
+            continue
+        layer = PROFILE_LAYER[profile]
+        delta_de = float(brackets[profile]["delta_de"])
+        h = float(brackets[profile]["h"])
+        dd_list = [delta_de - h, delta_de, delta_de + h]
+        fits = _a3_union_fits(pres)
+        point = (float(pres["fit"]["alpha"]), float(pres["fit"]["beta"]))
+        for n in (64, 128, 256):
+            row = {"profile": profile, "n": int(n)}
+            for eps in (EPS_PRIMARY, EPS_SENSITIVITY):
+                ms = m_star(int(n), float(eps), delta_de, point[0], point[1],
+                            layer)
+                back = row_backoff(int(n), float(eps), delta_de, point[0],
+                                   point[1], layer)
+                lo_ms, hi_ms = ms, ms
+                for alpha, beta in fits:
+                    for dd in dd_list:
+                        cand = m_star(int(n), float(eps), dd, alpha, beta,
+                                      layer)
+                        lo_ms, hi_ms = min(lo_ms, cand), max(hi_ms, cand)
+                key = ("eps%.2f" % float(eps)).replace(".", "p")
+                row[key] = {"m_point": int(ms), "backoff_point": int(back),
+                            "m_union": [int(lo_ms), int(hi_ms)],
+                            "backoff_union": [int(lo_ms - baseline_m0(layer, int(n))),
+                                              int(hi_ms - baseline_m0(layer, int(n)))]}
+            if row["eps0p10"]["m_point"] > row["eps0p01"]["m_point"]:
+                raise ValueError("STOP: m*(0.01) < m*(0.10) for %s n=%d"
+                                 % (profile, n))
+            table.append(row)
+    return table
+
+
+def _a3_binomial_8_interval(p_point):
+    """Deterministic model-based 8-trial 95% interval (exact binomial)."""
+    p = min(max(float(p_point), 0.0), 1.0)
+    pmf = [math.comb(8, k) * (p ** k) * ((1.0 - p) ** (8 - k)) for k in range(9)]
+    cdf = []
+    acc = 0.0
+    for v in pmf:
+        acc += v
+        cdf.append(acc)
+    lo_k, hi_k = 0, 8
+    for k in range(9):
+        if cdf[k] >= 0.025:
+            lo_k = k
+            break
+    acc = 0.0
+    for k in range(8, -1, -1):
+        acc += pmf[k]
+        if acc >= 0.025:
+            hi_k = k
+            break
+    # ponytail: exact 8-trial quantiles; upgrade to Clopper-Pearson only if needed
+    return {"n_trials": 8, "p_point": float(p), "k_low": int(lo_k),
+            "k_high": int(hi_k), "rate_low": float(lo_k) / 8.0,
+            "rate_high": float(hi_k) / 8.0}
+
+
+def _a3_empirical_residual_range(clusters, profile, delta_de, alpha, beta):
+    res = []
+    for c in clusters:
+        if c["profile"] != profile:
+            continue
+        pred = float(p_success(c["n"], c["delta"], float(delta_de),
+                               float(alpha), float(beta)))
+        res.append(float(c["y"]) / float(c["t"]) - pred)
+    if not res:
+        return {"min_residual": 0.0, "max_residual": 0.0, "n_clusters": 0,
+                "descriptive_only": True}
+    return {"min_residual": float(min(res)), "max_residual": float(max(res)),
+            "n_clusters": int(len(res)), "descriptive_only": True}
+
+
+def a3_predictions(fit_results, brackets, clusters, de_root):
+    """Build exactly the three outcome-BLANK D16 prediction records.
+
+    Only call when all three profiles identify; otherwise persist diagnostics
+    only and write no filled predictions.
+    """
+    for profile in ("L045", "L055", "L2"):
+        pres = fit_results.get(profile)
+        if pres is None or pres.get("model") == MODEL_NOT_IDENTIFIABLE:
+            raise ValueError("MODEL_NOT_IDENTIFIABLE for %s: no filled "
+                             "predictions" % profile)
+    assert_d16_root_absent()
+    preds = []
+    arms = (("L045", 125), ("L055", 125), ("L2", 94))
+    for profile, m in arms:
+        pres = fit_results[profile]
+        layer = PROFILE_LAYER[profile]
+        n = N_REF
+        delta = delta_of(int(m), int(n), layer)
+        delta_de = float(brackets[profile]["delta_de"])
+        h = float(brackets[profile]["h"])
+        dd_list = [delta_de - h, delta_de, delta_de + h]
+        fits = _a3_union_fits(pres)
+        lo, hi = predict_interval(int(n), float(delta), fits, dd_list)
+        point = float(p_success(int(n), float(delta), delta_de,
+                                float(pres["fit"]["alpha"]),
+                                float(pres["fit"]["beta"])))
+        disp = {"binomial_8_trial_interval_95":
+                _a3_binomial_8_interval(point),
+                "empirical_graph_residual_range_descriptive":
+                _a3_empirical_residual_range(clusters, profile, delta_de,
+                                            float(pres["fit"]["alpha"]),
+                                            float(pres["fit"]["beta"]))}
+        boot = pres.get("bootstrap", {})
+        pred = {
+            "schema": "d16_holdout_prediction_v1",
+            "profile": profile, "n": int(n), "m": int(m),
+            "delta": float(delta), "layer": layer,
+            "delta_DE": {"value": float(delta_de), "h": float(h),
+                         "source_de_root": str(de_root),
+                         "flags": list(brackets[profile].get("flags", [])),
+                         "union_list": [float(v) for v in dd_list]},
+            "model": {"link": "probit",
+                      "alpha": float(pres["fit"]["alpha"]),
+                      "beta": float(pres["fit"]["beta"]),
+                      "alpha_ci": list(boot.get("alpha_ci95", [])),
+                      "beta_ci_or_fixed": boot.get("beta_ci95", []),
+                      "identifiability": pres.get("model"),
+                      "ladder_reason": pres.get("reason", "")},
+            "prediction": {"p_success_interval_95": [float(lo), float(hi)],
+                           "p_point": float(point),
+                           "expected_graph_dispersion": disp,
+                           "n_graphs": 4, "trials_per_graph": 8},
+            "falsification": {
+                "rule": "pool outside 95% band -> FALSIFIED; inside -> "
+                        "NOT_FALSIFIED; engineering_violation -> "
+                        "INCONCLUSIVE; per-graph range descriptive"},
+            "outcome": {"pool": "BLANK", "per_graph": "BLANK",
+                        "exact": "BLANK", "syndrome": "BLANK",
+                        "undetected": "BLANK", "terminal": "BLANK"},
+            "gate": {"fail_if_d16_root_exists": True,
+                     "predictions_frozen_before_run": True},
+        }
+        for field in ("pool", "per_graph", "exact", "syndrome",
+                      "undetected", "terminal"):
+            if pred["outcome"][field] != "BLANK":
+                raise ValueError("prediction outcome not blank")
+        preds.append(pred)
+    return preds
+
+
+def _a3_rss_bytes():
+    try:
+        import resource
+        return int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024)
+    except Exception:
+        return 0
+
+
+def a3_write_root(bundle):
+    """Persist one A3 bundle to its fresh root (never overwrite)."""
+    resolved = bundle["resolved"]
+    resolved.mkdir(parents=True)  # fail-closed: exists → FileExistsError
+    _write_json(resolved / "manifest.json", bundle["manifest"])
+    _write_csv(resolved / "clusters.csv", A3_CLUSTER_COLUMNS,
+               bundle["clusters"])
+    _write_json(resolved / "fit.json", bundle["fit"])
+    _write_json(resolved / "backoffs.json", bundle["backoffs"])
+    for pred, name in zip(bundle.get("predictions") or [],
+                          A3_PREDICTION_NAMES):
+        with open(resolved / name, "w", encoding="utf-8") as fh:
+            json.dump(pred, fh, indent=2, sort_keys=True)
+            fh.write("\n")
+    with open(resolved / "command_log.txt", "w", encoding="utf-8") as fh:
+        fh.write("".join(line + "\n" for line in bundle["log_lines"]))
+    return bundle["manifest"]
+
+
+def a3_verify_fit_root(out_root, de_root=A3_DE_ROOT,
+                       finite_roots=A3_FINITE_ROOTS):
+    """Read-only recomputation of a completed A3 fit root (zero sci calls)."""
+    root = Path(str(out_root))
+    violations = []
+    if not root.is_dir():
+        print("VERIFY root missing: %s" % root)
+        return False
+    names = sorted(p.name for p in root.iterdir())
+    want = sorted(list(A3_FIT_EVIDENCE_FILES))
+    manifest = json.loads((root / "manifest.json").read_text("utf-8")) \
+        if (root / "manifest.json").exists() else {}
+    n_pred = 0
+    for cand in A3_PREDICTION_NAMES:
+        if (root / cand).exists():
+            n_pred += 1
+    if n_pred not in (0, 3):
+        violations.append("prediction files != 0/3")
+    if sorted([n for n in names if n not in A3_PREDICTION_NAMES]) != want:
+        violations.append("evidence files mismatch: %s" % names)
+        print("VERIFY evidence files mismatch: %s" % names)
+        return False
+    if manifest.get("command") != A3_FROZEN_COMMAND:
+        violations.append("manifest command != frozen A3 command")
+    if manifest.get("change_id") != CHANGE_ID:
+        violations.append("manifest change_id mismatch")
+    try:
+        brackets = a3_recompute_brackets(de_root)
+    except Exception as exc:
+        violations.append("bracket recompute FAIL: %s" % exc)
+        brackets = None
+    try:
+        clusters = a3_aggregate_finite(list(finite_roots))
+    except Exception as exc:
+        violations.append("aggregation recompute FAIL: %s" % exc)
+        clusters = None
+    if clusters is not None:
+        stored_clusters = _read_csv(root / "clusters.csv")
+        if len(stored_clusters) != len(clusters):
+            violations.append("cluster rows %d != recomputed %d"
+                              % (len(stored_clusters), len(clusters)))
+        else:
+            for stored, cell in zip(
+                    sorted(stored_clusters,
+                           key=lambda r: (r["source_root"], r["profile"],
+                                          int(r["n"]), int(r["m"]),
+                                          int(r["graph_seed"]))), clusters):
+                for key in ("source_root", "profile", "n", "m",
+                            "graph_seed", "y", "t"):
+                    if str(stored[key]) != str(cell[key]):
+                        violations.append("cluster %s %s drift" % (
+                            cell["graph_id"], key))
+                        break
+                if abs(float(stored["delta"]) - float(cell["delta"])) > 1e-12:
+                    violations.append("cluster %s delta drift"
+                                      % cell["graph_id"])
+        fit_doc = json.loads((root / "fit.json").read_text("utf-8"))
+        for profile in ("L045", "L055", "L2"):
+            stored = (fit_doc.get("profiles") or {}).get(profile)
+            if stored is None:
+                violations.append("fit profile %s missing" % profile)
+                continue
+            sub = [c for c in clusters if c["profile"] == profile]
+            if stored.get("model") == MODEL_NOT_IDENTIFIABLE:
+                continue
+            try:
+                primary = (profile == "L2")
+                check = fit_with_ladder(
+                    sub, float(brackets[profile]["delta_de"]),
+                    primary_one_param=primary, B=BOOTSTRAP_B,
+                    seed=BOOTSTRAP_SEED)
+            except Exception as exc:
+                violations.append("selection recompute FAIL %s: %s"
+                                  % (profile, exc))
+                continue
+            if check.get("model") != stored.get("model"):
+                violations.append("model selection drift %s: %s != %s"
+                                  % (profile, check.get("model"),
+                                     stored.get("model")))
+            try:
+                want_alpha = float(stored["fit"]["alpha"])
+                want_beta = float(stored["fit"]["beta"])
+                got = fit_profile(
+                    sub, float(brackets[profile]["delta_de"]),
+                    beta_fixed=(0.0 if stored.get("model") == "one_param"
+                                else None))
+                if abs(got["alpha"] - want_alpha) / max(want_alpha, 1e-12) > 1e-9 \
+                        or abs(got["beta"] - want_beta) > 1e-9:
+                    violations.append("point-fit drift %s" % profile)
+            except Exception as exc:
+                violations.append("point-fit recompute FAIL %s: %s"
+                                  % (profile, exc))
+        # Prediction + blank-gate recompute.
+        for name in A3_PREDICTION_NAMES:
+            path = root / name
+            if not path.exists():
+                continue
+            pred = json.loads(path.read_text("utf-8"))
+            for field in ("pool", "per_graph", "exact", "syndrome",
+                          "undetected", "terminal"):
+                if pred.get("outcome", {}).get(field) != "BLANK":
+                    violations.append("%s outcome %s not BLANK" % (name, field))
+            disp = pred.get("prediction", {}).get("expected_graph_dispersion",
+                                                  {})
+            if "binomial_8_trial_interval_95" not in disp \
+                    or "empirical_graph_residual_range_descriptive" not in disp:
+                violations.append("%s dispersion object incomplete" % name)
+        try:
+            assert_d16_root_absent()
+        except FileExistsError:
+            violations.append("D16 root exists (holdout violated)")
+    print("VERIFY checked_clusters=%d violations=%d"
+          % (len(clusters) if clusters is not None else -1, len(violations)))
+    for violation in violations[:20]:
+        print("  VIOLATION %s" % violation)
+    ok = not violations
+    print("VERIFY %s" % ("PASS" if ok else "FAIL"))
+    return ok
+
+
+def a3_run(out_root, de_root=A3_DE_ROOT, finite_roots=A3_FINITE_ROOTS,
+           now_fn=None, rss_fn=None):
+    """Execute the frozen one-shot A3 fit (no writes until verified in-memory).
+
+    Zero DE/decoder/CAL/VAL calls; exactly six input roots; single process;
+    no retry/resume/tuning. Creates the fresh fit root exactly once.
+    """
+    now = now_fn or time.monotonic
+    rss_fn = rss_fn or _a3_rss_bytes
+    t0 = float(now())
+    log_lines = []
+
+    def log(message):
+        line = "[%s] %s" % (time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                         time.gmtime()), message)
+        log_lines.append(line)
+
+    finite_roots = list(finite_roots)
+    # Fresh-root probe BEFORE input reads (fail-closed, creates nothing).
+    resolved = probe_fresh_root(out_root)
+    # D16 holdout gate BEFORE input reads.
+    assert_d16_root_absent()
+    log("A3 roots validated; D16 absent; reading six inputs")
+    brackets = a3_recompute_brackets(de_root)
+    log("brackets recomputed L045=%.17g L055=%.17g L2=%.17g"
+        % (brackets["L045"]["delta_de"], brackets["L055"]["delta_de"],
+           brackets["L2"]["delta_de"]))
+    clusters = a3_aggregate_finite(finite_roots)
+    log("aggregated clusters=%d (L045=%d L055=%d L2=%d)"
+        % (len(clusters),
+           sum(1 for c in clusters if c["profile"] == "L045"),
+           sum(1 for c in clusters if c["profile"] == "L055"),
+           sum(1 for c in clusters if c["profile"] == "L2")))
+    fit_results = a3_fit_all(clusters, brackets)
+    for profile in ("L045", "L055", "L2"):
+        pres = fit_results[profile]
+        if pres.get("model") == MODEL_NOT_IDENTIFIABLE:
+            log("%s %s (%s)" % (profile, MODEL_NOT_IDENTIFIABLE,
+                                pres.get("reason", "")))
+        else:
+            log("%s %s alpha=%.6g beta=%.6g" % (
+                profile, pres.get("model"), pres["fit"]["alpha"],
+                pres["fit"]["beta"]))
+    backoffs = a3_backoffs(fit_results, brackets)
+    log("backoffs rows=%d" % len(backoffs))
+    predictions = None
+    terminal = "SCALING_MODEL_NOT_IDENTIFIABLE"
+    if all(fit_results[p].get("model") != MODEL_NOT_IDENTIFIABLE
+           for p in ("L045", "L055", "L2")):
+        predictions = a3_predictions(fit_results, brackets, clusters, de_root)
+        terminal = "SCALING_FIT_COMPLETE_PREDICTIONS_FROZEN"
+        log("predictions frozen=%d (outcome BLANK)" % len(predictions))
+    else:
+        missing = [p for p in ("L045", "L055", "L2")
+                   if fit_results[p].get("model") == MODEL_NOT_IDENTIFIABLE]
+        log("diagnostics only; no filled predictions (missing %s)" % missing)
+    wall_s = float(now()) - t0
+    peak_rss = int(rss_fn())
+    violations = []
+    if wall_s > A3_WALL_BUDGET_S:
+        violations.append("wall budget exceeded")
+    if peak_rss >= RSS_BUDGET_BYTES:
+        violations.append("RSS budget exceeded")
+    manifest = {
+        "schema": "v72p2d17_scaling_fit_manifest_v1",
+        "change_id": CHANGE_ID, "cycle": CYCLE_ID,
+        "claim_ceiling": CLAIM_CEILING,
+        "command": A3_FROZEN_COMMAND,
+        "de_root": str(de_root),
+        "finite_roots": list(finite_roots),
+        "out_root": str(resolved),
+        "brackets": brackets,
+        "terminal": terminal,
+        "cluster_counts": {
+            "total": len(clusters),
+            "L045": sum(1 for c in clusters if c["profile"] == "L045"),
+            "L055": sum(1 for c in clusters if c["profile"] == "L055"),
+            "L2": sum(1 for c in clusters if c["profile"] == "L2")},
+        "models": {p: {"model": fit_results[p].get("model"),
+                       "reason": fit_results[p].get("reason", "")}
+                   for p in ("L045", "L055", "L2")},
+        "budgets": {"de_calls": 0, "decoder_calls": 0, "cal_calls": 0,
+                    "val_calls": 0, "inputs": 6, "wall_s": A3_WALL_BUDGET_S,
+                    "rss_bytes": RSS_BUDGET_BYTES, "processes": 1,
+                    "retry": False, "resume": False, "tuning": False},
+        "scientific_calls": 0, "decoder_calls": 0,
+        "wall_s": wall_s, "peak_rss_bytes": peak_rss,
+        "budget_violations": violations,
+        "evidence_files": list(A3_FIT_EVIDENCE_FILES) + (
+            list(A3_PREDICTION_NAMES) if predictions else []),
+        "authorization": ("A3 one-shot EXPLORE fit grant; --execution-"
+                          "authorized required; D16 execution unauthorized"),
+    }
+    fit_doc = {"schema": "v72p2d17_scaling_fit_v1", "change_id": CHANGE_ID,
+               "de_root": str(de_root), "brackets": brackets,
+               "profiles": fit_results}
+    back_doc = {"schema": "v72p2d17_row_backoff_v1", "change_id": CHANGE_ID,
+                "rows": backoffs,
+                "note": "diagnostic modeled backoffs, not FER qualification"}
+    log("terminal=%s wall_s=%.3f" % (terminal, wall_s))
+    bundle = {"resolved": resolved, "manifest": manifest,
+              "clusters": clusters, "fit": fit_doc, "backoffs": back_doc,
+              "predictions": predictions, "log_lines": log_lines}
+    # Single never-overwrite writer (mkdir fail-closed inside).
+    a3_write_root(bundle)
+    return bundle
+

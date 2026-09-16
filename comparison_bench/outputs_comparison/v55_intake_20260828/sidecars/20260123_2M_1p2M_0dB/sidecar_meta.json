@@ -1,0 +1,52 @@
+{
+  "session_id": "20260123_2M_1p2M_0dB",
+  "stratum": "2M",
+  "label": "2026.1.23 2M 1.2M",
+  "date": "2026-01-23",
+  "provenance": [
+    {
+      "path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.ttbin",
+      "sha256": "e8c6f67b2e129c6109f45326b3c7cc207a6a7d0a3f3419b6074ca811ef2f669b",
+      "size": 21264,
+      "mtime": 1769161808.6574023
+    },
+    {
+      "path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.1.ttbin",
+      "sha256": "e00796306c9d2615dfaeb3d6fad0ad4c6c5dd8b335da77af2c84494a63cf54ae",
+      "size": 37376992,
+      "mtime": 1769161811.6868136
+    }
+  ],
+  "provenance_note": "main .ttbin + .1.ttbin same acquisition, FileReader auto-merge, recorded both",
+  "materialize_params": {
+    "dimension": 1024,
+    "bin_width_ps": 200,
+    "pairing": "nearest",
+    "processing_rule": "legacy_v1",
+    "channels": {
+      "A": 1,
+      "B": 5
+    },
+    "used_params": {
+      "dimension": 1024,
+      "bin_width_ps": 200,
+      "pairing_mode": "nearest",
+      "processing_rule_version": "legacy_v1"
+    }
+  },
+  "diagnostics": {
+    "n_pairs_raw": 1411434,
+    "n_pairs_kept": 1411328,
+    "n_frames": 5513,
+    "n_tail_dropped": 106,
+    "pairs_per_frame": 256,
+    "dropped_tail_pairs": 106
+  },
+  "checks": {
+    "structural_only": true,
+    "no_decoder": true,
+    "no_padding": true,
+    "no_resampling": true,
+    "no_cross_session": true
+  }
+}

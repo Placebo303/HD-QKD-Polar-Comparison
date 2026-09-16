@@ -130,3 +130,174 @@
   path ready, batch NOT authorized. Pre-EXECUTE carried: APP-source frozen
   L055; d5-tree reconfirm carried. No-execution-authorized statement:
   **no D14N execution is authorized by this close.**
+- 2026-09-15 main-thread R2 acceptance: accepted independent review
+  `EVIDENCE_ACCESS: VERIFIED` / `PASS_WITH_FINDINGS`, BLOCKING none. The prior
+  authorized-branch blocker is resolved: CLI now calls exactly one
+  `run_authorized_batch` and one `write_batch_root`; fake true-branch executed
+  288/288 records with setup=32 and verifier PASS while production calls stayed
+  zero. Accepted terminal:
+  `D14N_R2_EXECUTION_PATH_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`. This grants
+  no execution. The real root remains absent; D7-H and route selection remain
+  closed.
+
+## 2026-09-14 — D14N Batch A1 pre-dispatch (AUTHORIZED once)
+
+- Authority: A1 packet + this-turn user grant (D14N_CALIBRATED_DISCRIMINATOR_BATCH_A1
+  once; root workspace/v72p2d14_discriminator/20260914_r1; 288 calls / 32 setup /
+  1800 s / 120 s / RSS<2GiB / 1 CPU; APP←L055). Track EXPLORE, n128 synthetic only.
+- C1 R2-marker+review: PASS. `D14N_R2_EXECUTION_PATH_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`
+  in decision-log.md:4228-4229 + MEMORY:3889 + this log:139; R207 VERIFIED
+  PASS_WITH_FINDINGS, BLOCKING none (this log:114,121-128; decision-log.md:4217).
+- C2 branch+scope: PASS. branch=formal-ir-v72p1-addendum-clean; HEAD=3f874bb7;
+  merge-base --is-ancestor 3f874bb HEAD → YES. Scoped code paths clean
+  (runner/N14 module/2 test files: zero diff). Uncommitted dirt preserved, no repair:
+  D14 log + proposal.md carry post-commit A1/R2 supersede notes (design §9.3-authorized
+  annotation); d5 mother carries the 7+/5− P-wiring hunks (R2-F1, excluded by design);
+  broad pre-existing worktree dirt untouched.
+- C3 root+Model-F: PASS. Future root ABSENT (ls: no such directory).
+  Model-F present: cal_only=true, decoder_calls=0, p0_calls=0 (summary.json);
+  npz sha256=38e4bfba74d06234af22e931d43d00e51e4a3c61825c59f02c1ed00b6280d345
+  matches V72P2D10 log record (matches prior); mtimes 2026-09-07 (pre-existing).
+- C4 D5 wiring: PASS, no drift. run_p0_cost_synthetic:2998 + run_g1_synthetic:3013 +
+  run_g2_synthetic:3036 each call prepare_model_f_prior_candidate exactly once;
+  zero legacy prepare_model_f_prior calls in bodies 2993-3042 (LEGACY_ZERO);
+  diff is exactly the carried 7+/5− hunks (3 call swaps + 2 docstrings).
+- C5 APP source+adapters: PASS. APP_SOURCE_PROFILE='L055' (runner:64) with fail-closed
+  guards (runner:309-312 orchestrator, :824-825 verifier). Inspect-only probe:
+  6 adapters + 4 transfer_parts resolve, all signatures valid;
+  decode_fn=comparison_bench.formal_ir.v35_algorithm_development.decode_row_layered_fftqspa;
+  app_source_profile='L055'; future root absent; DECODER_CALLS=0 LOADS=0 (no invocation).
+- C6 PROFILE_ONLY: PASS (rc=0; 3 side-effect-free stdout runs — first two truncated by
+  caller pipes, third full-capture to /tmp/opencode; no root write, decoder 0 throughout).
+  admitted=18/18 (A1-A6 true, status ok, A6 replay true); L045 6/6 identical
+  E313 vh{2:71,3:57} ch{2:17,3:93} m110; L055 6/6 identical E301 vh{2:83,3:45}
+  ch{2:29,3:81} m110; L2 6/6 identical E384 vh{3:128} ch{3:32,4:72} m104;
+  replacements=0, frozen_seed_failures=[], plan_calls=288 (72×4), decoder_calls=0,
+  future_root_absent=true; setup structural 18+12+2=32; root still absent after.
+- C7 refusal: PASS. Unauthorized --n14-batch vs /tmp/opencode scratch → RC=2,
+  refusal text pre-root/bind/load; scratch target never created (absent after).
+- C8 compile+tests: PASS. py_compile OK (runner, N14 module, 2 test files).
+  29/29 passed (authorized-path 7/7 + calibrated 22/22), -p no:cacheprovider
+  -o addopts=, .venv/bin/python. Note: TMPDIR under workspace/ (DrvFs) broke pytest
+  capture (FileNotFoundError); used fresh /tmp/opencode/d14n_check8 instead;
+  workspace/d14n_check8_basement rmdir'd (no repo pollution). D11/D12 evidence
+  trusted (no focused conflict).
+- C9 frozen contract: PASS. ARMS=(L045,L055,L2_APP,L2_ORACLE); seeds
+  L1 2026093401..06 / L2 2026093501..06 / blocks 2026093601..12; ceilings 288/32;
+  WALL 1800.0 / PERCALL 120.0 / RSS ceiling 2147483648 enforced strict (rss>= → breach);
+  L1_MIN_EXACT=18, GE2_MIN=5, ORACLE_MIN=18, JOINT_MIN=9; six TERMINALS exact +
+  first-match order eng→L1→L2deg→transfer→scale→ambiguous (module:526-549);
+  MODEL_F_ROOT frozen; no prior consumption (root absent, no batch content).
+- PRE-DISPATCH: 9/9 PASS. Grant consumed at command start (next entry).
+
+## 2026-09-14 — D14N Batch A1 run evidence (AUTHORIZED once, consumed)
+
+- Actual command (with --execution-authorized; manifest keeps flag-free identity
+  `... --n14-batch --model-f-root ... --out-root ...` per R2-F3 precedent):
+  `.venv/bin/python scripts/v72p2d14_discriminator_development.py --n14-batch --execution-authorized --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/v72p2d14_discriminator/20260914_r1`
+- EXIT=0. START_UTC=2026-09-14T18:52:43Z, END_UTC=2026-09-14T18:55:40Z.
+  Runner wall_s=170.990 (≤1800 PASS); shell WALL_S=177.
+- CALLS: scientific 288/288 (= ceiling, no breach); SETUP 32/32 (= ceiling:
+  18 graphs + 12 blocks + 2 plan/manifest). PER-CALL max=0.928 s (≤120 PASS;
+  min 0.0386, mean 0.592). PEAK RSS=137207808 B (<2147483648 PASS).
+  budget_violations=[], engineering_reason="". One foreground CPU process.
+  No retry/resume/repair/seed-search/tuning/adaptive (all false in summary).
+- ADMISSION: 18/18 (graph_records.csv; PROFILE_ONLY + command_log agree:
+  `built 18 graphs admitted=18`). Amended tables in manifest match A1
+  (L045 71/57/E313 2^17+3^93; L055 83/45/E301 2^29+3^81 m110; L2 E384
+  vh{3:128} ch{3:32,4:72} m104).
+- ORDER (recomputed from decoder_records.csv, 288 rows): call_idx 0..287 exact;
+  arms L045×72 → L055×72 → L2_APP×72 → L2_ORACLE×72; frozen
+  L1/L2/block seeds paired ascending per arm; batch_id uniform
+  `d14-discriminator-v1`; status 80 converged_exact + 208 converged_no_syndrome;
+  crash=False ×288; errors none; residual/nonfinite: none observed.
+- Per-arm/per-graph pools (exact / syndrome / undetected SEPARATE):
+  L045 exact=3 syndrome=3 undet=0, per-pair [1,0,0,0,1,1];
+  L055 exact=7 syndrome=7 undet=0, per-pair [1,0,1,2,2,1];
+  L2_APP exact=7 source=7 target=7 joint=7 syndrome=7 undet=0,
+  joint per-pair [1,0,1,2,2,1];
+  L2_ORACLE exact=63 syndrome=63 undet=0, per-pair [11,11,10,9,12,10].
+  Totals: exact=80, syndrome_valid=80, undetected=0 (never merged).
+  Paired L1 discordance (descriptive): 72 cells, concordant 68,
+  challenger_only 4, reference_only 0, trials 4.
+- APP SOURCE: L055 (summary + manifest `app_source_profile: L055`; command_log
+  `composed L055-fed transfer/oracle closures`, `derived L055-fed APP sources
+  count=72`). PROVENANCE: non-oracle 216/216 CHECK_UPDATED (L045/L055/L2_APP
+  72 each; zero uniform/prior-only fallback); oracle 72/72 ORACLE, graded=False
+  (ungraded, excluded from gates ✓).
+- PREDICATES (recomputed): L1-ADEQUATE=FALSE (L055 7<18; graphs≥2 only 2/6 <5);
+  ORACLE-ADEQUATE=TRUE (63≥18); L2-JOINT-GOOD=FALSE (7<9).
+  TERMINAL stored=N_ROUTE_L1_CONSTRUCTION = first-match rule 2 ✓ consistent.
+  Evidence only; authorizes no route, no D7-H, no claims.
+- ROOT `workspace/v72p2d14_discriminator/20260914_r1/` (6 files, sha256):
+  arm_summary.csv 4542eddb…9478cb0; command_log.txt ae07744e…413e29;
+  decoder_records.csv 06c2cff7…33ccdd28b; graph_records.csv 8a4d7ba5…93cf8fe74;
+  manifest.json 69b0351f…dafa4108; summary.json 2c2d9b26…4993deb91a.
+- VERIFIER (read-only --verify): `VERIFY checked_calls=288 violations=0 /
+  VERIFY PASS`, rc=0.
+- Model-F post-run immutable: npz sha256 38e4bfba…6280d345 unchanged,
+  mtimes 2026-09-07 unchanged.
+- GRANT_CONSUMED (single execution; no rerun/retry/repair performed).
+  No commit/push (none requested). Batch-end independent review PENDING —
+  return NOT YET `D14N_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`.
+
+## 2026-09-14 — D14N Batch A1 batch-end review (VERIFIED PASS)
+
+- REVIEW_ID: D14N-B1-REVIEW. EVIDENCE_ACCESS VERIFIED (direct reads, own
+  recounts, own read-only --verify rc=0, Model-F re-hash, branch/HEAD 3f874bb7
+  + merge-base ancestor YES). No edits/reruns/root-modification/commit/push.
+- AUTHORIZATION PASS: one-shot (operator record with-flag command; manifest
+  flag-free identity per explicit precedent; command_log single dispatched=288
+  pass; one root; grant consumed once).
+- INVENTORY PASS: six files, hashes match
+  (4542eddb…/ae07744e…/06c2cff7…/8a4d7ba5…/69b0351f…/2c2d9b26…);
+  288 decoder + 18 graph rows.
+- ADMISSION PASS: 18/18 (A1-A6 true all rows); amended cells in graph rows +
+  manifest (L045 m110/E313, L055 m110/E301, L2 m104/E384;
+  2^17+3^93 / 2^29+3^81 / 3^32+4^72).
+- IDENTITIES PASS: 288 unique (arm,pair,block); idx 0..287 (L045 0-71 →
+  L055 72-143 → APP 144-215 → ORACLE 216-287); frozen seeds; batch_id
+  d14-discriminator-v1; setup 18+12+2=32.
+- RECOUNTS PASS (own): L045 3/3/0 [1,0,0,0,1,1]; L055 7/7/0 [1,0,1,2,2,1];
+  APP 7/7/0 joint 7 [1,0,1,2,2,1] (source=target=7, joint==exact all 72);
+  ORACLE 63/63/0 [11,11,10,9,12,10]; totals 80=80, undetected 0,
+  mismatches 0; converged_exact 80 + no_syndrome 208; crash 0.
+- SOURCE PASS: APP←L055 (manifest/summary/command_log count=72); provenance
+  216 CHECK_UPDATED + 72 ORACLE; oracle graded=False excluded;
+  joint==L055 vector.
+- PREDICATES PASS: L1-ADEQUATE FALSE (7<18; ge2 2/6<5); ORACLE TRUE (63≥18);
+  JOINT FALSE (7<9).
+- TERMINAL PASS: rule-2 N_ROUTE_L1_CONSTRUCTION; stored matches; frozen
+  six-set; discordance 68/4/0 descriptive-only.
+- BUDGETS PASS: 288/288, 32/32, wall 170.990/1800, per-call-max 0.928/120
+  (mean 0.5916), RSS 137207808<2GiB, 1 proc, violations [] + verifier 0.
+- NO-RETRY PASS; VERIFIER OWN PASS (288/0 rc=0); MODEL-F/CLAIM/PATH PASS
+  (hash+mtimes unchanged; CAL-only; ceiling intact; no D7-H/real-data).
+- TRUST: R207 + 9/9 cited per trust rule (readiness provenance only; batch
+  numbers independently recomputed).
+- FINDINGS: BLOCKING none; non-blocking suggestion (echo argv+exit into
+  command_log.txt in future batches for self-contained one-shot proof).
+- VERDICT PASS; recommendation
+  D14N_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION; no
+  route/D7-H/commit-push.
+- Close: grant consumed, no second run, no commit/push, memory triage pending.
+- 2026-09-15 main-thread result acceptance: accept the verified 288-call batch
+  and literal machine terminal `N_ROUTE_L1_CONSTRUCTION` as correctly computed
+  evidence, but do not accept its causal investment inference yet. L1 was run
+  at effective disclosure about 1.002 while L2 ORACLE retained about 1.261;
+  their recovery rates are not a symmetric layer comparison. At n=128, failure
+  near entropy can be a finite-length margin effect rather than a degree-profile
+  defect. L055 also remains directionally above L045 (7 vs 3), so the statement
+  that its D12 advantage "was a rate artifact" is superseded as too strong.
+  Accepted terminal: `D14N_RESULT_ACCEPTED_MARGIN_CONFOUNDED_ROUTE_DEFERRED`.
+  Next: D15 paired L1/L2 finite-length margin curve; no D7-H.
+
+## 2026-09-15 — D15 readiness R1 pointer (append-only, no D14 change)
+
+- D15 readiness closed documentation-only: `docs/research_cycles/V72P2D15-MARGIN-CURVE/READINESS_R1.md`
+  + `EXPLORATION_LOG.md`; D15 OpenSpec `tasks.md` D1503–D1510 marked [x].
+- D15-R1510 (trusted VERIFIED, do not rerun): EVIDENCE_ACCESS VERIFIED, VERDICT
+  PASS_WITH_FINDINGS, BLOCKING none; terminal
+  `D15_MARGIN_CURVE_READY_AWAITING_EXPLICIT_AUTHORIZATION`.
+- No D15 execution authorized; future root absent; decoder/scientific 0; no commit/push.
+  D14 record above unchanged.

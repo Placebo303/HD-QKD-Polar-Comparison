@@ -4098,3 +4098,96 @@ def test_R2_candidate_prepare_contract_and_isolation(tmp_path,
     # production wiring unchanged: frozen prepare still uses per-cell math
     assert "build_f_model(" in inspect.getsource(mod.prepare_model_f_prior)
     assert "concentration" not in inspect.getsource(mod.prepare_model_f_prior)
+
+
+# --------------------------------------------------------------------------
+# D14 P-impl: production prior selection (fake decoder + tmp out_dir only)
+# --------------------------------------------------------------------------
+def _d14p_fixture_tables():
+    # Test-only injected Model-F tables (never a formal-root read, never
+    # claimed as CAL-TRAIN): accepted (1024, 1024) counts contract with a
+    # uniform P(B) marginal, seeded independently of other fixtures.
+    rng = np.random.default_rng(20260914)
+    counts = rng.integers(0, 50, size=(1024, 1024)).astype(np.float64)
+    p_b = np.full(1024, 1.0 / 1024)
+    return counts, p_b
+
+
+def _d14p_selection_proof(monkeypatch, tmp_path, runner_name,
+                          want_decoder_calls):
+    counts, p_b = _d14p_fixture_tables()
+    formal_before = _snapshot_formal_roots()
+    monkeypatch.chdir(tmp_path)
+    cand_calls = []
+    selected = {}
+    orig_cand = mod.prepare_model_f_prior_candidate
+
+    def _spy_cand(*a, **k):
+        cand_calls.append(1)
+        pb, pf = orig_cand(*a, **k)
+        selected["pb"] = np.asarray(pb)
+        selected["pf"] = np.asarray(pf)
+        return pb, pf
+
+    def _poison_legacy(*a, **k):
+        raise AssertionError("legacy prepare_model_f_prior entered")
+
+    def _boom_bind(*a, **k):
+        raise AssertionError("production decoder bound on fake path")
+
+    monkeypatch.setattr(mod, "prepare_model_f_prior_candidate", _spy_cand)
+    monkeypatch.setattr(mod, "prepare_model_f_prior", _poison_legacy)
+    monkeypatch.setattr(mod, "bind_historical_decoder", _boom_bind)
+    fake = FakeDecoder()
+    out = tmp_path / runner_name
+    runner = getattr(mod, runner_name)
+    res = runner(counts_ab=counts, p_b=p_b, decode_fn=fake,
+                 authorized=True, out_dir=out)
+    assert len(cand_calls) == 1
+    assert len(fake.calls) == want_decoder_calls
+    assert res["decoder_calls"] == want_decoder_calls
+    pb_sel = selected["pb"]
+    pf_sel = selected["pf"]
+    assert np.all(np.isfinite(pb_sel))
+    assert np.all(np.isfinite(pf_sel))
+    assert abs(float(pb_sel.sum()) - 1.0) <= 1e-8
+    assert np.all(np.abs(pf_sel.sum(axis=0) - 1.0) <= 1e-8)
+    assert float(np.abs(pf_sel - pf_sel.mean()).max()) > 1e-6
+    want_pb, want_pf = orig_cand(counts, p_b)
+    assert np.array_equal(pb_sel, want_pb)
+    assert np.array_equal(pf_sel, want_pf)
+    assert float(np.abs(pf_sel - want_pf).max()) == 0.0
+    assert sorted(p.name for p in out.iterdir()) == sorted(
+        mod.STAGE_EVIDENCE_FILES)
+    _assert_formal_roots_unchanged(formal_before)
+    return res
+
+
+def test_D14P_p0_selects_candidate(tmp_path, monkeypatch):
+    res = _d14p_selection_proof(monkeypatch, tmp_path,
+                                "run_p0_cost_synthetic", 12)
+    assert res["phase"] == "p0-cost"
+
+
+def test_D14P_g1_selects_candidate(tmp_path, monkeypatch):
+    res = _d14p_selection_proof(monkeypatch, tmp_path,
+                                "run_g1_synthetic", 440)
+    assert res["phase"] == "g1"
+
+
+def test_D14P_g2_selects_candidate(tmp_path, monkeypatch):
+    res = _d14p_selection_proof(monkeypatch, tmp_path,
+                                "run_g2_synthetic", 1320)
+    assert res["phase"] == "g2"
+
+
+def test_D14P_no_legacy_estimator_return():
+    # D7-E e03 precedent: the legacy stem must be followed by `(` so the
+    # candidate name never matches; each entrypoint body must select the
+    # candidate and never call the legacy estimator.
+    pat = re.compile(r"prepare_model_f_prior\(")
+    for name in ("run_p0_cost_synthetic", "run_g1_synthetic",
+                 "run_g2_synthetic"):
+        src = inspect.getsource(getattr(mod, name))
+        assert pat.search(src) is None
+        assert "prepare_model_f_prior_candidate(" in src

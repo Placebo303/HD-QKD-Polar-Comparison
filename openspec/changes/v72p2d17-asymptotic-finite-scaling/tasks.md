@@ -99,3 +99,138 @@ explicit user grant with Pre-`EXECUTE`/Pre-`RESULT`).
   identity, finite-data eligibility, equations/units, grid/budgets,
   identifiability logic, target-row inversion, `D16` holdout isolation, zero
   scientific calls. Any blocking finding → STOP.
+
+## R2-spec amendment (this call, planner, OpenSpec-only)
+
+- [x] **R2-SPEC** Amend this change (`design.md` new §10 + `specs/de-scaling/spec.md`
+  R2 deltas `REQ-DE-R2-01..07` + this task list): record A1 failure evidence by
+  reference (`DE_CALL_FAILED@0` tuple-not-callable, `0/240`, retained root
+  `workspace/d17_current_channel_asymptotic_de_7e4b2a1d-9c3f-4d8e-a1b2-c3d4e5f60718`,
+  review `VERIFIED/PASS`) with A1-root immutability; freeze `R201–R204`,
+  validation `V1–V7` + one-correction allowance, A2 root/command/budgets,
+  pre-dispatch `P1–P8`, batch-end scope, return terminals. Authority:
+  `.workbuddy/tasks/D17_DE_BINDING_REPAIR_R2_AND_RERUN_TASK_PACKET.md` §§1–5.
+  Zero `DE`/decoder calls; no code/scripts/tests/roots edits; no commit/push.
+  Branch `formal-ir-v72p1-addendum-clean` unchanged.
+
+## R2 binding repair + rerun (packet §§2–7 — [ ] future operator work, not this call)
+
+Each needs the packet + companion prompt authorization; A2 additionally needs
+pre-dispatch PASS. `R204` scientific contract unchanged.
+
+- [ ] **R201 L1 tuple-to-sampler** — `load_l1_channel` once → exact 3-item
+  finite shape-compatible `(pb,p_f,p1)` → `build_l1_sampler` once → callable →
+  tiny-invocation `(k,32)` finite-normalized-centered proof in zero-call
+  contract test (never a V26 `DE` call). Evidence: `design.md` §10.2 +
+  `REQ-DE-R2-02`.
+- [ ] **R202 L2 oracle adapter** — `p2` once via `conditionalize_f_to_p2`;
+  joint `pb[B]*p_f[A,B]` sampling; `u1=A//32`, `u2=A%32`; prior EXCLUSIVELY
+  via `oracle_l2_prior(p2,B,u1)`; D9/D5 floor-normalize; XOR-center on true
+  `u2`; fail-closed; V36/V37 forbidden with reason. Evidence: §10.3 +
+  `REQ-DE-R2-03`.
+- [ ] **R203 profile dispatch** — L1 profiles ← L1 callable only; L2 ← L2
+  callable only; frozen-plan-profile selection before every `run_de_call`;
+  unknown/mislabelled fail pre-scientific-call; DI preserved for fakes but
+  channels explicit; single shared callable forbidden. Evidence: §10.4 +
+  `REQ-DE-R2-04`.
+- [ ] **R204 freeze check** — 15 points, seeds `2026094201..08`, pops
+  `4000/16000`, lambda/rho, kernel `60/1e-4/20`, bracket/flag/`delta_DE`
+  rules, plan order, `240/12` ceilings + resource budgets, claim ceiling,
+  banned D16 — all unchanged. Evidence: §10.5 + `REQ-DE-R2-05`.
+- [ ] **V1–V7 validation** — (1) A1 mechanical reproduction from persisted
+  evidence; (2) zero-call binder resolution; (3) stub-loader
+  unpack/build/invoke/non-identical-rows proof; (4) 240-row fake dispatch with
+  swapped/missing/tuple/unknown/shape/nonfinite failures; (5) real-chain
+  zero-call spy with L2-mixer hit + `run_de_call` count zero; (6) `py_compile`
+  + focused tests in fresh basetemp; (7) scoped repair review. One correction
+  within `R201–R203`, contract unchanged, failed attempt in log. Evidence:
+  §10.6 + `REQ-DE-R2-06`. Any blocker → STOP before rerun.
+- [ ] **A2 fresh rerun** — fresh root
+  `workspace/d17_current_channel_asymptotic_de_r2_61fce6d0-07ad-4b67-a1a2-ef7fc1b74b24`
+  (absent); exact frozen command; `240/12/1200s/300s/2GiB/1-proc`; no
+  retry/resume/extension/search/adaptive/second-repair. Evidence: §10.7 +
+  `REQ-DE-R2-07`.
+- [ ] **P1–P8 pre-dispatch** — append raw evidence to the one D17 log (A1
+  `VERIFIED/PASS` + error + `0/240` + grant + six-file root; branch + scoped
+  diff; A2/D16 absence + Model-F unchanged; tests + repair review PASS; frozen
+  matrix equality; `PROFILE_ONLY` + refusal checks; zero-call dual-dispatch
+  proof; command + unused grant). Any failure → STOP. Evidence: §10.8.
+- [ ] **Batch-end review + terminal** — independent scope per §10.9
+  (provenance, recount 240, dispatch confirm, convergence/`delta_DE`
+  recompute, verifier, D16/Model-F/no-decoder checks, ceilings,
+  `EVIDENCE_ACCESS` in log). Return
+  `D17_DE_R2_COMPLETE_REVIEWED_AWAITING_SCALING_FIT_DECISION` or one
+  `D17_DE_R2_*_BLOCKED_AWAITING_DECISION`. No fit/D16/route/claim follow-on.
+
+## A3-spec amendment (this call, planner, OpenSpec-only)
+
+- [x] **A3-SPEC** Amend this change (`design.md` new §11 + `specs/de-scaling/spec.md`
+  A3 deltas `REQ-DE-A3-01..08` + this task list): record main-thread acceptance
+  of `D17_DE_R2_COMPLETE_REVIEWED_AWAITING_SCALING_FIT_DECISION` (stated in the
+  authorizing prompt) + A3 one-shot grant scope (minimal entrypoint, six named
+  roots read-only, one deterministic fit, outcome-blank predictions, one
+  batch-end review; no `DE`/decoder call; `D16` execution unauthorized); freeze
+  the `--scaling-fit --execution-authorized` entrypoint contract
+  (default-false refusal pre-output/input-reads, never-overwrite), the exact
+  frozen command naming the A2 `DE` root + five finite roots in fixed order +
+  fit root `workspace/d17_finite_scaling_fit_5b6d71c8-9e42-4e64-b1c3-73a1f20d8e95`
+  (absence verified this call; no glob discovery; byte-identical in
+  code/OpenSpec/log/prompt), budgets (zero `DE`/decoder/`CAL`/`VAL`, six
+  inputs, `300s` wall, `RSS<2GiB`, 1 proc, no retry/resume/tuning), the §3
+  aggregation / §4 fit / §5 backoff / §6 prediction-freeze contracts, fixed
+  `delta_DE/h` (L045 `0.24452956979862517`/`0.078125`; L055
+  `0.30312331979862517`/`0.05859375`; L2 `0.5468113653656221`/`0.09765625`),
+  pre-dispatch 1–5 + review scope + three §9 terminals. Authority:
+  `.workbuddy/tasks/D17_SCALING_FIT_AND_D16_PREDICTION_FREEZE_A3_TASK_PACKET.md`
+  §§1–9. Zero scientific calls; no code/scripts/tests/roots edits; no
+  commit/push. Branch `formal-ir-v72p1-addendum-clean` unchanged. Absence
+  re-verified this call: fit root `File not found`; `D16` official root
+  `File not found`.
+
+## A3 scaling fit + prediction freeze (packet §§2–9 — [ ] future operator work, not this call)
+
+Each needs the packet + companion prompt authorization; the single fit
+additionally needs pre-dispatch PASS. `EXPLORE` one-shot grant.
+
+- [ ] **A3-IMPL fit/verify path** — smallest fit/verify addition to the existing
+  `D17` module, runner (`--scaling-fit` per §11.3 frozen command), and focused
+  tests; no new dependency or modeling framework. Evidence: §11.3 +
+  `REQ-DE-A3-03`.
+- [ ] **A3-AGG aggregation** — actual decoder/arm records → one binomial cluster
+  per `(source_root,profile,n,m,graph_seed)` (`y=exact`, `t=blocks`);
+  root+graph identity; no pooling/duplication/replay/syndrome-merge; `delta`
+  recomputed (mismatch STOP); frozen decoder semantics + one class per cluster;
+  `D16`/banned/fake contact STOP; reconcile to accepted totals pre-fit.
+  Evidence: §11.4 + `REQ-DE-A3-04`.
+- [ ] **A3-FIT fit + uncertainty** — fixed `delta_DE`; ladder two-param →
+  `beta=0` → `MODEL_NOT_IDENTIFIABLE`; L2 predeclared one-param; cluster
+  likelihood + deterministic search; bootstrap+`LOO` (+leave-one-root-out for
+  L045/L055, union prediction); logistic descriptive-only; residuals excluded.
+  Evidence: §11.5 + `REQ-DE-A3-05`.
+- [ ] **A3-BACKOFF row-backoff report** — frozen inversion at n=64/128/256,
+  epsilon 0.10/0.01, point + union integer intervals, `m*(0.01)>=m*(0.10)`,
+  diagnostic labeling. Evidence: §11.6 + `REQ-DE-A3-06`.
+- [ ] **A3-PRED prediction freeze** — `D16` root absent proof; exactly 3 arms
+  L045/L055/L2-ORACLE n128 m125/m94; provenance/uncertainty/union content;
+  `expected_graph_dispersion` object (`binomial_8_trial_interval_95` +
+  `empirical_graph_residual_range_descriptive`); `pool/per_graph/exact/
+  syndrome/undetected/terminal` exactly `BLANK`; falsification rule;
+  never-revise-after-observed. Evidence: §11.7 + `REQ-DE-A3-07`.
+- [ ] **A3 pre-dispatch 1–5** — A2 review accept + bracket recompute; six inputs
+  present/read-only + fit/`D16` absent; frozen root list/command + no
+  `D16`/fake/banned identity; `py_compile` + focused tests (recovery,
+  non-identifiable terminal, graph-not-row, `APP`/undetected isolation,
+  refusal, no-overwrite, prediction-blank, fake full fit); zero calls + unused
+  grant in the single `D17` log. Any failure → STOP. Evidence: §11.8.
+- [ ] **A3 batch-end review + terminal** — independent scope per §11.8
+  (aggregation, accepted totals, fixed `delta_DE`, likelihood/ladder,
+  uncertainty, inversion, bands/dispersion, blank gate, verifier, resources,
+  input immutability; one review in the `D17` log). Return exactly
+  `D17_SCALING_FIT_COMPLETE_PREDICTIONS_FROZEN_AWAITING_D16_AUTHORIZATION` on
+  full identify+freeze,
+  `D17_SCALING_MODEL_NOT_IDENTIFIABLE_AWAITING_ROUTE_DECISION` on any
+  non-identifiable model (diagnostics only, no filled predictions), or
+  `D17_SCALING_FIT_ENGINEERING_BLOCKED_AWAITING_DECISION` on
+  engineering/review failure. No `D16`/`DE`/decoder/real-data/`D7-H`/
+  `FER`/leakage/`SKR`/qualification/optimality/publication/route-closure
+  follow-on.

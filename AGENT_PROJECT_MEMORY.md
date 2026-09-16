@@ -1,9 +1,218 @@
+## 2026-09-14 D13 Batch A1 complete + VERIFIED PASS_WITH_FINDINGS batch-end review (MODEST rescue, evidence-only)
+
+- Evidence [repo-observed]: single authorized `--d13-batch --execution-authorized` run in fresh root `workspace/d13_l055_decoder_ladder_5c41b416-cacc-4b6e-892e-d8a59c53170e` (6 files, hashes match); EXIT 0, 14:31:32–14:46:36Z; 224/224 calls (56 replay + 168 ladder), setup 2/8, wall 869.161/1800, per-call-max 8.297/120, RSS 125267968<2GiB, violations []; REPLAY 56/56 match, 0 mismatch, first-mismatch gate never triggered; RESCUES RL360_a1 3 (n128 1 / n256 2, MODEST) / RL360_a0.7 1 (0/1, NO) / FLOOD360 0 (NO); undetected 0 all arms, all 224 rows CHECK_UPDATED; ranking []; terminal `D13_MODEST_DECODER_RESCUE` (evidence-only, selects no route).
+- Review [repo-observed]: batch-end review `D13-B1-REVIEW` = `EVIDENCE_ACCESS: VERIFIED` / PASS_WITH_FINDINGS, no blocker; sole non-blocking (a) manifest.command omits runtime flag by design (D11/D12 precedent). D12/Model-F inputs unmodified; grant consumed; no retry/repair/rerun. Full record in `docs/research_cycles/V72P2D13-L055-LADDER/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D13_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only, no route acceptance; grant consumed; no second run.
+- Boundary [decision]: synthetic L1 decoder diagnostic on frozen D12 L055 failures only; no FER/leakage/SKR/forward/L2/real-data/qualification/promotion/D7-H claim. Next gate is main-thread route decision only.
+
+## 2026-09-14 D13 L055 decoder-ladder readiness complete (D1301-D1310, no execution)
+
+- Readiness [repo-observed]: D1301-D1310 all PASS per `docs/research_cycles/V72P2D13-L055-LADDER/READINESS_R1.md` + `EXPLORATION_LOG.md`; OpenSpec `openspec/changes/v72p2d13-l055-decoder-ladder/`. D1310 `EVIDENCE_ACCESS: VERIFIED` / `PASS_WITH_FINDINGS`, no blocker: 56 D12 L055 failures recomputed (n128 30 [5,5,7,4,5,4] / n256 26 [5,3,5,4,4,5], all iter90 converged_no_syndrome CHECK_UPDATED, undetected 0), replay/bindings/gates-ranking/terminals verified, binders accepted unchanged (RL90 replay + RL360/damped-RL360/flooding-360, no tuning, no new decoder), 16/16 tests rerun, PLAN_ONLY byte-deterministic (decoder 0), D12 root untouched, future root `workspace/d13_l055_decoder_ladder_5c41b416-…` absent. Combined D12+X3 8 failures adjudicated pre-existing/environmental.
+- Lifecycle [decision]: terminal `D13_L055_DECODER_LADDER_READY_AWAITING_EXPLICIT_AUTHORIZATION`; grants no execution; predecessor D12 L055 selection immutable (88 successes excluded, never pooled). Future batch EXPLORE (56 replay + 168 ladder = 224 calls).
+- Boundary [decision]: synthetic L1 decoder diagnostic on frozen failures only; no ensemble-optimality/forward/L2/FER/leakage/SKR/real-data/qualification/promotion/D7-H/commit/push.
+
+## 2026-09-14 D12 Batch A1 complete + VERIFIED PASS_WITH_FINDINGS batch-end review (L055 selected evidence-only)
+
+- Evidence [repo-observed]: single authorized `--d12-batch --execution-authorized` run in fresh root `workspace/d12_finite_l1_degree_94fb9d22-cadc-47f4-a96e-b2170bdba450` (6 files, hashes match); EXIT 0, 12:49:56–12:54:54Z; 432/432 calls, 62/62 setup, wall 290.154/1800, per-call-max 1.689/120, RSS 128274432<2GiB, violations []; 36/36 admission; exact total 221 = syndrome 221, undetected 0 (n128 L045 26 [6,3,2,5,4,6] / L050 39 [7,4,5,7,7,9] / L055 42 [7,7,5,8,7,8]; n256 L045 33 [6,6,4,6,5,6] / L050 35 [6,6,6,6,4,7] / L055 46 [7,9,7,8,8,7]); STABLE all six; MATERIAL L050 False (n256 margin +2, wins 2/6) / L055 True (margins +16/+13, wins 6/6); SPLIT False; ranking skipped; terminal `D12_SELECT_L055` (evidence-only).
+- Review [repo-observed]: batch-end review `D12-B1-REVIEW` = `EVIDENCE_ACCESS: VERIFIED` / PASS_WITH_FINDINGS, no blocker; non-blocking only (48-vs-36 seed label; 1s start skew; manifest.command omits flag by design; call_idx per-width D11-F1 pattern). Predecessors D11/R3/Model-F untouched; grant consumed; no retry/repair. Full record in `docs/research_cycles/V72P2D12-FINITE-L1-DEGREE/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D12_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only, no route acceptance; grant consumed; no second run.
+- Boundary [decision]: synthetic finite L1 degree comparison only; no FER/leakage/SKR/forward/L2/real-data/qualification/promotion/D7-H claim. Next gate is main-thread route decision only.
+
+## 2026-09-14 D12 finite L1 degree refinement readiness complete (D1201-D1210, no execution)
+
+- Readiness [repo-observed]: D1201-D1210 all PASS per `docs/research_cycles/V72P2D12-FINITE-L1-DEGREE/READINESS_R1.md` + `EXPLORATION_LOG.md`; OpenSpec `openspec/changes/v72p2d12-finite-l1-degree/`. D1210 `EVIDENCE_ACCESS: VERIFIED` / `PASS`, no blocker: six cells recomputed from D9 rule EXACT, 36/36 A1-A6 independently recomputed, isolation/gates-ranking/terminals verified, budgets match, 26/26 + 41/41 tests rerun, decoder/scientific 0, future root `workspace/d12_finite_l1_degree_94fb9d22-…` absent.
+- Lifecycle [decision]: terminal `D12_FINITE_L1_DEGREE_READY_AWAITING_EXPLICIT_AUTHORIZATION`; grants no execution; predecessor D11 wide-recovery immutable (never pooled). Future batch EXPLORE_HEAVY (432 calls).
+- Boundary [decision]: synthetic finite L1 degree comparison only; no FER/leakage/SKR/forward/L2/real-data/qualification/promotion/D7-H/commit/push. Pre-EXECUTE must reconfirm dirty-tree preflight; L050-3101 4-cycle diagnostic retained.
+
+## 2026-09-14 D11 Forward APP Batch A1 complete + VERIFIED PASS_WITH_FINDINGS batch-end review (wide recovery)
+
+- Evidence [repo-observed]: single authorized `--forward-batch --execution-authorized` run in fresh root `workspace/d11_forward_app_7c1878b5-23a8-4fd8-a395-b5a33a58ea64` (6 files, hashes match); EXIT 0, 11:32:33–11:43:58Z; 720/720 calls, 62/64 setup, wall 661.1/2400, per-call-max 1.833/120, RSS 137068544<2GiB, violations []; 36/36 admission; L1 replay EQUAL R3 both widths; provenance 288/288 CHECK_UPDATED; exact total 209 = syndrome 209 (n128 J_M22/J_C0/O43; n256 J_M28/J_C0/O64); SIGNAL/SIGNAL → `D11_FORWARD_APP_WIDE_RECOVERY` (evidence-only); R3 root untouched; grant consumed; no retry/repair; no D7-H/reverse/mixed-L2/real-data; no commit/push.
+- Review [repo-observed]: batch-end review `D11-B1-REVIEW` = `EVIDENCE_ACCESS: VERIFIED` / PASS_WITH_FINDINGS, no blocker; non-blocking F1-F5 (call_idx per-width wording; latent verify_root index basis; manifest command flag form; L2-seed column suggestion; R3-first test-order doc). Full record in `docs/research_cycles/V72P2D11-FORWARD-APP/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D11_FORWARD_APP_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only, no route acceptance; grant consumed; no second run.
+- Boundary [decision]: synthetic two-layer forward diagnostic only; no FER/leakage/SKR/qualification/promotion/real-data/D7-H claim. Next gate is main-thread route decision only.
+
+### D11 forward wide recovery accepted; L1 remains bottleneck (2026-09-14)
+
+- Decision: `D11_FORWARD_APP_WIDE_RECOVERY_ACCEPTED_ROUTE_TO_D12_L1_REFINEMENT`;
+  retain machine terminal `D11_FORWARD_APP_WIDE_RECOVERY`.
+- Evidence: MIX joint/source exact is 22/23 at n128 and 28/29 at n256;
+  CONTROL is zero, all 288 transfers CHECK_UPDATED, L2 oracle 43/72 and 64/72,
+  independent review PASS. Canonical forward transfer is not the main loss.
+- Next gate: D12 readiness for fresh-graph finite L1 comparison of only
+  λ2=0.45/0.50/0.55. D7-H remains closed; mixed L2 lacks calibration; real-data
+  DECIDE waits for a stronger synthetic operating point. No D12 execution.
+
+### D12 finite L1 degree-refinement readiness accepted (2026-09-14)
+
+- Evidence [repo-observed]: D1201--D1210 complete; `D12-R1210`
+  `EVIDENCE_ACCESS: VERIFIED / PASS`; D9 degree math, 36/36 admission,
+  isolation, all selection edges, 432-call plan and zero-production boundary
+  independently pass; 67 focused tests rerun by reviewer.
+- Decision: `D12_FINITE_L1_DEGREE_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`.
+  Retain L050/n256 seed 2026093101 four-cycle/girth-4 as diagnostic-only; no
+  graph replacement.
+- Boundary: future EXPLORE_HEAVY batch needs explicit user grant and runs both
+  widths. No execution, D7-H, L2, real data or claim is authorized here.
+
+### D12 L055 selected; route failures to D13 decoder ladder (2026-09-14)
+
+- Decision: `D12_L055_ACCEPTED_ROUTE_TO_D13_DECODER_LADDER`; retain machine
+  terminal `D12_SELECT_L055`; L050 rejected by the frozen two-width rule.
+- Evidence: L055 exact 42/72 vs L045 26/72 at n128 and 46/72 vs 33/72 at n256;
+  all 56 L055 failures used 90 iterations, while successes used 7--50.
+- Next gate: D13 readiness to replay those 56 identities at RL90 and compare
+  RL360, damped RL360 and flooding360. Do not broaden λ or rerun forward/L2
+  until decoder dynamics are resolved. No D13 execution or D7-H.
+
+## 2026-09-14 D11 canonical forward APP readiness complete (D1101-D1110, no execution)
+
+- Readiness [repo-observed]: D1101-D1110 all PASS per `docs/research_cycles/V72P2D11-FORWARD-APP/READINESS_R1.md` + `EXPLORATION_LOG.md`; OpenSpec `openspec/changes/v72p2d11-forward-app/`. R1110 `EVIDENCE_ACCESS: VERIFIED` / `PASS_WITH_FINDINGS`, no blocker: canonical transfer/provenance/q-APP/oracle/admission reuse is-identical (16/16 defs, 17/17 imports), L1 replay gate verbatim (n128 MIX [4,4,2,5,3,5], n256 MIX [6,3,5,5,6,4], CONTROL zeros), shared-L2 identity (6 distinct/width, oracle rides MIX excluded from grading), gates/priorities/8 terminals verified, budgets 720/64/2400/120/2GiB match; 33/33 tests rerun + PROFILE 36/36 (L2 12/12 + L1 24/24); decoder/scientific 0; future root `workspace/d11_forward_app_7c1878b5-…` absent.
+- Lifecycle [decision]: terminal `D11_FORWARD_APP_READY_AWAITING_EXPLICIT_AUTHORIZATION`; grants no execution; predecessor D10 R3 wide-L1 immutable (never pooled). Future batch EXPLORE_HEAVY (360/width, max 720, n256 iff `D11_FORWARD_SIGNAL(n128)`).
+- Boundary [decision]: synthetic two-layer forward diagnostic only; no FER/leakage/SKR/real-data/qualification/promotion/D7-H/commit/push. Pre-EXECUTE must reconfirm dirty v72p2d5 tree state (kwargs on `_run_layered_block`) per R1110 finding (a).
+
+## 2026-09-14 D10 R3 Batch A1 complete + VERIFIED PASS batch-end review (wide L1 signal reproduced)
+
+- Evidence [repo-observed]: single authorized `--r3-batch --execution-authorized` run in fresh root `workspace/d10_r3_fresh_graph_scaling_4d39ed0e-3cbb-49f6-a1df-1dcc10868a8d` (6 files, hashes match); EXIT 0, 08:37:35–08:43:01Z; 288/288 calls, 50/50 setup, wall 316.6/1800, per-call-max 1.9954/120, RSS 125063168<2GiB, 1 process, violations []; exact total 52 = syndrome 52 (n128 M=23 C=0 MIX[4,4,2,5,3,5]; n256 M=29 C=0 MIX[6,3,5,5,6,4]; DV3 all 0); both widths `R3_REPRODUCED` (clauses T×6 each); n256 dispatched iff n128 REPRODUCED met; terminal `D10_R3_WIDE_L1_SIGNAL_REPRODUCED` (evidence-only).
+- Review [repo-observed]: batch-end review `D10-R3-B1-REVIEW` = `EVIDENCE_ACCESS: VERIFIED` / VERDICT PASS, no blocking/non-blocking beyond benign notes; 24/24 A1-A6 independently recomputed; identities/dispatch/gates/budgets/A1-nonpooling PASS.
+- Lifecycle [decision]: terminal `D10_R3_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only, no route acceptance; grant consumed; no retry/repair/rerun; A1 untouched/unpooled; no commit/push.
+- Boundary [decision]: synthetic L1-only diagnostic only; no FER/leakage/SKR/qualification/promotion/real-data/L2/D7-H claim. Next gate is main-thread route decision only. Record: `docs/research_cycles/V72P2D10-R3-FRESH-SCALING/EXPLORATION_LOG.md`.
+
+### D10 R3 wide L1 signal accepted; route to D11 forward APP (2026-09-14)
+
+- Decision: `D10_R3_WIDE_L1_SIGNAL_ACCEPTED_ROUTE_TO_D11_FORWARD_APP`; retain
+  machine terminal `D10_R3_WIDE_L1_SIGNAL_REPRODUCED`.
+- Evidence: on six fresh graphs per width, mixed L1 exact is 23/72 at n128 and
+  29/72 at n256, versus DV3 0/72 at both; all gates, 24 graph admissions,
+  budgets and independent batch-end review pass.
+- Next gate: D11 implementation/readiness for one canonical forward L1→L2 APP
+  pass, comparing mixed versus DV3 L1 while holding a connected full-rank DV3
+  L2 target fixed, plus shared L2 oracle. Do not use mixed degree on L2 without
+  separate calibration. D7-H remains closed until forward transfer and L2-code
+  ceiling are known. No D11 execution is authorized.
+
+### D11 canonical forward APP readiness accepted (2026-09-14)
+
+- Evidence [repo-observed]: D1101--D1110 complete; reviewer `D11-R1110`
+  `EVIDENCE_ACCESS: VERIFIED / PASS_WITH_FINDINGS`, no blocker; canonical helper
+  reuse, R3 replay, shared L2/oracle isolation, all gates, 720-call ceiling and
+  zero-production boundary pass.
+- Decision: `D11_FORWARD_APP_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`;
+  trust reviewer tests without duplication.
+- Boundary: before the separately authorized batch, reconfirm the dirty-tree
+  `_run_layered_block` signature and `on_blocked_transfer="record"` semantics,
+  then run focused D11 tests. Acceptance grants no execution or D7-H.
+
+## 2026-09-14 D10 R3 fresh-graph scaling readiness complete (R301-R310, no execution)
+
+- Readiness [repo-observed]: R301-R310 all pass (R310 pass-with-comments, no blocker); 48 fresh seeds separated; 24/24 future graphs A1-A6 independently recomputed; 23 new + 18 R2 tests; PROFILE_ONLY 24/24; decoder/scientific calls 0; future root `workspace/d10_r3_fresh_graph_scaling_4d39ed0e-…` absent before+after. Records: `docs/research_cycles/V72P2D10-R3-FRESH-SCALING/READINESS_R1.md` + `EXPLORATION_LOG.md`; OpenSpec `openspec/changes/v72p2d10-r3-fresh-graph-scaling/`.
+- Lifecycle [decision]: terminal `D10_R3_FRESH_GRAPH_SCALING_READY_AWAITING_EXPLICIT_AUTHORIZATION`; grants no execution; A1 terminal/thresholds immutable, A1 records never pooled into R3 gates. Future batch is EXPLORE_HEAVY (144/width, max 288, n256 iff `R3_REPRODUCED(n128)`).
+- Boundary [decision]: L1-only synthetic; no FER/leakage/SKR/real-data/L2/D7-H/qualification/promotion/commit/push.
+
+## 2026-09-14 D10 Batch A1 complete + VERIFIED PASS batch-end review (evidence-only)
+
+- Evidence [repo-observed]: single authorized `--batch --execution-authorized` run in fresh root `workspace/d10_mixed_degree_l1_b2dd13e4-6600-4e27-90df-5c9038cf2c34` (6 files, hashes in EXPLORATION_LOG); EXIT 0; 96/144 L1 calls, 44/44 setup, wall 47.8775/1800 s, per-call max 0.9959/120 s, RSS 124772352<2GiB; 18/18 A1-A6; exact total 31 = syndrome-valid 31 (n64 DV3 1 [0,0,1], n64 MIX 20 [7,7,6], n128 DV3 0, n128 MIX 10 [5,2,3], n256 0 blocks undispatched); n64 POSITIVE → n128 dispatched; n128 AMBIGUOUS → n256 undispatched; terminal `D10_L1_AMBIGUOUS`.
+- Review [repo-observed]: batch-end review `D10-MIXED-DEGREE-L1-A1-REVIEW` = `EVIDENCE_ACCESS: VERIFIED` / VERDICT PASS, no blocking/non-blocking findings; identities/counts/gates/terminal/budgets independently recomputed PASS.
+- Lifecycle [decision]: terminal `D10_MIXED_DEGREE_L1_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only, no route acceptance; grant consumed; no retry/repair/rerun; no L2/D7-H/real-data; no commit/push.
+- Boundary [decision]: synthetic finite-length L1-only diagnostic only; no FER/leakage/SKR/qualification/promotion claim. Next gate is main-thread route decision only.
+
+### D10 A1 route accepted to fresh-graph R3 replication (2026-09-14)
+
+- Decision: `D10_L1_AMBIGUOUS_RESULT_ACCEPTED_ROUTE_TO_R3_REPLICATION`.
+  Preserve A1 terminal/thresholds and do not rerun it or dispatch its withheld
+  n256 cells.
+- Rationale: MIX vs DV3 exact was 20/24 vs 1/24 at n64 and 10/24 vs 0/24 at
+  n128. The n128 5/2/3 graph split is a material signal but three graphs cannot
+  distinguish finite-width decay from graph variability.
+- Next gate: D10 R3 implementation/readiness for six fresh n128 graph pairs ×
+  12 paired blocks, with conditional fresh n256 replication. D7-H remains
+  closed until stable wider-width L1 recovery exists; no R3 execution is
+  authorized by this route decision.
+
+### D10 R3 fresh-graph scaling readiness accepted (2026-09-14)
+
+- Evidence [repo-observed]: R301--R310 complete; reviewer `D10-R3-R310`
+  `EVIDENCE_ACCESS: VERIFIED`, no blocker; 24/24 fresh graphs independently
+  pass A1--A6 with zero replacements; seed separation, frozen gates/terminals,
+  A1 non-pooling, budgets and no-production boundary pass.
+- Decision: `D10_R3_FRESH_GRAPH_SCALING_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`.
+  Trust the independent review; run its deferred live refusal and focused tests
+  once at execution preflight rather than duplicating them now.
+- Boundary: next gate is a separately authorized EXPLORE_HEAVY batch; no
+  decoder execution, D7-H, L2/APP, real-data or claim is authorized here.
+
+## 2026-09-14 D9 calibration accepted; DV23-0.45 selected for finite readiness
+
+- Evidence [repo-observed]: D9 completed 96/96 DE calls, verifier 96/96 and 12/12 groups PASS, independent reviewer-go `EVIDENCE_ACCESS: VERIFIED`/`PASS_WITH_FINDINGS`, no blocker. DV3 stability 0/8+0/8; lambda2 0.45 8/8+8/8 stable-converged with AUT30 ratio 0.7453; lambda2 0.50 7/8+8/8 ambiguous; lambda2 0.55 6/8+4/8 stable-unconverged; f1.0 0/8 all and non-gating.
+- Acceptance [decision]: accept terminal `D9_DE_CALIBRATION_SELECT_ONE` and candidate `lam_d2_0.45_d3_0.55` only for successor finite-length construction readiness. Do not promote 0.50 despite lower AUT30 because it failed the frozen 8/8 stability rule. Lifecycle `D9_DE_CALIBRATION_RESULT_ACCEPTED_SELECT_DV23_045`.
+- Route [decision]: D10 builds a matched-constructor regular-DV3 control and mixed-DV23-0.45 candidate, uses multiple graph seeds, n64/n128/n256, accepted Model-F, f1.2 and L1-only decoding. This isolates degree distribution before L2 APP/cross-layer work. DE-to-row-layered trajectory/terminal equivalence remains unproven.
+- Boundary [decision]: no finite decoder success, FER/leakage/SKR, real-data, qualification or promotion claim; D7-H remains unauthorized/not recommended; D10 execution requires its own readiness and explicit authorization.
+
+## 2026-09-14 D9 DE-decoder calibration readiness accepted
+
+- Semantics [decision]: accept the seven-stage V26↔v35 map and independent primitive certification (max error <=1.94e-16) with explicit ceiling: prior/centering, incoming coefficient direction, primitive check and flooding-variable algebra are certified; outgoing coefficient absorption, flooding↔row-layered trajectory, DE entropy↔decoder exact/syndrome terminal and finite-length performance are not equivalent claims.
+- f1.0 [decision]: prospectively `BOUNDARY_DIAGNOSTIC`, derived from frozen `mu=0.013383 bit/symbol` (0.35% of H_L1) versus f1.2 `mu=0.794633`; it never gates/ranks, while >=7/8 crossing routes to main review. The two written margin clauses are algebraically one effective threshold; Δ_min=0.05 is a design allowance because accepted H_L1 has no uncertainty interval.
+- Future batch [decision]: DV3 + lambda2 0.45/0.50/0.55, eight seeds (three reproduction + five fresh), f1.2 populations 4000/16000 and f1.0 diagnostic 4000, <=96 DE calls + <=12 setup, <=1200 s, post-call <=300 s, RSS <2 GiB, no retry/resume/adaptive search. All 24 degree/socket realization cells n64/n128/n256 pass; normative max check degree <=8, actual frozen matrix <=4.
+- Lifecycle [decision]: `D9_DE_DECODER_CALIBRATION_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`; next gate is separate calibration authorization. No scientific DE run, finite decoder, D7-H, real data, qualification, promotion, commit or push is authorized.
+
+## 2026-09-14 D8 DE sweep accepted; no winner, route to D9 calibration
+
+- Evidence [repo-observed]: frozen D8 sweep completed 126/126 DE calls in 107.105 s, peak RSS 251805696 B, verifier PASS with 126/126 metric agreement and independent reviewer-go `EVIDENCE_ACCESS: VERIFIED`, `PASS_WITH_FINDINGS`, no blocker. Regular-DV3 converged 0/3 at f1.2 and f1.0; no candidate converged all seeds at both; terminal `D8_DE_BASELINE_NOT_CONVERGED`.
+- Acceptance [decision]: accept lifecycle `D8_DE_SWEEP_RESULT_ACCEPTED_ROUTE_TO_D9_CALIBRATION`; winner remains none under the frozen gate. Lambda2 0.45 and 0.50 primary f1.2 convergence 3/3 is descriptive successor evidence only, not a retroactive D8 advancement; every candidate was 0/3 at f1.0.
+- Route [decision]: next `D9_DE_DECODER_CALIBRATION_AND_THRESHOLD` must check DE-to-v35 semantics beyond check update, Monte-Carlo stability, finite graph realizability of `{2,3}` mixtures, and whether f1.0 is a justified hard gate or a boundary diagnostic in the next preregistration. No finite-length decoder or broader grid before this calibration.
+- Boundary [decision]: no NB-LDPC impossibility, finite-length, FER/leakage/SKR, real-data, qualification or promotion claim; D7-H remains unauthorized/not recommended; all new execution requires a separate packet and user authorization.
+
+## 2026-09-13 D8 rate-aligned GF32 ensemble readiness accepted
+
+- Readiness [decision]: accept V26 MC-DE reuse plus the exact Model-F L1 full-32-ary adapter, rate mapping and deterministic 21-candidate lambda support `{2,3}` grid after reviewer-go `EVIDENCE_ACCESS: VERIFIED`, `PASS_WITH_FINDINGS`, 56/56 independent math checks and F1 correction/re-review PASS (15/15 focused tests). Lifecycle `D8_RATE_ALIGNED_ENSEMBLE_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`.
+- Frozen future sweep [decision]: two conditions (f1.2 primary R=5/64, f1.0 secondary R=15/64), seeds 2026091601..03, 126 DE calls, regular-DV3 baseline, all-seed convergence plus >=5% worst-seed AUT_30 improvement advancement, deterministic single-winner tie-break. Claim ceiling is synthetic asymptotic DE-only.
+- Carried semantics [decision]: partial roots fail normal `--verify` and are retained/adjudicated; 120 s per-call is checked between/after calls rather than interrupted; implemented setup count is 0; V26 uses random nonzero-coefficient ensemble semantics and does not exercise finite-length coefficient-stream seeds. These are non-blocking but must be stated in execution/result review.
+- Boundary [decision]: readiness acceptance grants no DE sweep, finite-length decoder, D7-H, real-data, qualification, promotion, commit or push. Next gate is a separate D8 DE sweep authorization.
+
+## 2026-09-13 D6 R1d EXPLORE accepted; eligible-only DV3 redirect closed
+
+- Evidence [repo-observed]: fresh root `workspace/d6_graph_mother_r1d_141730d1-5ed4-4a60-a935-50e8f24f872d` completed 120 scientific + 18 setup calls, wall 13.5477 s, no watchdog/retry/resource failure, peak aggregate RSS 2049343488 <2 GiB. L1 exact/syndrome 0/40; L2-APP 5/40; L2-oracle 35/40; end-to-end APP exact 0/120; T1 PEG-DV3 silent at n64/n128/n256. Independent batch-end reviewer-go had `EVIDENCE_ACCESS: VERIFIED`, `PASS_WITH_FINDINGS`, no blocker, and verifier 20/20 PASS.
+- Acceptance [decision]: accept stored terminal `D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY` only for the frozen B0/B1/T1 DV3 synthetic contract; lifecycle `D6_R1D_EXPLORE_RESULT_ACCEPTED_GRAPH_REDIRECT_CLOSED`. This closes the eligible-only DV3 topology substitution, not all graph families, degree distributions, n>256, real-data performance, FER, leakage, qualification or promotion.
+- Route [decision]: next gate `D8_RATE_ALIGNED_ENSEMBLE_FEASIBILITY`; audit/reuse accepted GF32 density-evolution or ensemble machinery and test rate-aligned degree-distribution feasibility before another finite-length decoder batch. D7-H remains unauthorized/not recommended because X4/D6 show the base L1 layer is not recovering; alternation is not the next orthogonal variable.
+- Authorization [decision]: all execution/promotion flags remain false; acceptance grants no D8 execution, real-data work, commit or push.
+
+## 2026-09-13 主线程审查后自动续发下一任务包
+
+- 默认交互 [decision]: 每次主线程完成审查、验收或路线裁决后，只要下一步已由证据和当前路线唯一确定，主线程应在同一回复中自动给出下一阶段成对的 task packet + 可直接复制 prompt；用户无需再发送“给下一个任务包”。
+- 门禁边界 [decision]: 自动续发任务包不是自动执行授权。若下一阶段包含 decoder、EXPLORE batch、DECIDE、真实数据、昂贵或 claim-bearing 执行，包应冻结范围并停在相应显式用户授权门前；不得从用户对前一阶段的接受推导后续执行授权。
+- 例外 [decision]: 若证据支持多个实质不同路线、需要用户科学取舍、缺少关键输入或下一步会扩大既定范围，则先给出清晰裁决问题而不擅自选路；一旦用户裁决，立即随验收回复附上下一个任务包和 prompt。
+
+## 2026-09-13 reviewer-go 独立子代理证据可信规则
+
+- 证据身份 [decision]: 本项目记录中的 `reviewer-go`（包括明确标注的可用 backup）是与 operator 分离上下文的独立 review subagent；其报告为独立复核结果，不是 operator 自评或主线程转述。
+- 默认采信 [decision]: 当 reviewer 记录 `EVIDENCE_ACCESS: VERIFIED`，列明实际读取的制品与自行执行的命令/测试，给出可追溯结果，且 verdict 无 blocking finding 时，主线程可以直接采信其复核和测试结果；不得仅为形式完整再次机械重跑同一测试。`PASS_WITH_FINDINGS` 中已裁定为 non-blocking 的 finding 不触发重复评审，按记录的修正、后续 gate 或 batch-end review 处理。
+- 边界 [decision]: 采信限于 reviewer 明示的 evidence scope 和 claim ceiling；缺少制品访问、测试未实际运行、结果互相矛盾、范围漂移或存在 blocking finding 时仍须核查。独立 reviewer 不能替代主线程的科学解释/路线裁决，也不能授予用户专属的 DECIDE 或 EXPLORE 执行授权。
+- 当前应用 [decision]: D6 R1d heavy readiness 的 H45 `PASS_WITH_FINDINGS` 及其独立重跑结果可作为可信 readiness 证据，不需主线程再跑 343-test suite；终态仍为 `D6_R1D_EXPLORE_READY_AWAITING_EXPLICIT_AUTHORIZATION`，尚未授权 batch execution。
+
+## 2026-09-13 仓库级双轨研究流程 EXPLORE/DECIDE 接受生效（WORKFLOW-TWO-TIER-R1，F4 结清）
+
+- 接受终态 [decision]: 主线程接受 `TWO_TIER_WORKFLOW_ACCEPTED_REPOSITORY_WIDE`；`TWO_TIER_WORKFLOW_ACCEPTED` 为 D6 前置兼容别名，2026-09-13 正式生效。变更 `openspec/changes/repository-wide-two-tier-research-workflow/`（delta spec 为规范契约），独立评审 `docs/research_cycles/WORKFLOW-TWO-TIER-R1/REVIEW_VERDICT.md` = PASS_WITH_FINDINGS；F4 由本条结清。**D6 heavy-mainline packet 仅在此接受终态记录后方可启动。**
+- 范围与优先级 [decision]: 双轨（EXPLORE/DECIDE）为仓库级永久默认，适用于此后每个新 route/task/packet/OpenSpec change/experiment/result；权威规则为 `AGENTS.md` §1.2 适用矩阵 + §3 + §10.1/§10.3，SOP 与 `docs/prompts/*` 为实现面；历史周期不变；未执行旧包按新流程机制 + 原冻结科学输入/阈值/预算/no-overwrite/授权边界执行；不得以 cycle/方法改名重引入 per-arm 纸面。
+- EXPLORE 契约 [decision]: 五条件全满足才可 EXPLORE（synthetic 或已批准非敏感输入；fresh additive `workspace/` 或 no-write probe；有界可逆；无 FER/SKR/qualification/promotion/publication claim；无破坏性覆盖或新外部动作）。一 packet+prompt（含 preregistration 与授权边界）、一个结果根或 no-write transcript、一份 append-only `EXPLORATION_LOG.md`；一次授权覆盖冻结条件臂序列；至多一次预先注册的工程修复+重跑（科学输入/种子/阈值/数据角色/假设不变，失败尝试同日志保留）；一次 batch-end 独立评审替代逐臂评审；仅调用 decoder 不改变轨道。
+- DECIDE 契约 [decision]: 任一满足即 DECIDE（冻结点/生死门；real/private/raw 数据；昂贵/正式/不可逆/claim-bearing；报告/发布/qualification/promotion 结果）。保留 accepted preregistration、Pre-EXECUTE（精确命令/预算/输出不存在/显式用户授权）、一条执行/结果记录、独立 Pre-RESULT、主线程接受；允许紧凑三文档（`PREREG_AND_AUTH.md`/`RESULT.md`/`INDEPENDENT_ACCEPTANCE.md`）。EXPLORE 触及 real 数据、route-closing 阈值、发布 claim、破坏性输出、显著更高成本或科学输入/假设变更前须升级 DECIDE。
+- 取代与安全门 [decision]: 取代 `standardize-task-packet-review-loop` 的逐任务评审频率读法；扩展 `research-cycle-sop-single-user-simplification`；paired packet+prompt 交接面与全部安全门不变（user-only 授权、no-overwrite、real-data 保护、claim 边界、独立 Pre-RESULT、失败不可变保留、exact/syndrome/undetected 隔离、可复现）。
+- D7 教训 [decision]: 机器终态标签为带作用域的预注册分类，不是不可变科学事实；`D7_F_REVERSE_ORDER_REGRESSION` 仅限 n=16 单图（2 discordant pair，`D7_F_CORRIGENDUM_R1.md`）作用域，引用必须携带作用域。
+- F4 注记 [decision]: 下方 2026-08-28 与 2026-09-05 两条历史条目已就地限定（无例外措辞仅 DECIDE 成立；EXPLORE 以单日志 + 一次 batch-end 评审替代逐臂/逐次复核）；原文保留为历史记录。
+
+## 2026-09-13 Repository-wide EXPLORE/DECIDE workflow accepted
+
+- Acceptance [decision]: OpenSpec change `repository-wide-two-tier-research-workflow` and independent review `PASS_WITH_FINDINGS` are accepted with terminal `TWO_TIER_WORKFLOW_ACCEPTED_REPOSITORY_WIDE`; compatibility alias `TWO_TIER_WORKFLOW_ACCEPTED` is valid for successor prerequisite checks. The packet §2 change name is authoritative; its §4 slug was stale. No commit, push, decoder, D6, or other execution is authorized by this acceptance.
+- Applicability [decision]: every future research task in this repository declares `EXPLORE` or `DECIDE`; implementation-only and documentation-only work has no execution gate. `EXPLORE_HEAVY` is only a cost annotation. Real data, formal qualification, route-closing decisions, security/report numbers, publication and promotion remain `DECIDE`.
+- Review frequency [decision]: `EXPLORE` uses one frozen batch authorization, one append-only result log and one independent batch-end review; it does not require a separate reviewer after every operator arm or unchanged-scope repair. `DECIDE` retains explicit user authorization, Pre-EXECUTE, independent Pre-RESULT and main acceptance. This supersedes the unconditional reading of the 2026-09-05 coder-fast → reviewer-go entry; milestone review remains mandatory where the accepted track requires it.
+- Historical gate annotation [decision]: the 2026-08-28 V55 Pre-RESULT rule remains fully binding for `DECIDE` claim-bearing evidence, but its "every execution/result cycle without exception" wording does not impose per-arm Pre-RESULT review on `EXPLORE`. The V55 safeguards for thresholds, leakage decomposition, `undetected` isolation, per-source accounting and disclosure remain unchanged.
+- Deferred [decision]: add the track qualifier to `research-cycle-sop-single-user-simplification` when that older OpenSpec change is archived; no historical cycle rewrite is required.
+
 ## 2026-09-05 coder-fast → reviewer-go 必接规则持久化（一次性例外 R1 836e151c）
 
 - Rule [decision]: 每次 coder-fast 完成（COMPLETE 返回）后必须接 reviewer-go 独立只读复核，无默认跳过；plan-only / 零生产代码不是省略理由。
 - Exception [repo-observed]: V72P2D5 R1 push（commit `836e151c`）未做 post-commit reviewer 复核；用户 2026-09-05 显式特批跳过，记为一次性例外，下不为例。
 - SOP status [repo-observed]: `docs/research-cycle-sop.md` 全文无 coder-fast/reviewer-go 字样，仅有通用“independent review”（§6步骤7、§10 Pre-RESULT）；`AGENTS.md` 仅 §6 行180 `/implement-change` 描述 planner → coder-fast → reviewer-go → memory triage 流水线，无强制“必接”条款；均判为明确缺失，不直接改工作流文件，补写需走 OpenSpec change。
 - Follow-up [decision]: 后续每次 coder-fast COMPLETE 后调度 reviewer-go（push 前或 post-commit 补齐）；任何跳过需用户显式批准并在 `AGENT_PROJECT_MEMORY.md` + `docs/decision-log.md` 双记例外。
+- 2026-09-13 作用域注记（F4）[decision]: coder-fast → reviewer-go 必接规则保留；按双轨政策，DECIDE 及一般 coder-fast 交付维持每次 COMPLETE 后必接 reviewer-go，EXPLORE 批次由一次 batch-end 独立评审满足（不逐臂/不逐次调度）；跳过仍需用户显式批准并双记。见顶部 2026-09-13 条目。
 ## 2026-09-05 V72P2D5-R1 plan revision PASS (plan-only, no code, no execution)
 
 - Revision [repo-observed]: commit `836e151c` (`docs(v72p2d5-r1): revise GF32 rate-mother plan per review, no code no execution`), exactly 5 D5 plan files (`proposal.md`/`design.md`/`tasks.md`/`specs/spec.md`/`PLAN_FREEZE.md`); zero production `.py` modification; `REAL_EXECUTION_AUTHORIZED=false`, `DECODER_EXECUTED=false`, `VAL_LOADER_CALLS=0`, no `run_01`; Review PASS; `HEAD == origin`, ahead 0.
@@ -80,6 +289,7 @@
 - pre-EXECUTE review [decision, mandatory]: 每次正式 decoder 执行（`EXECUTE_AUTH` / 生产 `run_01`）前必须完成并记录：`HEAD == origin/<branch> == implementation SHA`、`ACCEPTED_PLAN_SHA` 重推导一致且 `rg <旧SHA>` 0 命中、目标 `run_01` 不存在、预算/门禁/`cycle_state` 与冻结 plan 一致、`py_compile` + 关键测试 PASS。FAIL 则阻塞执行，进入 `revise-required`/返工，新 SHA 重审。
 - pre-RESULT review [decision, mandatory]: 每次输出 development result（`OPERATOR_RETURN.md` / `RESULT_SUMMARY.md` / `run_01` 固化/提交）前必须由独立线程或 reviewer 对照冻结 plan 复核阈值、泄漏公式分解、`undetected` 隔离（不得并入 success/FER）、per-source 分解、disclosure 等语义与实际产物。问题即返工，不得先产出后补 review；FAIL 阻塞固化，不得带病提交 `run_01`。
 - 权威流程 [decision]: `AGENTS.md` §3 Mandatory Processes 与 §10.3、`docs/research-cycle-sop.md` §10 为长期流程；每次 execution/result 周期无例外适用。
+- 2026-09-13 作用域注记（F4）[decision]: 上条“每次 execution/result 周期无例外适用”按仓库级双轨政策限定为 DECIDE 轨道——Pre-EXECUTE 仅对 DECIDE（正式/claim-bearing/costly）执行强制；EXPLORE 批次适用“单 append-only 日志 + 一次 batch-end 独立评审”。原文保留为历史记录，见顶部 2026-09-13 条目。
 
 ## 2026-08-27 执行后分析口头通报规则（V42起）
 
@@ -168,6 +378,17 @@
   only; incompatible Polar/crosstalk history goes to a separate formal-IR
   branch rather than being merged or overwritten.
 - Authority: `docs/research-cycle-sop.md`; prompts under `docs/prompts/`.
+
+## 2026-09-12 Manual Codex/OpenCode handoff restored
+
+- Workflow [decision]: project-level Codex/ChatGPT ↔ OpenCode exchange is
+  manual copy-paste through the repository task-packet, prompt, and return
+  documents. Do not use `opencode_session`, `codex_desktop_bridge`, or an
+  automatic callback loop for project work.
+- Boundary [decision]: the existing global bridge, server, skills, and durable
+  sessions are not uninstalled, modified, restarted, or closed. They are
+  simply outside this project's active workflow unless the user explicitly
+  opts back in through a later workflow change.
 
 ## 2026-08-24 V36 post-run scientific review correction
 
@@ -3457,6 +3678,35 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - Evidence [repo-observed]: immutable root `workspace/d7_d_schedule_discriminator_64660d16-397d-4ef3-8454-3066d27c12c7` (seven files 3164/57659/17690/1777/1546/455/290 B, zero subdirs); lifecycle authorize `7a3f0d92` → one invocation → revoke `eba385bb` → result `63a69f57`; verifier `VERIFY_OK {'ok': True, 'problems': [], 'records': 256, 'terminal': 'D7_D_SCHEDULE_EFFECT_INCONCLUSIVE'}`; eight labels `EXACT_TIE_LOW, MIXED_SCHEDULE_EFFECT, EXACT_TIE_LOW, EXACT_TIE_LOW, EXACT_TIE_LOW, EXACT_TIE_HIGH, EXACT_TIE_LOW, EXACT_TIE_HIGH`; outer wall 67.178 s, stored wall 65.945 s, max call 0.436 s, RSS 105304064 B.
 - Route [decision]: `D7_D_SCHEDULE_EFFECT_INCONCLUSIVE` has no frozen automatic successor; this ruling selects Alternative A (explicit belief provenance plus fail-closed cross-layer consumers) as the next mainline action; `next_gate` → `BP_INTERFACE_PROVENANCE_IMPLEMENTATION`. R1d stays `PAUSED_OPTIONAL_LOCAL_CONFIRMATION_NOT_MAINLINE_GATE` (not a mainline gate); G1/G2 unauthorized; old D5/D6 checkboxes are historical accounting. Dimension/bw expansion waits for a working provenance-safe fixed-dimension mechanism and, for more than two layers, a separate mathematical/leakage contract. No forced sweep, warm-start, alternating/joint decoder or scientific run; no D7-E work; all authorizations false; no push.
 
+## 42. NB-Polar independent-track initialization (2026-09-11)
+
+- Ownership [decision]: native NB-Polar planning and implementation belong to
+  the separate checkout D:/Code/HD-QKD_Polar_Comparison-nbpolar; this
+  Comparison checkout owns the NB-LDPC history, accepted evidence, and
+  cross-project decision boundary. The Cascade worktree and Release checkout
+  are reference/boundary projects, not NB-Polar implementation locations.
+- Algorithm contract [decision]: the MVP candidate is GF32 over the polynomial
+  basis with primitive polynomial 37 and kernel
+  F_alpha=[[1,0],[alpha,1]], x0=u0+alpha*u1, x1=u1, natural index order,
+  normalized float64 log-probability metrics, source-polarization SC, and
+  static full-symbol disclosure before one final 64-bit universal tag.
+- Asset boundary [repo-observed]: reuse GF2mField, Model-F counts and
+  concentration semantics, explicit layer priors, shared IR accounting, and
+  Release Polar protocol patterns only through adapters. Do not reuse
+  NB-LDPC graph topology, implicit prior-only APP flow, binary PW ordering,
+  tag-selected paths, or direct GF1024 arithmetic in the MVP.
+- Lifecycle [decision]: the former hybrid
+  formal-ir-future-nbpolar-app-transfer draft was never implemented or
+  executed and is archived under
+  openspec/changes/archive/2026-09-11-formal-ir-future-nbpolar-app-transfer-superseded/.
+  The new formal-ir-nbpolar-mvp OpenSpec is a plan candidate only; all
+  implementation, real-data execution, qualification, promotion, and push
+  authorizations remain false.
+- Evidence ceiling [decision]: D5/D6/D7 results provide failure attribution
+  and interface lessons, not NB-Polar performance evidence. D7-E remains the
+  active formal-IR gate independently of this successor plan. See
+  docs/NBPOLAR_TRACK.md and the canonical sibling docs for phase gates.
+
 ## 2026-09-11 BP interface provenance Alternative A complete + reviews PASS (route to D7-E packet freeze)
 
 - Completion [decision]: BP-01…BP-05, BP-07, BP-08 complete; BP-06 complete only as a frozen non-implementation boundary (`WARM_START_DEFERRED`, no warm-start implementation). OpenSpec delta `5483dd8`; implementation `654fa299`. `layer_interface_implementation` = `IMPLEMENTED_ALTERNATIVE_A_FAIL_CLOSED`; `bp_implementation_review` = `D7_BP_INTERFACE_IMPLEMENTATION_REVIEW_PASS`; `bp_readiness_review` = `D7_BP_INTERFACE_READINESS_REVIEW_PASS`.
@@ -3499,3 +3749,279 @@ diagnostic replay is not an official verifier pass. Preserve all seven artifacts
 - Certification [repo-observed]: independent numpy-only oracle (`itertools`/`numpy` only, zero production imports); tree-exact ≤3.34e-16, loopy-vs-recurrence ≤3.03e-14 (never MAP, `syn_ok` False), forward+backward sum-product match ≤3.34e-16, all vs `1e-10` tolerance; double-count counterexample deterministic (msg gaps 0.387/0.367 vs 1e-2 floor; transfer gaps fwd 0.0657, bwd 0.0139/0.00646, redecoded 0.005105 vs 1e-3 floor); contract suite 48/48; D7-A 14/14 unchanged.
 - Reviews/compat [repo-observed]: `D7_G_EXTRINSIC_CONTRACT_REVIEW_PASS` (F01) + `D7_G_EXTRINSIC_INTEGRATION_READINESS_PASS` (F02); v35 diff +127/−0 additive; all existing consumers remain on prior posterior/`belief_provenance` contracts (zero extrinsic refs outside v35+oracle); helper accepts only explicit `CHECK_EXTRINSIC`, fully unwired from production (inventory PASS).
 - Posture [decision]: interface/certification only, not an algorithm result; prescribed next gate `D7_H_ALTERNATING_DISCRIMINATOR_PACKET_FREEZE` (closeout pending — `cycle_state.yaml` still `next_gate D7_G_IMPLEMENTATION_PENDING`, `d7g_result_accepted false`); D7-H not frozen/not authorized; no D7-G/H roots/UUID; all authorizations false; R1d/G1/G2 unauthorized; >2-stage alternating still blocked pending future D7-H packet; no push.
+
+## 2026-09-13 D7 root-cause and route-reset R1: A–F accepted per master packet; Phase P (X1–X4) readiness reviewed PASS_WITH_FINDINGS — terminal X1_READY_AWAITING_EXPLICIT_AUTHORIZATION (no execution, no authorization)
+
+- Milestone [repo-observed]: OpenSpec `formal-ir-d7-root-cause-and-route-reset` Phases A–F implemented under packet `.workbuddy/tasks/D7_ROOT_CAUSE_AND_ROUTE_RESET_R1_TASK_PACKET.md`; zero production decoder/CAL/VAL/G1/multi-graph/G2/D7-H calls; no commit, no push; historical evidence retained byte-identical. New module `comparison_bench/src/comparison_bench/formal_ir/v72p2d7_consistency_multigraph.py`, CLI `scripts/v72p2d7_consistency_multigraph.py`, tests `comparison_bench/tests/test_v72p2d7_r1_consistency_multigraph.py`; scoped D5 edit `v72p2d5_gf32_rate_mother.py` +278/−33 (canonical helpers, additive per-layer G1 schema, no-write provenance probe, G2 wall/RSS recording + gates); cycle docs under `docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/`; one decision-log entry.
+- Review [repo-observed]: independent implementation review (`reviewer-go-backup`, separate context) returned `PASS-WITH-FINDINGS` (no blockers); durable record `docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/INDEPENDENT_REVIEW_R1.md`; not accepted, no scientific promotion. `cycle_state.yaml` advanced from `IMPLEMENTATION_REVIEWED_AWAITING_MAIN_THREAD_ACCEPTANCE` to state/terminal `IMPLEMENTATION_REVIEWED_AND_CORRECTED_AWAITING_MAIN_THREAD_ACCEPTANCE`, `independent_review: PASS_WITH_FINDINGS`, `d7f_count_correction: MAIN_THREAD_AUTHORIZED_APPLIED_REVERIFIED`, `next_gate: MAIN_THREAD_ACCEPTANCE`; `implementation_accepted: false`; all execution flags false.
+- Equivalence [decision]: same-input contract (identical in-memory graph/block/priors/injected decoder results) — G1-compatible and D7 paths give bitwise-identical `q`, equal syndromes/decoded target/per-layer counters, and L1/L2 priors equal within float64 reassociation (max-abs-diff 6.9e-18..2.1e-17 vs frozen `atol=1e-12`); conditional on identical input priors (estimator difference `build_f_model` vs `build_f_model_concentration` outside scope). Claim ceiling: implementation candidate.
+- G1 correction [decision]: historical G1 did NOT use `None` beliefs or a silent uniform L2 prior (old wrapper array-converted `final_beliefs`; row-layered decoder updated beliefs through its 90 iterations); current code checks provenance before the `bel1 is None` branch and fails closed.
+- G2 [decision]: `G2_PENDING_NOT_FAILED_NOT_SKIPPED_NOT_SUPERSEDED`, `G2_RUNTIME_UNVERIFIED`; frozen accepted-plan matrix n=256, f=(1.0,1.1,1.2), L1 rows (196,215,235), L2 rows (172,189,206), block seeds 2026091000..2026091199, graph seeds 2026090501/2026090502, APP 200 + oracle 40 per f; four-state grading preserved; P0 485 s projection is not a reliable estimate; X4 needs separate explicit authorization + independent Pre-RESULT review.
+- D7-F corrigendum [decision]: `D7_F_REVERSE_ORDER_REGRESSION` is a historical machine label only (single graph pair 2026090501/2026090502, n=16 block seeds 2026091300..2026091315, f=1.2), not an immutable general mechanism fact; per immutable D7-F prereg (`C` = reverse candidate, `R` = forward reference) the discordant table is reference-only (forward-only) 2 / candidate-only (reverse-only) 0 / both 0 / neither 14, exact two-sided McNemar p=0.5; weak evidential status; historical artifacts byte-identical. OPEN ITEM [repo-observed] (finding retained as history; RESOLVED 2026-09-13): packet §4, `D7_F_CORRIGENDUM_R1.md`, `proposal.md`, `spec.md`, and the decision-log entry stated "candidate-only 2 / reference-only 0", swapped against the immutable D7-F `stratum_summary.csv` (`candidate_only=0, reference_only=2`). Resolution [decision, 2026-09-13]: main thread authorized a scoped text-only correction; applied to six locations (the five listed above plus the `OPERATOR_RETURN_R1.md` A04 line + delta note; packet §4 original line preserved with a dated main-thread-authorized correction note). All now state candidate-only 0 / reference-only 2 / both 0 / neither 14, matching `stratum_summary.csv`. Focused independent re-verification (separate context): PASS — ground truth re-read; residual inverted-phrasing scan clean except the intentionally preserved packet original line; historical artifacts, code, tests untouched; no commit, no push. Still awaiting main-thread acceptance; no acceptance or execution authorization implied.
+- Dormant phases [decision]: X1 read-only probe (`x1_consistency_probe_authorized` + `python scripts/v72p2d7_consistency_multigraph.py --consistency`); X2 frozen multi-graph batch (3 graph pairs, block seeds 2026091300..2026091315, 4 arms, `MAX_CALLS=384`, f=1.2 rows 59/52 primary + f=1.0 rows 49/43 sanity) needs Pre-EXECUTE review + explicit authorization + fresh `workspace/d7_r1_multigraph_<uuid>` root + recorded wall budget; X3 reference ladder (90/360/flooding-90, f=1.2 failing blocks only) with/after X2; X4 G2 unbundled; D7-H awaits X2–X4 reviewed evidence + new main-thread route decision. All authorization flags false at triage.
+- Open notes [repo-observed]: D5 `_load_v35_provenance_module` now prefers the `comparison_bench.src.comparison_bench` layout before the flat layout (behavior change not described in design; traced safe in tested layouts, record on acceptance); `bind_reference_ladder_decoders` unexercised until X3; minor gaps (G2 evidence lacks APP iteration totals, None-RSS→BLOCKED rule not in design §7, unused `PER_CALL_WATCHDOG_S`); pre-existing stale-world-state D7 suite failures reproduced (accepted historical roots exist while tests assert absence; files unmodified, unrelated); worktree not quiescent during review (`docs/v35-algorithm-development-report.md` mtime 2026-09-13 03:26 after the 03:06 operator return).
+
+### Phase P (D7 X1–X4 execution master R1) — readiness reviewed; awaiting explicit user X1 authorization (no execution)
+
+- Packet/acceptance [repo-observed]: `.workbuddy/tasks/D7_X1_X4_EXECUTION_MASTER_R1_TASK_PACKET.md` is the sole operational packet for X1–X4 (Phase P readiness-only). The A–F implementation boundary is accepted per master packet §1 with main-thread acceptance recorded 2026-09-13; `cycle_state.yaml` now `implementation_accepted: true` (the earlier `implementation_accepted: false` recorded at the A–F review point is superseded).
+- Phase P implementation [repo-observed]: P01–P09 closed — X1 `--historical-provenance-probe` calls `probe_historical_decoder_provenance(decode_fn=None)` exactly once with JSON contract/exit rules and authorization refusal; X3 selector/plan/guard/reconstruction, field-exact `ROW_LAYERED_90` baseline replay gate, 7-file never-overwrite writer labeled `STRONG_REFERENCE_DIAGNOSTIC`, CLI `--reference-ladder --x2-root/--out-root`; X4 `--g2` bridge requiring `x4_g2_execution_authorized`, asserting every other D5 flag false, exactly-once `run_g2_synthetic(authorized=True)`, abort-if-exists on frozen root `workspace/v72p2d5_g2/20260906_r1`. Zero production decoder/CAL/VAL calls; no writes to frozen roots.
+- Readiness review [repo-observed]: independent Phase P readiness review `PASS_WITH_FINDINGS`, no blockers — `docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/PHASE_P_INDEPENDENT_READINESS_REVIEW_R1.md`; readiness record `PHASE_P_PRE_EXECUTE_READINESS_R1.md`; `REVIEW_ENTRYPOINT.md` updated. Tests replayed independently: new suite 55, consistency 36, bp+decert+new 92, predecessors 165/32/62/32, `py_compile` exit 0; per-group invocation is the T1 protocol (mixed cross-suite fragility pre-existing and disclosed).
+- X3 call accounting [decision]: total = 3S + R ≤ 576 − 2R ≤ 576 by construction (equality only when all 192 selected); the earlier "worst case 672" wording was an unachievable over-count and has been corrected. X3 Pre-EXECUTE/Pre-RESULT must verify `ladder_calls + reconstruction_calls <= 576` from actual records.
+- Prior finding resolved [repo-observed]: `bind_reference_ladder_decoders` binding/import/signature coverage done with fakes plus a clean-subprocess real v35 import + real bind without invoking a wrapper; true-condition binding probe belongs to X3 Pre-EXECUTE before authorization consumption.
+- Carried non-blocking findings for phase Pre-EXECUTE [repo-observed]: (a) X3 `X3_ENGINEERING_BLOCKED` exits 0 (only baseline mismatch → exit 1) — document or make nonzero; (b) `run_g2_bridge` checks repo-rooted G2 root while writer resolves CWD-relative — pass resolved `out_dir` in the runner closure at X4 Pre-EXECUTE; (c) per-call watchdogs (X1/X4 120 s, X3 480 s) are external, not in-process — record external watchdog owner at X3 Pre-EXECUTE; (d) `X3_BASELINE_REPLAY_MISMATCH_BLOCKED` also covers ladder crashes/reconstruction errors — Pre-RESULT must read the `where` field; (e) `run_g2_bridge` coerces a non-dict runner return to `{}` (latent); (f) OpenSpec delta spec not extended for Phase P entrypoints (design §9 + tasks P cover them; optional).
+- Lifecycle posture [repo-observed]: `cycle_state.yaml` `state`/`terminal` = `X1_READY_AWAITING_EXPLICIT_AUTHORIZATION`, `next_gate: X1_MAIN_THREAD_AUTHORIZATION`, `phase_p_readiness: REVIEWED_PASS_WITH_FINDINGS`, `execution_authorization: EXECUTION_NOT_AUTHORIZED`; all eight authorization flags false, no authorization consumed; frozen roots `workspace/d7_r1_multigraph_20260913_r1`, `workspace/d7_r1_reference_ladder_20260913_r1`, `workspace/v72p2d5_g2/20260906_r1` absent; branch `formal-ir-v72p1-addendum-clean`, HEAD `278fdf07`; no commit, no staging, no push.
+- Next gate [decision]: X1 execution requires explicit user authorization (`x1_consistency_probe_authorized: true` plus the exact frozen command from master packet §7) at the main thread's gate; X2/X3/X4 and D7-H each remain separately non-authorized and no phase authorizes the next. This entry implies no execution authorization and no results.
+
+### D10 mixed-degree L1 R1 readiness — revise required (2026-09-14)
+
+- Reviewer trust [decision]: the D10 `EVIDENCE_ACCESS: VERIFIED` independent
+  review and independently executed tests are accepted; no ceremonial suite
+  duplication is required. Main-thread route/scientific adjudication remains
+  separate from reviewer correctness checks.
+- R1 disposition [decision]: `REVISE_REQUIRED_CONNECTIVITY_AND_RANK`; no L1
+  decoder batch authorization. All 18 profiled graphs were fragmented
+  (9--68 components, largest-component fraction 0.039--0.297) and several had
+  GF32 rank below `m`, so degree-profile effects would be confounded by graph
+  decomposition/effective constraint rank.
+- Next gate [decision]: D10 connectivity/rank R2 implementation/readiness only,
+  preserving degree tables and original seeds and requiring one component,
+  structural check-covering rank `m`, and GF32 row rank `m`. Failure stops
+  without seed search; decoder execution requires a later explicit grant.
+
+### D10 mixed-degree L1 R2 readiness accepted (2026-09-14)
+
+- Evidence [repo-observed]: R201--R212 complete; independent R211
+  `EVIDENCE_ACCESS: VERIFIED / PASS`; 44 focused tests independently passed;
+  PROFILE_ONLY admitted 18/18 original cells with one Tanner component,
+  structural rank `m`, GF32 rank `m`, zero replacement seeds, and zero
+  decoder/scientific calls.
+- Decision: accept readiness as
+  `D10_MIXED_DEGREE_L1_R2_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`.
+  Reviewer N1--N3 are non-blocking; do not duplicate the independent suites.
+- Boundary: the next D10 batch A1 still requires explicit user authorization;
+  acceptance alone grants no execution and does not revive D7-H.
+
+### Phase P execution (D7 X1–X4 execution master R1, A1 + A2) — all four phases executed serially under one authorization, each attempt independently reviewed; X4 complete verified awaiting main-thread route decision (no acceptance, no route conclusion; records under `docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/`)
+
+- Lifecycle [repo-observed]: one serial X1–X4 authorization granted 2026-09-13 (`.workbuddy/tasks/D7_X1_X4_EXECUTION_MASTER_R1_A1_TASK_PACKET.md`; grant record `X1_X4_AUTHORIZATION_A1.md`), one authorized attempt per phase, each gated by its own independent review; `cycle_state.yaml` state/terminal `X4_COMPLETE_VERIFIED_AWAITING_MAIN_THREAD_ROUTE_DECISION`, `next_gate: MAIN_THREAD_ROUTE_DECISION_D7H`, `x1_x4_authorization_consumed: ALL_CONSUMED_X1_X2_X3_X4_EXECUTED`; all execution flags false; `historical_evidence: RETAINED_BYTE_IDENTICAL`; D7-H/G1/real/n=1024 unauthorized; no commit, no staging, no push (entire R1 cycle uncommitted; branch `formal-ir-v72p1-addendum-clean`, HEAD `278fdf07` unchanged).
+- X1 [repo-observed]: pre-fix probe failed `X1_PROVENANCE_PROBE_FAILED` (exit 2, `PRIOR_ONLY`, iterations 0) because `_probe_fixture` used zero syndrome + uniform prior, so the historical row-layered decoder's iteration-0 early return (`v35_algorithm_development.py:835-854`) always fired and the frozen success contract (`CHECK_UPDATED`, iterations>=1) was unsatisfiable by construction — decoder correct, fixture at fault; independently verified `X1_FAILURE_VERIFIED`. Main-thread-authorized fixture-only fix in `v72p2d5_gf32_rate_mother.py` (`_probe_fixture`: syndrome [1,2], x_true [0,1]; h/prior unchanged), independent fix review `PASS_WITH_FINDINGS`, then one authorized rerun: exit 0, `CHECK_UPDATED`, iterations 90, decoder_calls 1, writes 0, no root; independently verified `X1_RERUN_VERIFIED`. X1 complete.
+- X2 [repo-observed]: one attempt, exit 0, 384/384 calls, terminal `GRAPH_SENSITIVITY_OBSERVED`, scope `EXPLORATORY_SYNTHETIC_SINGLE_IMPLEMENTATION`; per-graph f=1.2 paired discordant vectors (forward_only, reverse_only, both, neither) (2,0,0,14)/(2,0,0,14)/(1,0,0,15), descriptive exact McNemar p=0.5/0.5/1.0 with Wilson intervals; exact/syndrome separated (36/36); zero crash/blocked/nonfinite; stored wall 131.5423 s, max per-call 0.4907 s, RSS 133185536 B; root `workspace/d7_r1_multigraph_20260913_r1` (7 files, fresh, no-overwrite); independent `X2_PRE_RESULT_REVIEW_PASS`.
+- X3 [repo-observed]: one attempt, exit 0, terminal `X3_REFERENCE_LADDER_COMPLETED`; S=156 (51/54/51; 87 SOURCE/69 TARGET), reconstruction R=4, ladder 3S=468, total 472<=576; `ROW_LAYERED_90` baseline replay field-exact 156/156; arms RL90 0 exact, RL360 1 exact (rescue: record_idx 29, slot 40, graph 0, L1_MARGINAL, SOURCE, seed 2026091310, iterations 231, changed=True), FLOODING_90 0 exact; stored wall 372.2475 s, max call 1.7976 s, RSS 134381568 B; root `workspace/d7_r1_reference_ladder_20260913_r1` (7 files, fresh, no-overwrite); label `STRONG_REFERENCE_DIAGNOSTIC`; true-condition bind probe before consumption: 0 decoder invocations; independent `X3_PRE_RESULT_REVIEW_PASS`.
+- X4 [repo-observed]: one attempt, exit 0, grade `G2_CURRENT_CONFIGURATION_FAILED` (measured frozen four-state grade, not a route conclusion); 1320/1320 calls (440/f; 200 blocks/f; oracle subset 40/f); all f: L1/L2 exact 0, syndrome 0, provenance 200/200 `CHECK_UPDATED`, transfers 200 invoked / 0 blocked, crashes 0, nonfinite 0, monotonic true; stored wall 2141.94 s, outer 2143.83 s, RSS 159182848 B; root `workspace/v72p2d5_g2/20260906_r1` (4 files, fresh, no-overwrite); independent `X4_PRE_RESULT_REVIEW_PASS`. Pre-EXECUTE carried-findings adjudication `ACCEPTED-AS-IS` with conditions (`X4_PREEXECUTE_ADJUDICATION_R1.md`): repo-rooted existence check and CWD-relative writer coincide under CWD=repo root; non-dict runner coercion unreachable on the production runner path (injected-runner/test-only); external 120 s per-call watchdog owned by the operator with stall monitoring (0 stalls).
+- A2 remediation [decision]: user grant 2026-09-13 (`A2_X2_X4_REMEDIATION_AUTHORIZATION_R1.md`) allowed, on any X2/X3/X4 first-attempt failure, one scoped implementation-level fix + independent review + exactly one second attempt with frozen contract unchanged, plus final disclosure of changes and exploration-goal impact. Not used — X2/X3/X4 first attempts all completed.
+- Carried non-blocking [repo-observed]: stale D5-derived markers `g2_status: G2_PENDING_NOT_FAILED_NOT_SKIPPED_NOT_SUPERSEDED` and `g2_runtime_status: G2_RUNTIME_UNVERIFIED` remain in `cycle_state.yaml` although executed G2 evidence now exists (updating them is a main-thread acceptance decision); frozen X4 evidence set has no per-call wall field, so per-call <=120 s compliance is externally owned and not machine-observable; P0's 485 s runtime projection vs measured stored wall 2141.94 s (4.4x) — projection non-binding and not used for any decision.
+### 2026-09-14 — D13 L055 decoder-ladder readiness accepted
+
+- Main-thread accepted D1301–D1310 after independent `D13-R1310`
+  `EVIDENCE_ACCESS: VERIFIED` / `PASS_WITH_FINDINGS`, no blocking finding.
+  Durable terminal:
+  `D13_L055_DECODER_LADDER_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`.
+- Frozen diagnostic selects exactly 56 D12 L055 failures (n128 30, n256 26)
+  and compares strict RL90 replay with RL360, RL360 damping 0.7, and
+  flooding-360 in 224 calls. Readiness acceptance grants no execution.
+- Trust rule applied: do not mechanically duplicate reviewer-go tests or
+  recomputations when evidence access is VERIFIED and no blocking inconsistency
+  exists. Main-thread route adjudication and user-only authorization remain
+  separate.
+### 2026-09-14 — D13 accepted MODEST; D14 validity reset selected
+
+- D13 Batch A1 accepted as `D13_RESULT_ACCEPTED_MODEST_CLOSE_LADDER`:
+  strict replay 56/56; RL360 alpha=1 rescued 3/56 (MODEST), damping 0.7 1/56,
+  flooding-360 0/56. Close the ladder; do not select a decoder arm or rerun.
+- Current D5 synthetic production entrypoints P0/G1/G2 still call the rejected
+  per-cell `prepare_model_f_prior`; X4/G2 therefore describes failure of that
+  legacy configuration, not valid n=256 finite-length evidence. Preserve the
+  root and record a corrigendum rather than altering artifacts.
+- Before another L1/L2 route, independently reconcile the actual synthetic
+  generator entropy and per-block information load against row budgets for both
+  layers. D7-H remains closed until this channel/rate calibration is valid.
+### 2026-09-14 — D14 C-impl: G2 prior-configuration corrigendum recorded (docs only)
+
+- Additive corrigendum `docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/G2_PRIOR_CONFIG_CORRIGENDUM_R1.md`
+  (D14 VR-C): root `workspace/v72p2d5_g2/20260906_r1` preserved unchanged (4 files,
+  1320/1320 calls); literal grade `G2_CURRENT_CONFIGURATION_FAILED` retained for the
+  executed rejected per-cell-prior configuration; that result is invalid as n=256
+  finite-length feasibility / route-closure evidence; supersession covers the inference
+  only, not the execution; no unique-cause claim. Pointer blocks appended to D5
+  `G1_WIDE_ATTRIBUTION_R2.md` §10 and D7 `OPERATOR_RETURN_R1.md` §10; additive
+  status lines in both `cycle_state.yaml` files; no historical line rewritten.
+
+## 2026-09-14 D14 Scientific Validity Reset R1 complete (calibrated batch ready, unauthorized)
+
+- Close [repo-observed]: D14-FINAL `EVIDENCE_ACCESS: VERIFIED` / `PASS_WITH_FINDINGS`, no blocker; terminal `D14_VALIDITY_RESET_COMPLETE_CALIBRATED_BATCH_READY_AWAITING_EXPLICIT_AUTHORIZATION`. S 4 local commits (`55ab6de`/`5f4b121`/`43308b8`/`ccc33eb`), 70 paths, no push; group1 deferred, group5 STOPPED (mixed hunks, compliance). P 5 hunks (+7/-5) to candidate prior chain, D14P 4/4. C corrigendum + root untouched. R root `workspace/v72p2d14_rate_audit/20260914_r1/` (entropy 4dp reproduced, triple mismatch +0.003/+0.001/+0.003 retained never copied, 10/10 tests, single corrective rerun disclosed in log). N prereg Choice A (m_L1=110, 550 disclosed, 1.00237; n128; 288 calls; seeds/root/runner absent).
+- Lifecycle [decision]: N batch unauthorized; no route decision, no D7-H, no FER/leakage/SKR/real-data/qualification/promotion claim. Next gate is a separate explicit batch grant + DECIDE Pre-EXECUTE/Pre-RESULT.
+- Records [repo-observed]: `docs/research_cycles/D14_VALIDITY_RESET/` (inventory + prereg + log + readiness); OpenSpec `openspec/changes/v72p2d14-scientific-validity-reset/`.
+### 2026-09-15 — D14 N prereg accepted; runner implementation is the next gate
+
+- D14-FINAL is trusted and accepted, but its N runner is explicitly absent.
+  Therefore the next action is implementation/readiness, not a 288-call grant.
+- N is a bounded synthetic fresh-root EXPLORE batch. Execution still requires
+  separate user authorization after an independently reviewed runner; the
+  resulting investment route remains a main-thread decision.
+- Group5 mixed memory/decision-log hunks do not block D8–D13 code reproduction;
+  split only by explicit headers or leave excluded. Never stage them wholesale.
+
+## 2026-09-14 D14N calibrated L1/L2 discriminator readiness complete (N201-N210 + Amendment A1, no execution)
+
+- Readiness [repo-observed]: N201-N210 all PASS per `docs/research_cycles/D14_VALIDITY_RESET/D14N_READINESS_R1.md` + `EXPLORATION_LOG.md`; OpenSpec `openspec/changes/v72p2d14n-calibrated-l1-l2-discriminator/`. N210 `EVIDENCE_ACCESS: VERIFIED` / `PASS`, no blocker: 18/18 admission with amended check-allocs (L045 2^17+3^93 / L055 2^29+3^81 at m_L1=110), 22/22 tests rerun, PROFILE 288-plan, refusal RC=2, decoder/scientific 0, future root `workspace/v72p2d14_discriminator/20260914_r1` absent; APP-source FLAG carried to batch-runner freeze.
+- Amendment [repo-observed]: pre-code STOP on m110/m118 check-alloc contradiction with zero writes → main-thread adjudication (A) adopted: variable side stands, check side recomputed via D9 rule; retry green. Prereg file untouched (supersede, not edit).
+- Lifecycle [decision]: terminal `D14N_CALIBRATED_DISCRIMINATOR_READY_AWAITING_EXPLICIT_AUTHORIZATION`; grants no execution; N batch unauthorized; no route decision; no D7-H. Scoped local commit `4b11d60` (9 paths), no push; group5 memory/decision entries EXCLUDED uncommitted (mixed hunks, carried).
+- Boundary [decision]: synthetic n128 L1/L2 diagnostic only; no FER/leakage/SKR/real-data/qualification/promotion claim.
+### 2026-09-15 — D14N readiness blocked: authorized batch branch missing
+
+- Main-thread inspection found that the D14N CLI handles profile, verify and
+  unauthorized refusal, but authorized `--n14-batch` unconditionally exits with
+  "production ... adapters belong to a later authorized change". It cannot run
+  or write the frozen 288-call batch.
+- Retain the reviewed m=110 amendment, 18/18 admission, plan/gates and refusal
+  evidence. Do not grant A1 until a minimal R2 implements binding/dispatch/write
+  and a fake-injected authorized true-branch test proves 288 calls + verifier.
+## 2026-09-14 D14N R2 authorized-path completion close (docs only, path ready, batch unauthorized)
+
+- Readiness [repo-observed]: R201-R207 PASS_WITH_FINDINGS per `docs/research_cycles/D14_VALIDITY_RESET/D14N_READINESS_R1.md` §7 + `EXPLORATION_LOG.md` R2 section; OpenSpec `openspec/changes/v72p2d14n-calibrated-l1-l2-discriminator/` §9 + R2 tasks. R201 froze APP←L055 CHECK_UPDATED source (gate-coherence) + corrected stale ≤26/m=118. R202-R206 replaced authorized-path SystemExit with narrow binder + 288-plan-first orchestrator + single `run_authorized_batch`/`write_batch_root` writer. R207 `EVIDENCE_ACCESS: VERIFIED` / `PASS_WITH_FINDINGS`, no blocker: 14/14 adapters is-identical, no-SystemExit, fake 288/288 (M110 144 / M104 144, SETUP=32, ROWS==PLAN, N_ROUTE_SCALE_VALIDATION), verifier 288/0, future root absent, zero production (V35_ABSENT, binder 0, probe 0/0), refusal RC=2 pre-bind/load.
+- Lifecycle [decision]: terminal `D14N_R2_EXECUTION_PATH_READY_AWAITING_EXPLICIT_AUTHORIZATION`; path ready, real N batch still unauthorized; no route decision; no D7-H. Scoped local commit `3f874bb` (8 paths), no push; d5 + group5 memory/decision hunks EXCLUDED uncommitted (carried).
+- Boundary [decision]: synthetic n128 L1/L2 diagnostic only; no FER/leakage/SKR/real-data/qualification/promotion claim. Pre-EXECUTE carries APP-source L055 freeze + d5-tree reconfirm + target-absence + frozen command/budgets/authorization.
+### 2026-09-15 — D14N R2 execution path accepted; N-A1 is next
+
+- R2 replaced the authorized-path SystemExit with exactly one orchestrator and
+  one writer. Independent fake true-branch evidence: 288/288, setup 32, six
+  files, verifier PASS, zero production calls. Accepted terminal:
+  `D14N_R2_EXECUTION_PATH_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`.
+- Before N-A1, verify D5 P-wiring still calls the candidate prior at P0/G1/G2
+  and APP source remains L055. Execution needs a separate one-shot user grant;
+  D7-H and the route decision remain closed.
+
+## 2026-09-14 D14N calibrated discriminator Batch A1 complete + VERIFIED PASS batch-end review (evidence-only)
+
+- Evidence [repo-observed]: single authorized run in fresh root `workspace/v72p2d14_discriminator/20260914_r1` (6 files, hashes match); EXIT 0, 18:52:43–18:55:40Z; 288/288 calls, 32/32 setup, wall 170.990/1800, per-call-max 0.928/120, RSS 137207808<2GiB, violations []; 18/18 admission (amended cells); exact total 80 = syndrome 80, undetected 0 (L045 3 [1,0,0,0,1,1] / L055 7 [1,0,1,2,2,1] / APP joint 7 / ORACLE 63 [11,11,10,9,12,10]); APP←L055, provenance 216 CHECK_UPDATED + 72 ORACLE ungraded; predicates L1-ADEQUATE FALSE (7<18, ge2 2/6) / ORACLE TRUE (63) / JOINT FALSE (7<9) → N_ROUTE_L1_CONSTRUCTION (evidence-only); Model-F unchanged; grant consumed; no retry/repair; no D7-H/real-data; no commit/push.
+- Review [repo-observed]: batch-end review = `EVIDENCE_ACCESS: VERIFIED` / PASS, no blocker. Full record in `docs/research_cycles/D14_VALIDITY_RESET/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D14N_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only, no route acceptance; grant consumed; no second run.
+- Boundary [decision]: synthetic calibrated n128 L1/L2 discriminator only; no FER/leakage/SKR/forward/L2/real-data/qualification/promotion/D7-H claim. Next gate is main-thread route decision only.
+- Interpretation [decision]: at calibrated effective≈1.0 disclosure, L055 L1 exact collapsed 42/72 (D12 CE-rate) → 7/72 — D12 advantage was a rate artifact (main-thread interpretation, not a claim).
+### 2026-09-15 — D14N accepted; route deferred because layer margins differ
+
+- Accepted 288-call evidence: L045 3/72, L055 7/72, L2 APP joint 7/72,
+  L2 ORACLE 63/72; exact=syndrome, undetected 0, VERIFIED PASS. Literal machine
+  terminal `N_ROUTE_L1_CONSTRUCTION` is retained.
+- Main-thread terminal is
+  `D14N_RESULT_ACCEPTED_MARGIN_CONFOUNDED_ROUTE_DEFERRED`: L1 effective margin
+  was about 1.002 and L2 oracle about 1.261, so the result cannot yet choose L1
+  construction versus L2 degree investment. L055 still beats L045 7 vs 3; only
+  its absolute near-entropy adequacy failed.
+- Next evidence is a paired L1/L2 matched-margin finite-length curve. D7-H stays
+  closed.
+## 2026-09-15 D15 finite-length margin curve readiness complete (D1501-D1510, no execution)
+- Terminal `D15_MARGIN_CURVE_READY_AWAITING_EXPLICIT_AUTHORIZATION`; predecessor `D14N_RESULT_ACCEPTED_MARGIN_CONFOUNDED_ROUTE_DEFERRED`; 9 cells verified (L1 m110/114/118 + L2 m83/86/89, pairing gaps <0.004); 36/36 admission recomputed; seeds 3801-3836 + 3901-3908 frozen; 288/46 plan; no-APP; conservative route vocab; 25/25 tests; fake 288/288 + verifier; refusal RC=2; decoder/scientific 0; future root `workspace/d15_finite_margin_curve_8c1e4f2a-9b3d-4e7a-a5c6-d7e8f9a0b1c2` absent; D15-R1510 `VERIFIED PASS_WITH_FINDINGS` (D14N 3 fails = environmental stale-world-state); scoped local commit `614a0e81` (9 paths) no push. Refs: `docs/research_cycles/V72P2D15-MARGIN-CURVE/READINESS_R1.md` + `EXPLORATION_LOG.md`; OpenSpec `openspec/changes/v72p2d15-finite-length-margin-curve/`.
+### 2026-09-15 — D15 matched-margin readiness accepted
+
+- Accepted terminal:
+  `D15_MARGIN_CURVE_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION` after
+  D15-R1510 VERIFIED PASS_WITH_FINDINGS, no blocker. Three L1/L2 row pairs have
+  effective-factor gaps <0.004; 36/36 graphs admitted; fake 288/288 and verifier
+  PASS; production calls zero.
+- Materialized D14N-root absence-guard failures are stale predecessor state, not
+  a D15 gate. D15 execution still requires a one-shot user grant; D7-H remains
+  closed.
+## 2026-09-15 D15 margin-curve Batch A1 complete + VERIFIED PASS_WITH_FINDINGS batch-end review (ambiguous, evidence-only)
+- Evidence [repo-observed]: single authorized run in fresh root `workspace/d15_finite_margin_curve_8c1e4f2a-9b3d-4e7a-a5c6-d7e8f9a0b1c2` (6 files, hashes match); EXIT 0, 06:56:08–06:59:36Z; 288/288 calls, 46/46 setup, wall 201.7/1800, per-call-max 1.319/120, RSS 139161600<2GiB, violations []; 36/36 admission; exact total 61 = syndrome 61, undetected 0 (L045 0/6/19; L055 1/13/22; L2-ORACLE 0/0/0); monotonic non-decreasing all arms; WEAKx7 + MIDDLEx2, ADEQUATE none → MARGIN_CURVE_AMBIGUOUS (evidence-only); Model-F unchanged; grant consumed; no retry/repair; no APP/D7-H/real-data; no commit/push.
+- Review [repo-observed]: batch-end review = `EVIDENCE_ACCESS: VERIFIED` / PASS_WITH_FINDINGS, no blocker; L2-ORACLE-zero recorded as evidence only (zero interpretation). Full record in `docs/research_cycles/V72P2D15-MARGIN-CURVE/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D15_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only, no route acceptance; grant consumed; no second run.
+- Boundary [decision]: synthetic matched-margin single-layer diagnostic only; no FER/leakage/SKR/forward/real-data/qualification/promotion/D7-H claim. Next gate is main-thread route decision only.
+### 2026-09-15 — D15 accepted AMBIGUOUS; one matched backoff point next
+
+- D15 accepted: L045 0/6/19, L055 1/13/22, L2 ORACLE 0/0/0 across increasing
+  margins; all monotonic, exact=syndrome, undetected 0; terminal
+  `MARGIN_CURVE_AMBIGUOUS` retained.
+- Next minimal discriminator uses L1 m125 (factor 1.1390555) and L2 m94
+  (1.1393714), gap 0.00031594. It tests whether L1 crosses adequacy while L2 DV3
+  remains weak before starting L2 degree work. D7-H stays closed.
+## 2026-09-15 D16 matched-backoff discriminator readiness complete (D1601-D1609 + alignment + re-verify, no execution)
+- Terminal `D16_MATCHED_BACKOFF_READY_AWAITING_EXPLICIT_AUTHORIZATION`; predecessor `D15_RESULT_ACCEPTED_ROUTE_TO_ONE_POINT_BACKOFF_DISCRIMINATOR`; one-point n128 at factor ≈1.139 (L1 m125 disclosed 625 / L2 m94 disclosed 470, gap 0.0003159373731645); cells L045 71/57/313 2^62+3^63 + L055 83/45/301 2^74+3^51 + L2 128×3/384 4^86+5^8; 12/12 admission recomputed; seeds 4001-4012 + 4101-4108 frozen; 96/22 plan; no-APP; six terminals (packet string D16_MATCHED_BACKOFF_SUFFICIENT authoritative, implementation aligned, re-verified); 26/26 tests; fake 96/96 + verifier; refusal RC=2; decoder/scientific 0; future root workspace/d16_matched_backoff_discriminator_b7c2d4e6-8f1a-4c3d-9e5b-2a4f6c8d0e1a absent; D16-R1608 VERIFIED PASS_WITH_FINDINGS + R1608A PASS (D15 4 fails = environmental stale-world-state); scoped local commit a0260907 (9 paths) no push; D15 log pointer + d5/group5 hunks EXCLUDED uncommitted (carried).
+- Refs: docs/research_cycles/V72P2D16-MATCHED-BACKOFF/READINESS_R1.md + EXPLORATION_LOG.md; OpenSpec openspec/changes/v72p2d16-matched-backoff-discriminator/.
+- Boundary: synthetic one-point matched-backoff diagnostic only; batch unauthorized; no route choice; no D7-H; no FER/SKR/qualification/promotion/real-data claim.
+### 2026-09-15 — D16 matched-backoff readiness accepted
+
+- Accepted terminal:
+  `D16_MATCHED_BACKOFF_READINESS_ACCEPTED_AWAITING_EXPLICIT_AUTHORIZATION`.
+  Factors differ by 0.00031594; 12/12 graphs admitted; fake 96/96 and verifier
+  PASS; production calls zero. Terminal spelling is aligned to
+  `D16_MATCHED_BACKOFF_SUFFICIENT`.
+- D16 Batch A1 still requires a one-shot user grant. Pre-dispatch reconfirms
+  uncommitted D5 candidate-prior wiring. No route choice or D7-H.
+### 2026-09-15 — Route reset: asymptotic DE then finite-length scaling; D16 held out
+
+- The unconsumed D16 execution packet was withdrawn before execution. Its
+  m125/m94 matched point is retained as a held-out validation point; prediction
+  must be frozen before any later authorization.
+- New route: current Model-F empirical channel → per-ensemble L1/L2 asymptotic
+  DE threshold → explicit finite-length scaling/backoff for stated diagnostic
+  error targets → held-out D16 validation → finite-graph residual analysis.
+- V26 f1.3 is ancestor evidence, not automatically the current candidate-channel
+  threshold. D8/D9 partly cover L1; current-channel L2 DV3 DE is missing.
+- D7-H remains closed; graph/decoder pathologies are finite residuals, not an
+  analytic correction inferred automatically from DE.
+## 2026-09-15 D17 asymptotic-finite scaling readiness complete (A01-A05 + D01 + B/C/D02-D06 + D07, no execution)
+- Terminal `D17_DE_SCALING_READY_AWAITING_EXPLICIT_AUTHORIZATION`; predecessor route-reset (D16 held out); channel identity EXACT (candidate generator, H_L1/H_L2, floor/no-renorm, P1/P2 + true-U1 oracle); DE-transfer map V26-kernel + D9-adapter reuse, f1.3 numerics do NOT transfer; finite table F1-F19/H1-3 with compatibility classes (APP/joint excluded; L2-ORACLE L2-model-only); D16 holdout locked (banned seeds 4001-4012/4101-4108, root absent, blank schema); frozen 15-pt DE grid (L045 m106-122 / L055 m116-126 capped / L2 m89-109, seeds 2026094201..08, 240 calls, V26 60/1e-4/20); probit law + ladder/downgrade/MODEL_NOT_IDENTIFIABLE + logistic-descriptive + epsilon 0.10/0.01 inversion; 30/30 tests; PROFILE_ONLY rc=0 + refusal rc=2; DE/decoder 0; future roots (DE + D16) absent; D07 VERIFIED PASS_WITH_FINDINGS (first-run fixes in-scope); scoped local commit 73c6275b (10 paths) no push; d5/group5 hunks EXCLUDED uncommitted (carried).
+- Refs: docs/research_cycles/V72P2D17-DESCALING/READINESS_R1.md + EXPLORATION_LOG.md; OpenSpec openspec/changes/v72p2d17-asymptotic-finite-scaling/.
+- Boundary: synthetic DE + finite-fit diagnostic only; DE batch + fit + D16 prediction all unauthorized; no route decision; D7-H closed; no FER/SKR/qualification/promotion/real-data claim.
+## 2026-09-15 D17 DE Batch A1 ENGINEERING-BLOCKED + VERIFIED failure review (0/240, evidence retained)
+- Evidence [repo-observed]: single authorized `--de-batch --execution-authorized` run in fresh root `workspace/d17_current_channel_asymptotic_de_7e4b2a1d-9c3f-4d8e-a1b2-c3d4e5f60718` (6 files, hashes match); EXIT 0 fail-closed, ~3s wall / 184MB RSS, setup 4/12, violations []; plan 240/240 validated, 0/240 scientific calls; failure `DE_CALL_FAILED@0 TypeError tuple-not-callable` (D9 `load_l1_channel` tuple passed as `channel_sampler` into `v26.run_mcde_posterior`; `build_l1_sampler` never invoked on production path; fakes boom production bind by design); `de_plan.csv` full 240-row plan, `de_records/traces` header-only; Model-F unchanged; D16 blank; no decoder/CAL/VAL/real-data; grant consumed; no repair/rerun.
+- Review [repo-observed]: `D17-DE-B1-REVIEW` `EVIDENCE_ACCESS: VERIFIED` / PASS (STOP correct); B1 evidence unusable for fit (0/240), B2 readiness gap (zero-call bind validation needed), N1 latent L2-oracle dispatch gap, N2 RSS placeholder, N3 timestamp note. Full record in `docs/research_cycles/V72P2D17-DESCALING/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D17_DE_BATCH_ENGINEERING_BLOCKED_AWAITING_DECISION`; batch-end review of DE evidence moot; single decision needed: authorize fix+rerun packet (new grant, incl. N1 scope) or stand down Batch A1.
+- Boundary [decision]: synthetic current-channel DE diagnostic only; no fit/D16-prediction/D16/decoder/route/FER/leakage/SKR/qualification/promotion/real-data/D7-H claim.
+## 2026-09-15 D17 DE repair R2 + Batch A2 complete + VERIFIED PASS_WITH_FINDINGS batch-end review (240/240 DE_COMPLETE, clean DE_BRACKET)
+- Repair [repo-observed]: R2 L1 tuple→sampler (`build_l1_sampler` on production path; `None` channel builds via `build_production_channels`) + L2 oracle dispatch (per-entry profile dispatch from frozen plan entry, distinct tagged `{"L045":l1,"L055":l1,"L2":l2}` mapping, shared callable forbidden); R204 frozen symbols untouched (15-pt grid/seeds/pops/lambda-rho/V26 60/1e-4/20/bracket/budget/banned D16 unchanged); 37/37 focused tests; repair review `D17-R2-REPAIR` `EVIDENCE_ACCESS: VERIFIED` / REPAIR_CLOSE; zero scientific calls in repair/validation; A1 root re-hashed unchanged (six prefixes match).
+- Evidence [repo-observed]: single authorized `--de-batch --execution-authorized` fresh rerun in new root `workspace/d17_current_channel_asymptotic_de_r2_61fce6d0-07ad-4b67-a1a2-ef7fc1b74b24` (6 files, hashes match); EXIT 0, 11:31:35–11:37:12Z; 240/240 scientific calls, setup 4/12, wall 322.9/1200, per-call-max 2.70/300, RSS ~0.27GiB<2GiB, violations []; dispatch (L045,L1)x80 + (L055,L1)x80 + (L2,L2)x80, 0 crashes; A2 `de_plan.csv` byte-identical to A1 (`4837bd52…`); S_pop converged 139/240 (L045 m118 8/6 + m122 8/8; L055 m119 7/6 + m122-126 8/8; L2 m99-109 8/8; else 0/0); all three profiles clean DE_BRACKET (L045 lo m114/hi m118 delta_DE 0.24452956979862517; L055 lo m116/hi m119 delta_DE 0.30312331979862517; L2 lo m94/hi m99 delta_DE 0.5468113653656221); Model-F unchanged; D16 official root absent/blank; no fit/prediction/D16/decoder/route.
+- Review [repo-observed]: batch-end review `D17-A2-REVIEW` = `EVIDENCE_ACCESS: VERIFIED` / PASS_WITH_FINDINGS, no blocker; non-blocking only (N1 trace early-stop wording; N2 manifest.command A1-root path by verifier-equality design — do not "fix" without packet). Full record in `docs/research_cycles/V72P2D17-DESCALING/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D17_DE_R2_COMPLETE_REVIEWED_AWAITING_SCALING_FIT_DECISION`; evidence-only, no fit/prediction/route acceptance; A1+A2 grants consumed; no second run/retry/repair under A2 grant.
+- Boundary [decision]: synthetic current-channel DE diagnostic only; no fit/D16-prediction/D16/decoder/route/FER/leakage/SKR/qualification/promotion/real-data/D7-H claim. Next gate is scaling-fit decision under separate authorization only.
+## 2026-09-15 D17 scaling-fit A3 complete + VERIFIED PASS_WITH_FINDINGS batch-end review (predictions frozen, D16 unauthorized)
+- Evidence [repo-observed]: single authorized `--scaling-fit --execution-authorized` run in fresh root `workspace/d17_finite_scaling_fit_5b6d71c8-9e42-4e64-b1c3-73a1f20d8e95` (8 files, hashes match); EXIT 0, 13:16:04–13:20:19Z; wall 255.08/300, RSS ~0.097GiB<2GiB, violations []; DE/decoder/CAL/VAL 0; 96 clusters reconciled (L045 48 / L055 30 / L2 18); brackets literal-exact DE_BRACKET all three; fits L045 one-param α=14.5378 [10.0,21.752] (two-param unidentifiable→downgrade) / L055 two-param α=4.5973 [3.1623,5.6234] β=-1.075 [-1.5,-0.575] / L2 one-param α=5.0845 [3.4974,6.8786]; backoffs diagnostic only; 3 D16 outcome-BLANK predictions frozen (L045 p0.8516 [0.6157,0.9744]; L055 p0.9616 [0.8899,0.9955]; L2 p0.3121 [0.0,0.5]); D16 root absent pre-write; verifier 96/0 PASS; grant consumed; no retry/tuning; no commit/push.
+- Review [repo-observed]: batch-end review `D17-A3-REVIEW` = `EVIDENCE_ACCESS: VERIFIED` / PASS_WITH_FINDINGS, no blocker; non-blocking only N1 cmdlog float-display / N2 never-revise literal-key / N3 L045 LORO sensitivity (disclosed, wider union used). Full record in `docs/research_cycles/V72P2D17-DESCALING/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D17_SCALING_FIT_COMPLETE_PREDICTIONS_FROZEN_AWAITING_D16_AUTHORIZATION`; evidence-only, no D16/fit-claim/route acceptance; A3 grant consumed; no second completion/rerun.
+- Boundary [decision]: synthetic scaling-fit + frozen-prediction diagnostic only; no D16 execution/decoder/route/FER/leakage/SKR/qualification/promotion/real-data/D7-H claim. Next gate is D16 authorization (separate) only.
+## 2026-09-15 D16 held-out scaling validation B1 complete + VERIFIED PASS batch-end review (partial falsification, evidence-only)
+- Evidence [repo-observed]: single authorized 96-call run EXIT 0; exact total 61 = syndrome 61, undetected 0 (L045 25/32 obs 0.78125 [7,6,7,5]; L055 27/32 obs 0.84375 [7,7,6,7]; L2-ORACLE 9/32 obs 0.28125 [3,1,2,3]); frozen-band verdicts L045 NOT_FALSIFIED / L055 FALSIFIED (strictly below 0.8899) / L2 NOT_FALSIFIED; predictions predated run by ~33min, byte-identical + all-BLANK (never edited); legacy terminal D16_L2_DEGREE_SIGNAL secondary only; grant consumed; no retry/refit/rerun; no D17-model-change/D7-H/real-data; no commit/push.
+- Review [repo-observed]: batch-end review `D16-B1-REVIEW` = `EVIDENCE_ACCESS: VERIFIED` / PASS, no blocking findings. Partial falsification is evidence only (no interpretation). Full record in `docs/research_cycles/V72P2D16-MATCHED-BACKOFF/EXPLORATION_LOG.md` (+ pointer in D17 log).
+- Lifecycle [decision]: terminal `D16_HOLDOUT_VALIDATION_COMPLETE_REVIEWED_AWAITING_ROUTE_DECISION`; evidence-only, no route acceptance; grant consumed; no second run.
+
+## 2026-09-15 — D16 held-out route adjudication
+
+- D17 predictions were frozen before D16. D16 observed L045 25/32
+  (NOT_FALSIFIED), L055 27/32 (FALSIFIED under the frozen latent-p-band rule),
+  and true-conditioned L2-ORACLE 9/32 (NOT_FALSIFIED); predictions stayed
+  outcome-blank and immutable.
+- Preserve the L055 registered verdict, while recognizing it as a scaling-model
+  calibration miss rather than an L1 construction failure. Future held-outs
+  should use an observation-level predictive count interval in addition to a
+  latent-p confidence band.
+- Main route is D18 current-channel L2 ensemble DE, followed by finite L2 graph
+  validation if a candidate advances. L1 tuning is paused; D7-H/APP remain
+  closed until single-layer L2 reaches its finite operating region.
+## 2026-09-15 D18 L2 ensemble DE readiness complete (E01-E08, no execution)
+- Readiness [repo-observed]: E01-E08 all PASS per `docs/research_cycles/V72P2D18-L2ENSEMBLE/READINESS_R1.md` + `EXPLORATION_LOG.md`; OpenSpec `openspec/changes/v72p2d18-current-channel-l2-ensemble-de/`; E08 `EVIDENCE_ACCESS: VERIFIED` / `PASS_WITH_FINDINGS` (D17 3 fails environmental). 21 candidates (DV3 control mandatory) + feasibility 105/105 + DV3 baseline 0.5468113653656221; Stage-S 168 (21x{94,104}x4301..04x4000) + Stage-C 320 (32-overlap, 288 new, 456 total); eligibility <=0.5077488653656221 + rank + one winner; terminals incl. BASELINE_DRIFT; seeds 4301..4308 frozen; future root `workspace/d18_l2_ensemble_de_98abed5a-...` absent; budgets <=456/<=16/1800s/300s/2GiB/1-proc; 26/26 tests; PROFILE_ONLY + refusal rc=2; DE/decoder 0.
+- Methodology [decision]: L055 FALSIFIED preserved (mild miss 27/32 [7,7,6,7], descriptive tails T(p_lo)=0.273/T(p_hi)=3.3e-07); latent-band vs predictive-interval amendment forward-only, D16 NOT recomputed.
+- Lifecycle [decision]: terminal `D18_L2_ENSEMBLE_DE_READY_AWAITING_EXPLICIT_AUTHORIZATION`; grants no execution; predecessor D16 route adjudication immutable (pause-L1/optimize-L2). Future sweep EXPLORE (<=456 calls).
+- Boundary [decision]: synthetic current-channel L2 ensemble DE diagnostic only; sweep unauthorized; no route/FER/leakage/SKR/qualification/promotion/real-data/D7-H claim; no commit/push (E09 scope: triage + entry only).
+- Refs: `docs/research_cycles/V72P2D18-L2ENSEMBLE/` (being created in parallel); OpenSpec `openspec/changes/v72p2d18-current-channel-l2-ensemble-de/`.
+## 2026-09-15 D18 L2 ensemble DE Sweep A1 complete + VERIFIED PASS_WITH_FINDINGS batch-end review (winner `lam_d2_0.20_d3_0.80`, evidence-only)
+- Evidence [repo-observed]: single authorized one-shot `--de-sweep --execution-authorized` run in fresh root `workspace/d18_l2_ensemble_de_98abed5a-af4f-4780-9e83-54cccba28901` (6 files, sha256 match: manifest 50f5fd96…, de_plan 92039219…, de_records 7b8abea9…, de_traces a7ecbadf…, summary 293fcc47…, command_log 47e0ac65…); EXIT 0, 15:50:36–15:58:27Z; S 168 + C-new 288 = 456/456 unique (32 Stage-S overlaps reused, never rerun), setup 4/16, wall 466.36/1800, per-call-max 2.815/300, RSS 286371840<2GiB, violations []; Stage-S rank selected `[0.15, 0.20, 0.25, DV3]` (six-way tie S94=S104=4 + worst-H 3.089393128245247e-296 broken by pre-registered id ASC; rank-4..6 0.30/0.35/0.40 screen-indistinguishable = N4); selected brackets lo89/hi94 h=0.09765625 `delta_DE=0.35149886536562214` `[DE_BRACKET]`; DV3 lo94/hi99 `delta_DE=0.5468113653656221` (`baseline_drift=false`); 3 eligible; winner `lam_d2_0.20_d3_0.80` (id-ASC tie-break; 0.15 loses max_dc 5); terminal `D18_L2_DE_SELECT_ONE_ENSEMBLE`; read-only `--verify` PASS/0.
+- Review [repo-observed]: batch-end review `D18-A1-REVIEW` `EVIDENCE_ACCESS: VERIFIED` / `PASS_WITH_FINDINGS`, no blocker; non-blocking N1 RSS placeholder + setup constant, N2 saturation fixed point, N3 thin `command_log.txt`, N4 rank-4..6 screen-indistinguishable (main thread owns interpretation). Full record in `docs/research_cycles/V72P2D18-L2ENSEMBLE/EXPLORATION_LOG.md`.
+- Lifecycle [decision]: terminal `D18_L2_DE_SWEEP_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only (no route/optimality acceptance); one-shot grant consumed; no second run/retry/resume/repair/manual substitution; N4 interpretation and the next route gate (finite L2 validation if a candidate advances, per D16 route adjudication) belong to the main thread. No OpenSpec behavior delta (sweep matched the frozen spec).
+- Boundary [decision]: synthetic current-channel L2 ensemble DE diagnostic only; no finite L2/decoder/APP/L1/real-data/FER/leakage/SKR/qualification/promotion/D7-H claim; no commit/push.
+- Refs: `docs/research_cycles/V72P2D18-L2ENSEMBLE/EXPLORATION_LOG.md`; root above; OpenSpec `openspec/changes/v72p2d18-current-channel-l2-ensemble-de/`; packet `.workbuddy/tasks/D18_L2_ENSEMBLE_DE_SWEEP_A1_TASK_PACKET.md`.
+
+## 2026-09-16 — D18 L2 DE selection and D19 route
+
+- D18 completed 456 unique current-channel true-conditioned L2 DE calls.
+  L015/L020/L025 all bracketed at `delta_DE=0.35149886536562214`; DV3 remained
+  at `0.5468113653656221`. The frozen complexity/ID rank selected L020; this is
+  candidate selection, not ensemble optimality.
+- Next route is D19 paired finite L2 validation of L020 versus DV3 at m94/n128,
+  with six fresh graphs/eight shared blocks and conditional n256 confirmation.
+  L1 tuning, APP, and D7-H remain paused.
+## 2026-09-16 D19 L2 finite-ensemble validation readiness STOP (frozen-seed x constructor-trajectory BLOCKED, no execution)
+- Readiness [repo-observed]: STOP on frozen n256 DV3 graph seed 2026094408 deterministically failing construction (`no eligible check placement at variable 255 socket 2`) with accepted D10-R2 constructor; 23/24 graphs admit (n128 12/12); reviewer `D19-BLOCKER-REVIEW` `EVIDENCE_ACCESS: VERIFIED` / PASS confirmed frozen-seed x constructor-trajectory STOP (not table/implementation defect; arithmetic + sockets verified; five identical-multiset siblings admit); no replacement/search applied (forbidden); D19 module/runner/tests (33/33) + PROFILE_ONLY (24 attempted/23 admitted/192 plan/0 calls/root absent) + refusal rc2 exist as untracked-additive artifacts; F08 frozen root `workspace/d19_l2_finite_ensemble_5f2b8c1d-7a3e-4f90-b6d4-8e1a2c3d4f5a6b` absent; zero decoder/DE calls.
+- Lifecycle [decision]: NO ready terminal issued (`D19_L2_FINITE_ENSEMBLE_READY_AWAITING_EXPLICIT_AUTHORIZATION` must NOT be issued under frozen seeds); terminal `D19_L2_FINITE_ENGINEERING_BLOCKED` pending formal acceptance; ONE decision pending: amend frozen n256 DV3 seed set under new packet amendment (fresh disjointness + 24-graph re-profile + re-review) OR formally accept BLOCKED as D19 outcome; no commit/push; no D19 execution.
+- Boundary [decision]: synthetic finite L2 readiness only; no FER/leakage/SKR/route/qualification/promotion/real-data/D7-H claim.
+- Refs: `docs/research_cycles/V72P2D19-L2FINITE/` (parallel creation); OpenSpec `openspec/changes/v72p2d19-l2-finite-ensemble-validation/`; packet `.workbuddy/tasks/D19_L2_FINITE_ENSEMBLE_VALIDATION_READINESS_R1_TASK_PACKET.md`.

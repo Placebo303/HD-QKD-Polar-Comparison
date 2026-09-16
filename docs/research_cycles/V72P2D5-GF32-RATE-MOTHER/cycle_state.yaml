@@ -79,3 +79,7 @@ structure_runner_implementation: 737f731702106bacff3c509a3f877a8b037f1434
 # Evidence dir workspace/v72p2d5_g0/20260905_r2/ four files retained pending review (results.json, table.csv, report.md, execution_summary.json).
 # Acceptance 20260907: MODEL_F_INPUT_RESULT_ACCEPTED per MODEL_F_INPUT_RESULT_ACCEPTANCE_R1.md; PR16 cleared BY RECORD not by condition (G1 root still present, dispositioned VOID_RETAINED_IN_PLACE).
 # Residual risks carried into P0: R-R1 prod-side bare-authorized defaults unchanged (test-side guard only); R-R2 no global formal-root absence gate (per-test snapshots instead).
+# D14 VR-C additive pointer (2026-09-14, docs only; no historical key rewritten):
+# G2/X4 inference-scope corrigendum lives in the D7 reset cycle.
+g2_prior_config_corrigendum: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/G2_PRIOR_CONFIG_CORRIGENDUM_R1.md
+g2_prior_config_inference_scope: SUPERSEDED_AS_N256_FEASIBILITY_EVIDENCE_EXECUTION_RETAINED

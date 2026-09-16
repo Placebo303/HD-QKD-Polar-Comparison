@@ -237,3 +237,8 @@ pending.
   is downstream of the unresolved channel/rate calibration and cannot repair
   the non-material L1 decoder rescue.
 - Accepted terminal: `D13_RESULT_ACCEPTED_MODEST_CLOSE_LADDER`.
+
+## 2026-09-14 — Successor pointer: D14 validity reset closed (append-only)
+
+- D14 `docs/research_cycles/D14_VALIDITY_RESET/EXPLORATION_LOG.md` + `READINESS_R1.md` record D14-FINAL (`EVIDENCE_ACCESS: VERIFIED`, `PASS_WITH_FINDINGS`, BLOCKING none; S/P/C/R/N per §9 return contract; terminal `D14_VALIDITY_RESET_COMPLETE_CALIBRATED_BATCH_READY_AWAITING_EXPLICIT_AUTHORIZATION`).
+- This D13 log is unchanged history; D14 is the successor (prior correction + rate calibration + frozen N discriminator, still unauthorized). No D13 rerun, no route change.

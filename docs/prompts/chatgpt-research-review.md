@@ -10,7 +10,8 @@ reviewer cannot inspect the workspace directly.
 REPOSITORY: <owner/repository>
 BRANCH_OR_PR: <branch name or PR URL>
 CYCLE_ID: <cycle ID, e.g. V37R1>
-REVIEW_KIND: <PLAN | IMPLEMENTATION | DEVELOPMENT_RESULT | FORMAL_RESULT>
+TRACK: <EXPLORE | DECIDE>
+REVIEW_KIND: <EXPLORE_BATCH | PLAN | IMPLEMENTATION | DEVELOPMENT_RESULT | FORMAL_RESULT>
 ENTRYPOINT: <docs/research_cycles/.../REVIEW_ENTRYPOINT.md>
 
 第一性原理：寻找科学合理、高性能的 HD-QKD 纠错/信息协调算法。优先评价
@@ -29,6 +30,15 @@ exact recovery/FER、leakage/efficiency、runtime/resource cost 和净密钥收�
 6. 从机器可读结果独立重算关键统计；如果无法重算，列为 UNVERIFIED。
 7. 明确 oracle、development-only、非端到端、选择偏差和重复使用种子的边界。
 8. 不实现代码、不修改仓库、不授权正式运行、不自行扩大下一轮范围。
+
+按声明的 TRACK 应用对应证据契约：
+- EXPLORE_BATCH：审查冻结的条件分支序列与单一日志（EXPLORATION_LOG.md），
+  它取代逐分支审查，不得要求逐分支文件；只评价授权边界、machine gates、
+  保留的失败、预注册修复、最终证据和 claim 上限。
+- DECIDE：适用完整 Pre-RESULT 语义（冻结阈值、leakage 公式分解、`undetected`
+  绝不并入 success/FER、逐 source 分解、披露口径）。
+- 真实数据、route-closing gate 和 publication claim 永远是 DECIDE；EXPLORE
+  批次不得用于承载任何 claim。
 
 请严格输出以下结构，便于直接复制回仓库：
 

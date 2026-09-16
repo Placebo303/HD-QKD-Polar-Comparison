@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-08-29T18:41:06.433031+00:00",
+  "tool": "eval_cascade_single",
+  "version": "t6-synth",
+  "seed": 42,
+  "frames_per_point": 8,
+  "grid": {
+    "ser": [
+      0.05,
+      0.15
+    ],
+    "q": [
+      4,
+      7
+    ],
+    "N": [
+      64,
+      256
+    ]
+  },
+  "n_jobs": 8,
+  "n_rows": 24,
+  "elapsed_s": 0.16447129999869503,
+  "python": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:13:34) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "methods": [
+    "cascade_single_kernel",
+    "cascade_lite(shim)",
+    "cascade_formal(shim)"
+  ],
+  "metrics": [
+    "FER",
+    "leakage(key_dependent)",
+    "beta_eff_empirical=1-leak/(n*h(ber)) tracable",
+    "throughput_input_bps",
+    "net_key_rate",
+    "undetected_isolated"
+  ],
+  "verification": {
+    "bounded_single_ge_formal_within_5pct": true,
+    "bounded_worst_ratio_single_over_formal": 1.0,
+    "wide_single_ge_lite": true,
+    "wide_worst_ratio": 1.0,
+    "beta_trace_ok": true,
+    "n_bounded_pairs": 2,
+    "n_wide_pairs": 8
+  },
+  "beta_derivation": "beta_eff_empirical = max(0,1 - leak_EC_actual_bits / (n_input_bits * h(raw_ber))); h binary entropy; leak decomposed as BLOCK_PARITY(1 per block)+BISECTION(1 per level)+VERIFICATION_TAG(64)",
+  "undetected_isolation": "n_frames_failed_verify never merged into n_frames_success; success requires verified_success && toeplitz_tag match; frame status verify_failed isolated",
+  "transcript_contract": "unchanged; leak sum from transcript key_dependent_bits",
+  "manifest_block": {
+    "cascade_single_kernel": {
+      "kernel": "single",
+      "block_size_policy": "adaptive|fixed",
+      "lookback": "fifo",
+      "verification": "toeplitz",
+      "seed_policy": "domain-separated",
+      "q_handling": "auto",
+      "passes": [
+        16,
+        32,
+        64,
+        128
+      ],
+      "base_seed": 42,
+      "caps": {
+        "per_frame_s": 5,
+        "max_events": 100000,
+        "max_corrections": 4096,
+        "max_queue_pops": 10000
+      }
+    }
+  }
+}

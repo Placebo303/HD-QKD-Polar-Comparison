@@ -1,0 +1,24 @@
+{
+  "overall": "V65_DATA_NOT_READY",
+  "forbidden_nonempty": true,
+  "forbidden_keys": 360,
+  "frozen_binding_ok": true,
+  "checks": {
+    "session_count_ok": false,
+    "frozen_binding_ok": true,
+    "v56_chain_importable": false,
+    "zero_overlap_tuple": false,
+    "not_cross_spliced": false,
+    "frame_256": true,
+    "sign_50ps_precheck": true,
+    "sidecar_ok": true,
+    "forbidden_nonempty": true
+  },
+  "zero_overlap_verified": false,
+  "zero_overlap_key": "(source,session,frame)",
+  "v66_equals_v65_test": {
+    "status": "PENDING",
+    "equals": false,
+    "reason": "V66 registry not yet generated (=V65 TEST pending)"
+  }
+}

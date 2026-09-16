@@ -22,6 +22,22 @@ Reusable failure modes and their fixes for the HD-QKD_Polar_Comparison project.
 
 ## Known Issues
 
+### `No module named pytest` / `No module named numpy`
+
+**Observed**: Bare `python3 -m pytest` or `python -m ...` fails with `No module named pytest` or `No module named numpy`.
+
+**Root cause**: System `/usr/bin/python3` has no project deps; `pytest`/`numpy` live only in repo `.venv/`. `wsl-env.sh` exports data paths but does not activate the venv.
+
+**Fix**: Use the repo venv:
+```bash
+source .venv/bin/activate
+.venv/bin/python -m pytest --version
+```
+
+**Prevention**: Never use bare `python3`/`python -m pytest`; always `source .venv/bin/activate` or `.venv/bin/python -m ...`. Verify with `.venv/bin/python -c "import numpy,pytest; print(numpy.__version__)"`.
+
+---
+
 ### Permission denied on pytest cache directories
 
 **Observed**: When globbing or grepping the repo, you get `拒绝访问 (os error 5)` on files under `pytest-cache-files-*` directories.
@@ -360,3 +376,31 @@ under the existing resource terminal). Strict `< 2 GiB` limit unchanged
 evidence; repeating probes until one passes is forbidden. Cover all parser and
 edge cases with deterministic injected-text fixtures; sample the live kernel at
 most once as context.
+
+---
+
+### Frozen decoder success contract unsatisfiable by a zero-syndrome/uniform-prior fixture (D7 X1)
+
+**Observed** (2026-09-13, WSL): the one-shot historical-decoder provenance probe
+returned `PRIOR_ONLY`, `iterations: 0`, exit 2 (`X1_PROVENANCE_PROBE_FAILED`)
+although the decoder itself was healthy.
+
+**Root cause**: the probe fixture used a zero syndrome with a uniform prior.
+The historical row-layered decoder early-returns at iteration 0 whenever
+`H @ argmax(beliefs) == syndrome`
+(`comparison_bench/src/comparison_bench/formal_ir/v35_algorithm_development.py:835-854`);
+with `argmax(uniform prior) = 0` and `syndrome = 0` that condition always
+holds, so the decoder correctly returns `iterations=0` + `PRIOR_ONLY`, and a
+frozen success contract requiring `CHECK_UPDATED` with `iterations >= 1` can
+never pass. The fixture was unsatisfiable by construction, not the decoder.
+
+**Fix**: use a nonzero syndrome consistent with a chosen `x_true` (X1 fix in
+`_probe_fixture`: syndrome `[1, 2]`, `x_true [0, 1]`, `h = [[1, 1], [1, 2]]`,
+prior unchanged), so `H @ argmax(prior) != syndrome` and at least one check
+sweep runs; the authorized rerun then returned `CHECK_UPDATED`, iterations 90,
+exit 0 (`X1_RERUN_VERIFIED`).
+
+**Prevention**: before executing any frozen decoder success contract, check
+fixture satisfiability against the decoder's early-exit paths; a contract that
+demands updated beliefs cannot be met by a fixture that provably triggers a
+zero-iteration early return.

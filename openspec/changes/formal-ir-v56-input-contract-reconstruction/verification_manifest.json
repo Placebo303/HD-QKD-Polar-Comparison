@@ -1,0 +1,551 @@
+{
+  "provenance": {
+    "head": "1e34dafb1fa8677bc6d5b4bc013a7140f6aa2fe9",
+    "origin_formal_ir_mainline": "1e34dafb1fa8677bc6d5b4bc013a7140f6aa2fe9",
+    "implementation_sha": "1e34dafb1fa8677bc6d5b4bc013a7140f6aa2fe9",
+    "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
+    "frames": [
+      7,
+      8,
+      9,
+      10,
+      15,
+      16,
+      17,
+      18
+    ],
+    "lifecycle": "PLAN_CANDIDATE / VERIFICATION_ONLY / DECODE_FORBIDDEN",
+    "accepted_plan_sha": "97602558a8047a1c3b30c2cddd70fd0ef3e2ed46"
+  },
+  "per_stage_per_source": {
+    "1M": {
+      "per_stage": [
+        {
+          "stage": "raw_event_channel_selection",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "counts A=3013420 B=1886312 other=266728 | cur counts A=3013420 B=1886312 other=266728",
+          "sample_rows": [
+            {
+              "row": 0,
+              "v13": 3013420,
+              "current": 3013420,
+              "equal": true
+            },
+            {
+              "row": 1,
+              "v13": 1886312,
+              "current": 1886312,
+              "equal": true
+            },
+            {
+              "row": 2,
+              "v13": 266728,
+              "current": 266728,
+              "equal": true
+            }
+          ]
+        },
+        {
+          "stage": "pairing_index_dt",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "n_pairs=0 window=40000 | cur n_pairs=0 window=40000",
+          "sample_rows": []
+        },
+        {
+          "stage": "delay_sign_position",
+          "array_equal": false,
+          "delta": 100.0,
+          "note": "offset -50 applied pre-pairing | cur offset 50 applied pre-pairing",
+          "sample_rows": [
+            {
+              "row": 0,
+              "v13": [
+                -50
+              ],
+              "current": [
+                50
+              ],
+              "equal": false
+            }
+          ]
+        },
+        {
+          "stage": "frame_start_period_floor_div",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "period 204800 bin_width 200 frame_bins 1024 | cur period 204800 bin_width 200 frame_bins 1024",
+          "sample_rows": []
+        },
+        {
+          "stage": "bin_index",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "bin via floor_div non-proxy | cur bin via floor_div non-proxy",
+          "sample_rows": []
+        },
+        {
+          "stage": "symbol_1024",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "legacy_v1 mod 1024 | cur legacy_v1 mod 1024",
+          "sample_rows": []
+        },
+        {
+          "stage": "U1U2",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "F03 5+5 | cur F03 5+5",
+          "sample_rows": []
+        }
+      ],
+      "first_divergent_stage": "delay_sign_position",
+      "three_way": {
+        "old_equals_current": true,
+        "first_divergent_stage": "delay_sign_position",
+        "flipped_after_correction": [
+          "delay_sign_position"
+        ],
+        "per_stage": [
+          {
+            "stage": "raw_event_channel_selection",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "counts A=3013420 B=1886312 other=266728 | cur counts A=3013420 B=1886312 other=266728",
+            "sample_rows": [
+              {
+                "row": 0,
+                "v13": 3013420,
+                "current": 3013420,
+                "equal": true
+              },
+              {
+                "row": 1,
+                "v13": 1886312,
+                "current": 1886312,
+                "equal": true
+              },
+              {
+                "row": 2,
+                "v13": 266728,
+                "current": 266728,
+                "equal": true
+              }
+            ]
+          },
+          {
+            "stage": "pairing_index_dt",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "n_pairs=0 window=40000 | cur n_pairs=0 window=40000",
+            "sample_rows": []
+          },
+          {
+            "stage": "delay_sign_position",
+            "array_equal": false,
+            "delta": 100.0,
+            "note": "offset -50 applied pre-pairing | cur offset 50 applied pre-pairing",
+            "sample_rows": [
+              {
+                "row": 0,
+                "v13": [
+                  -50
+                ],
+                "current": [
+                  50
+                ],
+                "equal": false
+              }
+            ]
+          },
+          {
+            "stage": "frame_start_period_floor_div",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "period 204800 bin_width 200 frame_bins 1024 | cur period 204800 bin_width 200 frame_bins 1024",
+            "sample_rows": []
+          },
+          {
+            "stage": "bin_index",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "bin via floor_div non-proxy | cur bin via floor_div non-proxy",
+            "sample_rows": []
+          },
+          {
+            "stage": "symbol_1024",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "legacy_v1 mod 1024 | cur legacy_v1 mod 1024",
+            "sample_rows": []
+          },
+          {
+            "stage": "U1U2",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "F03 5+5 | cur F03 5+5",
+            "sample_rows": []
+          }
+        ],
+        "evidence_missing": true
+      },
+      "n_pairs_v13": 0,
+      "n_pairs_current": 0,
+      "evidence_missing": true
+    },
+    "1p5M": {
+      "per_stage": [
+        {
+          "stage": "raw_event_channel_selection",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "counts A=4527332 B=3615039 other=616882 | cur counts A=4527332 B=3615039 other=616882",
+          "sample_rows": [
+            {
+              "row": 0,
+              "v13": 4527332,
+              "current": 4527332,
+              "equal": true
+            },
+            {
+              "row": 1,
+              "v13": 3615039,
+              "current": 3615039,
+              "equal": true
+            },
+            {
+              "row": 2,
+              "v13": 616882,
+              "current": 616882,
+              "equal": true
+            }
+          ]
+        },
+        {
+          "stage": "pairing_index_dt",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "n_pairs=0 window=40000 | cur n_pairs=0 window=40000",
+          "sample_rows": []
+        },
+        {
+          "stage": "delay_sign_position",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "offset 50 applied pre-pairing | cur offset 50 applied pre-pairing",
+          "sample_rows": [
+            {
+              "row": 0,
+              "v13": [
+                50
+              ],
+              "current": [
+                50
+              ],
+              "equal": true
+            }
+          ]
+        },
+        {
+          "stage": "frame_start_period_floor_div",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "period 204800 bin_width 200 frame_bins 1024 | cur period 204800 bin_width 200 frame_bins 1024",
+          "sample_rows": []
+        },
+        {
+          "stage": "bin_index",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "bin via floor_div non-proxy | cur bin via floor_div non-proxy",
+          "sample_rows": []
+        },
+        {
+          "stage": "symbol_1024",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "legacy_v1 mod 1024 | cur legacy_v1 mod 1024",
+          "sample_rows": []
+        },
+        {
+          "stage": "U1U2",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "F03 5+5 | cur F03 5+5",
+          "sample_rows": []
+        }
+      ],
+      "first_divergent_stage": null,
+      "three_way": {
+        "old_equals_current": true,
+        "first_divergent_stage": null,
+        "flipped_after_correction": [],
+        "per_stage": [
+          {
+            "stage": "raw_event_channel_selection",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "counts A=4527332 B=3615039 other=616882 | cur counts A=4527332 B=3615039 other=616882",
+            "sample_rows": [
+              {
+                "row": 0,
+                "v13": 4527332,
+                "current": 4527332,
+                "equal": true
+              },
+              {
+                "row": 1,
+                "v13": 3615039,
+                "current": 3615039,
+                "equal": true
+              },
+              {
+                "row": 2,
+                "v13": 616882,
+                "current": 616882,
+                "equal": true
+              }
+            ]
+          },
+          {
+            "stage": "pairing_index_dt",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "n_pairs=0 window=40000 | cur n_pairs=0 window=40000",
+            "sample_rows": []
+          },
+          {
+            "stage": "delay_sign_position",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "offset 50 applied pre-pairing | cur offset 50 applied pre-pairing",
+            "sample_rows": [
+              {
+                "row": 0,
+                "v13": [
+                  50
+                ],
+                "current": [
+                  50
+                ],
+                "equal": true
+              }
+            ]
+          },
+          {
+            "stage": "frame_start_period_floor_div",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "period 204800 bin_width 200 frame_bins 1024 | cur period 204800 bin_width 200 frame_bins 1024",
+            "sample_rows": []
+          },
+          {
+            "stage": "bin_index",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "bin via floor_div non-proxy | cur bin via floor_div non-proxy",
+            "sample_rows": []
+          },
+          {
+            "stage": "symbol_1024",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "legacy_v1 mod 1024 | cur legacy_v1 mod 1024",
+            "sample_rows": []
+          },
+          {
+            "stage": "U1U2",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "F03 5+5 | cur F03 5+5",
+            "sample_rows": []
+          }
+        ],
+        "evidence_missing": true
+      },
+      "n_pairs_v13": 0,
+      "n_pairs_current": 0,
+      "evidence_missing": true
+    },
+    "2M": {
+      "per_stage": [
+        {
+          "stage": "raw_event_channel_selection",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "counts A=5737278 B=3569280 other=503506 | cur counts A=5737278 B=3569280 other=503506",
+          "sample_rows": [
+            {
+              "row": 0,
+              "v13": 5737278,
+              "current": 5737278,
+              "equal": true
+            },
+            {
+              "row": 1,
+              "v13": 3569280,
+              "current": 3569280,
+              "equal": true
+            },
+            {
+              "row": 2,
+              "v13": 503506,
+              "current": 503506,
+              "equal": true
+            }
+          ]
+        },
+        {
+          "stage": "pairing_index_dt",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "n_pairs=0 window=40000 | cur n_pairs=0 window=40000",
+          "sample_rows": []
+        },
+        {
+          "stage": "delay_sign_position",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "offset 50 applied pre-pairing | cur offset 50 applied pre-pairing",
+          "sample_rows": [
+            {
+              "row": 0,
+              "v13": [
+                50
+              ],
+              "current": [
+                50
+              ],
+              "equal": true
+            }
+          ]
+        },
+        {
+          "stage": "frame_start_period_floor_div",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "period 204800 bin_width 200 frame_bins 1024 | cur period 204800 bin_width 200 frame_bins 1024",
+          "sample_rows": []
+        },
+        {
+          "stage": "bin_index",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "bin via floor_div non-proxy | cur bin via floor_div non-proxy",
+          "sample_rows": []
+        },
+        {
+          "stage": "symbol_1024",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "legacy_v1 mod 1024 | cur legacy_v1 mod 1024",
+          "sample_rows": []
+        },
+        {
+          "stage": "U1U2",
+          "array_equal": true,
+          "delta": 0.0,
+          "note": "F03 5+5 | cur F03 5+5",
+          "sample_rows": []
+        }
+      ],
+      "first_divergent_stage": null,
+      "three_way": {
+        "old_equals_current": true,
+        "first_divergent_stage": null,
+        "flipped_after_correction": [],
+        "per_stage": [
+          {
+            "stage": "raw_event_channel_selection",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "counts A=5737278 B=3569280 other=503506 | cur counts A=5737278 B=3569280 other=503506",
+            "sample_rows": [
+              {
+                "row": 0,
+                "v13": 5737278,
+                "current": 5737278,
+                "equal": true
+              },
+              {
+                "row": 1,
+                "v13": 3569280,
+                "current": 3569280,
+                "equal": true
+              },
+              {
+                "row": 2,
+                "v13": 503506,
+                "current": 503506,
+                "equal": true
+              }
+            ]
+          },
+          {
+            "stage": "pairing_index_dt",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "n_pairs=0 window=40000 | cur n_pairs=0 window=40000",
+            "sample_rows": []
+          },
+          {
+            "stage": "delay_sign_position",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "offset 50 applied pre-pairing | cur offset 50 applied pre-pairing",
+            "sample_rows": [
+              {
+                "row": 0,
+                "v13": [
+                  50
+                ],
+                "current": [
+                  50
+                ],
+                "equal": true
+              }
+            ]
+          },
+          {
+            "stage": "frame_start_period_floor_div",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "period 204800 bin_width 200 frame_bins 1024 | cur period 204800 bin_width 200 frame_bins 1024",
+            "sample_rows": []
+          },
+          {
+            "stage": "bin_index",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "bin via floor_div non-proxy | cur bin via floor_div non-proxy",
+            "sample_rows": []
+          },
+          {
+            "stage": "symbol_1024",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "legacy_v1 mod 1024 | cur legacy_v1 mod 1024",
+            "sample_rows": []
+          },
+          {
+            "stage": "U1U2",
+            "array_equal": true,
+            "delta": 0.0,
+            "note": "F03 5+5 | cur F03 5+5",
+            "sample_rows": []
+          }
+        ],
+        "evidence_missing": true
+      },
+      "n_pairs_v13": 0,
+      "n_pairs_current": 0,
+      "evidence_missing": true
+    }
+  },
+  "first_divergent_stage_overall": "delay_sign_position",
+  "pre_registered_thresholds": {
+    "note": "CE thresholds pre-registered in verify step, see calibration_verification.json"
+  },
+  "wrapper_note": "fix confined to V56 wrapper/materializer, src/ unchanged, single-point V13 authoritative value, no grid, corrected recomputed via current materializer with V13 param only via true ttbin_pipeline _pair/_frame calls"
+}

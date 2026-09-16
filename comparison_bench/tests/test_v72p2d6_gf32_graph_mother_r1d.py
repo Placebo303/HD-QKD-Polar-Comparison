@@ -377,6 +377,85 @@ def test_r1d_dry_structure_mode(tmp_path):
     assert sel["fallback_T"] == _T1 and sel["fallback_M"] is None
 
 
+def test_r1d_residual_syndrome_weight_exposed(tmp_path, monkeypatch):
+    # H22: R1d records expose the per-mode residual syndrome weight
+    # (unsatisfied check rows vs the target syndrome) computed from the
+    # decoder's own hard decision. Fake raw decoder; real _decode_block.
+    dev = _load_dev("d6dev_r1d_resid")
+    live = sys.modules.get(
+        "comparison_bench.formal_ir.v72p2d5_gf32_rate_mother")
+    assert live is not None
+
+    def fake_raw(h, prior, syndrome, layer=None):
+        hh = np.asarray(h)
+        xh = (np.zeros(hh.shape[1], dtype=np.int64)
+              if hh.shape == (8, 8) else np.array([1, 0], dtype=np.int64))
+        return {"x_hat": xh, "syndrome_ok": False, "iterations": 7,
+                "final_beliefs": np.log(np.full((xh.size, 32), 1.0 / 32)),
+                "belief_provenance": "CHECK_UPDATED"}
+    monkeypatch.setattr(live, "bind_historical_decoder", lambda: fake_raw)
+
+    class _Conn:
+        def __init__(self, tasks):
+            self._tasks = list(tasks)
+            self.sent = []
+
+        def send(self, obj):
+            self.sent.append(obj)
+
+        def recv(self):
+            return self._tasks.pop(0) if self._tasks else None
+
+    h_task = np.ones((1, 2), dtype=np.uint8)
+    task = {"h": h_task,
+            "prior": np.full((2, 32), 1.0 / 32, dtype=np.float64),
+            "x_true": np.zeros(2, dtype=np.int64),
+            "return_beliefs": True}
+    conn = _Conn([task, None])
+    dev._worker_main(conn, str(ROOT / "comparison_bench" / "src"))
+    hello, out = conn.sent
+    assert hello["ready"] is True
+    assert out["crash"] is False
+    # target syndrome of zeros is 0; x_hat=[1,0] gives syndrome 1 -> 1 row.
+    assert int(out["residual_syndrome_weight"]) == 1
+
+    import threading
+    import time as _time
+    def _state(r1d):
+        return {"calls": 0, "setup_calls": 0, "t0": _time.perf_counter(),
+                "deadline": _time.perf_counter() + 60, "records": [],
+                "peak_rss": 0, "budget_stop": False, "chunk_wall_blocked": False,
+                "lock": threading.Lock(), "r1d": r1d}
+
+    class _W:
+        pids = ["1"]
+
+        def call(self, task, state=None):
+            return dict(out)
+
+    meta = {"arm": _T1, "n": 64, "seed": 2026091000, "point": "f1.2",
+            "r1": 59, "r2": 52, "matrix_id": "m"}
+    st = _state(True)
+    rec = dev.invoke(_W(), st, meta, "L1", h_task,
+                     np.full((2, 32), 1.0 / 32, dtype=np.float64),
+                     np.zeros(2, dtype=np.int64), 0.5, False)
+    assert int(rec["residual_syndrome_weight"]) == 1
+    p = tmp_path / "decoder_records.csv"
+    dev.flush_decoder_records(str(p), st["records"], None)
+    assert p.read_text(encoding="utf-8").splitlines()[0] == \
+        ",".join(dev.R1D_DECODER_FIELDNAMES)
+    # Non-R1d roots keep the frozen 23-column schema.
+    st2 = _state(False)
+    rec2 = dev.invoke(_W(), st2, meta, "L1", h_task,
+                      np.full((2, 32), 1.0 / 32, dtype=np.float64),
+                      np.zeros(2, dtype=np.int64), 0.5, False)
+    assert "residual_syndrome_weight" not in rec2
+    p2 = tmp_path / "decoder_records_old.csv"
+    dev.flush_decoder_records(str(p2), st2["records"], None)
+    assert p2.read_text(encoding="utf-8").splitlines()[0] == \
+        ",".join(dev.DECODER_FIELDNAMES)
+
+
 def test_r1d_fake_e2e_new_schema_verified_zero_decoder(tmp_path, capsys,
                                                           monkeypatch):
     # Fake end-to-end: real frozen builders + r1d writers produce an exact

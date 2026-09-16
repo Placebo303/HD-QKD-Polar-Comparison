@@ -1,0 +1,11 @@
+{"event": "start", "run_id": "20260731_v5d_nbldpc_post_synthetic", "tasks": 256, "workers": 20}
+{"completed": 64, "event": "flush"}
+{"completed": 128, "event": "flush"}
+{"completed": 192, "event": "flush"}
+{"completed": 256, "event": "flush"}
+{"event": "confirmation", "frames": 256}
+{"completed": 320, "event": "flush"}
+{"completed": 384, "event": "flush"}
+{"completed": 448, "event": "flush"}
+{"completed": 512, "event": "flush"}
+{"event": "done", "run_status": "completed"}

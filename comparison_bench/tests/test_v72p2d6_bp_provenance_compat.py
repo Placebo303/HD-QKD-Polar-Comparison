@@ -67,8 +67,16 @@ def _run_worker(monkeypatch, decode_fake, tasks):
         bind_calls.append(1)
         return object()
 
-    monkeypatch.setattr(dev.d5, "bind_historical_decoder", fake_bind)
-    monkeypatch.setattr(dev.d5, "_decode_block", decode_fake)
+    # Patch both the module instance this file loaded and the live
+    # package instance the worker resolves from sys.modules at call time
+    # (focused files reload comparison_bench.* in one pytest process, so
+    # the two instances can differ; both must stay fake-only).
+    live = sys.modules.get("comparison_bench.formal_ir.v72p2d5_gf32_rate_mother")
+    for _target in (dev.d5, live):
+        if _target is None:
+            continue
+        monkeypatch.setattr(_target, "bind_historical_decoder", fake_bind)
+        monkeypatch.setattr(_target, "_decode_block", decode_fake)
     conn = FakeConn(tasks)
     dev._worker_main(conn, str(ROOT / "comparison_bench" / "src"))
     assert len(bind_calls) == 1  # fake bind only; real decoder never bound

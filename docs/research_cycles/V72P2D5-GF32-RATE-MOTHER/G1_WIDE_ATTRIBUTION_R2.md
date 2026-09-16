@@ -137,3 +137,15 @@ talk: if L1 recovers under an honest estimator, resize rows from the
 candidate model's own channel CE; if not, stop the n=64 two-layer route
 (L2-only success at 52–64 rows is near-zero rate and not an operating
 point) and move block geometry, not smoothing.
+
+## 10. Additive pointer — G2 prior-configuration corrigendum (D14 VR-C, docs only)
+
+> This section is append-only (2026-09-14, D14 C-impl). No line above is
+> rewritten. The G2/X4 inference-scope corrigendum is recorded in
+> `docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/G2_PRIOR_CONFIG_CORRIGENDUM_R1.md`:
+> root `workspace/v72p2d5_g2/20260906_r1` preserved unchanged (4 files,
+> 1320/1320 calls); literal grade `G2_CURRENT_CONFIGURATION_FAILED` retained
+> as the accurate description of the executed rejected per-cell-prior
+> configuration; that result is invalid as n=256 finite-length feasibility /
+> route-closure evidence; supersession covers the scientific inference only,
+> not the recorded execution; no unique-cause claim.

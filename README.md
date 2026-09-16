@@ -52,6 +52,10 @@ Route B-lite is a completed archived study. Its LLR-only gains were local and un
 
 ## Main Documents
 
+- NB-Polar independent successor track:
+  - [docs/NBPOLAR_TRACK.md](docs/NBPOLAR_TRACK.md)
+  - canonical implementation worktree: D:/Code/HD-QKD_Polar_Comparison-nbpolar
+
 - GitHub/ChatGPT/OpenCode research-cycle SOP:
   - [docs/research-cycle-sop.md](docs/research-cycle-sop.md)
   - [ChatGPT review prompt](docs/prompts/chatgpt-research-review.md)

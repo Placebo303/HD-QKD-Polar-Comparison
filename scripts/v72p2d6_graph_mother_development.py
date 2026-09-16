@@ -87,6 +87,9 @@ DECODER_FIELDNAMES = ["call_idx", "arm", "n", "seed", "point", "rows_l1",
 # In-memory note only (DECODER_FIELDNAMES unchanged); the persisted loud
 # marker is the rec2["error"] provenance-blocked string.
 PROVENANCE_BLOCKED_NOTE = "provenance-blocked-l1-not-check-updated"
+# R1d/H22: additive residual-syndrome-weight column for NEW R1d roots only.
+# DECODER_FIELDNAMES itself is frozen and unchanged (historical schema).
+R1D_DECODER_FIELDNAMES = DECODER_FIELDNAMES + ["residual_syndrome_weight"]
 
 LOG = []
 
@@ -106,6 +109,27 @@ def _worker_main(conn, src_dir):
     import os as _os
     from comparison_bench.formal_ir import v72p2d5_gf32_rate_mother as core
     dec = core.bind_historical_decoder()
+    # R1d/H22 diagnostic: observe the decoder's own hard decision and count
+    # unsatisfied check rows (residual syndrome weight) vs the target
+    # syndrome. Wraps the bound decoder only; the frozen six-value
+    # _decode_block contract and DECODER_FIELDNAMES are unchanged. The
+    # diagnostic never fails a cell (decoder exceptions still propagate).
+    _diag = {}
+
+    def _decoder_with_residual(h, prior, syndrome, layer=None):
+        out = dec(h, prior, syndrome, layer=layer)
+        try:
+            _xh = out["x_hat"] if isinstance(out, dict) else getattr(
+                out, "x_hat")
+            _obs = core._gf32_syndrome(
+                _np.asarray(h, dtype=_np.uint8),
+                _np.asarray(_xh, dtype=_np.int64))
+            _diag["residual"] = int(_np.count_nonzero(
+                _obs != _np.asarray(syndrome)))
+        except Exception:  # noqa: BLE001 - diagnostics never fail a cell
+            _diag["residual"] = None
+        return out
+
     # Warmup (setup, counted as 1 setup_decoder_calls by the parent via
     # reserve_setup_idx): compile the decoder on a tiny fixture so no frozen
     # cell absorbs compile time. Setup + scientific must stay <= 2500.
@@ -137,16 +161,20 @@ def _worker_main(conn, src_dir):
             h = _np.asarray(task["h"], dtype=_np.uint8)
             prior = _np.asarray(task["prior"], dtype=_np.float64)
             xt = _np.asarray(task["x_true"], dtype=_np.int64)
-            e, s, it, f, bel, prov = core._decode_block(dec, h, prior, xt)
+            _diag.pop("residual", None)
+            e, s, it, f, bel, prov = core._decode_block(
+                _decoder_with_residual, h, prior, xt)
             out = {"exact": bool(e), "syndrome_ok": bool(s),
                    "iterations": int(it), "finite": bool(f),
                    "beliefs": _np.asarray(bel, dtype=_np.float64)
                    if task.get("return_beliefs") and bel is not None else None,
                    "belief_provenance": prov,
+                   "residual_syndrome_weight": _diag.get("residual"),
                    "crash": False, "error": ""}
         except Exception as ex:  # noqa: BLE001 - crash consumes the cell
             out = {"exact": False, "syndrome_ok": False, "iterations": -1,
                    "finite": False, "beliefs": None, "crash": True,
+                   "residual_syndrome_weight": -1,
                    "error": repr(ex)[:300]}
         out["wall_s"] = time.perf_counter() - t0
         try:
@@ -901,7 +929,9 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
                    "prior_mass_on_truth": tm, "wall_s": 0.0, "rss_bytes": "",
                    "watchdog_ok": False, "worker_pid": pid_before,
                    "respawn_pid": "", "error": "setup-budget-exhausted",
-                   "beliefs": None, "note": "setup-budget-exhausted-respawn"}
+                   "beliefs": None, "note": "setup-budget-exhausted-respawn",
+                   **({"residual_syndrome_weight": -1}
+                      if state.get("r1d") else {})}
             state["records"].append(rec)
         finally:
             if lock is not None:
@@ -944,6 +974,11 @@ def invoke(worker, state, meta, mode, h, prior, xt, tm, ret_bel,
            # BP compat: transient IPC only; never reaches CSV
            # (DECODER_FIELDNAMES unchanged).
            "belief_provenance": res.get("belief_provenance")}
+    if state.get("r1d"):
+        # R1d/H22: additive diagnostic column (new roots only; the frozen
+        # schema writer never projects it).
+        rec["residual_syndrome_weight"] = res.get(
+            "residual_syndrome_weight", "")
     lock = state.get("lock")
     if lock is not None:
         lock.acquire()
@@ -979,11 +1014,16 @@ def flush_decoder_records(path, records, logfh=None):
     """
     rows = sorted((r for r in records if int(r.get("call_idx", -1)) >= 0),
                   key=lambda r: int(r["call_idx"]))
+    fields = list(DECODER_FIELDNAMES)
+    if any("residual_syndrome_weight" in r for r in rows):
+        # R1d/H22: additive column for new roots; historical/other roots keep
+        # the frozen header because their records never carry the key.
+        fields = list(R1D_DECODER_FIELDNAMES)
     with open(path, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=DECODER_FIELDNAMES)
+        w = csv.DictWriter(fh, fieldnames=fields)
         w.writeheader()
         for r in rows:
-            w.writerow({k: r.get(k, "") for k in DECODER_FIELDNAMES})
+            w.writerow({k: r.get(k, "") for k in fields})
         fh.flush()
         try:
             os.fsync(fh.fileno())
