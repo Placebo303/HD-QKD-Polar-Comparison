@@ -404,3 +404,139 @@ exit 0 (`X1_RERUN_VERIFIED`).
 fixture satisfiability against the decoder's early-exit paths; a contract that
 demands updated beliefs cannot be met by a fixture that provably triggers a
 zero-iteration early return.
+
+---
+
+### Bare `pytest -p no:cacheprovider` under WSL yields setup errors from Windows `--basetemp`
+
+**Observed** (2026-09-18, WSL): bare `pytest -p no:cacheprovider` collected
+but reported 26 passed + 7 setup errors.
+
+**Root cause**: `pytest.ini` `addopts` carries a `--basetemp` Windows path
+(`D:/Code/...`) that is invalid under WSL, so fixture setup fails before tests
+run.
+
+**Fix**: rerun with `-o addopts=""` to clear the inherited addopts →
+33/33 pass. No file edited.
+
+**Prevention**: fix-debt — portable basetemp config (deferred, non-blocking).
+
+---
+
+### D19 refusal-test 4-fail after authorized D19 execution is expected
+
+**Observed**: Four refusal/root-absence tests fail after the authorized D19 execution because the D19 evidence root legitimately exists.
+
+**Root cause**: The tests assert root absence; post-execution the accepted root is present by design.
+
+**Fix**: Do not touch the evidence root. Treat the 4-fail as expected post-execution state; G6 readiness properly rests on its own 9/9 suite.
+
+**Prevention**: Never delete evidence roots to green tests; convert stale absence assertions to snapshot invariance only in a scoped change.
+
+---
+
+### Post-execution stale root-absence failures also hit R9–R12 and D17 (same class as D19)
+
+**Observed** (2026-09-19, WSL canonical env, suites run per file with
+`-o addopts=""`): after the authorized R9/R10/R11/R12 executions the
+corresponding frozen suites no longer pass:
+`test_g6r9_confirm.py::test_d5_no_overwrite`,
+`test_g6r10_ctrl.py::test_profile_only_fake_128_zero_calls`,
+`test_g6r11_adaptive.py::test_s3_no_overwrite`,
+`test_g6r12_fresh.py::test_r3_no_overwrite`,
+`test_g6_decide_r2_diag.py::test_profile_fake_pool_budgets_zero_calls`
+(asserted `future_root_absent is True` / `not FUTURE_ROOT.exists()`), plus
+`test_v72p2d17_descaling.py::test_d16_root_absent_and_blank_predictions`.
+
+**Root cause**: identical to the D19 entry — the assertions are pre-execution
+guards; the authorized single-invocation roots
+(`workspace/g6r9_confirm_3f9a1c2e-…`, `g6r10_ctrl_6f2b8c1d-…`,
+`g6r11_adaptive_3c2b5b2e-…`, `g6r12_fresh_c97777aa-…`) now legitimately exist.
+
+**Fix**: none applied. Evidence roots untouched; no rerun, no repair. Treat the
+failures as expected post-execution state, exactly as the D19 precedent rules.
+
+**Prevention**: conversion to snapshot invariance (root absent OR root equals
+the frozen executed package) is a scoped change requiring its own
+authorization — do not green these tests by editing asserts ad hoc or by
+deleting roots.
+
+---
+
+### Windows default `addopts` basetemp makes root-refusal tests fail spuriously
+
+**Observed** (2026-09-19, Windows + conda python 3.12.12): bare
+`python -m pytest comparison_bench/tests/test_v72p2r7_rate_scan.py -q` gives
+3 failures (`ValueError: refusing protected root …/workspace/tmp_pytest/…/root`).
+The same file passes 8/8 with an out-of-repo `--basetemp`.
+
+**Root cause**: `pytest.ini` `addopts` pins
+`--basetemp=D:/Code/HD-QKD_Polar_Comparison/workspace/tmp_pytest`; that path
+component starts with the protected prefix `tmp_pytest` used by
+`v72p2d10_mixed_degree_l1.refuse_out_root`, so every in-test fake root is
+refused as if it were a protected output root.
+
+**Fix**: run with an external basetemp, e.g.
+`-o addopts="-p no:cacheprovider" --basetemp=%TEMP%\pt_x` (Windows) or
+`-o addopts=""` (WSL, where the hard-coded Windows path is invalid and produces
+setup errors).
+
+**Why not simply delete `--basetemp`**: measured, not assumed — removing it
+entirely produces 12 setup errors on Windows
+(`test_v72p2d17_descaling.py`: 1 failed / 32 passed / 12 errors) while WSL is
+clean (3 failed / 42 passed). Portable-basetemp config therefore remains open
+fix-debt; do not remove the option silently.
+
+---
+
+### Windows conda python and WSL `.venv` give different suite verdicts
+
+**Observed** (2026-09-19): `test_v72p2d17_descaling.py` → Windows 8 failed /
+37 passed vs WSL 3 failed / 42 passed on the same HEAD.
+
+**Root cause**: environment divergence (conda python 3.12.12 / NumPy 2.4.0 on
+Windows vs `.venv` python 3.12.3 / NumPy 2.4.4 under WSL) plus the basetemp
+difference above.
+
+**Fix**: treat WSL `.venv` as the authoritative lane for suite verdicts; use
+Windows runs only for triage. No file edited.
+
+---
+
+### UNION-default trap: `--include-r72` returns UNION 64/8 incl r65-repeat
+
+**Observed** (2026-09-19, R23b-0.72): granted probe 32 sci + 4 setup, but the
+single invocation covered 64 rows / 8 setup (r72 0/16+0/16 plus r65-repeat
+0/16+0/16, bit-identical excl wall_s/call_idx) — SCOPE BREACH, self-reported
+STOP.
+
+**Root cause**: `--include-r72` builds a UNION plan (r65-repeat + r72) with no
+delta-only mode; the Pre-EXECUTE precondition missed the UNION check.
+
+**Fix**: assert plan length == granted scope (`len(plan) == 32`) before
+execution; admit only the granted half, annotate any repeat as zero-info.
+
+**Prevention**: runner hard-gated until delta-only mode + actual-argv logging +
+re-review. Manifest `command` may hold a stale FROZEN_COMMAND constant —
+verify actual argv from `command_log` / `out_root` / `conditional_r72`.
+
+---
+
+### 0.72 SCOPE-BREACH pattern — UNION-default plan executed 64/8 vs granted 32/4
+
+**Observed**: UNION-default plan executed 64/8 vs granted 32/4 (missed
+plan-length check); self-reported STOP with evidence retained, no concealment.
+
+**Root cause**: Pre-EXECUTE missed the plan-length check against the granted
+scope (see UNION-default trap entry).
+
+**Fix**: adjudicated — r65-repeat annotated zero-info deterministic, r72 half
+admitted as probe, envelope amended 96/12 consumed-closed, both grants closed.
+
+**Prevention**: runner hard-gated (delta-only mode + actual-argv log + re-review
+required before any conditional-probe run); Pre-EXECUTE must assert
+len(plan)==granted scope.
+
+---
+
+### Seed-disjointness scans must include D19 block ranges + packet paths — operator rg over decision-log/research_cycles/openspec/comparison_bench missed frozen D19 n128 block seeds 2026094501..4508 (packet + v72p2d19 tasks F01 + D19 READINESS_R1); picks 4501/4502 collided exactly and were rejected at main-thread review with zero tolerance for colliding provenance. Fix: scan list must explicitly include .workbuddy/tasks/*_PACKET.md + openspec/changes/v72p2d19-*/tasks.md + docs/research_cycles/V72P3*/READINESS_R1.md + numeric-range assertions (not just literal greps); reviewer re-checks collision against the frozen seed table before any Pre-EXECUTE.

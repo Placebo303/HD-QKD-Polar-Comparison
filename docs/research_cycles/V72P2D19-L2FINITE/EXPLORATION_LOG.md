@@ -79,3 +79,27 @@
   as-frozen is STOP, not READY.
 
 Decoder/DE calls this call: 0. COMMIT_PUSH: none.
+
+## 2026-09-18 — D19 finite-ensemble batch execution (EXPLORE HEAVY-cost, AMBIGUOUS)
+
+- Track: EXPLORE (HEAVY-cost annotation, synthetic-diagnostic only).
+- Authorization boundary: user grants ("你自己往前做决定并推进，我批准",
+  "直接往下推进就可以了，我授权你") activating packet §9
+  n128+mechanical-n256 arm sequence.
+- E-cmd: `.venv/bin/python scripts/v72p2d19_finite_development.py --d19-batch --execution-authorized --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d19_l2_finite_ensemble_5f2b8c1d-7a3e-4f90-b6d4-8e1a2c3d4f5a6b`
+  exit 0.
+- Pre-EXECUTE: branch clean, F08 root absent-proven, focused tests 33/33 PASS.
+- n128: 96/96 calls, M=19/48, M_g=[3,2,2,4,3,5], C=5/48, b=14, c=0,
+  discord=14 → AMBIGUOUS (POSITIVE fails M<30, NEGATIVE fails M>16).
+- undetected=0 isolated (never merged into success/FER); exact==syndrome_ok.
+- n256: NOT entered, 0 calls; seed 4408 retained construction_failed, no
+  replacement per frozen seed set.
+- Budgets: 96/192 calls, 42/42 setup, 67.9s/1800s, 137.9MB/2GiB, 1-proc,
+  no-retry, no violations.
+- Terminal: D19_L2_FINITE_AMBIGUOUS.
+- Batch-end review: reviewer-go PASS (B1-B7 recomputed match).
+- Claim ceiling: synthetic-diagnostic only; no FER/leakage/SKR/optimality/
+  route-closure claim.
+- Zero real-data; results//outputs_comparison/ untouched; no commit/push.
+- Note: n128 admission was 12/12 clean so 4408 profile-fail does not force
+  ENGINEERING_BLOCKED under conditional n256-iff-POSITIVE dispatch.
