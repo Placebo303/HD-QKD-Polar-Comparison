@@ -4448,3 +4448,39 @@ crossed its finite-length operating region.
 - 就地改runner热修续跑: rejected — 需D5-delta复审+新授权+新root, PRIMARY 420不可回收.
 
 **Consequences**: HOLD持续; 下一步planner fix plan已落盘S1_FIX_PLAN_20260919.md (F1-ACC/F2-ACC/F3-ACC/G-D5R/G-RERUN); 执行会话需对账+保留现场不删根; 本条目不授权执行.
+
+### 2026-09-20: V80 S1 rerun stopped and batch closed (user-authorized)
+
+**Decision**: Halt the S1 rerun and close the batch (option: 立即停 + 关批), per user authorization.
+
+**Context**: SECONDARY m24 0/24 combined (screen 0/14 + confirm 0/10); remaining 61 confirm slots ≈5 h near-zero value; halt executed with quiescence verified 6×60s empty; raw gate, uninterpretted: PRIMARY f_ens=1.1375228736333134 n=32 pass=true sw=0, SECONDARY null/0/false, flip withheld.
+
+**Alternatives considered**:
+- Finish the grid: rejected — cost/value (≈5 h for near-zero-value slots).
+- Silent resume-later: rejected — requires a new grant.
+
+**Consequences**: Batch closed pending batch-end review; PRIMARY raw gate noted without interpretation; claim ceiling pending; no S2/S3 authorization; pre-S2 items: P1 status-label defect (rows hardcode status="ok", 0/539 overrun labels) + P1 fix deferred, P3 reproducibility concern.
+
+### 2026-09-20: V80 f-accounting convention frozen (whole-frame with tag + superframe n=1024)
+
+**Decision**: Freeze the f-accounting convention: whole-frame f WITH tag + superframe n=1024 (user-approved).
+
+**Context**: Audit P4 found three coexisting f conventions (layer-local, whole-frame tagless, whole-frame with tag); n=256 with-tag can never reach f≤1.3 (tag alone ≈0.30).
+
+**Alternatives considered**:
+- Leave the convention unfrozen: rejected — S2/S3 targets unjudgeable.
+- n=256 single-frame with-tag target: rejected — unreachable per P4.
+
+**Consequences**: PROGRAM_PLAN §1.1-1.3 arithmetic updated; S2/S3 targets rebound to the frozen convention; PA-aware Tauz deferred as S3 alternative; this entry authorizes nothing.
+
+### 2026-09-20: V80 S1 batch closed; BER-1 fixed and BER-2 cleared by G-REPRO (pending re-review)
+
+**Decision**: Close the V80 S1 batch (rerun halt accepted 2026-09-20); record BER-1 status-label fix and G-REPRO BER-2 clearance as pre-S2 gates pending independent re-review verdict. No S2 entry authorized.
+
+**Context**: Batch-end review PASS_WITH_FINDINGS closed the batch (final ledger PRIMARY 420 / SECONDARY 119 / SETUP 12 / TOTAL 539; SECONDARY m24 0/24; 61 confirm slots abandoned); BER-1 fixed (honest `_row` status, `_validate_partial` completed==n_ok+n_overrun, suite 54+6, hash unchanged); G-REPRO PASS (m2=47 10/10 converged, f_layer 1.1373-1.1379, f_super 1.22457); f-convention frozen (whole-frame with tag + superframe n=1024).
+
+**Alternatives considered**:
+- Authorize S2 entry on G-REPRO PASS alone: rejected — BER-1 re-verify and independent re-review verdict still outstanding.
+- Map the S2 gate to layer-unit f=1.1375 without tag accounting: rejected — S2 prereg must map the layer-unit gate basis (m2=47, f=1.1375) to the frozen whole-frame+tag superframe accounting.
+
+**Consequences**: S1 batch closed; S2 prereg must carry the layer-to-whole-frame+tag mapping; IEEE 11440984 full text still needed [gap]; this entry authorizes no execution.
