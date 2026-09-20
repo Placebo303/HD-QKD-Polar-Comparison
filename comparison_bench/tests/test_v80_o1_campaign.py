@@ -689,3 +689,275 @@ def test_t16_de_precheck_existing_record_refuses(monkeypatch):
         c.run_de_precheck(root="workspace/s2c_deadbeef", arm="A208",
                           bundle=_fake_bundle(), de_fn=_fake_de_ok,
                           file_writer=lambda p, b: None)
+
+
+# T17: O1R back-compat — defaults behave exactly as before. ---------------
+def test_t17_o1r_defaults_back_compat():
+    assert c.O1_BLOCK_BASE == 2026095501
+    assert c.O1_CONSTRUCT_SEED == 2026092001
+    assert c.O1_MAX_TRIALS == 20
+    assert c.N_BLOCKS == 60
+    assert c.O1R_BLOCK_BASE == 2026095601
+    assert c.O1R_N_BLOCKS == 240
+    assert c.O1R_R1_SEED == 2026092001
+    assert c.O1R_R2_SEED == 2026092011
+    assert c.fail_bar(60) == c.PASS_MAX_FAILS == 3
+    w, clk = MemWriter(), FakeClock()
+    root = "/tmp/opencode/o1r_fake_backcompat"
+    mf = _run(root, w, clk, _decode_ok, arm="A208")
+    assert mf["campaign"] == "O1"
+    assert mf["n_blocks"] == 60
+    assert mf["fail_bar"] == 3
+    assert mf["pass_bar"] == "block FER<=5% (fails/60<=3)"
+    assert mf["replication"]["label"] == "R1"  # seed-derived (O1R §5)
+    assert mf["quarter_tally"]["quarters_complete"] == 1
+    assert mf["quarter_tally"]["quarters_le3"] == 1
+    mani = json.loads(w.store[f"{root}/manifest.json"])
+    assert mani["seeds"]["block_base"] == 2026095501
+    assert mani["construct"]["seed"] == 2026092001
+
+
+# T18: bar derivation + n=240 early-stop at the 13th fail. ---------------
+def test_t18_fail_bar_derivation():
+    assert c.fail_bar(60) == 3
+    assert c.fail_bar(240) == 12
+    assert c.fail_bar(59) == 2  # floor(n x 0.05)
+
+
+def test_t18_n240_early_stop_thirteenth_fail():
+    w, clk = MemWriter(), FakeClock()
+    mf = c.execute(root="/tmp/opencode/o1r_fake_early240", arm="A208",
+                   construct_fn=_fake_construct("A208"),
+                   decode_fn=_decode_fail, clock=clk,
+                   rss_fn=lambda: 0, writer=w, n_blocks=240)
+    assert mf["verdict"] == "FAIL-early-stop"
+    assert mf["blocks_completed"] == 13
+    assert mf["failures"] == 13
+    assert mf["n_blocks"] == 240
+    assert mf["fail_bar"] == 12
+    assert mf["campaign"] == "O1R-replication"
+    assert mf["next_block"] == 13
+    assert mf["partial"] is True
+
+
+def test_t18_n240_all_ok_pass_four_quarters():
+    w, clk = MemWriter(), FakeClock()
+    mf = c.execute(root="/tmp/opencode/o1r_fake_allok240", arm="A208",
+                   construct_fn=_fake_construct("A208"),
+                   decode_fn=_decode_ok, clock=clk,
+                   rss_fn=lambda: 0, writer=w, n_blocks=240)
+    assert mf["verdict"] == "PASS"
+    assert mf["blocks_completed"] == 240
+    assert mf["failures"] == 0
+    assert mf["fer_blocks"] == pytest.approx(0.0)
+    assert mf["quarter_tally"]["quarters_complete"] == 4
+    assert mf["quarter_tally"]["quarters_le3"] == 4
+
+
+# T19: block-base / construct-seed overrides recorded in manifest. --------
+def _fake_construct_param(arm, m):
+    def _build(arm_in, seed, max_trials):
+        assert arm_in == arm
+        assert isinstance(seed, int) and isinstance(max_trials, int)
+        return {"four_cycles": 0, "min_girth": 8, "rank": m,
+                "family": "peg-irregular", "n": 1024, "m": m,
+                "triples": [(0, 0, 1), (1, 1, 2), (seed % 7, 3, 4)],
+                "total_sockets": 2048, "parallel_edges": 0}
+
+    return _build
+
+
+def test_t19_block_seed_base_override():
+    assert c.block_seed("A208", 0, c.O1R_BLOCK_BASE) == 2026095601
+    assert c.block_seed("A208", 239, c.O1R_BLOCK_BASE) == 2026095840
+    assert c.block_seed("A188", 0) == 2026095501  # default unchanged
+    with pytest.raises(c.Refusal):
+        c.block_seed("A208", 0, True)
+
+
+def test_t19_overrides_recorded_in_manifest():
+    w, clk = MemWriter(), FakeClock()
+    root = "/tmp/opencode/o1r_fake_override"
+    seen = []
+
+    def _rec(construction, seed):
+        seen.append(seed)
+        return _decode_ok(construction, seed)
+
+    mf = c.execute(root=root, arm="A208",
+                   construct_fn=_fake_construct_param("A208", 208),
+                   decode_fn=_rec, clock=clk,
+                   rss_fn=lambda: 0, writer=w,
+                   block_base=2026095601, n_blocks=240,
+                   construct_seed=2026092011, construct_trials=20,
+                   max_blocks=2, de_label="covered")
+    assert mf["campaign"] == "O1R-replication"
+    assert mf["replication"]["label"] == "R2"
+    assert mf["n_blocks"] == 240
+    assert mf["fail_bar"] == 12
+    assert mf["de_cover"]["label"] == "covered"
+    assert seen == [2026095601, 2026095602]
+    mani = json.loads(w.store[f"{root}/manifest.json"])
+    assert mani["construct"]["seed"] == 2026092011
+    assert mani["construct"]["max_trials"] == 20
+    assert mani["seeds"]["block_base"] == 2026095601
+    assert mani["seeds"]["n_blocks"] == 240
+    rows = json.loads(w.store[f"{root}/rows.json"])
+    assert rows[0]["seed"] == 2026095601
+
+
+# T20: R2 dry-construct via the REAL constructor (allowed, fast).
+# O1R Amendment 2026-09-21: R2 (seed 2026092011) pins are
+# fc=0/rank-full/twice-identical ONLY; min_girth RECORDED as-measured (6),
+# reported, never gated. R1 (seed 2026092001) keeps fc=0/girth=8/rank-full.
+# No alternate seeds; no tuning.
+def test_t20_r2_amended_pins_accept_girth_recorded():
+    code = c.construct_arm("A208", 2026092011, 20)
+    assert code["four_cycles"] == 0
+    assert code["rank"] == 208
+    assert code["min_girth"] == 6  # measured, recorded not gated
+    again = c.construct_arm("A208", 2026092011, 20)
+    sa = sorted(tuple(map(int, t)) for t in code["triples"])
+    sb = sorted(tuple(map(int, t)) for t in again["triples"])
+    assert sa == sb  # construct-twice-identical holds
+    # Gate path accepts R2 girth 6 (real construction, allowed).
+    gated = c._construct_gate("A208", c.construct_arm, 2026092011, 20)
+    assert gated["four_cycles"] == 0
+    assert gated["rank"] == 208
+    assert gated["min_girth"] == 6
+    assert gated["construct_seed"] == 2026092011
+    assert gated["construct_trials"] == 20
+    # Manifest pin table records the measured girth (fast fake R2-mimic).
+    def _r2_mimic(arm_in, seed, max_trials):
+        assert (arm_in, seed, max_trials) == ("A208", 2026092011, 20)
+        return {"four_cycles": 0, "min_girth": 6, "rank": 208,
+                "family": "peg-irregular", "n": 1024, "m": 208,
+                "triples": [(0, 0, 1), (1, 1, 2)],
+                "total_sockets": 2048, "parallel_edges": 0}
+
+    w, clk = MemWriter(), FakeClock()
+    root = "/tmp/opencode/o1r_fake_r2accept"
+    mf = c.execute(root=root, arm="A208",
+                   construct_fn=_r2_mimic,
+                   decode_fn=_decode_ok, clock=clk,
+                   rss_fn=lambda: 0, writer=w,
+                   block_base=2026095601, n_blocks=240,
+                   construct_seed=2026092011, construct_trials=20,
+                   max_blocks=1)
+    assert mf["replication"]["label"] == "R2"
+    mani = json.loads(w.store[f"{root}/manifest.json"])
+    assert mani["construct"]["min_girth"] == 6
+    assert mani["construct"]["four_cycles"] == 0
+    assert mani["construct"]["rank"] == 208
+    assert "recorded-not-gated" in mani["construct"]["pins"]
+    assert "STOP-BLOCKED" in mani["construct"]["pins"]
+
+
+def test_t20_r2_rejects_fc_rank_mismatch(capsys):
+    # R2 still STOP-BLOCKED on gated fields (fc≠0 or rank≠full), with the
+    # measured girth carried in the raise-path evidence.
+    for pin, rec in (("fc", {"four_cycles": 1, "min_girth": 6,
+                             "rank": 208}),
+                     ("rank", {"four_cycles": 0, "min_girth": 6,
+                               "rank": 207})):
+        def _bad(arm_in, seed, max_trials, _rec=dict(rec)):
+            assert (arm_in, seed, max_trials) == ("A208", 2026092011, 20)
+            return {"four_cycles": _rec["four_cycles"],
+                    "min_girth": _rec["min_girth"], "rank": _rec["rank"],
+                    "family": "peg-irregular"}
+
+        with pytest.raises(c.Refusal) as exc:
+            c._construct_gate("A208", _bad, 2026092011, 20)
+        assert exc.value.code == 2
+        err = capsys.readouterr().err
+        assert "STOP-BLOCKED" in err
+        assert "measured girth 6" in err
+    # Full execute path with R2 fc-mismatch refuses pre-decode (zero).
+    def _bad_fc(arm_in, seed, max_trials):
+        assert (arm_in, seed, max_trials) == ("A208", 2026092011, 20)
+        return {"four_cycles": 1, "min_girth": 6, "rank": 208,
+                "family": "peg-irregular"}
+
+    calls = []
+
+    def _counting(construction, seed):
+        calls.append(seed)
+        return _decode_ok(construction, seed)
+
+    with pytest.raises(c.Refusal):
+        c.execute(root="/tmp/opencode/o1r_fake_r2badfc", arm="A208",
+                  construct_fn=_bad_fc,
+                  decode_fn=_counting, clock=FakeClock(),
+                  rss_fn=lambda: 0, writer=MemWriter(),
+                  block_base=2026095601, n_blocks=240,
+                  construct_seed=2026092011, construct_trials=20)
+    assert calls == []
+
+
+def test_t20_r1_girth8_gate_still_rejects(capsys):
+    # R1 keeps the girth==8 gate: measured girth 6 refuses STOP-BLOCKED.
+    def _r1_girth6(arm_in, seed, max_trials):
+        assert (arm_in, seed, max_trials) == ("A208", 2026092001, 20)
+        return {"four_cycles": 0, "min_girth": 6, "rank": 208,
+                "family": "peg-irregular"}
+
+    with pytest.raises(c.Refusal) as exc:
+        c._construct_gate("A208", _r1_girth6, 2026092001, 20)
+    assert exc.value.code == 2
+    err = capsys.readouterr().err
+    assert "STOP-BLOCKED" in err and "min_girth" in err
+    # Full execute path with R1 girth-6 refuses pre-decode (zero decodes).
+    calls = []
+
+    def _counting(construction, seed):
+        calls.append(seed)
+        return _decode_ok(construction, seed)
+
+    with pytest.raises(c.Refusal):
+        c.execute(root="/tmp/opencode/o1r_fake_r1girth6", arm="A208",
+                  construct_fn=_r1_girth6,
+                  decode_fn=_counting, clock=FakeClock(),
+                  rss_fn=lambda: 0, writer=MemWriter(),
+                  block_base=2026095601, n_blocks=240,
+                  construct_seed=2026092001, construct_trials=20)
+    assert calls == []
+
+
+# T21: R1/R2 labels derive from the construct seed. -----------------------
+def test_t21_replication_label_derivation():
+    assert c.replication_label(2026092001) == "R1"
+    assert c.replication_label(2026092011) == "R2"
+    assert c.replication_label(1) == "custom"
+
+
+# T22: per-60 quarter tally is report-only and derived from rows. ---------
+def test_t22_quarter_tally_report_only():
+    rows = [{"block": i,
+             "block_fail": 1 if i in (0, 61, 120, 200) else 0}
+            for i in range(240)]
+    t = c.quarter_tally(rows)
+    assert t["idx_0_59"] == {"blocks": 60, "fails": 1}
+    assert t["idx_60_119"] == {"blocks": 60, "fails": 1}
+    assert t["idx_120_179"] == {"blocks": 60, "fails": 1}
+    assert t["idx_180_239"] == {"blocks": 60, "fails": 1}
+    assert t["quarters_complete"] == 4
+    assert t["quarters_le3"] == 4  # O1-bar reference, never gated
+    partial = c.quarter_tally([{"block": 0, "block_fail": 0}])
+    assert partial["quarters_complete"] == 0
+    assert partial["quarters_le3"] == 0
+
+
+# T23: CLI O1R flags + o1r root prefix. -----------------------------------
+def test_t23_cli_o1r_flags_and_root_prefix():
+    assert c._allows_root("workspace/o1_deadbeef")
+    assert c._allows_root("workspace/o1r_deadbeef")
+    assert not c._allows_root("workspace/s2c_deadbeef")
+    base = ["--execute-real", "--execution-authorized", "--arm", "A208",
+            "--root", "workspace/o1r_deadbeef"]
+    with pytest.raises(c.Refusal):
+        c.main(base + ["--n-blocks", "0"])
+    with pytest.raises(c.Refusal):
+        c.main(base + ["--construct-trials", "0"])
+    with pytest.raises(c.Refusal):
+        c.main(["--execute-real", "--execution-authorized", "--arm",
+                "A208", "--root", "workspace/s2c_deadbeef"])
