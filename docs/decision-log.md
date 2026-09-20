@@ -4689,3 +4689,51 @@ crossed its finite-length operating region.
 - Re-quote Müller's f=1.036/1.166 against our f_super: rejected — different denominators (binary, tagless) and different FER basis; only qualitative/structural borrowings plus Eq. (13) support are admissible.
 
 **Consequences**: standing citation ban on Müller 2025 numbers lifted (numbers citable with the tag/f_eff basis caveat); f vs f_eff reporting policy is now a standing rule for all future arms; no frozen gate, quantity, threshold or packet changed; this note authorizes nothing.
+
+### 2026-09-21: V80 b2g two-construct-seed replication PASS — genie-retirement wording now eligible (strict condition)
+
+**Decision**: record the b2g EXPLORE_HEAVY synthetic replication (`docs/research_cycles/V80-NBLDPC-JAN21/B2G_RESULT_20260921.md` + `B2G_BATCH_END_REVIEW_20260921.md`, verdict PASS_WITH_FINDINGS). b2g mirrors b2f with EXACTLY ONE changed science input: construct PEG seed 2026092001→2026092011 (O1R R2 SECOND construction instance); everything else frozen (paired seeds 2026095601+idx = same 240 frames as O1R/P0/L1B/b2e/b2f; n=1024 GF(32) λ={2:1}; trials 20; arms F208 PRIMARY + F202 SECONDARY). Result: F208 0/240 FER 0.0 PASS; F202 4/240 FER 0.0167 PASS (fail seeds 2026095707/5710/5732/5803, all max_iter_reached@300 — a DIFFERENT subset from b2f's 5630/5638/5686/5698/5803/5834 ⇒ construction-instance-specific). Gates (a) fails/240≤12 and (b) f_super=(5m+64)/852.544≤1.3 (F208 1.294947 / F202 1.259759, unchanged O1 basis, pass by construction) both PASS. Walls 694.8/1244.0 s (cap 3600); RSS ≈170 MiB ≪4 GiB; 0 continuations; 1 window each; no early-stop (max 4<13); adaptive arm order honored (F208 first → PASS ≈13.2 min; F202 launched ≈13.4 min ≤50 min; no skip/swap). Because BOTH F208 construct instances now PASS gate (a) 0/240 (b2f 2026092001 + b2g 2026092011) AND the b2f batch-end review is PASS, the single verbatim genie-retirement sentence (B2G_RESULT §7) is ELIGIBLE.
+
+**Context**: this satisfies the b2f entry's gating condition ("genie-retirement wording NOT established until the b2g two-construct-seed replication passes") and closes the genie-u1 → soft-marginal question on TWO construction instances in the synthetic setting. Claim ceiling and forbidden items stay strict.
+
+**Alternatives considered**:
+- Pool b2f+b2g FERs into one number (e.g. 10/480): rejected — no cross-instance pooling; the two arms are on different construction instances with different recorded girth (b2f 8 / b2g 6).
+- Read the soft-marginal PASS as entropy parity or generalization: rejected — FXR-1 (measured marginal prior entropy ≈852.5 ≈ H_full·n, ~26 b/block flatter than genie 826.27, yet BP converges — prior entropy is not a decodability proxy); two-instance replication ≠ generalization; paired seeds carry no independence claim.
+
+**Consequences**: genie-retirement wording (the single §7 sentence) is now permitted, bounded by: no entropy-parity reading; no cross-instance FER pooling; no independence claim from paired seeds 2026095601+idx or two construct seeds; no two-instances⇒generalization claim; no S3/qualification/publication/route claim. Synthetic only; no real/Jan-21 frames; authorizes nothing further. Branch `formal-ir-v72p1-addendum-clean`; this memory append is NOT committed (unstaged for the main thread's next housekeeping commit).
+
+### 2026-09-21: f_eff per-arm own-basis correction — b2f F202 1.4146→1.3794, b2g F202 4/240→1.3395 (both >1.3, not literature-comparable)
+
+**Decision**: record the per-arm own-basis correction to the f vs f_eff standing rule (`F_EFF_ACCOUNTING_NOTE_20260921.md`; standing rule from commit 68b39f28; correction in commit aadc0428). f_eff = f_super + 4.7857·FER using the PER-ARM OWN f_super. At FER 5% (gate-(a) bar fails/240≤12): f_eff = 1.5342 (M=208 basis) / 1.4990 (M=202 basis — a task-supplied 1.4186 was an arithmetic error, corrected). f_eff≤1.3 requires FER≲0.1056% (M=208 basis; 0.84% M=202); each single fail in a 240-block arm costs ≈+0.0199. Corrected arm values: b2f F202 6/240 → f_eff 1.3794 (the earlier 1.4146 wrongly used the M=208 base 1.294947; Δ=0.0352); b2g F202 4/240 → f_eff 1.3395; both F202 arms EXCEED 1.3 ⇒ NOT literature-comparable at f≤1.3; only the F208 arms (0/240) give f_eff = f_super = 1.294947 ≤1.3.
+
+**Context**: GBR-1/GBR-2 of the b2g batch-end review required every FER>0 arm to report BOTH f_super and f_eff on the arm's own base; the bare f_super 1.259759 in a verdicts table is misreadable as an f_eff. The LITERATURE_DIRECTION_MEMO §Corrections(b) still carries the superseded b2f 1.4146 (uses the M=208 base); the corrected per-arm value is 1.3794.
+
+**Alternatives considered**:
+- Quote the bare gate-(b) f_super (1.259759) as the efficiency: rejected — it is a success-frame accounting identity, not a FER-aware literature f_eff; misreading risks an overclaim of literature-comparability.
+- Treat f_eff≤1.3 as a new gate: rejected — the frozen gate-(b) threshold 1.3 is a success-frame quantity on frozen m; changing the acceptance basis is a MAIN-THREAD decision (gate-(a) FER≤5% and f_eff≤1.3 are two DIFFERENT, non-interchangeable bases).
+
+**Consequences**: standing rule reinforced — every FER>0 arm must carry both f_super and f_eff on its own base; F202-class arms are not literature-comparable; no frozen gate/quantity/threshold changed; authorizes nothing.
+
+### 2026-09-21: Cross-paper FER-penalty comparison under ONE convention — ours ≈15–21% cheaper, NOT 6× (commit 2c0a5fc); PDF-vs-arXiv provenance precedence
+
+**Decision**: record the cross-paper comparison correction and the provenance-precedence rule (`LITERATURE_DIRECTION_MEMO_20260921.md` §Corrections, commit 2c0a5fc). (i) The withdrawn "~6× cheaper" statement (memo §4(iv)) was arithmetically inconsistent (mixed their per-bit h2(0.02)=0.1414 against our per-symbol 0.8326; and priced the leak term instead of the lost content). On ONE consistent Eq.(13)/net basis at FER 5%: ours +0.239 (m-saving) / +0.300 (naive) vs theirs +0.30 (m-saving) / +0.354 (naive) — ours ≈15–21% cheaper, NOT 6×; our +0.239 gives f_eff 1.5342 (matches the frozen note). Compare only under ONE consistent convention; do not reuse the 6× figure. (ii) Provenance precedence STANDING RULE: a directly user-PDF-verified value OUTRANKS any arXiv-HTML-derived value read by an agent that could not open the PDF (some models could not read the supplied PDFs and used arXiv HTML). Müller et al. figures are user-PDF-verified (control); Zhou et al. (PhysRevApplied 18.044022) figures remain arXiv-HTML-derived/flagged; Kanitschar & Huber figures remain arXiv-HTML-derived (context-only).
+
+**Context**: the correction is arithmetic-only (`.venv/bin/python`), no decode/execution; no literature figure re-derived. H_per-bit = 852.544/5120 = 0.1665 vs h2(0.02) = 0.1414 (only ~18% apart, so no 6× gap is possible).
+
+**Alternatives considered**:
+- Keep the 6× comparison: rejected — inconsistent units and wrong penalty term; would overstate our advantage ~3–4×.
+- Treat arXiv-HTML readings as equal to PDF readings: rejected — the provenance-precedence rule makes user-PDF-verified values control; flagged arXiv-HTML values (Zhou, Kanitschar) must not ride numeric claims until PDF-verified.
+
+**Consequences**: cross-paper FER comparisons must use ONE matched convention and state the basis; the 6× figure is withdrawn; provenance precedence is now a standing rule; no frozen quantity changed; authorizes nothing.
+
+### 2026-09-21: Jan-21 data is ENTANGLEMENT-based (not prepare-and-measure) + in-repo protocol declaration ABSENT; Kanitschar & Huber relevance upgraded (source-type PARTIAL, outer-layer/S3 highest, IR downgraded)
+
+**Decision**: record the data-physics correction and the Kanitschar & Huber adjudication (`docs/research_cycles/V80-NBLDPC-JAN21/KANITSCHAR_RELEVANCE_ADJUDICATION_20260921.md`). (i) Jan-21 data is ENTANGLEMENT-based (BBM92-type time-bin/ToA, d≤1024 ToA, SPDC source, Franson PE chain) — do NOT treat as prepare-and-measure. Repo evidence: SECURITY_MODEL.md:28 "Time-bin layer: High-dimensional arrival-time encoding", :29 "Polarization layer: Additional binary key register (BBM92-type)", :101 Zhong 2015 time-energy entanglement, v65a registry provenance (D:\SPDC源测试...SHG_Type2PPLN...ttbin). The in-repo protocol declaration is still ABSENT; the single settling source is the upstream acquisition/scanner protocol record for type2_2M_20260121_183657 (experiment logbook / .ttbin acquisition config), upstream of this checkout. (ii) Kanitschar & Huber (PRL 135.010802): source-type PARTIAL UPGRADE (mapping platform-independent, function of observed statistics — but needs off-diagonal/interference observables our gamma_f03 diagonal histogram lacks); outer-layer/S3 UPGRADE to HIGHEST priority (companion Composable finite-size HD-QKD paper targets our registered composable-proof gap — LATEST_RESULTS_20260327.md:81-83, V61 composable-theorem missing — and backs leak_IR = leak_EC + log2(2/ε_EV) ⇒ our +64-bit tag ≡ ε_EV≈2^-63); IR-relevance KEEP DOWNGRADE (framework consumes H(X|Y); nothing for our reconciliation efficiency/FER problem).
+
+**Context**: adjudication is EXPLORE doc-only (no execution/decode/real-data read). The PM-vs-entangled status is UNRESOLVED in-repo but not decision-relevant to the Kanitschar upgrade (platform-independent mapping). Their Devetak–Winter key rate is a different basis from our f_super.
+
+**Alternatives considered**:
+- Declare Jan-21 prepare-and-measure from the diagonal histogram: rejected — repo evidence points entanglement-based; only the upstream acquisition protocol record settles it.
+- Apply their finite-size key rate to gate-(b) f_super≤1.3, or import their d≤64 numbers onto Jan-21: rejected — different basis (bits/coincidence vs our f_super); off-diagonal observables missing; no S3 entry / theorem_id / gate change.
+
+**Consequences**: do not treat Jan-21 as prepare-and-measure in any future framing; the entanglement declaration needs the upstream acquisition record (not an in-repo assertion); Kanitschar & Huber is now the highest-priority outer-layer/S3 lead for the composable-proof gap while staying IR-irrelevant; no real-data/S3/qualification claim; authorizes nothing.

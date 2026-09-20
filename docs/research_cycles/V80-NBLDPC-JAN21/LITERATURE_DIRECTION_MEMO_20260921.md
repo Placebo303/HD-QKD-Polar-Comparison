@@ -99,3 +99,18 @@ Cross-pairing extremes span 0.677 (ours m-saving vs theirs naive) to 1.017 (ours
 **(d) Does-not-establish**
 
 No decision; arithmetic only; no decode; no execution; no change to any frozen gate or quantity (f_super formula, H_full, n, tag, gate-(a)/(b)); no B2G_*/b2g file touched; `LITERATURE_RECOMMENDATION_TRIAGE_20260921.md` and `B2G_RESULT_20260921.md` untouched. The withdrawn "~6× cheaper" statement must not be reused as a basis for §4(iv); §4(iv) remains an open question for the main thread. This memo still authorizes nothing.
+
+**(e) Per-arm-own-basis correction to (b) — b2f F202 f_eff and the gate-(a) FER=5% reference pair (commit aadc0428)**
+
+Subsection (b) priced f_eff on the F208 basis (f_super = 1104/852.544 = 1.294947) throughout, which is the WRONG basis for an m = 202 arm. Per commit aadc0428 (per-arm own-basis f_eff), an m = 202 arm must be priced on its OWN basis f_super(m = 202) = 1074/852.544 = 1.259759:
+
+- b2f F202 (6/240 => FER 2.5%): f_eff = 1.259759 + 4.7857×(6/240) = **1.3794**. This SUPERSEDES the "b2f F202 (6/240 -> f_eff 1.4146)" line in (b): the 1.4146 value = 1.294947 + 4.7857×0.025 was computed on the m = 208 basis and does not belong to an m = 202 arm. (Arithmetic re-verified via `.venv/bin/python`; the frozen per-arm-own-basis value 1.3794 is from commit aadc0428.)
+
+Gate-(a) FER = 5% reference points (fails/240 <= 12), stated on BOTH bases so neither is dropped:
+
+| basis | f_super | f_eff at FER = 5% (f_super + 4.7857×0.05) |
+|---|---|---|
+| m = 202 (own basis) | 1074/852.544 = 1.259759 | **1.4990** (1.259759 + 0.239285) |
+| m = 208 (own basis) | 1104/852.544 = 1.294947 | **1.5342** (1.294947 + 0.239285) |
+
+The m = 202-basis value at FER 5% is **1.4990** (NOT the ~1.4186 that (b)'s M=208-basis reading would imply for an m = 202 arm at FER 5%); the m = 208-basis value at FER 5% is **1.5342** (already the frozen note's gate-(a) row recorded in (a)). These two bases are NON-INTERCHANGEABLE (as already established): an m = 202 arm's f_eff must use 1.259759 and an m = 208 arm's must use 1.294947 — mixing them is exactly the defect this correction removes. Arithmetic only via `.venv/bin/python`; no decode, no execution, no gate or frozen-quantity change.
