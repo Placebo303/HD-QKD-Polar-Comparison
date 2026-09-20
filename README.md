@@ -21,17 +21,15 @@ This repository contains the current HD-QKD Polar comparison workspace, includin
 
 ## Current Status
 
-As of 2026-08-24, the active research mainline is performance-first formal IR:
+As of 2026-09-21, the active research mainline is V80 NB-LDPC on the Jan-21
+empirical 2M channel (S1 batch closed → S2 chain → O1/O1R):
 
-- V34 is closed as an ER1-accepted bounded failure for the tested matched
-  empirical-P V31 QC packet/decoder (`0/60` exact, useful residual reduction).
-- V35R1 is a bounded negative for one hand-designed mixed-degree NB-LDPC
-  configuration; it does not close empirical-P irregular or MET designs.
-- V36 produced an exploratory paired residual signal, but its DE selection and
-  finite-graph structural gates do not satisfy the frozen OpenSpec. It is not
-  an accepted candidate and remains `NO_FINITE_GRAPH_ADVANCE`.
-- The next algorithm decision is a small corrected DE/finite-graph experiment,
-  not automatic MET promotion or more verifier infrastructure.
+- O1R A208 is the first S2-level PASS on the empirical channel: pooled 0/480
+  exact across two construction instances (girth 8 & 6), n=1024, m=208.
+- Ceiling (no S3/qualification): genie-u1 upper bound, D_blind=0 with 4.31-bit
+  f headroom, synthetic single-code semantics.
+- Next gate: L1 construction (retire genie-u1 within m1+m2≤208) + blind-budget
+  accounting. Earlier V34–V36 states are superseded; see docs/decision-log.md.
 
 The older Polar reporting line below remains frozen baseline context, not the
 active algorithm-development objective.

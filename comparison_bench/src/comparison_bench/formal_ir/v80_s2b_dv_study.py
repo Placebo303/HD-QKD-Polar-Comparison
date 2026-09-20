@@ -8,10 +8,15 @@ frozen modules READ-ONLY; modifies nothing. Production stopping
 seeds per cell (new hundred-block 2026097101..104). Raw JSON -> /tmp.
 """
 import json
+import os
 import sys
 import time
+from pathlib import Path
 
-sys.path.insert(0, "/mnt/d/Code/HD-QKD_Polar_Comparison/comparison_bench/src")
+# Portable import root (AGENTS.md section 5.4): the package's own ``src/``
+# directory derived from this file's location; equals the historical
+# /mnt/d/Code/HD-QKD_Polar_Comparison/comparison_bench/src absolute path.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np  # noqa: E402
 
 from comparison_bench.formal_ir import nonbinary_v10_common as common  # noqa: E402
@@ -26,7 +31,7 @@ LAMBDAS = {"L-A": {2: 1.0}, "L-B": {2: 0.5, 3: 0.5}, "L-C": {3: 1.0}}
 P_GRID = [0.04, 0.05, 0.06, 0.081]
 FRAMES = [2026097101, 2026097102, 2026097103, 2026097104]
 C_SEED = 2026092001  # construction tie-break seed, all three (fixed mechanics)
-OUT = "/tmp/opencode/s2b_dv_study.json"
+OUT = os.environ.get("S2B_DV_STUDY_OUT", "/tmp/opencode/s2b_dv_study.json")
 
 
 def build(lam):

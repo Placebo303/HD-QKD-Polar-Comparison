@@ -1,0 +1,7 @@
+{"protocol": "holdout even/odd frame_id folds CAL 702..1725 (131072/131072) attempted; (H) BLOCKED on 47.2%/47.0% seen-column-unseen-u1 mass (no rule, STOP upheld) — NO holdout joint computed; (J) decided on raw-empirical joint instead",
+"raw_joint": {"H_U2_given_B": 3.69778676, "h_U1_given_B_U2": 1.37930847, "sum": 5.07709523, "chain_residual": 8.9e-16, "bias_note": "in-sample memorization-optimistic (~8 samples/cell); true HIGHER by unknown amount"},
+"bar_J": {"H_full_lt": "5.5/f", "f11": 5.0, "f105": 5.238, "comparison": "5.07709523 > 5.0 (f=1.1 FAIL); < 5.238 (f=1.05) BUT bias direction upward-only → fails under honest estimation"},
+"planes_NATURAL": {"EtoO": [0.8897,0.8794,0.8678,0.8662,0.8639,0.8614,0.8620,0.8617,0.8613,0.8574], "OtoE": [0.8923,0.8793,0.8679,0.8669,0.8657,0.8648,0.8635,0.8615,0.8586,0.8565], "mean": [0.8910,0.8794,0.8679,0.8665,0.8648,0.8631,0.8627,0.8616,0.8599,0.8570], "directional_max_diff": 0.003, "range": 0.034, "gray_note": "no executable Gray map in repo (v17 label-only; v19 Gray-codes XOR-diffs) → NATURAL labeled; skew insufficient (min-natural 0.857 vs bar 0.55) flagged as residual caveat, not pursued"},
+"bar_S": {"count_h_lt_0.55": 0, "need": ">=3"},
+"verdicts_proposed": {"JOINT": "DEAD (raw 5.077 > 5.0 bar, bias upward-only)", "SELECTIVE": "DEAD (0 planes < 0.55)", "route": "INFORMATION-CLOSURE per brief §8 (acquisition-level decision; 1/2/3 no more rounds)"},
+"N": 262144, "decoder_calls": 0}

@@ -605,7 +605,15 @@ and MET/protograph-failure wording is superseded.
 
 # AGENT_HANDOFF.md
 
-Last verified: **2026-08-16**
+Last verified: **2026-09-21**
+
+## Current State — V80 NB-LDPC Jan-21 chain: O1R replicated PASS, L1B blocked (2026-09-21)
+
+- V80 on empirical 2M channel: S1 batch closed; S2c n=256 FAIL (0/3 arms, no S3); O1 A208 first S2-level PASS; O1R replication PASS (pooled 0/480, girth 8 & 6).
+- P0 reduced-m probes PASS (A202 0/240; A200 2/240); L1 MAY proceed at m2≤202 (main-thread decision; no auto-proceed).
+- L1B Stage A BLOCKED pre-decode (m1 dense-check collapse, fc≠0); L1-construction rework decision pending.
+- Ceiling: genie-u1, synthetic, D_blind=0 (4.31-bit headroom); next gate = L1 construction + blind budget.
+- Records: `docs/research_cycles/V80-NBLDPC-JAN21/` (O1R/P0/L1B result + review docs); decision-log tail from line 4612.
 
 ## Current State — V13-R3 legacy drift audit：用户决定用 2026-01-21 三源继续，执行完成 (2026-08-16)
 

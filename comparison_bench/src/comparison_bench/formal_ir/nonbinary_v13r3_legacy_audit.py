@@ -16,6 +16,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import os
 import platform
 import subprocess
 import time
@@ -456,7 +457,13 @@ def run_audit(output_dir: Any, *, parquet_paths: Sequence[Any],
             ARTIFACTS[1]: {"sha256": _sha_bytes(telemetry_path.read_bytes()),
                            "bytes": telemetry_path.stat().st_size},
         }
-        release_root = Path("D:/Code/HD-QKD_Polar_Release")
+        # Portable sibling-checkout provenance (AGENTS.md section 5.4):
+        # override via POLAR_RELEASE_ROOT; the default equals the historical
+        # D:/Code/HD-QKD_Polar_Release layout, so behavior is unchanged when
+        # the variable is set to the old value (or the layout is unchanged).
+        release_root = Path(os.environ.get(
+            "POLAR_RELEASE_ROOT",
+            str(_repo_root().parent / "HD-QKD_Polar_Release")))
         release_head = _git_head(release_root) if release_root.exists() else None
         frames_per_source = None if all_frames else FRAMES_PER_SOURCE
         manifest_doc = _manifest_doc(run_id, sources, _test_only, command,

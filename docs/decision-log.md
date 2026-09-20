@@ -24,6 +24,8 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 
 ## Decisions
 
+> **最新条目在文件尾部**（tail）；头部为历史区（head stale，当前头为 2026-09-14 D13）。最新条目起于第 4612 行（`### 2026-09-21: P0 reduced-m L2 probes`）；验证：`grep -n '^### 2026' docs/decision-log.md | tail`。
+
 ### 2026-09-14: Accept D13 Batch A1 reviewed evidence-only result (modest decoder rescue)
 
 **Decision**: Accept `D13_BATCH_COMPLETE_REVIEWED_AWAITING_MAIN_ROUTE_DECISION` as the evidence-only close of the single authorized D13 Batch A1 run. Stored terminal `D13_MODEST_DECODER_RESCUE` stands; no route acceptance, retry, repair or rerun is granted.

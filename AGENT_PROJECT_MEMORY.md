@@ -1,3 +1,5 @@
+> **最新条目在文件尾部**（tail）；头部为历史区（head stale，当前头为 2026-09-14 D13）。读最新状态请从第 4127 行起（`## 2026-09-20 P0 reduced-m L2 probes`）；验证：`grep -n '^## 2026' AGENT_PROJECT_MEMORY.md | tail`。
+
 ## 2026-09-14 D13 Batch A1 complete + VERIFIED PASS_WITH_FINDINGS batch-end review (MODEST rescue, evidence-only)
 
 - Evidence [repo-observed]: single authorized `--d13-batch --execution-authorized` run in fresh root `workspace/d13_l055_decoder_ladder_5c41b416-cacc-4b6e-892e-d8a59c53170e` (6 files, hashes match); EXIT 0, 14:31:32–14:46:36Z; 224/224 calls (56 replay + 168 ladder), setup 2/8, wall 869.161/1800, per-call-max 8.297/120, RSS 125267968<2GiB, violations []; REPLAY 56/56 match, 0 mismatch, first-mismatch gate never triggered; RESCUES RL360_a1 3 (n128 1 / n256 2, MODEST) / RL360_a0.7 1 (0/1, NO) / FLOOD360 0 (NO); undetected 0 all arms, all 224 rows CHECK_UPDATED; ranking []; terminal `D13_MODEST_DECODER_RESCUE` (evidence-only, selects no route).

@@ -22,9 +22,10 @@ separate responsibilities:
 The canonical NB-Polar plan lives in
 D:\Code\HD-QKD_Polar_Comparison-nbpolar\docs\nbpolar\. Its OpenSpec
 candidate is formal-ir-nbpolar-mvp; it is still a plan candidate. The
-Comparison mainline remains on the D7-E provenance-safe cross-layer
-discriminator gate. NB-Polar does not replace, unlock, or reinterpret D7-E,
-D7-D, D7-C, D6, or D5.
+Comparison mainline has moved past D7-E to the V80 NB-LDPC Jan-21 chain
+(O1R A208 replicated PASS; next gate L1 construction + blind budget;
+see docs/CURRENT_MAINLINE.md). NB-Polar does not replace, unlock, or
+reinterpret V80, O1/O1R, P0, L1B, D7-E, D7-D, D7-C, D6, or D5.
 
 ## Accepted history that informs the design
 

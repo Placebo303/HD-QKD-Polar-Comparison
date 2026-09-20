@@ -45,6 +45,18 @@ own cycle document; no new claim is added here):
    and for more than two layers a separate mathematical/leakage contract is
    required.
 
+## V80 NB-LDPC Jan-21 current state (2026-09-21; active work past D7-E)
+
+- S1 batch closed (rerun halted; BER-1 fixed / BER-2 cleared); S2c n=256
+  three-arm empirical FAIL closed (0/3 arms, batch-end review PASS, no S3).
+- O1 n=1024: A208 first S2-level PASS (60/60, f_super 1.294947≤1.3) / A188 FAIL;
+  O1R replication PASS (pooled 0/480, two construction instances, girth 8 & 6).
+- P0 reduced-m probes PASS (A202 0/240; A200 2/240) — L1 budget de-risked.
+- L1B Stage A BLOCKED pre-decode by m1 dense-check collapse (fc≠0, girth 4);
+  L1-construction rework decision pending; ceiling stays genie-u1/D_blind=0.
+- Records: `docs/research_cycles/V80-NBLDPC-JAN21/O1R_RESULT_20260920.md`,
+  `P0_RESULT_20260920.md`, `L1B_PREEXEC_20260920.md`, `L1_CONSTRUCTION_MEMO_20260920.md`.
+
 ## NB-Polar successor boundary (2026-09-11)
 
 An independent native q-ary NB-Polar plan is now initialized in the sibling
