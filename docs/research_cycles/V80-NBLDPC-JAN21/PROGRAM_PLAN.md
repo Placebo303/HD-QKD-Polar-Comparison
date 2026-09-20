@@ -103,15 +103,41 @@ bits/帧（9×；tagless 单帧旧口径，已 SUPERSEDED——冻结口径见 �
 - **2025 新文献**（待读全文）：IEEE 11440984（NB-LDPC QKD 后处理协议 +
   速率自适应）；Wiley qute.202500389（CV-QKD rate-adaptive NB-LDPC，
   域不同，仅取速率自适应思路）。
-- **IEEE 11440984（FULL-TEXT-NOT-RETRIEVED，2026-09-20 追加）**：Crossref
-  元数据确认题名为 *Non-binary LDPC Code-Based Post-Processing Protocol
-  for QKD*（Chen/Han/Lv/Mao/Wu/Sun/Lv，ECCST 2025，pp. 6–9，DOI
-  `10.1109/eccst68196.2025.11440984`）；8 条参考文献含 Li 2023 Opt. Express
-  "Rate-adaptive non-binary LDPC codes for QKD information reconciliation"
-  与 Zhao 2022 PTL "Performance analysis of NB-LDPC codes in high-QBER QKD
-  systems"，速率自适应取向与 S1/S2 相关。全文未取得：websearch ×2 被取消、
-  IEEE Xplore 页抓取无正文、arXiv 通用查询无命中——仅元数据+参考文献，
-  无摘要/数字可录；待正式获取后再读。
+  [2026-09-20 注：本行"待读全文"已 stale——IEEE 11440984 全文已由用户提供 PDF 取回（见 `LITERATURE_QPRIOR.md` 新节），关键数字已摘录；本行作历史保留，不删除。]
+- **IEEE 11440984（全文已取：用户提供 PDF，2026-09-20；摘要/SciVerse 复核历史保留）**：
+  *Non-binary LDPC Code-Based Post-Processing Protocol for QKD*
+  （Chen/Han/Lv/Mao/Wu/Sun/Lv，ECCST 2025，pp. 6–9，DOI
+  `10.1109/eccst68196.2025.11440984`；State Grid 系作者，会议
+  2025-12-26 Qinhuangdao）。SciVerse 只返回元数据+摘要
+  （closed-access，无 doc_id、无正文 chunk；arXiv 精确题名 0 命中，
+  arXiv NB-LDPC+QKD 仅 Martinez-Mateo 2501.11009 与 Mitra/Tauz
+  2305.00956 两篇既有文献；Crossref 仅元数据+8 条参考文献）。
+  摘要要点：NB-LDPC + 针对 NB 特性的速率自适应技术；仿真称 NB 纠错
+  性能与协调效率优于 binary，且增益随有限域阶数增大——**GF(128) 上
+  效率 1.0661**；速率自适应扩展定码率码适用范围，缓解构造/存储负担。
+  参考文献含 Li 2023 Opt. Express "Rate-adaptive non-binary LDPC codes
+  for QKD information reconciliation" 与 Zhao 2022 PTL "Performance
+  analysis of NB-LDPC codes in high-QBER QKD systems"，速率自适应取向
+  与 S1/S2 相关。与 S2 关系：1.0661 优于 f≤1.3 门，支持"rate≈0.90
+  可达"方向，无矛盾；但摘要无速率自适应机制细节
+ （puncturing/shortening/blind 未明）、无块长/码率/FER 参数，
+  PEG/improved-PEG、n=1024 超帧构造均无对照——不作 S2 设计依据，仅作效率存在性旁证。
+  [2026-09-20 全文补注：用户提供 PDF（4 页）已取，摘录见 `LITERATURE_QPRIOR.md` 新节——
+  机制已明（shortening+puncturing，非 blind，需 QBER 估计；符号/比特两级公式 Eq.9/Eq.10）、
+  Table I 全字段数已取（R=0.5/n=20000/FFT-BP 200 iter：GF(2)→GF(128) f 由 1.8577 降至 1.0661，
+  FER≈0.75 系恒定对照快照）；上两句"无机制细节/无块长码率 FER"关闭；
+  "不作 S2 设计依据，仅作效率存在性旁证"维持（demo 点 rate 0.5/n=20k 远离 rate≈0.90/n=256·1024
+  设计点，且其 f 用二进制熵分母、非冻结口径）。]
+   穷尽记录（2026-09-20 SciVerse 复核，主线程已验证、本会话不再重跑）：8 函数调用——
+   `search_papers`（DOI 精确命中，题名/作者/关键词变体复核）、`semantic_search`（balanced + quality，
+   top_k=30，0 chunk 命中本文）、`list_paper_relations`（RELATED_WORKS 0 条、CITATIONS 0 条）、
+   `list_catalog`（papers + authors）→ 全文确定不在库内（access_oa_status=closed，
+   is_content_accessible=false，无 doc_id、无正文 chunk，in-corpus 引用/被引计数均为 0）。
+   [2026-09-20 补注：获取缺口已由用户提供 PDF 关闭（PDF 未入库；SciVerse-conclosed 状态仍是该库的事实记录）；下句 Xplore 待办作历史保留，不删除：]
+   状态：全文需经 IEEE Xplore 正式获取（proceedings 正式发布后）；按评审意见，非 S2 阻塞项。
+   作者网络注记："Qixiang Chen" 在库碰撞为材料学同名；"Yuxiang Lv"/"Pang Lv" 确认本文 +
+   合作者网络（电网系 QKD 工程组：ETEP/ICCSIE/SGEE 2025 系列，均为 closed、无预印本；
+   未见期刊扩展版）——该组无预印本文化，IEEE Xplore 外无第二来源预期。
 
 ### 2.4 补扫发现（2026-09-19 复核，SciVerse）
 
@@ -137,6 +163,9 @@ bits/帧（9×；tagless 单帧旧口径，已 SUPERSEDED——冻结口径见 �
   arXiv:2403.00192，PA-aware IR 采样框架）记为 **deferred S3 会计备选项**；
   三 misfits：demo rate 0.2–0.4 vs 我们的 0.89–0.91；码长 ≈2000 vs n=256；
   给定 Eve 信息下符号条件独立性在 Jan-21 相关误差下未经检验。S1/S2 不变。
+- 追加（2026-09-20）：Wiley `10.1002/qute.202500389`（Xing Long 等，Adv. Quantum Technol. 2025，
+  CV-QKD rate-adaptive NB-LDPC，与 IEEE 11440984 同速率自适应 NB-LDPC 家族、域不同；closed，无 doc_id）+
+  Kasai `arXiv:2510.25583`（accessible，entanglement-assisted CSS，IR 非对口，仅存档）。
 
 ### 2.3 文献空白（我们的位置）
 

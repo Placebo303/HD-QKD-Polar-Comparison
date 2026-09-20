@@ -1,0 +1,13 @@
+# V80 S2 Constructor Review (2026-09-20) — EXPLORE review-only
+- Track: EXPLORE review-only. Branch `formal-ir-v72p1-addendum-clean` (no switch/commit/push). No suite rerun; static read only.
+- Scope: `formal_ir/v80_s2_peg.py` (335 lines, new) + `tests/test_v80_s2_construction.py` (151 lines, new).
+- Verdicts — 1:PASS 2:PASS 3:PASS 4:PASS_WITH_FINDINGS 5:PASS 6:PASS 7:PASS. Overall: **PASS_WITH_FINDINGS** (no blocking findings).
+- 1 λ basis PASS: L2 `{2:1.0}` = `S1_REPRO_PREEXEC:21` slot-105 winner + runner `REPRO_LAMBDA={2:1.0}` (`v80_s1_mcde_runner.py:1619`); L1 `{2:1}` = `S1_READINESS:72` + runner `L1_FIXED`/guard (`:32,:1415-1416`); m1≈2/m_total=49 = `S2_ACCOUNTING_MAP:5,§1` (code attributes λ→S1 docs, m1→accounting map; no invention).
+- 2 Reuse PASS: `peg.peg_construct` + `_mcde.make_rho` (+`sparse_to_dense`,`syndrome_of`,`decode_error_domain`,`v10_seed`,`GF2mField`) imported read-only; `git diff --` on all five kernel paths empty (exit 0, no output).
+- 3 Ban PASS: `refuse_three_shift_cyclic` normalizes case/space/`_`/`-`, raises on banned token, stamps `family="peg-irregular"` on every output; V29 numbers (15/69/303/922/1107) match `S2_ENTRY_PACKET §1`. See SCR-01.
+- 4 Cycles PASS_WITH_FINDINGS: pair-C(k,2) with per-var `set` dedup is exact; toy `[(0,0),(0,1),(1,0),(1,1),(0,2)]`→pair(0,1)k=2→C=1 correct, bounds-check raises. SCR-02: real count 1158 (seed 2026092001) is sponsor-reported, statically unconfirmable — unverified-until-executed.
+- 5 Grouping PASS: `evaluate_superframe` enforces exactly 4 flags, any-fail⇒fail; `PER_FRAME…=1-(1-.05)^1/4≈1.274%` pinned; `D_blind` injected + `NEVER-ASSUME-ZERO` label; leak `4·5·49+64=1044`, f≈1.2246 match packet §3/accounting §1.
+- 6 Smoke PASS: V10 kernel bound read-only, `max_iter∈1..300` (301 raises, tested); `qsc_pair_sampler` labelled synthetic QSC proxy (NOT V17/V25 kernel/data, GF32-only XOR valid); returns carry "no FER meaning", no FER/success claims.
+- 7 Scope PASS: no `open`/write/path args in constructor (pure in-memory); no FER campaign (2-block smoke + guard test); in-scope change is 2 new untracked files only (other worktree dirt out-of-scope, untouched).
+- Findings: SCR-01 (non-blocking) missing-`family` passes guard as non-banned — acceptable per frozen ban text, consider explicit refuse if stricter provenance desired. SCR-02 (non-blocking) 1158 assert must gate Pre-EXECUTE per FER packet §1.
+- G-S2FER entry-evidence statement: this review **satisfies item (f) "reviewer PASS on constructor"** (independent, non-blocking findings only); items (e) 7-passed suite and (g) 1158 assert remain TO-BE-VERIFIED by execution and are NOT claimed here.

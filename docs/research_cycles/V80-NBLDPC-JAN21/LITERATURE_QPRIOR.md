@@ -44,3 +44,58 @@ Re-read of full text (ar5iv 2305.00956, §§II–V). Decision-relevant numbers o
   **not stated** — the 2–5 range is given as the JRDO framework setting with
   no ablation against wider support and no essential-vs-convenience claim
   (do not infer).
+
+## Entropy-2024 rate-adaptive + syndrome-estimation neighbor (2026-09-20)
+
+Source: Treeviriyanupab & Zhang, *Efficient integration of rate-adaptive reconciliation
+with syndrome-based error estimation and subblock confirmation for QKD*, Entropy 2024,
+26, 53 (doc_id 5dd2d27e...77dc2, 7 cites). Binary-LDPC BB84 DV-QKD — off-target for NB;
+mechanism directly informs our D_blind surcharge design. Extraction only; not-stated marked.
+(a) Rate-adaptive mechanism: puncturing + shortening (NOT blind — needs a priori q_est);
+R_C^0=(N-M)/N tuned to R_C^(opt)=(N-M-n_s)/(N-n_p-n_s); mother-rate set R, pick closest
+to R_C^(opt)=1-eta_IR^base*H(q_est); eta_IR^base from experimental evaluation (value: not-stated);
+fixed n_p/n_s numbers: not-stated (computed per q_est). Two lengths: primary N=64800, subblock N_sb=16200.
+(b) Syndrome-based QBER estimation: MLE q_est=argmax L(q|S_dis), q in [0,q_threshold];
+per-syndrome-bit Bernoulli likelihood, p(q,d_c)=sum over odd k of C(d_c,k)q^k(1-q)^(d_c-k);
+syndrome from max-rate mother code R_C^(max); puncturing/shortening-aware variant drops rows
+touching punctured positions (omega_i cap p = empty); abort if q_est>11%. Subblock confirmation:
+polynomial hash per subblock; primary key split into N_sb=16200 subblocks; FAILED subblocks
+re-reconciled at length N_sb (no discarding); 64-bit hash, P_collision<=7.11e-12 per subblock.
+(c) Quoted numbers: primary round ~99.93% success, FER 7.25e-4 avg over QBER range (2000 iters/point);
+after additional rounds 100% success, FER zero (2000 iters); eta_IR "closer to 1" than
+Cascade/blind/symmetric-blind (numeric eta: not-stated, figure-only); L_rec near theoretical
+limit (numeric: not-stated); Cascade >40 rounds per 10^4-bit frame (blind round counts: not-stated);
+1-Kbps distance ~49.10 km vs perfect-IR ~49.85 km (1-GHz BB84, Table-4 device params).
+
+## IEEE 11440984 full text (user-supplied PDF, 2026-09-20)
+
+Chen et al., ECCST 2025, pp. 6-9 (DOI 10.1109/eccst68196.2025.11440984).
+Extraction from full text; decision-relevant facts only.
+(a) System model: DV-QKD under BSC; six codes — binary GF(2) + NB
+GF(8)/16/32/64/128, ALL rate 0.5, length 20,000, identical degree dists.
+Mapping: q bits grouped into one symbol over GF(2^q); split back post-decode.
+(b) Rate-adaptive: shortening + puncturing (NOT blind — needs QBER estimate,
+params recomputed per run). Two granularities: symbol-level
+Rsym=(K-Ssym*q)/(N-(Ssym+Psym)*q) (Eq.9); bit-level Rbit=(K-Sbit)/(N-Sbit-Pbit)
+(Eq.10, finer, suits binary source). Alice signals shortened positions+values
+and punctured positions classically (Fig.3). GF(128)+adaptation holds f<1.1
+over 0.06 QBER span. Fig.4/5 caption rate numbers (0.10-0.15 / 0.09-0.05)
+read qualitative-only (inconsistent with 0.5 mother as printed).
+(c) Table I (FFT-BP, max 200 iter, f=(1-R)/H_bin, FER held ~constant by design):
+GF(2): QBER .046 f=1.8577 FER .74; GF(8): .072/1.3393/.76; GF(16): .085/1.1917/.76;
+GF(32): .092/1.1284/.75; GF(64): .097/1.0883/.75; GF(128): .100/1.0661/.74.
+Gains grow monotonically with field order. NOTE: FER~75% is a fixed-rate snapshot
+(authors hold FER constant to isolate field gains), NOT a qualification point —
+no clash with our FER<=5% gate.
+(d) Construction: PEG-built H, identical degree dists, distribution details
+(lambda/rho, dv/dc) NOT STATED; no QC/EMS; decoder = FFT-BP syndrome-based
+(Alice sends S=H*X'T over GF(Q); tentative-decode, syndrome match, iterate).
+(e) vs S2: SUPPORTS rate~0.90 direction (GF(128) 1.0661 < 1.3 gate; PEG family;
+bit-level puncture/shorten fits binary-source HD data). QUALIFIES: demo at rate
+0.5 / n=20k / QBER<=10% is far from our rate~0.90, n=256/1024, 4-8% point; their
+f uses binary-entropy denominator, NOT our frozen whole-frame-with-tag f —
+existence evidence only, not S2 design inputs. No q=1024 or GF(32)^2-layered
+test (max GF(128)); superframe n=1024 unaddressed.
+
+Provenance: user-supplied PDF (2572680 B, sha256 579bd831.., NOT committed);
+text at /tmp/opencode/ieee11440984.txt via pypdf (temp /tmp target, .venv untouched).

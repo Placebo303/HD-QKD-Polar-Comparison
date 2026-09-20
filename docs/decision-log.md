@@ -4496,3 +4496,25 @@ crossed its finite-length operating region.
 - Treating headroom/FER math as success evidence: rejected — budget-accommodating only.
 
 **Consequences**: S2 gated, not authorized; S1 claim ceiling stays synthetic DE-ensemble only; no FER/SKR/qualification/promotion; no push.
+
+### 2026-09-20: IEEE 11440984 full text retrieved (user-supplied PDF)
+
+**Decision**: Close the acquisition gap.
+
+**Context**: 8-function SciVerse exhaustion then user PDF (sha256 579bd831…); key numbers captured (GF(2) 1.8577 → GF(128) 1.0661 @ R=0.5/n=20000/FFT-BP-200/FER≈75% snapshot; shortening+puncturing not blind; PEG H; λ/ρ not stated).
+
+**Alternatives considered**:
+- Keep gap open: rejected — user supplied.
+
+**Consequences**: LITERATURE_QPRIOR updated, PROGRAM_PLAN §2.2 synced; existence-evidence only, not S2 design input; PDF not committed.
+
+### 2026-09-20: Zotero library scan attempted — offline (retry needs desktop)
+
+**Decision**: Record the offline probe; no new references obtained.
+
+**Context**: Probe RC=7 both endpoints (Zotero desktop/API unreachable).
+
+**Alternatives considered**:
+- Treat as no-library-evidence: rejected — probe failure is environmental, not a collection result.
+
+**Consequences**: Single retry step recorded (Zotero desktop open + local API allowed); ZOTERO_SCAN_20260920.md holds details; no new references obtained.
