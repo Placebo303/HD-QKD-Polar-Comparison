@@ -4557,3 +4557,15 @@ crossed its finite-length operating region.
 - Extend/rerun campaign: rejected — early-stop terminal, no rerun rule.
 
 **Consequences**: Triage studies running; V1/V2/S2b raw failures retained; no S3; no qualification/FER claim beyond machine verdicts.
+
+### 2026-09-20/21: S2c three-arm empirical-channel campaign FAIL-early-stop (0/3 arms); batch-end review PASS; fallback options memo issued
+
+**Decision**: Record raw machine verdicts (L-A frame FER 7/16, L-B 13/16, L-C 16/16; group 4/4 each; f_super 1.2246 budget-pass; no continuations, budgets interior); close the S2c batch with the independent batch-end review (PASS; claim ceiling = "0/3 arms meet the group FER bar under finite-length n=256/m₂=47/genie-u1/empirical-channel"; no S3 authorization); route decision deferred to user with the fallback options memo (ranked O4→O2→O1; O3 piggyback; O5 parallel S3-level; O6 last).
+
+**Context**: Decisive empirical-channel test after constructor fixes (wiring defect caught and fixed pre-launch, zero execution wasted); stopping-rule and dv evaluations previously closed; failure mode = finite-length gap at n=256 (per-frame success nowhere near the 98.7% group-rule requirement), genie-u1 upper bound. Full records in `docs/research_cycles/V80-NBLDPC-JAN21/S2C_RESULT_20260920.md`, `S2C_BATCH_END_REVIEW_20260920.md`, `S2_FALLBACK_OPTIONS_20260920.md`.
+
+**Alternatives considered**:
+- Declare route dead: rejected — options O1/O2/O4 unexplored.
+- S3 now: rejected — gate unmet, ceiling.
+
+**Consequences**: O4+O2 diagnostic study running; O1 scoping done; no S3; no qualification; user route review pending; records/commits consolidated.
