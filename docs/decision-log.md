@@ -4545,3 +4545,15 @@ crossed its finite-length operating region.
 - Retroactively declare dv=2 failure: rejected — not established.
 
 **Consequences**: Constructor fix task running; campaign executor pins will change (new actual four_cycles); S2b experiment needs re-frozen packet + review; no S3; no FER/qualification claim.
+
+### 2026-09-20: S2b FAIL-early-stop (fixed constructor, entropy-matched channel) — raw retained; triage opened, attribution paused
+
+**Decision**: Record raw machine verdict FAIL (4/4 groups; 16/16 frames converged_no_syndrome at iterations 5–17; wall 12.7 s; gate(a) FER fail, gate(b) f_super 1.2246 pass); open observation-level triage per user mandate: stopping-rule study (no-early-stop / loosened streak) and p-ladder with differential codeword weight; dv-distribution feasibility check separately; NO causal attribution yet.
+
+**Context**: Constructor fix verified (four_cycles=0/min_girth=6/rank=47); channel+prior entropy-matched QSC p*=0.081; S2b single arm; failure mode is a fast wrong-lock (converged_no_syndrome), distinct from max-iter exhaustion; earlier review corrections still in force (hard-decision streak ≠ soft convergence; weight unmeasured until now). Full record in `docs/research_cycles/V80-NBLDPC-JAN21/S2B_RESULT_20260920.md`.
+
+**Alternatives considered**:
+- Declare dv=2 as cause: rejected — attribution paused per user review.
+- Extend/rerun campaign: rejected — early-stop terminal, no rerun rule.
+
+**Consequences**: Triage studies running; V1/V2/S2b raw failures retained; no S3; no qualification/FER claim beyond machine verdicts.

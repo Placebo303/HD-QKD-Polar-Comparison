@@ -540,3 +540,15 @@ len(plan)==granted scope.
 ---
 
 ### Seed-disjointness scans must include D19 block ranges + packet paths — operator rg over decision-log/research_cycles/openspec/comparison_bench missed frozen D19 n128 block seeds 2026094501..4508 (packet + v72p2d19 tasks F01 + D19 READINESS_R1); picks 4501/4502 collided exactly and were rejected at main-thread review with zero tolerance for colliding provenance. Fix: scan list must explicitly include .workbuddy/tasks/*_PACKET.md + openspec/changes/v72p2d19-*/tasks.md + docs/research_cycles/V72P3*/READINESS_R1.md + numeric-range assertions (not just literal greps); reviewer re-checks collision against the frozen seed table before any Pre-EXECUTE.
+
+---
+
+### Zotero local-api scan returns curl RC=7 (connection refused)
+
+**Observed**: Zotero local-api scan returns curl RC=7 (connection refused, both 127.0.0.1:23119 and localhost).
+
+**Root cause**: Zotero desktop is not running / local API not enabled.
+
+**Fix**: Open Zotero desktop on the Windows host (local API allowed) then retry; details in `docs/research_cycles/V80-NBLDPC-JAN21/ZOTERO_SCAN_20260920.md`.
+
+**Prevention**: Ensure Zotero desktop is running with the local API allowed before any Zotero local-api scan.
