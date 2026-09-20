@@ -4606,3 +4606,15 @@ crossed its finite-length operating region.
 - generalize beyond ceiling (rejected).
 
 **Consequences**: next queue — L1 construction planning (retire genie-u1 within the shared m_total≤208 budget) + blind surcharge budgeting; no S3; no qualification.
+
+### 2026-09-21: P0 reduced-m L2 probes both PASS (A202 0/240, A200 2/240) — L1 budget channel de-risked; no auto-proceed
+
+**Decision**: record — P0 (genie-u1; paired seeds shared with O1R; n=1024 λ={2:1}): A202 (m=202, f_super 1.25976) 240/240 FER 0.0 PASS; A200 (m=200, f_super 1.24803) 2/240 fails (idx 42, 202; max-iter 300) FER 0.833% PASS; both gates met; batch-end review PASS_WITH_FINDINGS (P0BR-01/02 non-blocking). §7 rule honored: no auto-proceed; A202 PASS ⇒ L1 MAY proceed at m₂≤202; A200 PASS ⇒ m₁=8 option viable (m₂=200); L1 build remains a main-thread decision.
+
+**Context**: L1 memo constraint m₁+m₂≤208, m₁≥6 capacity floor; P0 was the cheapest decisive pre-arm before any L1 spend.
+
+**Alternatives considered**:
+- auto-start L1 build (rejected per §7)
+- run extra m points (rejected — no decision value, packet restricted arms)
+
+**Consequences**: L1 build planning may proceed (main-thread decision); blind-surcharge budgeting still queued; no S3; no qualification; claim ceiling unchanged (genie-u1, synthetic, single-code semantics, D_blind=0).

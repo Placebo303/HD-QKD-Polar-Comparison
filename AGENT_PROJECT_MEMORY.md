@@ -4113,3 +4113,18 @@ R22 PREDICTOR-DEAD (2026-09-18): best lost-free abort rule saves 480–800 bits 
 - Provenance [repo-observed]: commit a2c22c95 (O1R executor+amendment+reviews). Next queue: L1 construction planning (retire genie-u1); blind surcharge budgeting.
 - Lifecycle [decision]: O1R_REPLICATED_AWAITING_L1_CONSTRUCTION; evidence-only replication, no route acceptance/promotion; grant consumed; no rerun.
 - Boundary [decision]: synthetic genie-u1 replication only; no FER/SKR/real-data/qualification/promotion claim beyond stated ceiling.
+
+## 2026-09-20 READ-ONLY project audit (reviewer-go, no execution, no file mods) — verdict PASS_WITH_COMMENTS + durable hazards/findings
+
+- Verdict [repo-observed]: executed science consistent with decision chain (D8→D13 ladder, D14 reset, D15-D19, G6 NO_USEFUL_RECOVERY, R7-R24, G7 STOP-positive-net, G8 falsification, V80→O1/O1R); no scope-creep/overclaim; root `tests/` 27 passed; `compileall` EXIT 0; sampled doc refs exist; `results/` git-ignored. G7/G8 + O1/O1R substance already recorded at/above tail — not restated.
+- Hazard [repo-observed]: memory/decision-log are TAIL-appended — heads stale (memory head 2026-09-14 D13; HANDOFF 2026-08-16; README status 2026-08-24). Future agents: verify with `grep -n '^## 2026' AGENT_PROJECT_MEMORY.md | tail` (+ decision-log equivalent) before concluding state.
+- Topology risk [repo-observed, open, NOT a decision]: work on `formal-ir-v72p1-addendum-clean` (531 ahead, push never performed; ~60 untracked incl ~20 cycle dirs V72P3R10..R24/G6/G7/G8/V80 = single-worktree loss risk) while AGENTS.md §0 says checkout=`main`, sibling=`polar-mainline`; sibling actually on `codex/security-workbench-master-roadmap`. Any push needs main-thread ruling first.
+- Findings to fix [repo-observed, actionable, not results]: P0-1 stale sha256 pin `comparison_bench/tests/test_nonbinary_field.py:72-74` → 1 fail on clean tree (masking risk); P0-2 order-dependent collection error `comparison_bench/tests/test_g8_s0_entropy.py:22` (`import comparison_bench.formal_ir...` fails jointly) fix=conftest path fixture; P1-3 absolute/Windows paths `formal_ir/nonbinary_v13r3_legacy_audit.py:459`, `formal_ir/real_qualification.py:39`, `formal_ir/v80_s2b_dv_study.py:14` vs AGENTS.md §5.4; P1-4 `comparison_bench/src/comparison_bench/metrics/leakage.py:24-33` clamp `max(0,1-leak/denom)` makes beta-negative-derived-only unobservable, convention undocumented; P2-1 openspec `v80-nbldpc-jan21`, `g6-minimum-decide-design`, `astra-g1g8-deep-review-prep` lack `specs/` delta.
+- Boundary [decision]: read-only audit only; no FER/SKR/route/qualification claim; findings are fix-queue, not verdicts on the science.
+
+## 2026-09-20 P0 reduced-m L2 probes complete + PASS_WITH_FINDINGS batch-end review (A202/A200 PASS)
+
+- Evidence [repo-observed]: P0 reduced-m L2 probes, genie-u1, paired seeds 2026095601+idx shared with O1R: A202 (m=202, R=0.8027, f=1.25976) 240/240 exact FER 0.0 PASS; A200 (m=200, R=0.8047, f=1.24803) 240/240, 2 fails (idx 42, 202; max-iter 300) FER 0.833% PASS. Both gates (fails≤12 AND f_super≤1.3) met.
+- Review [repo-observed]: batch-end review PASS_WITH_FINDINGS, no blocker: P0BR-01 A200 wall 930s > 900s estimate, interior; P0BR-02 wall-vs-manifest elapsed ~1% delta.
+- Boundary [decision]: §7 rule honored: no auto-proceed; A202 PASS ⇒ L1 MAY proceed at m₂≤202; A200 PASS ⇒ m₁=8 option viable (m₂=200). L1 build remains main-thread decision.
+- Constraint [decision]: combined constraint from L1 memo: m₁+m₂≤208; L1 m₁≥6 capacity floor.
