@@ -576,3 +576,13 @@ len(plan)==granted scope.
 **Fix**: bound/clamp to support before any frozen/DECIDE use; the L-A bit-identity proof (sha 8a56b577) does not cover this path.
 
 **Prevention**: bound/clamp to support before any frozen/DECIDE use.
+
+### Silent death of nohup background launch (process group killed on shell exit)
+
+**Observed**: nohup'd run died silently <5 min, zero-byte log, no process.
+
+**Root cause**: background process group killed when the launching shell exited.
+
+**Fix**: relaunch with `setsid nohup <cmd> >log 2>&1 < /dev/null &` then verify with `ps`.
+
+**Prevention**: for long detached runs use setsid + explicit liveness check; if relaunched clean with no output contamination there is no science impact.

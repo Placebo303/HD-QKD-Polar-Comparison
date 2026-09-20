@@ -4581,3 +4581,16 @@ crossed its finite-length operating region.
 - Skip to S3: rejected — gate unmet.
 
 **Consequences**: O1 packet planning started; lambda study raw committed; no S3; no qualification; user route review pending.
+
+### 2026-09-21: O1 n=1024 — A208 first S2-level PASS on the empirical channel (A188 FAIL); margin-sensitive; batch-end review PASS_WITH_FINDINGS
+
+**Decision**: record machine verdicts — A208 (m=208, R=0.7969): 60/60 exact, FER 0.0, f_super=1.294947≤1.3, DE-covered (precheck converged, 36 iters) ⇒ frozen gates met; A188 (m=188, R=0.8164): FAIL-early-stop FER 4/14≈28.6%. Close the O1 batch with the independent batch-end review (PASS_WITH_FINDINGS; OBR-1 fixed by incident line; OBR-2 note-only). Claim ceiling: synthetic + genie-u1 (D1) + single-code acceptance unit + single seed-block + D_blind=0; headroom 4.31 bits so any blind disclosure fails gate (b); no S3/qualification.
+
+**Context**: post-constructor-fix chain (S2c n=256 FAIL → lambda study {2:1} best + redundancy-sensitive → O1 n=1024); +20 rows flips A188→A208 outcome.
+
+**Alternatives considered**:
+- Declare route dead: rejected — first pass obtained.
+- Generalize to S3: rejected — ceiling.
+- Rerun/tune now: rejected — no rerun rule; replication is a new packet.
+
+**Consequences**: pending user review; candidate next steps (not authorized): multi-seed-block replication packet; L1 construction planning to retire genie-u1; blind-surcharge budgeting; no S3 entry yet.

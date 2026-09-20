@@ -4101,3 +4101,6 @@ R22 PREDICTOR-DEAD (2026-09-18): best lost-free abort rule saves 480–800 bits 
 - Scoping [repo-observed]: O1 n=1024 — m=188 fc0/g8 rank-full, same rate => no new DE arm; m=208 needs new DE point; decoder length-agnostic; ~11s/decode est (estimate only, not a budget verdict).
 - Lifecycle [decision]: O1 packet planning started (leading arm per fallback memo); not granted/executed; no S3; no route-dead declaration.
 - Boundary [decision]: lambda numbers are diagnostic observations only; no FER/route/promotion claim; QSC reversal is not mechanism evidence.
+- O1 (n=1024 superframe-as-code, lam={2:1}, empirical 2M channel, genie-u1, D_blind=0, single seed-block): A208 (m=208, R=0.7969) S2-level PASS — 60/60 exact, FER 0.0, f_super=1.294947<=1.3, DE-covered (precheck converged, 36 iters); A188 (m=188, R=0.8164) FAIL-early-stop (fails {5,7,8,13}, FER 4/14~28.6%).
+- O1 significance: FIRST S2-level PASS on empirical channel post constructor fixes; margin-sensitive (+20 rows flips A188 FAIL -> A208 PASS); A208 headroom 4.31 bits — any blind disclosure fails gate (b).
+- O1 claim ceiling: synthetic + genie-u1 + single-code acceptance unit + single seed-block; no S3; no qualification; independent batch-end review PASS_WITH_FINDINGS.
