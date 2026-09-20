@@ -4104,3 +4104,12 @@ R22 PREDICTOR-DEAD (2026-09-18): best lost-free abort rule saves 480–800 bits 
 - O1 (n=1024 superframe-as-code, lam={2:1}, empirical 2M channel, genie-u1, D_blind=0, single seed-block): A208 (m=208, R=0.7969) S2-level PASS — 60/60 exact, FER 0.0, f_super=1.294947<=1.3, DE-covered (precheck converged, 36 iters); A188 (m=188, R=0.8164) FAIL-early-stop (fails {5,7,8,13}, FER 4/14~28.6%).
 - O1 significance: FIRST S2-level PASS on empirical channel post constructor fixes; margin-sensitive (+20 rows flips A188 FAIL -> A208 PASS); A208 headroom 4.31 bits — any blind disclosure fails gate (b).
 - O1 claim ceiling: synthetic + genie-u1 + single-code acceptance unit + single seed-block; no S3; no qualification; independent batch-end review PASS_WITH_FINDINGS.
+
+## 2026-09-20 O1R A208 replication PASS (pooled 0/480, two construction instances)
+
+- Evidence [repo-observed]: R1 (construct seed 2026092001, girth 8) 240/240 exact FER 0.0; R2 (fresh construct seed 2026092011, girth 6) 240/240 exact FER 0.0; pooled 0/480; both gates met (fails≤12 AND f_super 1.294947≤1.3); no early-stop; no resumes; 1 window each; wall ~548/562 s; RSS ~165 MB each.
+- Process [repo-observed]: R2 pre-run pin STOP (girth 6 vs expected 8) honored → planner Amendment (fc0/rank-full/twice gated; girth recorded-not-gated; pre-committed seed, no tuning); amendment review PASS (OARE-6 pointer fixed); batch-end review PASS (ORBR-1..3; ORBR-4 non-blocking RSS-not-in-manifests note).
+- Claim ceiling [decision]: "A208 PASS replicates: pooled 0/480 across two construction instances (girth 8 and 6), paired frames" — ceiling: genie-u1 (D1), synthetic, single-code semantics, D_blind=0 with 4.31-bit headroom (any blind disclosure fails gate b), no S3/qualification.
+- Provenance [repo-observed]: commit a2c22c95 (O1R executor+amendment+reviews). Next queue: L1 construction planning (retire genie-u1); blind surcharge budgeting.
+- Lifecycle [decision]: O1R_REPLICATED_AWAITING_L1_CONSTRUCTION; evidence-only replication, no route acceptance/promotion; grant consumed; no rerun.
+- Boundary [decision]: synthetic genie-u1 replication only; no FER/SKR/real-data/qualification/promotion claim beyond stated ceiling.

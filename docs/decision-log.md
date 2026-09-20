@@ -4594,3 +4594,15 @@ crossed its finite-length operating region.
 - Rerun/tune now: rejected — no rerun rule; replication is a new packet.
 
 **Consequences**: pending user review; candidate next steps (not authorized): multi-seed-block replication packet; L1 construction planning to retire genie-u1; blind-surcharge budgeting; no S3 entry yet.
+
+### 2026-09-21: O1R replication both arms PASS (pooled 0/480, two construction instances girth 8 & 6); batch-end review PASS
+
+**Decision**: record — R1 240/240, R2 240/240, pooled 0/480 exact, FER 0.0; both gates met (fails≤12 AND f_super 1.294947≤1.3); no early-stop, no resumes; accept the O1R batch as closed (evidence-only replication; claim ceiling unchanged: genie-u1 D1, synthetic, single-code semantics, D_blind=0 with 4.31-bit headroom, no S3).
+
+**Context**: R2 pre-run pin STOP (girth 6 vs 8) honored → planner Amendment (fc0/rank-full/twice gated; girth recorded-not-gated; pre-committed seed, no tuning); amendment review PASS; batch-end review PASS (ORBR-1..3; ORBR-4 non-blocking).
+
+**Alternatives considered**:
+- rerun/tune (rejected — no rerun rule; replication clean)
+- generalize beyond ceiling (rejected).
+
+**Consequences**: next queue — L1 construction planning (retire genie-u1 within the shared m_total≤208 budget) + blind surcharge budgeting; no S3; no qualification.
