@@ -592,3 +592,39 @@ len(plan)==granted scope.
 **Root cause**: decoder instability (max-iter exhaustion path), not a schedulable tail; budget stop leaves ledger short by design.
 **Fix**: retain RAW as FAIL(budget), never promote partial FER; record overrun block idx + wall + ledger mismatch.
 **Prevention**: Pre-EXECUTE must state per-decode cap + ledger_ok gate; batch-end review must check overrun block before any Stage B.
+
+---
+
+### `from TimeTagger import FileReader` fails although Swabian-TimeTagger is installed
+
+**Observed** (2026-09-21, WSL repo `.venv` with `Swabian-TimeTagger==2.22.6`): bare `import TimeTagger` → `ModuleNotFoundError: No module named 'TimeTagger'`; the frozen loader `src/qkd_io/ttbin_pipeline.py:148` then raises `RuntimeError: TimeTagger package not available; cannot read .ttbin: ...`, while `from Swabian import TimeTagger` works and exposes `FileReader`.
+
+**Root cause**: the PyPI `Swabian-TimeTagger` wheel provides ONLY the `Swabian.TimeTagger` namespace; the repo loader was written against the vendor Windows-driver layout that ships a top-level `TimeTagger` package. Permanent mismatch, not a broken install.
+
+**Fix**: call the alias shim BEFORE any TimeTagger import — `comparison_bench/src/comparison_bench/io/ttbin_compat.py::install_timetagger_alias()` (idempotent; registers `sys.modules['TimeTagger']`). Verify: the probe error flips from the import-gate `RuntimeError` to the vendor `FileReader could not open file ...` on a nonexistent path. Never patch `src/` (frozen, AGENTS.md §5.1).
+
+**Prevention**: every entrypoint (incl. future `scripts/`) must install the alias first AND run with repo-root `PYTHONPATH` (else `No module named 'src'`). Any future `--authorized` gate flag must be `action="store_true", default=False`.
+
+---
+
+### `.ttbin` pair double-count: opening `X.ttbin` + `X.1.ttbin` and concatenating counts every event twice
+
+**Observed** (2026-09-21): both pair members return byte-identical `getConfiguration()` (Jan-12: 4913-char JSON equal), `FileWriter.filename` in BOTH points at base `X.ttbin`, no part-index field; vendor docstring: FileReader "will automatically recognize if the files were split and read them too one by one"; decisively, the 8 KB Jan-12 `X.ttbin` read ALONE spans 29.9999524 s — an 8 KB file cannot hold that, so the reader followed into `.1`.
+
+**Root cause**: pair members are NESTED / SUPERSET via vendor auto-follow, NOT disjoint parts. Assuming disjointness and UNION-concatenating doubles the stream — pairs, counts_ab and H_full all wrong (and every downstream estimator/uncertainty/memory statistic with them).
+
+**Fix**: open ONLY `X.ttbin` (auto-follow covers `.1`); `.1` shard-only (`FileReader("X.1.ttbin")`) is the fallback — NEVER both, NEVER concatenate. Dedup-after-concat is the wrong fix (masks the error).
+
+**Prevention**: gate every ingest on the span-continuity assertion: span > 0 AND span consistent with mtime(`X.1`)−mtime(`X`) within tolerance, else STOP-BLOCKED (span ≈ 2× gap ⇒ doubling; span ≪ gap ⇒ truncation).
+
+---
+
+### Filename duration tags disagree with measured acquisition span (Jan-12 `3s` tag is wrong)
+
+**Observed** (2026-09-21): Jan-12 `Type2PPLN_3s_2026-01-12_165236` event-span drain = 29.9999524 s but filename tag says `3s`; Jan-21 `Type2_2M_3s_2026-01-21_183657` = 2.9999997 s (tag correct). Base→`.1` mtime gaps (+30 s / +3 s) and file sizes corroborate the spans; the config carries no duration field.
+
+**Root cause**: filename tags are stale/incorrect labels for at least one pair; nothing in the file metadata supplies duration.
+
+**Fix**: duration MUST be measured from the stream span (first→last timestamp), NEVER taken from the filename. Record `duration_measured_s` + verbatim `filename_duration_tag` + `tag_disputed` per row; Jan-12 is quarantined as `duration_measured_s=30.0`, `filename_tag_disputed=true`, never pooled with 3 s acquisitions undeclared.
+
+**Prevention**: any census/report schema must carry the three duration columns; pooling across durations requires explicit declaration.
