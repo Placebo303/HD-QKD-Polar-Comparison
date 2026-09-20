@@ -72,7 +72,11 @@ Reuse from ``v80_s2c_campaign``/``v80_o1_campaign`` (patterns only,
 never their science): dual-flag gate, checkpoint manifest+rows
 overwrite-in-place single writer, append-only ``wall_windows``,
 explicit ``--resume-from`` with strict pre-decode validation,
-early-stop at bar+1 block fails. Channel helpers
+early-stop at bar+1 block fails. SCAN trade-scan L1 arms (rework
+memo v2 2026-09-21, section 2): Stage-A-only configs C12A (m1=12)
++ C16A (m1=16); m2 legs NOT constructed (pairing deferred to the
+Stage B packet); L1-leg pins per the 2026-09-21 Amendment; Stage B
+refused for Stage-A-only configs (rc=2 pre-decode); C6/C8 unchanged. Channel helpers
 (``bind_empirical_bundle``, ``empirical_triple_sampler``,
 ``posterior_rows_l2``, ``center_rows_prior``) are reused READ-ONLY from
 ``v80_s2c_campaign`` — never re-implemented here.
@@ -132,7 +136,10 @@ L1B_N = 1024
 #: Fresh additive L1B run-root prefix (packet §6: workspace/l1b_<uuid8>).
 L1B_ROOT_PREFIX = "workspace/l1b_"
 #: Frozen configs (packet §1; both total 208 rows ⇒ leak 1104,
-#: f_super≈1.294947). L1 leak share 5×m1 bits (30/40 b).
+#: f_super≈1.294947). L1 leak share 5×m1 bits (30/40 b). SCAN
+#: Stage-A-only configs (rework memo v2 §2): m1=12/16, m2 NOT
+#: constructed (None; pairing deferred to the Stage B packet); the
+#: frozen total-208 budget line is carried as the system mapping.
 CONFIGS: dict[str, dict[str, Any]] = {
     "C6": {"m1": 6, "m2": 202, "lambda": {2: 1.0},
            "l1_rate": 1.0 - 6 / 1024,
@@ -140,6 +147,14 @@ CONFIGS: dict[str, dict[str, Any]] = {
     "C8": {"m1": 8, "m2": 200, "lambda": {2: 1.0},
            "l1_rate": 1.0 - 8 / 1024,
            "role": "SECONDARY (m1=8/m2=200 P0-PASS L2)"},
+    "C12A": {"m1": 12, "m2": None, "lambda": {2: 1.0},
+             "l1_rate": 1.0 - 12 / 1024, "stage_a_only": True,
+             "role": "SCAN Stage-A-only (m1=12/deg~171; "
+                     "m2 pairing deferred to Stage B packet)"},
+    "C16A": {"m1": 16, "m2": None, "lambda": {2: 1.0},
+             "l1_rate": 1.0 - 16 / 1024, "stage_a_only": True,
+             "role": "SCAN Stage-A-only (m1=16/deg128; "
+                     "m2 pairing deferred to Stage B packet)"},
 }
 #: Frozen stages (packet §§2–3): A = L1-only (runs FIRST, gates B);
 #: B = combined chain (passing configs only).
@@ -193,7 +208,7 @@ def block_seed(config: str, idx: int, base: int | None = None) -> int:
     refuses (fail closed, rc=2).
     """
     if config not in CONFIGS:
-        refuse(f"unknown config {config} (frozen: C6|C8 only)")
+        refuse(f"unknown config {config} (frozen: C6|C8|C12A|C16A only)")
     b = L1B_BLOCK_BASE if base is None else base
     if isinstance(b, bool) or not isinstance(b, int):
         refuse("block base must be an integer literal")
@@ -432,8 +447,14 @@ def leak_basis(config: str) -> dict[str, Any]:
     f_L1(8)≈1.522).
     """
     if config not in CONFIGS:
-        refuse(f"unknown config {config} (frozen: C6|C8 only)")
+        refuse(f"unknown config {config} (frozen: C6|C8|C12A|C16A only)")
     m1 = int(CONFIGS[config]["m1"])
+    if CONFIGS[config].get("stage_a_only"):
+        # SCAN Stage-A-only (rework memo v2 section 2): m2 pairing
+        # deferred to the Stage B packet; the system mapping is carried
+        # on the frozen total-208 budget line (both memo splits total
+        # 208 rows ⇒ leak 1104, same as C6/C8).
+        return _leak_basis_stage_a_only(config, m1)
     m2 = int(CONFIGS[config]["m2"])
     m_total = m1 + m2
     leak = float(m_total * 5 + 64)
@@ -471,6 +492,52 @@ def leak_basis(config: str) -> dict[str, Any]:
                        "fixed 208 rows); blind surcharge still open — "
                        "any D_blind>4 bits fails gate (b) "
                        "(L1B packet §9)"),
+    }
+
+
+def _leak_basis_stage_a_only(config: str, m1: int) -> dict[str, Any]:
+    """System mapping for a SCAN Stage-A-only config (C12A/C16A).
+
+    Same record shape as ``leak_basis``: the f_super mapping is carried
+    on the frozen total-208 budget line (leak 1104 bits,
+    f_super=1104/852.544, m2-deferred note) so the AND-gate arithmetic
+    stays wired; the L1 leak share is 5*m1 bits (60/80 b) and f_L1 is
+    INFORMATIONAL ONLY, never gated.
+    """
+    leak = 1104.0
+    f_super = leak / CONTENT_BITS
+    f_l1 = (5 * m1) / L1_CONTENT_BITS
+    return {
+        "config": config,
+        "m1": m1,
+        "m2": None,
+        "m_total": 208,
+        "leak_bits": leak,
+        "l1_leak_bits": float(5 * m1),
+        "content_bits": CONTENT_BITS,
+        "f_super_basis": f_super,
+        "f_super_label": ("System budget mapping carried on the frozen "
+                          "total-208 line: f_super=(208·5+64)/(1024·H_full) "
+                          f"=1104/852.544≈{f_super:.6f} "
+                          "(H_full=0.83256272). m2 pairing DEFERRED to the "
+                          "Stage B packet (Stage-A-only config). "
+                          "BUDGET MAPPING, not measured efficiency"),
+        "f_L1_basis": f_l1,
+        "f_L1_label": ("Layer-local reported efficiency: "
+                       f"f_L1=(m1·5)/(1024·H_L1)=({m1}·5)/(1024×0.02566205)"
+                       f"≈{f_l1:.6f}. INFORMATIONAL ONLY — never gated "),
+        "h_l1": H_L1_L1B,
+        "h_full": H_FULL_L1B,
+        "d_blind": D_BLIND,
+        "d_blind_label": ("MEASURED zero: no blind/puncturing rounds exist "
+                          "in the campaign path — NEVER assume zero "
+                          "in a claim (L1B packet §9)"),
+        "sensitivity": ("Δf = D_blind/852.544, i.e. each 16 bits "
+                        "≈ +0.019"),
+        "blind_risk": ("Headroom 1108.31−1104=4.31 b on the frozen "
+                       "total-208 line (m2 pairing deferred; Stage-A-only "
+                       "config); blind surcharge still open — "
+                       "any D_blind>4 bits fails gate (b)"),
     }
 
 
@@ -529,16 +596,24 @@ def _de_cover_record(config: str, de_label: str | None) -> dict[str, Any]:
     label = de_label or "exploratory"
     if label not in DE_LABELS:
         refuse(f"unknown de-label {label} (frozen: covered|exploratory only)")
+    if CONFIGS[config].get("stage_a_only"):
+        rate = 1.0 - int(CONFIGS[config]["m1"]) / L1B_N
+        arm_note = (f"{config} L1 rate {rate:.5f} is far off the S1 L2 "
+                    "grid; DE informative-not-decisive; the 240-block "
+                    "empirical FER is the gate (SCAN Stage-A-only: "
+                    "exploratory, no DE run)")
+    else:
+        arm_note = (f"{config} L1 rate ≈0.994 is far off the S1 L2 "
+                    "grid ⇒ DE informative-not-decisive; the 240-block "
+                    "empirical FER is the gate (P0 precedent: "
+                    "exploratory, no DE run)")
     return {"label": label,
             "label_source": ("explicit --de-label" if de_label
                              else "default 'exploratory' (DE precheck is "
                                    "OPTIONAL-with-label; Stage A proceeds "
                                    "regardless; gates unchanged; "
                                    "L1B packet §4)"),
-            "arm_note": (f"{config} L1 rate ≈0.994 is far off the S1 L2 "
-                         "grid ⇒ DE informative-not-decisive; the 240-block "
-                         "empirical FER is the gate (P0 precedent: "
-                         "exploratory, no DE run)")}
+            "arm_note": arm_note}
 
 
 def _build_manifest(*, stage: str, config: str, constructions: dict,
@@ -555,7 +630,8 @@ def _build_manifest(*, stage: str, config: str, constructions: dict,
     bb = L1B_BLOCK_BASE if block_base is None else int(block_base)
     nb = L1B_N_BLOCKS if n_blocks is None else int(n_blocks)
     bar = fail_bar(nb)
-    c1, c2 = constructions["m1"], constructions["m2"]
+    c1 = constructions["m1"]
+    c2 = constructions.get("m2")  # None for SCAN Stage-A-only configs
     if stage == "A":
         wiring = ("y1_i=(b_i>>5)&31 (factor_layers v29 L269-273); "
                   "rows_i=P(U1|B=b_i) (posterior_rows v26 L236-237, "
@@ -605,12 +681,16 @@ def _build_manifest(*, stage: str, config: str, constructions: dict,
                    "rank": c1.get("rank"),
                    "sockets": c1.get("total_sockets"),
                    "parity": c1.get("parallel_edges")},
-            "m2": {"m": c2.get("m"),
-                   "four_cycles": c2.get("four_cycles"),
-                   "min_girth": c2.get("min_girth"),
-                   "rank": c2.get("rank"),
-                   "sockets": c2.get("total_sockets"),
-                   "parity": c2.get("parallel_edges")},
+            "m2": ({"m": c2.get("m"),
+                    "four_cycles": c2.get("four_cycles"),
+                    "min_girth": c2.get("min_girth"),
+                    "rank": c2.get("rank"),
+                    "sockets": c2.get("total_sockets"),
+                    "parity": c2.get("parallel_edges")}
+                   if c2 is not None else
+                   {"m": None,
+                    "note": ("NOT CONSTRUCTED (SCAN Stage-A-only config; "
+                             "m2 pairing deferred to the Stage B packet)")}),
             "lambda": {str(k): float(v)
                        for k, v in spec["lambda"].items()},
             "family": c1.get("family"),
@@ -626,7 +706,21 @@ def _build_manifest(*, stage: str, config: str, constructions: dict,
                      f"construct-twice-identical required; mismatch on "
                      f"gated fields halts STOP-BLOCKED; "
                      f"dense-check flag: avg check deg "
-                     f"{2048 // spec['m1']}/{2048 // spec['m2']})"),
+                     f"{2048 // spec['m1']}/{2048 // spec['m2']})"
+                     if c2 is not None else
+                     f"m1 (m={spec['m1']}): rank-full + "
+                     f"construct-twice-identical GATED; fc-measured-"
+                     f"{c1.get('four_cycles')}/girth-measured-"
+                     f"{c1.get('min_girth')}-recorded-not-gated "
+                     f"(amendment 2026-09-21 dense-check); m2 NOT "
+                     f"CONSTRUCTED (SCAN Stage-A-only config; pairing "
+                     f"deferred to the Stage B packet); "
+                     f"constructor seed {c1.get('construct_seed')}/"
+                     f"trials {c1.get('construct_trials')}; "
+                     f"construct-twice-identical required; mismatch on "
+                     f"gated fields halts STOP-BLOCKED; "
+                     f"dense-check flag: avg check deg "
+                     f"{2048 // spec['m1']}/-"),
         },
         "seeds": {
             "policy": "literal-frozen (L1B packet §2; NOT derived)",
@@ -810,17 +904,23 @@ def _construct_gate(config: str, construct_fn: Callable,
     construct-twice-identical GATED; min_girth RECORDED-not-gated
     (P0/R2 precedent). Mismatch on a GATED field halts STOP-BLOCKED;
     unknown config refuses (rc=2). No alternate seeds; no tuning.
+    SCAN Stage-A-only configs (C12A/C16A, rework memo v2 section 2):
+    the m1 leg ONLY is constructed (m2 is None — pairing deferred to
+    the Stage B packet); the m1 leg follows the same Amendment rule
+    (rank-full + twice-identical GATED; fc/girth RECORDED).
     ``construct_fn`` convention is ``(m, seed, max_trials)``, mirroring
     ``construct_code``.
     """
     if config not in CONFIGS:
-        refuse(f"unknown config {config} (frozen: C6|C8 only)")
+        refuse(f"unknown config {config} (frozen: C6|C8|C12A|C16A only)")
     if isinstance(seed, bool) or not isinstance(seed, int):
         refuse("construct seed must be an integer")
     if isinstance(trials, bool) or not isinstance(trials, int) or trials < 1:
         refuse("construct trials must be a positive int")
     out: dict[str, Any] = {}
-    for tag in ("m1", "m2"):
+    legs = (("m1",) if CONFIGS[config].get("stage_a_only")
+            else ("m1", "m2"))
+    for tag in legs:
         m = int(CONFIGS[config][tag])
         try:
             code_a = construct_fn(m, seed, trials)
@@ -889,7 +989,9 @@ def execute(*, root: str, stage: str, config: str,
     configs/stages. ``max_blocks`` is a PROBE-ONLY cap (timing
     integration; never a CLI flag, never part of any verdict).
     ``decode_fn`` convention is ``(constructions, seed)`` where
-    ``constructions`` = ``{"m1": code, "m2": code}`` from the gate.
+    ``constructions`` = ``{"m1": code, "m2": code}`` from the gate
+    (``{"m1": code}`` only for SCAN Stage-A-only configs, for which
+    Stage B refuses rc=2 pre-decode — m2 not constructed).
     Without an injected ``decode_fn``, ``bundle`` is required (no silent
     production bind — the CLI binds ``--gamma`` explicitly). Stage A
     decodes L1-only; Stage B decodes the combined chain. All writes stay
@@ -899,7 +1001,7 @@ def execute(*, root: str, stage: str, config: str,
     if stage not in STAGES:
         refuse(f"unknown stage {stage} (frozen: A|B only)")
     if config not in CONFIGS:
-        refuse(f"unknown config {config} (frozen: C6|C8 only)")
+        refuse(f"unknown config {config} (frozen: C6|C8|C12A|C16A only)")
     if de_label is not None and de_label not in DE_LABELS:
         refuse(f"unknown de-label {de_label} (frozen: covered|exploratory)")
     if isinstance(block_base, bool) or not isinstance(block_base, int):
@@ -917,7 +1019,14 @@ def execute(*, root: str, stage: str, config: str,
     bar = fail_bar(n_blocks)
     _check_root(root)
     m1 = int(CONFIGS[config]["m1"])
-    m2 = int(CONFIGS[config]["m2"])
+    if CONFIGS[config].get("stage_a_only"):
+        if stage != "A":
+            refuse(f"Stage B unavailable for Stage-A-only config {config} "
+                   f"(m2 not constructed; m2 pairing deferred to the "
+                   f"Stage B packet)")
+        m2 = None
+    else:
+        m2 = int(CONFIGS[config]["m2"])
     construct_fn = construct_fn or construct_code
     if decode_fn is None:
         if bundle is None:
@@ -1120,7 +1229,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.stage not in STAGES:
         refuse(f"unknown stage {args.stage} (frozen: A|B only)")
     if args.config not in CONFIGS:
-        refuse(f"unknown config {args.config} (frozen: C6|C8 only)")
+        refuse(f"unknown config {args.config} (frozen: C6|C8|C12A|C16A only)")
     if args.de_label and args.de_label not in DE_LABELS:
         refuse(f"unknown de-label {args.de_label} (frozen: covered|exploratory)")
     if args.resume_from and args.root and args.root != args.resume_from:

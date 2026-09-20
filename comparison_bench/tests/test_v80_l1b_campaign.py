@@ -866,3 +866,225 @@ def test_t11_de_label_threading():
         _run("/tmp/opencode/l1b_fake_delabel_bad", MemWriter(),
              FakeClock(), _decode_l1_ok, stage="A", config="C6",
              max_blocks=1, de_label="maybe")
+
+
+# T12: SCAN trade-scan L1 arms — C12A/C16A Stage-A-only (memo v2 §2). --
+def _fake_construct_scan_cfg(config):
+    # Stage-A-only mimic: m1 leg only (m2 is None — never constructed).
+    # Signature mirrors production construct_code(m, seed, max_trials).
+    spec = c.CONFIGS[config]
+    assert spec["m2"] is None and spec.get("stage_a_only") is True
+
+    def _build(m_in, seed, max_trials):
+        assert (seed, max_trials) == (2026092001, 20)
+        assert m_in == spec["m1"]
+        return {"four_cycles": 0, "min_girth": 8, "rank": m_in,
+                "family": "peg-irregular", "n": 1024, "m": m_in,
+                "triples": [(0, 0, 1), (1, 1, 2)],
+                "total_sockets": 2048, "parallel_edges": 0}
+
+    return _build
+
+
+def _run_scan(root, writer, clock, decode_fn, config, **kw):
+    return c.execute(root=root, stage="A", config=config,
+                     construct_fn=_fake_construct_scan_cfg(config),
+                     decode_fn=decode_fn, clock=clock,
+                     rss_fn=lambda: 0, writer=writer, **kw)
+
+
+@pytest.mark.parametrize("config,m1,l1_leak,f_l1", [
+    ("C12A", 12, 60.0, 2.2833),
+    ("C16A", 16, 80.0, 3.0444),
+])
+def test_t12_scan_config_table_and_accounting(config, m1, l1_leak, f_l1):
+    assert c.CONFIGS[config]["m1"] == m1
+    assert c.CONFIGS[config]["m2"] is None  # NOT constructed
+    assert c.CONFIGS[config].get("stage_a_only") is True
+    assert c.CONFIGS[config]["lambda"] == {2: 1.0}
+    assert c.CONFIGS[config]["l1_rate"] == pytest.approx(1.0 - m1 / 1024)
+    basis = c.leak_basis(config)
+    assert basis["m1"] == m1 and basis["m2"] is None
+    assert basis["m_total"] == 208  # frozen total-208 line carried
+    assert basis["leak_bits"] == 1104.0
+    assert basis["l1_leak_bits"] == l1_leak
+    assert basis["f_super_basis"] == pytest.approx(1.294947, abs=1e-6)
+    assert "BUDGET MAPPING" in basis["f_super_label"]
+    assert "DEFERRED" in basis["f_super_label"]
+    assert basis["f_L1_basis"] == pytest.approx(f_l1, abs=1e-3)
+    assert "INFORMATIONAL ONLY" in basis["f_L1_label"]
+    assert "never gated" in basis["f_L1_label"]
+    assert "deferred" in basis["blind_risk"]
+    # Paired block seeds work for the new configs.
+    assert c.block_seed(config, 0) == 2026095601
+    assert c.block_seed(config, 239) == 2026095840
+
+
+def test_t12_scan_unknown_config_still_refuses():
+    for bad in ("C7", "C9", "C12", "C16", "c12a", ""):
+        with pytest.raises(c.Refusal):
+            c.block_seed(bad, 0)
+        with pytest.raises(c.Refusal):
+            c.leak_basis(bad)
+    calls = []
+
+    def _counting(constructions, seed):
+        calls.append(seed)
+        return _decode_l1_ok(constructions, seed)
+
+    with pytest.raises(c.Refusal) as exc:
+        c.execute(root="/tmp/opencode/l1b_fake_scanbadcfg", stage="A",
+                  config="C12",
+                  construct_fn=_fake_construct_scan_cfg("C12A"),
+                  decode_fn=_counting, clock=FakeClock(),
+                  rss_fn=lambda: 0, writer=MemWriter(), max_blocks=1)
+    assert exc.value.code == 2
+    assert calls == []
+
+
+def test_t12_scan_gate_constructs_m1_only():
+    for config, m1 in (("C12A", 12), ("C16A", 16)):
+        seen = []
+        inner = _fake_construct_scan_cfg(config)
+
+        def _spy(m_in, seed, max_trials):
+            seen.append(m_in)
+            return inner(m_in, seed, max_trials)
+
+        cons = c._construct_gate(config, _spy, 2026092001, 20)
+        assert set(cons) == {"m1"}  # no m2 leg constructed
+        assert cons["m1"]["m"] == m1
+        assert cons["m1"]["rank"] == m1  # rank-full gated
+        assert cons["m1"]["construct_seed"] == 2026092001
+        assert cons["m1"]["construct_trials"] == 20
+        assert seen == [m1, m1]  # construct-twice on the m1 leg only
+
+
+def test_t12_scan_pin_gating_rank_twice_stop_blocked(capsys):
+    # Rank/twice mismatch on the m1 leg STOP-BLOCKED pre-decode; dense
+    # fc/girth covariates (dry 2026-09-21: m12 fc7767/g4, m16 fc4177/g4)
+    # are RECORDED-not-gated per the Amendment.
+    def _dense(m_in, seed, max_trials):
+        assert (seed, max_trials) == (2026092001, 20)
+        fc = {12: 7767, 16: 4177}[m_in]
+        return {"four_cycles": fc, "min_girth": 4, "rank": m_in,
+                "family": "peg-irregular", "n": 1024, "m": m_in,
+                "triples": [(0, 0, 1)],
+                "total_sockets": 2048, "parallel_edges": 0}
+
+    cons = c._construct_gate("C16A", _dense, 2026092001, 20)
+    assert set(cons) == {"m1"}
+    assert cons["m1"]["four_cycles"] == 4177  # recorded covariate
+    assert cons["m1"]["min_girth"] == 4
+
+    def _bad_rank(m_in, seed, max_trials):
+        return {"four_cycles": 0, "min_girth": 8, "rank": m_in - 1,
+                "family": "peg-irregular", "n": 1024, "m": m_in,
+                "triples": [(0, 0, 1)]}
+
+    calls = []
+
+    def _counting(constructions, seed):
+        calls.append(seed)
+        return _decode_l1_ok(constructions, seed)
+
+    with pytest.raises(c.Refusal) as exc:
+        c.execute(root="/tmp/opencode/l1b_fake_scanpinbad", stage="A",
+                  config="C12A", construct_fn=_bad_rank,
+                  decode_fn=_counting, clock=FakeClock(),
+                  rss_fn=lambda: 0, writer=MemWriter(), max_blocks=1)
+    assert exc.value.code == 2
+    assert "STOP-BLOCKED" in capsys.readouterr().err
+    assert calls == []  # fail closed pre-decode
+
+
+@pytest.mark.parametrize("m,fc", [(12, 7767), (16, 4177)])
+def test_t12_scan_dry_construct_pins_real(m, fc):
+    # Dry construction via the REAL constructor (allowed, in-memory, no
+    # writes, no decodes): rank-full + twice-identical gated; fc/girth
+    # recorded (dense-check regime per memo v2 §1).
+    a = c.construct_code(m, 2026092001, 20)
+    b = c.construct_code(m, 2026092001, 20)
+    sa = sorted(tuple(map(int, t)) for t in a["triples"])
+    sb = sorted(tuple(map(int, t)) for t in b["triples"])
+    assert sa == sb  # construct-twice-identical holds
+    assert a["rank"] == m
+    assert a["four_cycles"] == fc
+    assert a["min_girth"] == 4
+    # The REAL measured pins through the REAL gate ACCEPT (Amendment).
+    gated = c._construct_gate("C12A" if m == 12 else "C16A",
+                              c.construct_code, 2026092001, 20)
+    assert set(gated) == {"m1"}
+    assert gated["m1"]["four_cycles"] == fc
+
+
+def test_t12_scan_stage_a_execute_probe_manifest():
+    w, clk = MemWriter(), FakeClock()
+    root = "/tmp/opencode/l1b_fake_scanA_c16a"
+    seen = []
+
+    def _rec(constructions, seed):
+        assert set(constructions) == {"m1"}
+        seen.append(seed)
+        return _decode_l1_ok(constructions, seed)
+
+    mf = c.execute(root=root, stage="A", config="C16A",
+                   construct_fn=_fake_construct_scan_cfg("C16A"),
+                   decode_fn=_rec, clock=clk,
+                   rss_fn=lambda: 0, writer=w, max_blocks=1)
+    assert mf["campaign"] == "L1B"
+    assert mf["stage"] == "A"
+    assert mf["config"] == "C16A"
+    assert mf["verdict"] == "PROBE-truncated"
+    assert mf["n_blocks"] == 240
+    assert mf["fail_bar"] == 12
+    assert seen == [2026095601]
+    mani = json.loads(w.store[f"{root}/manifest.json"])
+    assert mani["construct"]["m1"]["m"] == 16
+    assert mani["construct"]["m2"]["m"] is None
+    assert "NOT CONSTRUCTED" in mani["construct"]["m2"]["note"]
+    assert "NOT CONSTRUCTED" in mani["construct"]["pins"]
+    assert "STOP-BLOCKED" in mani["construct"]["pins"]
+    assert mani["leak_bits"] == 1104.0
+    assert mf["f_super"] == pytest.approx(1.294947, abs=1e-6)
+    assert mani["de_cover"]["label"] == "exploratory"
+    rows = json.loads(w.store[f"{root}/rows.json"])
+    assert rows[0]["seed"] == 2026095601
+    assert rows[0]["l2_exact"] is None  # Stage A: L1-only
+
+
+def test_t12_scan_stage_b_refuses_zero_decodes():
+    calls = []
+
+    def _counting(constructions, seed):
+        calls.append(seed)
+        return _decode_combined_ok(constructions, seed)
+
+    for config in ("C12A", "C16A"):
+        with pytest.raises(c.Refusal) as exc:
+            c.execute(root=f"/tmp/opencode/l1b_fake_scanB_{config.lower()}",
+                      stage="B", config=config,
+                      construct_fn=_fake_construct_scan_cfg(config),
+                      decode_fn=_counting, clock=FakeClock(),
+                      rss_fn=lambda: 0, writer=MemWriter(), max_blocks=1)
+        assert exc.value.code == 2
+        # CLI path refuses identically (dual-flag + stage/config gate).
+        with pytest.raises(c.Refusal):
+            c.main(["--execute-real", "--execution-authorized",
+                    "--stage", "B", "--config", config,
+                    "--root", "workspace/l1b_deadbeef"])
+    assert calls == []
+
+
+def test_t12_scan_n240_bar12_early_stop():
+    w, clk = MemWriter(), FakeClock()
+    mf = c.execute(root="/tmp/opencode/l1b_fake_scan_early240", stage="A",
+                   config="C12A",
+                   construct_fn=_fake_construct_scan_cfg("C12A"),
+                   decode_fn=_decode_l1_fail, clock=clk,
+                   rss_fn=lambda: 0, writer=w)
+    assert mf["verdict"] == "FAIL-early-stop"
+    assert mf["blocks_completed"] == 13
+    assert mf["failures"] == 13
+    assert mf["n_blocks"] == 240
+    assert mf["fail_bar"] == 12

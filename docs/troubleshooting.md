@@ -586,3 +586,9 @@ len(plan)==granted scope.
 **Fix**: relaunch with `setsid nohup <cmd> >log 2>&1 < /dev/null &` then verify with `ps`.
 
 **Prevention**: for long detached runs use setsid + explicit liveness check; if relaunched clean with no output contamination there is no science impact.
+
+### L1 per-decode overrun + ledger shortfall on budget FAIL (C8 pattern)
+**Observed**: block-84 per-decode 1120.7 s > 300 s cap with ledger 84 vs 85 (ledger_ok False), wall 2521.8 s; partial FER 0.071 RAW.
+**Root cause**: decoder instability (max-iter exhaustion path), not a schedulable tail; budget stop leaves ledger short by design.
+**Fix**: retain RAW as FAIL(budget), never promote partial FER; record overrun block idx + wall + ledger mismatch.
+**Prevention**: Pre-EXECUTE must state per-decode cap + ledger_ok gate; batch-end review must check overrun block before any Stage B.

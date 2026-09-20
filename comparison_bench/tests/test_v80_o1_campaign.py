@@ -1136,3 +1136,165 @@ def test_t24_p0_root_prefix_and_de_precheck_refusal():
             c.run_de_precheck(root="workspace/p0_deadbeef", arm=arm,
                               bundle=_fake_bundle(), de_fn=_fake_de_ok,
                               file_writer=lambda p, b: None)
+
+
+# T25: SCAN trade-scan L2 arms — A192/A196 P0-style (rework memo v2 §2).
+SCAN_CASES = (("A192", 192, 0.8125, 1024.0, 1.2011),
+              ("A196", 196, 0.80859375, 1044.0, 1.2246))
+
+
+def _fake_construct_scan(arm, m):
+    def _build(arm_in, seed, max_trials):
+        assert (arm_in, seed, max_trials) == (arm, 2026092001, 20)
+        return {"four_cycles": 0, "min_girth": 8, "rank": m,
+                "family": "peg-irregular", "n": 1024, "m": m,
+                "triples": [(0, 0, 1), (1, 1, 2)],
+                "total_sockets": 2048, "parallel_edges": 0}
+
+    return _build
+
+
+@pytest.mark.parametrize("arm,m,rate,leak,f_super", SCAN_CASES)
+def test_t25_scan_arm_table_and_accounting(arm, m, rate, leak, f_super):
+    assert arm in c.P0_ARMS  # P0-style mechanics/label (memo v2 §2)
+    assert c.ARMS[arm]["m"] == m
+    assert c.ARMS[arm]["four_cycles"] == 0
+    assert c.ARMS[arm]["rank"] == m
+    assert c.ARMS[arm]["lambda"] == {2: 1.0}
+    assert c.ARMS[arm]["rate"] == pytest.approx(rate)
+    assert c.ARMS[arm]["leak_bits"] == m * 5 + 64 == leak
+    basis = c.leak_basis(arm)
+    assert basis["m"] == m
+    assert basis["leak_bits"] == leak
+    assert basis["f_super_basis"] == pytest.approx(f_super, abs=1e-4)
+    assert basis["f_super_basis"] <= c.F_SUPER_MAX
+    assert "BUDGET MAPPING" in basis["f_super_label"]
+    assert "INFORMATIONAL ONLY" in basis["f_L2_label"]
+    assert "1.3 bar" in basis["blind_risk"]
+
+
+@pytest.mark.parametrize("arm,m,girth", [("A192", 192, 8),
+                                         ("A196", 196, 6)])
+def test_t25_scan_gate_binds_real_construct_arm(arm, m, girth):
+    # Production binding via the same gate path execute() uses (dry
+    # construction, allowed): fc==0 + rank-full + twice-identical gated,
+    # girth recorded as-measured (dry 2026-09-21: A192 girth 8, A196
+    # girth 6).
+    seen = []
+
+    def _spy(arm_in, seed, max_trials):
+        seen.append((arm_in, seed, max_trials))
+        return c.construct_arm(arm_in, seed, max_trials)
+
+    code = c._construct_gate(arm, _spy)
+    assert seen[0] == (arm, 2026092001, 20)
+    assert code["four_cycles"] == 0
+    assert code["min_girth"] == girth
+    assert code["rank"] == m
+    assert code["construct_seed"] == 2026092001
+    assert code["construct_trials"] == 20
+
+
+def test_t25_scan_girth_recorded_not_gated(capsys):
+    # Girth mismatch does NOT gate SCAN (P0 rule); fc/rank mismatch
+    # still STOP-BLOCKED pre-decode.
+    def _g4(arm_in, seed, max_trials):
+        assert (arm_in, seed, max_trials) == ("A196", 2026092001, 20)
+        return {"four_cycles": 0, "min_girth": 4, "rank": 196,
+                "family": "peg-irregular"}
+
+    code = c._construct_gate("A196", _g4, 2026092001, 20)
+    assert code["min_girth"] == 4
+    for pin, rec in (("fc", {"four_cycles": 1, "min_girth": 8,
+                             "rank": 192}),
+                     ("rank", {"four_cycles": 0, "min_girth": 8,
+                               "rank": 191})):
+        def _bad(arm_in, seed, max_trials, _rec=dict(rec)):
+            assert (arm_in, seed, max_trials) == ("A192", 2026092001, 20)
+            return {"four_cycles": _rec["four_cycles"],
+                    "min_girth": _rec["min_girth"], "rank": _rec["rank"],
+                    "family": "peg-irregular"}
+
+        with pytest.raises(c.Refusal) as exc:
+            c._construct_gate("A192", _bad, 2026092001, 20)
+        assert exc.value.code == 2
+        assert "STOP-BLOCKED" in capsys.readouterr().err
+
+
+def test_t25_unknown_arm_still_refuses():
+    for bad in ("A190", "A194", "A206", "A209", "a192", ""):
+        with pytest.raises(c.Refusal):
+            c.block_seed(bad, 0)
+        with pytest.raises(c.Refusal):
+            c.leak_basis(bad)
+    calls = []
+
+    def _counting(construction, seed):
+        calls.append(seed)
+        return _decode_ok(construction, seed)
+
+    with pytest.raises(c.Refusal) as exc:
+        c.execute(root="/tmp/opencode/scan_fake_badarm", arm="A190",
+                  construct_fn=_fake_construct_scan("A192", 192),
+                  decode_fn=_counting, clock=FakeClock(),
+                  rss_fn=lambda: 0, writer=MemWriter(), max_blocks=1)
+    assert exc.value.code == 2
+    assert calls == []
+
+
+def test_t25_scan_manifest_label_paired_base_and_bar12():
+    w, clk = MemWriter(), FakeClock()
+    root = "/tmp/opencode/scan_fake_manifest"
+    seen = []
+
+    def _rec(construction, seed):
+        seen.append(seed)
+        return _decode_ok(construction, seed)
+
+    mf = c.execute(root=root, arm="A192",
+                   construct_fn=_fake_construct_scan("A192", 192),
+                   decode_fn=_rec, clock=clk,
+                   rss_fn=lambda: 0, writer=w,
+                   block_base=2026095601, n_blocks=240,
+                   construct_seed=2026092001, construct_trials=20,
+                   max_blocks=2)
+    assert mf["campaign"] == "P0"  # P0-style label reused (memo v2 §2)
+    assert mf["n_blocks"] == 240
+    assert mf["fail_bar"] == 12
+    assert mf["pass_bar"] == "block FER<=5% (fails/240<=12)"
+    assert seen == [2026095601, 2026095602]
+    mani = json.loads(w.store[f"{root}/manifest.json"])
+    assert mani["seeds"]["block_base"] == 2026095601
+    assert mani["construct"]["m"] == 192
+    assert mani["leak_bits"] == 1024.0
+    assert mf["f_super"] == pytest.approx(1.2011, abs=1e-4)
+    assert "recorded-not-gated" in mani["construct"]["pins"]
+    assert "STOP-BLOCKED" in mani["construct"]["pins"]
+    assert "NO independence claim" in mani["replication"]["paired_note"]
+    assert mani["de_cover"]["label"] == "exploratory"
+    rows = json.loads(w.store[f"{root}/rows.json"])
+    assert rows[0]["seed"] == 2026095601
+
+
+def test_t25_scan_n240_early_stop_thirteenth_fail():
+    w, clk = MemWriter(), FakeClock()
+    mf = c.execute(root="/tmp/opencode/scan_fake_early240", arm="A196",
+                   construct_fn=_fake_construct_scan("A196", 196),
+                   decode_fn=_decode_fail, clock=clk,
+                   rss_fn=lambda: 0, writer=w,
+                   block_base=2026095601, n_blocks=240,
+                   construct_seed=2026092001, construct_trials=20)
+    assert mf["verdict"] == "FAIL-early-stop"
+    assert mf["blocks_completed"] == 13
+    assert mf["failures"] == 13
+    assert mf["campaign"] == "P0"
+    assert mf["fail_bar"] == 12
+
+
+def test_t25_scan_de_precheck_refusal():
+    # The precheck path is A208-only — SCAN refuses like P0.
+    for arm in ("A192", "A196"):
+        with pytest.raises(c.Refusal):
+            c.run_de_precheck(root="workspace/p0_deadbeef", arm=arm,
+                              bundle=_fake_bundle(), de_fn=_fake_de_ok,
+                              file_writer=lambda p, b: None)

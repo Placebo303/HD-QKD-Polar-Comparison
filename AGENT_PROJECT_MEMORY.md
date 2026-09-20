@@ -4130,3 +4130,11 @@ R22 PREDICTOR-DEAD (2026-09-18): best lost-free abort rule saves 480–800 bits 
 - Review [repo-observed]: batch-end review PASS_WITH_FINDINGS, no blocker: P0BR-01 A200 wall 930s > 900s estimate, interior; P0BR-02 wall-vs-manifest elapsed ~1% delta.
 - Boundary [decision]: §7 rule honored: no auto-proceed; A202 PASS ⇒ L1 MAY proceed at m₂≤202; A200 PASS ⇒ m₁=8 option viable (m₂=200). L1 build remains main-thread decision.
 - Constraint [decision]: combined constraint from L1 memo: m₁+m₂≤208; L1 m₁≥6 capacity floor.
+
+## 2026-09-21 L1B Stage A dense-check L1 FAIL closed + PASS_WITH_FINDINGS batch-end review (no Stage B)
+
+- Evidence [repo-observed]: Stage A dense-check L1, L1-only, n=1024 lam={2:1}, seeds 2026095601+idx: C6 (m1=6) FAIL-early-stop 13/27 fails FER 0.481; C8 (m1=8) FAIL(budget) partial 84 blocks 6 fails FER 0.071 RAW (not a pass), block-84 per-decode 1120.7 s > 300 s cap, ledger 84 vs 85 ledger_ok False, wall 2521.8 s.
+- Review [repo-observed]: batch-end review PASS_WITH_FINDINGS L1AR-1..8, no blockers; Stage B correctly not run.
+- Falsification [decision]: dense-SPA hypothesis falsified at m1=6/8; prior option-(a) amendment (m1 fc/girth recorded-not-gated) was correct process-wise but empirically failed.
+- Lifecycle [decision]: `L1B_STAGE_A_FAIL_CLOSED_AWAITING_MAIN_ROUTE_DECISION`; evidence-only, no route acceptance/promotion; no Stage B; no rerun.
+- Next [decision]: rework memo v2 issued, pending main-thread acceptance; Stage B only at a split where both legs pass. Claim ceiling stays synthetic L1-only genie-u1.

@@ -4620,3 +4620,16 @@ crossed its finite-length operating region.
 - run extra m points (rejected — no decision value, packet restricted arms)
 
 **Consequences**: L1 build planning may proceed (main-thread decision); blind-surcharge budgeting still queued; no S3; no qualification; claim ceiling unchanged (genie-u1, synthetic, single-code semantics, D_blind=0).
+
+### 2026-09-21: Close L1B Stage A dense-check L1 as FAIL (no Stage B)
+
+**Decision**: record C6 FAIL-early-stop and C8 FAIL(budget, partial) with review PASS_WITH_FINDINGS; close Stage A evidence-only; Stage B not run; dense-SPA at m1=6/8 falsified.
+
+**Context**: n=1024 lam={2:1} L1-only; C8 RAW FER 0.071 is not a pass (84/85 blocks, ledger_ok False, 1120.7 s overrun instability, wall 2521.8 s); L1AR-1..8 no blockers.
+
+**Alternatives considered**:
+- Promote C8 partial as pass: rejected — budget FAIL + ledger mismatch + overrun.
+- Run Stage B now: rejected — no passing split.
+- Re-run/tune m1=6/8 now: rejected — no-rerun; hypothesis falsified.
+
+**Consequences**: route decision deferred to main thread on rework memo v2 (trade scan L2@192+L1@16 primary / L2@196+L1@12 optional; splits 196+12 and 192+16 both leak 1104 f~1.29495; b2a fallback / b2c new family / b2b rejected / b2d background — all pending acceptance, not decided here). No S3/qualification/real-data claim.

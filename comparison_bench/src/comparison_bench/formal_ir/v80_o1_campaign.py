@@ -64,6 +64,17 @@ A202 fc0/girth8/rank202, A200 fc0/girth8/rank200); ``block_base``
 2026095601 (paired O1R reuse, no independence claim) / ``n_blocks``
 240 (bar 12); ``campaign`` label 'P0'; ``--de-label`` defaults
 exploratory (no DE run; precheck path is A208-only and refuses P0).
+
+SCAN trade-scan L2 arms (rework memo v2 2026-09-21 §2, same module,
+P0-style mechanics): new ARMS ``A192`` (m=192, leak 1024,
+f_super≈1.201124) + ``A196`` (m=196, leak 1044, f_super≈1.224585),
+λ={2:1}, seed 2026092001, trials 20; pin policy per P0 arms
+(fc==0 + rank-full + twice-identical GATED, girth RECORDED-not-gated;
+dry pins 2026-09-21: A192 fc0/girth8/rank192, A196 fc0/girth6/rank196);
+``block_base`` 2026095601 / ``n_blocks`` 240 (bar 12); ``campaign``
+label 'P0' reused (minimal consistent; SCAN identity carried by the
+arm id + preexec record, not a new label); ``--de-label`` defaults
+exploratory (precheck path is A208-only and refuses SCAN arms).
 """
 
 from __future__ import annotations
@@ -126,17 +137,20 @@ O1R_R2_SEED = 2026092011
 O1R_ROOT_PREFIX = "workspace/o1r_"
 #: Fresh additive P0 run-root prefix (P0 packet §6: workspace/p0_<uuid8>).
 P0_ROOT_PREFIX = "workspace/p0_"
-#: P0 pre-arm arms (P0 packet §1/§5): L2-only budget points sharing the
-#: O1R paired block base (2026095601) and the O1 construction seed
-#: (2026092001); girth RECORDED-not-gated (O1R R2-amendment precedent).
-P0_ARMS = ("A202", "A200")
+#: P0 pre-arm arms (P0 packet §1/§5) + SCAN trade-scan L2 arms (rework
+#: memo v2 §2): L2-only budget points sharing the O1R paired block base
+#: (2026095601) and the O1 construction seed (2026092001); girth
+#: RECORDED-not-gated (O1R R2-amendment precedent).
+P0_ARMS = ("A202", "A200", "A192", "A196")
 #: Frozen per-arm constructor/accounting table (packet §2/§6; P0 packet
 #: §1/§5 for A202/A200). Pins are the hard gate (STOP-BLOCKED) except
 #: girth on R2/P0 arms (recorded-not-gated); sockets/parity are recorded
 #: pins from the scoping dry run (sockets 2048, parity 0 both O1 arms).
 #: P0 pins dry-measured 2026-09-20 (seed 2026092001, trials 20, n=1024):
 #: A202 fc=0/girth=8/rank=202 + twice-identical; A200 fc=0/girth=8/
-#: rank=200 + twice-identical.
+#: rank=200 + twice-identical. SCAN pins dry-measured 2026-09-21 (same
+#: seed/trials/n): A192 fc=0/girth=8/rank=192 + twice-identical; A196
+#: fc=0/girth=6/rank=196 + twice-identical (girth recorded-not-gated).
 ARMS: dict[str, dict[str, Any]] = {
     "A188": {"m": 188, "four_cycles": 0, "min_girth": 8, "rank": 188,
              "lambda": {2: 1.0}, "rate": 1.0 - 188 / 1024,
@@ -152,6 +166,14 @@ ARMS: dict[str, dict[str, Any]] = {
              "lambda": {2: 1.0}, "rate": 1.0 - 200 / 1024,
              "leak_bits": 200 * 5 + 64,
              "role": "P0 SECONDARY (m1=8 budget point)"},
+    "A192": {"m": 192, "four_cycles": 0, "min_girth": 8, "rank": 192,
+             "lambda": {2: 1.0}, "rate": 1.0 - 192 / 1024,
+             "leak_bits": 192 * 5 + 64,
+             "role": "SCAN L2 (m1=16 budget point; total-208 line)"},
+    "A196": {"m": 196, "four_cycles": 0, "min_girth": 8, "rank": 196,
+             "lambda": {2: 1.0}, "rate": 1.0 - 196 / 1024,
+             "leak_bits": 196 * 5 + 64,
+             "role": "SCAN L2 (m1=12 budget point; total-208 line)"},
 }
 #: Frozen single-code length (packet §1): n=1024 symbols/block.
 O1_N = 1024
@@ -213,7 +235,7 @@ def block_seed(arm: str, idx: int, base: int | None = None) -> int:
     Unknown arm refuses (fail closed, rc=2).
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200|A192|A196 only)")
     b = O1_BLOCK_BASE if base is None else base
     if isinstance(b, bool) or not isinstance(b, int):
         refuse("block base must be an integer literal")
@@ -279,7 +301,7 @@ def construct_arm(arm: str, seed: int = O1_CONSTRUCT_SEED,
     n=1024/m per arm. No re-seed; no tuning. Pure in-memory; no disk writes.
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200|A192|A196 only)")
     m = int(ARMS[arm]["m"])
     field = GF2mField.create(s2.Q)
     lam = {int(k): float(v) for k, v in ARMS[arm]["lambda"].items()}
@@ -385,10 +407,11 @@ def leak_basis(arm: str) -> dict[str, Any]:
     A188: 1004/852.544≈1.177652 (headroom ~104.3 b). A208:
     1104/852.544≈1.294947 (headroom ~4.3 b — TIGHT). P0: A202
     1074/852.544≈1.259759 (headroom ~34.3 b); A200 1064/852.544≈1.248029
-    (headroom ~44.3 b).
+    (headroom ~44.3 b). SCAN: A192 1024/852.544≈1.201124 (headroom
+    ~84.3 b); A196 1044/852.544≈1.224585 (headroom ~64.3 b).
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200|A192|A196 only)")
     m = int(ARMS[arm]["m"])
     leak = float(m * 5 + 64)
     f_super = leak / CONTENT_BITS
@@ -399,6 +422,12 @@ def leak_basis(arm: str) -> dict[str, Any]:
                         "(P0 packet §4).") if arm == "A202"
                   else ("A200 headroom ~44.3 b to the 1.3 bar "
                         "(P0 packet §4).") if arm == "A200"
+                  else ("A192 headroom ~84.3 b to the 1.3 bar "
+                        "(SCAN trade-scan, rework memo v2 §2).")
+                  if arm == "A192"
+                  else ("A196 headroom ~64.3 b to the 1.3 bar "
+                        "(SCAN trade-scan, rework memo v2 §2).")
+                  if arm == "A196"
                   else ("A188 headroom ~104.3 b to the 1.3 bar "
                         "(O1 packet §6)."))
     return {
@@ -491,10 +520,11 @@ def _de_cover_record(arm: str, de_label: str | None) -> dict[str, Any]:
     note = ("A188 rate 0.81640625 is S1-identical "
             "(rho byte-identical {10:0.098,11:0.902}); NO new DE arm needed "
             "(O1 packet §2/scoping §3).") if arm == "A188" else (
-        "A202/A200 rates 0.802734375/0.8046875 are new (no S1 cover); "
-        "P0 runs NO new DE — default 'exploratory' carried "
-        "(run_de_precheck is A208-only and refuses P0 arms; gates "
-        "unchanged; P0 packet §5/D4).") if arm in P0_ARMS else (
+        "A202/A200/A192/A196 rates "
+        "0.802734375/0.8046875/0.8125/0.80859375 are new (no S1 cover); "
+        "P0/SCAN runs NO new DE — default 'exploratory' carried "
+        "(run_de_precheck is A208-only and refuses P0/SCAN arms; gates "
+        "unchanged; P0 packet §5/D4, SCAN rework memo v2 §2).") if arm in P0_ARMS else (
         "A208 rho differs ({9:0.141,10:0.859}); A208-DE pre-check decides "
         "the cover label (O1 packet §3). Campaign proceeds regardless: "
         "pass → DE-covered secondary; fail/marginal → exploratory WITHOUT "
@@ -767,6 +797,8 @@ def _construct_gate(arm: str, construct_fn: Callable,
     (A202/A200, any seed) follow the R2 rule: fc==0 + rank-full +
     construct-twice-identical GATED, girth RECORDED-not-gated
     (P0 packet §5/D3; dry pins 2026-09-20: A202 girth 8, A200 girth 8).
+    SCAN arms (A192/A196, any seed) follow the same P0 rule
+    (rework memo v2 §2; dry pins 2026-09-21: A192 girth 8, A196 girth 6).
     Any other seed follows the strict R1 rule. Construct-twice-identical
     required on all seeds; mismatch on a GATED field halts STOP-BLOCKED;
     unknown arm refuses (rc=2). No alternate seeds; no tuning.
@@ -774,7 +806,7 @@ def _construct_gate(arm: str, construct_fn: Callable,
     ``construct_arm``.
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200|A192|A196 only)")
     if isinstance(seed, bool) or not isinstance(seed, int):
         refuse("construct seed must be an integer")
     if isinstance(trials, bool) or not isinstance(trials, int) or trials < 1:
@@ -851,7 +883,7 @@ def execute(*, root: str, arm: str,
     (``de_label`` defaults 'exploratory' if absent).
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200|A192|A196 only)")
     if de_label is not None and de_label not in DE_LABELS:
         refuse(f"unknown de-label {de_label} (frozen: covered|exploratory)")
     if isinstance(block_base, bool) or not isinstance(block_base, int):
@@ -1134,7 +1166,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.execution_authorized:
         refuse("refusing: --execution-authorized missing (rc2 pre-anything)")
     if args.arm not in ARMS:
-        refuse(f"unknown arm {args.arm} (frozen: A188|A208|A202|A200 only)")
+        refuse(f"unknown arm {args.arm} (frozen: A188|A208|A202|A200|A192|A196 only)")
     if args.de_label and args.de_label not in DE_LABELS:
         refuse(f"unknown de-label {args.de_label} (frozen: covered|exploratory)")
     if args.resume_from and args.root and args.root != args.resume_from:
