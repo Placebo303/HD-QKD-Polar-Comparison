@@ -153,7 +153,198 @@ n=1024 GF(32) λ={2:1} m=208，F208 **0/240 PASS**，\(f_{super}=1.294947\le1.3\
 
 ### 5.4 本次核对的 Does-not-establish
 
+
 - 只核了存在性、元数据、摘要与可读到的正文片段；**未核 Müller 2025 的任何数字**（无全文）。
 - Scarinzi 的参考文献 [13] 在 SciVerse 无 relations 数据（`REFERENCES` 返回 0），其所用 rateless 码族是否
   即 Tarable 2024 **未正式确认**（仅由"块长为 1800 的倍数 + rateless protograph"推断，标注为未核实推断）。
 - 未做任何 decode / 真实数据读取；不改变任何冻结口径；不授权 S2/S3。
+
+---
+
+## 6. 定向补充检索：新发现的高价值文献（2026-09-21，追加）
+
+手段：SciVerse（`semantic_search`+`read_content`，按**仓库缺口**检索而非泛查 LDPC）+ 网页检索。
+只读；无解码、无真实数据读取、不授权任何 arm。
+
+### 6.1 新发现（按对我方价值排序）
+
+| # | 文献 | 标识符 | 核到的原文/结论 | 对仓库的价值 | 处置 |
+|---|---|---|---|---|---|
+| 1 | **Kanitschar & Huber, *Composable finite-size security of HD-QKD protocols*** | `10.1103/v51y-vkfr`（PRApplied 2025）；arXiv `2505.03874`，CC-BY | 逐字："the leakage in the information reconciliation phase $\text{leak}_{IR}$ … is the sum of the error-correction leakage $\text{leak}_{EC}$ **and the length of the hash used for error-verification $\log_2(2/\epsilon_{EV})$**"；并声明安全分析 **不依赖噪声模型**（各向同性模型仅用于绘图） | **直接背书我们冻结口径**：$f_{super}$ 分子里的 **+64-bit tag 就是 $\log_2(2/\epsilon_{EV})$，即 $\epsilon_{EV}\approx2^{-63}$**；且其 variable-length 论证对应我们"只算 accepted 帧"的会计 | **P2 → P0（会计/claim 层）**：这是比 Müller 2025 更硬、且可全文引用的依据 |
+| 2 | **Trushechkin, Kiktenko, Fedorov, PRA 96, 022316 (2017)** | `10.1103/physreva.96.022316`；arXiv `1702.08531`，OA | $\varepsilon_{qkd}=\varepsilon_{ver}+\varepsilon_{aut}+\varepsilon_{pa}+\varepsilon_{decoy}$，其中 $\varepsilon_{ver}$ = "verification hash tags coincide **whereas their keys after IR do not**" | 这正是仓库 `undetected_accepted_wrong` 门与"undetected 隔离、永不并入 success"的**已发表同构定义** | 引用纪律背书；写入 claim/验收口径 |
+| 3 | **Zhang et al., *High-speed IR with syndrome-based early termination for CV-QKD*, Opt. Express 2023** | 命中全文 chunk | "when the value of IR efficiency is high, the reconciliation **FER tends to 1**, and thus the SKR tends to 0 **since the erroneous frames are discarded**"；另给出 Raptor-like 码**只需算最高码率分段的 syndrome 即可判定成功** | 与我们 `net = A·5n − leak` / 效率–FER 悬崖（m=208 vs 202）同一机制；第二条可省验证算力 | 中-高；作为"效率不能脱离 FER"的外部同构表述 |
+| 4 | **Elkouss / Martinez-Mateo / Martin, *Blind reconciliation***（短块 LDPC） | arXiv 2013（SciVerse 命中全文） | 明确以 $n=2\times10^{3}$ 短 LDPC 码做 blind 协调，目标就是硬件高吞吐 | 我们超帧 = 1024 GF(32) 符号 = **5120 bits**，这是**块长量级上最接近的公开锚点** | 中；作为短块可行性的存在性旁证 |
+| 5 | **Heo, Lee, Park, *Improved reconciliation with polar codes in QKD*, 2018** | arXiv（有全文） | 2048/4096 小块 polar + virtual-string CRC 预编码；称 2048 polar 优于同长 LDPC | 我们的块长区间里 **LDPC 并不天然占优**的对照证据 | 中；若 Polar 臂重启则必读 |
+| 6 | **Gümüş et al., rate-adaptive reconciliation for CV-QKD over turbulent FSO（含实验验证）** | arXiv 2024/2025，Optica 系 | 信道波动下速率自适应 + $d$ 维协调，实验 SKR 增益最高 165% | 说明"随信道波动自适应"在 CV/FSO 已实验落地 ⇒ **我们缺的不是自适应机制，而是 HD/ToA + 经验 $P$ 的组合** | 中；作为背景，不改路线 |
+
+### 6.2 负结果（同样重要）
+
+- 定向检索「真实 **HD** QKD + 实测 FER + 泄漏 + 吞吐」：返回仍只有 **Müller 2024（仿真 + 有限 q=4）**
+  与 CV-QKD 综述/实验。**没有**任何一篇同时覆盖高维真实数据 + FER + 实际泄漏 + 吞吐 + finite-key 净密钥
+  ⇒ **用户/仓库关于"文献空白"的判断，在本轮检索后依然成立**（这是可被外部证据支持的贡献定位）。
+
+### 6.3 Müller 2025：新事实 + 需要手动下载
+
+- **存在 arXiv 预印本**：`arXiv:2408.15758`（2024-08，CC-BY，同作者同题），
+  以及 DTU Orbit 的**免费正式版 PDF**。SciVerse 对该预印本同样 `is_content_accessible=false`（无 `doc_id`）。
+- **Wiley `pdfdirect` 直链返回 403**；`web_fetch` 直接抓 arXiv PDF 只拿到二进制（无法解析成文本）。
+  ⇒ 走 SciVerse/网页自动提取的路已穷尽。
+- 从 PDF 目录结构确认**我们要的两节确实存在**：§3.1 "Latency and the **number of exchanged messages**"、
+  §3.3 "**Frame error rate and verification cost**"、§3.4 "Performance on live system"。
+- ⚠️ 其引用键中可见 `mao2021high`——即 **2025 年被撤稿**的那篇 570 Mbps 论文（参见 §5.1 末行）。
+  推论（未逐条核对参考文献表）：其吞吐对照可能建立在已撤稿来源上 ⇒ **引用其吞吐数字要额外谨慎**。
+
+**需要用户手动下载（任选其一，PDF 落到本地后我可精读提取）**：
+1. arXiv 预印本：`https://arxiv.org/abs/2408.15758` （PDF：`https://arxiv.org/pdf/2408.15758v1`）
+2. DTU Orbit 正式版 PDF：`https://backend.orbit.dtu.dk/ws/portalfiles/portal/410548179/IET_Quantum_Communication_-_2025_-_Mueller_-_Performance_of_Cascade_and_LDPC_Codes_for_Information_Reconciliation_on.pdf`
+
+### 6.4 对 §3 落地顺序的修订（追加，不覆盖）
+
+- **新增最高优先动作（零成本、纯引用）**：把 #1（Kanitschar 的 $\text{leak}_{IR}=\text{leak}_{EC}+\log_2(2/\epsilon_{EV})$）
+  与 #2（Trushechkin 的 $\varepsilon_{ver}$ 定义）写进 S3/claim 的会计说明，**用于替掉"为什么分子里要有 64-bit tag"的自证**，
+  并把我们的 tag 口径翻译成 $\epsilon_{EV}\approx2^{-63}$ 便于与文献对齐。**不改任何冻结公式**。
+- 其余顺序不变：逐块 vs 池化仍是唯一可能改 f 的科学项；Tarable 的 protograph DE 工具仍是唯一可取的技术件。
+
+### 6.5 本节 Does-not-establish
+
+- #1/#2 的引文为**全文逐字核到**；#3–#6 为**检索命中正文片段/摘要**核到，未逐页精读。
+- `mao2021high` 与被撤稿论文的同一性为**推断**（依据：撤稿告示作者列表与该引用键年代），未逐条核对参考文献表。
+- ~~未取到 Müller 2025 的任何数字（自动通道已穷尽，等待手动 PDF）。~~
+  **已于 2026-09-21 关闭**：用户提供 PDF 全文，数字见 §7。
+
+---
+
+## 7. Müller 2025 全文精读（2026-09-21，追加；数字已核）
+
+来源：用户本地 PDF（IET Quantum Communication 2025，`10.1049/qtc2.70003` 正式版）。
+手段：pypdf 抽全文 → 检索关键段 → 逐字引用。只读；无解码、无真实数据读取、不改任何冻结口径。
+
+### 7.1 核实到的数字（此前仅为转述，现为原文）
+
+| 量 | 值 | 位置 |
+|---|---|---|
+| 工业系统连续运行 | ~27 h，实时处理 | §3.4 |
+| 原始采集吞吐（sifting 后） | ~**6.7 kbit/s** | §3.4 |
+| Cascade 平均效率 | \(f_{\text{Cascade}}=\) **1.036** | §3.4 / 结论 |
+| LDPC（blind）平均效率 | \(f_{\text{LDPC}}=\) **1.166** | §3.4 / 结论 |
+| 平均消息数 | **446**（Cascade）vs **3.14**（LDPC） | §3.4 |
+| Cascade FER | **< 0.003**（1000 样本；perfect match 与各 mismatch 均如此） | §3.2 |
+| blind 协议 FER | **无帧错误**（"by design … apart from syndrome errors, which we did not encounter"） | §3.2/§3.4 |
+| EC 帧规模 / 译码器 | \(n=2^{16}\)；**SPA 50 次迭代**、步长 \(\alpha=1\)（blind）；另评估 1944 / 4000 | §3.1/§3.3 |
+| EV 参数（图 9） | \(t=50\) bits，\(P_{\text{Collision}}=10^{-10}\) | §3.3 |
+| QBER 估计偏差 | 用前一帧真值估计，绝对偏差 < 0.005（几乎全程） | §3.4 |
+| 消息数对照 | Cascade 高约 **2 个数量级**；LDPC 每帧 <100 条；Cascade 在 QBER 高估时可 >3000 条 | §4 |
+
+### 7.2 公式逐字（决定我们的会计口径）
+
+- \(f=\dfrac{\text{leak}_{IR}}{nH(X|Y)}\)（式 4）；文献常见的 FER 变体（式 5）：
+  \(f_{FER}=(1-\text{FER})f+\dfrac{\text{FER}}{H(p)}\)。
+- 本文**新提**的有效效率（式 11）：
+  \(f_{\text{eff}}=(1-\text{FER}_{\text{cluster}}-P_{\text{Collision}})\,f+\dfrac{\text{FER}_{\text{cluster}}+P_{\text{Collision}}}{H(q)}+\dfrac{t}{nH(q)}\)，
+  \(\text{FER}_{\text{cluster}}=1-(1-\text{FER})^{k}\)（式 12，\(k\) = 聚成一簇做 EV 的块数）。
+- 等价展开（式 13，逐字）：
+  \(nH(q)f_{\text{eff}}=(1-\text{FER}_{\text{cluster}}-P_{\text{Collision}})\,\text{leak}_{IR}+n(\text{FER}_{\text{cluster}}+P_{\text{Collision}})+t\)。
+  语义：**失败帧按"整帧 n bits 全部泄漏"计**；EV 的 \(t\) bits **每次**都泄漏。
+- 关于 blind 的原文（印证用户第 2 点警告）："Per design, the blind protocol does not allow for frame errors,
+  as it will **always converge by revealing more and more symbols**; only a syndrome error can lead to a frame
+  error." + "The blind protocol **has no frame errors by design** apart from syndrome errors, which we did not encounter."
+
+### 7.3 对仓库的 5 条含义（可直接用的部分）
+
+1. **我们的 +64-bit tag 就是他们的 \(t\) 项**：\(t/(nH)=64/852.544=\)**0.075070**，与 `PROGRAM_PLAN §1.3`
+   自记的 "tag share 0.0751" 完全一致 ⇒ 我们的 \(f_{super}\) 比文献 \(f\)（通常不含 tag）**更严**，这是优点，写 claim 时要说明。
+2. **仓库净收益口径与式 (13) 数学等价**：我们的 `net = A·5n − leak`（失败帧只丢毛密钥、不额外计泄漏）
+   ⇔ 式 (13) 的 "+ \(n\)·FER"（失败帧按整帧泄漏）。⇒ **我们的会计已经是 verification-aware + FER-aware**，
+   可以引式 (13) 作外部依据（比自证强）。
+3. **⚠️ 但冻结门 (b) \(f_{super}\le1.3\) 是"成功帧口径"，不是 \(f_{\text{eff}}\)**。按式 (11) 代入我们的锚点
+   （\(H_{\text{per-bit}}=H_{full}/5=0.166512544\)，\(f_{\text{notag}}=1040/852.544=1.219878\)，tag 项 0.075069）：
+   \(f_{\text{eff}}=1.294947+4.7857\,\text{FER}\) ⇒
+
+   | FER(超帧) | 5% | 1.274% | 0.5% | 0.2% | 0.105% |
+   |---|---|---|---|---|---|
+   | \(f_{\text{eff}}\) | **1.534** | 1.356 | 1.319 | 1.305 | 1.300 |
+
+   即：**S2 的 FER≤5% 门与"文献可比 \(f\le1.3\)"并不相容**；要 \(f_{\text{eff}}\le1.3\) 需 FER ≲ 0.1%。
+   **这不算矛盾**（我们的毛密钥/熵比 ≈6:1，即便 \(f_{\text{eff}}\approx1.53\) 净收益仍为正：FER=5% 时
+   net ≈ 0.95·5120 − 1065 ≈ +3799），但**对外报告时必须分开标注 \(f\) 与 \(f_{\text{eff}}\)**，不得把 1.2949 当 \(f_{\text{eff}}\)。
+   （纯算术复核：`python -c "H=0.83256272;C=1024*H;h=H/5;f0=1040/C;tg=64/C;print(round(f0,6),round(tg,6));[print(x,round((1-x)*f0+x/h+tg,4)) for x in (0.05,0.01274,0.005,0.002,0.001)]"`）
+4. **"聚簇做 EV"是他们对我们 4 帧超帧摊薄 tag 的原则化版本**：他们用式 (11)/(12) 求**最优簇大小 \(k\)**（图 9），
+   并指出惩罚**在 FER 高、块长短、QBER 低时最重**——正是我们的区间（EC 帧 5120 bits、低熵）。
+   ⇒ 我们 §1.3 选 4 帧是"为摊薄 64-bit tag"的经验决定；若要claim更稳，可用式 (11) 复核一次 \(k\)。
+   另：他们的"每簇允许 1 次 repeat request"显著降低惩罚 ⇔ **我们的 v52/v54/v55 条件救援**。
+5. **QBER 估计的偏向**：原文 "It is often advantageous to **overestimate** the QBER, as
+   **underestimation has a higher penalty**"（对 blind 而言低估会不断揭示更多符号）。
+   ⇒ 若做逐块信道估计，取**偏保守（略高）** 的 \(\hat H\) 更安全；他们实测偏差 <0.005 时效率惩罚很小。
+
+### 7.4 引用风险（已核实，非推断）
+
+其参考文献 **[15] 就是被撤稿的那篇**：H.-K. Mao, Q. Li, Peng-Lei H., B. Abd-El-Atty, A. M. Iliyasu,
+*High Performance Reconciliation for Practical QKD Systems*, Opt. Quantum Electron. **54 (2021) 163**
+（即 `10.1007/s11082-024-07829-y` 撤稿告示所指论文）。另有 [27] 为同组 2019 年 LDPC 协调论文。
+⇒ **引用 Müller 2025 的吞吐对照/文献基准时，不要顺这条线追溯到被撤稿源**。
+
+### 7.5 本节 Does-not-establish
+
+- 7.1 的数字与 7.2 的公式为 PDF 原文核到；7.3 的 \(f_{\text{eff}}\) 换算为**纯算术推导**（代入我们的锚点），
+  **不是测量结果**，且沿用了他们的"失败帧按整帧泄漏"约定（我们的净收益另按 `net=A·5n−leak`）。
+- 未改动冻结的 \(f_{super}\) 公式、未改 S2 门、不授权任何 arm / S2 / S3。
+- 未验证 Fig. 2/4/9/10 的数值曲线（图未解析），仅用了正文文字与公式。
+
+---
+
+## 8. 更正：Kanitschar & Huber 适用性（2026-09-21，追加；推翻此前"下调"判断）
+
+用户指出：本项目用的就是**时频纠缠的高维到达时间**。经仓库核实属实，
+§2/§5.1 中"纠缠型、对我们 PM/ToA 数据不可直接套 / 仅外层对账"的判断**予以撤销**。
+
+### 8.1 数据类核实（仓库证据，非推测）
+
+| 事实 | 证据 |
+|---|---|
+| 协议是 **BBM92 型纠缠**（非 prepare-and-measure） | `docs/SECURITY_MODEL.md:27-29`："Time-bin layer: High-dimensional **arrival-time** encoding；Polarization layer: Additional binary key register (**BBM92-type**)" |
+| **time-bin 高维**字母表 \(d\le1024\)（10 bit） | `docs/nbldpc-v25-empirical-channel-and-factorization-plan-20260818.md:67-76`："\(A\in\{0..1023\}\) 为 Alice 原始 **time-bin** symbol，\(B\in\{0..1023\}\) 为 Bob 完整 10-bit time-bin observation；1024 表示原始物理高维字母表" |
+| 源 = **SPDC**（Type-II PPLN），时戳 `.ttbin` | `docs/research_cycles/V65AR1/v65a_registry_stage0.json:59-64`：溯源 `D:\SPDC源测试\...\SHG_Type2PPLN_3s_2_...ttbin` |
+| 安全分析锚在 **time-energy 纠缠** HD-QKD | `docs/SECURITY_MODEL.md:101` 参考文献 [1] = Zhong et al. 2015, *Photon-efficient QKD using **time-energy entanglement** with high-dimensional encoding*, NJP 17, 022002 |
+| 参数估计链是 **Franson** 型（能量-时间纠缠） | `docs/research_cycles/V61P0/V61_SECURITY_MEASUREMENT_SPEC_REPORT.md:5`："per_point_**franson**_pe_chain missing" |
+
+⇒ 本项目数据类 = **EB（BBM92 型）· 高维 time-bin（ToA）· d 至 1024 · SPDC 源**，
+**恰是 Kanitschar & Huber 明确示范的 "time- or frequency-bin entangled photons" 范式**。
+
+### 8.2 更要命的一点：它正面命中仓库已登记的安全缺口
+
+- `docs/LATEST_RESULTS_20260327.md:81-97`：明确列出"Still not supported: strict Zhong 2015 proof；
+  **Niu 2016 composable proof**"，并要求"any strict-composable proof wording"保持谨慎。
+- `docs/research_cycles/V61P0/V61_SECURITY_MEASUREMENT_SPEC_REPORT.md:5,32-33`：
+  "V60_DATA_NOT_READY: **composable theorem missing**; decisive PE missing（e_ph/conjugate/n_PE）…"；
+  其待办清单第 1 优先项 = "composable theorem and assumptions"（需声明 theorem_id：Renner/Niu/Tomamichel/Lim）。
+- Kanitschar & Huber 配套篇（PRApplied 2025，`10.1103/v51y-vkfr`，arXiv `2505.03874`）的题目就是
+  **"Composable finite-size security of HD-QKD protocols"**：针对 collective **和 coherent** 攻击、
+  只用**实验可获取的测量**、同时给 **fixed-length 与 variable-length** —— 正是上述缺口。
+
+⇒ **重新定级：从"外层对账/低-中"上调为"与仓库已登记安全缺口直接对口的最高优先级外层文献"**。
+
+### 8.3 与我们现有会计的耦合点（可直接接）
+
+1. `leak_IR = leak_EC + log₂(2/ε_EV)` ⇒ 我们的 64-bit tag 可反解为 \(\epsilon_{EV}\approx2^{-63}\)，
+   直接填进他们的 eps 分解（V61 清单第 6 项：eps_PE+eps_PA+eps_EC ≤ eps_sec）。
+2. V61 清单第 7 项 `leak_verification_extra = max(0, actual − 64)` 与上式**同构**，可互相印证。
+3. 他们的 **variable-length** 论证 ↔ V61 清单第 9 项"post-selection / effective frames"
+   （我们目前只有 `accepted_frame_fraction` 影子代理）⇒ 这是把"只接受通过验证的帧"做严格的唯一已知途径。
+4. 我们 §7.3 的 \(f_{eff}\)（含 FER 与 tag 成本）可以作为进入其 key-rate 公式前的**泄漏上界**输入。
+
+### 8.4 仍须保留的边界（不因上调而消失）
+
+- 它是**安全/密钥率层**，**不能替 IR 算法做任何决定**：NB-LDPC 构造、经验先验、逐块信道、构造/解码
+  仍由第一性原理（纠错算法）决定，本文不做任何 IR 设计依据。
+- **不是即插即用**：需把我们的可观测量（ToA 单计数/符合计数、联合 \(P(A,B)\)、偏振寄存器）
+  映射到他们的 observable set + 矩阵补全参数化；我们的 **混合结构（time-bin 高维 + 偏振二元寄存器）**
+  在他们的通用 HD 协议里需要额外适配，这一点尚未验证。
+- **规模待验**：他们声称可算"very high dimensions"，但需用我们的 \(d=1024\) 验证其 SDP 对偶/矩阵补全的可计算性，
+  不可假设成立。
+- 若将来某些数据集实际改为 PM 型协议，则本节结论对该数据集不适用（当前证据为 EB）。
+
+### 8.5 本节 Does-not-establish
+
+- 未做任何密钥率计算、未读任何真实数据、未执行解码；仅做**文献-缺口匹配**与仓库证据核对。
+- 未改动 `SECURITY_MODEL.md`、未声明任何 theorem_id、未推进 V62/V61 状态；不授权 S2/S3。
+- 无解码、无真实数据读取、不改冻结口径、不授权 S2/S3。

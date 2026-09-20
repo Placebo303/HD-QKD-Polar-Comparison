@@ -96,6 +96,36 @@ Diagnostic performance proxies:
 - `PIE_practical`: Practical PIE without finite-key corrections
 - `SKR_measured_bps`: Measured SKR without security guarantees
 
+## Scope Note (2026-09-21): Frozen Polar Baseline vs Active V80 NB-LDPC / IR Work
+
+> Additive scope note. Existing content above (including the
+> time-bin/polarization layers and the "polarization layer (BBM92-type)"
+> text) is frozen-Polar-pipeline legacy and is PRESERVED unchanged; this
+> section only delimits its scope relative to the active IR line.
+
+- The polarization / BBM92-type layer described above belongs to the
+  **frozen Polar baseline pipeline** and is NOT in scope for the active
+  V80 NB-LDPC / IR work.
+- The active IR work operates on the **high-dimensional time-of-arrival
+  (ToA) layer only**: CW pumped SPDC, **time-energy entanglement**, ToA
+  time-bin encoding with d up to 1024 (10-bit alphabet), working alphabet
+  GF(32)^2 / superframe n=1024.
+- **It is not BBM92.** The IR stage consumes only H(X|Y) and the empirical
+  channel P(y|x); it is independent of the downstream security protocol and
+  of whether a polarization register is used.
+- Consequence: PM-vs-EB resolution is **not blocking** for IR work. The
+  upstream acquisition configuration for source
+  `type2_2M_20260121_183657` remains unavailable; it is needed only for the
+  security/protocol write-up, where the protocol assumption must be stated
+  explicitly.
+- Composable finite-size security is out of scope for this IR line
+  (companion-paper scope). Only bridge retained: Kanitschar & Huber —
+  `leak_IR = leak_EC + log2(2/eps_EV)`, so our 64-bit verification tag
+  corresponds to `eps_EV ≈ 2^-63`. See
+  `docs/research_cycles/V80-NBLDPC-JAN21/KANITSCHAR_RELEVANCE_ADJUDICATION_20260921.md`.
+- IR-layer contribution to security remains downgraded: IR does not alter
+  quantum-side security, it only consumes H(X|Y).
+
 ## References
 
 1. Zhong, T., et al. (2015). Photon-efficient quantum key distribution using time-energy entanglement with high-dimensional encoding. *New Journal of Physics*, 17(2), 022002.

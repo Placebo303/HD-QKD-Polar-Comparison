@@ -7,18 +7,24 @@ These rules apply to all agents operating in this repository.
 ## 0. Repository Scope (READ FIRST — boundary rule)
 
 - **This checkout (`HD-QKD_Polar_Comparison`) is the FORMAL IR / LDPC
-  RESEARCH MAINLINE** (`main` branch): formal Cascade/LDPC methods,
-  binary-LDPC v3+ long-frame work, and the nonbinary-LDPC ladder live and
-  evolve here.
+  RESEARCH MAINLINE**: formal Cascade/LDPC methods, binary-LDPC v3+
+  long-frame work, and the nonbinary-LDPC ladder live and evolve here.
+  The research line is carried on named `formal-ir-*` branches; the current
+  active branch is `formal-ir-v72p1-addendum-clean` and the next publication
+  branch is `formal-ir-v80-nbldpc-jan21`. `main` is only an integration
+  target while it contains no Polar-mainline content.
 - **The sibling checkout `../HD-QKD_Polar_Release` is the BINARY POLAR
   MAINLINE** (branch `polar-mainline`): mature binary Polar usage, frozen
-  baseline, security tooling. Do not advance Polar-mainline workstreams
-  there from this repository, and do not merge `polar-mainline` into this
-  `main`.
+  baseline, security tooling.
+- Neither side may sweep the other's workstreams into its own line; never
+  merge `polar-mainline` into this research line.
 - Both checkouts historically shared one remote and one `main`, which
   caused a crosstalk incident (research content swept into the shared
-  mainline, 2026-08-12..22). Keep research commits on this `main`; never
-  sweep them into the sibling's branch again.
+  mainline, 2026-08-12..22). Keep research commits on the formal-IR line;
+  never sweep them into the sibling's branch again.
+- Publication/push policy (restates §10.2): push a clearly named formal-IR
+  branch and open a PR; **ordinary non-force pushes only**; never
+  force-update or merge into a branch carrying the Polar/sibling line.
 - **All research work in this checkout declares exactly one track, `EXPLORE` or `DECIDE`, before execution (§1.2); the two-tier policy is the repository-wide workflow default.**
 
 ---
