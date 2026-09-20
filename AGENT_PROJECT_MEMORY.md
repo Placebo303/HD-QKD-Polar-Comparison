@@ -4087,3 +4087,17 @@ R22 PREDICTOR-DEAD (2026-09-18): best lost-free abort rule saves 480–800 bits 
 - Freeze [decision]: S2c empirical-channel finite-length validation frozen: 2M derived counts (γ/p_b), exact semantics (y=b&31; π_i(e)=γ₂(y⊕e|b,u1); XOR-centering; `decode_error_domain_posterior`); D1 = L1 conditioning GENIE true-u1 (ceiling explicitly stated); arms L-A/L-B/L-C; seeds 2026097201+ (2026098001 collision rejected); gates FER≤3/60 AND f_super≤1.3. Executor `v80_s2c_campaign.py` + tests reviewed PASS (SC1-3 non-blocking).
 - Blocker+fix [repo-observed]: S2c first launch BLOCKED by wiring defect — `_construct_gate` positional call passed arm as seed → all arms refused; zero decodes, zero roots created. Fixed to `construct_fn(arm, seed, trials)` + T15 production-binding test (fails on old wiring), 25 passed; wiring-fix review PASS. Re-launch under standing pre-authorization; S2c batch (packet/prompt/preexec/reviews/executor/tests) pending commit.
 - Boundary [decision]: no FER/SKR/qualification/promotion/publication claim until S2c run + batch-end review complete.
+
+## 2026-09-20/21 V80 S2c three-arm empirical-channel FAIL closed (0/3 arms; batch-end PASS; no S3)
+
+- Evidence [repo-observed]: S2c empirical-channel finite-length validation FAIL-early-stop — L-A 7/16, L-B 13/16, L-C 16/16 frame failures; group 4/4 each; f_super 1.2246 budget-pass; budgets interior, no continuations. Commit `36399d80` (result + batch-end review + fallback options + O1 scoping records).
+- Review [repo-observed]: independent batch-end review PASS; claim ceiling = "0/3 arms meet group FER bar at n=256/m2=47/genie-u1/empirical"; no S3 authorization.
+- Records [repo-observed]: `docs/research_cycles/V80-NBLDPC-JAN21/S2C_RESULT_20260920.md` + `S2C_BATCH_END_REVIEW_20260920.md` + `S2_FALLBACK_OPTIONS_20260920.md` (+ addendum); decision-log 4561-4571.
+- Boundary [decision]: genie-u1 upper bound; failure mode = finite-length gap at n=256 (per-frame success nowhere near 98.7% group-rule need); no FER/SKR/qualification/promotion/publication claim; route decision deferred to user via ranked memo O4->O2->O1 (O3 piggyback; O5 parallel S3-level; O6 last).
+
+## 2026-09-21 V80 O4+O2 lambda study (N=64 paired, observation-only) + O1 scoping (O1 packet started)
+
+- Evidence [repo-observed, observation-only]: O4+O2 paired N=64 — A47 33/64 [0.396,0.634]; B47 10/64; C47 0/64; A50 56/64 [0.772,0.935]; paired A50 superset A47; group-ref A50 9/16; ordering A50>A47>B47>C47 with non-overlapping CIs stated as observation only. QSC-vs-empirical ranking reversal noted as observation, no causal attribution.
+- Scoping [repo-observed]: O1 n=1024 — m=188 fc0/g8 rank-full, same rate => no new DE arm; m=208 needs new DE point; decoder length-agnostic; ~11s/decode est (estimate only, not a budget verdict).
+- Lifecycle [decision]: O1 packet planning started (leading arm per fallback memo); not granted/executed; no S3; no route-dead declaration.
+- Boundary [decision]: lambda numbers are diagnostic observations only; no FER/route/promotion claim; QSC reversal is not mechanism evidence.

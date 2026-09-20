@@ -4569,3 +4569,15 @@ crossed its finite-length operating region.
 - S3 now: rejected — gate unmet, ceiling.
 
 **Consequences**: O4+O2 diagnostic study running; O1 scoping done; no S3; no qualification; user route review pending; records/commits consolidated.
+
+### 2026-09-20/21: O4+O2 lambda study done — {2:1} best on empirical channel; m=50 redundancy-sensitive; O1 (n=1024) becomes leading arm
+
+**Decision**: Record observations (N=64 paired frames/arm, empirical channel, genie-u1): A47 {2:1} m47 33/64 CI [0.396,0.634]; B47 {2:0.5,3:0.5} 10/64; C47 {3:1} 0/64; A50 {2:1} m50 56/64 CI [0.772,0.935]; paired A50⊇A47 (A47-only 0 / A50-only 23); group-ref A50 9/16 (still ≫ gate); ordering A50>A47>B47>C47 with non-overlapping CIs (observation, no winner declared); O2 alone insufficient; per memo ranking O1 becomes the leading next arm (n=1024).
+
+**Context**: QSC-vs-empirical λ ranking reversal (earlier 16-frame sample too small); redundancy sensitivity (+3 rows: +36pp frame success); no causal claims.
+
+**Alternatives considered**:
+- Declare λ winner: rejected — observation only pending route review.
+- Skip to S3: rejected — gate unmet.
+
+**Consequences**: O1 packet planning started; lambda study raw committed; no S3; no qualification; user route review pending.

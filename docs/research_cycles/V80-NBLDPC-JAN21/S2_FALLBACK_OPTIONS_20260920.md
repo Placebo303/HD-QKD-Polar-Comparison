@@ -41,3 +41,7 @@
 ## Ranked recommendation (no execution; user decides)
 1. O4 first (cheap, de-noises lambda; gates O1/O2 choice). 2. O2 piggybacked on O4 (same machinery, tests redundancy slope within budget). 3. O1 next only if O4+O2 still far from gate (needs new DE arm + n=1024 constructor check). O3 piggyback only. O5 as S3-level reframing in parallel docs, never blocking S2. O6 if O4+O2 and O1 scoping both fail.
 - No authorization requested or granted; no S3 entry; next step needs a frozen packet + explicit grant.
+
+## Addendum 2026-09-20/21: O4+O2 executed
+- O4+O2 executed and folded into S2C_LAMBDA_STUDY_20260920.md (A47 33/64, B47 10/64, C47 0/64, A50 56/64; A50⊇A47 paired; group-ref A50 9/16, gate unmet).
+- O1 promoted to leading arm per ranked recommendation; O1 scoping confirmed feasible (O1_SCOPING_20260920.md). No S3; user route review pending.
