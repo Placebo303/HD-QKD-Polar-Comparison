@@ -4633,3 +4633,17 @@ crossed its finite-length operating region.
 - Re-run/tune m1=6/8 now: rejected — no-rerun; hypothesis falsified.
 
 **Consequences**: route decision deferred to main thread on rework memo v2 (trade scan L2@192+L1@16 primary / L2@196+L1@12 optional; splits 196+12 and 192+16 both leak 1104 f~1.29495; b2a fallback / b2c new family / b2b rejected / b2d background — all pending acceptance, not decided here). No S3/qualification/real-data claim.
+
+### 2026-09-21: Close b2e cheap-u1-estimator probe as FAIL (MAP-u1 13/13 both arms); estimator-only genie retirement falsified
+
+**Decision**: record — b2e closed evidence-only with machine verdicts B202 FAIL (gate a 13 fails of 240 planned > 12; gate b 1.290476 PASS) and B208 FAIL (gates a+b; gate b 1.325665 > 1.3); both arms FAIL-early-stop at the 13th fail (block 12, seed 2026095613), all completed blocks max_iter_reached at 300 iterations. Batch-end review PASS_WITH_FINDINGS (BER-01..04 non-blocking). Lifecycle `B2E_MAP_U1_FAIL_CLOSED_AWAITING_MAIN_ROUTE_DECISION`; no route acceptance, no rerun/tuning; route decision deferred to main thread.
+
+**Context**: MAP-u1 substitution (û1=argmax γ1, frozen gamma_f03.npz; genie ceiling removed), paired seeds 2026095601+idx shared with O1R/P0/L1B (no independence claim), A208/A202 construct instance 2026092001/trials 20, n=1024 GF(32) λ={2:1}. d_u1 paired-identical mean 26.1879 (p50 25.1404/p90 32.9515/p99 37.2748/max 37.7247); u1_mismatches mean 7.69 (max 13). Genie-u1 L2 passes (A202 0/240; O1R A208 pooled 0/480) vs MAP-u1 13/13 — extreme u1-conditioning sensitivity. Chain: L1 dense-check FAIL (C6 48.1% / C8 7.1% RAW partial); trade-scan splits all failed (A192 10.5%); b2a enumeration infeasible (k≈31.4, P(k≤4)=0); no viable (m1+m2≤208, f≤1.3 with tag) configuration found so far. Roots workspace/b2e_799c2d57 / workspace/b2e_681b442d retained; commit 050644c; records in docs/research_cycles/V80-NBLDPC-JAN21/B2E_RESULT_20260921.md + B2E_BATCH_END_REVIEW_20260921.md.
+
+**Alternatives considered**:
+- Estimator-only genie retirement (memo v3 choice (i), D-u1=0): rejected empirically — measured mean d_u1 26.19 bits consumes the 4.31-bit A208 headroom ~6x; B208 gate (b) foreclosed arithmetically before decode.
+- b2a enumeration repair: rejected as infeasible — per-block uncertain-column count k≈31.4 mean (P(k≤4)=0 over 1e6 blocks), 32^k≈4.6e46; entropy spread (top-5 = 17%), no small-k subset.
+- Promote C8 partial (m1=8, FER 0.071 RAW) or A196 (1/29, no verdict) as a pass: previously rejected; unchanged.
+- b2c new family / other rework-memo options: remain pending main-thread decision — not decided here.
+
+**Consequences**: estimator-only route closed evidence-only; next route decision (b2c new family vs other memo options vs stopping) belongs to the main thread; no S3/qualification/real-data claim; claim ceiling unchanged (synthetic; single-code acceptance; gate (b) uses measured D-u1 per the Amendment).
