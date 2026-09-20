@@ -552,3 +552,27 @@ len(plan)==granted scope.
 **Fix**: Open Zotero desktop on the Windows host (local API allowed) then retry; details in `docs/research_cycles/V80-NBLDPC-JAN21/ZOTERO_SCAN_20260920.md`.
 
 **Prevention**: Ensure Zotero desktop is running with the local API allowed before any Zotero local-api scan.
+
+---
+
+### S2c _construct_gate positional wiring (arm-as-seed) → all-arms-refused
+
+**Observed**: all arms refused `unknown arm 2026092001` with zero decodes/roots.
+
+**Root cause**: positional call `(seed, trials)` vs production signature `(arm, seed, trials)`.
+
+**Fix**: `construct_fn(arm, seed, trials)` + T15 production-binding test.
+
+**Prevention**: fake-only tests must mirror real `construct_fn` arity; add one production-binding test per campaign runner.
+
+---
+
+### v10_peg _reconcile_check_counts fallback can invent out-of-support degrees (|delta|>1)
+
+**Observed**: SRF-02 (socket fix review).
+
+**Root cause**: fallback path absorbs any representable delta.
+
+**Fix**: bound/clamp to support before any frozen/DECIDE use; the L-A bit-identity proof (sha 8a56b577) does not cover this path.
+
+**Prevention**: bound/clamp to support before any frozen/DECIDE use.
