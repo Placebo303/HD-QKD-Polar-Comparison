@@ -4518,3 +4518,30 @@ crossed its finite-length operating region.
 - Treat as no-library-evidence: rejected — probe failure is environmental, not a collection result.
 
 **Consequences**: Single retry step recorded (Zotero desktop open + local API allowed); ZOTERO_SCAN_20260920.md holds details; no new references obtained.
+
+---
+
+### 2026-09-20: S2 V1 FER campaign FAIL-early-stop; V2 triggered per frozen packet
+
+**Decision**: Record V1 FAIL-early-stop as raw machine verdict (4/4 groups failed; 16 decodes; 0 successes; wall 186 s; f_super 1.2246 pass, FER gate fail); trigger V2 single shot per packet §3 (no re-seed, no threshold change, no arm hopping).
+
+**Context**: Diagnostic PLUMBING-SANE (p=0 ladder: p=0 iter1 exact, p=0.005 iter2 exact, p=0.02 miscorrection, p=0.05 fails incl. zero-codeword control) → leading non-conclusive explanation = finite-length weakness of frozen λ={2:1} (regular dv=2; low-weight codewords); decoder budget secondary (most frames lock wrong early, not at cap). No conclusion beyond this; V2 pending.
+
+**Alternatives considered**:
+- Skip V2 straight to fallback review: rejected — packet freezes V2 single shot on V1 FAIL.
+- Rerun/re-seed V1: rejected — frozen no-retry rule.
+
+**Consequences**: V2 (construct seed 2026096101/trials 100, four_cycles<1158 else fails closed; frame seeds 2026096301+idx) running now; V2 FAIL ⇒ no S3 + fallback review; S2/S3 remain unauthorized beyond frozen arms; no FER/qualification claim beyond machine verdict.
+---
+
+### 2026-09-20: S2 constructor implementation defects found (user read-only review) — attribution paused, rework ordered
+
+**Decision**: Preserve V1/V2 raw failures; pause causal attribution and S3; order = fix v10 PEG edge selection/girth/trials → deterministic tests → independent re-review → re-frozen experiment (λ unchanged; channel/prior explicitly matched).
+
+**Context**: Two concrete implementation defects (edge selection; trials semantics) + interpretation scope corrections (PLUMBING-SANE too broad; proxy H=0.534 vs target 0.8069 ⇒ f_super=1.2246 is budget mapping, not measured efficiency; 1158→1140 confounded by seed change). Full record in `docs/research_cycles/V80-NBLDPC-JAN21/S2_CONSTRUCTOR_DEFECT_REVIEW_20260920.md`.
+
+**Alternatives considered**:
+- Continue λ/variant exploration on unfixed constructor: rejected — implementation defects would masquerade as algorithm failure.
+- Retroactively declare dv=2 failure: rejected — not established.
+
+**Consequences**: Constructor fix task running; campaign executor pins will change (new actual four_cycles); S2b experiment needs re-frozen packet + review; no S3; no FER/qualification claim.

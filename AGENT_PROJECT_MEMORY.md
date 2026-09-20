@@ -4070,3 +4070,12 @@ R22 PREDICTOR-DEAD (2026-09-18): best lost-free abort rule saves 480–800 bits 
 - Packet [repo-observed]: `docs/research_cycles/V80-NBLDPC-JAN21/S2_ENTRY_PACKET_20260920.md` (G-S2ENTRY, FROZEN NOT GRANTED) + `S2_ENTRY_PROMPT_20260920.md`; reviewer-go PASS, no blocking issues, RV-01..RV-05 non-blocking only.
 - Guards [decision]: S2 64.31-bit headroom is budget-accommodating ONLY, not success evidence; n=1024 is superframe grouping/accounting only (four n=256 codes, any-frame-fail ⇒ group fail; superframe FER≤5% ⇒ per-frame ≤1.274%); S2 PASS requires superframe FER≤5% AND whole-frame-with-tag f≤1.3 with L1 actual + D_blind measured.
 - Boundary [decision]: EXPLORE planning-only; S1 closed, S2 gated; no grant/Pre-EXECUTE/execution/authorization/push; §4 entry evidence still required before construction.
+
+## 2026-09-20 S2 setup complete, FER campaign running (no verdict)
+
+- Literature [repo-observed]: IEEE 11440984 full text retrieved via user PDF (sha256 579bd831…); GF(2) f=1.8577 → GF(128) f=1.0661 @ R=0.5, n=20000, FFT-BP 200 iter, FER≈75% snapshot; rate-adaptive = shortening+puncturing (NOT blind); PEG-built H; λ/ρ not stated. Synced in LITERATURE_QPRIOR + PROGRAM_PLAN §2.2.
+- Construction [repo-observed]: `v80_s2_peg.py` + 7 tests PASS; reviewer PASS_WITH_FINDINGS (SCR-01/02 non-blocking); four_cycles actual=1158 confirmed by timing probe.
+- Timing [repo-observed]: per-decode mean 14.23s / max 19.65s; 240 decodes ≈3433s mean fits 3600s, worst 4735s → MARGINAL; record `S2_TIMING_PROBE_20260920.md`.
+- Executor [repo-observed]: `v80_s2_fer_campaign.py` (checkpoint-per-group, exactly ONE explicit continuation per packet §7 delta, early-stop, dual-flag) + 11 tests PASS (18 total with construction); reviewer PASS_WITH_FINDINGS (SCE-01..04; §7 governs over old §3/§4); Pre-EXECUTE `S2_FER_PREEXEC_20260920.md`; __main__ guard + canonical command fixed.
+- VC [repo-observed]: housekeeping commit `bc927b9` (22 files: S2 code+tests+docs+openspec v80); code under VC; NO PUSH (ahead 2+).
+- Lifecycle [decision]: S2 FER campaign RUNNING in background (`workspace/s2_fer_<uuid>`); no FER/verdict recorded yet.
