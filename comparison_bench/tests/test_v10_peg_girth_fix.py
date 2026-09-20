@@ -210,3 +210,70 @@ def test_t3_min_girth_never_zero_or_one():
                               seed=seed, max_trials=2)
         assert r["status"] == "ok"
         assert r["min_girth"] is None or r["min_girth"] >= 4
+
+
+# --------------------------------------------------------------------------- #
+# T5: socket reconciliation (2026-09-20 fix; S2b dv-study blocker)
+# --------------------------------------------------------------------------- #
+
+_S2B_N, _S2B_M, _S2B_SEED = 256, 47, 2026092001
+
+
+def _s2b_construct(lam):
+    from comparison_bench.src.comparison_bench.formal_ir import (
+        nonbinary_v26_mcde as mcde)
+    from comparison_bench.src.comparison_bench.formal_ir.nonbinary_field import (
+        GF2mField)
+    rho = mcde.make_rho(1.0 - _S2B_M / _S2B_N, dict(lam))
+    result = peg.peg_construct(_S2B_N, _S2B_M, dict(lam), rho, _S2B_SEED,
+                               max_trials=20, field=GF2mField.create(1024))
+    return result, rho
+
+
+def test_t5_lb_reconciled_exact_sockets():
+    # Independent largest-remainder gave var 614 vs chk 615 (off by 1);
+    # reconciliation moves one check 14 -> 13: 44*13 + 3*14 = 614.
+    c, _ = _s2b_construct({2: 0.5, 3: 0.5})
+    assert c["status"] == "ok"
+    assert c["var_counts"] == {2: 154, 3: 102}
+    assert c["check_counts"] == {13: 44, 14: 3}
+    assert sum(d * v for d, v in c["check_counts"].items()) == 614
+    assert c["total_sockets"] == 614
+    assert sum(c["check_counts"].values()) == _S2B_M
+
+
+def test_t5_lc_reconciled_exact_sockets():
+    # Independent largest-remainder gave var 768 vs chk 769 (off by 1);
+    # reconciliation moves one check 17 -> 16: 31*16 + 16*17 = 768.
+    c, _ = _s2b_construct({3: 1.0})
+    assert c["status"] == "ok"
+    assert c["var_counts"] == {3: 256}
+    assert c["check_counts"] == {16: 31, 17: 16}
+    assert sum(d * v for d, v in c["check_counts"].items()) == 768
+    assert c["total_sockets"] == 768
+    assert sum(c["check_counts"].values()) == _S2B_M
+
+
+def test_t5_impossible_request_still_refuses():
+    # Genuinely non-representable: var sockets 10 < 2*m minimum.
+    import pytest
+
+    from comparison_bench.src.comparison_bench.formal_ir.nonbinary_field import (
+        GF2mField)
+    with pytest.raises(ValueError):
+        peg.peg_construct(5, 47, {2: 1.0}, {10: 1.0}, seed=1, max_trials=2,
+                          field=GF2mField.create(1024))
+
+
+def test_t5_la_bit_identity_pin():
+    # Reconciliation is a no-op for already-consistent L-A: pinned outputs
+    # four_cycles=0, min_girth=6, rank=47 and construct-twice identity.
+    c, _ = _s2b_construct({2: 1.0})
+    assert c["status"] == "ok"
+    assert c["four_cycles"] == 0
+    assert c["min_girth"] == 6
+    assert c["rank"] == 47
+    assert c["var_counts"] == {2: 256}
+    assert c["check_counts"] == {10: 5, 11: 42}
+    c2, _ = _s2b_construct({2: 1.0})
+    assert c["triples"] == c2["triples"]

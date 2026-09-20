@@ -11,6 +11,20 @@ Contents:
   (largest-remainder adjustment to exactly ``m``);
 - ``socket_consistency``: asserts ``sum count_d*d == sum count_j*j``
   (mismatch -> blocker);
+- ``_reconcile_check_counts``: deterministic check-side socket
+  reconciliation (2026-09-20 fix).  The variable-side realization from
+  ``node_view_counts`` is kept as specified; the CHECK-side allocation
+  from ``check_degree_counts`` (independent largest-remainder rounding,
+  off by exactly 1 edge for some lambda/m/n combos) is adjusted to hit
+  the exact variable-side socket total while keeping ``m`` unchanged.
+  Rule: delta 0 -> input returned unchanged (already-consistent inputs
+  are bit-identical); else count transfer within the existing support
+  (move ``|delta|/gap`` checks between the extreme degrees when
+  divisible, preserving the concentrated adjacent-degree shape);
+  fallback single highest-degree check shift by ``delta`` (e.g.
+  single-degree rho).  Donor shortage or a resulting degree < 2 raises
+  ``ValueError`` — the ``socket_consistency`` guard still refuses
+  genuinely non-representable requests;
 - ``peg_construct``: deterministic irregular PEG over GF(1024).  Variable
   sockets are placed in node order; each socket picks the free check that
   maximizes the local girth (BFS distance from the variable), tie-break 1
@@ -140,6 +154,65 @@ def socket_consistency(node_counts: Mapping[Any, Any], check_counts: Mapping[Any
         raise ValueError(
             f"socket mismatch: variable sockets {var_sockets} != check sockets {check_sockets}")
     return var_sockets
+
+
+def _reconcile_check_counts(check_counts: Mapping[Any, Any],
+                            var_sockets: int) -> dict[int, int]:
+    """Deterministic check-side socket reconciliation (2026-09-20 fix).
+
+    Keeps the variable-side realization as specified and adjusts the
+    CHECK-side allocation from :func:`check_degree_counts` (independent
+    largest-remainder rounding, off by exactly 1 edge for some
+    lambda/m/n combos, e.g. L-B 614 vs 615 and L-C 768 vs 769 at
+    n=256/m=47) to hit exactly ``var_sockets`` total sockets while
+    keeping the check count ``m`` unchanged.
+
+    Rule (in order):
+    1. ``delta = var_sockets - check_sockets``; ``delta == 0`` returns
+       the input unchanged (already-consistent inputs are bit-identical).
+    2. Count transfer within the existing support: with extreme degrees
+       ``d_lo < d_hi`` and ``gap = d_hi - d_lo``, if ``delta`` is a
+       multiple of ``gap``, move ``|delta| / gap`` checks from the donor
+       extreme (``d_hi`` when ``delta < 0``, ``d_lo`` when ``delta > 0``)
+       to the other extreme — this preserves the concentrated
+       adjacent-degree support shape.
+    3. Fallback single-check shift: change one check at the highest
+       degree by ``delta`` (deterministic donor); used only when rule 2
+       cannot apply (e.g. single-degree rho or indivisible delta).
+
+    Donor shortage or a resulting check degree < 2 raises
+    ``ValueError``; the :func:`socket_consistency` guard after this step
+    still refuses genuinely non-representable requests (e.g.
+    ``var_sockets < 2 * m``).
+    """
+    counts = {int(degree): int(count) for degree, count in check_counts.items()}
+    total = sum(degree * count for degree, count in counts.items())
+    delta = int(var_sockets) - total
+    if delta == 0:
+        return counts
+    extremes = sorted(counts)
+    d_lo, d_hi = extremes[0], extremes[-1]
+    if d_hi != d_lo:
+        gap = d_hi - d_lo
+        if delta % gap == 0:
+            need = abs(delta) // gap
+            if delta < 0 and counts[d_hi] >= need:
+                counts[d_hi] -= need
+                counts[d_lo] += need
+                return counts
+            if delta > 0 and counts[d_lo] >= need:
+                counts[d_lo] -= need
+                counts[d_hi] += need
+                return counts
+    if counts[d_hi] < 1 or d_hi + delta < 2:
+        raise ValueError(
+            f"socket reconciliation impossible: variable sockets {int(var_sockets)} "
+            f"vs check sockets {total} (delta {delta})")
+    counts[d_hi] -= 1
+    counts[d_hi + delta] = counts.get(d_hi + delta, 0) + 1
+    if counts[d_hi] == 0:
+        del counts[d_hi]
+    return counts
 
 
 # --------------------------------------------------------------------------- #
@@ -294,6 +367,13 @@ def peg_construct(n: int, m: int, lambda_edge: Mapping[Any, Any],
                   edge_label_seed: int | None = None) -> dict[str, Any]:
     """Deterministic irregular PEG construction over GF(1024).
 
+    Degree realization: variable side via ``node_view_counts`` (kept as
+    specified); check side via ``check_degree_counts`` plus the
+    deterministic ``_reconcile_check_counts`` adjustment to the exact
+    variable-side socket total (no-op for already-consistent inputs —
+    their constructions are bit-identical); ``socket_consistency``
+    remains the fail-closed guard for non-representable requests.
+
     Returns a dict with ``status`` ("ok" or "frozen_failure"), ``triples``
     (sorted ``(row, col, coeff)`` list), ``n``, ``m``, ``trials_used`` and
     diagnostics (degree sequences, socket totals, parallel-edge count, rank,
@@ -314,6 +394,8 @@ def peg_construct(n: int, m: int, lambda_edge: Mapping[Any, Any],
         raise ValueError("field must be a pinned GF2mField")
     var_counts = node_view_counts(lambda_edge, n)
     check_counts = check_degree_counts(rho_edge, m)
+    var_sockets = sum(int(degree) * int(count) for degree, count in var_counts.items())
+    check_counts = _reconcile_check_counts(check_counts, var_sockets)
     total_sockets = socket_consistency(var_counts, check_counts)
     edge_seed = common.v10_seed(f"peg_labels:{int(seed)}") if edge_label_seed is None \
         else int(edge_label_seed)
