@@ -1,0 +1,13 @@
+# P0 Executor Review (2026-09-20) — EXPLORE, deltas only, no run
+- Verdict: PASS_WITH_FINDINGS (no blockers; 3 non-blocking findings).
+- Scope: `formal_ir/v80_o1_campaign.py` D1–D5 + `tests/test_v80_o1_campaign.py` T24 vs O1R HEAD. Rerun: 54 passed (19.5 s); T24 10 passed.
+- Verified: closed-world refusals kept on all entries (A188|A208|A202|A200 only; no `--m`); unknown arms refuse pre-decode.
+- Verified: pins fc==0 + rank-full + twice-identical GATED; girth RECORDED-not-gated on P0 (R2 precedent); R2-seed pins text byte-invariant.
+- Verified: dry pins via real gate A202 fc0/g8/rank202, A200 fc0/g8/rank200; paired base 2026095601+idx (0..239) + NO-independence note; bar 12/n 240/early-stop 13th.
+- Verified: de-label literals `covered|exploratory` only (no `exploratory-no-DE` anywhere); P0 defaults exploratory; `run_de_precheck` A208-only refuses P0.
+- Verified: budgets ≤900 s/arm, ≤1 WALL-PARTIAL resume, terminal never resume; `workspace/p0_*` absent; `results/` untouched; R2 text unchanged.
+- Verified: interpretation rule honored — A202 PASS ⇒ L1 MAY proceed m2≤202 / FAIL ⇒ memo re-opens; A200 decides m1=8; cross-arm pooling FORBIDDEN; G-P0 NOT granted here.
+- P0R-01 (non-blocking): Q4a "9 files ONLY" counts 2+5+2, omits self P0_PREEXEC (legit 2026095601 hits in Q4c/Q6); actual rg = 10 files, all in-scope; substance holds.
+- P0R-02 (non-blocking): packet §9 "pooled FER" ambiguous — read as within-arm only ("under each run root"); result doc must keep within-arm, never cross-arm.
+- P0R-03 (non-blocking): worktree dirty (ZOTERO_SCAN + untracked) is pre-existing, not P0 delta; P0 diff itself is exactly module+test.
+- Statement: run may proceed under standing pre-authorization when granted; this review authorizes nothing itself.

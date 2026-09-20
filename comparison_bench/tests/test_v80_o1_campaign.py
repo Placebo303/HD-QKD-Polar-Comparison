@@ -961,3 +961,178 @@ def test_t23_cli_o1r_flags_and_root_prefix():
     with pytest.raises(c.Refusal):
         c.main(["--execute-real", "--execution-authorized", "--arm",
                 "A208", "--root", "workspace/s2c_deadbeef"])
+
+
+# T24: P0 pre-arm — A202/A200 closed-world entries + P0 label + paired base.
+P0_CASES = (("A202", 202, 1074.0, 1.259759),
+            ("A200", 200, 1064.0, 1.248029))
+
+
+def _fake_construct_p0(arm, m):
+    def _build(arm_in, seed, max_trials):
+        assert (arm_in, seed, max_trials) == (arm, 2026092001, 20)
+        return {"four_cycles": 0, "min_girth": 8, "rank": m,
+                "family": "peg-irregular", "n": 1024, "m": m,
+                "triples": [(0, 0, 1), (1, 1, 2)],
+                "total_sockets": 2048, "parallel_edges": 0}
+
+    return _build
+
+
+@pytest.mark.parametrize("arm,m,leak,f_super", P0_CASES)
+def test_t24_p0_arm_table_and_accounting(arm, m, leak, f_super):
+    assert c.ARMS[arm]["m"] == m
+    assert c.ARMS[arm]["four_cycles"] == 0
+    assert c.ARMS[arm]["min_girth"] == 8  # dry-measured 2026-09-20
+    assert c.ARMS[arm]["rank"] == m
+    assert c.ARMS[arm]["lambda"] == {2: 1.0}
+    assert c.ARMS[arm]["rate"] == pytest.approx(1.0 - m / 1024)
+    assert c.ARMS[arm]["leak_bits"] == m * 5 + 64 == leak
+    basis = c.leak_basis(arm)
+    assert basis["m"] == m
+    assert basis["leak_bits"] == leak
+    assert basis["f_super_basis"] == pytest.approx(f_super, abs=1e-6)
+    assert "BUDGET MAPPING" in basis["f_super_label"]
+    assert "INFORMATIONAL ONLY" in basis["f_L2_label"]
+
+
+@pytest.mark.parametrize("arm,m", [("A202", 202), ("A200", 200)])
+def test_t24_p0_gate_binds_real_construct_arm(arm, m):
+    # Production binding via the same gate path execute() uses (dry
+    # construction, allowed): fc==0 + rank-full + twice-identical gated,
+    # girth recorded as-measured (P0 packet §5/D3).
+    seen = []
+
+    def _spy(arm_in, seed, max_trials):
+        seen.append((arm_in, seed, max_trials))
+        return c.construct_arm(arm_in, seed, max_trials)
+
+    code = c._construct_gate(arm, _spy)
+    assert seen[0] == (arm, 2026092001, 20)
+    assert code["four_cycles"] == 0
+    assert code["min_girth"] == 8
+    assert code["rank"] == m
+    assert code["construct_seed"] == 2026092001
+    assert code["construct_trials"] == 20
+
+
+def test_t24_p0_girth_recorded_not_gated(capsys):
+    # Girth mismatch does NOT gate P0 (R2-amendment precedent); fc/rank
+    # mismatch still STOP-BLOCKED pre-decode.
+    def _g6(arm_in, seed, max_trials):
+        assert (arm_in, seed, max_trials) == ("A202", 2026092001, 20)
+        return {"four_cycles": 0, "min_girth": 6, "rank": 202,
+                "family": "peg-irregular"}
+
+    code = c._construct_gate("A202", _g6, 2026092001, 20)
+    assert code["min_girth"] == 6
+    for pin, rec in (("fc", {"four_cycles": 1, "min_girth": 8,
+                             "rank": 202}),
+                     ("rank", {"four_cycles": 0, "min_girth": 8,
+                               "rank": 201})):
+        def _bad(arm_in, seed, max_trials, _rec=dict(rec)):
+            assert (arm_in, seed, max_trials) == ("A202", 2026092001, 20)
+            return {"four_cycles": _rec["four_cycles"],
+                    "min_girth": _rec["min_girth"], "rank": _rec["rank"],
+                    "family": "peg-irregular"}
+
+        with pytest.raises(c.Refusal) as exc:
+            c._construct_gate("A202", _bad, 2026092001, 20)
+        assert exc.value.code == 2
+        assert "STOP-BLOCKED" in capsys.readouterr().err
+
+
+def test_t24_unknown_arm_still_refuses():
+    for bad in ("A206", "A209", "A202 ", "a202", ""):
+        with pytest.raises(c.Refusal):
+            c.block_seed(bad, 0)
+        with pytest.raises(c.Refusal):
+            c.leak_basis(bad)
+    calls = []
+
+    def _counting(construction, seed):
+        calls.append(seed)
+        return _decode_ok(construction, seed)
+
+    with pytest.raises(c.Refusal) as exc:
+        c.execute(root="/tmp/opencode/p0_fake_badarm", arm="A206",
+                  construct_fn=_fake_construct_p0("A202", 202),
+                  decode_fn=_counting, clock=FakeClock(),
+                  rss_fn=lambda: 0, writer=MemWriter(), max_blocks=1)
+    assert exc.value.code == 2
+    assert calls == []
+
+
+def test_t24_p0_block_seed_paired_base():
+    assert c.block_seed("A202", 0, 2026095601) == 2026095601
+    assert c.block_seed("A202", 239, 2026095601) == 2026095840
+    assert c.block_seed("A200", 239, 2026095601) == 2026095840
+
+
+def test_t24_p0_manifest_label_paired_base_and_de_default():
+    w, clk = MemWriter(), FakeClock()
+    root = "/tmp/opencode/p0_fake_manifest"
+    seen = []
+
+    def _rec(construction, seed):
+        seen.append(seed)
+        return _decode_ok(construction, seed)
+
+    mf = c.execute(root=root, arm="A202",
+                   construct_fn=_fake_construct_p0("A202", 202),
+                   decode_fn=_rec, clock=clk,
+                   rss_fn=lambda: 0, writer=w,
+                   block_base=2026095601, n_blocks=240,
+                   construct_seed=2026092001, construct_trials=20,
+                   max_blocks=2)
+    assert mf["campaign"] == "P0"
+    assert mf["n_blocks"] == 240
+    assert mf["fail_bar"] == 12
+    assert mf["pass_bar"] == "block FER<=5% (fails/240<=12)"
+    assert seen == [2026095601, 2026095602]
+    mani = json.loads(w.store[f"{root}/manifest.json"])
+    assert mani["campaign"] == "P0"
+    assert mani["seeds"]["block_base"] == 2026095601
+    assert mani["seeds"]["n_blocks"] == 240
+    assert mani["construct"]["seed"] == 2026092001
+    assert mani["construct"]["m"] == 202
+    assert mani["leak_bits"] == 1074.0
+    assert mf["f_super"] == pytest.approx(1.259759, abs=1e-6)
+    assert "recorded-not-gated" in mani["construct"]["pins"]
+    assert "STOP-BLOCKED" in mani["construct"]["pins"]
+    assert "2026095601" in mani["replication"]["paired_note"]
+    assert "NO independence claim" in mani["replication"]["paired_note"]
+    assert mani["de_cover"]["label"] == "exploratory"  # D4: no DE run
+    rows = json.loads(w.store[f"{root}/rows.json"])
+    assert rows[0]["seed"] == 2026095601
+    assert rows[0]["f_super"] == pytest.approx(1.259759, abs=1e-6)
+
+
+def test_t24_p0_n240_early_stop_thirteenth_fail():
+    w, clk = MemWriter(), FakeClock()
+    mf = c.execute(root="/tmp/opencode/p0_fake_early240", arm="A200",
+                   construct_fn=_fake_construct_p0("A200", 200),
+                   decode_fn=_decode_fail, clock=clk,
+                   rss_fn=lambda: 0, writer=w,
+                   block_base=2026095601, n_blocks=240,
+                   construct_seed=2026092001, construct_trials=20)
+    assert mf["verdict"] == "FAIL-early-stop"
+    assert mf["blocks_completed"] == 13
+    assert mf["failures"] == 13
+    assert mf["campaign"] == "P0"
+    assert mf["fail_bar"] == 12
+    assert mf["quarter_tally"]["quarters_complete"] == 0  # partial q0
+
+
+def test_t24_p0_root_prefix_and_de_precheck_refusal():
+    assert c.P0_ROOT_PREFIX == "workspace/p0_"
+    assert c._allows_root("workspace/p0_deadbeef")
+    assert c._allows_root("workspace/o1r_deadbeef")  # unchanged
+    assert not c._allows_root("workspace/s2c_deadbeef")  # unchanged
+    # D4: the precheck path is A208-only — P0 refuses (the campaign never
+    # requires/forces it; the cover label defaults to exploratory).
+    for arm in ("A202", "A200"):
+        with pytest.raises(c.Refusal):
+            c.run_de_precheck(root="workspace/p0_deadbeef", arm=arm,
+                              bundle=_fake_bundle(), de_fn=_fake_de_ok,
+                              file_writer=lambda p, b: None)

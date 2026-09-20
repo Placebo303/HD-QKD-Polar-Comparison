@@ -14,3 +14,11 @@ Relevance to V80: no new S2 (PEG/NB-LDPC) or S3 (rate-adaptive) refs added.
 Retry: open Zotero desktop on Windows host with local HTTP API allowed,
 then re-run the Z1 ping from this environment.
 No writes to Zotero made; only non-auth GET probes. Branch untouched.
+
+## Retry 2026-09-21 (skill: zotero-local-search, read-only)
+- Helper: `check_zotero.py` -> `connected:false, status:unavailable`
+  (`localhost:23119/api/` + WSL host fallback `10.255.255.254` both refused).
+- Verdict: still offline; searches not attempted (no real Zotero search possible).
+- Single user-side step: start Zotero desktop on the Windows host with
+  Settings → Advanced → "Allow other applications…" enabled, then re-run check.
+- Items found: none new (known: Müller ISTC 2023 FN9JZSLS only). S2/S3: unchanged.

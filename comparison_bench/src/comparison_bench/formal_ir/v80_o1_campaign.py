@@ -54,6 +54,16 @@ defaults): ``block_base`` (O1 2026095501; O1R 2026095601, paired R1<->R2),
 ``construct_trials`` (20). R1/R2 labels derive from the construct seed;
 ``--de-label covered`` carried; decode semantics, checkpoint-per-block,
 resume/window logic UNCHANGED.
+
+P0 pre-arm (P0 packet 20260920, same module, D1-D5 deltas with O1R
+defaults): new ARMS ``A202`` (m=202, leak 1074, f_super≈1.259759) +
+``A200`` (m=200, leak 1064, f_super≈1.248029), λ={2:1}, seed
+2026092001, trials 20; pins fc==0 + rank-full + twice-identical GATED,
+girth RECORDED-not-gated (R2-amendment precedent; dry pins 2026-09-20:
+A202 fc0/girth8/rank202, A200 fc0/girth8/rank200); ``block_base``
+2026095601 (paired O1R reuse, no independence claim) / ``n_blocks``
+240 (bar 12); ``campaign`` label 'P0'; ``--de-label`` defaults
+exploratory (no DE run; precheck path is A208-only and refuses P0).
 """
 
 from __future__ import annotations
@@ -82,7 +92,7 @@ from .nonbinary_field import GF2mField
 __all__ = [
     "O1_CONSTRUCT_SEED", "O1_MAX_TRIALS", "O1_BLOCK_BASE",
     "O1R_BLOCK_BASE", "O1R_N_BLOCKS", "O1R_R1_SEED", "O1R_R2_SEED",
-    "O1R_ROOT_PREFIX",
+    "O1R_ROOT_PREFIX", "P0_ROOT_PREFIX",
     "ARMS", "O1_N", "N_BLOCKS",
     "MAX_ITER", "H_L2_O1", "H_FULL_O1", "CONTENT_BITS", "D_BLIND",
     "PASS_MAX_FAILS", "F_SUPER_MAX",
@@ -114,9 +124,19 @@ O1R_R1_SEED = O1_CONSTRUCT_SEED
 O1R_R2_SEED = 2026092011
 #: Fresh additive O1R run-root prefix (O1R packet §6: workspace/o1r_<uuid8>).
 O1R_ROOT_PREFIX = "workspace/o1r_"
-#: Frozen per-arm constructor/accounting table (packet §2/§6). Pins are
-#: the hard gate (STOP-BLOCKED); sockets/parity are recorded pins from
-#: the scoping dry run (sockets 2048, parity 0 both arms).
+#: Fresh additive P0 run-root prefix (P0 packet §6: workspace/p0_<uuid8>).
+P0_ROOT_PREFIX = "workspace/p0_"
+#: P0 pre-arm arms (P0 packet §1/§5): L2-only budget points sharing the
+#: O1R paired block base (2026095601) and the O1 construction seed
+#: (2026092001); girth RECORDED-not-gated (O1R R2-amendment precedent).
+P0_ARMS = ("A202", "A200")
+#: Frozen per-arm constructor/accounting table (packet §2/§6; P0 packet
+#: §1/§5 for A202/A200). Pins are the hard gate (STOP-BLOCKED) except
+#: girth on R2/P0 arms (recorded-not-gated); sockets/parity are recorded
+#: pins from the scoping dry run (sockets 2048, parity 0 both O1 arms).
+#: P0 pins dry-measured 2026-09-20 (seed 2026092001, trials 20, n=1024):
+#: A202 fc=0/girth=8/rank=202 + twice-identical; A200 fc=0/girth=8/
+#: rank=200 + twice-identical.
 ARMS: dict[str, dict[str, Any]] = {
     "A188": {"m": 188, "four_cycles": 0, "min_girth": 8, "rank": 188,
              "lambda": {2: 1.0}, "rate": 1.0 - 188 / 1024,
@@ -124,6 +144,14 @@ ARMS: dict[str, dict[str, Any]] = {
     "A208": {"m": 208, "four_cycles": 0, "min_girth": 8, "rank": 208,
              "lambda": {2: 1.0}, "rate": 1.0 - 208 / 1024,
              "leak_bits": 208 * 5 + 64, "role": "SECONDARY (budget-max)"},
+    "A202": {"m": 202, "four_cycles": 0, "min_girth": 8, "rank": 202,
+             "lambda": {2: 1.0}, "rate": 1.0 - 202 / 1024,
+             "leak_bits": 202 * 5 + 64,
+             "role": "P0 PRIMARY (m1=6 budget point)"},
+    "A200": {"m": 200, "four_cycles": 0, "min_girth": 8, "rank": 200,
+             "lambda": {2: 1.0}, "rate": 1.0 - 200 / 1024,
+             "leak_bits": 200 * 5 + 64,
+             "role": "P0 SECONDARY (m1=8 budget point)"},
 }
 #: Frozen single-code length (packet §1): n=1024 symbols/block.
 O1_N = 1024
@@ -185,7 +213,7 @@ def block_seed(arm: str, idx: int, base: int | None = None) -> int:
     Unknown arm refuses (fail closed, rc=2).
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
     b = O1_BLOCK_BASE if base is None else base
     if isinstance(b, bool) or not isinstance(b, int):
         refuse("block base must be an integer literal")
@@ -251,7 +279,7 @@ def construct_arm(arm: str, seed: int = O1_CONSTRUCT_SEED,
     n=1024/m per arm. No re-seed; no tuning. Pure in-memory; no disk writes.
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
     m = int(ARMS[arm]["m"])
     field = GF2mField.create(s2.Q)
     lam = {int(k): float(v) for k, v in ARMS[arm]["lambda"].items()}
@@ -355,17 +383,24 @@ def leak_basis(arm: str) -> dict[str, Any]:
     (ii) System budget mapping: f_super=(m·5+64)/(1024·H_full) BUDGET
     MAPPING, not measured efficiency; L1 unconstructed, GENIE-conditioned.
     A188: 1004/852.544≈1.177652 (headroom ~104.3 b). A208:
-    1104/852.544≈1.294947 (headroom ~4.3 b — TIGHT).
+    1104/852.544≈1.294947 (headroom ~4.3 b — TIGHT). P0: A202
+    1074/852.544≈1.259759 (headroom ~34.3 b); A200 1064/852.544≈1.248029
+    (headroom ~44.3 b).
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
     m = int(ARMS[arm]["m"])
     leak = float(m * 5 + 64)
     f_super = leak / CONTENT_BITS
     f_l2 = (5 * m) / (O1_N * H_L2_O1)
-    blind_line = ("A208 blind risk: headroom ~4.3 b ⇒ any blind disclosure "
-                  "fails gate (b) (O1 packet §6).") if arm == "A208" else (
-        "A188 headroom ~104.3 b to the 1.3 bar (O1 packet §6).")
+    blind_line = (("A208 blind risk: headroom ~4.3 b ⇒ any blind disclosure "
+                   "fails gate (b) (O1 packet §6).") if arm == "A208"
+                  else ("A202 headroom ~34.3 b to the 1.3 bar "
+                        "(P0 packet §4).") if arm == "A202"
+                  else ("A200 headroom ~44.3 b to the 1.3 bar "
+                        "(P0 packet §4).") if arm == "A200"
+                  else ("A188 headroom ~104.3 b to the 1.3 bar "
+                        "(O1 packet §6)."))
     return {
         "arm": arm,
         "m": m,
@@ -432,14 +467,18 @@ def _default_rss() -> int:
 
 
 def _allows_root(root: str) -> bool:
-    """Fresh additive prefixes: O1 ``workspace/o1_<uuid>`` or O1R
-    ``workspace/o1r_<uuid>`` (O1R packet §6)."""
-    return root.startswith(ROOT_PREFIX) or root.startswith(O1R_ROOT_PREFIX)
+    """Fresh additive prefixes: O1 ``workspace/o1_<uuid>``, O1R
+    ``workspace/o1r_<uuid>`` (O1R packet §6), or P0
+    ``workspace/p0_<uuid>`` (P0 packet §6)."""
+    return (root.startswith(ROOT_PREFIX)
+            or root.startswith(O1R_ROOT_PREFIX)
+            or root.startswith(P0_ROOT_PREFIX))
 
 
 def _check_root(root: str) -> None:
     if not root:
-        refuse("root required (fresh additive workspace/o1_<uuid>)")
+        refuse("root required (fresh additive workspace/o1_<uuid>, "
+               "workspace/o1r_<uuid> or workspace/p0_<uuid>)")
     parts = Path(root).parts
     if any(p in FORBIDDEN_ROOT_PARTS for p in parts):
         refuse(f"root under forbidden tree (results/outputs_comparison): {root}")
@@ -452,6 +491,10 @@ def _de_cover_record(arm: str, de_label: str | None) -> dict[str, Any]:
     note = ("A188 rate 0.81640625 is S1-identical "
             "(rho byte-identical {10:0.098,11:0.902}); NO new DE arm needed "
             "(O1 packet §2/scoping §3).") if arm == "A188" else (
+        "A202/A200 rates 0.802734375/0.8046875 are new (no S1 cover); "
+        "P0 runs NO new DE — default 'exploratory' carried "
+        "(run_de_precheck is A208-only and refuses P0 arms; gates "
+        "unchanged; P0 packet §5/D4).") if arm in P0_ARMS else (
         "A208 rho differs ({9:0.141,10:0.859}); A208-DE pre-check decides "
         "the cover label (O1 packet §3). Campaign proceeds regardless: "
         "pass → DE-covered secondary; fail/marginal → exploratory WITHOUT "
@@ -480,11 +523,12 @@ def _build_manifest(*, arm: str, construction: dict, rows: list[dict],
     bar = fail_bar(nb)
     rep = replication_label(construction.get("construct_seed",
                                              O1_CONSTRUCT_SEED))
-    campaign = ("O1" if (bb == O1_BLOCK_BASE and nb == N_BLOCKS
-                         and construction.get("construct_seed")
-                         == O1_CONSTRUCT_SEED
-                         and construction.get("construct_trials")
-                         == O1_MAX_TRIALS)
+    campaign = ("P0" if arm in P0_ARMS
+                else "O1" if (bb == O1_BLOCK_BASE and nb == N_BLOCKS
+                              and construction.get("construct_seed")
+                              == O1_CONSTRUCT_SEED
+                              and construction.get("construct_trials")
+                              == O1_MAX_TRIALS)
                 else "O1R-replication")
     return {
         "arm": arm,
@@ -495,9 +539,16 @@ def _build_manifest(*, arm: str, construction: dict, rows: list[dict],
             "label_source": ("derived from construct seed "
                              "(O1R packet §5: 2026092001→R1, "
                              "2026092011→R2)"),
-            "paired_note": ("R1<->R2 share block seeds base+idx "
-                            "(paired streams; same seed ⇒ same channel "
-                            "triple); O1 o1_blk: stream domain kept"),
+            "paired_note": (("P0 shares block seeds base+idx with O1R "
+                             "(paired reuse 2026095601+idx, idx=0..239; "
+                             "same frames at different m is the "
+                             "paired-design norm; NO independence claim "
+                             "P0<->O1R; O1 o1_blk: stream domain kept; "
+                             "P0 packet §3)")
+                            if arm in P0_ARMS else
+                            ("R1<->R2 share block seeds base+idx "
+                             "(paired streams; same seed ⇒ same channel "
+                             "triple); O1 o1_blk: stream domain kept")),
         },
         "n_blocks": nb,
         "fail_bar": bar,
@@ -521,14 +572,17 @@ def _build_manifest(*, arm: str, construction: dict, rows: list[dict],
                      f"trials {construction.get('construct_trials')}; "
                      f"construct-twice-identical required; mismatch halts "
                      f"STOP-BLOCKED"
-                     if construction.get("construct_seed") != O1R_R2_SEED
+                     if (construction.get("construct_seed") != O1R_R2_SEED
+                         and arm not in P0_ARMS)
                      else f"fc=0/girth-measured-"
                      f"{construction.get('min_girth')}-recorded-not-"
                      f"gated/rank-full asserted pre-run ({arm}; "
-                     f"R2 constructor seed "
+                     f"{'R2' if construction.get('construct_seed') == O1R_R2_SEED else 'P0'}"
+                     f" constructor seed "
                      f"{construction.get('construct_seed')}/trials "
                      f"{construction.get('construct_trials')}; "
-                     f"Amendment 2026-09-21; construct-twice-"
+                     f"{'Amendment 2026-09-21' if construction.get('construct_seed') == O1R_R2_SEED else 'P0 packet §5/D3'}; "
+                     f"construct-twice-"
                      f"identical required; mismatch on gated fields "
                      f"halts STOP-BLOCKED"),
             "sockets_parity": {"sockets": construction.get("total_sockets"),
@@ -709,7 +763,10 @@ def _construct_gate(arm: str, construct_fn: Callable,
 
     R1 (seed 2026092001, incl. O1 default) asserts four_cycles=0,
     min_girth=8, rank=m; R2 (seed 2026092011) asserts four_cycles=0 and
-    rank=m ONLY — min_girth is recorded as-measured (no gating).
+    rank=m ONLY — min_girth is recorded as-measured (no gating). P0 arms
+    (A202/A200, any seed) follow the R2 rule: fc==0 + rank-full +
+    construct-twice-identical GATED, girth RECORDED-not-gated
+    (P0 packet §5/D3; dry pins 2026-09-20: A202 girth 8, A200 girth 8).
     Any other seed follows the strict R1 rule. Construct-twice-identical
     required on all seeds; mismatch on a GATED field halts STOP-BLOCKED;
     unknown arm refuses (rc=2). No alternate seeds; no tuning.
@@ -717,7 +774,7 @@ def _construct_gate(arm: str, construct_fn: Callable,
     ``construct_arm``.
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
     if isinstance(seed, bool) or not isinstance(seed, int):
         refuse("construct seed must be an integer")
     if isinstance(trials, bool) or not isinstance(trials, int) or trials < 1:
@@ -752,7 +809,7 @@ def _construct_gate(arm: str, construct_fn: Callable,
     if fc != int(spec["four_cycles"]):
         refuse(f"{arm} four_cycles {fc} != {spec['four_cycles']} "
                f"(STOP-BLOCKED; O1 packet §2; measured girth {girth})")
-    is_r2 = int(seed) == int(O1R_R2_SEED)
+    is_r2 = int(seed) == int(O1R_R2_SEED) or arm in P0_ARMS
     if not is_r2 and girth != int(spec["min_girth"]):
         refuse(f"{arm} min_girth {girth} != {spec['min_girth']} "
                f"(STOP-BLOCKED; O1 packet §2)")
@@ -794,7 +851,7 @@ def execute(*, root: str, arm: str,
     (``de_label`` defaults 'exploratory' if absent).
     """
     if arm not in ARMS:
-        refuse(f"unknown arm {arm} (frozen: A188|A208 only)")
+        refuse(f"unknown arm {arm} (frozen: A188|A208|A202|A200 only)")
     if de_label is not None and de_label not in DE_LABELS:
         refuse(f"unknown de-label {de_label} (frozen: covered|exploratory)")
     if isinstance(block_base, bool) or not isinstance(block_base, int):
@@ -1077,7 +1134,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.execution_authorized:
         refuse("refusing: --execution-authorized missing (rc2 pre-anything)")
     if args.arm not in ARMS:
-        refuse(f"unknown arm {args.arm} (frozen: A188|A208 only)")
+        refuse(f"unknown arm {args.arm} (frozen: A188|A208|A202|A200 only)")
     if args.de_label and args.de_label not in DE_LABELS:
         refuse(f"unknown de-label {args.de_label} (frozen: covered|exploratory)")
     if args.resume_from and args.root and args.root != args.resume_from:
@@ -1096,10 +1153,12 @@ def main(argv: list[str] | None = None) -> int:
         refuse("construct-trials must be a positive int")
     root = args.resume_from or args.root
     if not root:
-        refuse("root required (fresh additive workspace/o1_<uuid>)")
+        refuse("root required (fresh additive workspace/o1_<uuid>, "
+               "workspace/o1r_<uuid> or workspace/p0_<uuid>)")
     if not _allows_root(root):
-        refuse(f"root must be fresh additive {ROOT_PREFIX}<uuid> or "
-               f"{O1R_ROOT_PREFIX}<uuid> (got {root})")
+        refuse(f"root must be fresh additive {ROOT_PREFIX}<uuid>, "
+               f"{O1R_ROOT_PREFIX}<uuid> or {P0_ROOT_PREFIX}<uuid> "
+               f"(got {root})")
     if args.de_precheck:
         if args.resume_from:
             refuse("de-precheck takes no --resume-from (fail closed)")
