@@ -4647,3 +4647,15 @@ crossed its finite-length operating region.
 - b2c new family / other rework-memo options: remain pending main-thread decision — not decided here.
 
 **Consequences**: estimator-only route closed evidence-only; next route decision (b2c new family vs other memo options vs stopping) belongs to the main thread; no S3/qualification/real-data claim; claim ceiling unchanged (synthetic; single-code acceptance; gate (b) uses measured D-u1 per the Amendment).
+
+### 2026-09-21: b2f soft-marginal L2 two-arm PASS — first genie-free config under frozen f-accounting; b2g replication pending
+
+**Decision**: record — b2f two-arm PASS (soft Bayes-marginal L2 prior, exact u1 marginalization in the prior; no genie u1 fed to the decoder): F208 (m=208, f_super 1.294947, leak 1104 b) 0/240 FER 0.0, iters 7–23, decode mean 2.77 s; F202 (m=202, f 1.259759, leak 1074 b) 6/240 FER 0.025 all max_iter_reached; gates (a) fails/240≤12 and (b) f≤1.3 PASS both arms. First genie-free configuration under the frozen f-accounting (whole-frame + 64-bit tag, superframe n=1024). Batch-end review PASS (BFR-1..4 non-blocking).
+
+**Context**: Contrast with b2e — hard-argmax conditioning on a wrong u1 kills BP (13/13 FAIL, ~8 mismatches/block) while the exact soft marginalization (Bayes prior π(e)=Σ_u1 γ1(u1|b)·γ2(y⊕e|u1,b), deterministic in b) is robust. FXR-1 correction: measured marginal prior entropy ≈852.5 ≈ H_full·n, ~26 b/block FLATTER than genie rows 826.27 — prior entropy is NOT a valid proxy for BP convergence; no entropy-parity reading. Paired seeds 2026095601+idx (shared O1R/P0/L1B/b2e, no independence claim); single construct seed 2026092001/trials 20 on A208/A202 instances. Records in `docs/research_cycles/V80-NBLDPC-JAN21/B2F_RESULT_20260921.md` + `B2F_BATCH_END_REVIEW_20260921.md`.
+
+**Alternatives considered**:
+- Estimator-only / hard-argmax genie retirement (b2e path): rejected empirically — MAP-u1 13/13 FAIL; the exact soft marginalization is the robust substitute for argmax, not a tuned estimator.
+- Entropy-parity reading of the marginal prior: rejected — FXR-1 shows prior entropy is not a decodability proxy (flatter prior still decodes).
+
+**Consequences**: claim ceiling synthetic; no cross-arm pooling; genie-retirement wording NOT established until the two-construct-seed replication (b2g) passes; no S3/real-data/qualification/publication claim. Next step: b2g two-construct-seed replication (fresh construct seed, e.g. F208) before any genie-retirement wording.
