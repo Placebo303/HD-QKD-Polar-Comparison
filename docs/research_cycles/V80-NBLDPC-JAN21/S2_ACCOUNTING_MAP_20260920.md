@@ -19,6 +19,11 @@ Frozen formula: f_super=(4·(5·(m₂+m₁))+64)/(1024·H_full), H_full=0.832562
 
 - Under frozen convention, m₂=47 achieves f≈1.2246 < 1.3 budget ⇒ S2
   construction target feasible only at superframe n=1024 (n=256 single-frame impossible).
+  [2026-09-20 wording correction — history retained, claim narrowed:
+  预算可容纳，构造与 FER 待验证. Budget 1.2246 < 1.3 holds BUT depends on
+  L1≈2 rows, four frames sharing one 64-bit tag, zero extra disclosure;
+  headroom is only 64.31 bits/superframe (1108.31−1044); L1 actual redundancy
+  + blind-reconciliation extra disclosure must still be counted.]
 - Row budget: m_total=49 rows × 5 bits per 256-frame; superframe leak 4×245+64=1044.
 - Construction rate (frame-layer basis, labelled): 1−49/256≈0.8085. FER≤5% goal unchanged.
 

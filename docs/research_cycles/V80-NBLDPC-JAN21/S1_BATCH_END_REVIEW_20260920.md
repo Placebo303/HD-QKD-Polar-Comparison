@@ -42,6 +42,10 @@
   `status="ok"` (runner:899); 9 rows >300 s, 0/539 overrun labels; gate
   screens `status=="ok"` so overrun rows are gate-eligible. This instance
   unaffected (overruns confined to 0-converged SECONDARY-confirm).
+  [2026-09-20 wording: 超时返回后停机 — `run_once` checks dt AFTER the call
+  returns (~runner.py:646) then halts subsequent calls, NOT a hard preemptive
+  timeout. Old root retains 9 rows >300 s with 0 overrun labels; the new-code
+  fix does NOT retroactively relabel old rows.]
 - **BER-2 (S2-blocking)**: P3 reproducibility — PRIMARY pass rests on one
   m₂=47 1/9 confirm candidate; confirm single-seed by code design
   (runner:837-839 vs declared 2 seeds); non-monotonic convergence.
@@ -62,7 +66,7 @@
 ## Addendum 2026-09-20 — BER-1/BER-2 re-review (EXPLORE, review-only)
 
 - Source: independent reviewer-go re-review (inspection-only; suite not re-run).
-- CLAIM-1 PASS (REV-1/REV-2): overrun honestly labelled (`_row` status carried; overrun call sites screen/confirm/repro); `evaluate_gate` / `evaluate_flip_rule` / `_find_cached_fit` remain `status=="ok"`-gated so overruns stay excluded from converged-pass computation; `_validate_partial` `completed == n_ok + n_overrun` is the minimal change preserving resume of overrun-halted partials, no-retry intact.
+- CLAIM-1 PASS (REV-1/REV-2): overrun honestly labelled (`_row` status carried; overrun call sites screen/confirm/repro); `evaluate_gate` / `evaluate_flip_rule` / `_find_cached_fit` remain `status=="ok"`-gated so overruns stay excluded from converged-pass computation; `_validate_partial` `completed == n_ok + n_overrun` is the minimal change preserving resume of overrun-halted partials, no-retry intact. [2026-09-20 wording: 超时返回后停机, NOT hard preemptive; fix is prospective only — old rows stay 0-overrun-labelled; resuming the old root (same hash) does NOT substitute for a new grant + historical-label handling.]
 - CLAIM-2 PASS (REV-3/REV-4/REV-5): `config_hash == recorded_hash == 60ab1e44…0da` unchanged (restart `seed+r*7919` is gate-local, outside `frozen_config`); m₂=47 5/5 + 5/5 both seeds (bar ≥3/5), pooled converged range 0.000559 ≤ 0.04 ⇒ G-REPRO PASS with no post-hoc m selection, no threshold tuning, no retry-on-failure; every row carries `f_row` + `f_superframe` (dual-unit reporting satisfied).
 - REV-6: no scope creep, no S2/S3 advance; frozen thresholds/budgets/seeds unchanged; fresh root `workspace/s1_repro_26483764` only; old roots untouched.
 - Suite 54 passed + 6 subtests cited from PREEXEC, not re-executed here.

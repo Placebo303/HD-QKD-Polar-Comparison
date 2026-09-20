@@ -4459,7 +4459,7 @@ crossed its finite-length operating region.
 - Finish the grid: rejected — cost/value (≈5 h for near-zero-value slots).
 - Silent resume-later: rejected — requires a new grant.
 
-**Consequences**: Batch closed pending batch-end review; PRIMARY raw gate noted without interpretation; claim ceiling pending; no S2/S3 authorization; pre-S2 items: P1 status-label defect (rows hardcode status="ok", 0/539 overrun labels) + P1 fix deferred, P3 reproducibility concern.
+**Consequences**: Batch closed pending batch-end review; PRIMARY raw gate noted without interpretation; claim ceiling pending; no S2/S3 authorization; pre-S2 items: P1 status-label defect (rows hardcode status="ok", 0/539 overrun labels; [2026-09-20 wording: 超时返回后停机 — run_once checks dt AFTER the call returns (~runner.py:646) then halts subsequent calls, NOT hard preemptive; old-root 9 rows >300 s stay 0-overrun-labelled, fix is prospective only]) + P1 fix deferred, P3 reproducibility concern.
 
 ### 2026-09-20: V80 f-accounting convention frozen (whole-frame with tag + superframe n=1024)
 
@@ -4477,10 +4477,22 @@ crossed its finite-length operating region.
 
 **Decision**: Close the V80 S1 batch (rerun halt accepted 2026-09-20); record BER-1 status-label fix and G-REPRO BER-2 clearance as pre-S2 gates pending independent re-review verdict. No S2 entry authorized.
 
-**Context**: Batch-end review PASS_WITH_FINDINGS closed the batch (final ledger PRIMARY 420 / SECONDARY 119 / SETUP 12 / TOTAL 539; SECONDARY m24 0/24; 61 confirm slots abandoned); BER-1 fixed (honest `_row` status, `_validate_partial` completed==n_ok+n_overrun, suite 54+6, hash unchanged); G-REPRO PASS (m2=47 10/10 converged, f_layer 1.1373-1.1379, f_super 1.22457); f-convention frozen (whole-frame with tag + superframe n=1024).
+**Context**: Batch-end review PASS_WITH_FINDINGS closed the batch (final ledger PRIMARY 420 / SECONDARY 119 / SETUP 12 / TOTAL 539; SECONDARY m24 0/24; 61 confirm slots abandoned); BER-1 fixed (honest `_row` status, `_validate_partial` completed==n_ok+n_overrun, suite 54+6, hash unchanged; [2026-09-20 wording: 超时返回后停机, NOT hard preemptive; old rows NOT retroactively relabelled; resuming the old root (same hash) does NOT substitute for a new grant + historical-label handling]); G-REPRO PASS (m2=47 10/10 converged, f_layer 1.1373-1.1379, f_super 1.22457); f-convention frozen (whole-frame with tag + superframe n=1024).
 
 **Alternatives considered**:
 - Authorize S2 entry on G-REPRO PASS alone: rejected — BER-1 re-verify and independent re-review verdict still outstanding.
 - Map the S2 gate to layer-unit f=1.1375 without tag accounting: rejected — S2 prereg must map the layer-unit gate basis (m2=47, f=1.1375) to the frozen whole-frame+tag superframe accounting.
 
 **Consequences**: S1 batch closed; S2 prereg must carry the layer-to-whole-frame+tag mapping; IEEE 11440984 full text still needed [gap]; this entry authorizes no execution.
+
+### 2026-09-20: V80 review corrections applied; S2 entry packet frozen (NOT granted)
+
+**Decision**: Applied the 5 review wording corrections; froze S2_ENTRY_PACKET G-S2ENTRY + prompt; independent review PASS with no blocking issues.
+
+**Context**: S1 accepted as diagnostic-batch close only (G-REPRO m47 10/10, dual-seed 5/5, range 0.00056; SECONDARY m24 0/24); closes the "(pending re-review)" qualifier on the 2026-09-20 batch-closed entry.
+
+**Alternatives considered**:
+- Entering S2 now: rejected — needs fresh grant + Pre-EXECUTE + §4 evidence.
+- Treating headroom/FER math as success evidence: rejected — budget-accommodating only.
+
+**Consequences**: S2 gated, not authorized; S1 claim ceiling stays synthetic DE-ensemble only; no FER/SKR/qualification/promotion; no push.

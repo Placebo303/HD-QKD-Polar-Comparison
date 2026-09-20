@@ -30,3 +30,11 @@ Branch: formal-ir-v72p1-addendum-clean (no switch/commit/push; none done).
 - Mechanism: bounded resume script /tmp/opencode/s1_resume_loop.sh (80-turn cap, manual relaunch per completion, no daemon/cron); loop killed first, then runner; 2 external (tool-bridge) respawn waves killed; stand-down confirmed; inert now.
 - Quiescence verified 6×60s empty; no scheduler.
 - Resume constraint: partial resumable ONLY while config-hash stays 60ab1e44…0da; any hash-rotating runner edit makes it hash-foreign — resume-before-edit decision if ever needed.
+
+## H6 — timeout-semantics wording correction (2026-09-20, docs-only)
+- Accurate statement: 超时返回后停机 — `run_once` checks dt AFTER the call
+  returns (~runner.py:646), then halts subsequent calls. NOT a hard preemptive
+  timeout (no in-call interrupt).
+- Old root retains 9 rows >300 s with 0 overrun labels; the new-code fix does
+  NOT retroactively relabel old rows; resuming the old root (same hash) does
+  NOT substitute for a new grant + historical-label handling.
