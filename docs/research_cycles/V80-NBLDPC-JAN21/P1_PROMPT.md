@@ -11,3 +11,5 @@
 - Deliverables: `P1_RESULT_*.md` + `rows.json` + `block_accounting.csv` per root; append-only `EXPLORATION_LOG.md`; one batch-end independent review.
 - Interpretation: PASS ⇒ report (P3→P5 path); FAIL ⇒ return (P4-mandatory path); no rerun/tuning; no S3. Synthetic only; no pooling across instances; never quote f_exp as f_eff if F > 0. Does NOT establish FER/route/S3/qualification/real-data claims.
 - Pre-EXECUTE Q0–Q6 + fresh explicit user grant required before ANY execution. This prompt authorizes NOTHING.
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved there; retained for history.

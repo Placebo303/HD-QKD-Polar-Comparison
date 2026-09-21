@@ -39,3 +39,5 @@
 
 17. Claim ceiling: real-data `H_full` with uncertainty, per-plane decomposition, memory/stationarity diagnostics. Does NOT establish FER, SKR, an operating point, a route decision, qualification, or a publication number. A positive drift/memory result escalates to the main thread (it would invalidate synthetic→real transfer) — the operator reports it and draws no conclusion.
 18. **Pre-EXECUTE Q0–Q6 + the signed user grant are required before ANY execution. This prompt authorizes NOTHING.**
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved there; retained for history. (Note F-7: item 4's both-member probe text is stale; the amended packet §2/A1 governs.)

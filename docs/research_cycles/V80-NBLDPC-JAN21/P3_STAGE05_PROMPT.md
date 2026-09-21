@@ -37,3 +37,5 @@
 
 14. Claim ceiling: file-identity verdict + span table + config survey. Does NOT establish `H_full`, alignment, FER, SKR, a route decision, qualification, or a publication number. A `getConfiguration()` payload that supplies channel roles/gates is a recommendation (branch-B FITTED → READ-FROM-FILE candidate) for the main thread — the operator decides nothing.
 15. **Pre-EXECUTE Q0–Q5 + the signed user grant are required before ANY execution. This prompt authorizes NOTHING.**
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved there; retained for history.

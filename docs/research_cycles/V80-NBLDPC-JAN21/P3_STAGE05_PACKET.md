@@ -80,3 +80,5 @@ Authority: `docs/TTBIN_MEMBER_SEMANTICS_20260921.md` §§A–B,E. The reported s
 - Entry: (a) alias + `PYTHONPATH` smoke (no data: `install_timetagger_alias()` then `from TimeTagger import FileReader` resolves; `import qkd_io.ttbin_pipeline` clean); (b) Q0–Q5 Pre-EXECUTE recorded (intended branch context, scoped cleanliness, frozen contract §§1–8, output-absence + `rg` proofs, focused no-data tests); (c) FRESH EXPLICIT USER GRANT in `P3_STAGE05_PREREG_AND_AUTH.md` signature block. This packet is NOT a grant.
 - `[BLOCKING: needs user input]` — the signature, the UUID, and the G3 tolerance confirmation.
 - Deliverables: 10× `<id>.json` + `duration_table.md` + `config_notes.md` + `INDEPENDENT_ACCEPTANCE.md` after independent batch-end review, then main-thread acceptance. Prompt: `P3_STAGE05_PROMPT.md`.
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved to the consolidated baseline. This file is retained as history. Executed evidence and review verdicts recorded here remain authoritative; do not cite its frozen clauses as current without checking the baseline.

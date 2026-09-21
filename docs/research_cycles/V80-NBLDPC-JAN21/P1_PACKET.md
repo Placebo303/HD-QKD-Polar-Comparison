@@ -70,3 +70,5 @@
 - Arm count: 6 total — 2 frozen 2M arms (§4, NOT re-run) + 2 new 1M arms + 2 new 1.5M arms (pending). Budget: per-arm wall ≤ 3600 s (§7 rule kept); **new-arm ceiling 4 × 3600 s = 14400 s; package ceiling 6 × 3600 s = 21600 s** (unspent budget is NOT authorization).
 - Gates kept: (a) final fails/240 = 0 HARD; (b) f ≤ 1.3 on the arm's OWN source basis; (c) headroom ≥ 21.5 b on the arm's OWN cap. §7 STOP/repair/forbidden rules apply unchanged per arm (plus per-source channel binding).
 - This amendment authorizes NOTHING (execution needs X1 evidence + Q0–Q6 + fresh explicit grant per arm).
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved to the consolidated baseline. This file is retained as history. Executed evidence and review verdicts recorded here remain authoritative; do not cite its frozen clauses as current without checking the baseline.

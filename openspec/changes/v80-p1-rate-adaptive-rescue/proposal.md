@@ -25,3 +25,5 @@
 ## Affected specs
 
 - `specs/v80-p1-rate-adaptive-rescue/spec.md` (delta: rescue procedure, gates, budgets, forbidden list).
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved to the consolidated baseline; retained for history. No new OpenSpec change created (consolidation is documentation-only).

@@ -53,3 +53,5 @@
 - Entry: (a) executors built per §6; (b) Q0–Q6 Pre-EXECUTE per arm (branch; scope cleanliness; frozen contract §§1–6; output-absence + rg proofs — `p2_` absent, `2026094951/52` hits only in S1 docs+runner; focused tests incl. dry joint-sampler check (i) and dry-construct pins for new m points (ii)); (c) FRESH EXPLICIT USER GRANT per arm ("P2-DE execute" / "P2-curve execute" — this freeze is NOT a grant).
 - Deliverables: `P2_DE_RESULT.md` (f_DE per seed, agreement gate) + `P2_CURVE_RESULT.md` (per-point FER/censor state, monotonicity report, coverage table) + `rows.json` + `block_accounting.csv` (arm ii) per root; assembly note computing §5 (or recording non-reproducibility/unresolved). Prompt: `P2_PROMPT.md`.
 - Batch: ONE append-only `EXPLORATION_LOG.md` + ONE batch-end independent review (no per-arm review). This packet authorizes NOTHING.
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved to the consolidated baseline. This file is retained as history. Executed evidence and review verdicts recorded here remain authoritative; do not cite its frozen clauses as current without checking the baseline.

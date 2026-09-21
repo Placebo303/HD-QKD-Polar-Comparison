@@ -33,3 +33,5 @@
 ## Affected specs
 
 - `specs/v80-p3-real-hfull-census/spec.md` (delta: census estimator + bias/uncertainty rule, memory/stationarity battery, alignment gating decision tree, conditional certification arithmetic, gated execution with explicit grant).
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved to the consolidated baseline; retained for history. No new OpenSpec change created (consolidation is documentation-only).

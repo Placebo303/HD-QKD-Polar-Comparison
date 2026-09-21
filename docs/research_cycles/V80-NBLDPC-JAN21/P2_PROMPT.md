@@ -11,3 +11,5 @@
 - Deliverables: `P2_DE_RESULT.md` + `P2_CURVE_RESULT.md` + assembly note + machine artifacts per root; append-only `EXPLORATION_LOG.md`; one batch-end independent review.
 - Precedence: P1 first; P2-(i) may parallel; P2-(ii) assembles after P1 Stage-1; never re-measure m = 200 here. Synthetic only; no pooling; no off-channel extrapolation. Does NOT establish FER/SKR/qualification/real-data claims.
 - Pre-EXECUTE Q0–Q6 + fresh explicit user grant required per arm before ANY execution. This prompt authorizes NOTHING.
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved there; retained for history.

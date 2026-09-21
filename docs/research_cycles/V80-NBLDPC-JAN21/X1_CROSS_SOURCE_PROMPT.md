@@ -11,3 +11,5 @@
 - Deliverables: `X1_RESULT_*.md` + `rows.json` + `block_accounting.csv` per root; append-only `EXPLORATION_LOG.md`; one batch-end independent review.
 - Interpretation: PASS/FAIL per frozen gates ⇒ report to main thread (P1 per-source bases consume X1, never assume it); no rerun/tuning; no S3. Synthetic per-source curves only; no generality claim by itself. Does NOT establish FER/route/S3/qualification/real-data claims.
 - Pre-EXECUTE Q0–Q6 + fresh explicit user grant required before ANY execution. This prompt authorizes NOTHING.
+
+> **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved there; retained for history.
