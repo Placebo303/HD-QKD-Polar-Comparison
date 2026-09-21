@@ -4795,3 +4795,17 @@ crossed its finite-length operating region.
 - Adopt the review's "negative SKR ceiling" phrasing: rejected — contradicts frozen V80 net accounting (G7 legacy).
 
 **Consequences**: no frozen accounting quantity, gate, threshold or packet changed; no execution authorized; adopting an amortization/reuse statement, a disclosure-route decision (sacrifice-sample vs disclose-statistic), or corrected S3 block counts requires a future OpenSpec change; no FER/SKR/route/qualification/publication claim; no commit/push.
+
+### 2026-09-21: V80 Step-1 prior-cost decision — sacrifice-the-sample default, key-eligible counts 200/276/364, F-3 A1-only ratification, 1M-led headlines (docs-only)
+
+**Decision**: execute baseline §6-step-1 via `docs/PRIOR_COST_ACCOUNTING_DECISION_20260921.md` (docs-only, zero cost). (1) Amortization: one-time pool model (honest pool ratio 0.12–0.26×); per-source 1.50× figure binds. (2) Disclosure route: sacrifice-the-sample DEFAULT (cost in SKR numerator only, f untouched); disclose-the-statistic PERMITTED-BUT-NOT-DEFAULT with m→201 relocation. (3) Block counts corrected to key-eligible 200/276/364 (corrects `P3_CENSUS_PACKET.md:43`). (4) F-3 ratified as A1-only grant; tolerances ±0.01/0.02 CONFIRMED; 2M alone carries A208, generality headlines LEAD with 1M. Baseline §5 (ii)+(iii) SETTLED, (i) partially settled, (iv) OPEN; §6-step-1 DONE; §7 items 2–6 RATIFIED.
+
+**Context**: baseline `docs/V80_BASELINE_20260921.md` §6-step-1 unlocked all SKR/publication talk and fixed §5 (ii)+(iii); user ratified all seven §7 recommendations with step order 1→2→3 and P1-2M/P2 frozen until X1. Prior `gamma_f03.npz` is read-only across O1/O1R/P0/L1B/B2E/B2F/B2G/X1 (one-time calibration); cross-source reuse FORBIDDEN (`X1_CROSS_SOURCE_PACKET.md:32`); 60/20/20 split makes prior 1.50× key per source (`PRIOR_COST_CLAIM_REVIEW_20260921.md` §2c); 36 b disclosure is 8.36× the 4.3075 b A208 headroom (m≤201, unmapped 188–208 cliff).
+
+**Alternatives considered**:
+- Disclose-the-statistic as default: rejected — 36 b costs 8.36× headroom, forces m 208→201 into the unmapped cliff, and needs λ_total re-certification.
+- Per-packet-recalibration (51–256×) or withdrawn 1.8× as planning number: rejected — wrong model / unit artifact (≈1.856); honest pool figure is 0.12–0.26×.
+- Sibling zero-PE-leakage as transferable proof: rejected — scope exclusion (`public_ec_only_not_secure`, `composable_security_claim_flag=0`).
+- Parameterize-the-prior now: deferred — decoder-equivalence UNMEASURED (§5-iv OPEN, FXR-1).
+
+**Consequences**: future S3/SKR packets must exclude the calibration sample from key and report forgone key, use 200/276/364 (never 500/691/911), use own-H_MM per-source f, lead generality headlines with 1M, and re-derive m + map the 188–208 cliff before any disclose-the-statistic choice; certifiability (N_req 15438/2708/1754 ≫ 200/276/364) only strengthens; no operating point, FER/SKR/route/qualification/publication claim; no execution/data/commit/push authorized.
