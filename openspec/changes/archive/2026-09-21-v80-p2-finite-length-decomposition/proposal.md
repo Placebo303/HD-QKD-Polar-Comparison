@@ -27,3 +27,11 @@
 - `specs/v80-p2-finite-length-decomposition/spec.md` (delta: DE point, curve partition + precedence, assembly rule, budgets).
 
 > **SUPERSEDED 2026-09-21 by `docs/V80_BASELINE_20260921.md`** — planning authority moved to the consolidated baseline; retained for history. No new OpenSpec change created (consolidation is documentation-only).
+
+> **ARCHIVED 2026-09-21 — SUPERSEDED BEFORE EXECUTION.** Planning authority moved to
+> `docs/V80_BASELINE_20260921.md` (§0.1 retained-clause index). This change was frozen
+> but NEVER executed and NEVER granted; its spec delta is intentionally NOT merged into
+> `openspec/specs/`. Retained for history. Do not cite its frozen clauses as current
+> without checking the baseline. Note: the banner's earlier closing sentence
+> "No new OpenSpec change created (consolidation is documentation-only)" is falsified by
+> the subsequent creation of `openspec/changes/v80-prior-cost-accounting/`.
