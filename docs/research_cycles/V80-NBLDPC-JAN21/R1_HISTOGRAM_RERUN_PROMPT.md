@@ -1,3 +1,5 @@
+> **Amendment 2026-09-21 (main-thread decision — bootstrap NOT waived; stale row-B text annotated).** Steps 13/19/30 below still carry the WITHDRAWN Row B / NO-CI budget alternative. Bootstrap (≥200 resamples, frozen seed 20260921) is REQUIRED with no waiver; the single budget ceiling is per-read ≤300 s, per-dataset ≤1800 s, trio ≤5400 s, RSS <4 GiB, 0 decoder/DE/graph calls. Authoritative sources: `R1_HISTOGRAM_RERUN_PACKET.md` §2.8 and `R1_HISTOGRAM_RERUN_PREREG_AND_AUTH.md` §3 (the packet amendment of 2026-09-21 explicitly left the prereg/prompt files untouched; this annotation closes the resulting stale-text gap per the P3-A1-REVIEW F-7 precedent). This note is additive; no other prompt text is modified.
+
 # R1 Operator Prompt (2026-09-21) — FROZEN, NOT GRANTED
 
 - Track **DECIDE** (real/raw data, claim-bearing). Branch context `formal-ir-v72p1-addendum-clean`; publication branch `formal-ir-v80-nbldpc-jan21` untouched. No switch, no commit, no push, no PR. ID **G-R1**: frozen only, authorizes NOTHING.

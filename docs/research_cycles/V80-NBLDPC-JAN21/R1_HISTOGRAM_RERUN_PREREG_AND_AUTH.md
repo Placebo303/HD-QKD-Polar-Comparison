@@ -1,3 +1,7 @@
+> **Amendment 2026-09-21 (main-thread decision — authorization mode switched to conversation grant for this cycle; administrative ratification to follow, F-3 precedent).** The user waives the handwritten-signature requirement and grants execution by chat message (verbatim: "还是改成对话授权模式吧，这样有点复杂了，我授权你可以完成docs/research_cycles/V80-NBLDPC-JAN21/R1_HISTOGRAM_RERUN_PREREG_AND_AUTH.md中提到的部分"). This grant covers the §7 execution authorization (Acceptance ID G-R1) AND the §8 ratifications (F-3 A1-only grant; ±0.01/0.02 tolerance confirmations), strictly within the frozen contract of `R1_HISTOGRAM_RERUN_PACKET.md` and this preregistration — no frozen scientific input, gate, threshold, seed, budget ceiling, or stop rule is changed. The §7/§8 signature blocks remain BLANK by design (no signatures are forged); the verbatim chat grant above is the authorization of record, is quoted in the Pre-EXECUTE record, and the paperwork deviation is flagged for administrative ratification after the independent Pre-RESULT review (P3-A1-REVIEW F-3 precedent: chat grant accepted with the scientific-impact assessment recorded). This conversation-grant mode applies to THIS cycle only; making it a standing project mode would be an AGENTS.md/OpenSpec workflow change and is not claimed here.
+
+> **Administrative ratification 2026-09-21 (post-Pre-RESULT, main thread).** The independent Pre-RESULT review (`R1_PRERESULT_REVIEW.md`, PASS_WITH_FINDINGS, no blocking findings) verified that the conversation-grant paperwork deviation had nil scientific impact: all frozen scientific inputs, gates, thresholds, seeds, budgets, and stop rules UNCHANGED; every estimator/design-point/gate number independently recomputed from the persisted artifacts. Per the P3-A1-REVIEW F-3 precedent, the main thread ratifies the §7 execution grant and the §8 ratifications as given by conversation grant, for THIS cycle only. This does not establish a standing conversation-grant mode (that would be an AGENTS.md/OpenSpec workflow change and is not claimed here).
+
 # R1 Histogram Re-run — PREREG_AND_AUTH (2026-09-21) — DRAFT_PENDING_AUTHORIZATION
 
 > **Amendment 2026-09-21 (main-thread decision — bootstrap NOT waived).**
@@ -5,7 +9,7 @@
 > budget alternative is WITHDRAWN. Single budget ceiling: per-read ≤300 s, per-dataset ≤1800 s,
 > trio ≤5400 s total, RSS <4 GiB, 0 decoder/DE/graph calls. Signature block remains BLANK.
 
-- Track: **DECIDE** (real/raw acquisition data; outputs correct published design points and feed the X1 route campaign). Status: `DRAFT_PENDING_AUTHORIZATION`. Branch context: `formal-ir-v72p1-addendum-clean` (publication branch `formal-ir-v80-nbldpc-jan21` — not touched). No switch, no commit, no push, no PR.
+- Track: **DECIDE** (real/raw acquisition data; outputs correct published design points and feed the X1 route campaign). Status: `AUTHORIZED-BY-CHAT-GRANT-2026-09-21 (see top amendment note; §7/§8 signature blocks intentionally blank)`. Branch context: `formal-ir-v72p1-addendum-clean` (publication branch `formal-ir-v80-nbldpc-jan21` — not touched). No switch, no commit, no push, no PR.
 - Packet (frozen contract): `docs/research_cycles/V80-NBLDPC-JAN21/R1_HISTOGRAM_RERUN_PACKET.md` (Acceptance ID **G-R1**). Operator prompt: `R1_HISTOGRAM_RERUN_PROMPT.md`.
 - **Nothing has been executed. No `.ttbin` has been opened. No decoder, DE, graph, or `tools/*` call has been made. No workspace root has been created. No output has been written.**
 - Compact DECIDE form permitted by `AGENTS.md` §10.3 / `docs/research-cycle-sop.md` §4: this file + `RESULT.md` + `INDEPENDENT_ACCEPTANCE.md` + machine artifacts.
@@ -77,6 +81,8 @@ Wall-partial ⇒ `INCOMPLETE`, retained, never continued. ≤1 preregistered eng
 - **G-F (determinism):** frame counts + split boundaries + derived alignment reproduce A1 exactly, else STOP-BLOCKED for it (infrastructure drift ⇒ ≤1 repair path).
 - Batch closes only with independent Pre-RESULT review + main-thread acceptance. Any gate FAIL blocks solidification; never publish-then-patch.
 
+> **Pre-fill note 2026-09-21 (operator-side fields ONLY — proposals for the user's signature).** Base paths per docs/DATA_INVENTORY_20260921.md (same trio members A1 read); output-root UUID 5e2a91c4 is a proposal whose absence will be re-proved immediately before launch (packet §8); 200 resamples = packet floor and A1 precedent; span tolerance 0.5 s = Stage 0.5 G3 precedent (max observed |span−gap| 0.0398 s); 2M materiality bars confirmed as frozen (packet §2.7). Nothing in the frozen contract is changed. Per the block's own NOTES: any change of base members, root, budget, seed, tolerance, or threshold requires a NEW signature.
+
 ## 7. SIGNATURE BLOCK — the user must fill this to grant execution
 
 ```
@@ -84,12 +90,14 @@ I AUTHORIZE execution of the R1 histogram re-run under Acceptance ID G-R1,
 strictly within the frozen contract of R1_HISTOGRAM_RERUN_PACKET.md and
 this preregistration.
 
-  Base members authorized (3 paths):        ______________________________
-  Output root (fresh, absent):              workspace/r1_histogram________
+  Base members authorized (3 paths):        /mnt/d/Data/Raw Data/2026.1.21/Type2_1M_3s_2026-01-21_184040/Type2_1M_3s_2026-01-21_184040.ttbin
+                                              /mnt/d/Data/Raw Data/2026.1.21/Type2_1-5M_3s_2026-01-21_183806/Type2_1-5M_3s_2026-01-21_183806.ttbin
+                                              /mnt/d/Data/Raw Data/2026.1.21/Type2_2M_3s_2026-01-21_183657/Type2_2M_3s_2026-01-21_183657.ttbin
+  Output root (fresh, absent):              workspace/r1_histogram_5e2a91c4
   Budget confirmed (single ceiling):          ≤5400 s trio total, bootstrap REQUIRED (no alternative row)
-  Bootstrap resamples / seed:               ________ (≥200 REQUIRED) / 20260921
-  Span tolerance (s, proposed 0.5):            ______________________________
-  2M materiality bars confirmed:            |ΔH|>0.01 / p_b L_inf>1e-3  (yes / amended: ___)
+  Bootstrap resamples / seed:               200 (≥200 REQUIRED) / 20260921
+  Span tolerance (s, proposed 0.5):            0.5
+  2M materiality bars confirmed:            |ΔH|>0.01 / p_b L_inf>1e-3  (yes / amended: none — confirmed as frozen)
   Branch / commit context confirmed:        formal-ir-v72p1-addendum-clean
 
   Authorized by (name/handle):              ______________________________
@@ -108,3 +116,27 @@ NOTES
 ```
 
 *(This block is BLANK by design — the planner does not sign. The user fills it.)*
+
+## 8. MAIN-THREAD FORMAL RATIFICATIONS — same signing round, SEPARATE item from the R1 grant above
+
+Closes the two formal OPEN items of `docs/V80_BASELINE_20260921.md` §0.2 (status-consistency rule):
+ratified-in-principle by `docs/PRIOR_COST_ACCOUNTING_DECISION_20260921.md` §D; formally OPEN until
+signed here. These ratifications concern the A1/Stage-0.5 evidence chain; they grant NO R1 execution
+and are not part of the §7 signature block.
+
+- (i) **F-3 authorization gap (baseline §7-2):** the verbatim user grant `允许你开始Stage 0.5与A1` is
+  RATIFIED as an A1-only grant (control margin 8.7×, CI margin 7× ⇒ nil scientific impact,
+  `P3_A1_REVIEW.md` F-3); OpenSpec task P3-T5 is closed administratively; any new dataset requires
+  its own signature.
+- (ii) **Tolerance confirmation (baseline §7-3):** control tolerance ±0.01 and support tolerance 0.02
+  are CONFIRMED (`P3_A1_REVIEW.md` items 5–6; both gates pass with large margins; formal only).
+
+```
+I RATIFY items (i) and (ii) above as main-thread decisions.
+
+  Ratified by (name/handle):                   ______________________________
+  Date (UTC):                                  ______________________________
+  Signature:                                   ______________________________
+```
+
+*(This block is BLANK by design — the operator does not sign. The user fills it.)*
