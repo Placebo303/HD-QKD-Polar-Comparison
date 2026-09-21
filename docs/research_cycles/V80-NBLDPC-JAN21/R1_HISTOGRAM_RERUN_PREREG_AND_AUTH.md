@@ -1,5 +1,10 @@
 # R1 Histogram Re-run — PREREG_AND_AUTH (2026-09-21) — DRAFT_PENDING_AUTHORIZATION
 
+> **Amendment 2026-09-21 (main-thread decision — bootstrap NOT waived).**
+> Bootstrap (≥200 resamples, frozen seed 20260921) is REQUIRED; the row-B / waived / NO-CI
+> budget alternative is WITHDRAWN. Single budget ceiling: per-read ≤300 s, per-dataset ≤1800 s,
+> trio ≤5400 s total, RSS <4 GiB, 0 decoder/DE/graph calls. Signature block remains BLANK.
+
 - Track: **DECIDE** (real/raw acquisition data; outputs correct published design points and feed the X1 route campaign). Status: `DRAFT_PENDING_AUTHORIZATION`. Branch context: `formal-ir-v72p1-addendum-clean` (publication branch `formal-ir-v80-nbldpc-jan21` — not touched). No switch, no commit, no push, no PR.
 - Packet (frozen contract): `docs/research_cycles/V80-NBLDPC-JAN21/R1_HISTOGRAM_RERUN_PACKET.md` (Acceptance ID **G-R1**). Operator prompt: `R1_HISTOGRAM_RERUN_PROMPT.md`.
 - **Nothing has been executed. No `.ttbin` has been opened. No decoder, DE, graph, or `tools/*` call has been made. No workspace root has been created. No output has been written.**
@@ -19,20 +24,26 @@ PYTHONPATH=<repo-root> .venv/bin/python -m comparison_bench.src.comparison_bench
   --bases <BASE_1M;.1.5M;.2M_BASE_X_TTBIN> \
   --datasets T2-1M;T2-1.5M;T2-2M \
   --root workspace/r1_histogram_<UUID8> \
-  --bootstrap-seed 20260921 --bootstrap-resamples <200|0-WAIVED> \
-  --per-read-timeout-s 300 --budget-s <5400|1800-WAIVED>
+  --bootstrap-seed 20260921 --bootstrap-resamples 200 \
+  --per-read-timeout-s 300 --budget-s 5400
 ```
 
 - `<BASE_...>` = the three Jan-21 trio base `X.ttbin` members (same members A1 read; `[TO BE CONFIRMED at Pre-EXECUTE]` against `docs/DATA_INVENTORY_20260921.md`). Base-only; never `.1`; never both.
-- `<UUID8>`, budget row, and tolerance confirmations are `[TO BE FROZEN]` at Pre-EXECUTE. This file deliberately invents none of them.
-- Bootstrap `0-WAIVED` only with explicit main-thread waiver recorded below; waived runs mark every design-point row `NO-CI`.
+- `<UUID8>` and tolerance confirmations are `[TO BE FROZEN]` at Pre-EXECUTE. This file deliberately invents none of them. Budget is the single bootstrap-inclusive ceiling (trio ≤5400 s); no alternative row exists.
+- `WITHDRAWN by main-thread decision 2026-09-21 — bootstrap is REQUIRED; a NO-CI run is not authorizable under this packet` (former `0-WAIVED` / `NO-CI` path deleted in its entirety).
 
-## 3. Budget table (frozen ceilings — circle the authorized row in the signature block)
+## 3. Budget table (frozen single ceiling — bootstrap REQUIRED)
 
-| row | per-read | per-dataset | trio total | RSS | decoder/DE/graph |
-|---|---|---|---|---|---|
-| A — with bootstrap (default) | ≤ 300 s | ≤ 1800 s | ≤ 5400 s | < 4 GiB | 0 |
-| B — bootstrap-waived (cost path) | ≤ 300 s | ≤ 600 s | ≤ 1800 s | < 4 GiB | 0 |
+| item | ceiling |
+|---|---|
+| per-read | ≤ 300 s |
+| per-dataset (read + §3A + pairing/framing/bincount + persistence + bootstrap) | ≤ 1800 s |
+| trio total | ≤ 5400 s |
+| RSS | < 4 GiB |
+| decoder/DE/graph calls | 0 |
+| bootstrap | ≥ 200 resamples, frozen seed 20260921 |
+
+`WITHDRAWN by main-thread decision 2026-09-21 — bootstrap is REQUIRED; a NO-CI run is not authorizable under this packet` (former row B — bootstrap-waived ≤1800 s cost path — deleted in its entirety and SHALL NOT be authorized).
 
 Wall-partial ⇒ `INCOMPLETE`, retained, never continued. ≤1 preregistered engineering repair+rerun for infrastructure failure only, scientific inputs unchanged, failed attempt retained in the same root.
 
@@ -75,8 +86,8 @@ this preregistration.
 
   Base members authorized (3 paths):        ______________________________
   Output root (fresh, absent):              workspace/r1_histogram________
-  Budget row authorized (circle):           A (≤5400 s, bootstrap) / B (≤1800 s, waived)
-  Bootstrap resamples / seed:               ________ / 20260921
+  Budget confirmed (single ceiling):          ≤5400 s trio total, bootstrap REQUIRED (no alternative row)
+  Bootstrap resamples / seed:               ________ (≥200 REQUIRED) / 20260921
   Span tolerance (s, proposed 0.5):            ______________________________
   2M materiality bars confirmed:            |ΔH|>0.01 / p_b L_inf>1e-3  (yes / amended: ___)
   Branch / commit context confirmed:        formal-ir-v72p1-addendum-clean
@@ -89,8 +100,8 @@ NOTES
 - This signature is the ONLY authorization. The frozen packet and this
   preregistration authorize NOTHING by themselves.
 - Pre-EXECUTE Q0–Q6 (packet §8) must be recorded and PASS before any execution.
-- The grant covers ONE bounded run. Any change of base members, root, budget
-  row, seed, tolerance, or threshold requires a NEW signature.
+- The grant covers ONE bounded run. Any change of base members, root, budget,
+  seed, tolerance, or threshold requires a NEW signature.
 - After execution: one result record, then independent Pre-RESULT, then
   main-thread acceptance. No PR, no push, no commit without a separate
   explicit authorization.

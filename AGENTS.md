@@ -241,7 +241,7 @@ openspec/
 - `/opsx-propose <name>` — Create a complete proposal/specs/design/tasks
 - `/opsx-explore <topic>` — Enter explore mode (requirements clarification)
 - `/opsx-apply <name>` — Start/continue implementing a change from its tasks
-- `/opsx-archive <name>` — Archive a completed change (merge delta specs into main)
+- `/opsx-archive <name>` — Archive a completed change (merge delta specs into main). Two dispositions (see `openspec/changes/amend-openspec-archive-superseded-before-execution/`): (1) **completed** — implemented, executed and reviewed → merge delta specs into `openspec/specs/`; (2) **superseded-before-execution** — frozen/drafted but never granted and never executed → move to `openspec/changes/archive/` under `<date>-<name>-superseded` with an `archive.md` disposition record and **NO delta merge**. Disposition-2 frozen clauses are not citable as current; survival only via an explicit retained-clause index in the successor authority.
 
 ### Custom Commands
 - `/implement-change <name>` — Full pipeline: planner → coder-fast → reviewer-go → memory triage

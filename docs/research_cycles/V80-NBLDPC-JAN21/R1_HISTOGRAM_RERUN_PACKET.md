@@ -1,5 +1,10 @@
 # R1 Histogram Re-run Packet (2026-09-21) — FROZEN, NOT GRANTED
 
+> **Amendment 2026-09-21 (main-thread decision: 那就不豁免 — bootstrap NOT waived).**
+> Bootstrap (≥200 resamples, frozen seed 20260921) is REQUIRED; the row-B / waived / NO-CI
+> budget alternative is withdrawn (§2.8, §8). Design points without uncertainty are not
+> admissible for design-point decisions (§6). Prereg/prompt files untouched by this amendment.
+
 - Track: **DECIDE** (real/raw acquisition data; outputs feed design-point and route decisions). See §3 for the explicit justification.
 - Acceptance ID: **G-R1** (packet frozen, NOT granted). Authorizes NOTHING. Nothing may run without the full DECIDE chain (§3 + `R1_HISTOGRAM_RERUN_PREREG_AND_AUTH.md` signature + Pre-EXECUTE).
 - Parent contract (structure only, NOT current authority): `docs/research_cycles/V80-NBLDPC-JAN21/P3_CENSUS_PACKET.md` (carries a supersede banner).
@@ -68,18 +73,18 @@ R1 does NOT build gamma npz files (no `ChannelAdapter` factorization here — th
 - Comparison rule (all reported, none gated except as stated): report ΔN_train (R1 `[TO BE MEASURED]` vs 559872 — a delta here is EXPECTED: different pairing realization/scope, V25 parquet rows 512000/708352/933120 vs A1 N=525831/735780/982182; N alone is never a discrepancy finding), per-plane ΔH_L1/ΔH_L2 vs the frozen bundle sidecars, and p_b max-abs-diff.
 - Materiality bar: |ΔH| > 0.01 b/sym per plane OR p_b L_inf > 1e-3 ⇒ FINDING, escalated to the main thread. 2M is the V80 frozen-channel source: any material discrepancy is a finding, not a failure to be smoothed over. NEVER refit/replace `gamma_f03.npz` in this packet; NEVER substitute the re-derived bundle into any decoder path.
 
-### §2.8 Bootstrap cost trade-off (frozen)
-- Bootstrap on the corrected statistic is REQUIRED by default: ≥200 resamples, frame-level, frozen seed 20260921 (A1 precedent; P3 §6 requires CI for every below-anchor design-point candidate).
-- Waiver path (cost only): the operator may skip bootstrap ONLY with explicit main-thread approval recorded at Pre-EXECUTE; the design points from a bootstrapless run then carry NO uncertainty and every such row is marked `NO-CI` (never silently treated as certain).
-- Budget table:
+### §2.8 Bootstrap (frozen — REQUIRED, no waiver)
+- Bootstrap on the corrected statistic is REQUIRED: ≥200 resamples, frame-level, frozen seed 20260921 (A1 precedent; P3 §6 requires CI for every below-anchor design-point candidate). NO waiver path exists.
+- REMOVED — bootstrap is required; the NO-CI alternative is withdrawn by main-thread decision 2026-09-21. The former row-B / bootstrap-waiver / `NO-CI` path (operator-may-skip with main-thread approval at Pre-EXECUTE) is deleted in its entirety and SHALL NOT be authorized at Pre-EXECUTE or recorded in the signature block.
+- Budget table (single bootstrap-inclusive ceiling):
 
-| item | ceiling (with bootstrap, default) | ceiling (bootstrap-waiver path) |
-|---|---|---|
-| Per `.ttbin` read | ≤ 300 s | ≤ 300 s |
-| Per-dataset all-in (read + §3A + pairing/framing/bincount + persistence [+ bootstrap]) | ≤ 1800 s | ≤ 600 s |
-| Trio total | ≤ 5400 s | ≤ 1800 s |
-| Peak RSS | < 4 GiB | < 4 GiB |
-| Decoder / DE / graph calls | **0** | **0** |
+| item | ceiling |
+|---|---|
+| Per `.ttbin` read | ≤ 300 s |
+| Per-dataset all-in (read + §3A + pairing/framing/bincount + persistence + bootstrap) | ≤ 1800 s |
+| Trio total | ≤ 5400 s |
+| Peak RSS | < 4 GiB |
+| Decoder / DE / graph calls | **0** |
 
 - Precedent: A1 measured 688/1053/1246 s per dataset WITH the bootstrap dominating; histogram-only pass over both 1M/1.5M estimated ~5–15 min without it (X1 assessment §T4). No retry/resume/adaptive search; wall-partial ⇒ INCOMPLETE, retained, never continued; ≤1 preregistered engineering repair+rerun for infrastructure failure ONLY, scientific inputs unchanged, failed attempt retained in the same root.
 
@@ -111,6 +116,7 @@ R1 does NOT build gamma npz files (no `ChannelAdapter` factorization here — th
 - Corrected per-source design points + materialized channel-bundle inputs ONLY. No FER/SKR/route/qualification/publication claim.
 - The corrected design points do NOT by themselves authorize X1 — X1 needs its own entry gate (bundles as input + fresh Pre-EXECUTE + explicit grant; X1 remains ENTRY-BLOCKED until this packet's artifacts land AND its own gate passes).
 - `H_corr` is CONDITIONAL on the re-derived §3A alignment (reported as a derived measurement with acceptance status) and on the TRAIN split side.
+- Design points without bootstrap uncertainty are NOT admissible for design-point decisions: every reported design-point row carries its CI (lo/hi/hw); a `NO-CI` row does not exist in this packet.
 
 ## §7 Executor tasks (for coder agents — implementation only, no requirement changes)
 1. **T-R1-1 (executor):** Create additive module `comparison_bench/src/comparison_bench/cli/r1_histogram_rerun.py` (new file; do NOT rewrite `p3_census_a1.py`): reuse its frozen read → §3A alignment → pairing/framing → TRAIN-split → `h_full_f03` path byte-identically (same imports of frozen `ttbin_pipeline` arithmetic and `align_wrapper`). ADD ONLY: (i) `K_B_train` computation on TRAIN `N_ab`; (ii) `p_b_train` capture; (iii) sparse COO persistence of TRAIN `N_ab`; (iv) corrected MM + old defective MM + delta; (v) bootstrap CI on the CORRECTED statistic (seed 20260921, ≥200 resamples); (vi) per-source JSON + shared design-point/delta tables per §2.9. If any frozen arithmetic must change to add persistence, STOP and return to planner instead of guessing.
@@ -121,5 +127,5 @@ R1 does NOT build gamma npz files (no `ChannelAdapter` factorization here — th
 
 ## §8 Entry evidence + authorization gate (EXPLICIT USER GATE — STOPS HERE)
 - Entry: (a) T-R1-1–T-R1-3 built + fake-only tests pass; (b) Q0–Q6 Pre-EXECUTE recorded (intended branch state = this packet; scoped cleanliness; frozen contract §§1–7; output-absence + `rg` proofs; dry control read); (c) FRESH EXPLICIT USER GRANT in `R1_HISTOGRAM_RERUN_PREREG_AND_AUTH.md` (blank until signed).
-- `[BLOCKING: needs user input]` — base paths confirmation, UUID, budget row (with/without bootstrap), span-tolerance + anchor-tolerance confirmations, signature.
+- `[BLOCKING: needs user input]` — base paths confirmation, UUID, budget-row confirmation (single bootstrap-inclusive ceiling ≤5400 s; the waived row is withdrawn), span-tolerance + anchor-tolerance confirmations, signature.
 - This freeze is NOT a grant.
