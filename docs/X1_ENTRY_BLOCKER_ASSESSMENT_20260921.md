@@ -125,15 +125,15 @@ for the main thread to adjudicate, not an executor substitution.
 ## T5 — Is a 2M-only sweep sufficient?
 
 - **What 2M-only answers:** the "doubly motivated" operating-point question — where the cliff
-  sits in 188–208 on the frozen 2M channel, hence whether m≤201 (forced by a disclosed 36 b
-  prior vs 4.3 b A208 headroom, baseline §2) still decodes. 2M bundle exists; only
-  {192,196,204} need fresh arms (F200/F208 consumable by b2f reference: 6/240 and 0/240;
+  sits in 188–208 on the frozen 2M channel, hence whether m≤201 (CONDITIONAL: per-block disclosure model only — baseline §2(a); under amortization m≤201 does NOT follow) still decodes. 2M bundle exists; only
+  {192,196,204} need fresh arms (F202/F208 consumable by b2f reference: 6/240 and 0/240 — CORRECTED REVISE R6 from "F200" (B2F measured **F202**, `B2F_RESULT_20260921.md:10-14`);
   X1 re-measures as single-batch curve, never pooled). Cost ≤3×1800 s, **no entry blocker**.
+- **NOTE (REVISE R6 — standalone vs nested m=200):** X1-2M m=200 is a STANDALONE per-m construct (X1 §7), distinct from P1 Stage-1's nested leading-200 submatrix of the frozen A208 matrix (P1 §3) — the two m=200 values are NON-INTERCHANGEABLE (P2 §4 ownership: P1 owns its m=200 measurement; P2/X1 consume by reference, never substitute). The ≤5400 s / three-new-arm shortcut therefore covers the OPERATING-POINT down payment only; it does not supply P1's m=200 baseline and does not reduce the 1M/1.5M entry blocker.
 - **What 2M-only does NOT answer:** X1's primary purpose — per-source m_base for P1 rescue
   ("never assume 2M", P1 §9) — and the cycle's anti-cherry-picking directive: the user
   strategic directive is "test the WORST source, not the best", and baseline §7-6 **forbids**
   reporting 2M-only as any generality headline (generality headlines LEAD with 1M, which is
-  OUT@208 ~9σ but IN@200/199). The cliff position is set by each source's own H
+  OUT@208 (threshold-H gap 0.0257 ≈9.0× CI hw 0.00285 — halfwidth ratio, NOT σ; REVISE S2) but IN@200/199). The cliff position is set by each source's own H
   (m_max 201/207/208), so 2M cannot proxy 1M's cliff.
 - **Assessment:** a 2M-only sweep is a legitimate, cheap, immediately-runnable **down payment**
   that settles the operating-point half of the motivation; it **cannot substitute** for the
@@ -148,6 +148,6 @@ for the main thread to adjudicate, not an executor substitution.
   for a histogram-only pass over both sources), not hours**; the factorization itself is seconds.
   (A stale-vintage zero-`.ttbin` shortcut via V25 `channel_counts.npz` exists but changes the
   science input and needs a main-thread decision.)
-- **2M-only is sufficient for the operating-point question (m≤201 on the frozen channel) and
+- **2M-only is sufficient for the operating-point question (CONDITIONAL m≤201 under the per-block model only, on the frozen channel) and
   runnable today; it is NOT sufficient for X1's cross-source mandate** — the 1M/1.5M sweeps
   are genuinely required for per-source m_base and any generality claim.

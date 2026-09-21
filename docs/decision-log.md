@@ -4809,3 +4809,28 @@ crossed its finite-length operating region.
 - Parameterize-the-prior now: deferred — decoder-equivalence UNMEASURED (§5-iv OPEN, FXR-1).
 
 **Consequences**: future S3/SKR packets must exclude the calibration sample from key and report forgone key, use 200/276/364 (never 500/691/911), use own-H_MM per-source f, lead generality headlines with 1M, and re-derive m + map the 188–208 cliff before any disclose-the-statistic choice; certifiability (N_req 15438/2708/1754 ≫ 200/276/364) only strengthens; no operating point, FER/SKR/route/qualification/publication claim; no execution/data/commit/push authorized.
+
+### 2026-09-21: CORRECTION NOTE (appended; historical entries above NOT rewritten)
+
+**Correction**: the 2026-09-21 A1-census entry above states "~9σ beyond its bootstrap CI" and
+"N_req ≈ 15438 / ≈2708 / 1754", and the Step-1 entry below repeats "N_req 15438/2708/1754".
+(1) The "~9σ" phrasing is WITHDRAWN: the 1M threshold–H gap 0.0257 is ≈9.0× the bootstrap CI
+halfwidth 0.00285 — an interval-halfwidth multiple, NOT a standard-deviation multiple — and the
+bootstrap percentile interval does not bracket the plug-in point estimate.
+(2) N_req at m_max is CORRECTED to **15487** (1M@201) / **2700** (1.5M@207) / **1754** (2M at the
+frozen capped m_max 208; raw formula m_max=209 gives 6138).
+Authority: `docs/V80_BASELINE_20260921.md` §3/§5; full-precision recompute (commands + verbatim
+outputs) in `docs/A1_ARITHMETIC_RECOMPUTE_20260921.md`. No frozen gate, threshold, or packet changed.
+
+### 2026-09-21: V80 baseline REVISE corrections applied + A1 estimator error confirmed + OpenSpec v80-prior-cost-accounting created (docs-only)
+
+**Decision**: apply the independent review's ADVISORY_VERDICT REVISE corrections to `docs/V80_BASELINE_20260921.md` (§0.1 retained-clause index, §0.2 governance, R5/A2/S3/S2/overturned-ledger/R6/R1); recompute A1 arithmetic for real (`docs/A1_ARITHMETIC_RECOMPUTE_20260921.md`); verify estimator + slope (`docs/A1_ESTIMATOR_AND_SLOPE_VERIFICATION_20260921.md`); execute baseline §6-step-1 (`docs/PRIOR_COST_ACCOUNTING_DECISION_20260921.md`); create OpenSpec `openspec/changes/v80-prior-cost-accounting/` (7 SHALLs). Settled: sacrifice-the-sample DEFAULT, key-eligible 200/276/364, 1.50× per-source forgone key, conditional (per-block-only) m≤201, f_super/f_eff invariance, K_B-persisting estimator rule, claim ceiling.
+
+**Context**: the review upheld the consolidation direction but found accounting gaps; verification CONFIRMED a real A1 estimator error — `p3_census_a1.py:349` applies the joint MM correction `(K_AB−1)/(2N ln2)` to conditional `H(A|B)` (correct: `(K_AB−K_B)/(2N ln2)`); `K_B` unpersisted/unrecoverable; max plausible over 0.82σ/0.76σ/0.65σ, no verdict flips (only 1M m_max 201→200 if K_B≳253). Three own-errors retracted: "~9σ" (halfwidth multiple, not σ), H-direction (underestimated H ⇒ LARGER f, conservative), negative-ceiling mis-rejection (source states a claim-ceiling prohibition, not a negative SKR value). N_req corrected to 15487/2700/1754; blanket "every source exceeds at m=200" refuted (2M m=200 262≤364 YES; 1.5M m=199 274≤276 provisional YES); 0.12–0.26× withdrawn as planning number (binding: 1.50× per source); A4 re-raise of settled f_eff convention (slope gap 0.0009); X1 "F200" corrected to F202.
+
+**Alternatives considered**:
+- Rewrite the report-only stale hits (`X1_CROSS_SOURCE_PACKET.md:43`, `P1_PACKET.md:68`, x1-cliff design/proposal, memory :4216/4220): rejected — SUPERSEDED/history/memory domains stay frozen; baseline §0.1 index governs citations.
+- Treat the MM error as verdict-flipping: rejected — full-range analysis shows no IN↔OUT flip; per-source design points marked UNVERIFIED pending a K_B-persisting DECIDE re-run instead.
+- Promote the amortized 36-bit cost to a headline: rejected — 36/200=0.18 b / 36/364≈0.099 b does not force m≤201; 36 b itself is not a proven security-leakage quantity.
+
+**Consequences**: baseline is the single entry point for the user's new-session full review; no `.ttbin`/workspace/data/commit/push; no FER/SKR/route/qualification/publication claim; `ROADMAP-20260921.md:264` still needs re-derivation (500/691/911); "2M margin 0.0021" provenance still unclear (H-margin 0.00526, f-margin 0.00819).

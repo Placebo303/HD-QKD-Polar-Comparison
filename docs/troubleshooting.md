@@ -652,3 +652,37 @@ len(plan)==granted scope.
 **Fix**: before quoting any cost/ratio number, (1) grep the exact digit string repo-wide AND confirm a prose/code/manifest source (substring-inside-float ≠ evidence); (2) state the support-count source dataset (2545/2821/139766/≈2400), bits-per-parameter basis, denominator pool + reuse model, and symbol basis (GF(32) vs full ToA); (3) never mix V80 nets with V13 denominators.
 
 **Prevention**: any future prior/disclosure-cost arithmetic must print the four-tuple (k-source, bits/param, pool+reuse, symbol basis) alongside the ratio; treat any un-sourced "~1.8×" as a unit-mix suspect until the tuple is shown.
+
+### Joint-entropy bias correction applied to a conditional entropy (A1 MM estimand error)
+
+**Observed** (2026-09-21, `comparison_bench/src/comparison_bench/cli/p3_census_a1.py:349`): plug-in is conditional `Ĥ(A|B)=H_L1+H_L2` (chain rule over the F03 bijection) but the added Miller–Madow term is the joint correction `(K_AB−1)/(2N·ln2)`; correct first-order conditional term is `(K_AB−K_B)/(2N·ln2)`, so the code over-corrects by `(K_B−1)/(2N·ln2)` (optimistic: H up ⇒ f down ⇒ m_max up). `K_B` was never persisted (transient `p_b`, line 103) and is unrecoverable from the summary JSONs — max plausible over 0.82σ/0.76σ/0.65σ of CI halfwidth, no verdict flip. Authority: `docs/A1_ESTIMATOR_AND_SLOPE_VERIFICATION_20260921.md` T1–T2.
+
+**Root cause**: Miller–Madow biases subtract across the `Ĥ(A,B)−Ĥ(B)` decomposition (joint `(K_AB−1)` minus marginal `(K_B−1)`); copying the textbook joint formula onto a chain-rule conditional plug-in silently changes the estimand.
+
+**Fix**: state the estimand (joint vs conditional) next to every bias-correction formula; persist the marginal support (`K_B_train` minimum) so the correction is auditable without re-reading raw data.
+
+**Prevention**: any entropy-correction code must print `(K_AB, K_B, N)` and the applied term; reviewers check the correction's K against the plug-in's estimand, not just its algebra.
+
+---
+
+### Bootstrap interval halfwidth presented as a sigma multiple ("~9σ")
+
+**Observed** (2026-09-21): a threshold–H gap of 0.0257 was reported as "~9σ beyond its bootstrap CI" — but 0.00285 was the percentile-interval halfwidth, not a standard deviation, and the interval does not bracket the plug-in point estimate. Withdrawn; replaced by halfwidth-ratio form (≈9.0× CI hw). Authority: `docs/V80_BASELINE_20260921.md` §3.
+
+**Root cause**: a percentile interval on a statistic has no σ semantics; dividing a gap by its halfwidth yields an interval multiple, which sounds like significance but is not.
+
+**Fix**: report "gap ≈ N.N× CI halfwidth (interval multiple, NOT σ)" and state whether the interval brackets the point estimate before any significance-flavoured language.
+
+**Prevention**: ban bare "σ" for bootstrap/resampling intervals unless a standard error was actually estimated; verdict tables print the halfwidth next to every threshold comparison.
+
+---
+
+### One-time calibration cost charged as a per-block cost (36-bit m≤201 overreach)
+
+**Observed** (2026-09-21): 36 b prior-disclosure cost charged against a single block's 4.3075 b headroom ⇒ m≤201 was stated unconditionally; amortized once per same-source batch it is 36/200≈0.18 b (1M) or 36/364≈0.099 b (2M) ⇒ 0.036/0.020 rows ⇒ m≤201 does NOT follow. Authority: `docs/V80_BASELINE_20260921.md` §2(a).
+
+**Root cause**: a one-time cost was divided by 1 block instead of by the batch it serves; the charging model (per-block vs per-batch, batch size) was never stated.
+
+**Fix**: every cost-consequence claim states its charging model + amortization basis FIRST (bits disclosed, encoding, protocol, per-block vs per-batch); underdetermined models yield conditionals ("ONLY under per-block charging"), never headline consequences.
+
+**Prevention**: any "cost forces design-point move" claim must show the per-block figure under both models side by side before the relocation follows.
