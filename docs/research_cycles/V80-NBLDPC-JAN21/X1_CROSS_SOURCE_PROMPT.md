@@ -1,0 +1,13 @@
+# X1 Operator Prompt (2026-09-21) — FROZEN, NOT GRANTED
+
+- Track EXPLORE synthetic (EXPLORE_HEAVY, 15 arms); branch `formal-ir-v72p1-addendum-clean` (no switch/commit/push). ID G-X1: frozen only, authorizes NOTHING.
+- Entrypoint: `docs/research_cycles/V80-NBLDPC-JAN21/X1_CROSS_SOURCE_PACKET.md` (§§1–8 frozen).
+- Run ONE arm: `--arm X1-<source>-<m>` with `<source> ∈ {1M,1.5M,2M}`, m from the frozen grid — 1M {185,189,193,197,201}; 1.5M {191,195,199,203,207}; 2M {192,196,200,204,208} (packet §3). SINGLE construction instance 2026092001, standalone per-m construct (X1-*-S<m>-standalone — NOT P1 nested submatrices); 240 blocks, seeds `2026095601+idx`, stream `o1_blk:{seed}`; root `workspace/x1_<uuid8>` (fresh, absence proven).
+- Channel bundle PER SOURCE, read-only, no `.ttbin`: 2M = frozen `gamma_f03.npz` + `gamma_f03_pb.npz`; 1M/1.5M = materialized A1-census-derived bundles (entry-blocked until they exist). Cross-source channel reuse FORBIDDEN — executor refuses a channel whose source label ≠ arm source.
+- Decode: b2f soft-marginal prior verbatim, v28 max_iter 300/streak 3, `exact_match` accept; NO genie/argmax/L1. Report-only per block: `prior_entropy_bits`, `u1_mismatches`. Metrics: FER = fails/240; f_super = (5m+64)/(1024·H_source_corrected) with H ∈ {0.80361, 0.82896, 0.83458} (arm's OWN source); f_eff = f_super+4.785675·FER; `undetected`-class logged separately, never success.
+- Gates per arm (AND): (a) fails/240 ≤ 12 internal route gate; (b) f_super ≤ 1.3 own corrected H; (c) N ≥ ceil(3·4.785675/(1.3−f_super)) — expected to FAIL essentially everywhere; never present a single-source f_eff as certifiable.
+- Budgets: wall ≤ 1800 s/arm (single window); per-decode ≤ 300 s terminal; RSS < 4 GiB; NO resume/retry/adaptive search (≤1 preregistered engineering repair+rerun ONLY for infrastructure failure, inputs unchanged).
+- STOP on any science-input change; re-reading any `.ttbin` or opening both pair members is STOP-BLOCKED. No pooling across sources/m-points/instances; never quote f_super as f_eff when FER > 0. New module only; frozen modules untouched; fake-only tests.
+- Deliverables: `X1_RESULT_*.md` + `rows.json` + `block_accounting.csv` per root; append-only `EXPLORATION_LOG.md`; one batch-end independent review.
+- Interpretation: PASS/FAIL per frozen gates ⇒ report to main thread (P1 per-source bases consume X1, never assume it); no rerun/tuning; no S3. Synthetic per-source curves only; no generality claim by itself. Does NOT establish FER/route/S3/qualification/real-data claims.
+- Pre-EXECUTE Q0–Q6 + fresh explicit user grant required before ANY execution. This prompt authorizes NOTHING.

@@ -101,3 +101,51 @@ NOTES
 - After execution: one result record, then independent Pre-RESULT, then main-thread
   acceptance. No PR, no push, no commit without a separate explicit authorization.
 ```
+
+## A1 ratification (F-3 closure) — DRAFT FOR USER SIGNATURE
+
+- **Status: DRAFT, PENDING USER RATIFICATION. This block is UNSIGNED — the operator
+  drafted it and must NOT sign it. P3-T5 remains formally incomplete until the user
+  fills and confirms the lines below.**
+- **Provenance:** closes governance finding **F-3** of
+  `P3_A1_REVIEW.md` (unsigned §7 signature block above; grant given by verbatim chat
+  message). The A1 execution record is `workspace/p3_census_3954637c/PRE_EXECUTE.md`
+  (Q0–Q6 all PASS) and `RESULT_SUMMARY.md`.
+
+### The grant as actually given
+
+- Verbatim chat authorization (2026-09-21): `允许你开始Stage 0.5与A1`.
+- Scope as executed: **Stage 0.5 + A1 trio reads only**
+  (Jan-21 trio: T2-1M, T2-1.5M, T2-2M base members only). NOT covered: Families A/C/D,
+  any Stage-1/entropy use beyond what was executed, any commit/push/PR.
+
+### Operator-frozen values the chat grant did NOT name (each PENDING USER RATIFICATION)
+
+- A1 dataset list (T2-1M, T2-1.5M, T2-2M base members only) `[OPERATOR-FROZEN, PENDING USER RATIFICATION]`
+- Alignment frozen ports (bin_width_ps=100, max_lag_ps=819200, 16384 bins, argmax, offset_ps=+lag_centre) `[OPERATOR-FROZEN, PENDING USER RATIFICATION]`
+- Acceptance gates (p2bg ≥ 100; single dominant mode >50% secondary outside ±1000 ps; crude sigma 10–500 ps; else STOP-BLOCKED, no fallback) `[OPERATOR-FROZEN, PENDING USER RATIFICATION]`
+- Estimator (plug-in + Miller–Madow (K−1)/(2N·ln2); bootstrap ≥200 resamples, seed 20260921, frame-level) `[OPERATOR-FROZEN, PENDING USER RATIFICATION]`
+- Anchor comparison tolerance ±0.01 b/sym `[TO BE CONFIRMED]` `[OPERATOR-FROZEN, PENDING USER RATIFICATION]`
+- Budgets (≤1800 s/dataset, ≤3 datasets, per-read ≤300 s, RSS <4 GiB) `[OPERATOR-FROZEN, PENDING USER RATIFICATION]`
+- Output root `workspace/p3_census_3954637c` `[OPERATOR-FROZEN, PENDING USER RATIFICATION]`
+
+### Ratification statement (user to confirm by signing)
+
+```
+I RATIFY the executed A1 reads as performed under the verbatim grant above and the
+operator-frozen values listed (taken from the packet's own proposed values, applied
+as stated, verdicts reported conditional on the [TO BE CONFIRMED] tolerances).
+
+  Ratified scope:  Stage 0.5 + A1 trio reads ONLY (T2-1M, T2-1.5M, T2-2M base members)
+
+  Authorized/ratified by (name/handle):   ______________________________
+  Date (UTC):                             ______________________________
+  Signature:                              ______________________________
+
+NOTES
+- This ratification covers ONLY the executed A1 reads. It does NOT authorize any
+  further read, any Family A/C/D dataset, or any Stage-1/entropy use beyond what
+  was executed.
+- Any change of branch, dataset list, config, seed, tolerance, threshold, or budget
+  requires a NEW signature.
+```

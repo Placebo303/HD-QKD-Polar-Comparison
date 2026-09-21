@@ -628,3 +628,15 @@ len(plan)==granted scope.
 **Fix**: duration MUST be measured from the stream span (first→last timestamp), NEVER taken from the filename. Record `duration_measured_s` + verbatim `filename_duration_tag` + `tag_disputed` per row; Jan-12 is quarantined as `duration_measured_s=30.0`, `filename_tag_disputed=true`, never pooled with 3 s acquisitions undeclared.
 
 **Prevention**: any census/report schema must carry the three duration columns; pooling across durations requires explicit declaration.
+
+---
+
+### Plug-in-only entropy table flipped the out-of-box verdict (P3 A1): uncorrected estimator drove a route-relevant number
+
+**Observed** (2026-09-21, `P3_A1_REVIEW.md` item 7 vs `workspace/p3_census_3954637c/DESIGN_POINT_ARITHMETIC.md`): on plug-in H_full the table reads T2-1.5M OUT@208 (f=1.306853) and T2-1M OUT@200 (f=1.301864); on the Miller–Madow-corrected H (plug-in + (K−1)/(2N·ln2)) the same arms read INDETERMINATE@208 (f=1.300573; corrected H 0.82896 sits 0.00037 below the 0.829327 threshold, INSIDE the bootstrap CI half-width 0.00221) and IN@200 (f=1.292997). Related trap (finding F-2): the sparse-histogram bootstrap CI does NOT bracket the plug-in point estimate (all three CIs sit entirely below it) — CI_hi must not be read as an upper bound on H_full.
+
+**Root cause**: plug-in entropy is biased LOW on sparse histograms (occupancy K/1024² ≈ 0.0023; support ≈ 2400 occupied joint cells; N ≈ 0.5–1.0M coincidences). Where a verdict threshold sits within ~0.001 of a source's H, the bias alone moves the verdict across the f ≤ 1.3 line — the direction that makes a source look worse than it is.
+
+**Fix**: compute every design-point quantity (m_max, f@m, N_req) on the CORRECTED H, reporting plug-in alongside; when |H − threshold| is inside the bootstrap CI half-width, label the verdict INDETERMINATE, not OUT/IN. Authority: `workspace/p3_census_3954637c/DESIGN_POINT_ARITHMETIC.md` (closes finding F-1; documentation completion only, no re-execution).
+
+**Prevention**: any verdict/design-point table must state which estimator governs the verdict and print the CI half-width next to every threshold comparison; never let a plug-in-only table (or an uncorrected review reconstruction) drive a route/design-point decision.

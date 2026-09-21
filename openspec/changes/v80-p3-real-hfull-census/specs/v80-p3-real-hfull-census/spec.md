@@ -58,12 +58,27 @@ The census SHALL NOT silently select an alignment strategy. It SHALL present fou
 - **WHEN** the selected channel pair is not the unique coincidence-throughput argmax with second-best ≤ 50 %, or the coincidence peak is not a single dominant mode
 - **THEN** the dataset is STOP-BLOCKED and no `H_full` is produced for it.
 
+### Requirement: Mandatory pre-pairing correlation-based delay auto-alignment
+Before any pairing, histogram, or entropy step, the census SHALL derive the delay per dataset by cross-correlation and SHALL NOT pair until that alignment passes acceptance. Frozen procedure: `compute_cross_correlation_histogram(events, ch_a, ch_b, bin_width_ps=100, max_lag_ps=819200)` (16384 bins, lag convention `t_B − t_A`; authority `src/qkd_io/ttbin_pipeline.py:252-328`) → `pk = argmax(counts)` → `offset_ps = +lag_center_ps[pk]` (sign: offset added to side A in `_pair_nearest_unique`, `src/qkd_io/ttbin_pipeline.py:219-249`), no interpolation, derived ONCE on the vendor-auto-followed merged stream from the base member only (nested/superset prohibition binding), never per-frame. The recorded trio −50/+50 ps values SHALL be quoted as prior evidence only, never as inputs. Frozen acceptance (all required, else STOP-BLOCKED with no fallback to 0 or to any borrowed/recorded offset): `peak_to_bg ≥ 100` (median background excluding ±2 bins); single dominant mode [HEURISTIC — frozen rule: no secondary local maximum above 50% of primary outside ±1000 ps of `pk`]; crude ±12-bin sigma within 10–500 ps; ok-equivalent non-empty status. Every row SHALL carry `offset_ps_derived`, `peak_bin_index`, `peak_center_ps`, `peak_to_bg`, `sigma_crude_ps`, `align_status`, plus the prior offset for comparison only. A1 SHALL additionally require agreement with the recorded −50/+50 centres within one-bin tolerance (disagreement beyond one bin is a reported FINDING). The derived offset SHALL be reported as a derived measurement with acceptance status, and `H_full` SHALL be stated conditional on it. Alignment SHALL NOT be embedded into `compute_ttbin_metrics` (frozen `src/`).
+
+#### Scenario: Pairing attempted without passed alignment
+- **WHEN** any pairing/histogram/entropy step is requested with a frozen or default (0) `offset_ps` before alignment acceptance for that dataset
+- **THEN** it is refused as STOP-BLOCKED; no `H_full` is produced for that dataset.
+
+#### Scenario: Weak or ambiguous correlation peak
+- **WHEN** `peak_to_bg < 100`, a second mode exceeds 50% of primary outside ±1000 ps, sigma falls outside 10–500 ps, or the histogram/status is empty
+- **THEN** the dataset is STOP-BLOCKED; the offset SHALL NOT fall back to 0, SHALL NOT borrow another dataset's or any recorded value, and SHALL NOT be adopted.
+
 ### Requirement: Declared identifiability limit of empirical alignment
 Under Branch B, the census SHALL label `bin_width_ps`, `frame_bins`, `align`, and `postselect` as `IMPOSED-NOT-MEASURED` (fixed at the V80 convention `d=1024`, `bin 200 ps`, `align=global`, `keep_all`), SHALL label every affected row `ALIGNMENT-FITTED`, and SHALL state in the result that coincidence-throughput fitting identifies the channel plan and window/offset but not the bin width or frame length.
 
 #### Scenario: Fitted framing presented as measured
 - **WHEN** a Branch-B output presents the imposed framing as estimated from the data
 - **THEN** it is refused and must be relabelled `IMPOSED-NOT-MEASURED`.
+
+#### Scenario: Branch-B delay presented as fitted rather than measured
+- **WHEN** a Branch-B output presents the delay/offset as fitted when §3A correlation alignment applies
+- **THEN** it is refused: the delay is MEASURED by correlation (§3A procedure + gates); only the channel plan and framing remain fitted/imposed.
 
 ### Requirement: Conditional certification arithmetic without operating-point claims
 The census SHALL report, for each measured `H_full`, the conditional arithmetic `content = 1024·H_full`, `f_super(m) = (5m+64)/content`, `headroom = 1.3·content − (5m+64)`, and `N ≥ ⌈3·4.785675/(1.3 − f_super)⌉` at the integer `m_max(H) = ⌊(1.3·1024·H − 64)/5⌋`, and SHALL record that at the fixed A208 arm any `H_full < 0.829327` is out of box (`f_super > 1.3`); it SHALL NOT select an operating point, predict an FER, or claim a route decision.
