@@ -640,3 +640,15 @@ len(plan)==granted scope.
 **Fix**: compute every design-point quantity (m_max, f@m, N_req) on the CORRECTED H, reporting plug-in alongside; when |H − threshold| is inside the bootstrap CI half-width, label the verdict INDETERMINATE, not OUT/IN. Authority: `workspace/p3_census_3954637c/DESIGN_POINT_ARITHMETIC.md` (closes finding F-1; documentation completion only, no re-execution).
 
 **Prevention**: any verdict/design-point table must state which estimator governs the verdict and print the CI half-width next to every threshold comparison; never let a plug-in-only table (or an uncorrected review reconstruction) drive a route/design-point decision.
+
+---
+
+### Misattributed parameter count / unit-mixed ratio in prior-cost claims (digit-substring false positive `138516`; 5-bit vs 10-bit symbol mix)
+
+**Observed** (2026-09-21, triple-audit `docs/PRIOR_COST_ACCOUNTING_AUDIT_20260921.md` §3/§6 + `docs/PRIOR_COST_CLAIM_REVIEW_20260921.md` §6): a prior-cost claim quoted `P20Q 138,516 bits ÷ 32,768 symbols`, `PHASE4_P0_PRIOR_CONTRACT.md`, "C03 ≈ 2 parameters", "2545 parameters", and a "~1.8× quantity-order error". Audit: `P20Q`/`138516` zero hits in `docs/`+`src/` (7 repo-wide hits are digit-substrings inside unrelated floats, e.g. `0.0012013851679151025`); the named contract file does not exist; 2545 is the 1M Jan-21 joint support (2M = 2821; CAL nonzero = 139,766); C03 is a 1024-bin smoothed histogram (`nonbinary_v25_gate.py:364-371`); no repo-grounded model yields 1.8× (honest ratios 51–256× / 1.50× / 0.12–0.26× / 1.07×) — 7.84/4.23 ≈ 1.856 matches the GF(32) 5-bit-symbol vs full 10-bit-symbol unit conversion exactly.
+
+**Root cause**: two compounding traps — (i) quoting numbers without a repo-wide existence check (digit-substring grep hits look like evidence; a missing source document goes unnoticed); (ii) the repo uses "symbol" in two senses (V80 accounting = GF(32) 5-bit unit, net 3.92 b/sym; V13/V25 channel = full 10-bit ToA symbol, net 7.84 b/sym), so dividing a V80-scale net by a V13-scale denominator fabricates a ~1.86× factor.
+
+**Fix**: before quoting any cost/ratio number, (1) grep the exact digit string repo-wide AND confirm a prose/code/manifest source (substring-inside-float ≠ evidence); (2) state the support-count source dataset (2545/2821/139766/≈2400), bits-per-parameter basis, denominator pool + reuse model, and symbol basis (GF(32) vs full ToA); (3) never mix V80 nets with V13 denominators.
+
+**Prevention**: any future prior/disclosure-cost arithmetic must print the four-tuple (k-source, bits/param, pool+reuse, symbol basis) alongside the ratio; treat any un-sourced "~1.8×" as a unit-mix suspect until the tuple is shown.

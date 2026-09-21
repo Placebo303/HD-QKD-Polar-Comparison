@@ -24,7 +24,7 @@ Durable decisions and rejected alternatives for the HD-QKD_Polar_Comparison proj
 
 ## Decisions
 
-> **最新条目在文件尾部**（tail）；头部为历史区（head stale，当前头为 2026-09-14 D13）。最新条目起于第 4756 行（`### 2026-09-21: ttbin ingest unblocked`）；验证：`grep -n '^### 2026' docs/decision-log.md | tail`。
+> **最新条目在文件尾部**（tail）；头部为历史区（head stale，当前头为 2026-09-14 D13）。最新条目起于第 4785 行（`### 2026-09-21: Prior/calibration cost triple-audit`）；验证：`grep -n '^### 2026' docs/decision-log.md | tail`。
 
 ### 2026-09-14: Accept D13 Batch A1 reviewed evidence-only result (modest decoder rescue)
 
@@ -4781,3 +4781,17 @@ crossed its finite-length operating region.
 - Present single-source f_eff as certifiable: rejected — N_req ≫ available block counts at every source.
 
 **Consequences**: X1 and P1 §9 are frozen planning artifacts authorizing nothing (fresh explicit per-arm grant + Q0–Q6 Pre-EXECUTE required); m_min measurement is the prerequisite for any per-source operating-point claim; no FER/SKR/route/qualification/publication claim; no commit/push.
+
+### 2026-09-21: Prior/calibration cost triple-audit — CONFIRMED uncounted gap, REFUTED figures withdrawn, disclosure-route and block-count corrections recorded (docs-only)
+
+**Decision**: record the triple-audit verdict (`docs/PRIOR_COST_ACCOUNTING_AUDIT_20260921.md`, `docs/PRIOR_COST_CLAIM_REVIEW_20260921.md`, `docs/SIBLING_PRIOR_PARAMETERIZATION_AUDIT_20260921.md`) WITHOUT changing any frozen quantity, gate, threshold or packet. (1) CONFIRMED: prior/channel-estimation cost is counted nowhere (`λ_total = leak_EC + 64` two terms only; `SECURITY_MODEL.md` zero hits; no `+ prior` term in `v80_o1_campaign.py:415-417` / `nonbinary_qspa.py:264-268` / `metrics/leakage.py:29-34`) — a THIRD uncounted extra alongside L1 share and blind rounds. (2) WITHDRAWN as fact, never re-quote: the "1.8×" ratio (honest values 51–256× / 1.50× / 0.12–0.26× / 1.07×; 1.8× is a 5-bit vs 10-bit symbol unit artifact ≈1.856), the `P20Q 138,516 ÷ 32,768` figure (does not exist), `PHASE4_P0_PRIOR_CONTRACT.md` (does not exist), the CAL-vs-DEV/EVAL/HOLD framing (named CAL is Jan-23 out-of-scope; real V80 prior is Jan-21 2M TRAIN N=559,872), "C03 ≈ 2 params" (1024-bin histogram), and "2545 params" for CAL (2545 = 1M support; 2M = 2821; CAL = 139,766). (3) If the prior is publicly disclosed it enters `λ_total`: even 36 bits is 8.36× the A208 headroom (4.3075 b) ⇒ m=208→201, inside the unmapped 188–208 cliff — parameterization wins on data requirement only, not disclosure cost. (4) Planning block counts reserve zero frames for the prior: 500/691/911 ⇒ key-eligible 200/276/364 (2.5× overstatement; uncertifiability only worsens). (5) `f_super`/`f_eff` and A208 0/240 @ f=1.294947 stand (prior disclosure is not EC leakage); the gap bites net-key/SKR and certifiability counts only. (6) Decoder-equivalence (parameterized vs full-table prior) is UNMEASURED — no V80 arm compares them. (7) Sibling zero-PE-leakage is scope exclusion (`public_ec_only_not_secure`, `composable_security_claim_flag=0`), not a transferable proof. (8) The "negative SKR ceiling" sentence in the adversarial review is NOT adopted (G7-era legacy; V80 `net = 5120 − 1104 = +4016 b/superframe` stands).
+
+**Context**: sibling-raised accounting gap, audited three ways (fact-finding, adversarial review, sibling code audit), all read-only with no code/data/execution. `gamma_f03.npz` is read-only and reused across all V80 arms (one-time factory calibration ⇒ severity LOW if a reuse statement is written), but cross-source reuse is FORBIDDEN and no amortization/reuse statement exists anywhere — the single missing document. Sibling decoder uses O(10) BSC scalars vs our ~2545-parameter joint table, but publishes no composable SKR.
+
+**Alternatives considered**:
+- Retract A208 0/240 @ f=1.294947 over the gap: rejected — `f_super` numerator is syndrome + tag only (FXR-3 identity); no prior input.
+- Adopt the "1.8×" / "P20Q 138,516" / "C03 ≈ 2 params" figures as findings: rejected — each refuted with file:line evidence in the audits.
+- Treat the sibling zero-PE-leakage as a transferable result: rejected — declared-by-omission inside a non-composable scope; only its inventory/bookkeeping discipline transfers.
+- Adopt the review's "negative SKR ceiling" phrasing: rejected — contradicts frozen V80 net accounting (G7 legacy).
+
+**Consequences**: no frozen accounting quantity, gate, threshold or packet changed; no execution authorized; adopting an amortization/reuse statement, a disclosure-route decision (sacrifice-sample vs disclose-statistic), or corrected S3 block counts requires a future OpenSpec change; no FER/SKR/route/qualification/publication claim; no commit/push.
