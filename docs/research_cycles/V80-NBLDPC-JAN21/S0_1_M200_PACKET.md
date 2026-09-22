@@ -86,7 +86,7 @@
   (b) 执行面就绪：thin runner（若无既有 CLI 逐字跑 F1–F5）+ fake-only focused 单文件测试已实现——**实现本身无 track gate**（AGENTS §1.2 矩阵），track gate 挂在首次合成执行；
   (c) **Pre-EXECUTE Q0–Q6**（记入日志条目 0）：Q0 目标分支 `formal-ir-v72p1-addendum-clean`（不切分支）；Q1 范围清洁（仅 additive runner+测试；`git diff -- src/` EMPTY；脏树按显式文件清单界定，外源 `openspec/changes/binary-ldpc-v5-*` 不纳入）；Q2 冻结契约 F1–F10 逐项核对；Q3 输出缺席 + `rg 'S01_|S0_1_M200'` 仅命中本包族 + 保护根快照字节一致；Q4 **focused 单文件 fake-only 测试 PASS 并附输出**（E5 风险：batch-end 必须附此输出）；Q5 dry 零解码 pins（F6：A208 fc=0/rank208/twice-identical、基码 rank=200、girth 记录）——**Grant 前零生产解码**；
   (d) **FRESH EXPLICIT USER GRANT**，填入下方授权块（签名，或本周期 verbatim 对话授权记录——F-3/X1/X1S 先例，仅限本周期）：
-  - **授权块（空白待签；未填 = 未授权）**：Acceptance ID `G-S01M200`；grant verbatim：________；臂根 UUID（R1/R2）：________；预算确认（≤3600 s/臂、≤7200 s 总）：________；日期 / 主线程：________。
+  - **授权块（已填 = 已授权，且恰好仅此一处）**：Acceptance ID `G-S01M200`；grant verbatim：`G-S01M200 GRANT：授权S0.1 m=200探针执行（2臂 S01-R1/S01-R2 ×240块禁合并，双旗标 --execute-real --execution-authorized，预算≤3600s/臂、≤7200s总、≤300s/调用、RSS<2GiB、1CPU）`；臂根 UUID（R1/R2）：`S01-R1_6e48f11e` / `S01-R2_b74322cf`；预算确认（≤3600 s/臂、≤7200 s 总）：**6 项全确认** —— ① 单臂 wall ≤ 3600 s（单窗口）✓ ② 批次总 ≤ 7200 s ✓ ③ 单调用 ≤ 300 s（超时 = 终态，块计 fail，不续跑）✓ ④ RSS < 2 GiB ✓ ⑤ 1 CPU ✓ ⑥ 零 `.ttbin` / 零真实数据 / 零 `results/` 与 `outputs_comparison/` 写入 ✓；日期 / 主线程：**2026-09-22 / main**。
 - **未授权不得执行。** 本文件不授权解码、不授权测试长跑、不授权 commit/push、不授权任何 P1 臂。
 
 ## §11 本任务（planner 冻结）创建范围声明 — S01-3
