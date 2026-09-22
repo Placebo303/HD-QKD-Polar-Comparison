@@ -4857,3 +4857,27 @@ outputs) in `docs/A1_ARITHMETIC_RECOMPUTE_20260921.md`. No frozen gate, threshol
 - **F4**: "f_eff ≤ 1.3 结构性拿不到" 一类表述**限定在冻结网格分辨率内**（X1 m_min 204/203/197 等为 grid-resolution 结论，between-grid 未测），不得外推为连续参数空间的结构性不可能，也不构成对外认证句。
 
 **Lift + residual gate**: G0 未裁决期间的禁令（`EXECUTION_PLAN_20260922.md:83`：冻结 P1 重臂、启动 P5、对外 `f_eff≤1.3` 认证句）自本裁决起**解除**；**P5 仍需独立包冻结**（+ 显式授权）方可执行。本条为裁决落档（docs-only）：**P1/P5 均未执行**，无任何臂、无认证句、无 FER/SKR/qualification/publication 主张。
+
+### 2026-09-22: S0.1 m=200 probe landed — S0.1-gate PASS, P1 anchor ready
+
+**Decision**: 落档 S0.1 m=200 probe：batch-end `PASS_WITH_FINDINGS`，S0.1-gate `PASS`；P1 Stage-1 锚就绪。
+
+**Context**: 双实例各 240/240 `COMPLETE`（R1/R2 均完成全部 240 调用）；证据见 `docs/research_cycles/V80-NBLDPC-JAN21/S0_1_BATCH_END_REVIEW.md`。
+
+**Alternatives considered**:
+- 视为 route/qualification 证据：rejected — 本条仅为 probe 落档与 P1 锚就绪记录。
+- 追加 FER/SKR 主张：rejected — 本条不含任何 FER/SKR/route/qualification claim。
+
+**Consequences**: P1 Stage-1 可引用本锚；P1 仍 Δm=8 未测，需另行授权；无 commit/push。
+
+### 2026-09-22: S0.1 dual-instance anchor (P1 reference only)
+
+**Decision**: 落档双实例锚数字（P1 reference only，report-only），两实例分列，禁合并、禁单实例冒充、不作可认证 f_eff 句。
+
+**Context**: R1 `instance2026092001`（girth8）：79/240，FER 0.329167，u79，871.9 s；R2 `instance2026092011`（girth6）：119/240，FER 0.495833，u116，1010.5 s。f_super=1.248029；f_eff 2.823314（R1）/ 3.620927（R2）；N_req=277。以上均为 report-only 数值。
+
+**Alternatives considered**:
+- 6+4 合并或以单实例代表整体：rejected — 两实例须分列陈述，禁止合并、禁止单实例冒充。
+- 由 f_eff 数字形成可认证句：rejected — 不作任何可认证 f_eff 句。
+
+**Consequences**: P1 引用时必须保持双实例分列与 report-only 定性；P1 仍 Δm=8 未测，需另行授权；无 FER/SKR/route/qualification claim；无 commit/push。

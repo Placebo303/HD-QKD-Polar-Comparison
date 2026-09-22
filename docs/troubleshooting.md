@@ -686,3 +686,13 @@ len(plan)==granted scope.
 **Fix**: every cost-consequence claim states its charging model + amortization basis FIRST (bits disclosed, encoding, protocol, per-block vs per-batch); underdetermined models yield conditionals ("ONLY under per-block charging"), never headline consequences.
 
 **Prevention**: any "cost forces design-point move" claim must show the per-block figure under both models side by side before the relocation follows.
+
+### S0.1 batch-end F1 — 行级 status='success' 语义
+
+**Observed**: 含 `undetected` 的失败行仍可能记为行级 `status='success'` / `decoded=1`。
+
+**Root cause**: 行级 `status`/`decoded` 反映解码器收敛语义，不等于验证成功；summary 级 `k` 会计正确，但下游若按 `status`/`decoded` 聚合成功数会得到错误计数。
+
+**Fix**: 成功数以权威列 `failed`/`k` 为准，且须与 FER、`undetected` 联读；严禁按 `status`/`decoded` 聚合成功数。
+
+**Prevention**: 任何下游聚合/报表在取成功数前先确认使用 `failed`/`k` 列；证据见 `docs/research_cycles/V80-NBLDPC-JAN21/S0_1_BATCH_END_REVIEW.md` F1。
