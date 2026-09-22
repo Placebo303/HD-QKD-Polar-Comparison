@@ -4834,3 +4834,26 @@ outputs) in `docs/A1_ARITHMETIC_RECOMPUTE_20260921.md`. No frozen gate, threshol
 - Promote the amortized 36-bit cost to a headline: rejected — 36/200=0.18 b / 36/364≈0.099 b does not force m≤201; 36 b itself is not a proven security-leakage quantity.
 
 **Consequences**: baseline is the single entry point for the user's new-session full review; no `.ttbin`/workspace/data/commit/push; no FER/SKR/route/qualification/publication claim; `ROADMAP-20260921.md:264` still needs re-derivation (500/691/911); "2M margin 0.0021" provenance still unclear (H-margin 0.00526, f-margin 0.00819).
+
+### 2026-09-22: Adopt project execution plan (hygiene + G0 claim gate + phased schedule)
+
+**Decision**: Land `docs/EXECUTION_PLAN_20260922.md` as the execution/recovery plan beside `docs/ROADMAP-20260921.md`. Science freezes remain with ROADMAP/V80_BASELINE; schedule, hygiene, and process slim-down follow the execution plan. G0 claim-target (A/B/C) is explicitly OPEN.
+
+**Context**: Whole-repo health review found decodability solved but certifiability empty (X1), prior-cost and throughput gaps, uncommitted X1 + ~562 unpublished commits, OpenSpec/CLI/memory bloat, broken `.venv` contract, and EXPLORE paperwork overhead against AGENTS.md §1.1.
+
+**Alternatives considered**:
+- Merge into ROADMAP-20260921: rejected — keeps scientific route document stable; execution debt is a different axis.
+- Proceed to heavy P1 without G0: rejected — X1 shows no jointly route-passing and count-certifiable point on n=1024 key-eligible counts.
+
+**Consequences**: Immediate items are H0 publish/isolation/env/NOW + G0 decision + S0 light probes. No execution, commit, push, or claim is authorized by this entry. Process slim-down (EXPLORE two-file packets, readiness checklist) requires its own OpenSpec when adopted.
+
+### 2026-09-22: G0=B裁决 (用户授权)
+
+**Decision**: G0 claim 目标由用户显式裁决为 **(B)**。主文主张 = 实测效率（measured reconciliation efficiency）+ 同一数据上的 MLC/R3 对照（same-data MLC/R3 comparison）；不选 (A) 文献可证成主张，不触发 (C) 新采集。
+
+**Scope (F3/F4)**:
+- **F3**: `docs/ROADMAP-20260921.md:209,268` 的 "P1 失败 ⇒ P4 在 S3 之前成为必经" 分支被本裁决取代——P4 不因 P1-FAIL 自动升为 S3 前置必经。
+- P4 n=2048 定位为**第二代并行**路线，不阻塞 S3；可与主路径并行做零解码构造可行性（本条不授权任何解码执行）。
+- **F4**: "f_eff ≤ 1.3 结构性拿不到" 一类表述**限定在冻结网格分辨率内**（X1 m_min 204/203/197 等为 grid-resolution 结论，between-grid 未测），不得外推为连续参数空间的结构性不可能，也不构成对外认证句。
+
+**Lift + residual gate**: G0 未裁决期间的禁令（`EXECUTION_PLAN_20260922.md:83`：冻结 P1 重臂、启动 P5、对外 `f_eff≤1.3` 认证句）自本裁决起**解除**；**P5 仍需独立包冻结**（+ 显式授权）方可执行。本条为裁决落档（docs-only）：**P1/P5 均未执行**，无任何臂、无认证句、无 FER/SKR/qualification/publication 主张。
