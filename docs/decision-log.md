@@ -4881,3 +4881,27 @@ outputs) in `docs/A1_ARITHMETIC_RECOMPUTE_20260921.md`. No frozen gate, threshol
 - 由 f_eff 数字形成可认证句：rejected — 不作任何可认证 f_eff 句。
 
 **Consequences**: P1 引用时必须保持双实例分列与 report-only 定性；P1 仍 Δm=8 未测，需另行授权；无 FER/SKR/route/qualification claim；无 commit/push。
+
+### 2026-09-23: P1 Stage-1 batch-end PASS_WITH_FINDINGS — rescue mechanically effective, no arm passes all gates
+
+**Decision**: 落档 P1 Stage-1 batch-end `PASS_WITH_FINDINGS`：rescue 机械有效，但按冻结§4决策树无一臂通过全部 gate。
+
+**Context**: 两臂COMPLETE：R1(`2026092001`/girth8) Stage-1 k=84 → Stage-2 rescued 83/84 → final F=1/240=0.004167，f_eff=1.284196；R2(`2026092011`/girth6) k=138 → rescued 138/138 → F=0/240=0.000000，f_eff=1.275008；attempted==k集合相等双过；undetected隔离(81/134)；累计3032.8s/7200；证据三方一致(R1 324=240+84, R2 378=240+138)；修复路径未用。
+
+**Alternatives considered**:
+- 视为 P1-PASS 通往 P3 DECIDE 的门票：rejected — R1 FAIL(a)、R2 FAIL(c)（headroom 21.31b vs gate 21.5b，差0.19b）。
+- 视为 route/qualification 证据：rejected — 本条判为 P4-elevation 输入，不是 P1-PASS。
+
+**Consequences**: 机械有效但按冻结§4决策树 R1 FAIL(a)、R2 FAIL(c) ⇒ 判为 P4-elevation 输入，不是 P1-PASS 通往 P3 DECIDE 的门票；无 FER/SKR/route/qualification/publication claim；无 commit/push。
+
+### 2026-09-23: No single-point f_eff<=1.3 certification — N_req 402/575 > key-eligible 200/276/364
+
+**Decision**: 禁止单点认证句：P1两臂 N_req report-only 均超可用块数，与 X1 joint 可认证集=∅一致；G0=B 判断被实证再次印证，可给实测效率曲线，禁止单点认证句。
+
+**Context**: P1两臂 N_req report-only (402/575) > key-eligible (200/276/364)；G-P1S1授权已用完，不得在其下重跑；后续任何 P3/P4 需新 packet+新授权。评审 findings F1(1e-6舍入)、F2(R1中间态0.000000→终态0.004167三方最终一致)、F3(decoded=1含失败行，后继文档加图例)均为非阻塞。
+
+**Alternatives considered**:
+- 由实测 f_eff 数字形成单点可认证句：rejected — N_req 超可用块数，joint 可认证集=∅。
+- 在 G-P1S1 授权下重跑：rejected — 授权已用完，需新 packet+新授权。
+
+**Consequences**: 可给实测效率曲线，禁止单点认证句；无 FER/SKR/route/qualification/publication claim；无 commit/push。
