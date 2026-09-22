@@ -1,0 +1,15 @@
+# B2G Executor Review (2026-09-21) — EXPLORE focused review; readiness ONLY, authorizes NOTHING
+
+- Scope: NEW untracked only — `formal_ir/v80_b2g_campaign.py` (1342L), `tests/test_v80_b2g_campaign.py` (1072L), `B2G_PREEXEC/PACKET/PROMPT_20260921.md`. Branch `formal-ir-v72p1-addendum-clean`; no switch/commit/push. `git diff` on all tracked modules EMPTY; `results/`+`outputs_comparison/` untouched; 0 `workspace/b2g*` roots.
+- Mirror correctness (vs frozen b2f): full-file diff = ONLY intended deltas (seed 2026092011, `workspace/b2g_` prefix, CAMPAIGN_LABEL, construction-instance note, 2026092001 refusal). Decode wiring BYTE-EQUAL (targeted diff): einsum `nu,nuv->nv`, row-renormalize guard + delta-at-0, `center_rows_prior(marg, y=b&31)`, `v28.decode_error_domain_posterior(...,300)`. No genie/argmax reachable; T8 monkeypatches `posterior_rows_l2` to raise and decode still returns the b-only marginal prior (u1_source=MARGINAL, max_iter=300).
+- Anti-footgun: CLI refuses rc=2 pre-root-contact for `--construct-seed` 2026092001 AND every other seed, non-frozen trials/block-base/n-blocks, arms≠F208/F202, single-flag, wrong prefix, root/resume mismatch. Negative reruns of 2026092001 and 2026092099 refused, no root written.
+- Manifest labels: campaign `B2G-soft-marginal-replication`; construct_seed 2026092011; note "second construction instance 2026092011 (O1R R2 precedent)"; FORBIDDEN "byte-identical paired construction" ABSENT (grep=0); paired_note 2026095601+idx shared O1R/P0/L1B/b2e/b2f, no independence claim; u1_source MARGINAL; D-u1=0.0 MEASURED + never-assume-zero; prior_entropy_bits/u1_mismatches report-only, absent from PASS gate.
+- Gates verbatim: fails/240≤12 early-stop at 13th fail (retain partials); f_super=(5m+64)/852.544≤1.3 unchanged O1 basis (F208 1.294947 / F202 1.259759); no pooling; PASS=(failures≤bar AND f_super≤1.3).
+- Tests (independently rerun): b2g 39 passed (~18s); frozen regression o1+s2c+b2f+b2e 165 passed (~54s). Fake-only: execute injects decode_fn/construct_fn; T8/T13 monkeypatch the kernel; `--execute-real` calls are refusal-only; run_execution never called directly.
+- Preexec cross-check: Q3 pins F208/A208 + F202/A202 seed 2026092011 trials 20 fc=0 rank-full twice-identical (girth 6 recorded-not-gated); Q4 dry probe max|Δ|=0.0, prior_entropy 853.0211, u1_mismatches 4, genie 832.6036 — IDENTICAL to b2f on paired block 2026095601 (construct-seed-independent draw); no difference to explain. Header flips = exactly the 2 CONTINGENCY RESOLVED lines. Known nit (packet §1 parents "(pending)") noted, no finding.
+
+Verdict: PASS
+Blocking Issues: none.
+Non-Blocking Suggestions: none.
+Readiness: executor + tests + pre-exec are internally consistent and faithful to the frozen b2f mirror. The two-arm run MAY proceed under the standing pre-authorization recorded in the packet/pre-exec — subject to a fresh explicit per-arm user grant and Pre-EXECUTE. This review authorizes NOTHING.
+Checklist: [x] Matches OpenSpec/spec  [x] Tests pass (39+165)  [x] No scope creep  [ ] docs/decision-log or troubleshooting update: not required (mirror replication; no new durable decision/failure mode).

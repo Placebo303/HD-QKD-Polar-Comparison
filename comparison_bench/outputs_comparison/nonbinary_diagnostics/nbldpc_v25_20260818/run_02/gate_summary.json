@@ -1,0 +1,35 @@
+{
+  "schema": "nbldpc_v25_gate_summary_v1",
+  "status": "fail_no_stable_factorization",
+  "structured_model_beats_qsc_v17_on_all_holdout": false,
+  "chain_rule_closed": true,
+  "candidates_for_v26": {
+    "high_field_candidate": {
+      "factorization": "F01",
+      "labeling": "L01_natural",
+      "key": "F01:L01_natural",
+      "mean_total_H_bits": 0.819722
+    },
+    "mid_field_control": {
+      "factorization": "F03",
+      "labeling": "L01_natural",
+      "key": "F03:L01_natural",
+      "mean_total_H_bits": 0.819722
+    },
+    "all_factorization_totals": {
+      "F01:L01_natural": 0.819722,
+      "F01:L02_gray": 0.819722,
+      "F02:L01_natural": 0.819722,
+      "F02:L02_gray": 0.819722,
+      "F03:L01_natural": 0.819722,
+      "F03:L02_gray": 0.819722,
+      "F04:L01_natural": 0.819722,
+      "F04:L02_gray": 0.819722,
+      "F05:L01_natural": 0.819722,
+      "F05:L02_gray": 0.819722
+    },
+    "selection_rule": "fewest layers, then lowest mean total conditional entropy; deterministic"
+  },
+  "trigger_note": "pass_ready_for_de_change -> V26 proposed (not auto-started); still no finite code/FER/MET/fresh-qualification.",
+  "prohibitions_respected": true
+}

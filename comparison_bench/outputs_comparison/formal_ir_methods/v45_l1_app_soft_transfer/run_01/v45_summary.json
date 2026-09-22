@@ -1,0 +1,464 @@
+{
+  "cycle_id": "V45P0",
+  "change_id": "formal-ir-v45-l1-app-soft-transfer",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "execution_scope": "v45_l1_app_soft_transfer_27_calls_exactly_once",
+  "fake_runner": false,
+  "mechanism_id": "l1_app_soft_transfer_H1_syndrome_derived",
+  "mechanism_candidate": "l1_app_soft_transfer",
+  "provenance": {
+    "authorized_target_sha": "69f6d42838a091d09fa6f8405cacc7f33b3c480b",
+    "sha_binding": {
+      "HEAD": "69f6d42838a091d09fa6f8405cacc7f33b3c480b",
+      "origin/formal-ir-mainline": "69f6d42838a091d09fa6f8405cacc7f33b3c480b"
+    },
+    "structural_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v38_architecture_triage\\run_01\\v38_structural_prototypes.json",
+    "structural_records_strict_match": 4,
+    "predecessor_cycle": "V43P0",
+    "predecessor_terminal_state": "V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK",
+    "predecessor_plan_sha": "13c791e58c0f2a886af5d49cd26af493476dd4f9",
+    "predecessor_execution_sha": "f2ea4fa2c97f6c2ffe5fe6c27f0d84c8f7874e9b",
+    "predecessor_result_sha": "4e2ed4db",
+    "v43_accepted_plan_sha": "13c791e58c0f2a886af5d49cd26af493476dd4f9",
+    "v44_plan_sha": "c51a21c0",
+    "h1_material": "V31-H1-QC-16x1024 rank16 QC-cyclic-projective",
+    "h1_rank": 16
+  },
+  "v25_counts_provenance": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+    "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts",
+    "role": "source-specific V25 TRAIN empirical counts (read-only)",
+    "exists": true
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": 27,
+      "l1": 9,
+      "control_l2": 9,
+      "treatment_l2": 9
+    },
+    "decoder_calls_started": {
+      "total": 27,
+      "l1": 9,
+      "control_l2": 9,
+      "treatment_l2": 9
+    },
+    "decoder_calls_completed": {
+      "total": 27,
+      "l1": 9,
+      "control_l2": 9,
+      "treatment_l2": 9
+    },
+    "structural_reconstruction_decoder_calls": 0,
+    "preflight_decoder_calls": 0
+  },
+  "leakage": {
+    "m1_bits": 80,
+    "per_source": {
+      "1M": {
+        "m2": 184,
+        "l2_syndrome_bits": 920,
+        "l2_plus_tag_bits": 984,
+        "control_leak_total": 984,
+        "treatment_leak_total": 1064,
+        "f_total": {
+          "control": 1.1996156362812802,
+          "treatment": 1.2971453628082137
+        }
+      },
+      "1p5M": {
+        "m2": 190,
+        "l2_syndrome_bits": 950,
+        "l2_plus_tag_bits": 1014,
+        "control_leak_total": 1014,
+        "treatment_leak_total": 1094,
+        "f_total": {
+          "control": 1.1994611128386465,
+          "treatment": 1.2940931532992892
+        }
+      },
+      "2M": {
+        "m2": 192,
+        "l2_syndrome_bits": 960,
+        "l2_plus_tag_bits": 1024,
+        "control_leak_total": 1024,
+        "treatment_leak_total": 1104,
+        "f_total": {
+          "control": 1.201110707540725,
+          "treatment": 1.294947481567344
+        }
+      }
+    },
+    "Control_984_1014_1024_vs_Treatment_1064_1094_1104": true,
+    "note": "Control 984/1014/1024 vs Treatment 1064/1094/1104 (syndrome 920/950/960 f_total)"
+  },
+  "npz_policy": {
+    "forbidden_winner_npz_read": false,
+    "any_npz_output_written": false,
+    "v25_channel_counts_npz_read_only_allowed": true
+  },
+  "routing_trace": [
+    "rule_0_integrity_ok",
+    "rule_3_both_gates_failed -> V45_GO_STRUCTURE"
+  ],
+  "terminal_state": "V45_GO_STRUCTURE",
+  "terminal_reason": "BOTH_ARMS_GATES_FAILED",
+  "stopped_for_analysis": {
+    "cond_control": true,
+    "cond_l1_app": true
+  },
+  "control_arm_wrong_codeword_anomaly": true,
+  "needs_1p5m_structure_branch": false,
+  "l1_diagnostics_by_source": {
+    "1M": {
+      "mean_abs_diff_q_p": 0.0007348854367013965,
+      "mean_bp_posterior_entropy": 0.0013703099982786925,
+      "iterations_l1": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "exact_u1_count": 3,
+      "syndrome_ok_l1_count": 6,
+      "wrong_l1_count": 0
+    },
+    "1p5M": {
+      "mean_abs_diff_q_p": 0.0007629716046051073,
+      "mean_bp_posterior_entropy": 0.00011540887391429201,
+      "iterations_l1": [
+        1,
+        1,
+        3,
+        3,
+        1,
+        1
+      ],
+      "exact_u1_count": 3,
+      "syndrome_ok_l1_count": 6,
+      "wrong_l1_count": 0
+    },
+    "2M": {
+      "mean_abs_diff_q_p": 0.0008164474700163563,
+      "mean_bp_posterior_entropy": 0.001177946441057869,
+      "iterations_l1": [
+        2,
+        2,
+        1,
+        1,
+        2,
+        2
+      ],
+      "exact_u1_count": 3,
+      "syndrome_ok_l1_count": 6,
+      "wrong_l1_count": 0
+    }
+  },
+  "gate_evaluation": {
+    "cond_control": {
+      "condition": "cond_control",
+      "calls": 9,
+      "g1_overall_exact_ge_7_of_9": {
+        "exact_total": 4,
+        "threshold": 7,
+        "pass": false
+      },
+      "g2_every_source_ge_2_of_3": {
+        "exact_by_source": {
+          "1M": 1,
+          "1p5M": 2,
+          "2M": 1
+        },
+        "threshold_per_source": 2,
+        "pass": false
+      },
+      "g3_wrong_zero": {
+        "wrong_count": 1,
+        "pass": false
+      },
+      "passed": false
+    },
+    "cond_l1_app": {
+      "condition": "cond_l1_app",
+      "calls": 9,
+      "g1_overall_exact_ge_7_of_9": {
+        "exact_total": 7,
+        "threshold": 7,
+        "pass": true
+      },
+      "g2_every_source_ge_2_of_3": {
+        "exact_by_source": {
+          "1M": 2,
+          "1p5M": 2,
+          "2M": 3
+        },
+        "threshold_per_source": 2,
+        "pass": true
+      },
+      "g3_wrong_zero": {
+        "wrong_count": 1,
+        "pass": false
+      },
+      "passed": false
+    }
+  },
+  "aggregates": {
+    "per_condition": {
+      "cond_control": {
+        "calls": 9,
+        "exact_l2_total": 4,
+        "exact_full_total": 0,
+        "wrong_count": 1,
+        "exact_by_source_l2": {
+          "1M": 1,
+          "1p5M": 2,
+          "2M": 1
+        },
+        "exact_by_source_full": {
+          "1M": 0,
+          "1p5M": 0,
+          "2M": 0
+        }
+      },
+      "cond_l1_app": {
+        "calls": 9,
+        "exact_l2_total": 7,
+        "exact_full_total": 7,
+        "wrong_count": 1,
+        "exact_by_source_l2": {
+          "1M": 2,
+          "1p5M": 2,
+          "2M": 3
+        },
+        "exact_by_source_full": {
+          "1M": 2,
+          "1p5M": 2,
+          "2M": 3
+        }
+      }
+    },
+    "per_source": {
+      "1M": {
+        "calls": 6,
+        "exact_l2_total": 3,
+        "exact_full_total": 2,
+        "by_condition_l2": {
+          "cond_control": 1,
+          "cond_l1_app": 2
+        },
+        "by_condition_full": {
+          "cond_control": 0,
+          "cond_l1_app": 2
+        }
+      },
+      "1p5M": {
+        "calls": 6,
+        "exact_l2_total": 4,
+        "exact_full_total": 2,
+        "by_condition_l2": {
+          "cond_control": 2,
+          "cond_l1_app": 2
+        },
+        "by_condition_full": {
+          "cond_control": 0,
+          "cond_l1_app": 2
+        }
+      },
+      "2M": {
+        "calls": 6,
+        "exact_l2_total": 4,
+        "exact_full_total": 3,
+        "by_condition_l2": {
+          "cond_control": 1,
+          "cond_l1_app": 3
+        },
+        "by_condition_full": {
+          "cond_control": 0,
+          "cond_l1_app": 3
+        }
+      }
+    },
+    "wrong_total_l2": 2,
+    "wrong_total_l1": 0,
+    "paired_outcomes": [
+      {
+        "block_seed": 390119,
+        "source": "1M",
+        "both_exact": false,
+        "control_only_exact": false,
+        "treatment_only_exact": true,
+        "neither_exact": false,
+        "both_exact_full": true,
+        "errors_final_control": 161,
+        "errors_final_treatment": 0,
+        "errors_final_delta": -161,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390120,
+        "source": "1M",
+        "both_exact": true,
+        "control_only_exact": false,
+        "treatment_only_exact": false,
+        "neither_exact": false,
+        "both_exact_full": true,
+        "errors_final_control": 0,
+        "errors_final_treatment": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390121,
+        "source": "1M",
+        "both_exact": false,
+        "control_only_exact": false,
+        "treatment_only_exact": false,
+        "neither_exact": true,
+        "both_exact_full": false,
+        "errors_final_control": 215,
+        "errors_final_treatment": 98,
+        "errors_final_delta": -117,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390219,
+        "source": "1p5M",
+        "both_exact": true,
+        "control_only_exact": false,
+        "treatment_only_exact": false,
+        "neither_exact": false,
+        "both_exact_full": true,
+        "errors_final_control": 0,
+        "errors_final_treatment": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390220,
+        "source": "1p5M",
+        "both_exact": true,
+        "control_only_exact": false,
+        "treatment_only_exact": false,
+        "neither_exact": false,
+        "both_exact_full": true,
+        "errors_final_control": 0,
+        "errors_final_treatment": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390221,
+        "source": "1p5M",
+        "both_exact": false,
+        "control_only_exact": false,
+        "treatment_only_exact": false,
+        "neither_exact": true,
+        "both_exact_full": false,
+        "errors_final_control": 3,
+        "errors_final_treatment": 3,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390319,
+        "source": "2M",
+        "both_exact": false,
+        "control_only_exact": false,
+        "treatment_only_exact": true,
+        "neither_exact": false,
+        "both_exact_full": true,
+        "errors_final_control": 176,
+        "errors_final_treatment": 0,
+        "errors_final_delta": -176,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390320,
+        "source": "2M",
+        "both_exact": false,
+        "control_only_exact": false,
+        "treatment_only_exact": true,
+        "neither_exact": false,
+        "both_exact_full": true,
+        "errors_final_control": 92,
+        "errors_final_treatment": 0,
+        "errors_final_delta": -92,
+        "pairing_errors_initial_equal": true
+      },
+      {
+        "block_seed": 390321,
+        "source": "2M",
+        "both_exact": true,
+        "control_only_exact": false,
+        "treatment_only_exact": false,
+        "neither_exact": false,
+        "both_exact_full": true,
+        "errors_final_control": 0,
+        "errors_final_treatment": 0,
+        "errors_final_delta": 0,
+        "pairing_errors_initial_equal": true
+      }
+    ],
+    "l1_diagnostics_by_source": {
+      "1M": {
+        "mean_abs_diff_q_p": 0.0007348854367013965,
+        "mean_bp_posterior_entropy": 0.0013703099982786925,
+        "iterations_l1": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "exact_u1_count": 3,
+        "syndrome_ok_l1_count": 6,
+        "wrong_l1_count": 0
+      },
+      "1p5M": {
+        "mean_abs_diff_q_p": 0.0007629716046051073,
+        "mean_bp_posterior_entropy": 0.00011540887391429201,
+        "iterations_l1": [
+          1,
+          1,
+          3,
+          3,
+          1,
+          1
+        ],
+        "exact_u1_count": 3,
+        "syndrome_ok_l1_count": 6,
+        "wrong_l1_count": 0
+      },
+      "2M": {
+        "mean_abs_diff_q_p": 0.0008164474700163563,
+        "mean_bp_posterior_entropy": 0.001177946441057869,
+        "iterations_l1": [
+          2,
+          2,
+          1,
+          1,
+          2,
+          2
+        ],
+        "exact_u1_count": 3,
+        "syndrome_ok_l1_count": 6,
+        "wrong_l1_count": 0
+      }
+    }
+  },
+  "master_stop_rule": "\u552f\u4e00\u4e00\u6b21 27-invocation \u53cc\u6761\u4ef6\u914d\u5bf9\u8bca\u65ad\uff08\u542b 9 L1 BP + 18 L2\uff09\uff1b\u5bf9\u7167\u4e3a V43 soft-marginal P(U2|B)\uff08Control\uff09vs Treatment \u03a3 q_i P(U2|B,u1)\uff1b\u4ec5 Lane C \u56fa\u5b9a\u5404 source ordinal-2 \u4ee3\u8868\u77e9\u9635 + V31 H1 QC 16\u00d71024\u3001max_iter=90\u3001damping_alpha=1.0 \u51bb\u7ed3 early-stop \u4e0d\u518d\u8c03\u53c2\uff1bcond_l1_app \u6309\u51bb\u7ed3 syndrome-derived APP\uff08p_i(u1)=P(U1|B)\u3001s1=H1\u00b7u1^Alice\u3001BP_i=decode(H1,p_i,s1).bp_posterior_beliefs / APP approximation\u3001q_i=softmax BP_i\u3001P_i(U2)=\u03a3 q_i P(U2|B,u1)\u3001\u6cc4\u6f0f Control 984/1014/1024 (syndrome 920/950/960+64 tag) vs Treatment 1064/1094/1104 (\u542b 80) f_total=leak_total/[N(H1+H2)] N=1024\uff0cH1 \u590d\u7528 rank16 QC-cyclic\uff0c\u901a\u7528 FFT-QSPA \u590d\u7528\u4e0d\u65b0\u589e decoder\uff0c\u4e0d\u505a hard \u4f30\u8ba1/pilot/\u566a\u58f0/\u91cf\u5316/\u5931\u914d\u4fe1\u9053\u5f8b/joint \u8fed\u4ee3/\u65b0\u77e9\u9635/\u65b0 decoder \u53c2\u6570/\u53c2\u6570\u7f51\u683c/joint GF1024\uff0c\u533a\u5206 exact_l2 \u4e0e exact_full\uff0cControl/Treatment \u975e\u7b49\u6cc4\u6f0f\u6bd4\u8f83\u4e3a\u989d\u5916 80-bit \u4ef7\u503c\u8bc4\u4f30\uff09\u540e\u4e0d\u518d\u66f4\u6539\u3002\u65e0\u8bba\u7ed3\u679c\u5982\u4f55\uff1a\u4e0d\u8ffd\u52a0 blocks\u3001\u4e0d\u8865\u8dd1\u3001\u4e0d\u505a\u7b2c\u4e8c\u8f6e\u8bca\u65ad\u3001\u4e0d\u5e76\u884c\u6d4b\u8bd5\u591a\u65b9\u6848\u3001\u4e0d\u542f\u52a8 V46\u3002",
+  "statistics_note": "Descriptive only; sample is tiny and clustered (27 invocations = 9 unique blocks x (1 L1 + 2 L2); 18 L2 records paired). Exact-recovery proportions reported with n and raw counts; any interval is naive and uncorrected for clustering; no significance testing. Success primary is exact_l2 only; exact_full = exact_u1 && exact_l2 reported separately.",
+  "claim_boundary": [
+    "results support ONLY bounded conditional attribution on V25 TRAIN empirical-count development blocks",
+    "control arm is V43 soft-marginal P(U2|B) (zero extra leakage)",
+    "cond_l1_app arm is syndrome-derived L1 APP soft transfer q_i=softmax BP posterior / APP approximation via V31 H1 16x1024 QC-cyclic rank16 + generic FFT-QSPA (s1=H1\u00b7u1^Alice, 80 bits), L2 on frozen Lane C ordinal-2 matrices 90/1.0 single point (frozen early-stop), Control 984/1014/1024 vs Treatment 1064/1094/1104 (syndrome 920/950/960+80+64 tag) f_total accounted, no hard/noise/quantization/distortion/C04/joint GF1024, not coupled graph/branch C/D/E, SHALL NOT be generalized as real condition",
+    "Control vs Treatment non-equal-leakage comparison is ONLY extra 80-bit L1 syndrome information L2 transfer value",
+    "V45_L1APP_NO_VALUE_OR_HARM attributes loss ONLY to this L1-APP soft transfer limitation (M_{H1,s1} insufficient or H1 non-convergence, extra 80-bit not transferred), NOT Lane C graph structure nor concrete upstream coding scheme or real system",
+    "V45_L1APP_ADDED_VALUE_SIGNAL means ONLY finite-sample/iteration/prior differences require inspection; never unconditional evidence treatment outperforms control"
+  ],
+  "integrity_failures": [],
+  "performance_interpretation_presented": true
+}

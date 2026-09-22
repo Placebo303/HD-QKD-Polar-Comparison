@@ -1,0 +1,13 @@
+{
+  "artifacts": {
+    "formal_candidate_manifest.json": "70d6b391031822dd5bd2d321de55184d20f0cad4f130eec68bb6f55324e9b1fe",
+    "formal_codebook_manifest.json": "2c49cf26da0b0a4c207cd1ace444a9ab739df67102ed7de4c4f16f19c1ff0b1a",
+    "formal_frame_outcomes.csv": "c9930197d92611b8acb896ad367cf2d0465c1898180f25a64f1c5478d2fa0538",
+    "formal_policy_manifest.json": "69929000f05be72861996bb2527d76391b916a2ccd47029c203ac5c4e89a781e",
+    "formal_transcript.jsonl": "1309b5930579bbce372e6c979af7b20508d22475c01f082427509940e46076ad",
+    "pre_run_plan.json": "b69189cfb45869c49904670d6a121a3eb397e13ced53637f0ce5e9e8e09dea09"
+  },
+  "outcome_count": 512,
+  "run_id": "20260731_v5a_nbldpc_multistage_synthetic",
+  "run_status": "completed"
+}

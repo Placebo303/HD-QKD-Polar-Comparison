@@ -1,0 +1,67 @@
+{
+  "schema": "v66_data_v1",
+  "lifecycle": "PLAN_CANDIDATE / DEVELOPMENT_BENCHMARK / EXECUTE_NOT_AUTHORIZED",
+  "head": "832e5394bb366927c779414ee5a08427bd740a2d",
+  "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
+  "processing_rule": "legacy_v1",
+  "dimension": 1024,
+  "bin_width_ps": 200,
+  "pairing": "nearest",
+  "overall_blocks": 72,
+  "per_segment_overall": {
+    "CAL": 24,
+    "VAL": 24,
+    "EVAL": 24
+  },
+  "per_source_per_segment_blocks": 24,
+  "per_source_total_blocks": 72,
+  "single_source": "20260123_1M_600k_0dB",
+  "block_def": "4x256 frames =1024 symbols",
+  "frame_def": "256 pairs, U=32*U1+U2 F03 5+5 natural",
+  "single_session": true,
+  "single_session_id": "20260123_1M_600k_0dB",
+  "development_replay": true,
+  "replay_source": "v55_intake_20260828",
+  "replay_note": "Single-session single-source window reused from v55 single raw session 20260123_1M_600k_0dB (F=2130 K=532), marked development_replay=true, not fresh qualification; CAL 0-23 VAL 24-47 EVAL 48-71 contiguous, internally non-overlapping",
+  "per_source": {
+    "20260123_1M_600k_0dB": {
+      "source_label": "1M",
+      "session_id": "20260123_1M_600k_0dB",
+      "F": 2130,
+      "K": 532,
+      "CAL_blocks": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+      "VAL_blocks": [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47],
+      "EVAL_blocks": [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
+      "CAL_frame_ids": [[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19],[20,21,22,23],[24,25,26,27],[28,29,30,31],[32,33,34,35],[36,37,38,39],[40,41,42,43],[44,45,46,47],[48,49,50,51],[52,53,54,55],[56,57,58,59],[60,61,62,63],[64,65,66,67],[68,69,70,71],[72,73,74,75],[76,77,78,79],[80,81,82,83],[84,85,86,87],[88,89,90,91],[92,93,94,95]],
+      "VAL_frame_ids": [[96,97,98,99],[100,101,102,103],[104,105,106,107],[108,109,110,111],[112,113,114,115],[116,117,118,119],[120,121,122,123],[124,125,126,127],[128,129,130,131],[132,133,134,135],[136,137,138,139],[140,141,142,143],[144,145,146,147],[148,149,150,151],[152,153,154,155],[156,157,158,159],[160,161,162,163],[164,165,166,167],[168,169,170,171],[172,173,174,175],[176,177,178,179],[180,181,182,183],[184,185,186,187],[188,189,190,191]],
+      "EVAL_frame_ids": [[192,193,194,195],[196,197,198,199],[200,201,202,203],[204,205,206,207],[208,209,210,211],[212,213,214,215],[216,217,218,219],[220,221,222,223],[224,225,226,227],[228,229,230,231],[232,233,234,235],[236,237,238,239],[240,241,242,243],[244,245,246,247],[248,249,250,251],[252,253,254,255],[256,257,258,259],[260,261,262,263],[264,265,266,267],[268,269,270,271],[272,273,274,275],[276,277,278,279],[280,281,282,283],[284,285,286,287]],
+      "pairs_per_segment": 24576,
+      "frames_per_segment": 96,
+      "provenance": "v55_intake_20260828/pairs/20260123_1M_600k_0dB",
+      "development_replay": true,
+      "session_provenance_verified": true
+    }
+  },
+  "zero_overlap_verified": {
+    "key": "(source, session_id, frame_id)",
+    "CAL∩VAL": true,
+    "CAL∪VAL∩EVAL": true,
+    "CAL∪VAL∪EVAL ∩ (V13∪V48..V64)": true,
+    "single_session_isolation": true,
+    "not_cross_spliced": true,
+    "note": "All 72 blocks 0-71 within 20260123_1M_600k_0dB contiguous window, internally disjoint, checked against v55_stratified_registry_candidate & v64_fresh_registry by (source,session,frame) tuple; development_replay=true"
+  },
+  "segment_size_check": {
+    "overall_24_per_segment": true,
+    "per_segment_24": 24,
+    "per_source_24": 24,
+    "K_required": 72,
+    "K_available": 532,
+    "F_required": 288,
+    "F_available": 2130,
+    "data_not_ready": false
+  },
+  "created_at": "2026-08-31T00:00:00Z",
+  "authoritative": true,
+  "next_step": "spike decoder-free CE/m_family/rank check with m1<1024&&m2<1024; if fails -> RATE_NOT_FEASIBLE/MATRIX_NOT_CONSTRUCTIBLE"
+}

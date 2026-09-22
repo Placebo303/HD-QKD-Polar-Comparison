@@ -1,0 +1,44 @@
+2026-09-09T12:58:42 r1c-a1 workers requested=18 revision=R1c-A2
+2026-09-09T12:59:11 structure-parallel n=64 workers=18 wall=29.0 arms=8 records=48 pid=34468
+2026-09-09T12:59:11 selected=['B0_D5_DV3_NATIVE', 'B1_D5_DV3_COMMON_LABELS', 'T1_PEG_DV3', 'T3_SC_DV3_W4', 'M1_ACCUMULATOR_FOREST_MAX'] fallbacks={'best_T': 'T1_PEG_DV3', 'best_M': 'M1_ACCUMULATOR_FOREST_MAX'}
+2026-09-09T12:59:11 prior E2 identity counts=(1024, 1024) pb=(1024,) LAMBDA_STAR=137.3823795883264
+2026-09-09T12:59:12 worker spawn (initial) pid=16112 warmup=ok
+2026-09-09T12:59:12 r1c-a2 workers requested=18 effective=18 pilot_rss=88109056 main_rss=112836608
+2026-09-09T12:59:12 worker spawn (initial) pid=17684 warmup=ok
+2026-09-09T12:59:13 worker spawn (initial) pid=40600 warmup=ok
+2026-09-09T12:59:13 worker spawn (initial) pid=16964 warmup=ok
+2026-09-09T12:59:14 worker spawn (initial) pid=5240 warmup=ok
+2026-09-09T12:59:14 worker spawn (initial) pid=42992 warmup=ok
+2026-09-09T12:59:15 worker spawn (initial) pid=2868 warmup=ok
+2026-09-09T12:59:15 worker spawn (initial) pid=35976 warmup=ok
+2026-09-09T12:59:16 worker spawn (initial) pid=39856 warmup=ok
+2026-09-09T12:59:16 worker spawn (initial) pid=29100 warmup=ok
+2026-09-09T12:59:17 worker spawn (initial) pid=40944 warmup=ok
+2026-09-09T12:59:17 worker spawn (initial) pid=6460 warmup=ok
+2026-09-09T12:59:17 worker spawn (initial) pid=30676 warmup=ok
+2026-09-09T12:59:18 worker spawn (initial) pid=33636 warmup=ok
+2026-09-09T12:59:18 worker spawn (initial) pid=19308 warmup=ok
+2026-09-09T12:59:19 worker spawn (initial) pid=47648 warmup=ok
+2026-09-09T12:59:19 worker spawn (initial) pid=34924 warmup=ok
+2026-09-09T12:59:20 worker spawn (initial) pid=36844 warmup=ok
+2026-09-09T12:59:20 r1c-a2 workers requested=18 effective=18 main_rss=112836608 worker_rss=[88109056, 88182784, 87924736, 88064000, 88027136, 88203264, 88018944, 88317952, 88088576, 87986176, 88088576, 88064000, 87838720, 88129536, 87977984, 87969792, 87941120, 87900160] aggregate=1697669120 setup=18
+2026-09-09T12:59:23 r1c chunk cells=40 workers=18 wall=3.2
+2026-09-09T12:59:23 r1c chunk canary wall=3.2 chunk_ok=True
+2026-09-09T12:59:23 flush decoder_records rows=104
+2026-09-09T12:59:23 canary-parallel wall=3.2 chunk_ok=True
+2026-09-09T12:59:23 canary done advancing-pool={'T1_PEG_DV3': {'f12_exact': 0, 'f12_iter': 720, 'sq_exact': 0}, 'T3_SC_DV3_W4': {'f12_exact': 0, 'f12_iter': 0, 'sq_exact': 0}, 'M1_ACCUMULATOR_FOREST_MAX': {'f12_exact': 0, 'f12_iter': 0, 'sq_exact': 0}}
+2026-09-09T12:59:23 advancing=[]
+2026-09-09T13:06:55 structure-parallel n=128 workers=18 wall=451.4 arms=8 records=48 pid=34468
+2026-09-09T13:06:55 checkpoint structure_records rows=96
+2026-09-09T13:06:58 r1c chunk cells=16 workers=18 wall=3.0
+2026-09-09T13:06:58 r1c chunk scaling-n128-canary wall=3.0 chunk_ok=True
+2026-09-09T13:06:58 flush decoder_records rows=144
+2026-09-09T13:06:58 scaling n=128 {'T1_PEG_DV3': {'f12_exact': 0, 'f12_iter': 720, 'sq_exact': 0}, 'M1_ACCUMULATOR_FOREST_MAX': {'f12_exact': 0, 'f12_iter': 0, 'sq_exact': 0}}
+2026-09-09T15:17:43 structure-parallel n=256 workers=18 wall=7845.0 arms=8 records=48 pid=34468
+2026-09-09T15:17:43 checkpoint structure_records rows=144
+2026-09-09T15:17:50 r1c chunk cells=16 workers=18 wall=7.2
+2026-09-09T15:17:50 r1c chunk scaling-n256-canary wall=7.2 chunk_ok=True
+2026-09-09T15:17:50 flush decoder_records rows=184
+2026-09-09T15:17:50 scaling n=256 {'T1_PEG_DV3': {'f12_exact': 0, 'f12_iter': 720, 'sq_exact': 0}, 'M1_ACCUMULATOR_FOREST_MAX': {'f12_exact': 0, 'f12_iter': 0, 'sq_exact': 0}}
+2026-09-09T15:17:52 flush decoder_records rows=184
+2026-09-09T15:17:52 done terminal=D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY calls=184 setup=18 wall=8349.6 peak_rss=88764416

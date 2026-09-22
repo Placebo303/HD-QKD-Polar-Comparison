@@ -1,0 +1,11 @@
+{
+  "candidates": ["cascade_lite", "layered_ldpc_lite"],
+  "config_sources": [
+    {"path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\configs\\cascade_param_sweep.yaml", "sha256": "e3952f2d171a9e29e1883edb27826c44dcb33cdf9159f8d6553ecdf70ba163ec"},
+    {"path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\configs\\layered_ldpc_param_sweep.yaml", "sha256": "f7a542157ea6b5a1b90a691a0395b6f64ef53e2bfdc33d5c8cb913bed750fad8"}
+  ],
+  "one_global_config_per_candidate": true,
+  "per_point_oracle_selection": false,
+  "selection_order": ["verified success fraction", "failure count", "compatible leakage only within method", "runtime"],
+  "tune_only_on": "tuning"
+}

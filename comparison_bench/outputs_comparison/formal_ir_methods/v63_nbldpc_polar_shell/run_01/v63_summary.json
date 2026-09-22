@@ -1,0 +1,162 @@
+{
+  "registry_type": "INTEGRATION_FRESH_CANDIDATE",
+  "total_blocks": 90,
+  "total_calls": 234,
+  "hard_cap": 360,
+  "budget": "90 L1+90 base+\u226490 stage1+\u226490 stage2 =180-360, got 234",
+  "total_disclosed_bits": 100020,
+  "overall_avg": 1111.3333333333333,
+  "per_source_avg": {
+    "1M": 1093.3333333333333,
+    "1p5M": 1118.0,
+    "2M": 1122.6666666666667
+  },
+  "per_source_total": {
+    "1M": 32800,
+    "1p5M": 33540,
+    "2M": 33680
+  },
+  "stage_used": {
+    "delta8": 20,
+    "delta16": 17,
+    "base": 53
+  },
+  "rescue": {
+    "N_stage1_delta8": 20,
+    "N_stage2_delta16": 17
+  },
+  "elapsed_s": 527.48947930336,
+  "accepted_plan_sha": "397c1bb6d60cdf6dfa00d34bfae2eb1ca231d20a",
+  "head_sha": "38b6d071eb084017cbecf8ae86d977cd0d33d936",
+  "accepted": "85/90",
+  "accepted_n": 85,
+  "exact": "84/90",
+  "exact_n": 84,
+  "undetected": 1,
+  "undetected_blocks": [
+    "v63_dev_1M_0133"
+  ],
+  "per_source": {
+    "1M": {
+      "blocks": 30,
+      "accepted": "29/30",
+      "accepted_n": 29,
+      "exact": "28/30",
+      "exact_n": 28,
+      "undetected": 1,
+      "four_class": {
+        "exact": 28,
+        "undetected": 1,
+        "rejected": 1,
+        "accepted_non_exact_detected": 0
+      },
+      "wilson95_accepted": [
+        0.8332924860304112,
+        0.9940915620051425
+      ],
+      "wilson95_exact": [
+        0.7867618227892791,
+        0.9815233646723066
+      ],
+      "stage_used": {
+        "delta8": 10,
+        "delta16": 6,
+        "base": 14
+      },
+      "disclosed_total": 32800,
+      "disclosed_avg": 1093.3333333333333,
+      "disclosed_per_accepted": 1091.5862068965516
+    },
+    "1p5M": {
+      "blocks": 30,
+      "accepted": "28/30",
+      "accepted_n": 28,
+      "exact": "28/30",
+      "exact_n": 28,
+      "undetected": 0,
+      "four_class": {
+        "exact": 28,
+        "undetected": 0,
+        "rejected": 2,
+        "accepted_non_exact_detected": 0
+      },
+      "wilson95_accepted": [
+        0.7867618227892791,
+        0.9815233646723066
+      ],
+      "wilson95_exact": [
+        0.7867618227892791,
+        0.9815233646723066
+      ],
+      "stage_used": {
+        "base": 18,
+        "delta16": 6,
+        "delta8": 6
+      },
+      "disclosed_total": 33540,
+      "disclosed_avg": 1118.0,
+      "disclosed_per_accepted": 1114.0
+    },
+    "2M": {
+      "blocks": 30,
+      "accepted": "28/30",
+      "accepted_n": 28,
+      "exact": "28/30",
+      "exact_n": 28,
+      "undetected": 0,
+      "four_class": {
+        "exact": 28,
+        "undetected": 0,
+        "rejected": 2,
+        "accepted_non_exact_detected": 0
+      },
+      "wilson95_accepted": [
+        0.7867618227892791,
+        0.9815233646723066
+      ],
+      "wilson95_exact": [
+        0.7867618227892791,
+        0.9815233646723066
+      ],
+      "stage_used": {
+        "delta16": 5,
+        "base": 21,
+        "delta8": 4
+      },
+      "disclosed_total": 33680,
+      "disclosed_avg": 1122.6666666666667,
+      "disclosed_per_accepted": 1118.2857142857142
+    }
+  },
+  "four_class_overall": {
+    "exact": 84,
+    "undetected": 1,
+    "rejected": 5,
+    "accepted_non_exact_detected": 0
+  },
+  "disclosure_per_accepted": 1176.7058823529412,
+  "disclosure_per_accepted_str": "1176.71",
+  "wilson95_overall_accepted": [
+    0.8764610019095158,
+    0.9760393817156569
+  ],
+  "wilson95_overall_exact": [
+    0.8620973805849326,
+    0.9690904934496106
+  ],
+  "overall_state": "V63_SHELL_CORRECTION_WORKS_BUT_NOT_PASS",
+  "overall_pass": false,
+  "fail_reason": "undetected==1 blocks PASS gate (requires undetected==0); block v63_dev_1M_0133",
+  "tag_scope": "l2_only",
+  "leak_tiers": {
+    "base": {
+      "1M": 1064,
+      "1p5M": 1094,
+      "2M": 1104
+    },
+    "delta8": 40,
+    "delta16": 80,
+    "verified": true,
+    "note": "tag64 included in base once, leak_stage1=base+40 leak_stage2=base+80"
+  }
+}

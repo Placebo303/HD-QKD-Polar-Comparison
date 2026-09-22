@@ -1,0 +1,506 @@
+[
+  {
+    "block_id": "v64_fresh_1M_00",
+    "source": "1M",
+    "frame_ids": [
+      1674,
+      1675,
+      1676,
+      1677
+    ],
+    "held_out_ordinal_start": 74,
+    "held_out_ordinal_end": 77,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 400,
+      "base": 1600,
+      "K2": 12
+    }
+  },
+  {
+    "block_id": "v64_fresh_1M_01",
+    "source": "1M",
+    "frame_ids": [
+      1723,
+      1724,
+      1725,
+      1726
+    ],
+    "held_out_ordinal_start": 123,
+    "held_out_ordinal_end": 126,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 400,
+      "base": 1600,
+      "K2": 12
+    }
+  },
+  {
+    "block_id": "v64_fresh_1M_02",
+    "source": "1M",
+    "frame_ids": [
+      1764,
+      1765,
+      1766,
+      1767
+    ],
+    "held_out_ordinal_start": 164,
+    "held_out_ordinal_end": 167,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 400,
+      "base": 1600,
+      "K2": 12
+    }
+  },
+  {
+    "block_id": "v64_fresh_1M_03",
+    "source": "1M",
+    "frame_ids": [
+      1847,
+      1848,
+      1849,
+      1850
+    ],
+    "held_out_ordinal_start": 247,
+    "held_out_ordinal_end": 250,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 400,
+      "base": 1600,
+      "K2": 12
+    }
+  },
+  {
+    "block_id": "v64_fresh_1M_04",
+    "source": "1M",
+    "frame_ids": [
+      1878,
+      1879,
+      1880,
+      1881
+    ],
+    "held_out_ordinal_start": 278,
+    "held_out_ordinal_end": 281,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 400,
+      "base": 1600,
+      "K2": 12
+    }
+  },
+  {
+    "block_id": "v64_fresh_1M_05",
+    "source": "1M",
+    "frame_ids": [
+      1907,
+      1908,
+      1909,
+      1910
+    ],
+    "held_out_ordinal_start": 307,
+    "held_out_ordinal_end": 310,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 400,
+      "base": 1600,
+      "K2": 12
+    }
+  },
+  {
+    "block_id": "v64_fresh_1M_06",
+    "source": "1M",
+    "frame_ids": [
+      1963,
+      1964,
+      1965,
+      1966
+    ],
+    "held_out_ordinal_start": 363,
+    "held_out_ordinal_end": 366,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 400,
+      "base": 1600,
+      "K2": 12
+    }
+  },
+  {
+    "block_id": "v64_fresh_1M_07",
+    "source": "1M",
+    "frame_ids": [
+      1984,
+      1985,
+      1986,
+      1987
+    ],
+    "held_out_ordinal_start": 384,
+    "held_out_ordinal_end": 387,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 400,
+      "base": 1600,
+      "K2": 12
+    }
+  },
+  {
+    "block_id": "v64_fresh_1p5M_00",
+    "source": "1p5M",
+    "frame_ids": [
+      2236,
+      2237,
+      2238,
+      2239
+    ],
+    "held_out_ordinal_start": 23,
+    "held_out_ordinal_end": 26,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 554,
+      "base": 2213,
+      "K2": 84
+    }
+  },
+  {
+    "block_id": "v64_fresh_1p5M_01",
+    "source": "1p5M",
+    "frame_ids": [
+      2339,
+      2340,
+      2341,
+      2342
+    ],
+    "held_out_ordinal_start": 126,
+    "held_out_ordinal_end": 129,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 554,
+      "base": 2213,
+      "K2": 84
+    }
+  },
+  {
+    "block_id": "v64_fresh_1p5M_02",
+    "source": "1p5M",
+    "frame_ids": [
+      2437,
+      2438,
+      2439,
+      2440
+    ],
+    "held_out_ordinal_start": 224,
+    "held_out_ordinal_end": 227,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 554,
+      "base": 2213,
+      "K2": 84
+    }
+  },
+  {
+    "block_id": "v64_fresh_1p5M_03",
+    "source": "1p5M",
+    "frame_ids": [
+      2502,
+      2503,
+      2504,
+      2505
+    ],
+    "held_out_ordinal_start": 289,
+    "held_out_ordinal_end": 292,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 554,
+      "base": 2213,
+      "K2": 84
+    }
+  },
+  {
+    "block_id": "v64_fresh_1p5M_04",
+    "source": "1p5M",
+    "frame_ids": [
+      2559,
+      2560,
+      2561,
+      2562
+    ],
+    "held_out_ordinal_start": 346,
+    "held_out_ordinal_end": 349,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 554,
+      "base": 2213,
+      "K2": 84
+    }
+  },
+  {
+    "block_id": "v64_fresh_1p5M_05",
+    "source": "1p5M",
+    "frame_ids": [
+      2624,
+      2625,
+      2626,
+      2627
+    ],
+    "held_out_ordinal_start": 411,
+    "held_out_ordinal_end": 414,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 554,
+      "base": 2213,
+      "K2": 84
+    }
+  },
+  {
+    "block_id": "v64_fresh_1p5M_06",
+    "source": "1p5M",
+    "frame_ids": [
+      2704,
+      2705,
+      2706,
+      2707
+    ],
+    "held_out_ordinal_start": 491,
+    "held_out_ordinal_end": 494,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 554,
+      "base": 2213,
+      "K2": 84
+    }
+  },
+  {
+    "block_id": "v64_fresh_1p5M_07",
+    "source": "1p5M",
+    "frame_ids": [
+      2751,
+      2752,
+      2753,
+      2754
+    ],
+    "held_out_ordinal_start": 538,
+    "held_out_ordinal_end": 541,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_1p5M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 554,
+      "base": 2213,
+      "K2": 84
+    }
+  },
+  {
+    "block_id": "v64_fresh_2M_00",
+    "source": "2M",
+    "frame_ids": [
+      2928,
+      2929,
+      2930,
+      2931
+    ],
+    "held_out_ordinal_start": 12,
+    "held_out_ordinal_end": 15,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 729,
+      "base": 2916,
+      "K2": 254
+    }
+  },
+  {
+    "block_id": "v64_fresh_2M_01",
+    "source": "2M",
+    "frame_ids": [
+      3049,
+      3050,
+      3051,
+      3052
+    ],
+    "held_out_ordinal_start": 133,
+    "held_out_ordinal_end": 136,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 729,
+      "base": 2916,
+      "K2": 254
+    }
+  },
+  {
+    "block_id": "v64_fresh_2M_02",
+    "source": "2M",
+    "frame_ids": [
+      3163,
+      3164,
+      3165,
+      3166
+    ],
+    "held_out_ordinal_start": 247,
+    "held_out_ordinal_end": 250,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 729,
+      "base": 2916,
+      "K2": 254
+    }
+  },
+  {
+    "block_id": "v64_fresh_2M_03",
+    "source": "2M",
+    "frame_ids": [
+      3256,
+      3257,
+      3258,
+      3259
+    ],
+    "held_out_ordinal_start": 340,
+    "held_out_ordinal_end": 343,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 729,
+      "base": 2916,
+      "K2": 254
+    }
+  },
+  {
+    "block_id": "v64_fresh_2M_04",
+    "source": "2M",
+    "frame_ids": [
+      3351,
+      3352,
+      3353,
+      3354
+    ],
+    "held_out_ordinal_start": 435,
+    "held_out_ordinal_end": 438,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 729,
+      "base": 2916,
+      "K2": 254
+    }
+  },
+  {
+    "block_id": "v64_fresh_2M_05",
+    "source": "2M",
+    "frame_ids": [
+      3458,
+      3459,
+      3460,
+      3461
+    ],
+    "held_out_ordinal_start": 542,
+    "held_out_ordinal_end": 545,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 729,
+      "base": 2916,
+      "K2": 254
+    }
+  },
+  {
+    "block_id": "v64_fresh_2M_06",
+    "source": "2M",
+    "frame_ids": [
+      3557,
+      3558,
+      3559,
+      3560
+    ],
+    "held_out_ordinal_start": 641,
+    "held_out_ordinal_end": 644,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 729,
+      "base": 2916,
+      "K2": 254
+    }
+  },
+  {
+    "block_id": "v64_fresh_2M_07",
+    "source": "2M",
+    "frame_ids": [
+      3626,
+      3627,
+      3628,
+      3629
+    ],
+    "held_out_ordinal_start": 710,
+    "held_out_ordinal_end": 713,
+    "pairs_count": 1024,
+    "BLOCK_LENGTH": 1024,
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh_v64",
+    "held_out_source_path": "comparison_bench/outputs_comparison/nonbinary_diagnostics/v13r3fresh_pairs_20260816/type2_2M_20260121_*/pairs.parquet",
+    "H_provenance": {
+      "H": 729,
+      "base": 2916,
+      "K2": 254
+    }
+  }
+]

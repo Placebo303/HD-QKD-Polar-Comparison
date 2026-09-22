@@ -14,6 +14,7 @@ import importlib.util
 import json
 import math
 import time
+from functools import lru_cache
 from dataclasses import asdict, dataclass
 from numbers import Integral
 from pathlib import Path
@@ -156,8 +157,8 @@ def syndrome_of_gf32(matrix: np.ndarray, vector: np.ndarray, field: Optional[GF2
     return syndromes
 
 
-def compute_gf32_rank(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
-    """Compute exact row rank of matrix over GF(32) using Gaussian elimination."""
+def _compute_gf32_rank_loop(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
+    """Reference element-loop GF(32) elimination; P2 equality-gate对照, not the default path."""
     if field is None:
         field = GF2mField.create(FIELD_Q)
     mul_table, _, inv_table = _get_gf32_tables(field)
@@ -198,29 +199,187 @@ def compute_gf32_rank(matrix: np.ndarray, field: Optional[GF2mField] = None) -> 
         col += 1
     return rank
 
+
+def _compute_gf32_rank_vectorized(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
+    """Vectorized GF(32) elimination; identical pivot choice/arithmetic to the loop."""
+    if field is None:
+        field = GF2mField.create(FIELD_Q)
+    mul_table, _, inv_table = _get_gf32_tables(field)
+    A = np.asarray(matrix, dtype=np.uint8).copy()
+    m, n = A.shape
+    rank = 0
+    col = 0
+    cols = np.arange(n)
+    for r in range(m):
+        if col >= n:
+            break
+        pivot_row = -1
+        while col < n:
+            nz = np.flatnonzero(A[r:, col])
+            if nz.size:
+                pivot_row = r + int(nz[0])
+                break
+            col += 1
+        if pivot_row < 0:
+            break
+        if pivot_row != r:
+            A[[r, pivot_row]] = A[[pivot_row, r]]
+        inv_val = inv_table[A[r, col]]
+        # scale pivot row
+        A[r, col:] = mul_table[A[r, col:], inv_val]
+        # eliminate column col in all other rows at once
+        factors = A[:, col].copy()
+        factors[r] = 0
+        rows = np.flatnonzero(factors)
+        if rows.size:
+            seg = cols[col:]
+            A[rows[:, None], seg] ^= mul_table[factors[rows, None], A[r, seg][None, :]]
+        rank += 1
+        col += 1
+    return rank
+
+
+_TABLE_LISTS_CACHE: dict[str, tuple[list[list[int]], list[int]]] = {}
+
+
+def _get_gf32_table_lists(field: GF2mField) -> tuple[list[list[int]], list[int]]:
+    """Cached (mul_table, inv_table) as nested Python lists for the tiny fast path."""
+    field_id = field.spec.field_id
+    cached = _TABLE_LISTS_CACHE.get(field_id)
+    if cached is None:
+        mul_table, _, inv_table = _get_gf32_tables(field)
+        cached = (mul_table.tolist(), inv_table.tolist())
+        _TABLE_LISTS_CACHE[field_id] = cached
+    return cached
+
+
+def _compute_gf32_rank_tiny(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
+    """Exact GF(32) elimination on plain Python lists; fastest for tiny matrices."""
+    if field is None:
+        field = GF2mField.create(FIELD_Q)
+    mul_rows, inv_vals = _get_gf32_table_lists(field)
+    A = [list(map(int, row)) for row in np.asarray(matrix, dtype=np.uint8).tolist()]
+    m = len(A)
+    n = len(A[0]) if m else 0
+    rank = 0
+    col = 0
+    for r in range(m):
+        if col >= n:
+            break
+        pivot_row = -1
+        while col < n:
+            for r2 in range(r, m):
+                if A[r2][col]:
+                    pivot_row = r2
+                    break
+            if pivot_row >= 0:
+                break
+            col += 1
+        if pivot_row < 0:
+            break
+        if pivot_row != r:
+            A[r], A[pivot_row] = A[pivot_row], A[r]
+        inv_val = inv_vals[A[r][col]]
+        prow = A[r]
+        for c in range(col, n):
+            if prow[c]:
+                prow[c] = mul_rows[prow[c]][inv_val]
+        for r2 in range(m):
+            if r2 != r and A[r2][col]:
+                factor = A[r2][col]
+                mrow = mul_rows[factor]
+                tgt = A[r2]
+                for c in range(col, n):
+                    if prow[c]:
+                        tgt[c] ^= mrow[prow[c]]
+        rank += 1
+        col += 1
+    return rank
+
+
+def compute_gf32_rank(matrix: np.ndarray, field: Optional[GF2mField] = None) -> int:
+    """Compute exact row rank of matrix over GF(32) using Gaussian elimination.
+
+    Default path dispatches by size: tiny matrices use the list fast path
+    (numpy call overhead dominates there); larger ones use the vectorized form.
+    All forms share pivot choice and table arithmetic, gated to equal outputs.
+    """
+    A0 = np.asarray(matrix, dtype=np.uint8)
+    m, n = A0.shape
+    if m * n <= 48:
+        return _compute_gf32_rank_tiny(A0, field)
+    return _compute_gf32_rank_vectorized(A0, field)
+
 # ---------------------------------------------------------------------------
 # Channel Loading & Sampling
 # ---------------------------------------------------------------------------
+
+# P1 (perf-v38-triage-test-cost): bounded stat-keyed caches for the V25/V31 loaders.
+# Key = (resolved_abs_path, mtime_ns, size): same file via relative/absolute/symlink
+# paths hits one entry; any content change misses. Cached payloads are immutable
+# (shape, bytes); every public call rebuilds fresh arrays so callers can never
+# pollute the cache by in-place mutation. Failures are never cached.
+_V31_CACHE_MAXSIZE = 4
+_V25_CACHE_MAXSIZE = 4
+
+
+def _stat_cache_key(resolved: Path) -> tuple[str, int, int]:
+    st = resolved.stat()
+    return (str(resolved), st.st_mtime_ns, st.st_size)
+
+
+@lru_cache(maxsize=_V25_CACHE_MAXSIZE)
+def _load_v25_payload_cached(key: tuple[str, int, int]) -> dict[str, tuple[tuple[int, ...], bytes]]:
+    data = np.load(key[0])
+    try:
+        out: dict[str, tuple[tuple[int, ...], bytes]] = {}
+        for src in SOURCES:
+            npz_key = NPZ_KEYS[src]
+            if npz_key not in data:
+                raise KeyError(f"Key {npz_key} not found in channel counts file")
+            arr = np.asarray(data[npz_key], dtype=np.float64)
+            if arr.shape != (DIMENSION, DIMENSION):
+                raise ValueError(f"Unexpected shape {arr.shape} for source {src}")
+            out[src] = (tuple(int(v) for v in arr.shape), arr.tobytes(order="C"))
+    finally:
+        data.close()
+    return out
+
 
 def load_v25_channel_counts(path: Optional[Path | str] = None) -> dict[str, np.ndarray]:
     """Load the V25 channel joint counts NPZ file."""
     if path is None:
         repo_root = Path(__file__).resolve().parents[4]
         path = repo_root / "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v25_20260818/run_04/channel_counts.npz"
-    path = Path(path)
-    if not path.is_file():
+    resolved = Path(path).resolve()
+    if not resolved.is_file():
         raise FileNotFoundError(f"V25 channel counts file not found: {path}")
-    data = np.load(path)
-    out: dict[str, np.ndarray] = {}
-    for src in SOURCES:
-        key = NPZ_KEYS[src]
-        if key not in data:
-            raise KeyError(f"Key {key} not found in channel counts file")
-        arr = np.asarray(data[key], dtype=np.float64)
-        if arr.shape != (DIMENSION, DIMENSION):
-            raise ValueError(f"Unexpected shape {arr.shape} for source {src}")
-        out[src] = arr
+    payload = _load_v25_payload_cached(_stat_cache_key(resolved))
+    return {
+        src: np.frombuffer(blob, dtype=np.float64).copy().reshape(shape)
+        for src, (shape, blob) in payload.items()
+    }
+
+
+@lru_cache(maxsize=_V31_CACHE_MAXSIZE)
+def _load_v31_payload_cached(key: tuple[str, int, int]) -> dict[str, tuple[tuple[int, ...], bytes]]:
+    with open(key[0], "r", encoding="utf-8") as fh:
+        doc = json.load(fh)
+    pkt = next((p for p in doc.get("packets", []) if p.get("packet_id") == "m1_16_n1024_n1024|QC-cyclic-projective"), None)
+    if pkt is None:
+        raise ValueError("QC-cyclic-projective packet not found in matrix payloads")
+    l2_mats = pkt.get("matrices", {}).get("L2", {})
+    out: dict[str, tuple[tuple[int, ...], bytes]] = {}
+    for src in ("1M", "1p5M", "2M"):
+        arr = np.asarray(l2_mats[src], dtype=np.uint8)
+        out[src] = (tuple(int(v) for v in arr.shape), arr.tobytes(order="C"))
     return out
+
+
+def load_v31_qc_baseline_matrices_cache_clear() -> None:
+    """Test-isolation hook: drop all cached V25/V31 loader payloads."""
+    _load_v25_payload_cached.cache_clear()
+    _load_v31_payload_cached.cache_clear()
 
 
 def load_v31_qc_baseline_matrices(path: Optional[Path | str] = None) -> dict[str, np.ndarray]:
@@ -234,19 +393,13 @@ def load_v31_qc_baseline_matrices(path: Optional[Path | str] = None) -> dict[str
     if path is None:
         repo_root = Path(__file__).resolve().parents[4]
         path = repo_root / "comparison_bench/outputs_comparison/nonbinary_diagnostics/nbldpc_v31_20260820/run_01/matrix_payloads.json"
-    path = Path(path)
-    if not path.is_file():
+    resolved = Path(path).resolve()
+    if not resolved.is_file():
         raise FileNotFoundError(f"V31 matrix payloads file not found: {path}")
-    with open(path, "r", encoding="utf-8") as fh:
-        doc = json.load(fh)
-    pkt = next((p for p in doc.get("packets", []) if p.get("packet_id") == "m1_16_n1024_n1024|QC-cyclic-projective"), None)
-    if pkt is None:
-        raise ValueError("QC-cyclic-projective packet not found in matrix payloads")
-    l2_mats = pkt.get("matrices", {}).get("L2", {})
+    payload = _load_v31_payload_cached(_stat_cache_key(resolved))
     return {
-        "1M": np.array(l2_mats["1M"], dtype=np.uint8),
-        "1p5M": np.array(l2_mats["1p5M"], dtype=np.uint8),
-        "2M": np.array(l2_mats["2M"], dtype=np.uint8),
+        src: np.frombuffer(blob, dtype=np.uint8).copy().reshape(shape)
+        for src, (shape, blob) in payload.items()
     }
 
 
@@ -363,6 +516,146 @@ def _check_update_log_batch(
 # Stage A1: FFT-QSPA Decoders (Flooding, Row-Layered, Damped Row-Layered)
 # ---------------------------------------------------------------------------
 
+# Belief provenance contract (D7/BP Alternative A). Tokens are exact; the
+# field is additive and defaulted so legacy positional construction keeps
+# working. CHECK_UPDATED labels a BP APP approximation that incorporated check
+# messages -- not a calibrated exact posterior.
+BELIEF_PROVENANCE_PRIOR_ONLY = "PRIOR_ONLY"
+BELIEF_PROVENANCE_CHECK_UPDATED = "CHECK_UPDATED"
+BELIEF_PROVENANCE_WARM_START_UNSPECIFIED = "WARM_START_UNSPECIFIED"
+BELIEF_PROVENANCE_TOKENS = (
+    BELIEF_PROVENANCE_PRIOR_ONLY,
+    BELIEF_PROVENANCE_CHECK_UPDATED,
+    BELIEF_PROVENANCE_WARM_START_UNSPECIFIED,
+)
+# Diagnostic record label only (never a provenance token): a PRIOR_ONLY return
+# may be recorded as current belief, never as conditioned posterior/APP.
+PRIOR_ONLY_CURRENT_BELIEF = "PRIOR_ONLY_CURRENT_BELIEF"
+
+
+class UnconditionedBeliefProvenanceError(RuntimeError):
+    """Cross-layer APP refused: returned beliefs are not CHECK_UPDATED."""
+
+
+def require_check_updated_provenance(provenance, *, consumer):
+    """Fail closed unless ``provenance`` is exactly CHECK_UPDATED.
+
+    Cross-layer APP consumers call this before computing or forwarding a
+    conditioned prior; PRIOR_ONLY, WARM_START_UNSPECIFIED, None/absent and
+    unknown tokens are all refused.
+    """
+    if provenance != BELIEF_PROVENANCE_CHECK_UPDATED:
+        raise UnconditionedBeliefProvenanceError(
+            f"{consumer}: cross-layer APP requires belief_provenance="
+            f"'{BELIEF_PROVENANCE_CHECK_UPDATED}'; got {provenance!r}")
+    return provenance
+
+
+def belief_diagnostic_label(provenance):
+    """Record label for a returned current belief state (BP-05 seam).
+
+    PRIOR_ONLY may only be recorded as PRIOR_ONLY_CURRENT_BELIEF; the
+    hard decision is a separate field (x_hat/syndrome_ok) and never upgrades
+    this label. Other tokens pass through unchanged (CHECK_UPDATED is not an
+    exact-posterior claim).
+    """
+    if provenance == BELIEF_PROVENANCE_PRIOR_ONLY:
+        return PRIOR_ONLY_CURRENT_BELIEF
+    return provenance
+
+
+# Code-factor extrinsic contract (D7-G, frozen OpenSpec
+# `v72p2d7-code-factor-extrinsic-contract`). A cold decoder's outgoing
+# code-factor message is `L_code_ext = L_post - log(p_in)` (per-row additive
+# constant free), stored row-normalized by subtracting log-sum-exp so
+# `softmax(log(p_in) + L_code_ext) == softmax(L_post)` exactly. This is a BP
+# factor message, not a calibrated exact posterior and not MAP truth. Valid
+# only for cold start after >=1 completed check sweep with finite
+# shape-correct beliefs. Iteration 0 carries no check evidence (neutral zeros
+# + NO_CHECK_EVIDENCE, ineligible for transfer); warm start is fail-closed
+# (WARM_START_UNSPECIFIED, never inferred); nonfinite/shape mismatch fails
+# loud, never silently repaired. Existing final_beliefs/belief_provenance
+# semantics are unchanged; no consumer is wired to this field yet.
+EXTRINSIC_NO_CHECK_EVIDENCE = "NO_CHECK_EVIDENCE"
+EXTRINSIC_CHECK_EXTRINSIC = "CHECK_EXTRINSIC"
+EXTRINSIC_WARM_START_UNSPECIFIED = "WARM_START_UNSPECIFIED"
+EXTRINSIC_PROVENANCE_TOKENS = (
+    EXTRINSIC_NO_CHECK_EVIDENCE,
+    EXTRINSIC_CHECK_EXTRINSIC,
+    EXTRINSIC_WARM_START_UNSPECIFIED,
+)
+
+
+class UnusableExtrinsicError(RuntimeError):
+    """Cross-layer transfer refused: no usable CHECK_EXTRINSIC."""
+
+
+def _build_check_extrinsic_log_beliefs(final_beliefs, log_input_prior):
+    """Form the stored code-factor extrinsic message (D7-G producer rule).
+
+    Returns ``L_post - log(p_in)`` row-normalized by subtracting
+    log-sum-exp. Raises ``ValueError`` on ``None`` inputs, shape mismatch,
+    non-2-D input, or any nonfinite entry: fail-loud, never repaired.
+    """
+    if final_beliefs is None or log_input_prior is None:
+        raise ValueError("extrinsic needs finite final beliefs and input prior")
+    post = np.asarray(final_beliefs, dtype=np.float64)
+    pin = np.asarray(log_input_prior, dtype=np.float64)
+    if post.ndim != 2 or pin.ndim != 2 or post.shape != pin.shape:
+        raise ValueError(
+            "extrinsic shape mismatch: %r vs %r" % (post.shape, pin.shape))
+    if post.shape[0] < 1 or post.shape[1] < 2:
+        raise ValueError("extrinsic needs a nonempty (n, q>=2) belief matrix")
+    if not bool(np.all(np.isfinite(post))) or not bool(np.all(np.isfinite(pin))):
+        raise ValueError("extrinsic needs finite beliefs and input prior")
+    ext = post - pin
+    m = np.max(ext, axis=1, keepdims=True)
+    lse = m + np.log(np.sum(np.exp(ext - m), axis=1, keepdims=True))
+    return ext - lse
+
+
+def require_check_extrinsic_for_transfer(
+    extrinsic_log_beliefs, extrinsic_provenance, *, consumer,
+    expected_n=None, q=FIELD_Q,
+):
+    """Fail closed unless the extrinsic is explicit CHECK_EXTRINSIC.
+
+    Only a finite shape-correct ``(n, q)`` array with provenance exactly
+    ``CHECK_EXTRINSIC`` is stably softmaxed for transport. ``NO_CHECK_EVIDENCE``,
+    ``WARM_START_UNSPECIFIED``, missing/``None``/unknown provenance, missing
+    arrays, wrong shapes, and nonfinite values all raise
+    ``UnusableExtrinsicError`` before any cross-layer prior is computed.
+    Not wired into D5/D6/D7 production execution.
+    """
+    if extrinsic_provenance != EXTRINSIC_CHECK_EXTRINSIC:
+        raise UnusableExtrinsicError(
+            f"{consumer}: cross-layer transfer requires extrinsic_provenance="
+            f"'{EXTRINSIC_CHECK_EXTRINSIC}'; got {extrinsic_provenance!r}")
+    if extrinsic_log_beliefs is None:
+        raise UnusableExtrinsicError(
+            f"{consumer}: cross-layer transfer requires an extrinsic array; "
+            "got None")
+    try:
+        arr = np.asarray(extrinsic_log_beliefs, dtype=np.float64)
+    except (ValueError, TypeError) as exc:
+        raise UnusableExtrinsicError(
+            f"{consumer}: extrinsic array is not convertible: {exc}") from exc
+    if arr.ndim != 2 or arr.shape[0] < 1 or arr.shape[1] != int(q):
+        raise UnusableExtrinsicError(
+            f"{consumer}: extrinsic shape must be (n, {int(q)}); "
+            f"got {arr.shape!r}")
+    if expected_n is not None and arr.shape[0] != int(expected_n):
+        raise UnusableExtrinsicError(
+            f"{consumer}: extrinsic row count {arr.shape[0]} != "
+            f"expected {int(expected_n)}")
+    if not bool(np.all(np.isfinite(arr))):
+        raise UnusableExtrinsicError(
+            f"{consumer}: extrinsic array must be finite")
+    m = np.max(arr, axis=1, keepdims=True)
+    e = np.exp(arr - m)
+    return e / np.sum(e, axis=1, keepdims=True)
+
+
 @dataclass
 class DecoderResult:
     x_hat: np.ndarray
@@ -371,6 +664,9 @@ class DecoderResult:
     runtime_s: float
     status: str
     final_beliefs: np.ndarray
+    belief_provenance: Optional[str] = None
+    extrinsic_log_beliefs: Optional[np.ndarray] = None
+    extrinsic_provenance: Optional[str] = None
 
 
 def decode_flooding_fftqspa(
@@ -460,6 +756,7 @@ def decode_flooding_fftqspa(
                 runtime_s=time.perf_counter() - t0,
                 status=status,
                 final_beliefs=beliefs,
+                belief_provenance=BELIEF_PROVENANCE_CHECK_UPDATED,
             )
 
         # Update V->C extrinsic messages for next iteration
@@ -477,6 +774,7 @@ def decode_flooding_fftqspa(
         runtime_s=time.perf_counter() - t0,
         status="converged_no_syndrome" if not syn_ok else "converged_exact",
         final_beliefs=beliefs,
+        belief_provenance=BELIEF_PROVENANCE_CHECK_UPDATED,
     )
 
 
@@ -504,12 +802,18 @@ def decode_row_layered_fftqspa(
     syn = np.asarray(syndromes, dtype=np.uint8)
 
     # Initial log-beliefs
-    if warm_beliefs is not None and warm_beliefs.shape == (n, q):
+    warm_seeded = warm_beliefs is not None and warm_beliefs.shape == (n, q)
+    if warm_seeded:
         beliefs = warm_beliefs.copy()
+        log_input_prior = None
     else:
         priors_clean = np.maximum(np.asarray(priors, dtype=np.float64), 1e-15)
         priors_clean /= np.sum(priors_clean, axis=1, keepdims=True)
         beliefs = np.log(priors_clean)
+        # Exact normalized input prior used internally (frozen floor/renorm
+        # rule above, untouched): retained for the additive D7-G extrinsic
+        # field only. Same array, no duplicated cleaning rule.
+        log_input_prior = beliefs.copy()
 
     # Check node structures
     check_edges: list[list[int]] = [[] for _ in range(m)]
@@ -529,6 +833,12 @@ def decode_row_layered_fftqspa(
 
     # Check initial syndrome
     if np.array_equal(syndrome_of_gf32(mat, best_x, field), syn):
+        if warm_seeded:
+            ext_beliefs, ext_prov = None, EXTRINSIC_WARM_START_UNSPECIFIED
+        else:
+            # Iteration 0: no check evidence yet; neutral zeros, ineligible.
+            ext_beliefs = np.zeros((n, q), dtype=np.float64)
+            ext_prov = EXTRINSIC_NO_CHECK_EVIDENCE
         return DecoderResult(
             x_hat=best_x,
             syndrome_ok=True,
@@ -536,6 +846,11 @@ def decode_row_layered_fftqspa(
             runtime_s=time.perf_counter() - t0,
             status="converged_exact",
             final_beliefs=beliefs,
+            belief_provenance=(
+                BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
+                else BELIEF_PROVENANCE_PRIOR_ONLY),
+            extrinsic_log_beliefs=ext_beliefs,
+            extrinsic_provenance=ext_prov,
         )
 
     for it in range(1, max_iter + 1):
@@ -573,6 +888,12 @@ def decode_row_layered_fftqspa(
         best_x = np.argmax(beliefs, axis=1).astype(np.uint8)
         current_syn = syndrome_of_gf32(mat, best_x, field)
         if np.array_equal(current_syn, syn):
+            if warm_seeded:
+                ext_beliefs, ext_prov = None, EXTRINSIC_WARM_START_UNSPECIFIED
+            else:
+                ext_beliefs = _build_check_extrinsic_log_beliefs(
+                    beliefs, log_input_prior)
+                ext_prov = EXTRINSIC_CHECK_EXTRINSIC
             return DecoderResult(
                 x_hat=best_x,
                 syndrome_ok=True,
@@ -580,10 +901,25 @@ def decode_row_layered_fftqspa(
                 runtime_s=time.perf_counter() - t0,
                 status="converged_exact",
                 final_beliefs=beliefs,
+                belief_provenance=(
+                    BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
+                    else BELIEF_PROVENANCE_CHECK_UPDATED),
+                extrinsic_log_beliefs=ext_beliefs,
+                extrinsic_provenance=ext_prov,
             )
 
     current_syn = syndrome_of_gf32(mat, best_x, field)
     syn_ok = bool(np.array_equal(current_syn, syn))
+    if warm_seeded:
+        ext_beliefs, ext_prov = None, EXTRINSIC_WARM_START_UNSPECIFIED
+    elif int(max_iter) >= 1:
+        ext_beliefs = _build_check_extrinsic_log_beliefs(
+            beliefs, log_input_prior)
+        ext_prov = EXTRINSIC_CHECK_EXTRINSIC
+    else:
+        # No sweep completed (max_iter < 1): no check evidence.
+        ext_beliefs = np.zeros((n, q), dtype=np.float64)
+        ext_prov = EXTRINSIC_NO_CHECK_EVIDENCE
     return DecoderResult(
         x_hat=best_x,
         syndrome_ok=syn_ok,
@@ -591,6 +927,12 @@ def decode_row_layered_fftqspa(
         runtime_s=time.perf_counter() - t0,
         status="converged_no_syndrome" if not syn_ok else "converged_exact",
         final_beliefs=beliefs,
+        belief_provenance=(
+            BELIEF_PROVENANCE_WARM_START_UNSPECIFIED if warm_seeded
+            else (BELIEF_PROVENANCE_CHECK_UPDATED if max_iter >= 1
+                  else BELIEF_PROVENANCE_PRIOR_ONLY)),
+        extrinsic_log_beliefs=ext_beliefs,
+        extrinsic_provenance=ext_prov,
     )
 
 

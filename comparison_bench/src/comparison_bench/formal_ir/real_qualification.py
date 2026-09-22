@@ -36,6 +36,12 @@ SOURCE_SHA256 = "967f569c3b3977cc9846025fc9af9b2faf3aa7d89b4e52e0d0ca804f5ab972c
 FINAL_IR_MANIFEST_SHA256 = "28efc5d1654bfc241681a3a9e320aeded213f96f94e23273e33e4f4ea68acd95"
 FINAL_IR_SPLIT_SHA256 = "915eb3212b801e7a3539d28b1b8de77dff8c2bcb7629fc6e9a08cd4e0fea20cb"
 SOURCE_COLUMNS = ("dataset_id", "frame_id", "pair_idx", "alice_symbol", "bob_symbol", "dimension", "frame_len_symbols", "rows_input", "rows_used", "rows_dropped_tail", "source_path", "loss_db", "bin_width_ps", "n_eff_pairs", "threshold_ps", "processing_rule_version", "pairing_path_tag", "data_mode")
+# Frozen provenance string (AGENTS.md section 5.4 exception): this exact value
+# is bound by equality into existing lock artifacts (see _old_keys/make_lock/
+# verify_lock below), so the constant itself must not change. Portable
+# filesystem access goes through _resolve_split_path, which honors
+# FINAL_IR_SPLIT_OVERRIDE; when that variable is unset (or set to the old
+# value) behavior is unchanged.
 FINAL_IR_SPLIT_PATH = r"D:\Code\HD-QKD_Polar_Comparison\comparison_bench\outputs_comparison\final_ir_method_selection\20260725_v1\locked_frame_split.csv"
 SELECTION = {"calibration_dataset": "real_typeii_20db_d1024_bw100_blk0", "confirmation_dataset": "real_typeii_20db_d1024_bw120_blk0", "calibration_seed": 2026072541, "confirmation_seed": 2026072542, "ser": [0.2, 0.3]}
 SYNTHETIC_GATES = {"cascade_formal_v1|0.01": {"promoted": True, "requested": 32, "verified_success": 32, "unclassified_internal_provenance_accounting_failures": 0}, "cascade_formal_v1|0.02": {"promoted": True, "requested": 32, "verified_success": 32, "unclassified_internal_provenance_accounting_failures": 0}, "ldpc_formal_v1|0.01": {"promoted": False, "requested": 32, "verified_success": 29, "unclassified_internal_provenance_accounting_failures": 0}, "ldpc_formal_v1|0.02": {"promoted": False, "requested": 32, "verified_success": 14, "unclassified_internal_provenance_accounting_failures": 0}}
@@ -85,11 +91,26 @@ def _eligibility_record(items: pd.DataFrame, seed: int, name: str) -> tuple[dict
         raise ValueError("fixed eligible-list preimage/hash mismatch")
     return got, items.iloc[order[:60]].reset_index(drop=True)
 
+def _resolve_split_path(stored_path: str) -> Path:
+    """Resolve the locked split CSV for reading.
+
+    The stored provenance string stays frozen; only the live read may be
+    redirected via FINAL_IR_SPLIT_OVERRIDE for POSIX/fresh-clone use.
+    Raises a clear error when the file is absent.
+    """
+    override = os.environ.get("FINAL_IR_SPLIT_OVERRIDE")
+    path = Path(override) if override else Path(stored_path)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"final-IR split CSV absent: {path} "
+            "(set FINAL_IR_SPLIT_OVERRIDE to its POSIX location)")
+    return path
+
 def _old_keys(path: Path) -> set[str]:
     old = json.loads(path.read_text(encoding="utf-8"))
     locked = old.get("locked_split", {})
     if locked != {"path": FINAL_IR_SPLIT_PATH, "sha256": FINAL_IR_SPLIT_SHA256}: raise ValueError("final-IR split path/manifest mismatch")
-    split_path = Path(locked["path"])
+    split_path = _resolve_split_path(str(locked["path"]))
     if _file_sha(split_path) != FINAL_IR_SPLIT_SHA256: raise ValueError("final-IR split hash mismatch")
     split = pd.read_csv(split_path)
     return set(split["locked_frame_key"].astype(str))

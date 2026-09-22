@@ -1,0 +1,50 @@
+{
+  "schema": "v70r1_manifest_v1",
+  "lifecycle": "DEVELOPMENT_RESULT_CANDIDATE / DECODER_FREE_EXECUTION_COMPLETE",
+  "V72_not_started": true,
+  "no_run_01": true,
+  "data_sha": "84d62779",
+  "head": "EXTERNALLY_BOUND_AT_PRE_EXECUTE",
+  "accepted_plan_sha": "0509d10ba78902b36f6bcf447f1ebfe289e03fc89b",
+  "initial_implementation": "179916f7cfec0ea469683bb78083c3752700193d",
+  "predecessor_v71": "487be11387a5a68c275c43ccb5528ec700bfd3d3",
+  "predecessor_v70": "9bc34be64a2822c8babb4320efb47fc7e335a21a",
+  "guards": {
+    "R70R1-01": true,
+    "R70R1-02": true,
+    "R70R1-03": true,
+    "R70R1-04": true,
+    "R70R1-05": true,
+    "R70R1-06": true,
+    "R70R1-07": true,
+    "R70R1-08": true,
+    "R70R1-09": true,
+    "R70R1-10": true
+  },
+  "terminal_counts": {
+    "V70R1_EVIDENCE_INVALID": 0,
+    "V70R1_TRANSLATION_INVARIANCE_REJECTED": 0,
+    "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE": 1,
+    "V70R1_PARAMETRIC_MODEL_REDUCES_VAL_CE": 2,
+    "V70R1_PARAMETRIC_MODEL_NO_VALUE": 0
+  },
+  "overall": "V70R1_PARAMETRIC_MODEL_CHANGES_CAPACITY_ROUTE",
+  "plan_revision": {
+    "revision": "V70R1-R2",
+    "mechanical_reclassification": true,
+    "rerun": false,
+    "note": "insert REDUCES_VAL_CE, cost descriptive-only"
+  },
+  "ce_decomposition_claimed": false,
+  "planning_f_is_not_achieved_f": true,
+  "used_val_in_selection": false,
+  "used_test": false,
+  "f_actual": "NOT_MEASURED",
+  "decoder_calls": 0,
+  "rerun": false,
+  "contract_sha": "99e6b25f1e7d14ae5168acabc3e4c42e31dafd4d",
+  "current_sha": "36d493d82c640f3902c5a7dcd603fdcbb2b03aef",
+  "four_stage_provenance": "0509d10b/179916f7/99e6b25f/36d493d8",
+  "terminal_priority_note": "CHANGES(1) precedes REDUCES(2): overall is first non-zero terminal, not majority count",
+  "PRE_RESULT_ORDERING_DEVIATION": true
+}

@@ -1,0 +1,6 @@
+{
+  "tag": "ENGINEERING_INVALID_SIMULATED_CONTRACT_EQUALITY",
+  "note": "R2 verification_manifest_r2.json / calibration_verification_r2.json retain simulated contract equality via array copy; not overwritten, marked invalid. R3 is authoritative fixed replay with separate TTBin reconstruction, real seven-stage compare, per-frame 256 strict, correction=null when no influential param.",
+  "r2_head": "1e34dafb1fa8677bc6d5b4bc013a7140f6aa2fe9",
+  "r3_head": "5d94f26564226561e55bad43819360fbdbdf9b9c"
+}

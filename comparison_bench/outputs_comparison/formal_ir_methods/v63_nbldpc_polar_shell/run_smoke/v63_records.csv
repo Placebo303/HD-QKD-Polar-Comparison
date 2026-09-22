@@ -1,0 +1,10 @@
+block_id,source,frame_ids,held_out_ordinal_start,held_out_ordinal_end,stage_used,leak_total,accepted,exact,undetected,decoder_calls
+v63_smoke_1M_0018,1M,"[1618, 1619, 1620, 1621]",18,21,delta8,1104,True,True,False,3
+v63_smoke_1M_0245,1M,"[1845, 1846, 1847, 1848]",245,248,base,1064,True,True,False,2
+v63_smoke_1M_0392,1M,"[1992, 1993, 1994, 1995]",392,395,base,1064,True,True,False,2
+v63_smoke_1p5M_0004,1p5M,"[2217, 2218, 2219, 2220]",4,7,delta16,1174,True,True,False,4
+v63_smoke_1p5M_0333,1p5M,"[2546, 2547, 2548, 2549]",333,336,delta16,1174,True,True,False,4
+v63_smoke_1p5M_0546,1p5M,"[2759, 2760, 2761, 2762]",546,549,base,1094,True,True,False,2
+v63_smoke_2M_0004,2M,"[2920, 2921, 2922, 2923]",4,7,delta8,1144,True,True,False,3
+v63_smoke_2M_0403,2M,"[3319, 3320, 3321, 3322]",403,406,delta8,1144,True,True,False,3
+v63_smoke_2M_0721,2M,"[3637, 3638, 3639, 3640]",721,724,base,1104,True,True,False,2

@@ -1,0 +1,14 @@
+# S2b Executor Review (2026-09-20) — EXPLORE, deltas only
+- Scope: `v80_s2_fer_campaign.py` + `test_v80_s2_campaign.py` + `S2B_PREEXEC_20260920.md` vs frozen S2b packet E1–E6. Branch `formal-ir-v72p1-addendum-clean`; no switch/commit/push done.
+- Verdict: PASS_WITH_FINDINGS (no blocking issues; mechanics match the frozen contract).
+- E1 PASS: `four_cycles==0` gate pre-run (seed 2026092001), mismatch halts STOP-BLOCKED; legacy-1158 refuses (T7 covers 1 and 1158).
+- E2 PASS: single arm S2b; V1/V2 constants + `<1158` predicate deleted; `frame_seed`/`execute`/`main` refuse any non-S2b variant rc2 with zero decode calls (T1/T7).
+- E3 PASS: frame base 2026097001+idx, idx=4g+f; rg `20260970xx` found only in S2b packet/prompt/preexec/executor/tests — absence substantiated.
+- E4 PASS: sampler AND prior both QSTAR=0.081 (`_s2b_sampler` + `qber=QSTAR`), MAX_ITER=300 (=s2.MAX_ITER); line 0.40569+0.081x4.954196=0.80698 confirmed (see SBX-01).
+- E5 PASS: f_L2≈1.1376 INFORMATIONAL ONLY (235/206.586); f_super≈1.2246 BUDGET MAPPING, not measured efficiency; D_blind NEVER-ASSUME-ZERO + sensitivity lines exact (T6/T12).
+- E6 PASS: checkpoint-per-group (61 writes/60 groups, T3); ≤1 explicit wall-partial `--resume-from` (2nd refuses, T9); terminal FAIL/early-stop never resume (T5/T10); caps 300 s/decode, 3600 s/window, RSS<4 GiB; root `workspace/s2b_`.
+- Q0–Q6 COMPLETE: branch, scope, frozen contract, auth boundary ("do NOT run the campaign"), output-absence, tests, command+budgets, rg proof. Rerun: 26 passed in 5.43 s (matches Q5 claim).
+- SBX-01 (non-blocking): H_QSC delta recomputes +8.2e-05 vs packet +7.5e-05 (h2 rounding 0.405693→0.40569); frozen p*/H values unaffected, no gate impact.
+- SBX-02 (non-blocking): dirty worktree (`troubleshooting.md` Zotero hunk + untracked G6/journal files) is out-of-scope, pre-existing, disclosed in Q1; scoped S2b diff is deltas-only.
+- SBX-03 (non-blocking): one `QBER_SYNTH` mention remains as an intentional-no-change comment; no stale V1/V2 wiring in the S2b path (only removal-explaining comments + test bad-variant strings).
+- Authorization: this review authorizes nothing itself; the run may proceed only under the user's standing pre-authorization plus fresh grant/acceptance of Pre-EXECUTE Q0–Q6.

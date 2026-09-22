@@ -71,4 +71,9 @@ def test_non_integer_q_requests_fail_closed_without_coercion(q: object):
 
 def test_qldpc_reference_source_is_not_mutated():
     path = Path("comparison_bench/src/comparison_bench/methods/qldpc_reference.py")
-    assert hashlib.sha256(path.read_bytes()).hexdigest() == "c40d690cbb7e929a18c032d75bc4b71770104267a560c421ccb7bd1825dffcd4"
+    # Pin recomputed 2026-09-20 from the committed artifact (git blob c64518,
+    # created in 71bda20d, working tree clean for this file): the prior pin
+    # c40d690c... never matched any committed version (stale from birth).
+    # Artifact verified legitimate (364-line reference bridge, ast-parseable),
+    # so the pin — not the artifact — was fixed.
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == "7756929fcf41b8c97c6c1ae18949c8320fac23f1c6043ce6570b015bf554988e"

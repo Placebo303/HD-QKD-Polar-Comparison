@@ -1,0 +1,173 @@
+{
+  "created_at": "2026-08-14T10:16:08.028781",
+  "point": {
+    "d": 1024,
+    "bw": 180
+  },
+  "factor": 1,
+  "d_eff": 1024,
+  "q": 1024,
+  "m": 10,
+  "block_index": 0,
+  "n_symbols": 74398,
+  "source_point_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw180",
+  "source_joint_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw180\\results\\attempt_0\\ttbin_parsing\\ttbin_metrics.json#framed.joint_counts_sparse",
+  "source_sequence_path": "a_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0\\a_eff.npy;b_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0\\b_eff.npy",
+  "sequence_source_mode": "strict",
+  "sequence_is_sampled": 0,
+  "joint_source_mode": "from_ttbin",
+  "joint_origin": "from_ttbin",
+  "joint_source_path": "a_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0\\a_eff.npy;b_eff=D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0\\b_eff.npy",
+  "joint_fingerprint": {
+    "size": 199751,
+    "mtime": 1786673768.0277817,
+    "sha256": "accb876f3aa105731b49ad707283298af8afe97054fe4d97a1961809fc0daa59"
+  },
+  "fail_reason": "",
+  "materialize_attempted": 1,
+  "materialize_ok": 1,
+  "materialize_origin": "materialized_from_ttbin",
+  "materialize_out_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0",
+  "materialize_error": null,
+  "materialize_params": {
+    "offset_override_ps": null,
+    "max_pairs": 0,
+    "frame_start_override_ps": null,
+    "coinc_window_override_ps": null,
+    "pairing_mode": "nearest",
+    "processing_rule_version": "pairing_v2",
+    "peak_gate_sigma": null,
+    "delay_override_ps": null,
+    "used_params": {
+      "dimension": 1024,
+      "bin_width_ps": 180,
+      "max_pairs": 74398,
+      "n_pairs_actual": 74398,
+      "coincidence_window_ps": null,
+      "coinc_window_override_ps": null,
+      "relative_delay_ps": null,
+      "delay_offset_ps": null,
+      "delay_override_ps": null,
+      "delay_used_ps": 0,
+      "frame_start_override_ps": null,
+      "frame_start_ps": null,
+      "frame_anchor": null,
+      "pairing_mode": "nearest",
+      "pairing_mode_requested": "nearest",
+      "pairing_mode_auto_forced": 0,
+      "frame_period_ps": 184320,
+      "nearest_threshold_ps": 40000,
+      "peak_gate_sigma": null,
+      "gate_width_ps": 180,
+      "effective_pairing_window_ps": 180,
+      "pairing_window_source_tag": "bw_fallback",
+      "gate_width_fallback": false,
+      "peak_center_ps": -13,
+      "peak_sigma_ps": 109.36553566549081,
+      "peak_to_bg": 530.0909090909091,
+      "peak_status": "ok",
+      "corr_bins": 16384,
+      "corr_nonzero": 16382,
+      "corr_argmax": 8192,
+      "corr_max": 5831.0,
+      "peak_scan_range_ps": 737280,
+      "peak_bin_ps": 90,
+      "global_peak_center_ps": -13,
+      "mapping": null,
+      "source_ttbin_paths": "D:\\Data\\Raw Data\\QKD_Loss\\TypeII_776.1nm_3s\\Type2_5s_16dB_2026-01-30_224900\\Type2_5s_16dB_2026-01-30_224900.ttbin",
+      "source_point_dir": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw180",
+      "n_pairs_total_available": 74398,
+      "slice_start_pair": 0,
+      "slice_end_pair": 74398,
+      "processing_rule_version": "pairing_v2",
+      "pairing_path_tag": "time_pairs_nearest",
+      "occupancy_filter": {
+        "dimension": 1024,
+        "bin_width_ps": 180,
+        "n_candidates_before": 74398,
+        "n_kept_after": 74183,
+        "n_dropped_occupancy": 5,
+        "drop_frac_occupancy": 6.720610769106697e-05,
+        "n_dropped_multievent": 210,
+        "drop_frac_multievent": 0.0028226565230248125,
+        "filter_enabled": 0,
+        "frame_period_ps": 184320,
+        "pairing_mode": "nearest",
+        "threshold_ps": 180,
+        "frame_diag_available": 1,
+        "n_frames_total": 74298,
+        "n_frames_clean_single_single": 74183,
+        "n_frames_cross_frame": 10,
+        "n_frames_A_multi": 0,
+        "n_frames_B_multi": 0,
+        "n_frames_both_multi": 105,
+        "n_pairs_in_clean_frames": 74183,
+        "n_pairs_in_ambiguous_frames": 215
+      }
+    }
+  },
+  "real_sequence_resolve_debug": {
+    "ok": true,
+    "a_eff_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0\\a_eff.npy",
+    "b_eff_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0\\b_eff.npy",
+    "a_symbols_path": null,
+    "b_symbols_path": null,
+    "chosen_kind": "eff_pair",
+    "tried_globs": [
+      "materialize_out_dir"
+    ],
+    "found_candidates": {
+      "a_eff": [
+        "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0\\a_eff.npy"
+      ],
+      "b_eff": [
+        "D:\\Code\\HD-QKD_Polar_Release\\results\\real_sequences\\d1024_bw180\\blk0\\b_eff.npy"
+      ],
+      "a_symbols": [],
+      "b_symbols": []
+    }
+  },
+  "diagnostics": {
+    "enabled": 1,
+    "delta_hist_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\e2e_16dB_pairing_v2_rematerialize\\sidecars\\d1024_bw180\\blk0\\delta_hist.csv",
+    "seq_pair_stats_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\e2e_16dB_pairing_v2_rematerialize\\sidecars\\d1024_bw180\\blk0\\seq_pair_stats.json",
+    "n_pairs": 74398,
+    "n_pairs_actual": 74398,
+    "raw_ser": 0.06941046802333396,
+    "delta_mode": 0,
+    "delta_mode_frac": 0.930589531976666,
+    "near_neighbor_frac": 1.0,
+    "n_unique_a": 1024,
+    "n_unique_b": 1024,
+    "top_a_frac": 0.0014247694830506197,
+    "top_b_frac": 0.0013710045968977661,
+    "occupancy_filter_summary_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\e2e_16dB_pairing_v2_rematerialize\\sidecars\\d1024_bw180\\blk0\\occupancy_filter_summary.csv"
+  },
+  "symbolization_snapshot": {
+    "bin_width_ps": 180,
+    "dimension": 1024,
+    "block_symbols": 512,
+    "mapping": "",
+    "bit_order": "",
+    "ttbin_file": "D:\\Data\\Raw Data\\QKD_Loss\\TypeII_776.1nm_3s\\Type2_5s_16dB_2026-01-30_224900\\Type2_5s_16dB_2026-01-30_224900.ttbin",
+    "offset_ps": null,
+    "delay_ps": null,
+    "pairing_window_ps": null,
+    "coincidence_window_ps": null,
+    "scanfix_align": null,
+    "wrap_rule": "floor_div"
+  },
+  "source_fingerprints": {
+    "metrics_file": {
+      "path": "D:\\Code\\HD-QKD_Polar_Release\\results\\archive\\workspace_override_points\\d1024_bw180\\results\\attempt_0\\ttbin_parsing\\ttbin_metrics.json",
+      "size": 243089,
+      "mtime": 1786673752.3807757,
+      "sha256": "494c8ab4e6ccf5b16b0d09894fb6517fbd2e36f2548afa06522ecd07b88c6ced"
+    }
+  },
+  "map_sanity": {
+    "map_ser": 0.06941046802333396,
+    "map_ber": 0.01396005268958843,
+    "verdict": "PASS"
+  }
+}

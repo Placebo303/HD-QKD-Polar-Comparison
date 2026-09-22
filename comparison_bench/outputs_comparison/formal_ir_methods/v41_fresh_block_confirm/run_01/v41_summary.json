@@ -1,0 +1,161 @@
+{
+  "cycle_id": "V41P0",
+  "change_id": "formal-ir-v41-fresh-block-confirm",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "execution_scope": "v41_confirmation_18_calls_exactly_once",
+  "fake_runner": false,
+  "provenance": {
+    "authorized_target_sha": "6d75e754899e8470445c2bf58f2f4ff84130fc33",
+    "sha_binding": {
+      "HEAD": "6d75e754899e8470445c2bf58f2f4ff84130fc33",
+      "origin/formal-ir-mainline": "6d75e754899e8470445c2bf58f2f4ff84130fc33"
+    },
+    "structural_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v38_architecture_triage\\run_01\\v38_structural_prototypes.json",
+    "structural_records_strict_match": 6,
+    "predecessor_cycle": "V40P0",
+    "predecessor_terminal_state": "V40_PROBE_CONFIRM_ALLOWED",
+    "predecessor_plan_sha": "36a3751e190ff06e0e88024b51b6f8713c13a4dc",
+    "predecessor_execution_sha": "80d605489f1f65eefd091625134514e8a09902de"
+  },
+  "v25_counts_provenance": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+    "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts",
+    "role": "source-specific V25 TRAIN empirical counts (read-only)",
+    "exists": true
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": 18
+    },
+    "decoder_calls_started": {
+      "total": 18
+    },
+    "decoder_calls_completed": {
+      "total": 18
+    },
+    "structural_reconstruction_decoder_calls": 0,
+    "preflight_decoder_calls": 0
+  },
+  "npz_policy": {
+    "forbidden_winner_npz_read": false,
+    "any_npz_output_written": false,
+    "v25_channel_counts_npz_read_only_allowed": true
+  },
+  "routing_trace": [
+    "rule_0_integrity_ok",
+    "rule_2_only_lane_c_passes -> V41_C_ONLY_RETAINED"
+  ],
+  "terminal_state": "V41_C_ONLY_RETAINED",
+  "terminal_reason": null,
+  "gate_evaluation": {
+    "lane_c": {
+      "lane": "lane_c",
+      "calls": 9,
+      "g1_overall_exact_ge_7_of_9": {
+        "exact_total": 8,
+        "threshold": 7,
+        "pass": true
+      },
+      "g2_every_source_ge_2_of_3": {
+        "exact_by_source": {
+          "1M": 3,
+          "1p5M": 3,
+          "2M": 2
+        },
+        "threshold_per_source": 2,
+        "pass": true
+      },
+      "g3_wrong_zero": {
+        "wrong_count": 0,
+        "pass": true
+      },
+      "passed": true
+    },
+    "lane_b": {
+      "lane": "lane_b",
+      "calls": 9,
+      "g1_overall_exact_ge_7_of_9": {
+        "exact_total": 6,
+        "threshold": 7,
+        "pass": false
+      },
+      "g2_every_source_ge_2_of_3": {
+        "exact_by_source": {
+          "1M": 2,
+          "1p5M": 1,
+          "2M": 3
+        },
+        "threshold_per_source": 2,
+        "pass": false
+      },
+      "g3_wrong_zero": {
+        "wrong_count": 0,
+        "pass": true
+      },
+      "passed": false
+    }
+  },
+  "aggregates": {
+    "per_lane": {
+      "lane_c": {
+        "calls": 9,
+        "exact_total": 8,
+        "wrong_count": 0,
+        "exact_by_source": {
+          "1M": 3,
+          "1p5M": 3,
+          "2M": 2
+        }
+      },
+      "lane_b": {
+        "calls": 9,
+        "exact_total": 6,
+        "wrong_count": 0,
+        "exact_by_source": {
+          "1M": 2,
+          "1p5M": 1,
+          "2M": 3
+        }
+      }
+    },
+    "per_source": {
+      "1M": {
+        "calls": 6,
+        "exact_total": 5,
+        "by_lane": {
+          "lane_c": 3,
+          "lane_b": 2
+        }
+      },
+      "1p5M": {
+        "calls": 6,
+        "exact_total": 4,
+        "by_lane": {
+          "lane_c": 3,
+          "lane_b": 1
+        }
+      },
+      "2M": {
+        "calls": 6,
+        "exact_total": 5,
+        "by_lane": {
+          "lane_c": 2,
+          "lane_b": 3
+        }
+      }
+    },
+    "wrong_total": 0
+  },
+  "master_stop_rule": "\u552f\u4e00\u4e00\u6b21 18-call \u5168\u65b0\u786e\u8ba4\uff1b\u4e0d\u518d\u8c03 decoder \u53c2\u6570\uff1b\u4e0d\u590d\u7528 V40 probe \u4f5c\u4e3a\u786e\u8ba4\u6837\u672c\u3002\u65e0\u8bba\u7ed3\u679c\u5982\u4f55\uff1a\u4e0d\u8ffd\u52a0 blocks\u3001\u4e0d\u8865\u8dd1\u3001\u4e0d\u505a\u7b2c\u4e8c\u8f6e\u786e\u8ba4\u3002",
+  "statistics_note": "Descriptive only; sample is tiny and clustered (18 calls = 9 unique blocks x 2 lanes). Exact-recovery proportions are reported with n and raw counts; any interval printed is naive and uncorrected for block/lane clustering; no significance testing is performed. Success means exact_l2 only.",
+  "claim_boundary": [
+    "results support ONLY bounded route-retention judgments on V25 TRAIN empirical-count development blocks with oracle-L1 inputs - these are NOT real-frame FER evidence",
+    "do not infer threshold, SKR, formal-execution, qualification, or promotion results",
+    "success metric is exact_l2 only; syndrome_ok/wrong_codeword reported separately and wrong codewords are NEVER counted as exact recoveries",
+    "retention gates judge ROUTE RETENTION only; they are NOT a Lane C or Lane B superiority result and support no B-vs-C comparative ranking regardless of outcome",
+    "forbidden regardless of outcome: FER, asymptotic threshold, SKR, security, formal qualification, promotion, real-frame behavior, Lane C superiority, Lane B superiority, or any statement that historical gates would now pass",
+    "retention terminals do not auto-start any successor work; successor directions (more-realistic/non-oracle comparison after dual retention; protograph/MET after STOP) are directional descriptions recorded in this summary only"
+  ],
+  "integrity_failures": [],
+  "performance_interpretation_presented": true
+}

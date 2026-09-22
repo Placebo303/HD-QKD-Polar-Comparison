@@ -1,0 +1,214 @@
+{
+  "schema": "nbldpc_v32_operating_point_audit_d1_v1",
+  "q_definition": "Q_B1(b|a) = (1-raw_ser)*delta_{b=a} + raw_ser*Uniform{b != a mod 1024}; raw_ser quoted verbatim from V25 channel_summary.json per_source[sid].ser",
+  "p_definition": "P = N_ab / total from channel_counts.npz key {sid}_N_ab_train_N_ab_train (verbatim on-disk key with duplicated suffix)",
+  "mc_plan_frozen_in_manifest": {
+    "seed": 20260822,
+    "n_samples": 100000,
+    "quantiles": [
+      0.05,
+      0.5,
+      0.95
+    ],
+    "zero_hit_policy": "samples whose true-symbol posterior cell has probability zero are counted separately; finite statistics are computed over non-hit samples only"
+  },
+  "per_source": {
+    "1M": {
+      "source_id": "type2_1M_20260121_184040",
+      "raw_ser_quoted_from": "channel_summary.json per_source[type2_1M_20260121_184040].ser",
+      "raw_ser": 0.239779296875,
+      "q_mass_conservation": {
+        "total_mass": 1.0000000000000004,
+        "off_diagonal_support_positive": true
+      },
+      "cross_entropy_H_QP_bits_over_common_support": 7.909127715481916,
+      "common_support_cell_count": 2384,
+      "support_miss": {
+        "q_mass_on_p_zero_cells": 0.2394679998284094,
+        "p_mass_on_q_zero_cells": 0.0,
+        "mc_zero_hit_count": 24046,
+        "mc_zero_hit_frequency": 0.24046
+      },
+      "delta_distribution": {
+        "q_delta_mass_at_zero": 0.760220703125,
+        "q_delta_pm1_mass": {
+          "plus1": 0.0002343883644916911,
+          "minus1": 0.0002343883644916911
+        },
+        "p_delta_pm1_mass_quoted_from_pm1_mass_field": {
+          "plus1": 0.2384453125,
+          "minus1": 0.001333984375,
+          "zero": 0.760220703125
+        },
+        "structure_note": "Q's uniform nonzero delta destroys the V25 +/-1 direction structure (1M dominated by +1; 1p5M/2M by -1)",
+        "tv_distance_q_vs_p_delta": 0.23931052014601661
+      },
+      "conditional_tv_distances": {
+        "measure": "total variation per conditioning value, aggregated mean/max",
+        "U1_given_B_mean": 0.23265404447886892,
+        "U1_given_B_max": 0.2918416775994203,
+        "U2_given_B_U1_mean": 0.12835704548963714,
+        "U2_given_B_U1_max": 0.21013543590708364
+      },
+      "dual_expected_nll": {
+        "E_V25_nll_under_own_posterior_bits_per_symbol": {
+          "L1": 0.024280546818678823,
+          "L2": 0.7767572780789993
+        },
+        "E_Q_nll_under_V25_posterior_bits_per_symbol": {
+          "analytic": null,
+          "analytic_is_infinite_due_to_support_miss": true,
+          "mc_mean": 0.39689697672163377,
+          "mc_quantiles_bits_per_symbol": {
+            "0.05": 0.3195803400309395,
+            "0.5": 0.3966047811818586,
+            "0.95": 0.47740935956635283
+          },
+          "mc_sample_size": 100000,
+          "mc_seed": 20260822
+        },
+        "self_reference_magnitude_check": "E_V25[NLL|own posterior] ~= V31 H.L1+H.L2 magnitudes (cross-checked in d2_feasibility.json)",
+        "ratio_E_Q_over_self": 0.4954784460675525
+      },
+      "catastrophic_mismatch": true,
+      "thresholds_applied": {
+        "expected_nll_ratio_K": 3.0,
+        "expected_nll_ratio_derivation": "Anchored to log2(1024)=10 bits/symbol uniform-symmetry bound. The self-NLL baseline is the V31 reference conditional entropy sum H.L1+H.L2 <= 0.833 bits/symbol; K=3 places the catastrophic-mismatch line at ~2.50 bits/symbol, far above plug-in estimation noise (< 0.05 bits) and far below the 10 bits/symbol uniform bound.",
+        "support_miss_fraction_max": 0.01,
+        "support_miss_fraction_derivation": "With n=1024 symbols per frame, a per-symbol support-miss probability of 1% gives P(at least one miss per frame) = 1-(1-0.01)^1024 ~= 1.0: every long frame would hit a P-zero posterior cell. Anchored to the frozen n=1024 frame length."
+      }
+    },
+    "1p5M": {
+      "source_id": "type2_1p5M_20260121_183806",
+      "raw_ser_quoted_from": "channel_summary.json per_source[type2_1p5M_20260121_183806].ser",
+      "raw_ser": 0.2544695292735815,
+      "q_mass_conservation": {
+        "total_mass": 1.0000000000000004,
+        "off_diagonal_support_positive": true
+      },
+      "cross_entropy_H_QP_bits_over_common_support": 7.777767092029151,
+      "common_support_cell_count": 2436,
+      "support_miss": {
+        "q_mass_on_p_zero_cells": 0.2541265286632689,
+        "p_mass_on_q_zero_cells": 0.0,
+        "mc_zero_hit_count": 25469,
+        "mc_zero_hit_frequency": 0.25469
+      },
+      "delta_distribution": {
+        "q_delta_mass_at_zero": 0.7455304707264185,
+        "q_delta_pm1_mass": {
+          "plus1": 0.00024874831796049026,
+          "minus1": 0.00024874831796049026
+        },
+        "p_delta_pm1_mass_quoted_from_pm1_mass_field": {
+          "plus1": 0.0012084387423202023,
+          "minus1": 0.2532610905312613,
+          "zero": 0.7455304707264185
+        },
+        "structure_note": "Q's uniform nonzero delta destroys the V25 +/-1 direction structure (1M dominated by +1; 1p5M/2M by -1)",
+        "tv_distance_q_vs_p_delta": 0.25406763890624773
+      },
+      "conditional_tv_distances": {
+        "measure": "total variation per conditioning value, aggregated mean/max",
+        "U1_given_B_mean": 0.24687766950639978,
+        "U1_given_B_max": 0.29001985180505635,
+        "U2_given_B_U1_mean": 0.13396034962562733,
+        "U2_given_B_U1_max": 0.2043022605372214
+      },
+      "dual_expected_nll": {
+        "E_V25_nll_under_own_posterior_bits_per_symbol": {
+          "L1": 0.02519949687785433,
+          "L2": 0.8003665547438702
+        },
+        "E_Q_nll_under_V25_posterior_bits_per_symbol": {
+          "analytic": null,
+          "analytic_is_infinite_due_to_support_miss": true,
+          "mc_mean": 0.42617411644642966,
+          "mc_quantiles_bits_per_symbol": {
+            "0.05": 0.3602945346844118,
+            "0.5": 0.42223300068304787,
+            "0.95": 0.4947646917495781
+          },
+          "mc_sample_size": 100000,
+          "mc_seed": 20260822
+        },
+        "self_reference_magnitude_check": "E_V25[NLL|own posterior] ~= V31 H.L1+H.L2 magnitudes (cross-checked in d2_feasibility.json)",
+        "ratio_E_Q_over_self": 0.5162204957547155
+      },
+      "catastrophic_mismatch": true,
+      "thresholds_applied": {
+        "expected_nll_ratio_K": 3.0,
+        "expected_nll_ratio_derivation": "Anchored to log2(1024)=10 bits/symbol uniform-symmetry bound. The self-NLL baseline is the V31 reference conditional entropy sum H.L1+H.L2 <= 0.833 bits/symbol; K=3 places the catastrophic-mismatch line at ~2.50 bits/symbol, far above plug-in estimation noise (< 0.05 bits) and far below the 10 bits/symbol uniform bound.",
+        "support_miss_fraction_max": 0.01,
+        "support_miss_fraction_derivation": "With n=1024 symbols per frame, a per-symbol support-miss probability of 1% gives P(at least one miss per frame) = 1-(1-0.01)^1024 ~= 1.0: every long frame would hit a P-zero posterior cell. Anchored to the frozen n=1024 frame length."
+      }
+    },
+    "2M": {
+      "source_id": "type2_2M_20260121_183657",
+      "raw_ser_quoted_from": "channel_summary.json per_source[type2_2M_20260121_183657].ser",
+      "raw_ser": 0.2557409550754458,
+      "q_mass_conservation": {
+        "total_mass": 0.9999999999999998,
+        "off_diagonal_support_positive": true
+      },
+      "cross_entropy_H_QP_bits_over_common_support": 7.768754037724351,
+      "common_support_cell_count": 2635,
+      "support_miss": {
+        "q_mass_on_p_zero_cells": 0.25534765843849927,
+        "p_mass_on_q_zero_cells": 0.0,
+        "mc_zero_hit_count": 25518,
+        "mc_zero_hit_frequency": 0.25518
+      },
+      "delta_distribution": {
+        "q_delta_mass_at_zero": 0.7442590449245542,
+        "q_delta_pm1_mass": {
+          "plus1": 0.0002499911584315208,
+          "minus1": 0.0002499911584315208
+        },
+        "p_delta_pm1_mass_quoted_from_pm1_mass_field": {
+          "plus1": 0.0014842678326474623,
+          "minus1": 0.2542566872427984,
+          "zero": 0.7442590449245542
+        },
+        "structure_note": "Q's uniform nonzero delta destroys the V25 +/-1 direction structure (1M dominated by +1; 1p5M/2M by -1)",
+        "tv_distance_q_vs_p_delta": 0.2566302188719801
+      },
+      "conditional_tv_distances": {
+        "measure": "total variation per conditioning value, aggregated mean/max",
+        "U1_given_B_mean": 0.2480706672072853,
+        "U1_given_B_max": 0.2861179299890188,
+        "U2_given_B_U1_mean": 0.13326822636187255,
+        "U2_given_B_U1_max": 0.1858492306873115
+      },
+      "dual_expected_nll": {
+        "E_V25_nll_under_own_posterior_bits_per_symbol": {
+          "L1": 0.025662048796870115,
+          "L2": 0.8069006731253232
+        },
+        "E_Q_nll_under_V25_posterior_bits_per_symbol": {
+          "analytic": null,
+          "analytic_is_infinite_due_to_support_miss": true,
+          "mc_mean": 0.43116176123155947,
+          "mc_quantiles_bits_per_symbol": {
+            "0.05": 0.36801099176496005,
+            "0.5": 0.429167828113732,
+            "0.95": 0.4896375416978459
+          },
+          "mc_sample_size": 100000,
+          "mc_seed": 20260822
+        },
+        "self_reference_magnitude_check": "E_V25[NLL|own posterior] ~= V31 H.L1+H.L2 magnitudes (cross-checked in d2_feasibility.json)",
+        "ratio_E_Q_over_self": 0.5178730080973448
+      },
+      "catastrophic_mismatch": true,
+      "thresholds_applied": {
+        "expected_nll_ratio_K": 3.0,
+        "expected_nll_ratio_derivation": "Anchored to log2(1024)=10 bits/symbol uniform-symmetry bound. The self-NLL baseline is the V31 reference conditional entropy sum H.L1+H.L2 <= 0.833 bits/symbol; K=3 places the catastrophic-mismatch line at ~2.50 bits/symbol, far above plug-in estimation noise (< 0.05 bits) and far below the 10 bits/symbol uniform bound.",
+        "support_miss_fraction_max": 0.01,
+        "support_miss_fraction_derivation": "With n=1024 symbols per frame, a per-symbol support-miss probability of 1% gives P(at least one miss per frame) = 1-(1-0.01)^1024 ~= 1.0: every long frame would hit a P-zero posterior cell. Anchored to the frozen n=1024 frame length."
+      }
+    }
+  },
+  "worst_expected_nll_ratio": 0.5178730080973448,
+  "signature_mismatch": true
+}

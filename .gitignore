@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.venv/
 *.nbi
 *.nbc
 .pytest_cache/
@@ -37,3 +38,11 @@ Thumbs.db
 .idea/
 .env
 *.local
+
+# H0.3 exogenous-source isolation (docs/engineering, no track gate).
+# These four roots are NOT part of this formal-IR line and must never enter
+# a commit on this branch. See docs/H0_3_ISOLATION.md.
+/.codebuddy/
+/.workbuddy/memory/2026-09-21.md
+/openspec/changes/binary-ldpc-v5-audit-remediation-plan/
+/openspec/changes/binary-ldpc-v5-transfer-to-qrl/

@@ -1,0 +1,4 @@
+scripts/v72p2d7_gf32_bidirectional_oracle.py --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d7_c_bidirectional_oracle_94c0ea15-a786-4cb8-a991-6fec521cccae
+terminal: D7_C_BIDIRECTIONAL_DEPENDENCE
+calls_completed: 128
+stored_wall_s: 32.63112180600365

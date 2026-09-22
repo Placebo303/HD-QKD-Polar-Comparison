@@ -1,0 +1,285 @@
+{
+  "schema": "v72p0_results_v1",
+  "lifecycle": "PLAN_CANDIDATE / SYNTHETIC_ONLY / EXECUTE_NOT_AUTHORIZED",
+  "head": "5591e16bf35b03c3df30a003bee12011a796d73e",
+  "data_sha": "84d62779",
+  "used_2m": false,
+  "f_actual": "NOT_MEASURED",
+  "successor_v72_not_started": true,
+  "local_factor": {
+    "T_LF01": true,
+    "T_LF02": true,
+    "T_LF03": true,
+    "T_LF04": true,
+    "T_LF05": true,
+    "T_LF06": true,
+    "T_LF07": true,
+    "T_LF08": true,
+    "maxDelta_TLF05": 3.1086244689504383e-15,
+    "maxDelta_TLF08": 0.0,
+    "KERNEL_PASS": true
+  },
+  "P0A": {
+    "per_k": {
+      "2": {
+        "m": 2,
+        "n": 6,
+        "total_bits": 6,
+        "trials": 8,
+        "exhaustive_total": 64,
+        "checks_per_trial": [
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        ],
+        "worst_marginal_delta": 1.3322676295501878e-15,
+        "tree_flags": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "loopy_descriptive_count": 0,
+        "per_m_pass": true,
+        "observed_zero": true,
+        "observed_one": true,
+        "c3_observed": true
+      },
+      "3": {
+        "m": 3,
+        "n": 9,
+        "total_bits": 9,
+        "trials": 8,
+        "exhaustive_total": 512,
+        "checks_per_trial": [
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        ],
+        "worst_marginal_delta": 2.1094237467877974e-15,
+        "tree_flags": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "loopy_descriptive_count": 0,
+        "per_m_pass": true,
+        "observed_zero": true,
+        "observed_one": true,
+        "c3_observed": true
+      }
+    },
+    "P0A_PASS": true,
+    "wall_s": 0.10899999999674037,
+    "peak_MiB": 0.016854286193847656,
+    "per_invocation_ns": 6812499.999796273,
+    "mode": "tiny_exhaustive_syndrome_marginal_tree",
+    "k_set": [
+      2,
+      3
+    ],
+    "n_set": [
+      6,
+      9
+    ],
+    "total_bits_le_9": true,
+    "exhaustive": true,
+    "worst_marginal_delta": 2.1094237467877974e-15,
+    "seven_fail_closed": true
+  },
+  "P0B": {
+    "mother_shape": [
+      9036,
+      10240
+    ],
+    "r0": 160,
+    "delta": 8,
+    "Rs_len": 1111,
+    "structure": "sparse_CSR_IRA",
+    "nnz": 49620,
+    "row_deg": {
+      "row_mean": 5.49136786188579,
+      "row_min": 4,
+      "row_max": 6,
+      "col_mean": 4.845703125,
+      "col_min": 1,
+      "col_max": 47
+    },
+    "zero_cols": 0,
+    "dup_rows": 0,
+    "rank": 9036,
+    "prefix_nested": true,
+    "pivot_checks": {
+      "160": true,
+      "168": true,
+      "176": true,
+      "9036": true
+    },
+    "dual_diagonal_proof": "H_p dual-diagonal => det=1 => rank=m, verified pivots at 160/168/176/9036",
+    "C1": true,
+    "C2": true,
+    "C3": true,
+    "C4": true,
+    "C5": true,
+    "C6": true,
+    "P0B_PASS": true
+  },
+  "classification": "V72P0_ADAPTER_PLAN_READY",
+  "successor": "v72_mother_adapter_design",
+  "overall": "OVERALL_ADAPTER_PLAN_READY",
+  "counts": {
+    "ADAPTER_PLAN_READY": 1,
+    "KERNEL_FAIL": 0,
+    "TINY_FAIL": 0,
+    "MATRIX_FAIL": 0,
+    "EVIDENCE_INCOMPLETE": 0
+  },
+  "no_run_01": true
+}

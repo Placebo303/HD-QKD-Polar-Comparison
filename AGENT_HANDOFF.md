@@ -11,6 +11,9 @@ existing data. See AGENTS.md §1.1 and
 ## 2026-08-24 COLLABORATION SOP — GITHUB / CHATGPT / OPENCODE
 
 - Durable protocol: `docs/research-cycle-sop.md`.
+- Current delivery decision (2026-09-12): handoffs are manual copy-paste only;
+  do not call the Codex/OpenCode interaction bridge or automatic callback
+  loop. Leave the global bridge/server/session installation untouched.
 - ChatGPT copy prompt: `docs/prompts/chatgpt-research-review.md`.
 - OpenCode copy prompt: `docs/prompts/opencode-research-execution.md`.
 - Git/PR contract: `.github/pull_request_template.md`; compact result template:
@@ -125,8 +128,11 @@ existing data. See AGENTS.md §1.1 and
   conversion still fails, move to
   informed NB-MLC/JRDO, protograph/MET, one Block-MDS/QC candidate, or a
   rate-adaptive mother code rather than more QC/PEG seed tuning.
-- Do not delete/overwrite historical outputs, rerun V33, start finite-control,
-  implement NB-Polar, push, or claim qualification/promotion.
+- Do not delete/overwrite historical outputs, rerun V33, or start finite-control.
+- Do not implement NB-Polar in this formal-IR checkout. The independent
+  plan and future code are documented in
+  D:/Code/HD-QKD_Polar_Comparison-nbpolar/docs/nbpolar/.
+- Do not push or claim qualification/promotion from the plan-only track.
 
 ## 2026-08-21 V31 — CLOSED finite_graph_fail (archived)
 
@@ -599,7 +605,15 @@ and MET/protograph-failure wording is superseded.
 
 # AGENT_HANDOFF.md
 
-Last verified: **2026-08-16**
+Last verified: **2026-09-21**
+
+## Current State — V80 NB-LDPC Jan-21 chain: O1R replicated PASS, L1B blocked (2026-09-21)
+
+- V80 on empirical 2M channel: S1 batch closed; S2c n=256 FAIL (0/3 arms, no S3); O1 A208 first S2-level PASS; O1R replication PASS (pooled 0/480, girth 8 & 6).
+- P0 reduced-m probes PASS (A202 0/240; A200 2/240); L1 MAY proceed at m2≤202 (main-thread decision; no auto-proceed).
+- L1B Stage A BLOCKED pre-decode (m1 dense-check collapse, fc≠0); L1-construction rework decision pending.
+- Ceiling: genie-u1, synthetic, D_blind=0 (4.31-bit headroom); next gate = L1 construction + blind budget.
+- Records: `docs/research_cycles/V80-NBLDPC-JAN21/` (O1R/P0/L1B result + review docs); decision-log tail from line 4612.
 
 ## Current State — V13-R3 legacy drift audit：用户决定用 2026-01-21 三源继续，执行完成 (2026-08-16)
 

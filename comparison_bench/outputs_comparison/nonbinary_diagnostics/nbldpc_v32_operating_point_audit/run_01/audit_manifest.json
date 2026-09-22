@@ -1,0 +1,274 @@
+{
+  "schema": "nbldpc_v32_operating_point_audit_manifest_v1",
+  "created_utc": "2026-08-22T05:15:55.971950+00:00",
+  "execution_order": [
+    "manifest_freeze",
+    "d0",
+    "d1",
+    "d2",
+    "d3",
+    "final_branch_decision"
+  ],
+  "bindings": [
+    {
+      "binding": "code_fact_harness",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\src\\comparison_bench\\cli\\run_nonbinary_v32_finite_de_bridge.py",
+      "size_bytes": 69268,
+      "sha256": "191f69aecc289955f6c80aee2624653c8a07a936dd0a9c352032a253d080b6af"
+    },
+    {
+      "binding": "code_fact_sampler",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\src\\comparison_bench\\formal_ir\\nonbinary_v26_channel.py",
+      "size_bytes": 12742,
+      "sha256": "432313167562f370ef3c9c45ca7ee6427c5fb1d0f1252e2f4b4d65c4593295b6"
+    },
+    {
+      "binding": "v25_channel_counts",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+      "size_bytes": 25166822,
+      "sha256": "e0360203b8003c821d3ee543bdaf712bd853b0ea712055b936ca37f478ddd5b2"
+    },
+    {
+      "binding": "v25_channel_summary",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_summary.json",
+      "size_bytes": 12094,
+      "sha256": "e38ae524e9f07a702853d1c293a571d0696ef362d7a9a18a08731ce97f6a4b1d"
+    },
+    {
+      "binding": "v25_split_manifest",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\split_manifest.json",
+      "size_bytes": 849,
+      "sha256": "4c08927c1a8df1be7b989465fa9f1f8a66680d560c913437c34026e9cc0cc468"
+    },
+    {
+      "binding": "v26_confirmation_results",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\confirmation_results.json",
+      "size_bytes": 89569,
+      "sha256": "0c60277ccfc8e64bee353edcb95dbf120baea0ed8b6a6dd93000f58592edc57e"
+    },
+    {
+      "binding": "v26_gate",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\gate.json",
+      "size_bytes": 185,
+      "sha256": "a20cebded19c7f95b858c89e4af2397c1461f0565a7dee9224c7d5a6bd1b0c1d"
+    },
+    {
+      "binding": "v26_m0_report",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\m0_report.json",
+      "size_bytes": 2632,
+      "sha256": "c1950d3358305b8dc53fd5ef362aacb626a7cac0a39e2a3c4b96f61281702c8f"
+    },
+    {
+      "binding": "v26_m1_report",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\m1_report.json",
+      "size_bytes": 1445,
+      "sha256": "da3f7cd6b80754f54eaf3a186ef1ce3984c5d60ffc92fca4ed253b8bf56d8d1f"
+    },
+    {
+      "binding": "v26_run_manifest",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\run_manifest.json",
+      "size_bytes": 1342,
+      "sha256": "604084e68cec0937ae835e27a850f892e0f27e72c258c1f5fe66b5d95589472f"
+    },
+    {
+      "binding": "v26_screen_results",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v26_20260818\\run_02\\screen_results.json",
+      "size_bytes": 110463,
+      "sha256": "d38fb4b4ffef631c3d2e4d8076041d360b6c7be359e59474650267ed76bc53d3"
+    },
+    {
+      "binding": "v31_m1_registry",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v31_20260820\\run_01\\m1_registry.json",
+      "size_bytes": 25138,
+      "sha256": "98f1f7306196d797405414a53898d2e90d5a8056635a273f05e720c22522111e"
+    },
+    {
+      "binding": "v31_matrix_audits",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v31_20260820\\run_01\\matrix_audits.json",
+      "size_bytes": 12558442,
+      "sha256": "50ab9db6ea875157e3488e671a399162fe02bb059a6da20b62e63a80377c3b37"
+    },
+    {
+      "binding": "v31_run_manifest",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v31_20260820\\run_01\\run_manifest.json",
+      "size_bytes": 121602,
+      "sha256": "180eb106ca53145744934aac3d3d3bd946ad384a235c69261fc754e085106ca4"
+    },
+    {
+      "binding": "v32_candidate_terminal",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\candidate_terminal.json",
+      "size_bytes": 479,
+      "sha256": "83f10d012c2151467a9e05a4b76e9c69d70ab878aa05b0f099b354f3ecbcdb28"
+    },
+    {
+      "binding": "v32_per_block",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\per_block.jsonl",
+      "size_bytes": 245306,
+      "sha256": "2cc00a5f4c3573343ef8be37739922d8fbeb9922ced95f1179ed6dba4625789c"
+    },
+    {
+      "binding": "v32_run_manifest",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\RUN_MANIFEST.json",
+      "size_bytes": 5979,
+      "sha256": "ad5302db960c74556002f7df7f8110685f489b66ce76848e6c3389f04019be38"
+    },
+    {
+      "binding": "v32_summary_B0",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B0.json",
+      "size_bytes": 487,
+      "sha256": "93a8a2f4c003fc3e70ae4600d121b3a350921ea7e9d67a1de9fd2edfeb216674"
+    },
+    {
+      "binding": "v32_summary_B1",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B1.json",
+      "size_bytes": 494,
+      "sha256": "d3a14f2b85d272683b87ca9d4bd16d523f16fc61cd02a72b339225269d96413f"
+    },
+    {
+      "binding": "v32_summary_B2",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B2.json",
+      "size_bytes": 504,
+      "sha256": "145c5964114f529bde646b5778c8d31601b7b0e0171e6162436e579be1037a7b"
+    },
+    {
+      "binding": "v32_summary_B3",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B3.json",
+      "size_bytes": 504,
+      "sha256": "13bc4077347ea50c2bc5f64c6ec27cb425df1f26690da85a02ce24303f56ff44"
+    },
+    {
+      "binding": "v32_summary_B4",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B4.json",
+      "size_bytes": 499,
+      "sha256": "1312182a5bc0d465c8d26de295b85acb4e23261406754b922f4e37eeebeeca1a"
+    },
+    {
+      "binding": "v32_summary_B5",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\summary_B5.json",
+      "size_bytes": 220,
+      "sha256": "1cf893f75b5be9493946aeb0f937a05ae3d7de84d5103f03b79b6ec7cad67208"
+    },
+    {
+      "binding": "v32_terminal_reconstruction",
+      "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v32_finite_de_bridge\\run_01\\terminal_reconstruction.json",
+      "size_bytes": 589,
+      "sha256": "0a198a034e1cb45ee839ef572445c72acd7faeb5edecd9b99319fb9d2596ec16"
+    }
+  ],
+  "code_facts": {
+    "harness_synth_channel_sample_L555_L564": {
+      "file": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\src\\comparison_bench\\cli\\run_nonbinary_v32_finite_de_bridge.py",
+      "lines": "555-564",
+      "excerpt": "def synth_channel_sample(seed: int, p_ser: float) -> tuple[list[int], list[int]]:\n    \"\"\"Matched iid synthetic channel: uniform GF(1024) words, iid substitution\n    with probability ``p_ser`` (frozen V25 raw_ser), replacement delta uniform\n    in [1,1023] added modulo 1024.\"\"\"\n    rng = np.random.default_rng(seed)\n    alice = rng.integers(0, 1024, size=N_FROZEN, dtype=np.int64)\n    mask = rng.random(N_FROZEN) < float(p_ser)\n    deltas = rng.integers(1, 1024, size=N_FROZEN, dtype=np.int64)\n    bob = np.where(mask, (alice + deltas) % 1024, alice)\n    return alice.tolist(), bob.tolist()"
+    },
+    "nonbinary_v26_channel_semantics_L10_L13": {
+      "file": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\src\\comparison_bench\\formal_ir\\nonbinary_v26_channel.py",
+      "lines": "10-13",
+      "excerpt": "Semantics (V26 design section 1):\n- ``(A,B)`` sampled from the train joint ``P(A,B)`` = N_ab / total.\n- L1: ``P(U1=u|B) = sum_{a: L1(a)=u} P(A=a|B)``.\n- L2: ``P(U2=u|B,U1) = sum_{a: L1(a)=U1,L2(a)=u} P(A=a|B) / sum_{a: L1(a)=U1} P(A=a|B)``."
+    }
+  },
+  "frozen": {
+    "thresholds": {
+      "expected_nll_ratio_K": 3.0,
+      "expected_nll_ratio_derivation": "Anchored to log2(1024)=10 bits/symbol uniform-symmetry bound. The self-NLL baseline is the V31 reference conditional entropy sum H.L1+H.L2 <= 0.833 bits/symbol; K=3 places the catastrophic-mismatch line at ~2.50 bits/symbol, far above plug-in estimation noise (< 0.05 bits) and far below the 10 bits/symbol uniform bound.",
+      "support_miss_fraction_max": 0.01,
+      "support_miss_fraction_derivation": "With n=1024 symbols per frame, a per-symbol support-miss probability of 1% gives P(at least one miss per frame) = 1-(1-0.01)^1024 ~= 1.0: every long frame would hit a P-zero posterior cell. Anchored to the frozen n=1024 frame length."
+    },
+    "mc_plan": {
+      "seed": 20260822,
+      "n_samples": 100000,
+      "quantiles": [
+        0.05,
+        0.5,
+        0.95
+      ],
+      "zero_hit_policy": "samples whose true-symbol posterior cell has probability zero are counted separately; finite statistics are computed over non-hit samples only"
+    },
+    "histogram_bins": {
+      "error_delta_bin_edges": [
+        -1024,
+        -960,
+        -896,
+        -832,
+        -768,
+        -704,
+        -640,
+        -576,
+        -512,
+        -448,
+        -384,
+        -320,
+        -256,
+        -192,
+        -128,
+        -64,
+        0,
+        64,
+        128,
+        192,
+        256,
+        320,
+        384,
+        448,
+        512,
+        576,
+        640,
+        704,
+        768,
+        832,
+        896,
+        960,
+        1024
+      ],
+      "log2_edges_bits_per_symbol": [
+        9.5367431640625e-07,
+        1.9073486328125e-06,
+        3.814697265625e-06,
+        7.62939453125e-06,
+        1.52587890625e-05,
+        3.0517578125e-05,
+        6.103515625e-05,
+        0.0001220703125,
+        0.000244140625,
+        0.00048828125,
+        0.0009765625,
+        0.001953125,
+        0.00390625,
+        0.0078125,
+        0.015625,
+        0.03125,
+        0.0625,
+        0.125,
+        0.25,
+        0.5,
+        1.0,
+        2.0,
+        4.0,
+        8.0,
+        16.0,
+        32.0,
+        64.0
+      ]
+    },
+    "margin_method": "simple gap reporting at n=1024 only: gap_bits = leakage_bits - required_bits per layer and total, plus leakage/required ratio; no normal approximation and no other statistics",
+    "h_cross_check_tol_bits": 1e-06,
+    "branch_table": [
+      {
+        "branch": "A",
+        "condition": "total infeasible",
+        "consequence": "LDPC 与 Polar 同速率方案均暂停，先重审泄漏预算/运行点"
+      },
+      {
+        "branch": "B",
+        "condition": "total feasible 且 L2 allocation infeasible",
+        "consequence": "当前 multilevel allocation 失败，joint/重新分配的 NB-Polar feasibility 价值上升，不值得先换 QC 图"
+      },
+      {
+        "branch": "C",
+        "condition": "layer 与 total 均可行",
+        "consequence": "finite graph/decoder 值得一次 corrected matched control（后续单独变更，不在本审计内执行）"
+      }
+    ]
+  },
+  "freeze_digest": "050a218dc0d4c48dfc79f3fc3b3f495c1028171e94ed1092cb5523c67c469e30"
+}

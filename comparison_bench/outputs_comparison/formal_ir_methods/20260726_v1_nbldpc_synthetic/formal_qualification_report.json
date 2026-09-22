@@ -1,0 +1,22 @@
+{
+  "formal_run_manifest_sha256": "1a7973c2fbb16e66287f3c789ee6b9f15798d690a7ae1f53bb195014f03b1468",
+  "promoted": false,
+  "promotion_gates": {
+    "p20": {
+      "denominator_included": 32,
+      "prohibited_failures": 0,
+      "promoted": false,
+      "requested": 32,
+      "verified_success": 18
+    },
+    "p30": {
+      "denominator_included": 32,
+      "prohibited_failures": 0,
+      "promoted": false,
+      "requested": 32,
+      "verified_success": 5
+    }
+  },
+  "run_id": "20260726_v1_nbldpc_synthetic",
+  "run_status": "completed"
+}

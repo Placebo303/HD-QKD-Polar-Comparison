@@ -1,0 +1,21 @@
+{
+  "formal_run_manifest_sha256": "d2cea54ce6a512a0fbd3d38170417f4f3ff25b3c7505678dcf2dfaea02bd4532",
+  "promoted": false,
+  "promotion_gates": {
+    "0.2": {
+      "denominator_included": 128,
+      "prohibited_failures": 0,
+      "requested": 128,
+      "verified_success": 128
+    },
+    "0.3": {
+      "denominator_included": 128,
+      "prohibited_failures": 0,
+      "requested": 128,
+      "verified_success": 127
+    }
+  },
+  "readiness": true,
+  "run_id": "20260731_v5c_nbldpc_decoder_synthetic",
+  "run_status": "completed"
+}

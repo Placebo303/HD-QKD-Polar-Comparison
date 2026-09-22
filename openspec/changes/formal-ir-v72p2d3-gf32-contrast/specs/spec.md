@@ -1,0 +1,129 @@
+# V72P2D3 Spec Delta：GF32 两层增量对照（syndrome-only）
+
+状态：`PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED`。本 delta 绑定 base `e094f7e548380db4bfcbc1fe73472e670c32379a`，不合并、不替代已接受的 V72P1、V72P2、D1、D2 行为。本周期不实现、不运行 decoder、不读取 raw/parquet、不创建结果目录。
+
+`base_sha/accepted_plan_sha/implementation_sha` 只承担 Git 版本绑定，不承担 data/artifact 内容校验。输出不得包含数据或 artifact 内容摘要、签名或其他校验字段。不预设优胜者。
+
+## S-ARM：二臂对照
+
+- **S-ARM-01**：系统 SHALL 以已存 D1 Arm A 作为 baseline A；A SHALL 只读复用，SHALL NOT 重跑。
+- **S-ARM-02**：G SHALL 使用本 spec `S-MAP/S-GF32/S-PRIOR` 定义的 GF32 两层增量，同 VAL 块、同 CAL 域，一次运行；SHALL NOT 用 VAL 选参/调参/回灌。
+- **S-ARM-03**：A 与 G 的对照 SHALL 为描述性表示对照；SHALL NOT 宣称单因素因果或优胜者。
+- **S-ARM-04**：不得创建混合臂；不得事后调参、重跑或扩展 block。
+
+## S-COMMON：输入与状态
+
+- **S-COMMON-01**：block SHALL 是 session `20260123_1M_600k_0dB` 的 `VAL1726..1729` 四帧连续 1024-symbol D1 诊断块，标记 `non_fresh=true`；CAL SHALL 是同 session `CAL702..1725`；计划和测试阶段 SHALL NOT 读取 raw/parquet。
+- **S-COMMON-02**：A mother/数值/ladder SHALL 复用 D1（9036x10240、nnz49620、72 点、10/ckpt、720/arm、float64/clip20/tol1e-6）。
+- **S-COMMON-03**：Alice SHALL 仅提供 syndrome prefix 与结束后 posthoc oracle；Bob+CAL SHALL 仅提供 prior；诊断 SHALL 为 syndrome-only。
+- **S-COMMON-04**：`tag_bits` SHALL 为 0，`tag_ok` SHALL 为 `NOT_APPLICABLE`；SHALL NOT 生成 tag 泄漏。
+
+## S-MAP：映射
+
+- **S-MAP-01**：`low` SHALL 为 bits0..4（u2），`high` SHALL 为 bits5..9（u1），`bit0` SHALL 为 LSB；方向 SHALL 绑定 v35 `factorize_f03`。
+- **S-MAP-02**：`symbol` SHALL 为 `low+32*high`（即 `s=32*u1+u2` 其中 `u1=high/u2=low`），同方向、无 Gray、无置换。
+- **S-MAP-03**：pack/unpack SHALL 满足 `+1024 roundtrip` 全值往返一致；任一歧义 SHALL 导致 `REVISE`。
+
+## S-GF32：场、矩阵、decoder（R1–R2 唯一真核）
+
+- **S-GF32-01**：场 SHALL 为 `q=32 poly37`，统一复用 v35 `GF2mField.create(32)` 数学；SHALL NOT 新定义多项式或改历史 kernel。
+- **S-GF32-02**：矩阵 SHALL 为 `H_base=184`（1M；190/192 仅参照）+ `H1=16`，`H_total=200`，nested 前缀 `184/192/200`（Δ8+8）。
+- **S-GF32-03**：layered（A 家族）vs incremental（G 两层增量）SHALL 正交，不得混合；G syndrome SHALL 经 `syndrome_of_gf32`，SHALL NOT 称 binary 为 GF32。
+- **S-GF32-04**：G decoder SHALL 为 v35 `decode_row_layered_fftqspa` 码字域（长度 `n=1024` 的 GF32 码字向量；输入 `H/prior/syndrome`，输出 `DecoderResult(x_hat/syndrome_ok/iterations 0..max/final_beliefs + runtime/status)`，`0` 为初值即满足，仅 syndrome 等式停止），满足 `max_iter=90` 硬帽、`damping=1.0`、无 residual tolerance；BP SHALL 用自然 log，CE SHALL 用 log2；`residual` SHALL 为 `NOT_RECORDED`（真核无 residual，不伪造）；生产 SHALL 恒 `decode_fn=None` 直调真核。
+- **S-GF32-05**：薄 adapter SHALL 唯一复用 V54 链 `L1(_dec_l1/H1，经 get_l1_prior_p_u1_given_b 的 P(U1|B)，q=softmax(final_beliefs))+L2(H_base/H_joint/H_total，同 prior_l2=q@P 经 get_l1_app_prior_l2)`；字段 SHALL 经 `get_gf32_field` 统一为 v35 `GF2mField.create(32)` poly37；syndrome SHALL 为 `s1=H1*u1/s_base=H_base*u2/s_joint/s_total`（Alice 侧，经 `syndrome_of_gf32`）；生产 SHALL 直调真迭代函数，每 stage cold start（恒 `belief_warm=None`，`belief_warm` 仅 `(n,32)` 初值，不称 message carry）；SHALL NOT argmax 冒充/固定 hard/写死 iters/mock 进生产/简化 decoder；三审查 SHALL 核真 kernel（import 探针 + tiny 已知答案含 `iterations==0` + stub/mock 零命中 + `np.argmax(prior` 零命中），否则 BLOCKED。
+- **S-GF32-06**：历史顺序 SHALL 为 `L1(H1,P(U1|B)) → q=softmax(final_beliefs) → prior_l2=q@P → base → joint → total`；短路 SHALL 为 L1 失败仍进 L2（L2 恒用 q，不门控）且 base 满足跳过 joint/total、joint 满足跳过 total（syndrome-only；R5）；L1 结果不门控 L2（L2 恒用 q）。
+
+## S-PRIOR：先验
+
+- **S-PRIOR-01**：方向 SHALL 明确为 `P(high|Bob_side)=P(U1|B)` 与 `P(low|high,Bob_side)=P(U2|U1,B)`；生产 L2 prior SHALL 为 `q@P`（经 V54 `get_l1_app_prior_l2` 精确复用）；禁 Alice、禁旧 session、禁 VAL 选参；歧义 SHALL 导致 `REVISE`。
+- **S-PRIOR-02**：builder SHALL 只接 physical Bob + 当前 CAL + 冻结参数；`K/P` SHALL 先正常归一；floor 只保护 log。
+- **S-PRIOR-03**：SHALL 报告 `joint/low/high CE` log2 链式 `|CE_joint-CE_high-CE_low_given_high|<1e-9`，decoder 自然 log 转换显式；VAL 仅确认度量。
+
+## S-ACCT：泄漏与计费
+
+- **S-ACCT-01**：泄漏 SHALL 为 `leak=5*m_total+64=5*m_base+80+64`（`m_total` 含 H1：`200/208/216 → 1064/1104/1144`；等价 L2-only 行 `184/192/200 → 1064/1104/1144` 经 `leak_for_base`）；`tag_bits_published` SHALL 为 0。
+- **S-ACCT-02**：G SHALL 分层报告 `x_hat/syndrome_observed/ok/iterations_used/residual 或 NOT_RECORDED/finite/runtime/stop/candidate_changed/vs_bob` 与 `total/control`；SHALL NOT 伪造缺失字段（无 Bob 层时 `vs_bob/candidate_changed` 为 null；`hard/iters/syndrome_satisfied` 仅为回兼容视图）；A 新指标 SHALL 为 null 附 `not_recorded_reason`。
+- **S-ACCT-03**：V64 `compute_tag_64` SHALL 仅作只读 pure-function helper；SHALL NOT 计入泄漏或门禁；V64 归因 SHALL NOT 写成定论。
+
+## S-IO：未来实现、执行和 schema
+
+- **S-IO-01**：实现精确只有：`comparison_bench/src/comparison_bench/formal_ir/v72p2d3_gf32_contrast.py`、`scripts/v72p2d3_gf32_contrast.py`、`comparison_bench/tests/test_v72p2d3_gf32_contrast.py`。不得新增 config/fixture，或修改 adapter/src/experiments/tools/results/旧输出。
+- **S-IO-02**：输出根 SHALL 是 `comparison_bench/outputs_comparison/v72p2d3_gf32_contrast_20260904/`，且只含 `manifest.json/results.json/table.csv/report.md`；不得覆盖 D1/D2 输出或创建 `run_01`。
+- **S-IO-03**：manifest/results 顶层 SHALL 含 schema、cycle、`base_sha/accepted_plan_sha/implementation_sha`、session/block/CAL provenance、`non_fresh`、mapping/field/matrix/nested/decoder/prior/leakage、arms 和 claim boundary；三字段仅 Git 绑定，不得添加内容校验字段。
+- **S-IO-04**：每臂 SHALL 含 status、rows/iters、syndrome、candidate、posthoc、accounting、runtime/RSS；checkpoint oracle SHALL 为 null 附 `oracle_runs_after_arm_end`。
+
+## S-STOP：预算与状态机
+
+- **S-STOP-01**：synthetic 全双层 SHALL 满足 `wall≤300s`、`peak_rss<2GiB`、误差 `≤15%`；超限 SHALL 为 `PLAN_REVISE_REQUIRED`。
+- **S-STOP-02**：准备/输入校验失败时 G SHALL 为 `NOT_ATTEMPTED` 非零返回；G exception/nonfinite/RSS/timeout SHALL 为 `BLOCKED` 保留 artifact；普通耗尽 SHALL 为正常终态；A SHALL NOT 重跑。
+- **S-STOP-03**：执行前 SHALL 通过独立 Plan Review、Implementation Review、Pre-EXECUTE，发布前 SHALL 通过 Pre-RESULT；本计划 SHALL NOT 授权执行。
+
+## S-CLAIM：判别和边界
+
+- **S-CLAIM-01**：终态 SHALL 为 `G_EXACT / G_COLLISION / G_IMPROVED_NO_SYNDROME / G_NO_MOTION` 四分支互斥；SHALL NOT 预设优胜者。
+- **S-CLAIM-02**：`G_EXACT` SHALL 仅允许同路线小样本 confirmation plan，不直接进入 V73；SHALL NOT 作 FER/SKR/信息极限/LDPC 无效/图因果/GF32 优胜/跨 session 断言。
+- **S-CLAIM-03**：文献 SHALL 保留 PEG `10.1109/TIT.2004.839541`、layered `10.1109/SIPS.2004.1363033`、`arXiv:1001.1826`、`arXiv:2305.08631`，以及 V54 `43/45`、V64 `22/24`、V5-C2 `384/384` 限定域；V67–V72P1 SHALL NOT 写成真实纠错成功。
+
+## S-TEST：未来 synthetic 验收
+
+- **S-TEST-01**：T0/D6 SHALL 覆盖 15 项清单（场统一 v35/映射/roundtrip/方向绑定 factorize/H/nested/归一+q@P/链式/隔离/硬帽+cold 语义+真核探针/GF32 符号方向/GF32 violation/短路/V64 只读/直接比较/schema），`py_compile`/import 无副作用，fake 仅显式注入的测试路径。
+- **S-TEST-02**：D7 SHALL 断言全双层 `wall≤300s/peak<2GiB/误差≤15%` 与 RSS 采样口径。
+- **S-TEST-03**：D8 SHALL 断言三审查核唯一真核（import+已知答案+stub/mock 零命中+argmax 零命中）。
+- **S-TEST-04**：T2 SHALL 使用显式 fake（仅 orchestration 短路逻辑） 和 fresh workspace，覆盖 G 全双层、首次满足不早停、动态计费、final-candidate oracle 分类、四文件 schema、production path 门禁（生产 `decode_fn=None` 直调真核）；replay 排除 wall/RSS/timestamp/path。
+
+## S-R2：真实输入适配（prepare-only，additive）
+
+- **S-R2-01**：registry SHALL 为 `v72p2d3_real_registry_v1`（session 冻结 1M，
+  CAL702..1725/VAL1726..1729 disjoint，禁 1730+，`used_2m=false`，列恰 4 列）；
+  SHALL NOT 读或计算 checksum/hash/tag。
+- **S-R2-02**：parquet SHALL 仅受限 4 列读（`frame_id/pair_idx/alice_symbol/bob_symbol`），
+  SHALL 校验 CAL1024x256+VAL4x256 几何；数据行 SHALL NOT 落盘。
+- **S-R2-03**：prepare summary SHALL 仅标量（`v72p2d3_prepare_summary_v1`，
+  `formal=false`，`decoder_calls=0`，`published_bits=0`）；SHALL NOT 含 Alice/Bob 数组、
+  prior/syndrome/matrix 值、candidate/messages；缺输入 SHALL 为 `PREP_FAILED`，
+  预算超限 SHALL 为 `BLOCKED`；输出 SHALL 恰一文件且 SHALL NOT 为 `run_01`，
+  SHALL NOT 在生产根下。
+- **S-R2-04**：R3 SHALL 绑定 `r3_implementation_sha=1deb0fd8`（首次真核绑定，非 retry；`implementation_sha` 旧值与 R2 BLOCKED 不动）；`--execute-real` SHALL 仅放行精确预注册根，其余生产路径与 workspace 路由仍拒绝。
+
+## S-R5：数学接口、码率与路线修订（计划状态）
+
+- **S-R5-01 R4 closure**：R4 的入口放行/terminal writer 拒绝必须记录为
+  `BLOCKED_FINAL_WRITE_MISMATCH`、`exit=2`、decoder/data/disclosure/output 为0；不得
+  把它写成算法结果、重试或复用其授权。R5 SHALL 保持
+  `real_execution_authorized=false`、`formal_execution_authorized=false`、
+  `scientific_promotion=false`。
+- **S-R5-02 canonical counts**：生产统计 SHALL 唯一采用
+  `counts[a,b]=count(Alice symbol=a, Bob symbol=b)`，`axis0=Alice`、`axis1=Bob`；
+  SHALL NOT 在 V54 调用点隐式转置或同时保留相反生产约定。
+- **S-R5-03 asymmetric direction test**：测试 SHALL 使用非对称、可手算联合分布，
+  分别验证 `P(U1|B)` 与 `P(U2|U1,B)`；转置输入 SHALL 被捕获。只检查归一化或
+  对称数据 SHALL NOT 算作方向证据；CLI 实际 CAL builder SHALL 被覆盖。
+- **S-R5-04 historical H1**：真实 H1 SHALL 来自 V31/V54 QC-cyclic-projective
+  builder，`shape=(16,1024)`、nnz>0、每行非零、GF32 元素在 `0..31`、GF32 rank=16；
+  CLI 实际组装输入 SHALL 被验证，`zeros((16,1024))` SHALL 被拒绝。若历史 builder
+  无法可靠重建，状态 SHALL 为 `BLOCKED`，不得用替代矩阵。
+- **S-R5-05 shared production prior**：prepare、fake E2E 和 production SHALL 共用
+  一个 prior builder；L1 SHALL 使用 `get_l1_prior_p_u1_given_b`，L2 SHALL 使用
+  `get_l1_app_prior_l2`，`prior_l2=q@P` 且 `q=softmax(L1 final_beliefs)`。输入仅
+  physical Bob、当前 CAL 和冻结参数；Alice、oracle、旧 session、VAL 选参 SHALL
+  被排除。
+- **S-R5-06 CAL-only CV**：R5 的 CV SHALL 只读取 CAL；每 fold SHALL 用三折建立
+  canonical counts、在留出折计算 L1/L2/joint log2 CE；VAL loader 调用必须为0。
+  现有同 CAL custom P1/P2 重拟合数值如保留 SHALL 命名
+  `cal_resubstitution_nll_descriptive`，不得称 production validation。
+- **S-R5-07 rate audit**：SHALL 报告 `CE_L1=H(U1|B)`、
+  `CE_L2_oracle=H(U2|U1,B)`、`CE_joint=CE_L1+CE_L2_oracle`，单位 bit/symbol，
+  并分别与 `80`、`1000`、`1080` bit 比较；`1080/1024=1.0546875 bit/symbol`。
+  `CE_L2_oracle` 仅用于分层预算诊断。模型 CE 不是信息论下界；不足 SHALL 只记
+  `MODEL_BUDGET_MISMATCH`，不得称 information limit、GF32 failed 或 LDPC impossible；
+  L1 不足 SHALL NOT 只增加 L2。
+- **S-R5-08 arbitrary-data boundary**：路线 SHALL 区分读入、先验估计、码率构造和
+  预算内纠错四层；目标是适用性识别与参数匹配，不保证任意数据高效纠错。
+- **S-R5-09 generalization backlog**：通用化 SHALL 暂停；后续顺序为
+  `d=256,[4,4],N=1024` 后 `d=512,[5,4],N=1024`。三层以上 APP SHALL 另立联合
+  消息数学合同并经微型枚举验证，SHALL NOT 直接重复 `q@P`。
+- **S-R5-10 execution boundary**：R5 SHALL 只做文档、计划、代码审查定义和 CAL-only
+  标量审计；SHALL NOT 读取 VAL、调用 decoder、创建正式输出、修 terminal writer、
+  授权真实执行或实现扩维。
+- **S-R5-11 stop conditions**：counts 约定不唯一、历史 H1 无法可靠重建、CV 读取
+  VAL 或任何 decoder 被调用时，状态 SHALL 为 `BLOCKED`，不得猜测、替代或重试。

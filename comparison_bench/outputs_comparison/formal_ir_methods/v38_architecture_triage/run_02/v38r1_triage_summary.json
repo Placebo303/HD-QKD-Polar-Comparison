@@ -1,0 +1,162 @@
+{
+  "cycle_id": "V38R1",
+  "predecessor_cycle": "V38P0",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "execution_status": "DEVELOPMENT_RESULT_CANDIDATE",
+  "winners_reconstructed_count": 9,
+  "decoder_runs_count": 45,
+  "lane_statuses": {
+    "lane_a": "LANE_PROMISING_DIRECTION_SIGNAL",
+    "lane_b": "LANE_PROMISING_DIRECTION_SIGNAL",
+    "lane_c": "LANE_PROMISING_DIRECTION_SIGNAL"
+  },
+  "lane_aggregates": {
+    "lane_a": {
+      "lane": "lane_a",
+      "records_count": 15,
+      "integrity_ok": true,
+      "status": "OK",
+      "exact_recovery_count": 0,
+      "overall_mean_errors": 111.6,
+      "overall_median_errors": 115.0,
+      "overall_median_improvement": 0.3502824858757062,
+      "improve_count": 15,
+      "equal_count": 0,
+      "worsen_count": 0,
+      "worst_single_block_degradation": 0,
+      "source_stats": {
+        "1M": {
+          "exact_count": 0,
+          "mean_errors": 108.6,
+          "median_errors": 105.0,
+          "median_delta_s": -0.38596491228070173,
+          "ref_median": 171.0
+        },
+        "1p5M": {
+          "exact_count": 0,
+          "mean_errors": 113.6,
+          "median_errors": 121.0,
+          "median_delta_s": -0.3202247191011236,
+          "ref_median": 178.0
+        },
+        "2M": {
+          "exact_count": 0,
+          "mean_errors": 112.6,
+          "median_errors": 99.0,
+          "median_delta_s": -0.45901639344262296,
+          "ref_median": 183.0
+        }
+      }
+    },
+    "lane_b": {
+      "lane": "lane_b",
+      "records_count": 15,
+      "integrity_ok": true,
+      "status": "OK",
+      "exact_recovery_count": 9,
+      "overall_mean_errors": 16.466666666666665,
+      "overall_median_errors": 0.0,
+      "overall_median_improvement": 1.0,
+      "improve_count": 15,
+      "equal_count": 0,
+      "worsen_count": 0,
+      "worst_single_block_degradation": 0,
+      "source_stats": {
+        "1M": {
+          "exact_count": 3,
+          "mean_errors": 8.2,
+          "median_errors": 0.0,
+          "median_delta_s": -1.0,
+          "ref_median": 171.0
+        },
+        "1p5M": {
+          "exact_count": 2,
+          "mean_errors": 39.8,
+          "median_errors": 30.0,
+          "median_delta_s": -0.8314606741573034,
+          "ref_median": 178.0
+        },
+        "2M": {
+          "exact_count": 4,
+          "mean_errors": 1.4,
+          "median_errors": 0.0,
+          "median_delta_s": -1.0,
+          "ref_median": 183.0
+        }
+      }
+    },
+    "lane_c": {
+      "lane": "lane_c",
+      "records_count": 15,
+      "integrity_ok": true,
+      "status": "OK",
+      "exact_recovery_count": 14,
+      "overall_mean_errors": 4.2,
+      "overall_median_errors": 0.0,
+      "overall_median_improvement": 1.0,
+      "improve_count": 15,
+      "equal_count": 0,
+      "worsen_count": 0,
+      "worst_single_block_degradation": 0,
+      "source_stats": {
+        "1M": {
+          "exact_count": 5,
+          "mean_errors": 0.0,
+          "median_errors": 0.0,
+          "median_delta_s": -1.0,
+          "ref_median": 171.0
+        },
+        "1p5M": {
+          "exact_count": 4,
+          "mean_errors": 12.6,
+          "median_errors": 0.0,
+          "median_delta_s": -1.0,
+          "ref_median": 178.0
+        },
+        "2M": {
+          "exact_count": 5,
+          "mean_errors": 0.0,
+          "median_errors": 0.0,
+          "median_delta_s": -1.0,
+          "ref_median": 183.0
+        }
+      }
+    }
+  },
+  "triage_gate_details": {
+    "lane_a": {
+      "gate_passed": true,
+      "criterion_a": false,
+      "criterion_b": true,
+      "criterion_c": true,
+      "exact_count": 0,
+      "overall_median": 115.0,
+      "improve_count": 15,
+      "worsen_count": 0
+    },
+    "lane_b": {
+      "gate_passed": true,
+      "criterion_a": true,
+      "criterion_b": true,
+      "criterion_c": true,
+      "exact_count": 9,
+      "overall_median": 0.0,
+      "improve_count": 15,
+      "worsen_count": 0
+    },
+    "lane_c": {
+      "gate_passed": true,
+      "criterion_a": true,
+      "criterion_b": true,
+      "criterion_c": true,
+      "exact_count": 14,
+      "overall_median": 0.0,
+      "improve_count": 15,
+      "worsen_count": 0
+    }
+  },
+  "terminal_state": "V38_MULTIPLE_ROUTE_SIGNALS",
+  "fake_runner": false,
+  "run_01_immutable_invalid_evidence": true,
+  "npz_input_used": false
+}

@@ -1,0 +1,5 @@
+stratum_idx,f,direction,source_layer,target_layer,blocks,eligible_count,blocked_count,control_exact_count,transfer_exact_count,control_only_exact_count,transfer_only_exact_count,both_exact_count,neither_exact_count,control_syndrome_ok_count,transfer_syndrome_ok_count,control_only_syndrome_ok_count,transfer_only_syndrome_ok_count,both_syndrome_ok_count,neither_syndrome_ok_count,nonfinite_count,crash_count,stratum_label,coverage_status
+1,1.0,L1_TO_L2,L1,L2,16,16,0,0,0,0,0,0,16,0,0,0,0,0,16,0,0,NO_TRANSFER_RECOVERY,COVERAGE_OK
+2,1.0,L2_TO_L1,L2,L1,16,16,0,0,0,0,0,0,16,0,0,0,0,0,16,0,0,NO_TRANSFER_RECOVERY,COVERAGE_OK
+3,1.2,L1_TO_L2,L1,L2,16,16,0,0,3,0,3,0,13,0,3,0,3,0,13,0,0,AMBIGUOUS_TRANSFER_EFFECT,COVERAGE_OK
+4,1.2,L2_TO_L1,L2,L1,16,16,0,3,7,0,4,3,9,3,7,0,4,3,9,0,0,STRONG_TRANSFER_LIFT,COVERAGE_OK

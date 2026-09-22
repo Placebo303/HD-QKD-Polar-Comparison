@@ -1,0 +1,163 @@
+{
+  "batch": 1,
+  "decoder_calls": 0,
+  "diagnostics": [
+    {
+      "changed_axis": "none (read-only)",
+      "decoder_calls": 0,
+      "entropy_P1_bits": 4.999985322023371,
+      "entropy_P2_bits": 4.999659312231358,
+      "frozen": {
+        "ce_joint": 7.162347,
+        "ce_l1": 3.814742,
+        "ce_l2_oracle": 3.347605
+      },
+      "id": "D1",
+      "input": "workspace/v72p2d5_model_f_input/20260907_r1/model_f_input.npz",
+      "joint_actual": 9.999644634254839,
+      "l1_actual": 4.999985322023371,
+      "l2_actual": 4.999659312231358,
+      "pb_sum_raw": 1.0,
+      "pf_col_norm_maxerr": 4.063416270128073e-14,
+      "prior_E_maxP1": 0.03202713759557873,
+      "rows_width64": {
+        "1.0": {
+          "m1_actual": 64,
+          "m1_frozen": 49,
+          "m2_actual": 64,
+          "m2_frozen": 43
+        },
+        "1.2": {
+          "m1_actual": 77,
+          "m1_frozen": 59,
+          "m2_actual": 77,
+          "m2_frozen": 52
+        }
+      }
+    },
+    {
+      "changed_axis": "none (construction = formal defaults)",
+      "decoder_calls": 0,
+      "h1_shape": [
+        59,
+        64
+      ],
+      "h2_shape": [
+        52,
+        64
+      ],
+      "id": "D2",
+      "input": "L1 mother (64,59,59,seed 2026090501); L2 mother (64,52,52,seed 2026090502)",
+      "prefix_audits": {
+        "H1[:49]": {
+          "base_pair_duplicates": 1,
+          "coefficients_nonzero": true,
+          "connected_components": 2,
+          "degree1_variables": 5,
+          "degree2_variables": 21,
+          "degree3_variables": 37,
+          "duplicate_projective_columns": 1,
+          "four_cycle_variable_incidence_max": 2,
+          "four_cycles": 8,
+          "isolated_variables": 1,
+          "largest_component_fraction": 0.984375,
+          "passed": false,
+          "prefix_rows": 49,
+          "rank": 49,
+          "status": "STRUCTURE_BLOCKED",
+          "support_triple_duplicates": 0,
+          "total_edges": 158,
+          "variable_degree_max": 3,
+          "variable_degree_median": 3.0,
+          "variable_degree_min": 0,
+          "zero_columns": 1,
+          "zero_rows": 0
+        },
+        "H1[:59]": {
+          "base_pair_duplicates": 1,
+          "coefficients_nonzero": true,
+          "connected_components": 1,
+          "degree1_variables": 0,
+          "degree2_variables": 0,
+          "degree3_variables": 64,
+          "duplicate_projective_columns": 0,
+          "four_cycle_variable_incidence_max": 2,
+          "four_cycles": 10,
+          "isolated_variables": 0,
+          "largest_component_fraction": 1.0,
+          "passed": false,
+          "prefix_rows": 59,
+          "rank": 59,
+          "status": "STRUCTURE_BLOCKED",
+          "support_triple_duplicates": 0,
+          "total_edges": 192,
+          "variable_degree_max": 3,
+          "variable_degree_median": 3.0,
+          "variable_degree_min": 3,
+          "zero_columns": 0,
+          "zero_rows": 0
+        },
+        "H2[:43]": {
+          "base_pair_duplicates": 3,
+          "coefficients_nonzero": true,
+          "connected_components": 1,
+          "degree1_variables": 7,
+          "degree2_variables": 21,
+          "degree3_variables": 36,
+          "duplicate_projective_columns": 1,
+          "four_cycle_variable_incidence_max": 2,
+          "four_cycles": 13,
+          "isolated_variables": 0,
+          "largest_component_fraction": 1.0,
+          "passed": false,
+          "prefix_rows": 43,
+          "rank": 43,
+          "status": "STRUCTURE_BLOCKED",
+          "support_triple_duplicates": 0,
+          "total_edges": 157,
+          "variable_degree_max": 3,
+          "variable_degree_median": 3.0,
+          "variable_degree_min": 1,
+          "zero_columns": 0,
+          "zero_rows": 0
+        },
+        "H2[:52]": {
+          "base_pair_duplicates": 3,
+          "coefficients_nonzero": true,
+          "connected_components": 1,
+          "degree1_variables": 0,
+          "degree2_variables": 0,
+          "degree3_variables": 64,
+          "duplicate_projective_columns": 0,
+          "four_cycle_variable_incidence_max": 2,
+          "four_cycles": 18,
+          "isolated_variables": 0,
+          "largest_component_fraction": 1.0,
+          "passed": false,
+          "prefix_rows": 52,
+          "rank": 52,
+          "status": "STRUCTURE_BLOCKED",
+          "support_triple_duplicates": 0,
+          "total_edges": 192,
+          "variable_degree_max": 3,
+          "variable_degree_median": 3.0,
+          "variable_degree_min": 3,
+          "zero_columns": 0,
+          "zero_rows": 0
+        }
+      }
+    },
+    {
+      "add_is_xor": true,
+      "changed_axis": "none (table/code read)",
+      "decoder_calls": 0,
+      "field_spec": "FieldSpec(method='nbldpc_formal_v1', backend_id='internal_polynomial_basis_gf2m', backend_version='1', q=32, m=5, primitive_polynomial=37, basis='polynomial', symbol_encoding='unsigned_coefficient_integer_lsb_x_to_the_i', field_id='c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf')",
+      "id": "D3",
+      "input": "core GF32 fns vs v35 GF2mField.create(32) + frozen G1 prefixes",
+      "mul_table_match": true,
+      "rank_match_4prefixes": true,
+      "syndrome_match_12trials": true
+    }
+  ],
+  "wall_s": 0.3394599000457674
+}

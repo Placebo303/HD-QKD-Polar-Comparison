@@ -1,19 +1,81 @@
 # Current Mainline
 
-## Formal-IR research mainline (2026-08-24)
+## Formal-IR research mainline — current route ledger (through D7-D + BP provenance interface)
+
+This document is **status, not authorization**. The active gate and accepted
+cycle documents outrank aggregate checkbox counts; stale historical checkboxes
+are bookkeeping, not execution authorization.
 
 The strict first principle is high-performance error correction for actual
 HD-QKD data. The frozen Polar line below is a comparison baseline; active
 algorithm work lives under `comparison_bench/`, OpenSpec, and the NB-LDPC
-research documents.
+research cycle documents.
 
-Current bounded state:
+Current route ledger (each item is a bounded conclusion already accepted in its
+own cycle document; no new claim is added here):
 
-- V34: matched empirical-P fixed-packet bounded failure, ER1 accepted.
-- V35R1: no candidate for the tested hand-designed NB configuration.
-- V36: real exploratory residual decrease on 15 paired development blocks,
-  but no exact recovery and no finite-graph advance. Its DE-selection gate is
-  not accepted and its realized graphs violate the frozen zero-cycle gate.
+1. **D5 — fixed rate-mother path stopped within tested scope.** The two-layer
+   rate-mother BP path is accepted as stopped for the tested configuration.
+2. **D6 — graph/mother successor structurally blocked.** The graph/mother A2
+   path is structurally blocked; R1d Option C is frozen but optional/paused
+   (`PAUSED_OPTIONAL_LOCAL_CONFIRMATION_NOT_MAINLINE_GATE`) and is not a
+   mainline gate.
+3. **D7-A — decoder certification PASS.**
+4. **D7-B — hard-decision easy region observed**, with RSS/belief limitations
+   recorded; no belief-calibration claim.
+5. **D7-C — bounded bidirectional dependence accepted** as a diagnostic; it
+   does not prove that alternating/joint BP can bootstrap.
+6. **D7-D — schedule effect inconclusive** (`D7_D_SCHEDULE_EFFECT_INCONCLUSIVE`,
+   accepted as `D7_D_RESULT_ACCEPTED_SCHEDULE_EFFECT_INCONCLUSIVE`); no
+   schedule-superiority claim.
+7. **Active gate — D7-E provenance-safe cross-layer discriminator frozen
+   awaiting explicit authorization.** BP provenance Alternative A is
+   implemented and dual-reviewed
+   (`D7_BP_INTERFACE_IMPLEMENTATION_REVIEW_PASS`,
+   `D7_BP_INTERFACE_READINESS_REVIEW_PASS`); D7-E is frozen at `f82804f6`
+   with implementation review `D7_E_IMPLEMENTATION_REVIEW_PASS` and
+   Pre-EXECUTE `D7_E_PRE_EXECUTE_REVIEW_PASS_AWAITING_EXPLICIT_AUTHORIZATION`
+   recorded — nothing executed, no UUID, no result root. D6 R1d
+   BP-provenance compat is repaired and re-reviewed but R1d stays
+   optional/paused; G1/G2 remain unauthorized.
+8. **After D7-E is frozen and authorized**, run the provenance-safe cross-layer
+   mechanism discriminator before any further cross-layer APP work; that run
+   needs its own prereg/packet and explicit Pre-EXECUTE.
+9. **Only then** consider dimension/bandwidth expansion; expansion stays gated,
+   and for more than two layers a separate mathematical/leakage contract is
+   required.
+
+## V80 NB-LDPC Jan-21 current state (2026-09-21; active work past D7-E)
+
+- S1 batch closed (rerun halted; BER-1 fixed / BER-2 cleared); S2c n=256
+  three-arm empirical FAIL closed (0/3 arms, batch-end review PASS, no S3).
+- O1 n=1024: A208 first S2-level PASS (60/60, f_super 1.294947≤1.3) / A188 FAIL;
+  O1R replication PASS (pooled 0/480, two construction instances, girth 8 & 6).
+- P0 reduced-m probes PASS (A202 0/240; A200 2/240) — L1 budget de-risked.
+- L1B Stage A BLOCKED pre-decode by m1 dense-check collapse (fc≠0, girth 4);
+  L1-construction rework decision pending; ceiling stays genie-u1/D_blind=0.
+- Records: `docs/research_cycles/V80-NBLDPC-JAN21/O1R_RESULT_20260920.md`,
+  `P0_RESULT_20260920.md`, `L1B_PREEXEC_20260920.md`, `L1_CONSTRUCTION_MEMO_20260920.md`.
+
+## NB-Polar successor boundary (2026-09-11)
+
+An independent native q-ary NB-Polar plan is now initialized in the sibling
+worktree D:\Code\HD-QKD_Polar_Comparison-nbpolar. The canonical documents
+are docs/nbpolar/DOCUMENT_INDEX.md and OpenSpec change
+formal-ir-nbpolar-mvp. This is a plan candidate only: there is no production
+decoder, real-data execution, result root, or qualification claim.
+
+The old hybrid APP-transfer draft is archived under
+openspec/changes/archive/2026-09-11-formal-ir-future-nbpolar-app-transfer-superseded/.
+The active Comparison route remains D7-E; NB-Polar planning neither changes
+nor authorizes D7-E, D7-D, D7-C, D6, or D5 work.
+
+Earlier bounded V-series states superseded by the ledger above: V34 matched
+empirical-P fixed-packet bounded failure (ER1 accepted); V35R1 closed only the
+tested hand-designed NB configuration
+(`NO_NB_CANDIDATE_FOR_TESTED_HAND_DESIGNED_CONFIGURATION`,
+`PROTOCOL_PARTIAL_A4_NOT_EXECUTED`); V36 showed a real exploratory residual
+decrease with no exact recovery and no accepted finite-graph advance.
 
 Use `docs/research-cycle-sop.md` for the next plan -> ChatGPT review -> OpenCode
 implementation -> result-review loop. No successor or formal run is currently

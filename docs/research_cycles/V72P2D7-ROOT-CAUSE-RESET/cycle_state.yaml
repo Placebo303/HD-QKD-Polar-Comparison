@@ -1,0 +1,105 @@
+cycle_id: V72P2D7-ROOT-CAUSE-RESET
+state: X4_COMPLETE_VERIFIED_AWAITING_MAIN_THREAD_ROUTE_DECISION
+terminal: X4_COMPLETE_VERIFIED_AWAITING_MAIN_THREAD_ROUTE_DECISION
+# A03 initial terminal: IMPLEMENTATION_IN_PROGRESS / EXECUTION_NOT_AUTHORIZED
+# Phase P (2026-09-13): X1/X3/X4 entrypoints closed; readiness record
+# PHASE_P_PRE_EXECUTE_READINESS_R1.md; P10 independent readiness review
+# PASS_WITH_FINDINGS (PHASE_P_INDEPENDENT_READINESS_REVIEW_R1.md);
+# User granted one serial X1-X4 authorization on 2026-09-13 under
+# D7_X1_X4_EXECUTION_MASTER_R1_A1_TASK_PACKET.md. Each phase flag remains
+# false until immediately before its own process start and is restored false
+# immediately after. D7-H remains unauthorized.
+execution_authorization: X1_X4_SERIAL_AUTHORIZED_A1
+change_name: formal-ir-d7-root-cause-and-route-reset
+packet: .workbuddy/tasks/D7_X1_X4_EXECUTION_MASTER_R1_TASK_PACKET.md
+branch: formal-ir-v72p1-addendum-clean
+implementation_authorized: true
+implementation_candidate: true
+implementation_accepted: true
+x1_consistency_probe_authorized: false
+x2_multigraph_execution_authorized: false
+x3_reference_ladder_authorized: false
+x4_g2_execution_authorized: false
+d7h_execution_authorized: false
+# decoder_executed tracks formal X2-X4/G2 phase execution only; the consumed
+# X1 provenance probe is tracked separately by x1_decoder_executed.
+decoder_executed: true
+multigraph_executed: true
+g2_executed: true
+g1_rerun_authorized: false
+result_solidification_authorized: false
+scientific_promotion: false
+historical_evidence: RETAINED_BYTE_IDENTICAL
+d7f_terminal_corrigendum: D7_F_SINGLE_GRAPH_PAIRED_EVIDENCE_LABEL
+g2_status: G2_PENDING_NOT_FAILED_NOT_SKIPPED_NOT_SUPERSEDED
+g2_runtime_status: G2_RUNTIME_UNVERIFIED
+equivalence_finding: MATHEMATICALLY_EQUIVALENT_WITHIN_FLOAT_REASSOCIATION
+operator_return: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/OPERATOR_RETURN_R1.md
+review_entrypoint: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/REVIEW_ENTRYPOINT.md
+independent_review: PASS_WITH_FINDINGS
+independent_review_artifact: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/INDEPENDENT_REVIEW_R1.md
+d7f_count_correction: MAIN_THREAD_AUTHORIZED_APPLIED_REVERIFIED
+phase_p_readiness: REVIEWED_PASS_WITH_FINDINGS
+phase_p_review_artifact: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/PHASE_P_INDEPENDENT_READINESS_REVIEW_R1.md
+phase_p_readiness_record: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/PHASE_P_PRE_EXECUTE_READINESS_R1.md
+phase_p_scope: P01_P09_IMPLEMENTATION_TESTS_READINESS
+phase_p_production_decoder_cal_val_calls: 0
+x1_x4_authorization_record: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X1_X4_AUTHORIZATION_A1.md
+x1_x4_authorization_scope: ONE_SERIAL_ATTEMPT_EACH_WITH_INTERPHASE_INDEPENDENT_REVIEW
+x1_x4_authorization_granted: true
+x1_x4_authorization_consumed: ALL_CONSUMED_X1_X2_X3_X4_EXECUTED
+a1_preexecute_record: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/A1_X1_X4_AUTHORIZATION_RECORD_R1.md
+x1_authorization_consumed: true
+x1_rerun_authorization_consumed: true
+x1_terminal: X1_PROVENANCE_PROBE_SUCCEEDED
+x1_process_starts: 1
+x1_decoder_calls: 1
+x1_rerun_process_starts: 1
+x1_rerun_decoder_calls: 1
+x1_cumulative_process_starts: 2
+x1_cumulative_decoder_calls: 2
+x1_decoder_executed: true
+x1_failure_review_artifact: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X1_FAILURE_VERIFICATION_R1.md
+x1_operator_return: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X1_OPERATOR_RETURN_R1.md
+x1_fixture_fix: REVIEWED_PASS_WITH_FINDINGS
+x1_fix_review_artifact: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X1_FIX_IMPLEMENTATION_REVIEW_R1.md
+x1_rerun_authorization: CONSUMED_RERUN_EXECUTED_2026-09-13
+x1_rerun_operator_return: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X1_OPERATOR_RETURN_R2.md
+x1_rerun_verification_artifact: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X1_RERUN_VERIFICATION_REVIEW_R1.md
+x2_authorization_consumed: true
+x2_process_starts: 1
+x2_decoder_calls: 384
+x2_root: workspace/d7_r1_multigraph_20260913_r1
+x2_terminal: GRAPH_SENSITIVITY_OBSERVED
+x2_operator_return: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X2_OPERATOR_RETURN_R1.md
+x2_pre_result_review: PASS
+x2_pre_result_review_artifact: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X2_PRE_RESULT_REVIEW_R1.md
+a2_remediation_authorization: GRANTED_MAIN_THREAD_2026-09-13
+a2_remediation_authorization_record: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/A2_X2_X4_REMEDIATION_AUTHORIZATION_R1.md
+x3_authorization_consumed: true
+x3_process_starts: 1
+x3_decoder_calls: 472
+x3_selected_records: 156
+x3_reconstruction_calls: 4
+x3_ladder_calls: 468
+x3_root: workspace/d7_r1_reference_ladder_20260913_r1
+x3_terminal: X3_REFERENCE_LADDER_COMPLETED
+x3_operator_return: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X3_OPERATOR_RETURN_R1.md
+x4_authorization_consumed: true
+x4_process_starts: 1
+x4_decoder_calls: 1320
+x4_root: workspace/v72p2d5_g2/20260906_r1
+x4_grade: G2_CURRENT_CONFIGURATION_FAILED
+x4_terminal: G2_CURRENT_CONFIGURATION_FAILED
+x4_operator_return: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X4_OPERATOR_RETURN_R1.md
+x3_pre_result_review: PASS
+x3_pre_result_review_artifact: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X3_PRE_RESULT_REVIEW_R1.md
+x4_pre_result_review: PASS
+x4_pre_result_review_artifact: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X4_PRE_RESULT_REVIEW_R1.md
+x4_preexecute_adjudication: ACCEPTED_AS_IS_WITH_CONDITIONS
+x4_preexecute_adjudication_record: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/X4_PREEXECUTE_ADJUDICATION_R1.md
+next_gate: MAIN_THREAD_ROUTE_DECISION_D7H
+# D14 VR-C additive pointer (2026-09-14, docs only; no historical key rewritten):
+# inference-scope corrigendum for the X4/G2 legacy per-cell-prior configuration.
+g2_prior_config_corrigendum: docs/research_cycles/V72P2D7-ROOT-CAUSE-RESET/G2_PRIOR_CONFIG_CORRIGENDUM_R1.md
+g2_prior_config_inference_scope: SUPERSEDED_AS_N256_FEASIBILITY_EVIDENCE_EXECUTION_RETAINED

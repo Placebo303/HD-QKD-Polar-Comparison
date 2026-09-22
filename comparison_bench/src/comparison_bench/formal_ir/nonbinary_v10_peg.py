@@ -11,6 +11,20 @@ Contents:
   (largest-remainder adjustment to exactly ``m``);
 - ``socket_consistency``: asserts ``sum count_d*d == sum count_j*j``
   (mismatch -> blocker);
+- ``_reconcile_check_counts``: deterministic check-side socket
+  reconciliation (2026-09-20 fix).  The variable-side realization from
+  ``node_view_counts`` is kept as specified; the CHECK-side allocation
+  from ``check_degree_counts`` (independent largest-remainder rounding,
+  off by exactly 1 edge for some lambda/m/n combos) is adjusted to hit
+  the exact variable-side socket total while keeping ``m`` unchanged.
+  Rule: delta 0 -> input returned unchanged (already-consistent inputs
+  are bit-identical); else count transfer within the existing support
+  (move ``|delta|/gap`` checks between the extreme degrees when
+  divisible, preserving the concentrated adjacent-degree shape);
+  fallback single highest-degree check shift by ``delta`` (e.g.
+  single-degree rho).  Donor shortage or a resulting degree < 2 raises
+  ``ValueError`` — the ``socket_consistency`` guard still refuses
+  genuinely non-representable requests;
 - ``peg_construct``: deterministic irregular PEG over GF(1024).  Variable
   sockets are placed in node order; each socket picks the free check that
   maximizes the local girth (BFS distance from the variable), tie-break 1
@@ -19,12 +33,27 @@ Contents:
   (``numpy.random.default_rng(common.v10_seed(
   f"peg_tie:{seed}:v:{v}:s:{socket}"))`` permutation over the sorted tied
   candidates; first element wins — deterministic and unbiased, no hash layer).
+  PEG priority (constructor fix, 2026-09-20): (1) candidates unreachable
+  from the variable (cycle-free, new-component merge) are ALWAYS preferred
+  over reachable (cycle-closing) candidates; (2) among reachable candidates,
+  maximize BFS depth; (3) deterministic tie-break by largest free check
+  degree, then max ACE score (reachable group only), then the seeded-RNG
+  pick over the sorted tied list (exact policy, in this order).
   First-edge placement (no path yet) prefers the largest free degree, then the
   seeded tie-break.  Parallel edges are forbidden by construction (a check
   already adjacent to ``v`` is never re-selected).
-  No eligible check -> failure trial; ``max_trials`` exhausted -> frozen
+  ``max_trials`` is a best-of-N cap: each trial derives its tie-break seed
+  as ``seed + trial`` (trial 1-based: ``seed + (trial - 1)``), every trial
+  runs to completion, and the kept graph is the successful trial with
+  minimum ``four_cycles`` (ties -> lowest trial index); an early stop fires
+  only on ``four_cycles == 0`` (unbeatable).  Failure trials count within
+  the same cap; ``max_trials`` exhausted with no success -> frozen
   failure (``status == "frozen_failure"``).  Edge labels are uniform nonzero
   GF(1024) samples from a frozen seed (validated via GF2mField).
+  ``min_girth`` is the true minimum cycle length over placed edges;
+  unreachable (cycle-free) placements are never girth candidates; a graph
+  with no cycle at all reports ``min_girth=None`` (sentinel meaning
+  "acyclic — no cycle length exists").
 - verification helpers: ``rank_GF1024`` (Gaussian elimination over GF(q)),
   ``syndrome_round_trip``, ``sparse_to_dense`` and ``peg_manifest``
   (construction parameters only).
@@ -125,6 +154,65 @@ def socket_consistency(node_counts: Mapping[Any, Any], check_counts: Mapping[Any
         raise ValueError(
             f"socket mismatch: variable sockets {var_sockets} != check sockets {check_sockets}")
     return var_sockets
+
+
+def _reconcile_check_counts(check_counts: Mapping[Any, Any],
+                            var_sockets: int) -> dict[int, int]:
+    """Deterministic check-side socket reconciliation (2026-09-20 fix).
+
+    Keeps the variable-side realization as specified and adjusts the
+    CHECK-side allocation from :func:`check_degree_counts` (independent
+    largest-remainder rounding, off by exactly 1 edge for some
+    lambda/m/n combos, e.g. L-B 614 vs 615 and L-C 768 vs 769 at
+    n=256/m=47) to hit exactly ``var_sockets`` total sockets while
+    keeping the check count ``m`` unchanged.
+
+    Rule (in order):
+    1. ``delta = var_sockets - check_sockets``; ``delta == 0`` returns
+       the input unchanged (already-consistent inputs are bit-identical).
+    2. Count transfer within the existing support: with extreme degrees
+       ``d_lo < d_hi`` and ``gap = d_hi - d_lo``, if ``delta`` is a
+       multiple of ``gap``, move ``|delta| / gap`` checks from the donor
+       extreme (``d_hi`` when ``delta < 0``, ``d_lo`` when ``delta > 0``)
+       to the other extreme — this preserves the concentrated
+       adjacent-degree support shape.
+    3. Fallback single-check shift: change one check at the highest
+       degree by ``delta`` (deterministic donor); used only when rule 2
+       cannot apply (e.g. single-degree rho or indivisible delta).
+
+    Donor shortage or a resulting check degree < 2 raises
+    ``ValueError``; the :func:`socket_consistency` guard after this step
+    still refuses genuinely non-representable requests (e.g.
+    ``var_sockets < 2 * m``).
+    """
+    counts = {int(degree): int(count) for degree, count in check_counts.items()}
+    total = sum(degree * count for degree, count in counts.items())
+    delta = int(var_sockets) - total
+    if delta == 0:
+        return counts
+    extremes = sorted(counts)
+    d_lo, d_hi = extremes[0], extremes[-1]
+    if d_hi != d_lo:
+        gap = d_hi - d_lo
+        if delta % gap == 0:
+            need = abs(delta) // gap
+            if delta < 0 and counts[d_hi] >= need:
+                counts[d_hi] -= need
+                counts[d_lo] += need
+                return counts
+            if delta > 0 and counts[d_lo] >= need:
+                counts[d_lo] -= need
+                counts[d_hi] += need
+                return counts
+    if counts[d_hi] < 1 or d_hi + delta < 2:
+        raise ValueError(
+            f"socket reconciliation impossible: variable sockets {int(var_sockets)} "
+            f"vs check sockets {total} (delta {delta})")
+    counts[d_hi] -= 1
+    counts[d_hi + delta] = counts.get(d_hi + delta, 0) + 1
+    if counts[d_hi] == 0:
+        del counts[d_hi]
+    return counts
 
 
 # --------------------------------------------------------------------------- #
@@ -279,11 +367,18 @@ def peg_construct(n: int, m: int, lambda_edge: Mapping[Any, Any],
                   edge_label_seed: int | None = None) -> dict[str, Any]:
     """Deterministic irregular PEG construction over GF(1024).
 
+    Degree realization: variable side via ``node_view_counts`` (kept as
+    specified); check side via ``check_degree_counts`` plus the
+    deterministic ``_reconcile_check_counts`` adjustment to the exact
+    variable-side socket total (no-op for already-consistent inputs —
+    their constructions are bit-identical); ``socket_consistency``
+    remains the fail-closed guard for non-representable requests.
+
     Returns a dict with ``status`` ("ok" or "frozen_failure"), ``triples``
     (sorted ``(row, col, coeff)`` list), ``n``, ``m``, ``trials_used`` and
     diagnostics (degree sequences, socket totals, parallel-edge count, rank,
-    min girth).  On trial-cap exhaustion the construction returns
-    ``frozen_failure`` — never a partial success.
+    min girth, four-cycle count).  On trial-cap exhaustion the construction
+    returns ``frozen_failure`` — never a partial success.
     """
     if isinstance(n, bool) or not isinstance(n, Integral) or int(n) < 1 \
             or isinstance(m, bool) or not isinstance(m, Integral) or int(m) < 1:
@@ -299,6 +394,8 @@ def peg_construct(n: int, m: int, lambda_edge: Mapping[Any, Any],
         raise ValueError("field must be a pinned GF2mField")
     var_counts = node_view_counts(lambda_edge, n)
     check_counts = check_degree_counts(rho_edge, m)
+    var_sockets = sum(int(degree) * int(count) for degree, count in var_counts.items())
+    check_counts = _reconcile_check_counts(check_counts, var_sockets)
     total_sockets = socket_consistency(var_counts, check_counts)
     edge_seed = common.v10_seed(f"peg_labels:{int(seed)}") if edge_label_seed is None \
         else int(edge_label_seed)
@@ -336,66 +433,28 @@ def peg_construct(n: int, m: int, lambda_edge: Mapping[Any, Any],
     def free_checks() -> list[int]:
         return [c for c in range(m) if check_free[c] > 0]
 
-    def select_check(variable: int, socket: int) -> int | None:
-        free = free_checks()
-        if not free:
-            return None
-        existing = set(var_adj[variable])
-        candidates = [c for c in free if check_node(c) not in existing]
-        if not candidates:
-            return None
-        if not var_adj[variable]:
-            # First edge of the variable: no path exists; prefer the largest
-            # free degree, then the deterministic seeded-RNG tie-break.
-            best_free = max(check_free[c] for c in candidates)
-            group = [c for c in candidates if check_free[c] == best_free]
-            if len(group) == 1:
-                return group[0]
-            group.sort()
-            return _tie_pick(seed, variable, socket, group)
-        # BFS from the variable over the current partial graph (node ids).
-        distances: dict[int, int] = {variable: 0}
-        parents: dict[int, int | None] = {variable: None}
-        frontier = deque([variable])
-        while frontier:
-            node = frontier.popleft()
-            neighbours = var_adj[node] if node < n else check_adj[node]
-            for other in neighbours:
-                if other not in distances:
-                    distances[other] = distances[node] + 1
-                    parents[other] = node
-                    frontier.append(other)
-        reachable = [c for c in candidates if check_node(c) in distances]
-        if not reachable:
-            # Component exhausted: all remaining free checks are equally
-            # distant (no path); prefer largest free degree, then seeded
-            # tie-break.
-            best_free = max(check_free[c] for c in candidates)
-            group = [c for c in candidates if check_free[c] == best_free]
-            if len(group) == 1:
-                return group[0]
-            group.sort()
-            return _tie_pick(seed, variable, socket, group)
-        max_depth = max(distances[check_node(c)] for c in reachable)
-        group = [c for c in reachable if distances[check_node(c)] == max_depth]
-        if len(group) > 1:
-            scores: dict[int, float] = {}
-            for c in group:
-                scores[c] = _ace_score(variable, check_node(c), parents, distances,
-                                       var_degree_of, check_degree_of, n)
-            best_score = max(scores.values())
-            group = [c for c in group if scores[c] == best_score]
-        if len(group) == 1:
-            return group[0]
-        group.sort()
-        return _tie_pick(seed, variable, socket, group)
+    def select_check(variable: int, socket: int, tie_seed: int) -> int | None:
+        return _select_check(n, m, var_adj, check_adj, check_free,
+                             var_degree_of, check_degree_of,
+                             int(variable), int(socket), int(tie_seed))
 
+    # D3 fix (constructor rework 2026-09-20): deterministic best-of-N.
+    # Every trial runs the full placement with a per-trial tie-break seed
+    # ``tie_seed = seed + (trial - 1)`` (trial 1-based, so trial 1 replays
+    # the legacy single-trial stream exactly).  The kept graph is the
+    # successful trial with minimum four-cycle count (ties -> lowest trial
+    # index).  An early stop fires only on four_cycles == 0 (unbeatable).
+    # Failure trials count within the same ``max_trials`` cap.
+    best_triples: list[tuple[int, int, int]] = []
+    best_girth: int | None = None
+    best_four: int | None = None
     trials_used = 0
     status = "frozen_failure"
     triples: list[tuple[int, int, int]] = []
     min_girth: int | None = None
-    while trials_used < int(max_trials):
-        trials_used += 1
+    for trial in range(1, int(max_trials) + 1):
+        trials_used = trial
+        tie_seed = int(seed) + (trial - 1)
         var_sockets = {int(v): var_degree_of[v] for v in range(n)}
         check_free = {int(c): check_degree_of[c] for c in range(m)}
         var_adj = {int(v): [] for v in range(n)}
@@ -405,26 +464,37 @@ def peg_construct(n: int, m: int, lambda_edge: Mapping[Any, Any],
         failed = False
         for variable in range(n):
             for socket in range(var_sockets[variable]):
-                check = select_check(variable, socket)
+                check = select_check(variable, socket, tie_seed)
                 if check is None:
                     failed = True
                     break
-                # local girth of the new edge: distance + 1 when a path exists.
+                # D2 fix: local girth of the new edge is distance + 1 ONLY
+                # when a path already exists (distance > 0).  Unreachable
+                # (distance -1, cycle-free merge) is NEVER a girth
+                # candidate.  A graph with no cycle at all keeps
+                # min_girth=None (sentinel: "acyclic").
                 existing = set(var_adj[variable])
                 if existing:
                     distance = _bfs_distance(variable, check_node(check), n, var_adj, check_adj)
-                    girth = distance + 1
-                    min_girth = girth if min_girth is None else min(min_girth, girth)
+                    if distance > 0:
+                        girth = distance + 1
+                        min_girth = girth if min_girth is None else min(min_girth, girth)
                 var_adj[variable].append(check_node(check))
                 check_adj[check_node(check)].append(variable)
                 check_free[check] -= 1
                 triples.append((variable, check, 0))
             if failed:
                 break
-        if not failed and len(triples) == total_sockets:
-            status = "ok"
-            break
-    if status != "ok":
+        if failed or len(triples) != total_sockets:
+            continue
+        four = _count_four_cycles_var_check(triples)
+        if best_four is None or four < best_four:
+            best_four = four
+            best_triples = list(triples)
+            best_girth = min_girth
+            if best_four == 0:
+                break
+    if best_four is None:
         return {
             "status": "frozen_failure",
             "triples": [], "n": n, "m": m, "trials_used": trials_used,
@@ -433,6 +503,9 @@ def peg_construct(n: int, m: int, lambda_edge: Mapping[Any, Any],
             "rank": None, "parallel_edges": None,
             "reason": f"no eligible check placement within {int(max_trials)} trials",
         }
+    status = "ok"
+    triples = best_triples
+    min_girth = best_girth
 
     # Edge labels: uniform nonzero GF(1024) samples from the frozen seed.
     labeled: list[tuple[int, int, int]] = []
@@ -446,16 +519,121 @@ def peg_construct(n: int, m: int, lambda_edge: Mapping[Any, Any],
     parallel_edges = _parallel_edge_count(labeled)
     dense = sparse_to_dense(labeled, n, m, field)
     rank = rank_GF1024(field, dense.tolist())
+    four_cycles = _count_four_cycles_var_check(
+        [(col, row) for row, col, _ in labeled])
     return {
         "status": "ok",
         "triples": labeled, "n": n, "m": m, "trials_used": trials_used,
         "max_trials": int(max_trials), "seed": int(seed),
         "edge_label_seed": edge_seed,
         "total_sockets": total_sockets, "min_girth": min_girth,
+        "four_cycles": four_cycles,
         "rank": rank, "parallel_edges": parallel_edges,
         "var_counts": {int(k): int(v) for k, v in var_counts.items()},
         "check_counts": {int(k): int(v) for k, v in check_counts.items()},
     }
+
+
+def _select_check(n: int, m: int,
+                  var_adj: Mapping[int, Sequence[int]],
+                  check_adj: Mapping[int, Sequence[int]],
+                  check_free: Mapping[int, int],
+                  var_degree_of: Mapping[int, int],
+                  check_degree_of: Mapping[int, int],
+                  variable: int, socket: int, tie_seed: int) -> int | None:
+    """One PEG edge decision (module-level core; closure-free for testing).
+
+    Priority (exact tie-break policy, in order): (1) unreachable
+    (cycle-free) candidates always beat reachable ones — among them, prefer
+    the largest free check degree, then the seeded-RNG pick over the sorted
+    tied list; (2) among reachable candidates, maximize BFS depth, then
+    largest free degree, then max ACE score, then the seeded-RNG pick;
+    (3) first-edge / all-unreachable placements use largest free degree,
+    then the seeded-RNG pick.  Parallel edges are never selected.
+    """
+    variable, socket, tie_seed = int(variable), int(socket), int(tie_seed)
+    free = [c for c in range(m) if check_free[c] > 0]
+    if not free:
+        return None
+
+    def check_node(check: int) -> int:
+        return n + int(check)
+
+    existing = set(var_adj[variable])
+    candidates = [c for c in free if check_node(c) not in existing]
+    if not candidates:
+        return None
+    if not var_adj[variable]:
+        best_free = max(check_free[c] for c in candidates)
+        group = [c for c in candidates if check_free[c] == best_free]
+        if len(group) == 1:
+            return group[0]
+        group.sort()
+        return _tie_pick(tie_seed, variable, socket, group)
+    distances: dict[int, int] = {variable: 0}
+    parents: dict[int, int | None] = {variable: None}
+    frontier: deque[int] = deque([variable])
+    while frontier:
+        node = frontier.popleft()
+        neighbours = var_adj[node] if node < n else check_adj[node]
+        for other in neighbours:
+            if other not in distances:
+                distances[other] = distances[node] + 1
+                parents[other] = node
+                frontier.append(other)
+    # D1: unreachable (cycle-free merge) beats any reachable candidate.
+    unreachable = [c for c in candidates if check_node(c) not in distances]
+    if unreachable:
+        best_free = max(check_free[c] for c in unreachable)
+        group = [c for c in unreachable if check_free[c] == best_free]
+        if len(group) == 1:
+            return group[0]
+        group.sort()
+        return _tie_pick(tie_seed, variable, socket, group)
+    reachable = [c for c in candidates if check_node(c) in distances]
+    if not reachable:
+        best_free = max(check_free[c] for c in candidates)
+        group = [c for c in candidates if check_free[c] == best_free]
+        if len(group) == 1:
+            return group[0]
+        group.sort()
+        return _tie_pick(tie_seed, variable, socket, group)
+    max_depth = max(distances[check_node(c)] for c in reachable)
+    group = [c for c in reachable if distances[check_node(c)] == max_depth]
+    if len(group) > 1:
+        best_free = max(check_free[c] for c in group)
+        group = [c for c in group if check_free[c] == best_free]
+    if len(group) > 1:
+        scores: dict[int, float] = {}
+        for c in group:
+            scores[c] = _ace_score(variable, check_node(c), parents,
+                                   distances, var_degree_of,
+                                   check_degree_of, n)
+        best_score = max(scores.values())
+        group = [c for c in group if scores[c] == best_score]
+    if len(group) == 1:
+        return group[0]
+    group.sort()
+    return _tie_pick(tie_seed, variable, socket, group)
+
+
+def _count_four_cycles_var_check(triples: Sequence[Sequence[int]]) -> int:
+    """Count 4-cycles over ``(variable, check)`` triples (pre-label order).
+
+    Each 4-cycle {v1,v2,c1,c2} is counted once: for every check pair
+    co-occurring at ``k`` variables, add C(k,2).  Deterministic.
+    """
+    pair_counts: dict[tuple[int, int], int] = {}
+    var_checks: dict[int, list[int]] = {}
+    for variable, check, *_ in triples:
+        var_checks.setdefault(int(variable), []).append(int(check))
+    for checks in var_checks.values():
+        ordered = sorted(set(checks))
+        for i in range(len(ordered)):
+            for j in range(i + 1, len(ordered)):
+                key = (ordered[i], ordered[j])
+                pair_counts[key] = pair_counts.get(key, 0) + 1
+    return sum(k * (k - 1) // 2 for k in pair_counts.values())
 
 
 def _bfs_distance(source: int, target: int, n: int,

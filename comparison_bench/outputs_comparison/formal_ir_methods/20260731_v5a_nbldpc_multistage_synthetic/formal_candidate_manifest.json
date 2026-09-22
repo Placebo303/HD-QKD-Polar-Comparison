@@ -1,0 +1,8 @@
+{
+  "method": "nbldpc_formal_v5a_multistage",
+  "policies": [
+    "nbldpc_v5a_ir56",
+    "nbldpc_v5a_ir48"
+  ],
+  "v3_codebook_manifest_id": "ed221b1bc2cec2dd326dfa1ea9e31c2395004819655a376b899827e5f04d6c78"
+}

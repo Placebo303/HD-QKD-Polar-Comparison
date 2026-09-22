@@ -1,0 +1,200 @@
+{
+  "head": "73bb21669c1b76039a6981151d8cc0008dc778d0",
+  "branch": "formal-ir-mainline",
+  "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
+  "lifecycle": "DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN",
+  "per_source": {
+    "1M": {
+      "sid": "20260123_1M_600k_0dB",
+      "delay_used_ps": -50,
+      "peak": null,
+      "channel": null,
+      "sidecar_persisted": {
+        "channels": {
+          "A": 1,
+          "B": 5
+        },
+        "delay_used_ps": -50,
+        "peak_center_ps": null,
+        "peak_sigma_ps": null,
+        "peak_to_bg": null,
+        "corr_argmax": null,
+        "corr_bins": 16384,
+        "gate_width_ps": 200,
+        "pairing_threshold_ps": 40000,
+        "frame_start_ps": -50,
+        "frame_anchor": "peak_center",
+        "mapping": "legacy_v1",
+        "wrap_rule": "floor_div",
+        "frame_period_ps": 204800
+      },
+      "timing_contract_verified": false,
+      "routing_contract_verified": false,
+      "p2bg_status": "UNKNOWN",
+      "p2bg_assessed": false,
+      "p2bg_value": null,
+      "calibration_frames": [
+        7,
+        8,
+        9,
+        10,
+        15,
+        16,
+        17,
+        18
+      ],
+      "calibration_starts": [
+        7,
+        15
+      ],
+      "calibration_blocks": 2,
+      "zero_overlap_verified": true,
+      "in_range": true,
+      "F": 2130,
+      "K": 2127,
+      "calibration_rate": 0.42431640625,
+      "calibration_nll_bits_per_symbol": 22.67439284109674,
+      "calibration_q_mass_on_p_zero": 0.5634765625,
+      "calibration_delta_mass_0_pm1": 0.443359375,
+      "reasons": [
+        "peak_shape not ok sigma None",
+        "timing |peak None - delay -50| >=50 or sign mismatch",
+        "channel missing -> routing INCOMPLETE"
+      ],
+      "calibration_pass": false,
+      "corr_error": "INCOMPLETE TimeTagger not installed"
+    },
+    "1p5M": {
+      "sid": "20260107_PPLN_1p5M",
+      "delay_used_ps": 50,
+      "peak": null,
+      "channel": null,
+      "sidecar_persisted": {
+        "channels": {
+          "A": 1,
+          "B": 5
+        },
+        "delay_used_ps": 50,
+        "peak_center_ps": null,
+        "peak_sigma_ps": null,
+        "peak_to_bg": null,
+        "corr_argmax": null,
+        "corr_bins": 16384,
+        "gate_width_ps": 200,
+        "pairing_threshold_ps": 40000,
+        "frame_start_ps": 50,
+        "frame_anchor": "peak_center",
+        "mapping": "legacy_v1",
+        "wrap_rule": "floor_div",
+        "frame_period_ps": 204800
+      },
+      "timing_contract_verified": false,
+      "routing_contract_verified": false,
+      "p2bg_status": "UNKNOWN",
+      "p2bg_assessed": false,
+      "p2bg_value": null,
+      "calibration_frames": [
+        7,
+        8,
+        9,
+        10,
+        15,
+        16,
+        17,
+        18
+      ],
+      "calibration_starts": [
+        7,
+        15
+      ],
+      "calibration_blocks": 2,
+      "zero_overlap_verified": true,
+      "in_range": true,
+      "F": 5125,
+      "K": 5122,
+      "calibration_rate": 0.3828125,
+      "calibration_nll_bits_per_symbol": 24.38210965378595,
+      "calibration_q_mass_on_p_zero": 0.60693359375,
+      "calibration_delta_mass_0_pm1": 0.3955078125,
+      "reasons": [
+        "peak_shape not ok sigma None",
+        "timing |peak None - delay 50| >=50 or sign mismatch",
+        "channel missing -> routing INCOMPLETE"
+      ],
+      "calibration_pass": false,
+      "corr_error": "INCOMPLETE TimeTagger not installed"
+    },
+    "2M": {
+      "sid": "20260123_2M_1p2M_0dB",
+      "delay_used_ps": -50,
+      "peak": null,
+      "channel": null,
+      "sidecar_persisted": {
+        "channels": {
+          "A": 1,
+          "B": 5
+        },
+        "delay_used_ps": -50,
+        "peak_center_ps": null,
+        "peak_sigma_ps": null,
+        "peak_to_bg": null,
+        "corr_argmax": null,
+        "corr_bins": 16384,
+        "gate_width_ps": 200,
+        "pairing_threshold_ps": 40000,
+        "frame_start_ps": -50,
+        "frame_anchor": "peak_center",
+        "mapping": "legacy_v1",
+        "wrap_rule": "floor_div",
+        "frame_period_ps": 204800
+      },
+      "timing_contract_verified": false,
+      "routing_contract_verified": false,
+      "p2bg_status": "UNKNOWN",
+      "p2bg_assessed": false,
+      "p2bg_value": null,
+      "calibration_frames": [
+        7,
+        8,
+        9,
+        10,
+        15,
+        16,
+        17,
+        18
+      ],
+      "calibration_starts": [
+        7,
+        15
+      ],
+      "calibration_blocks": 2,
+      "zero_overlap_verified": true,
+      "in_range": true,
+      "F": 5513,
+      "K": 5510,
+      "calibration_rate": 0.26953125,
+      "calibration_nll_bits_per_symbol": 28.79272632518372,
+      "calibration_q_mass_on_p_zero": 0.71875,
+      "calibration_delta_mass_0_pm1": 0.28662109375,
+      "reasons": [
+        "peak_shape not ok sigma None",
+        "timing |peak None - delay -50| >=50 or sign mismatch",
+        "channel missing -> routing INCOMPLETE"
+      ],
+      "calibration_pass": false,
+      "corr_error": "INCOMPLETE TimeTagger not installed"
+    }
+  },
+  "overall": "FAIL_NEED_FIX",
+  "overall_reasons": [
+    "1M FAIL: timing False routing False rate 0.42431640625 zero_overlap True p2bg UNKNOWN reasons ['peak_shape not ok sigma None', 'timing |peak None - delay -50| >=50 or sign mismatch', 'channel missing -> routing INCOMPLETE']",
+    "1p5M FAIL: timing False routing False rate 0.3828125 zero_overlap True p2bg UNKNOWN reasons ['peak_shape not ok sigma None', 'timing |peak None - delay 50| >=50 or sign mismatch', 'channel missing -> routing INCOMPLETE']",
+    "2M FAIL: timing False routing False rate 0.26953125 zero_overlap True p2bg UNKNOWN reasons ['peak_shape not ok sigma None', 'timing |peak None - delay -50| >=50 or sign mismatch', 'channel missing -> routing INCOMPLETE']"
+  ],
+  "forbidden": [
+    "DO NOT rerun corrected pipeline on original 90",
+    "DO NOT tune H1/Lane C/Δ8/decoder",
+    "Zero decoder"
+  ],
+  "note": "unique delay -50/+50/-50 not cherry-picked; |peak-delay|<50; frac_B>=40%; p2bg>1000 per-source HEALTHY/PARTIAL/LOW not hard shared; 8-16 frames zero-overlap with V55; calibration_pass only if timing+routing+rate>60% + zero_overlap"
+}

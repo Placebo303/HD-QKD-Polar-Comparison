@@ -1,0 +1,1 @@
+scripts/v72p2d7_gf32_easy_regime.py --out-root workspace/d7_b_easy_regime_c605d1e6-8577-4c52-a865-12500fc8c964

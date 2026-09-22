@@ -1,0 +1,81 @@
+{
+  "workstream": "W3",
+  "decoder_calls": 0,
+  "answers": {
+    "Q1_lambda_identity": {
+      "form": "scalar total concentration per Bob column",
+      "formula": "P(a|b)=(counts[a,b]+lam*p_global[a])/(n_b[b]+lam)",
+      "per_cell_pseudocount_NO": true,
+      "scale_note": "lam=137.38 is added ONCE per column (distributed by p_global), NOT per cell",
+      "selection": "D4R2 inner 3-fold CV on F joint CE, grid30 logspace(-2,3); all 4 outer folds selected 137.3823795883264",
+      "applied_in_consumer_as": "per-cell pseudocount sm=counts+lam (140679.56 added per column)"
+    },
+    "Q2_scope_match": {
+      "alphabet": "same 1024 symbols, symbol=low+32*high, U1=high, U2=low",
+      "axes": "same (Alice,Bob), axis0 Alice; chain-split maxerr 2.2e-16",
+      "population": "same CAL702..1725 262144 symbols, session 1M",
+      "probability_object_MATCH": false,
+      "mismatch": "estimation smooths with total-concentration backoff; application smooths with per-cell pseudocount",
+      "evaluation_MISMATCH": "D4 CE = outer-TEST held-out NLL (honest); consumer CE = in-sample channel entropy of the smoothed table (AUDIT_FLOOR 1e-300)"
+    },
+    "Q3_domination": {
+      "observed_per_col_mean": 256.0,
+      "added_per_col_consumer": 140679.55669844622,
+      "added_per_col_d4": 137.3823795883264,
+      "consumer_prior_frac": 0.998183566972047,
+      "d4_prior_frac": 0.3492336889417789,
+      "dominance_ratio_consumer": 549.5295183533055,
+      "overwhelms_by_construction": true
+    },
+    "Q4_reproducibility": {
+      "d4_frozen": {
+        "ce_l1": 3.814742,
+        "ce_l2": 3.347605,
+        "ce_joint": 7.162347
+      },
+      "consumer_from_accepted": {
+        "ce_l1": 4.999985322023371,
+        "ce_l2": 4.999659312231358,
+        "ce_joint": 9.999644634254839
+      },
+      "backoff_same_counts_same_functional": {
+        "ce_l1": 4.286720430201375,
+        "ce_l2": 3.222719884634378,
+        "ce_joint": 7.5094403148357545
+      },
+      "reproducible": false,
+      "verdict": "D4 values are NOT reproducible through the accepted consumer; same counts + same channel-CE functional with the D4 backoff return to the D4 family (7.51 vs 7.16 joint)."
+    },
+    "Q5_layer_priors": {
+      "axis_semantics_correct": true,
+      "p1_shape": [
+        32,
+        1024
+      ],
+      "p2_shape": [
+        32,
+        1024,
+        32
+      ],
+      "accepted_p1_col_entropy_mean": 4.99998555060478,
+      "backoff_p1_col_entropy_mean": 4.291256503729591,
+      "verdict": "marginals/conditionals are the intended ones OF THE TABLE GIVEN; the table itself is destroyed (near-uniform), so both layer priors sit at ~1/32 mass on truth."
+    }
+  },
+  "mi_contrast_bits": {
+    "accepted": {
+      "H_A": 9.999999964895597,
+      "H_AgB": 9.999644634254839,
+      "I": 0.0003553306407582113
+    },
+    "backoff": {
+      "H_A": 9.992509064402794,
+      "H_AgB": 7.5094403148357545,
+      "I": 2.48306874956704
+    }
+  },
+  "d4_g_reference_joint": 9.999677136099834,
+  "d4_F_gain_over_G_bits": 2.837329706141049,
+  "wall_s": 0.1782863000407815,
+  "rss_bytes": 85442560
+}

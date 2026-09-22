@@ -1,0 +1,71 @@
+{
+  "schema": "v70_manifest_v1",
+  "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
+  "head": "9825d0b336042ad4bf2b26ed31b7fa09a04de620",
+  "data_sha": "84d62779",
+  "V71_not_started": true,
+  "frozen_body": {
+    "n": 1024,
+    "q": 1024,
+    "GF": "GF32 poly37",
+    "H1": "16x1024 rank16 80b",
+    "U_natural": "32*U1+U2",
+    "10bit": "bit_i(s)=(s>>i)&1 LSB->MSB",
+    "per_frame": 256,
+    "Lane_C_base": {
+      "1M": 184,
+      "1p5M": 190,
+      "2M": 192
+    },
+    "H_inc": "Delta8",
+    "decoder": "90/1.0 poly37 disabled",
+    "verification": "full-tag canonical 64b",
+    "leak": "sum w_i*m_i+64",
+    "materialization": "legacy_v1",
+    "successor_v71_not_started": true
+  },
+  "guards": {
+    "R70-01": true,
+    "R70-02": true,
+    "R70-03": true,
+    "R70-04": true,
+    "R70-05": true,
+    "R70-06": true,
+    "R70-07": true,
+    "R70-08": true,
+    "R70-09": true,
+    "R70-10": true
+  },
+  "overall": "V70_OVERALL_PARTIAL_SESSIONS_FEASIBLE",
+  "counts": {
+    "V70_EVIDENCE_INCOMPLETE": 0,
+    "V70_MODEL_NOT_STABLE": 0,
+    "V70_SOFT_JOINT_FEASIBLE": 1,
+    "V70_SOFT_JOINT_MARGINAL": 1,
+    "V70_SOFT_JOINT_HEAVY": 0,
+    "V70_SOFT_JOINT_NO_INFORMATION_MARGIN": 1
+  },
+  "used_val_in_selection": false,
+  "used_test": false,
+  "no_run_01": true,
+  "orthogonal_counts": {
+    "V70_EVIDENCE_INCOMPLETE": 0,
+    "V70_MODEL_NOT_STABLE": 0,
+    "V70_SOFT_JOINT_FEASIBLE": 1,
+    "V70_SOFT_JOINT_MARGINAL": 1,
+    "V70_SOFT_JOINT_HEAVY": 0,
+    "V70_SOFT_JOINT_NO_INFORMATION_MARGIN": 1
+  },
+  "no_information_margin_count": 1,
+  "feasible_count": 1,
+  "marginal_count": 1,
+  "provenance_head": "9825d0b336042ad4bf2b26ed31b7fa09a04de620",
+  "provenance_note": "provenance 9825d0b, not d6f590ac",
+  "family": {
+    "step": 8,
+    "tail_9519": 7,
+    "tail_10047": 7,
+    "achieved_equals_requested": true,
+    "matrix_for_11169": "NOT_APPLICABLE"
+  }
+}

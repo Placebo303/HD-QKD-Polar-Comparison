@@ -1,0 +1,36 @@
+{
+  "schema": "v67_acquisition_inventory_v1",
+  "data_sha": "84d62779",
+  "pairs_root": "comparison_bench/outputs_comparison/v55_intake_20260828/pairs",
+  "entries": [
+    {
+      "session_id": "20260123_1M_600k_0dB",
+      "acquisition_id": "20260123_1M_600k_0dB",
+      "source_label": "1M",
+      "acquisition_dedup_key": "(1M,20260123_1M_600k_0dB)",
+      "provenance": "comparison_bench/outputs_comparison/v55_intake_20260828/pairs/20260123_1M_600k_0dB/pairs.parquet",
+      "acquisition_time": "20260123_174534",
+      "frames_total": 2130
+    },
+    {
+      "session_id": "20260107_PPLN_1p5M",
+      "acquisition_id": "20260107_PPLN_1p5M",
+      "source_label": "1p5M",
+      "acquisition_dedup_key": "(1p5M,20260107_PPLN_1p5M)",
+      "provenance": "comparison_bench/outputs_comparison/v55_intake_20260828/pairs/20260107_PPLN_1p5M/pairs.parquet",
+      "acquisition_time": "20260107_174222",
+      "frames_total": 5125
+    },
+    {
+      "session_id": "20260123_2M_1p2M_0dB",
+      "acquisition_id": "20260123_2M_1p2M_0dB",
+      "source_label": "2M",
+      "acquisition_dedup_key": "(2M,20260123_2M_1p2M_0dB)",
+      "provenance": "comparison_bench/outputs_comparison/v55_intake_20260828/pairs/20260123_2M_1p2M_0dB/pairs.parquet",
+      "acquisition_time": "20260123_175008",
+      "frames_total": 5513
+    }
+  ],
+  "dedup_verified": true,
+  "total_acquisitions": 3
+}

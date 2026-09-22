@@ -1,0 +1,7 @@
+cycle_id: V37P0
+state: REVIEW_ACCEPTED
+base_sha: dad06e7fe7784245923c0e2d10766e450afb7175
+accepted_implementation_sha: a258c5a7549f33f43a32b193b134f1ca0df15aea
+development_execution_authorized: false
+formal_execution_authorized: false
+scientific_promotion: false

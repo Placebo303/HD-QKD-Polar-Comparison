@@ -1,0 +1,30 @@
+{
+  "old_completion": "comparison_bench/outputs_comparison/formal_ir_methods/v65ar2_pipeline/run_02/v65ar2_phase_r_completion.json",
+  "superseded_by": "comparison_bench/outputs_comparison/formal_ir_methods/v65ar2_pipeline/run_02/v65ar2_phase_r_completion_r2.json",
+  "status": "ENGINEERING_INVALID_CANDIDATE_BINDING",
+  "reason": "candidate binding reused/conflicting sidecar or swapped raw/contract hash binding; Phase R completion v65ar2_phase_r_completion.json is ENGINEERING_INVALID_CANDIDATE_BINDING - superseded by v65ar2_phase_r_completion_r2.json which independently recomputed 2500K/160254 with frozen maps (raw_root_map + contract_map) under same binding; not to be confused with predecessor 3a6c4fa ENGINEERING_INVALID_STAGE0_GATE_MISAPPLICATION (Stage0 misapplied hierarchical_estimate/CE/lambda/m gates on 8-frame, see INVALID_RESULT_NOTE.md)",
+  "binding": {
+    "head": "fea852baf16522be78627146bbb4b1e4887f223a",
+    "origin": "fea852baf16522be78627146bbb4b1e4887f223a",
+    "accepted_plan": "70f9ed8ece53704374d37810a163a519e57be6e9",
+    "binding_ok": true
+  },
+  "head": "fea852ba",
+  "origin": "fea852baf16522be78627146bbb4b1e4887f223a",
+  "accepted_plan": "70f9ed8ece53704374d37810a163a519e57be6e9",
+  "predecessor_invalid": {
+    "sha": "3a6c4fa",
+    "short": "3a6c4fac255c7094a357468140129c8149f6fa9",
+    "status": "ENGINEERING_INVALID_STAGE0_GATE_MISAPPLICATION",
+    "description": "Stage0 misapplied hierarchical_estimate/CE1/CE2/lambda/unseen/m gates on 8-frame (4+4); plan-frozen Stage0 is materialization-only; no elimination effect on 162148",
+    "scope": "run_02/v65ar2_pipeline_result.json @ 3a6c4fa"
+  },
+  "current_invalid": {
+    "file": "run_02/v65ar2_phase_r_completion.json",
+    "status": "ENGINEERING_INVALID_CANDIDATE_BINDING",
+    "description": "Phase R completion reused/conflicting sidecar or swapped raw/contract hash binding for 2500K/160254; decoder-free additive binding violated",
+    "remedy": "superseded by run_02/v65ar2_phase_r_completion_r2.json which independently recomputed both candidates with frozen maps (workspace/v65ar2_raw_root_map_3a6c4fa.json + workspace/v65ar2_contract_map_3a6c4fa.json), decoder-free, no data overwrite"
+  },
+  "no_recomputation": true,
+  "note": "此 INVALID_NOTE 仅修正指针与绑定说明，不重算数据；原 completion 与 r2 数据保持不变"
+}

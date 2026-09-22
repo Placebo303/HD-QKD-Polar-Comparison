@@ -1,0 +1,103 @@
+{
+  "candidate_config_policy": {
+    "candidates": [
+      "cascade_lite",
+      "layered_ldpc_lite"
+    ],
+    "config_sources": [
+      {"path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\configs\\cascade_param_sweep.yaml", "sha256": "e3952f2d171a9e29e1883edb27826c44dcb33cdf9159f8d6553ecdf70ba163ec"},
+      {"path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\configs\\layered_ldpc_param_sweep.yaml", "sha256": "f7a542157ea6b5a1b90a691a0395b6f64ef53e2bfdc33d5c8cb913bed750fad8"}
+    ],
+    "one_global_config_per_candidate": true,
+    "per_point_oracle_selection": false,
+    "selection_order": [
+      "verified success fraction",
+      "failure count",
+      "compatible leakage only within method",
+      "runtime"
+    ],
+    "tune_only_on": "tuning"
+  },
+  "confidence_and_stopping": {
+    "confirmation_frame_cap_per_stratum": 60,
+    "no_adaptive_extension": true,
+    "time_limit": "declared before Phase 3; unset at data lock",
+    "zero_failure_95pct_upper_bound": "1 - 0.05**(1/n); n=60 gives 0.0487"
+  },
+  "counts": {
+    "confirmation_frames": 60,
+    "eligible_frames": 4199,
+    "required_confirmation_frames_per_stratum": 60,
+    "tuning_frames": 60
+  },
+  "created_utc": "2026-07-25T09:27:20+00:00",
+  "decision_rule": {
+    "alpha": 0.05,
+    "no_decision": "zero discordant pairs, p >= 0.05, missing paired outcome, any required stratum under 60 attempted frames, or bounded run incomplete",
+    "primary": "paired independently verified frame success",
+    "test": "exact two-sided binomial test on McNemar discordant pairs"
+  },
+  "domain": {
+    "data_mode": "real_data",
+    "dataset_raw_ser_stratum": {
+      "lower_inclusive": 0.2,
+      "upper_exclusive": 0.3
+    },
+    "dimension": 1024,
+    "frame_len_symbols": 64
+  },
+  "environment": {
+    "git_commit": "71bda20dbe1f663321369a802ac3639d221caf60",
+    "numpy": "2.4.0",
+    "pandas": "2.3.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:13:34) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "locked_split": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\locked_frame_split.csv",
+    "sha256": "915eb3212b801e7a3539d28b1b8de77dff8c2bcb7629fc6e9a08cd4e0fea20cb"
+  },
+  "preprocessing_mapping_verification_contract": {
+    "input_columns": [
+      "alice_symbol",
+      "bob_symbol",
+      "dataset_id",
+      "dimension",
+      "frame_id",
+      "frame_len_symbols",
+      "pair_idx"
+    ],
+    "mapping": "gray for both executable candidates",
+    "preprocessing": "source frame table as stored; no symbol remapping during lock",
+    "success_classifier": "comparison_bench.metrics.success.classify_real_ir_success_row",
+    "verification": "independent per-frame verification; failures retained in attempted denominator"
+  },
+  "policy_artifact": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\initial_global_candidate_config_policy.json",
+    "sha256": "cb9f37f7a5569119b0d313665921872a6d1ca76ff484837d509f4b98d57f182d"
+  },
+  "reserved_output_paths": [
+    "frozen_candidate_configs.json",
+    "confirmation_frame_outcomes.csv",
+    "aggregate_summary.csv",
+    "route_a_compatibility_gate.json",
+    "decision_report.md"
+  ],
+  "schema_version": "final_ir_method_selection_data_lock_v1",
+  "source": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\real_sidecars_frame_batch.parquet",
+    "sha256": "967f569c3b3977cc9846025fc9af9b2faf3aa7d89b4e52e0d0ca804f5ab972cc"
+  },
+  "split": {
+    "confirmation_dataset_ids": [
+      "real_typeii_20db_d1024_bw180_blk0"
+    ],
+    "disjoint": true,
+    "group_disjoint": true,
+    "seed": 20260725,
+    "selection": "numpy PCG64 assigns whole dataset/source groups before sampling sorted composite frame IDs",
+    "tuning_dataset_ids": [
+      "real_typeii_20db_d1024_bw200_blk0"
+    ]
+  }
+}

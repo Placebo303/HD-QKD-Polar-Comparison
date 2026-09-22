@@ -1,0 +1,389 @@
+{
+  "cycle_id": "V52P0",
+  "change_id": "formal-ir-v52-rate-adaptive-l2-rescue",
+  "accepted_plan_sha": "1d66b11917d229b214bd1d8b4255bf6df95c99c8",
+  "branch_ref": "origin/formal-ir-mainline",
+  "execution_scope": "v52_nested_rescue_15_blocks_paired_exactly_once",
+  "mechanism_id": "nested_incremental_l2_rescue_delta8_conditional_harq",
+  "tag_scope": "l2_only",
+  "decoder_setting": [
+    90,
+    1.0
+  ],
+  "delta_m": 8,
+  "leakage": {
+    "per_source": {
+      "1M": {
+        "leak_base": 1064,
+        "leak_joint": 1104,
+        "delta": 40
+      },
+      "1p5M": {
+        "leak_base": 1094,
+        "leak_joint": 1134,
+        "delta": 40
+      },
+      "2M": {
+        "leak_base": 1104,
+        "leak_joint": 1144,
+        "delta": 40
+      }
+    },
+    "leakage_already_accounted": true,
+    "first_pass_success_leak": {
+      "1M": 1064,
+      "1p5M": 1094,
+      "2M": 1104
+    },
+    "rescued_success_leak": {
+      "1M": 1104,
+      "1p5M": 1134,
+      "2M": 1144
+    },
+    "final_failure_leak": {
+      "1M": 1104,
+      "1p5M": 1134,
+      "2M": 1144
+    },
+    "avg_leak_per_source": {
+      "1M": 1096.0,
+      "1p5M": 1126.0,
+      "2M": 1120.0
+    },
+    "avg_overall": 1114.0,
+    "formula": "avg_leak = leak_base + 40*N_rescue_attempted/15",
+    "n_rescue_attempted": 10
+  },
+  "counts": {
+    "first_pass_success": 5,
+    "rescued_by_increment": 7,
+    "final_exact_full": 12,
+    "old_exact_full": 5,
+    "per_source": {
+      "1M": {
+        "first": 1,
+        "rescued": 4,
+        "final": 5,
+        "old": 1,
+        "rescue_attempted": 4
+      },
+      "1p5M": {
+        "first": 1,
+        "rescued": 2,
+        "final": 3,
+        "old": 1,
+        "rescue_attempted": 4
+      },
+      "2M": {
+        "first": 3,
+        "rescued": 1,
+        "final": 4,
+        "old": 3,
+        "rescue_attempted": 2
+      }
+    },
+    "n_blocks": 15,
+    "rescue_rate": 0.7
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": "30-45",
+      "l1": 15,
+      "l2_base": 15,
+      "l2_rescue_max": 15,
+      "l2_max": 30
+    },
+    "decoder_calls_started": {
+      "total": 40,
+      "l1": 15,
+      "l2": 25,
+      "base": 15,
+      "rescue": 10
+    },
+    "decoder_calls_completed": {
+      "total": 40,
+      "l1": 15,
+      "l2": 25,
+      "base": 15,
+      "rescue": 10
+    },
+    "hard_cap": 45
+  },
+  "matrix": {
+    "per_source": {
+      "1M": {
+        "m2": 184,
+        "m_joint": 192,
+        "delta_m": 8,
+        "joint_rank": 192,
+        "nested": true,
+        "independence": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc": 96
+      },
+      "1p5M": {
+        "m2": 190,
+        "m_joint": 198,
+        "delta_m": 8,
+        "joint_rank": 198,
+        "nested": true,
+        "independence": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc": 96
+      },
+      "2M": {
+        "m2": 192,
+        "m_joint": 200,
+        "delta_m": 8,
+        "joint_rank": 200,
+        "nested": true,
+        "independence": 8,
+        "row_max_le16": true,
+        "col_inc_max_le1": true,
+        "E_inc": 96
+      }
+    }
+  },
+  "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh",
+  "held_out_provenance": {
+    "block_windows": {
+      "393001": {
+        "source": "1M",
+        "held_out_ordinal_start": 18,
+        "held_out_ordinal_end": 21,
+        "frame_ids": [
+          1618,
+          1619,
+          1620,
+          1621
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393002": {
+        "source": "1M",
+        "held_out_ordinal_start": 22,
+        "held_out_ordinal_end": 25,
+        "frame_ids": [
+          1622,
+          1623,
+          1624,
+          1625
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393003": {
+        "source": "1M",
+        "held_out_ordinal_start": 46,
+        "held_out_ordinal_end": 49,
+        "frame_ids": [
+          1646,
+          1647,
+          1648,
+          1649
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393004": {
+        "source": "1M",
+        "held_out_ordinal_start": 50,
+        "held_out_ordinal_end": 53,
+        "frame_ids": [
+          1650,
+          1651,
+          1652,
+          1653
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393005": {
+        "source": "1M",
+        "held_out_ordinal_start": 74,
+        "held_out_ordinal_end": 77,
+        "frame_ids": [
+          1674,
+          1675,
+          1676,
+          1677
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393101": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 4,
+        "held_out_ordinal_end": 7,
+        "frame_ids": [
+          2217,
+          2218,
+          2219,
+          2220
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393102": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 8,
+        "held_out_ordinal_end": 11,
+        "frame_ids": [
+          2221,
+          2222,
+          2223,
+          2224
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393103": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 23,
+        "held_out_ordinal_end": 26,
+        "frame_ids": [
+          2236,
+          2237,
+          2238,
+          2239
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393104": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 27,
+        "held_out_ordinal_end": 30,
+        "frame_ids": [
+          2240,
+          2241,
+          2242,
+          2243
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393105": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 31,
+        "held_out_ordinal_end": 34,
+        "frame_ids": [
+          2244,
+          2245,
+          2246,
+          2247
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393201": {
+        "source": "2M",
+        "held_out_ordinal_start": 4,
+        "held_out_ordinal_end": 7,
+        "frame_ids": [
+          2920,
+          2921,
+          2922,
+          2923
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393202": {
+        "source": "2M",
+        "held_out_ordinal_start": 8,
+        "held_out_ordinal_end": 11,
+        "frame_ids": [
+          2924,
+          2925,
+          2926,
+          2927
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393203": {
+        "source": "2M",
+        "held_out_ordinal_start": 12,
+        "held_out_ordinal_end": 15,
+        "frame_ids": [
+          2928,
+          2929,
+          2930,
+          2931
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393204": {
+        "source": "2M",
+        "held_out_ordinal_start": 29,
+        "held_out_ordinal_end": 32,
+        "frame_ids": [
+          2945,
+          2946,
+          2947,
+          2948
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      },
+      "393205": {
+        "source": "2M",
+        "held_out_ordinal_start": 33,
+        "held_out_ordinal_end": 36,
+        "frame_ids": [
+          2949,
+          2950,
+          2951,
+          2952
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh"
+      }
+    },
+    "sampling_mode": "deterministic_four_consecutive_frames_heldout_fresh",
+    "fresh_15": {
+      "1M": [
+        393001,
+        393002,
+        393003,
+        393004,
+        393005
+      ],
+      "1p5M": [
+        393101,
+        393102,
+        393103,
+        393104,
+        393105
+      ],
+      "2M": [
+        393201,
+        393202,
+        393203,
+        393204,
+        393205
+      ]
+    }
+  },
+  "provenance": {
+    "h_inc_det_ids": {
+      "1M": 600001,
+      "1p5M": 600002,
+      "2M": 600003
+    },
+    "deterministic": "single_run_no_seed_search",
+    "joint_rank_nested_independence": "verified"
+  },
+  "terminal_state": "V52_NESTED_RESCUE_COMPLETE",
+  "claim_boundary": [
+    "results support ONLY nested incremental L2 rescue Δ8 on frozen Lane C support/prior/MET n=1024 m2 184/190/192 GF32 poly37 decoder 90/1.0 leak 1064/1094/1104 base 1104/1134/1144 joint conditional only rescue frames +40 avg=base+40*N_attempt/15 total 30-45 hard cap 45 old vs pass1 same decode L2-only 2^-64",
+    "leakage H1-16 includes 64-bit tag f_total=leak/[N(H1+H2)] N=1024 joint rank m2+8 nested independence 8 row≤16 col_inc≤1 deterministic no seed search not V48/V50/V51",
+    "not threshold/SKR/formal qualification/promotion; paired descriptive only Δexact = final_V52 - old (old=base_exact) McNemar b/c descriptive four-way G3' undetected==0"
+  ],
+  "statistics_note": "Descriptive only; sample is 15 blocks paired old vs V52 (15 L1 +15 base +≤15 rescue =30-45 L2 15-30 records). Exact-recovery proportions with n and raw counts; any interval naive uncorrected clustering; no significance."
+}

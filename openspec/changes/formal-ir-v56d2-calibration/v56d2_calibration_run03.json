@@ -1,0 +1,373 @@
+{
+  "head": "73bb21669c1b76039a6981151d8cc0008dc778d0",
+  "branch": "formal-ir-mainline",
+  "data_sha": "84d62779603e62de50ded5182ed65b65d3dc6084",
+  "lifecycle": "DIAGNOSIS_PLAN_READY / DECODE_FORBIDDEN",
+  "revision": "V56D2R1",
+  "provenance_deviation": true,
+  "provenance_note": "src/qkd_io histogram modified to chunk single but SHA still 8d4df35c, src belongs to frozen baseline; result not authoritative; chunk optimization moved to diagnostic inline, small-sample np.array_equal proof PASS (<=1k events, 800+200 bg), src reverted to frozen baseline 8d4df35c HEAD==origin",
+  "provenance_equivalence": {
+    "tested": true,
+    "sample_events": 1000,
+    "method": "synthetic t_A 800 + t_B bg 200, bin100 max819200 chunk256, per-pair vs chunk counts np.array_equal PASS",
+    "counts_equal": true,
+    "src_reverted": true,
+    "head": "8d4df35c57fb168a389f591721b562b2baca5a8f",
+    "origin_head": "8d4df35c57fb168a389f591721b562b2baca5a8f"
+  },
+  "overall": "RESULT_CANDIDATE_WITH_PROVENANCE_DEVIATION",
+  "overall_reasons": [
+    "1M FAIL_NEED_FIX: timing True routing True rate 0.42431640625 zero_overlap True p2bg PARTIAL reasons ['p2bg PARTIAL 708.6 (500-1000) warn but not hard fail', 'routing OK (proportion only reported) frac_A 0.583 frac_B 0.365 other 0.052 uniq {1, 1001, 5}', 'A==B 0.424 <=0.60 not recovered', 'NLL 22.7 still 20-30 range -> true domain issue if timing complete']",
+    "1p5M FAIL_NEED_FIX: timing True routing True rate 0.3828125 zero_overlap True p2bg PARTIAL reasons ['p2bg PARTIAL 629.4 (500-1000) warn but not hard fail', 'routing OK (proportion only reported) frac_A 0.517 frac_B 0.413 other 0.070 uniq {1, 1002, 5}', 'A==B 0.383 <=0.60 not recovered', 'NLL 24.4 still 20-30 range -> true domain issue if timing complete']",
+    "2M FAIL_NEED_FIX: timing True routing True rate 0.26953125 zero_overlap True p2bg LOW reasons ['p2bg LOW 378.8 (<500) need per-source threshold review', 'routing OK (proportion only reported) frac_A 0.585 frac_B 0.364 other 0.051 uniq {1, 1001, 5}', 'A==B 0.270 <=0.60 not recovered', 'NLL 28.8 still 20-30 range -> true domain issue if timing complete']"
+  ],
+  "per_source": {
+    "1M": {
+      "sid": "20260123_1M_600k_0dB",
+      "delay_used_ps": -50,
+      "peak": {
+        "peak_idx": 8191,
+        "peak_center_ps": -50.0,
+        "peak_count": 133926,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 189.0,
+        "peak_to_bg": 708.6031746031746,
+        "delay_sign": -1
+      },
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1001
+        ],
+        "count_A": 3013420,
+        "count_B": 1886312,
+        "other": 266728,
+        "total_events": 5166460,
+        "frac_A": 0.5832659112816125,
+        "frac_B": 0.3651072494512684,
+        "frac_other": 0.05162683926711907,
+        "acquisition_duration_s": 2.999999852046,
+        "ttbin_merge": {
+          "main_size": 21264,
+          "chunk_size": 19698352,
+          "merge_verified": true
+        }
+      },
+      "sidecar_persisted": {
+        "channels": {
+          "A": 1,
+          "B": 5
+        },
+        "delay_used_ps": -50,
+        "peak_center_ps": -50.0,
+        "peak_sigma_ps": 127.38853503184714,
+        "peak_to_bg": 708.6031746031746,
+        "corr_argmax": 8191,
+        "corr_bins": 16384,
+        "gate_width_ps": 200,
+        "pairing_threshold_ps": 40000,
+        "frame_start_ps": -50,
+        "frame_anchor": "peak_center",
+        "mapping": "legacy_v1",
+        "wrap_rule": "floor_div",
+        "frame_period_ps": 204800
+      },
+      "timing_contract_verified": true,
+      "routing_contract_verified": true,
+      "timing_evidence_complete": true,
+      "p2bg_status": "PARTIAL",
+      "p2bg_assessed": true,
+      "p2bg_value": 708.6031746031746,
+      "calibration_frames": [
+        7,
+        8,
+        9,
+        10,
+        15,
+        16,
+        17,
+        18
+      ],
+      "calibration_starts": [
+        7,
+        15
+      ],
+      "calibration_blocks": 2,
+      "zero_overlap_verified": true,
+      "in_range": true,
+      "F": 2130,
+      "K": 2127,
+      "calibration_rate": 0.42431640625,
+      "calibration_nll_bits_per_symbol": 22.67439284109674,
+      "calibration_q_mass_on_p_zero": 0.5634765625,
+      "calibration_delta_mass_0_pm1": 0.443359375,
+      "reasons": [
+        "p2bg PARTIAL 708.6 (500-1000) warn but not hard fail",
+        "routing OK (proportion only reported) frac_A 0.583 frac_B 0.365 other 0.052 uniq {1, 1001, 5}",
+        "A==B 0.424 <=0.60 not recovered",
+        "NLL 22.7 still 20-30 range -> true domain issue if timing complete"
+      ],
+      "calibration_pass": false,
+      "per_source_status": "FAIL_NEED_FIX",
+      "corr_error": null,
+      "environment": {
+        "interpreter_path": "D:\\software\\Miniforge3\\python.exe",
+        "timetagger_available": true,
+        "timetagger_version": "26.1.1",
+        "timetagger_file": "C:\\Program Files\\Swabian Instruments\\Time Tagger\\driver\\python\\TimeTagger\\__init__.py",
+        "sys_executable": "D:\\software\\Miniforge3\\python.exe",
+        "repo_import_smoke": {
+          "ok": true,
+          "spec_origin": "D:\\Code\\HD-QKD_Polar_Comparison\\src\\qkd_io\\ttbin_pipeline.py",
+          "repo_root": "D:\\Code\\HD-QKD_Polar_Comparison",
+          "sys_path_head": "D:\\Code\\HD-QKD_Polar_Comparison"
+        }
+      },
+      "interpreter_path": "D:\\software\\Miniforge3\\python.exe",
+      "sys_executable": "D:\\software\\Miniforge3\\python.exe",
+      "timetagger_version": "26.1.1",
+      "timetagger_available": true,
+      "timetagger_file": "C:\\Program Files\\Swabian Instruments\\Time Tagger\\driver\\python\\TimeTagger\\__init__.py"
+    },
+    "1p5M": {
+      "sid": "20260107_PPLN_1p5M",
+      "delay_used_ps": 50,
+      "peak": {
+        "peak_idx": 8192,
+        "peak_center_ps": 50.0,
+        "peak_count": 342378,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 544.0,
+        "peak_to_bg": 629.3713235294117,
+        "delay_sign": 1
+      },
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1002
+        ],
+        "count_A": 4527332,
+        "count_B": 3615039,
+        "other": 616882,
+        "total_events": 8759253,
+        "frac_A": 0.5168627964051272,
+        "frac_B": 0.41271087842764675,
+        "frac_other": 0.07042632516722602,
+        "acquisition_duration_s": 2.999999561983,
+        "ttbin_merge": {
+          "main_size": 8640,
+          "chunk_size": 32530768,
+          "merge_verified": true
+        }
+      },
+      "sidecar_persisted": {
+        "channels": {
+          "A": 1,
+          "B": 5
+        },
+        "delay_used_ps": 50,
+        "peak_center_ps": 50.0,
+        "peak_sigma_ps": 127.38853503184714,
+        "peak_to_bg": 629.3713235294117,
+        "corr_argmax": 8192,
+        "corr_bins": 16384,
+        "gate_width_ps": 200,
+        "pairing_threshold_ps": 40000,
+        "frame_start_ps": 50,
+        "frame_anchor": "peak_center",
+        "mapping": "legacy_v1",
+        "wrap_rule": "floor_div",
+        "frame_period_ps": 204800
+      },
+      "timing_contract_verified": true,
+      "routing_contract_verified": true,
+      "timing_evidence_complete": true,
+      "p2bg_status": "PARTIAL",
+      "p2bg_assessed": true,
+      "p2bg_value": 629.3713235294117,
+      "calibration_frames": [
+        7,
+        8,
+        9,
+        10,
+        15,
+        16,
+        17,
+        18
+      ],
+      "calibration_starts": [
+        7,
+        15
+      ],
+      "calibration_blocks": 2,
+      "zero_overlap_verified": true,
+      "in_range": true,
+      "F": 5125,
+      "K": 5122,
+      "calibration_rate": 0.3828125,
+      "calibration_nll_bits_per_symbol": 24.38210965378595,
+      "calibration_q_mass_on_p_zero": 0.60693359375,
+      "calibration_delta_mass_0_pm1": 0.3955078125,
+      "reasons": [
+        "p2bg PARTIAL 629.4 (500-1000) warn but not hard fail",
+        "routing OK (proportion only reported) frac_A 0.517 frac_B 0.413 other 0.070 uniq {1, 1002, 5}",
+        "A==B 0.383 <=0.60 not recovered",
+        "NLL 24.4 still 20-30 range -> true domain issue if timing complete"
+      ],
+      "calibration_pass": false,
+      "per_source_status": "FAIL_NEED_FIX",
+      "corr_error": null,
+      "environment": {
+        "interpreter_path": "D:\\software\\Miniforge3\\python.exe",
+        "timetagger_available": true,
+        "timetagger_version": "26.1.1",
+        "timetagger_file": "C:\\Program Files\\Swabian Instruments\\Time Tagger\\driver\\python\\TimeTagger\\__init__.py",
+        "sys_executable": "D:\\software\\Miniforge3\\python.exe",
+        "repo_import_smoke": {
+          "ok": true,
+          "spec_origin": "D:\\Code\\HD-QKD_Polar_Comparison\\src\\qkd_io\\ttbin_pipeline.py",
+          "repo_root": "D:\\Code\\HD-QKD_Polar_Comparison",
+          "sys_path_head": "D:\\Code\\HD-QKD_Polar_Comparison"
+        }
+      },
+      "interpreter_path": "D:\\software\\Miniforge3\\python.exe",
+      "sys_executable": "D:\\software\\Miniforge3\\python.exe",
+      "timetagger_version": "26.1.1",
+      "timetagger_available": true,
+      "timetagger_file": "C:\\Program Files\\Swabian Instruments\\Time Tagger\\driver\\python\\TimeTagger\\__init__.py"
+    },
+    "2M": {
+      "sid": "20260123_2M_1p2M_0dB",
+      "delay_used_ps": -50,
+      "peak": {
+        "peak_idx": 8191,
+        "peak_center_ps": -50.0,
+        "peak_count": 258375,
+        "fwhm_ps": 300.0,
+        "sigma_ps": 127.38853503184714,
+        "bg_median": 682.0,
+        "peak_to_bg": 378.84897360703815,
+        "delay_sign": -1
+      },
+      "channel": {
+        "unique_channels": [
+          1,
+          5,
+          1001
+        ],
+        "count_A": 5737278,
+        "count_B": 3569280,
+        "other": 503506,
+        "total_events": 9810064,
+        "frac_A": 0.5848359399082411,
+        "frac_B": 0.3638386049265326,
+        "frac_other": 0.05132545516522624,
+        "acquisition_duration_s": 2.999999625449,
+        "ttbin_merge": {
+          "main_size": 21264,
+          "chunk_size": 37376992,
+          "merge_verified": true
+        }
+      },
+      "sidecar_persisted": {
+        "channels": {
+          "A": 1,
+          "B": 5
+        },
+        "delay_used_ps": -50,
+        "peak_center_ps": -50.0,
+        "peak_sigma_ps": 127.38853503184714,
+        "peak_to_bg": 378.84897360703815,
+        "corr_argmax": 8191,
+        "corr_bins": 16384,
+        "gate_width_ps": 200,
+        "pairing_threshold_ps": 40000,
+        "frame_start_ps": -50,
+        "frame_anchor": "peak_center",
+        "mapping": "legacy_v1",
+        "wrap_rule": "floor_div",
+        "frame_period_ps": 204800
+      },
+      "timing_contract_verified": true,
+      "routing_contract_verified": true,
+      "timing_evidence_complete": true,
+      "p2bg_status": "LOW",
+      "p2bg_assessed": true,
+      "p2bg_value": 378.84897360703815,
+      "calibration_frames": [
+        7,
+        8,
+        9,
+        10,
+        15,
+        16,
+        17,
+        18
+      ],
+      "calibration_starts": [
+        7,
+        15
+      ],
+      "calibration_blocks": 2,
+      "zero_overlap_verified": true,
+      "in_range": true,
+      "F": 5513,
+      "K": 5510,
+      "calibration_rate": 0.26953125,
+      "calibration_nll_bits_per_symbol": 28.79272632518372,
+      "calibration_q_mass_on_p_zero": 0.71875,
+      "calibration_delta_mass_0_pm1": 0.28662109375,
+      "reasons": [
+        "p2bg LOW 378.8 (<500) need per-source threshold review",
+        "routing OK (proportion only reported) frac_A 0.585 frac_B 0.364 other 0.051 uniq {1, 1001, 5}",
+        "A==B 0.270 <=0.60 not recovered",
+        "NLL 28.8 still 20-30 range -> true domain issue if timing complete"
+      ],
+      "calibration_pass": false,
+      "per_source_status": "FAIL_NEED_FIX",
+      "corr_error": null,
+      "environment": {
+        "interpreter_path": "D:\\software\\Miniforge3\\python.exe",
+        "timetagger_available": true,
+        "timetagger_version": "26.1.1",
+        "timetagger_file": "C:\\Program Files\\Swabian Instruments\\Time Tagger\\driver\\python\\TimeTagger\\__init__.py",
+        "sys_executable": "D:\\software\\Miniforge3\\python.exe",
+        "repo_import_smoke": {
+          "ok": true,
+          "spec_origin": "D:\\Code\\HD-QKD_Polar_Comparison\\src\\qkd_io\\ttbin_pipeline.py",
+          "repo_root": "D:\\Code\\HD-QKD_Polar_Comparison",
+          "sys_path_head": "D:\\Code\\HD-QKD_Polar_Comparison"
+        }
+      },
+      "interpreter_path": "D:\\software\\Miniforge3\\python.exe",
+      "sys_executable": "D:\\software\\Miniforge3\\python.exe",
+      "timetagger_version": "26.1.1",
+      "timetagger_available": true,
+      "timetagger_file": "C:\\Program Files\\Swabian Instruments\\Time Tagger\\driver\\python\\TimeTagger\\__init__.py"
+    }
+  },
+  "environment": {
+    "interpreter_path": "D:\\software\\Miniforge3\\python.exe",
+    "timetagger_available": true,
+    "timetagger_version": "26.1.1",
+    "timetagger_file": "C:\\Program Files\\Swabian Instruments\\Time Tagger\\driver\\python\\TimeTagger\\__init__.py",
+    "sys_executable": "D:\\software\\Miniforge3\\python.exe",
+    "repo_import_smoke": {
+      "ok": true,
+      "spec_origin": "D:\\Code\\HD-QKD_Polar_Comparison\\src\\qkd_io\\ttbin_pipeline.py",
+      "repo_root": "D:\\Code\\HD-QKD_Polar_Comparison",
+      "sys_path_head": "D:\\Code\\HD-QKD_Polar_Comparison"
+    }
+  },
+  "forbidden": [
+    "DO NOT rerun corrected pipeline on original 90",
+    "DO NOT tune H1/Lane C/Δ8/decoder",
+    "Zero decoder",
+    "DO NOT overwrite run_01"
+  ],
+  "note": "R1: unique delay -50/+50/-50 not cherry-picked; |peak-delay|<50; routing proportion only reported (no frac>=40% hard gate); p2bg per-source H/P/L; 8 frames [7,8,9,10,15,16,17,18] zero-overlap with V55; timing must be truly recomputed in V56D1 same TimeTagger env else EVIDENCE_INCOMPLETE; V13 implementation reused; additive run_02 not overwriting"
+}

@@ -1,0 +1,200 @@
+{
+  "type2_1M_20260121_184040": {
+    "ser_train": 0.23944010416666667,
+    "empirical_H_AbB_train_bits": 0.8010378248976788,
+    "per_model_split": {
+      "C01_qsc:val": {
+        "nll_bits": 3.199829878252474,
+        "mean_conf": 0.577747566898827,
+        "zero_prob_count": 0
+      },
+      "C01_qsc:hold": {
+        "nll_bits": 3.1962981828221046,
+        "mean_conf": 0.5779777436665037,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:val": {
+        "nll_bits": 3.322767066845582,
+        "mean_conf": 0.702617573599295,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:hold": {
+        "nll_bits": 3.321114233956791,
+        "mean_conf": 0.7028988788262025,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:val": {
+        "nll_bits": 993.9469907584622,
+        "mean_conf": 0.0009431199477596144,
+        "zero_prob_count": 102129
+      },
+      "C03_pooled_delta:hold": {
+        "nll_bits": 994.0633249879355,
+        "mean_conf": 0.0009065423144995635,
+        "zero_prob_count": 102141
+      },
+      "C04_source_delta:val": {
+        "nll_bits": 993.9496610816661,
+        "mean_conf": 0.0010058375676472984,
+        "zero_prob_count": 102129
+      },
+      "C04_source_delta:hold": {
+        "nll_bits": 994.0672672250091,
+        "mean_conf": 0.0009121650695800782,
+        "zero_prob_count": 102141
+      },
+      "C05_source_parity:val": {
+        "nll_bits": 993.949751312013,
+        "mean_conf": 0.0010048822221358136,
+        "zero_prob_count": 102129
+      },
+      "C05_source_parity:hold": {
+        "nll_bits": 994.0673730512112,
+        "mean_conf": 0.0009114604087011864,
+        "zero_prob_count": 102141
+      },
+      "C06_jitter_bg:val": {
+        "nll_bits": 14.292847297450955,
+        "mean_conf": 0.0010043738142649329,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:hold": {
+        "nll_bits": 14.295329791227328,
+        "mean_conf": 0.0009153849411010737,
+        "zero_prob_count": 0
+      }
+    }
+  },
+  "type2_1p5M_20260121_183806": {
+    "ser_train": 0.2545651355421687,
+    "empirical_H_AbB_train_bits": 0.8255660516217248,
+    "per_model_split": {
+      "C01_qsc:val": {
+        "nll_bits": 3.374716602974077,
+        "mean_conf": 0.5550273288670476,
+        "zero_prob_count": 0
+      },
+      "C01_qsc:hold": {
+        "nll_bits": 3.3472413348288312,
+        "mean_conf": 0.5568001947238918,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:val": {
+        "nll_bits": 3.5252950914648595,
+        "mean_conf": 0.6886793866482463,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:hold": {
+        "nll_bits": 3.4967518260931922,
+        "mean_conf": 0.6908727640556888,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:val": {
+        "nll_bits": 993.9312065932934,
+        "mean_conf": 0.0007813887717807099,
+        "zero_prob_count": 141191
+      },
+      "C03_pooled_delta:hold": {
+        "nll_bits": 993.8025095906354,
+        "mean_conf": 0.0008478109697480584,
+        "zero_prob_count": 141428
+      },
+      "C04_source_delta:val": {
+        "nll_bits": 993.9367127405989,
+        "mean_conf": 0.0007725861101680968,
+        "zero_prob_count": 141191
+      },
+      "C04_source_delta:hold": {
+        "nll_bits": 993.8073425069548,
+        "mean_conf": 0.0008560918350289414,
+        "zero_prob_count": 141428
+      },
+      "C05_source_parity:val": {
+        "nll_bits": 993.9367951032189,
+        "mean_conf": 0.0007729349095150562,
+        "zero_prob_count": 141191
+      },
+      "C05_source_parity:hold": {
+        "nll_bits": 993.8074381240717,
+        "mean_conf": 0.000856548169937609,
+        "zero_prob_count": 141428
+      },
+      "C06_jitter_bg:val": {
+        "nll_bits": 14.296125554625569,
+        "mean_conf": 0.0007827849296596917,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:hold": {
+        "nll_bits": 14.293641494382353,
+        "mean_conf": 0.0008621153682774941,
+        "zero_prob_count": 0
+      }
+    }
+  },
+  "type2_2M_20260121_183657": {
+    "ser_train": 0.25713020118884317,
+    "empirical_H_AbB_train_bits": 0.832562721922195,
+    "per_model_split": {
+      "C01_qsc:val": {
+        "nll_bits": 3.371475712222964,
+        "mean_conf": 0.5533274858624244,
+        "zero_prob_count": 0
+      },
+      "C01_qsc:hold": {
+        "nll_bits": 3.335088649295819,
+        "mean_conf": 0.5556712480089784,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:val": {
+        "nll_bits": 3.5155521124185647,
+        "mean_conf": 0.6889383782942564,
+        "zero_prob_count": 0
+      },
+      "C02_v17_product:hold": {
+        "nll_bits": 3.4778372652259733,
+        "mean_conf": 0.6918550150149161,
+        "zero_prob_count": 0
+      },
+      "C03_pooled_delta:val": {
+        "nll_bits": 993.6594556350905,
+        "mean_conf": 0.0008455162067406783,
+        "zero_prob_count": 186076
+      },
+      "C03_pooled_delta:hold": {
+        "nll_bits": 993.8829683436885,
+        "mean_conf": 0.0008245481064005506,
+        "zero_prob_count": 186118
+      },
+      "C04_source_delta:val": {
+        "nll_bits": 993.6648032222012,
+        "mean_conf": 0.0008461828090039529,
+        "zero_prob_count": 186076
+      },
+      "C04_source_delta:hold": {
+        "nll_bits": 993.887710449654,
+        "mean_conf": 0.0008251942229713745,
+        "zero_prob_count": 186118
+      },
+      "C05_source_parity:val": {
+        "nll_bits": 993.6647962980999,
+        "mean_conf": 0.000846807524742347,
+        "zero_prob_count": 186076
+      },
+      "C05_source_parity:hold": {
+        "nll_bits": 993.8877052285628,
+        "mean_conf": 0.00082583692884516,
+        "zero_prob_count": 186118
+      },
+      "C06_jitter_bg:val": {
+        "nll_bits": 14.292749965705593,
+        "mean_conf": 0.0008527017935537552,
+        "zero_prob_count": 0
+      },
+      "C06_jitter_bg:hold": {
+        "nll_bits": 14.294588361992245,
+        "mean_conf": 0.0008327626368228057,
+        "zero_prob_count": 0
+      }
+    }
+  }
+}

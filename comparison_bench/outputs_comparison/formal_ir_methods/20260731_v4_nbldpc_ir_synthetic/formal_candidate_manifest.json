@@ -1,0 +1,9 @@
+{
+  "method": "nbldpc_formal_v4_ir",
+  "policies": [
+    "nbldpc_v4_control",
+    "nbldpc_v4_ir_warm",
+    "nbldpc_v4_ir_restart"
+  ],
+  "v3_codebook_manifest_id": "265fd0d07ce44e195bf35a01a241bce7a0eab167cbdcf2322ee9d5a0954c66fe"
+}

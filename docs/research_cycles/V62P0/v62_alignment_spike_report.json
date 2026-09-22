@@ -1,0 +1,167 @@
+{
+  "provenance": {
+    "head": "79776dc9... (verify via git rev-parse HEAD == origin/formal-ir-mainline)",
+    "data_sha": "84d62779",
+    "polar_roots_checked": [
+      "D:\\Code\\HD-QKD_Polar_Release",
+      "D:\\Code\\HD-QKD_Polar_Comparison\\results",
+      "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison"
+    ],
+    "selected_path": "D:\\Code\\HD-QKD_Polar_Release\\results\\authoritative\\_tmp_longrun_fresh_rerun\\full_20dB\\candidate_rerun\\polar_diag_summary.csv",
+    "polar_commit": "ab58fe0a2cfe0d36852386c5c4e79d16f308c3f1",
+    "R62_03_strict": "Polar_block_verified_accept=4frames all success+verify; leak/runtime=Σ4; exact null if no per-frame truth; round/aggregate prohibited"
+  },
+  "polar_reference_summary": {
+    "n_rows": 121,
+    "header": [
+      "dimension",
+      "bin_width_ps",
+      "status",
+      "sidecar_verdict",
+      "fail_reason",
+      "skip_reason",
+      "map_ser",
+      "layers_success_best",
+      "coincidence_rate_hz",
+      "peak_center_ps",
+      "peak_sigma_ps",
+      "peak_to_bg",
+      "raw_ser",
+      "near_neighbor_frac",
+      "n_pairs_actual",
+      "frame_diag_available",
+      "accepted_rate_proxy",
+      "IAB_est",
+      "IAB_or_proxy",
+      "beta_or_proxy",
+      "leak_ec_bits_or_proxy",
+      "n_unique_a",
+      "n_unique_b",
+      "top_a_frac",
+      "top_b_frac",
+      "security_claim_level",
+      "security_assumption_tag",
+      "pairing_model_tag",
+      "multi_event_handling_tag",
+      "frame_cleaning_tag"
+    ],
+    "companion": {
+      "checked_files": [
+        "D:\\Code\\HD-QKD_Polar_Release\\results\\authoritative\\_tmp_longrun_fresh_rerun\\full_20dB\\candidate_rerun\\_tmp_grid_table.csv",
+        "D:\\Code\\HD-QKD_Polar_Release\\results\\authoritative\\_tmp_longrun_fresh_rerun\\full_20dB\\candidate_rerun\\_tmp_src_table.csv",
+        "D:\\Code\\HD-QKD_Polar_Release\\results\\authoritative\\_tmp_longrun_fresh_rerun\\full_20dB\\candidate_rerun\\polar_e2e_results.csv",
+        "D:\\Code\\HD-QKD_Polar_Release\\results\\authoritative\\_tmp_longrun_fresh_rerun\\full_20dB\\candidate_rerun\\polar_layer_metrics.csv"
+      ],
+      "missing_after_companion_scan": [
+        "leak_EC_actual_bits",
+        "runtime_s",
+        "n_frames_success",
+        "n_frames_failed_decode",
+        "n_frames_failed_verify",
+        "throughput_input_bits_per_s"
+      ],
+      "by_key_size": 0
+    },
+    "errors": []
+  },
+  "per_frame_completeness": {
+    "per_frame_frame_id_present": false,
+    "per_frame_success_present": true,
+    "per_frame_verification_present": true,
+    "per_frame_leak_present": true,
+    "per_frame_runtime_present": false,
+    "has_256_frame_hint": false,
+    "has_per_frame_rows": false,
+    "header_sample": [
+      "dimension",
+      "bin_width_ps",
+      "status",
+      "sidecar_verdict",
+      "fail_reason",
+      "skip_reason",
+      "map_ser",
+      "layers_success_best",
+      "coincidence_rate_hz",
+      "peak_center_ps",
+      "peak_sigma_ps",
+      "peak_to_bg",
+      "raw_ser",
+      "near_neighbor_frac",
+      "n_pairs_actual",
+      "frame_diag_available",
+      "accepted_rate_proxy",
+      "IAB_est",
+      "IAB_or_proxy",
+      "beta_or_proxy"
+    ],
+    "per_frame_complete": false,
+    "four_frame_aggregation_feasible": false,
+    "reason": "missing per-frame required fields (need frame ID + success + verification + leak + runtime per 256-frame)"
+  },
+  "alignment": {
+    "dimension_ok": null,
+    "bin_width_ok": null,
+    "frame_len_ok": null,
+    "pairing_ok": null,
+    "v55_domain_incompatible_excluded": null,
+    "replayable_hash_equal": null,
+    "K_aligned": 0,
+    "per_source_aligned": {},
+    "hash_samples": [],
+    "errors": [
+      "R62-03: Polar lacks per-frame required fields → V62_COMPARISON_DATA_NOT_ALIGNED (detail: {'per_frame_frame_id_present': False, 'per_frame_success_present': True, 'per_frame_verification_present': True, 'per_frame_leak_present': True, 'per_frame_runtime_present': False, 'has_256_frame_hint': False, 'has_per_frame_rows': False, 'header_sample': ['dimension', 'bin_width_ps', 'status', 'sidecar_verdict', 'fail_reason', 'skip_reason', 'map_ser', 'layers_success_best', 'coincidence_rate_hz', 'peak_center_ps', 'peak_sigma_ps', 'peak_to_bg', 'raw_ser', 'near_neighbor_frac', 'n_pairs_actual', 'frame_diag_available', 'accepted_rate_proxy', 'IAB_est', 'IAB_or_proxy', 'beta_or_proxy'], 'per_frame_complete': False, 'four_frame_aggregation_feasible': False, 'reason': 'missing per-frame required fields (need frame ID + success + verification + leak + runtime per 256-frame)'})"
+    ],
+    "overall": "V62_COMPARISON_DATA_NOT_ALIGNED",
+    "R62_03_checks": {
+      "per_frame_completeness": {
+        "per_frame_frame_id_present": false,
+        "per_frame_success_present": true,
+        "per_frame_verification_present": true,
+        "per_frame_leak_present": true,
+        "per_frame_runtime_present": false,
+        "has_256_frame_hint": false,
+        "has_per_frame_rows": false,
+        "header_sample": [
+          "dimension",
+          "bin_width_ps",
+          "status",
+          "sidecar_verdict",
+          "fail_reason",
+          "skip_reason",
+          "map_ser",
+          "layers_success_best",
+          "coincidence_rate_hz",
+          "peak_center_ps",
+          "peak_sigma_ps",
+          "peak_to_bg",
+          "raw_ser",
+          "near_neighbor_frac",
+          "n_pairs_actual",
+          "frame_diag_available",
+          "accepted_rate_proxy",
+          "IAB_est",
+          "IAB_or_proxy",
+          "beta_or_proxy"
+        ],
+        "per_frame_complete": false,
+        "four_frame_aggregation_feasible": false,
+        "reason": "missing per-frame required fields (need frame ID + success + verification + leak + runtime per 256-frame)"
+      }
+    },
+    "per_frame_complete": false
+  },
+  "overall": "V62_COMPARISON_DATA_NOT_ALIGNED",
+  "v62_overall_first_match": "V62_EVIDENCE_INVALID if not polar_reference_mechanically_extracted else V62_COMPARISON_DATA_NOT_ALIGNED if per-frame incomplete or K<45 or pairing/bw/dim mismatch or V55 else V62_ALIGNMENT_READY/needs_pairs",
+  "R62_03_prohibitions": [
+    "round(aggregate*45) prohibited",
+    "aggregate FER fake per-block prohibited",
+    "accepted vs exact direct comparison prohibited",
+    "Polar_block_exact derived from accepted_fraction prohibited (null if no per-frame exact truth)"
+  ],
+  "notes": [
+    "POLAR_REFERENCE_PROXY only — finite-key/PIE/SKR not upgraded",
+    "V55 intake (256/frame) excluded as domain-incompatible",
+    "hash equality sampled first block only; full 45-block registry needs future freeze",
+    "COMPETITIVE gate R62-03: NB verify_final >= Polar_block_verified_accept -2 overall and -1 per-source and undetected==0 (+ exact paired only if both have exact truth)"
+  ]
+}

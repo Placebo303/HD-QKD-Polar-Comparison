@@ -1,0 +1,2 @@
+dimension,bin_width_ps,n_candidates_before,n_kept_after,n_dropped_occupancy,drop_frac_occupancy,n_dropped_multievent,drop_frac_multievent,filter_enabled,frame_period_ps,pairing_mode,threshold_ps,frame_diag_available,n_frames_total,n_frames_clean_single_single,n_frames_cross_frame,n_frames_A_multi,n_frames_B_multi,n_frames_both_multi,n_pairs_in_clean_frames,n_pairs_in_ambiguous_frames
+1024,180,74398,74183,5,6.720610769106697e-05,210,0.0028226565230248125,0,184320,nearest,180,1,74298,74183,10,0,0,105,74183,215

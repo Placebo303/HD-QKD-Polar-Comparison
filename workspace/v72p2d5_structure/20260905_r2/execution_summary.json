@@ -1,0 +1,22 @@
+{
+  "attempts": 1,
+  "build_calls": {
+    "L1": 1,
+    "L2": 1
+  },
+  "cal_rows_read": 0,
+  "completed": 1,
+  "decision": "STRUCTURE_PASS_WITH_CYCLE_RISK",
+  "decoder_calls": 0,
+  "error": null,
+  "files": [
+    "results.json",
+    "table.csv",
+    "report.md",
+    "execution_summary.json"
+  ],
+  "formal_root": "workspace/v72p2d5_structure/20260905_r2",
+  "l2_attempted": true,
+  "phase": "structure",
+  "val_rows_read": 0
+}

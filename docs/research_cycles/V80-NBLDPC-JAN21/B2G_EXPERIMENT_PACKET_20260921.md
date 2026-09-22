@@ -1,0 +1,45 @@
+# B2G Experiment Packet (2026-09-21) — FROZEN, NOT GRANTED — CONTINGENCY RESOLVED
+
+CONTINGENCY RESOLVED 2026-09-21: B2F_BATCH_END_REVIEW_20260921.md = PASS — packet FROZEN by main thread under standing pre-authorization; per-arm execution grant still recorded at Pre-EXECUTE.
+- Track: EXPLORE synthetic only (EXPLORE_HEAVY cost annotation). Branch `formal-ir-v72p1-addendum-clean` (no switch/commit/push).
+- Acceptance ID: G-B2G (frozen, NOT granted). Authorizes NOTHING; Pre-EXECUTE + fresh explicit grant per arm required (§7).
+- Parents: `B2F_EXPERIMENT_PACKET_20260921`/`B2F_EXPERIMENT_PROMPT_20260921`/`B2F_RESULT_20260921` + `B2F_BATCH_END_REVIEW_20260921` (PASS 2026-09-21) + `O1R_EXPERIMENT_PACKET_20260920` §1 + §Amendment (second construct seed precedent) + `O1R_RESULT_20260920` + `S2_ROUTE_DECISION_MEMO_20260921` (option A3 / O-A).
+
+## 1. Why (EXACTLY ONE scientific input changes)
+- b2g = b2f with the construct (PEG) seed changed: **2026092001 (b2f) → 2026092011 (b2g)** — 2026092011 is the O1R R2 fresh construction instance, i.e. the established two-construction-instance seed series 2026092001 (first instance) → 2026092011 (second instance), already used and dry-pinned by O1R; no new convention is invented.
+- Everything else frozen IDENTICAL to b2f: arms F208 (PRIMARY, claim-bearing) + F202 (SECONDARY, exploratory, adaptive rule §7); block base 2026095601; n-blocks 240; trials 20; prior formula, decoder, gates, D-u1 label, budgets, stream `o1_blk:`.
+- Hypothesis (retest, not new): the exact Bayes-marginal L2 prior π_i(e)=Σ_{u1} γ1(u1|b_i)·γ2(y_i⊕e|u1,b_i), y_i=b_i&31, restores A208-class decodability with NO u1 conditioning; b2g asks whether the b2f PASS replicates on a SECOND construction instance of the same code.
+
+## 2. Frozen formula + semantics (verbatim from B2F packet §2; unchanged)
+- `g1c=g1[:,b]`; `cond=g2[:,:,b].transpose(2,0,1)`; `marg=np.einsum("nu,nuv->nv", g1c.T, cond)`; per-row renormalize guard (non-positive/non-finite row sum → delta-at-0); `prior=center_rows_prior(marg,y)`; feed `v28.decode_error_domain_posterior(field, y.tolist(), dense, s_x, prior, 300)`. NO genie u1, NO argmax û1, NO L1 code, NO refit (`gamma_f03.npz` read-only). max_iter=300/streak 3; accept = `exact_match` (x̂==u2).
+- FXR-1 reading constraint carried verbatim: measured prior entropy ≈852.5 b/block ≈ H_full·n (852.544) is ~26 b/block FLATTER (weaker) than the genie row 826.266 b — NO entropy-parity reading; the column is report-only, never gated.
+- D-u1 = 0.0 STRUCTURAL/MEASURED label (prior computed from b alone; û1 never transmitted); never-assume-zero note retained.
+
+## 3. Arms (EXACTLY two — no more, no substitutions)
+- **F208 PRIMARY**: m=208 via `construct_arm("A208", 2026092011, 20)` — the SECOND construction instance. **F202 SECONDARY**: m=202 via `construct_arm("A202", 2026092011, 20)`. Both n=1024 GF(32) λ={2:1}.
+- Pins GATED: fc==0 AND rank-full AND construct-twice-identical (mismatch → STOP-BLOCKED pre-decode); girth RECORDED-not-gated (O1R R2-amendment precedent; O1R measured A208 girth 6 at seed 2026092011 — carried as a recorded covariate; A202 girth at this seed is MEASURED at the Pre-EXECUTE dry-construct and recorded, never gated).
+- DEVIATION from the b2f template (declared): b2g instances are NOT byte-identical to the O1/b2f A208/A202 genie arms (different construct seed); the manifest must say "second construction instance 2026092011 (O1R R2 precedent)", never "byte-identical paired construction".
+
+## 4. Blocks / seeds / gates (unchanged from b2f)
+- 240 blocks/arm; literal paired base 2026095601+idx, idx=0..239 (SAME 240 frames as b2f/O1R/P0/L1B/b2e — paired contrast; NO independence claim; no pooling across arms or instances). Stream `o1_blk:{seed}`.
+- (a) fails/240 ≤ 12 (5% exact); early-stop at the 13th fail → FAIL, retain partials — the scientific test. (b) f_super = (5m+64)/852.544 ≤ 1.3 on the UNCHANGED O1 basis: F208 1.294947, F202 1.259759 (PASS by construction; accounting identity). D-u1 = 0.0 measured label. `prior_entropy_bits` and `u1_mismatches` REPORT-ONLY (never gated, not disclosures, not criteria).
+
+## 5. Executor delta (EXACT list; thin NEW wrapper)
+- X1 NEW `comparison_bench/src/comparison_bench/formal_ir/v80_b2g_campaign.py` mirroring `v80_b2f_campaign.py` with `B2G_CONSTRUCT_SEED = 2026092011`; imports frozen helpers READ-ONLY (from `v80_o1_campaign`: `construct_arm`, `fail_bar`, `stream_seed`, caps, anchors; from `v80_s2c_campaign`: `bind_empirical_bundle`, `empirical_triple_sampler`, `center_rows_prior`; plus `peg`/`v28`/`fftqspa`/`GF2mField`). NO edits to any existing module — `v80_b2f_campaign.py` stays frozen and is NOT reused (its CLI refuses seed 2026092011 by design).
+- X2 `marginal_prior_l2` + decode wiring byte-for-byte the b2f semantics (same einsum contraction, row guard, XOR centering, v28 entrypoint, max_iter). X3 report-only columns identical (prior_entropy_bits, u1_mismatches). X4 ARMS F208/F202 only. X5 pins per §3. X6 manifest labels: campaign `B2G-soft-marginal-replication`, `construct_seed: 2026092011`, second-instance note (§3 deviation), paired-block-seed note (shared with b2f/O1R/P0/L1B/b2e), de-label `covered` (F208 carried) / `exploratory` (F202), D-u1 = 0.0 measured label + never-assume-zero note.
+- X7 CLI hardening: refuse any non-frozen `--construct-seed` (INCLUDING 2026092001 — that is b2f's frozen value, not b2g's)/`--construct-trials`/`--block-base`/`--n-blocks` (science-input change → STOP); root prefix `workspace/b2g_` (fresh additive; `results/`+`outputs_comparison/` forbidden); dual-flag `--execute-real --execution-authorized` gate; checkpoint-per-block; ≤1 `--resume-from` (wall-partial only); no auto-relaunch.
+- X8 fake-only `tests/test_v80_b2g_campaign.py` (mirror b2f tests: contraction vs manual Σ_u γ1·γ2, XOR-centering identity, row-sum guard + delta-at-0, entropy/mismatch columns, bar derivation, early-stop, root confinement, resume-once, refusal of 2026092001 and every other seed). No production decode in tests.
+
+## 6. Budgets / scope / stop
+- 240 blocks/arm; b2f MEASURED (F208 672.6 s, F202 1346.9 s; decode mean 2.77 s) — MEASURE block 0 anyway. b2e risk carried: 300-iter non-convergence ≈70 s/decode ⇒ gates must fire before the wall cap or the arm yields INCOMPLETE-wall with ≤1 continuation — NEVER a false PASS; per-decode >300 s = terminal overrun. 1 window ≤3600 s; RSS <4 GiB; 1 CPU.
+- Roots `workspace/b2g_<uuid8>` fresh additive per arm (UUID + absence proven at Pre-EXECUTE). STOP on ANY science-input change beyond the ONE preregistered construct-seed change (n/m/λ/block seeds/thresholds/channel/decoder/hypothesis/data roles); no rerun, no tuning, no arm substitution, no S3.
+
+## 7. Adaptive arm order + claim ceiling
+- F208 runs FIRST (primary; gate (b) passes by construction on both arms so order forecloses nothing). F202 runs ONLY if F208 is terminal AND total elapsed at F202 launch ≤50 min (b2f precedent: ≈12.7 min). No arm skipped; no swap.
+- PASS on an arm ⇒ report to main thread. FAIL ⇒ return for the A2/O-D decision (memo options). Neither authorizes anything further.
+- Genie-retirement wording is permitted ONLY if BOTH construct instances PASS gate (a) on F208 (b2f seed 2026092001 AND b2g seed 2026092011) AND the b2f batch-end review is not FAIL. The ONLY sentence then allowed (verbatim): **"The soft-marginal L2 prior (exact Bayes marginalization, D-u1 = 0.0) sustains A208-class decodability (fails/240 ≤ 12) on two construction instances of the (n=1024, GF(32), λ={2:1}, m=208) code — construct seeds 2026092001 (b2f: 0/240) and 2026092011 (b2g) — on identical paired channel frames; genie-u1 conditioning is not required for A208-class decodability in this synthetic setting."**
+- FORBIDDEN sentences (always, even after two PASSes): any entropy-parity reading (prior entropy ≈852.5 ≈ H_full·n is ~26 b/block FLATTER than the genie 826.266 b — mixing penalty, not parity); any pooling of b2f+b2g (or any cross-instance) FERs into a single FER number; any independence claim from the paired block seeds (2026095601+idx shared across O1R/P0/L1B/b2e/b2f/b2g) or any claim that two construct seeds establish statistical independence of construction instances; any S3/real-data/qualification/promotion/publication/route/FER claim; any genie-retirement wording if EITHER instance fails or the b2f batch-end review is FAIL.
+
+## 8. Deliverables + does-NOT-establish
+- `B2G_RESULT_20260921.md` per arm (RAW: verdict, FER, per-60 tally report-only, prior-entropy mean + distribution, u1-mismatch mean/max, both f_super lines, D-u1 label, FXR-1 caveat, budget/ledger/windows, provenance) + `rows.json` + `block_accounting.csv` per root. Prompt: `B2G_EXPERIMENT_PROMPT_20260921.md` (≤60 lines).
+- Does NOT establish: no FER/route/S3/qualification/publication claim; no entropy-parity reading (FXR-1); no cross-instance pooling into a single FER; paired-seed reuse carries NO independence claim; two-instance replication ≠ generalization; synthetic only (no real/Jan-21 frames); block ≠ S2c-group; this packet authorizes NOTHING.

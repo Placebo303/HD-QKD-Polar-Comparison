@@ -1,0 +1,211 @@
+{
+  "schema": "nbldpc_v32_run_manifest_v1",
+  "created_utc": "2026-08-21T20:03:34Z",
+  "role": "diagnostic_bridge_only_not_qualification",
+  "bindings": {
+    "v31_packet_sha256": "3d0e8773a436eed59b515f32c1bde9525814f0ecaf0d8af5cd9d2bcd12ce9242",
+    "graph_packet_identity": "3d0e8773a436eed5",
+    "packet_id": "m1_16_n1024_n1024|QC-cyclic-projective",
+    "validation_blocks_sha256": "302165d16d0eac18db48fa0b8423d8a52def10bc5d8b0901a1dd1a874e545027",
+    "baseline_records": 300,
+    "baseline_sha256": "e467a5301807ddea4a6114ec9a5da031305adc11e77d210548e486554e1f0d76",
+    "channel_counts_sha256": "e0360203b8003c821d3ee543bdaf712bd853b0ea712055b936ca37f478ddd5b2",
+    "posterior_identity": "e0360203b8003c82",
+    "v26_terminal_state": "pass_target_f13",
+    "field_id": "c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf",
+    "field_polynomial": "0b100101",
+    "verified_utc": "2026-08-21T20:03:34Z"
+  },
+  "allocation_scalar_m1": 16,
+  "field_id": "c3a3660aa3cfbf788568cf366ee5de345ddc6be0372154a702c9e244a53bc6cf",
+  "sources": {
+    "1M": "type2_1M_20260121_184040",
+    "1p5M": "type2_1p5M_20260121_183806",
+    "2M": "type2_2M_20260121_183657"
+  },
+  "arms": {
+    "B0": {
+      "blocks_per_source": 2,
+      "seeds": {
+        "1M": [
+          740882432,
+          341735623
+        ],
+        "1p5M": [
+          2122513526,
+          2680077274
+        ],
+        "2M": [
+          2944134738,
+          3170367255
+        ]
+      }
+    },
+    "B1": {
+      "blocks_per_source": 20,
+      "seeds": {
+        "1M": [
+          320101,
+          320102,
+          320103,
+          320104,
+          320105,
+          320106,
+          320107,
+          320108,
+          320109,
+          320110,
+          320111,
+          320112,
+          320113,
+          320114,
+          320115,
+          320116,
+          320117,
+          320118,
+          320119,
+          320120
+        ],
+        "1p5M": [
+          320201,
+          320202,
+          320203,
+          320204,
+          320205,
+          320206,
+          320207,
+          320208,
+          320209,
+          320210,
+          320211,
+          320212,
+          320213,
+          320214,
+          320215,
+          320216,
+          320217,
+          320218,
+          320219,
+          320220
+        ],
+        "2M": [
+          320301,
+          320302,
+          320303,
+          320304,
+          320305,
+          320306,
+          320307,
+          320308,
+          320309,
+          320310,
+          320311,
+          320312,
+          320313,
+          320314,
+          320315,
+          320316,
+          320317,
+          320318,
+          320319,
+          320320
+        ]
+      },
+      "channel": "matched iid synthetic (uniform substitution at frozen V25 raw_ser), bound V25/V26 posterior, oracle L1"
+    },
+    "B2": {
+      "identical_blocks_as": "B1",
+      "only_change": "oracle L1 -> Bob-only sequential L1"
+    },
+    "B3": {
+      "blocks_per_source": 20,
+      "permutation": {
+        "rule": "position permutation of the real per-block error vector (delta = (bob-alice) mod 1024); surrogate bob = (alice + permuted_delta) mod 1024; per-block error count and value marginals preserved exactly",
+        "object": "EXACTLY the B4 block set: blocks 0..19 per source (P1.4 ruling f)",
+        "base_seed": 20260822,
+        "seed_derivation": "sha256('<base_seed>:<source>/<block_index>')[:4] big-endian",
+        "selected_by_results": false
+      }
+    },
+    "B4": {
+      "block_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "errors": "real V31 n=1024 validation errors, oracle L1"
+    },
+    "B5": {
+      "mode": "read_only_import",
+      "expected_records": 300
+    }
+  },
+  "discriminator": {
+    "block_success": "exact && tag && syndrome && !false_accept",
+    "arm_pass": "every source >= 19/20 block successes (B0: 6/6)",
+    "b2_significantly_below_b1": "B2 FAIL while B1 PASS under the same discriminator",
+    "development_only": true
+  },
+  "posterior_anomaly_criteria": {
+    "registered_before": "any_arm_execution",
+    "bucket_definition": "calibration_bucket = 9 - min(9, floor(mean_true_symbol_prior_prob * 10)); 0=best calibrated, 9=worst",
+    "block_anomaly_rule": "mean_true_symbol_prior_prob < 0.05 OR posterior_nll_bits_per_symbol > source_ref_entropy_bits[source]",
+    "arm_anomaly_rule": "anomalous_fraction_over_B3_and_B4_blocks >= 0.25",
+    "reference_semantics": "per-source total posterior entropy (bits/symbol) of the bound V25/V26 empirical posterior population (adapter_entropy_bits on frozen counts)",
+    "source_ref_entropy_bits": {
+      "1M": 0.8010378248976774,
+      "1p5M": 0.8255660516217236,
+      "2M": 0.8325627219221954
+    }
+  },
+  "terminals": [
+    "bridge_binding_fail",
+    "finite_graph_decoder_mismatch",
+    "l1_sequential_propagation_limit",
+    "real_error_structure_mismatch",
+    "empirical_channel_model_mismatch",
+    "bridge_pass_ready_for_successor",
+    "bridge_inconclusive",
+    "resource_blocked",
+    "implementation_blocked"
+  ],
+  "early_stop_whitelist": [
+    "binding_failure",
+    "b0_failure",
+    "implementation_exception",
+    "output_collision",
+    "cumulative_12h_exhausted",
+    "canonical_input_drift",
+    "truth_use_violation"
+  ],
+  "execution_order": [
+    "binding_verification",
+    "B5",
+    "B0",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "terminal_reconstruction"
+  ],
+  "budget_seconds": 43200,
+  "harness_code_sha256": "191f69aecc289955",
+  "config_fingerprint": "391288dc8e4545e4975c94a5f7a2287df19c360e0b2cd5a98a64bbfe7cc47075"
+}

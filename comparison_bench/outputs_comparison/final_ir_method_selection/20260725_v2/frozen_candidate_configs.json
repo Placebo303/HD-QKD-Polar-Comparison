@@ -1,0 +1,61 @@
+{
+  "candidates": {
+    "cascade_lite": {
+      "config": {
+        "block_size_schedule": [
+          12,
+          6,
+          24,
+          13
+        ],
+        "mapping": "gray",
+        "num_passes": 4,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      },
+      "config_id": "1725a914f7084a6a",
+      "tuning_selection_summary": {
+        "attempted_frames": 60,
+        "config_id": "1725a914f7084a6a",
+        "config_json": "{\"block_size_schedule\": [12, 6, 24, 13], \"mapping\": \"gray\", \"num_passes\": 4, \"permutation_mode\": \"seeded_random\", \"seed\": 0, \"verify_mode\": \"crc32\"}",
+        "failed_frames": 0,
+        "leakage_comparison_note": "method-specific disclosure accounting; not cross-method ranked",
+        "method": "cascade_lite",
+        "method_status": "ok",
+        "runtime_s": 0.06869600003119558,
+        "same_method_total_leak_bits": 33641.0,
+        "split": "tuning",
+        "verified_successes": 60
+      }
+    },
+    "layered_ldpc_lite": {
+      "config": {
+        "bitplane_rate_mode": "uniform",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "bsc_estimated",
+        "mapping": "gray",
+        "max_iter": 50,
+        "osd_order": 0,
+        "parity_fraction": 1.0
+      },
+      "config_id": "d113d97b728b14c2",
+      "tuning_selection_summary": {
+        "attempted_frames": 60,
+        "config_id": "d113d97b728b14c2",
+        "config_json": "{\"bitplane_rate_mode\": \"uniform\", \"bp_method\": \"minimum_sum\", \"column_weight\": 3, \"ldpc_seed\": 20260428, \"llr_mode\": \"bsc_estimated\", \"mapping\": \"gray\", \"max_iter\": 50, \"osd_order\": 0, \"parity_fraction\": 1.0}",
+        "failed_frames": 2,
+        "leakage_comparison_note": "method-specific disclosure accounting; not cross-method ranked",
+        "method": "layered_ldpc_lite",
+        "method_status": "ok",
+        "runtime_s": 0.38458860001992434,
+        "same_method_total_leak_bits": 40320.0,
+        "split": "tuning",
+        "verified_successes": 58
+      }
+    }
+  },
+  "frozen_before_confirmation": true
+}

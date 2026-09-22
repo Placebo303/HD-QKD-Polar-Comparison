@@ -1,0 +1,11 @@
+priority,item,missing_reason,minimal_new_measurement,required_sample_or_proof,acceptance_criterion,depends_on
+1,composable theorem and assumptions,no theorem_id / assumptions / domain declared,"declare theorem_id (Renner/Niu/Tomamichel) + assumptions {collective/coherent, PE model, finite-key, auth, EV} + domain",theorem binding proof + assumption validation,theorem_id with file:lines expr,none
+2,phase-error / conjugate,conjugate_basis_stats missing; per_point_franson_pe_chain missing; e_ph missing,conjugate-basis / decoy-state e_ph measurement with sifting,n_PE coherent with e_ph; conjugate stats file:lines,e_ph with confidence interval and theorem linkage,composable theorem
+3,n_PE,n_PE authoritative missing; only n_eff shadow proxy,PE acquisition n_PE authoritative count,n_PE file:lines with provenance,n_PE with PE model binding,phase-error/conjugate
+4,visibility interval and source,global vis=0.95 shadow only; no per-point interval,"per-point / per-loss vis interval [vis_low, vis_high] with calibration",vis interval with source chain file:lines,vis interval with composable chi_E linkage,n_PE
+5,finite-size authority,DeltaFK shadow calibrated only; n_eff not authoritative,n_eff actual count + DeltaFK composable coefficient authority,finite-key theorem constants with n_eff,DeltaFK bits/pair with eps_sec/eps_cor binding,n_PE
+6,EV bound,verification transcript missing; epsilon_EC shadow,verification transcript + epsilon_EC bound,transcript file:lines with tag bits,EV bound with auth separation,finite-size
+7,auth leakage,auth bits missing (protocol_specific_composable_constants missing),auth bits observation and accounting,auth bits file:lines,auth leakage bits/block with theorem,EV
+8,post-selection / accepted-frame,accepted_frame_fraction shadow surrogate only,rigorous accepted/rejected frame accounting + post_sel correction proof,post_sel file:lines with composable correction,post_sel with finite-key linkage,finite-size
+9,eps_sec / eps_cor,shadow calibrated 1e-10 not protocol-authoritative,protocol-fixed eps_sec/eps_cor declaration,eps values with DeltaFK formula binding,eps with file:lines and coefficient match,finite-size
+10,unit per-frame/block conversion,unit table shadow inferred only,authoritative unit declaration bits/block vs bits/symbol vs bits/pair,unit table file:lines,unit_table with conversion proof,none

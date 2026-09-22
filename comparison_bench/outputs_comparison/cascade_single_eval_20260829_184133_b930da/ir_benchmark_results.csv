@@ -1,0 +1,25 @@
+method,dataset_id,ser,q,N,frames,n_success,n_failed_decode,n_failed_verify,fer,leak_total,leak_per_frame,beta_eff_empirical,throughput_input_bps,net_key_rate_bits_per_frame,raw_ber,raw_ser,method_status,q_branch,block_schedule,dropped_semantics
+cascade_single_kernel,eval_ser0.05_q4_N64,0.05,4,64,4,4,0,0,0.0,450.0,112.5,0.0,197454.68477965752,15.5,0.03125,0.05078125,ok,power_of_two,"47,23,64,11","['adaptive_schedule:[47, 23, 64, 11]']"
+cascade_lite,eval_ser0.05_q4_N64,0.05,4,64,4,4,0,0,0.0,450.0,112.5,0.0,281860.72453359526,15.5,0.03125,0.05078125,ok,power_of_two,"47,23,64,11","['adaptive_schedule:[47, 23, 64, 11]']"
+cascade_formal,eval_ser0.05_q4_N64,0.05,4,64,4,3,0,1,0.25,368.0,92.0,0.0,346578.2135424832,4.0,0.03125,0.05078125,ok,power_of_two,"16,32,64,128",[]
+cascade_single_kernel,eval_ser0.05_q4_N256,0.05,4,256,4,4,0,0,0.0,820.0,205.0,0.0,414390.35238268017,307.0,0.0234375,0.0390625,ok,power_of_two,"42,21,84,22","['adaptive_schedule:[42, 21, 84, 22]']"
+cascade_lite,eval_ser0.05_q4_N256,0.05,4,256,4,4,0,0,0.0,820.0,205.0,0.0,419594.74687138293,307.0,0.0234375,0.0390625,ok,power_of_two,"42,21,84,22","['adaptive_schedule:[42, 21, 84, 22]']"
+cascade_formal,eval_ser0.05_q4_N256,0.05,4,256,4,4,0,0,0.0,698.0,174.5,0.0,500452.06966983236,337.5,0.0234375,0.0390625,ok,power_of_two,"16,32,64,128",[]
+cascade_single_kernel,eval_ser0.05_q7_N64,0.05,7,64,4,0,4,0,1.0,0.0,0.0,1.0,6310598.567054901,0.0,0.020833333333333336,0.0390625,unsupported_domain,non_power_of_two,"16,32,64,128","['adaptive_schedule:[16, 32, 64, 128]']"
+cascade_lite,eval_ser0.05_q7_N64,0.05,7,64,4,0,4,0,1.0,0.0,0.0,1.0,7679999.635219592,0.0,0.020833333333333336,0.0390625,unsupported_domain,non_power_of_two,"16,32,64,128","['adaptive_schedule:[16, 32, 64, 128]']"
+cascade_formal,eval_ser0.05_q7_N64,0.05,7,64,4,0,4,0,1.0,0.0,0.0,1.0,7710843.2415775675,0.0,0.020833333333333336,0.0390625,unsupported_domain,non_power_of_two,"16,32,64,128",[]
+cascade_single_kernel,eval_ser0.05_q7_N256,0.05,7,256,4,0,4,0,1.0,0.0,0.0,1.0,23594469.705974422,0.0,0.029622395833333332,0.0478515625,unsupported_domain,non_power_of_two,"16,32,64,128","['adaptive_schedule:[16, 32, 64, 128]']"
+cascade_lite,eval_ser0.05_q7_N256,0.05,7,256,4,0,4,0,1.0,0.0,0.0,1.0,23869460.24195659,0.0,0.029622395833333332,0.0478515625,unsupported_domain,non_power_of_two,"16,32,64,128","['adaptive_schedule:[16, 32, 64, 128]']"
+cascade_formal,eval_ser0.05_q7_N256,0.05,7,256,4,0,4,0,1.0,0.0,0.0,1.0,24517154.362808794,0.0,0.029622395833333332,0.0478515625,unsupported_domain,non_power_of_two,"16,32,64,128",[]
+cascade_single_kernel,eval_ser0.15_q4_N64,0.15,4,64,4,4,0,0,0.0,586.0,146.5,0.0,165599.3273870763,-18.5,0.111328125,0.16015625,ok,power_of_two,"8,16,11","['adaptive_schedule:[8, 16, 11]']"
+cascade_lite,eval_ser0.15_q4_N64,0.15,4,64,4,4,0,0,0.0,586.0,146.5,0.0,166764.37975559855,-18.5,0.111328125,0.16015625,ok,power_of_two,"8,16,11","['adaptive_schedule:[8, 16, 11]']"
+cascade_formal,eval_ser0.15_q4_N64,0.15,4,64,4,1,0,3,0.75,514.0,128.5,0.0,214270.76750029644,-96.5,0.111328125,0.16015625,ok,power_of_two,"16,32,64,128",[]
+cascade_single_kernel,eval_ser0.15_q4_N256,0.15,4,256,4,4,0,0,0.0,1479.0,369.75,0.0,107729.37207061854,142.25,0.109375,0.1650390625,ok,power_of_two,"8,16,22","['adaptive_schedule:[8, 16, 22]']"
+cascade_lite,eval_ser0.15_q4_N256,0.15,4,256,4,4,0,0,0.0,1479.0,369.75,0.0,111427.88731841047,142.25,0.109375,0.1650390625,ok,power_of_two,"8,16,22","['adaptive_schedule:[8, 16, 22]']"
+cascade_formal,eval_ser0.15_q4_N256,0.15,4,256,4,4,0,0,0.0,1488.0,372.0,0.0,129498.95043186747,140.0,0.109375,0.1650390625,ok,power_of_two,"16,32,64,128",[]
+cascade_single_kernel,eval_ser0.15_q7_N64,0.15,7,64,4,0,4,0,1.0,0.0,0.0,1.0,6796459.188998445,0.0,0.09895833333333334,0.15625,unsupported_domain,non_power_of_two,"16,32,64,128","['adaptive_schedule:[16, 32, 64, 128]']"
+cascade_lite,eval_ser0.15_q7_N64,0.15,7,64,4,0,4,0,1.0,0.0,0.0,1.0,7876921.879845675,0.0,0.09895833333333334,0.15625,unsupported_domain,non_power_of_two,"16,32,64,128","['adaptive_schedule:[16, 32, 64, 128]']"
+cascade_formal,eval_ser0.15_q7_N64,0.15,7,64,4,0,4,0,1.0,0.0,0.0,1.0,8170213.794481727,0.0,0.09895833333333334,0.15625,unsupported_domain,non_power_of_two,"16,32,64,128",[]
+cascade_single_kernel,eval_ser0.15_q7_N256,0.15,7,256,4,0,4,0,1.0,0.0,0.0,1.0,10648179.726131052,0.0,0.08789062499999999,0.15625,unsupported_domain,non_power_of_two,"16,32,64,128","['adaptive_schedule:[16, 32, 64, 128]']"
+cascade_lite,eval_ser0.15_q7_N256,0.15,7,256,4,0,4,0,1.0,0.0,0.0,1.0,23943883.87740549,0.0,0.08789062499999999,0.15625,unsupported_domain,non_power_of_two,"16,32,64,128","['adaptive_schedule:[16, 32, 64, 128]']"
+cascade_formal,eval_ser0.15_q7_N256,0.15,7,256,4,0,4,0,1.0,0.0,0.0,1.0,25430465.995374225,0.0,0.08789062499999999,0.15625,unsupported_domain,non_power_of_two,"16,32,64,128",[]

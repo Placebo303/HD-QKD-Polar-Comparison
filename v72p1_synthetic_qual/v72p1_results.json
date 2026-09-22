@@ -1,0 +1,248 @@
+{
+  "schema": "v72p1_results_v1",
+  "head": "fb46954fda50318ecf17fc76e768a0b1019556e2",
+  "data_sha": "84d62779",
+  "seed": 20260902,
+  "used_2m": false,
+  "no_run_01": true,
+  "wall_s": 5.469000000040978,
+  "peak_MiB": 103.50780582427979,
+  "P1A": {
+    "pack_ok": true,
+    "prefix1111": true,
+    "Rs_len": 1111,
+    "checkpoint72": true,
+    "incremental": true,
+    "tag_ok": true,
+    "deterministic": true,
+    "pass": true
+  },
+  "P1B": {
+    "results": {
+      "2": {
+        "m": 2,
+        "n": 6,
+        "worst": 4.440892098500626e-16,
+        "per_pass": true,
+        "tree_flags": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "checks": [
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        ],
+        "observed_zero": true,
+        "observed_one": true
+      },
+      "3": {
+        "m": 3,
+        "n": 9,
+        "worst": 2.220446049250313e-15,
+        "per_pass": true,
+        "tree_flags": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "checks": [
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        ],
+        "observed_zero": true,
+        "observed_one": true
+      }
+    },
+    "wall": 0.10999999998603016,
+    "overall_pass": true,
+    "worst": 2.220446049250313e-15
+  },
+  "P1C": {
+    "outs": {
+      "1": {
+        "finite": true,
+        "maxLLR": 0.0,
+        "residual": 0.0,
+        "converged": true,
+        "wall": 0.2029999999795109
+      },
+      "3": {
+        "finite": true,
+        "maxLLR": 0.0,
+        "residual": 0.0,
+        "converged": true,
+        "wall": 0.2190000000409782
+      },
+      "10": {
+        "finite": true,
+        "maxLLR": 0.0,
+        "residual": 0.0,
+        "converged": true,
+        "wall": 0.2339999999385327
+      }
+    },
+    "wall": 0.6559999999590218,
+    "peak": 0.0,
+    "pass": true
+  },
+  "P1D": {
+    "is_tree": false,
+    "finite": true,
+    "wall": 0.06299999996554106,
+    "worst": 0.00895829830848486,
+    "pass": true
+  },
+  "overall": true,
+  "five_state": true
+}

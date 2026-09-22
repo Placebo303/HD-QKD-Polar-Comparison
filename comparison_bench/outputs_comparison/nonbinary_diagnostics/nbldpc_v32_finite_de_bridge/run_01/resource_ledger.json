@@ -1,0 +1,8 @@
+{
+  "schema": "nbldpc_v32_resource_ledger_v1",
+  "budget_seconds": 43200.0,
+  "cumulative_seconds": 10047.234999999986,
+  "created_utc": "2026-08-21T20:03:34Z",
+  "resume_events": [],
+  "updated_utc": "2026-08-21T22:51:02Z"
+}

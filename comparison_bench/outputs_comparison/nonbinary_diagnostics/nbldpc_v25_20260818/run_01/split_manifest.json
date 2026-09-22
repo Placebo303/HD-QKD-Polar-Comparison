@@ -1,0 +1,46 @@
+{
+  "schema": "nbldpc_v25_split_manifest_v1",
+  "split_ratios": [
+    0.6,
+    0.2,
+    0.2
+  ],
+  "per_source": {
+    "type2_1M_20260121_184040": {
+      "frames": {
+        "train": 1200,
+        "val": 400,
+        "hold": 400
+      },
+      "pairs": {
+        "train": 307200,
+        "val": 102400,
+        "hold": 102400
+      }
+    },
+    "type2_1p5M_20260121_183806": {
+      "frames": {
+        "train": 1660,
+        "val": 553,
+        "hold": 554
+      },
+      "pairs": {
+        "train": 424960,
+        "val": 141568,
+        "hold": 141824
+      }
+    },
+    "type2_2M_20260121_183657": {
+      "frames": {
+        "train": 2187,
+        "val": 729,
+        "hold": 729
+      },
+      "pairs": {
+        "train": 559872,
+        "val": 186624,
+        "hold": 186624
+      }
+    }
+  }
+}

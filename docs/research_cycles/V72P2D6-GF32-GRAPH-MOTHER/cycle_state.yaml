@@ -1,0 +1,80 @@
+cycle_id: V72P2D6-GF32-GRAPH-MOTHER
+state: D6_R1D_EXPLORE_RESULT_ACCEPTED_GRAPH_REDIRECT_CLOSED
+plan_revision: R1_HEAVY
+plan_accepted: true
+implementation_authorized: false
+structure_execution_authorized: false
+g0_execution_authorized: false
+g0_recovery_execution_authorized: false
+p0_cost_execution_authorized: false
+g1_execution_authorized: false
+g2_execution_authorized: false
+synthetic_execution_authorized: false
+real_execution_authorized: false
+formal_execution_authorized: false
+scientific_promotion: false
+development_decoder_authorized: false
+development_authorization_basis: forwarded-prompt-after-independent-pre-execute-pass
+predecessor: V72P2D5-GF32-RATE-MOTHER
+predecessor_terminal: G2_CURRENT_CONFIGURATION_FAILED
+# superseded history (retained visibly, not rewritten): the earlier D5
+# decomposition terminal was elevated by the accepted X4 G2 run (2026-09-13).
+predecessor_terminal_previous: DECOMPOSITION_NO_N64_RECOVERY
+predecessor_next_gate: D6_GRAPH_MOTHER_R1D_RESUME
+predecessor_route_close: D5_RATE_MOTHER_CURRENT_CONFIGURATION_CLOSED
+predecessor_g2_runtime_s: 2141.9420988290076
+predecessor_d7h_status: NOT_AUTHORIZED_NOT_RECOMMENDED
+next_orthogonal_variable: graph_code_construction
+heavy_r1_track: EXPLORE_HEAVY
+heavy_r1_readiness_record: docs/research_cycles/V72P2D6-GF32-GRAPH-MOTHER/D6_GRAPH_MOTHER_R1D_HEAVY_R1_READINESS.md
+heavy_r1_exploration_log: docs/research_cycles/V72P2D6-GF32-GRAPH-MOTHER/EXPLORATION_LOG_R1D.md
+heavy_r1_planned_root: workspace/d6_graph_mother_r1d_141730d1-5ed4-4a60-a935-50e8f24f872d
+heavy_r1_planned_root_absent: false
+heavy_r1_root_created: true
+heavy_r1_planned_root_absent_note: planning-time H32 check was true; root created by A1 on 2026-09-13 19:43:47
+heavy_r1_phase: A1_EXECUTED_REVIEWED_AWAITING_MAIN_ROUTE_DECISION
+heavy_r1_readiness_verdict: PASS_WITH_FINDINGS
+heavy_r1_readiness_review: docs/research_cycles/V72P2D6-GF32-GRAPH-MOTHER/D6_GRAPH_MOTHER_R1D_HEAVY_R1_READINESS_REVIEW.md
+heavy_r1_incident_disclosed: true
+baseline_head: 821388d6fd2a50fc24559c8b9c3895de89ae32a9
+baseline_head_note: prereg baseline; readiness candidate HEAD 278fdf07 (uncommitted working-tree delta)
+baseline_branch: formal-ir-v72p1-addendum-clean
+arms_frozen:
+- B0_D5_DV3_NATIVE
+- B1_D5_DV3_COMMON_LABELS
+- T1_PEG_DV3
+- T2_CYCLE_GREEDY_DV3
+- T3_SC_DV3_W4
+- T4_SC_DV3_W8
+- M1_ACCUMULATOR_FOREST_MAX
+- M2_ACCUMULATOR_FOREST_HALF
+max_decoder_arms: 6
+canary_seeds:
+- 2026091000
+- 2026091001
+- 2026091002
+- 2026091003
+confirmation_seeds_first: 2026091010
+confirmation_seeds_last: 2026091025
+scaling_seeds:
+- 2026091100
+- 2026091101
+- 2026091102
+- 2026091103
+budget_calls: 2500
+budget_wall_s: 43200
+watchdog_s: 120
+rss_budget_bytes: 2147483648
+next_gate: D8_RATE_ALIGNED_ENSEMBLE_FEASIBILITY
+evidence_root: workspace/d6_graph_mother_r1d_141730d1-5ed4-4a60-a935-50e8f24f872d
+terminal: D6_GRAPH_TOPOLOGY_NO_USEFUL_RECOVERY
+result_review_verdict: PASS_WITH_FINDINGS
+result_review_artifact: docs/research_cycles/V72P2D6-GF32-GRAPH-MOTHER/D6_R1D_EXPLORE_A1_BATCH_END_REVIEW.md
+main_route_decision: ACCEPT_RESULT_CLOSE_ELIGIBLE_DV3_REDIRECT_ROUTE_TO_RATE_ALIGNED_ENSEMBLE
+result_accepted: true
+result_acceptance_date: 2026-09-13
+result_claim_ceiling: FROZEN_SYNTHETIC_DV3_GRAPH_REDIRECT_ONLY
+a1_execution_calls: 138
+a1_scientific_calls: 120
+a1_exit_code: 0
+memory_triage: COMPLETE_AT_D6_RESULT_ACCEPTANCE

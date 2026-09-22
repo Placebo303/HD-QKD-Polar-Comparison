@@ -1,0 +1,830 @@
+{
+  "cycle_id": "V48P0",
+  "change_id": "formal-ir-v48-heldout-confirm",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "execution_scope": "v48_diagnostic_90_invocations_heldout_exactly_once",
+  "fake_runner": false,
+  "mechanism_id": "l1_app_soft_transfer_H1_16_syndrome_derived_with_v35_tag_l2_only_heldout_deterministic_spread",
+  "tag_scope": "l2_only",
+  "tag_source": "v35:compute_tag_64(empty,x2)[:16] tag_scope=l2_only",
+  "tag_bits": 64,
+  "sampling_mode": "deterministic_spread_four_consecutive_frames",
+  "provenance": {
+    "authorized_target_sha": "9aa992f73106f8ea8568330bf320ad2a2f5ec606",
+    "sha_binding": {
+      "HEAD": "9aa992f73106f8ea8568330bf320ad2a2f5ec606",
+      "origin/formal-ir-mainline": "9aa992f73106f8ea8568330bf320ad2a2f5ec606"
+    },
+    "structural_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v38_architecture_triage\\run_01\\v38_structural_prototypes.json",
+    "structural_records_strict_match": 4,
+    "h1_material": "V31-H1-QC-16\u00d71024 rank16 QC-cyclic-projective poly37",
+    "h1_rank": 16,
+    "tag_material": "v35:compute_tag_64(empty,x2)[:16] tag_scope=l2_only",
+    "tag_scope": "l2_only"
+  },
+  "v25_counts_provenance": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+    "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts",
+    "role": "source-specific V25 TRAIN empirical counts (read-only)",
+    "exists": true,
+    "counts_source": "TRAIN",
+    "held_out_pool": "split_manifest hold interval 1683 frames / 430k pairs (1M 400 / 1p5M 554 / 2M 729) deterministic spread"
+  },
+  "held_out_provenance": {
+    "frames": {
+      "1M": 400,
+      "1p5M": 554,
+      "2M": 729
+    },
+    "total_frames": 1683,
+    "total_pairs": 430848,
+    "per_source_starts": {
+      "1M": [
+        0,
+        28,
+        56,
+        84,
+        113,
+        141,
+        169,
+        198,
+        226,
+        254,
+        282,
+        311,
+        339,
+        367,
+        396
+      ],
+      "1p5M": [
+        0,
+        39,
+        78,
+        117,
+        157,
+        196,
+        235,
+        275,
+        314,
+        353,
+        392,
+        432,
+        471,
+        510,
+        550
+      ],
+      "2M": [
+        0,
+        51,
+        103,
+        155,
+        207,
+        258,
+        310,
+        362,
+        414,
+        466,
+        517,
+        569,
+        621,
+        673,
+        725
+      ]
+    },
+    "block_windows": {
+      "390128": {
+        "source": "1M",
+        "held_out_ordinal_start": 0,
+        "held_out_ordinal_end": 3,
+        "frame_ids": [
+          1600,
+          1601,
+          1602,
+          1603
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390129": {
+        "source": "1M",
+        "held_out_ordinal_start": 28,
+        "held_out_ordinal_end": 31,
+        "frame_ids": [
+          1628,
+          1629,
+          1630,
+          1631
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390130": {
+        "source": "1M",
+        "held_out_ordinal_start": 56,
+        "held_out_ordinal_end": 59,
+        "frame_ids": [
+          1656,
+          1657,
+          1658,
+          1659
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390131": {
+        "source": "1M",
+        "held_out_ordinal_start": 84,
+        "held_out_ordinal_end": 87,
+        "frame_ids": [
+          1684,
+          1685,
+          1686,
+          1687
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390132": {
+        "source": "1M",
+        "held_out_ordinal_start": 113,
+        "held_out_ordinal_end": 116,
+        "frame_ids": [
+          1713,
+          1714,
+          1715,
+          1716
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390133": {
+        "source": "1M",
+        "held_out_ordinal_start": 141,
+        "held_out_ordinal_end": 144,
+        "frame_ids": [
+          1741,
+          1742,
+          1743,
+          1744
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390134": {
+        "source": "1M",
+        "held_out_ordinal_start": 169,
+        "held_out_ordinal_end": 172,
+        "frame_ids": [
+          1769,
+          1770,
+          1771,
+          1772
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390135": {
+        "source": "1M",
+        "held_out_ordinal_start": 198,
+        "held_out_ordinal_end": 201,
+        "frame_ids": [
+          1798,
+          1799,
+          1800,
+          1801
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390136": {
+        "source": "1M",
+        "held_out_ordinal_start": 226,
+        "held_out_ordinal_end": 229,
+        "frame_ids": [
+          1826,
+          1827,
+          1828,
+          1829
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390137": {
+        "source": "1M",
+        "held_out_ordinal_start": 254,
+        "held_out_ordinal_end": 257,
+        "frame_ids": [
+          1854,
+          1855,
+          1856,
+          1857
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390138": {
+        "source": "1M",
+        "held_out_ordinal_start": 282,
+        "held_out_ordinal_end": 285,
+        "frame_ids": [
+          1882,
+          1883,
+          1884,
+          1885
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390139": {
+        "source": "1M",
+        "held_out_ordinal_start": 311,
+        "held_out_ordinal_end": 314,
+        "frame_ids": [
+          1911,
+          1912,
+          1913,
+          1914
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390140": {
+        "source": "1M",
+        "held_out_ordinal_start": 339,
+        "held_out_ordinal_end": 342,
+        "frame_ids": [
+          1939,
+          1940,
+          1941,
+          1942
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390141": {
+        "source": "1M",
+        "held_out_ordinal_start": 367,
+        "held_out_ordinal_end": 370,
+        "frame_ids": [
+          1967,
+          1968,
+          1969,
+          1970
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390142": {
+        "source": "1M",
+        "held_out_ordinal_start": 396,
+        "held_out_ordinal_end": 399,
+        "frame_ids": [
+          1996,
+          1997,
+          1998,
+          1999
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390228": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 0,
+        "held_out_ordinal_end": 3,
+        "frame_ids": [
+          2213,
+          2214,
+          2215,
+          2216
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390229": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 39,
+        "held_out_ordinal_end": 42,
+        "frame_ids": [
+          2252,
+          2253,
+          2254,
+          2255
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390230": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 78,
+        "held_out_ordinal_end": 81,
+        "frame_ids": [
+          2291,
+          2292,
+          2293,
+          2294
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390231": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 117,
+        "held_out_ordinal_end": 120,
+        "frame_ids": [
+          2330,
+          2331,
+          2332,
+          2333
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390232": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 157,
+        "held_out_ordinal_end": 160,
+        "frame_ids": [
+          2370,
+          2371,
+          2372,
+          2373
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390233": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 196,
+        "held_out_ordinal_end": 199,
+        "frame_ids": [
+          2409,
+          2410,
+          2411,
+          2412
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390234": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 235,
+        "held_out_ordinal_end": 238,
+        "frame_ids": [
+          2448,
+          2449,
+          2450,
+          2451
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390235": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 275,
+        "held_out_ordinal_end": 278,
+        "frame_ids": [
+          2488,
+          2489,
+          2490,
+          2491
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390236": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 314,
+        "held_out_ordinal_end": 317,
+        "frame_ids": [
+          2527,
+          2528,
+          2529,
+          2530
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390237": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 353,
+        "held_out_ordinal_end": 356,
+        "frame_ids": [
+          2566,
+          2567,
+          2568,
+          2569
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390238": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 392,
+        "held_out_ordinal_end": 395,
+        "frame_ids": [
+          2605,
+          2606,
+          2607,
+          2608
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390239": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 432,
+        "held_out_ordinal_end": 435,
+        "frame_ids": [
+          2645,
+          2646,
+          2647,
+          2648
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390240": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 471,
+        "held_out_ordinal_end": 474,
+        "frame_ids": [
+          2684,
+          2685,
+          2686,
+          2687
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390241": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 510,
+        "held_out_ordinal_end": 513,
+        "frame_ids": [
+          2723,
+          2724,
+          2725,
+          2726
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390242": {
+        "source": "1p5M",
+        "held_out_ordinal_start": 550,
+        "held_out_ordinal_end": 553,
+        "frame_ids": [
+          2763,
+          2764,
+          2765,
+          2766
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390328": {
+        "source": "2M",
+        "held_out_ordinal_start": 0,
+        "held_out_ordinal_end": 3,
+        "frame_ids": [
+          2916,
+          2917,
+          2918,
+          2919
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390329": {
+        "source": "2M",
+        "held_out_ordinal_start": 51,
+        "held_out_ordinal_end": 54,
+        "frame_ids": [
+          2967,
+          2968,
+          2969,
+          2970
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390330": {
+        "source": "2M",
+        "held_out_ordinal_start": 103,
+        "held_out_ordinal_end": 106,
+        "frame_ids": [
+          3019,
+          3020,
+          3021,
+          3022
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390331": {
+        "source": "2M",
+        "held_out_ordinal_start": 155,
+        "held_out_ordinal_end": 158,
+        "frame_ids": [
+          3071,
+          3072,
+          3073,
+          3074
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390332": {
+        "source": "2M",
+        "held_out_ordinal_start": 207,
+        "held_out_ordinal_end": 210,
+        "frame_ids": [
+          3123,
+          3124,
+          3125,
+          3126
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390333": {
+        "source": "2M",
+        "held_out_ordinal_start": 258,
+        "held_out_ordinal_end": 261,
+        "frame_ids": [
+          3174,
+          3175,
+          3176,
+          3177
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390334": {
+        "source": "2M",
+        "held_out_ordinal_start": 310,
+        "held_out_ordinal_end": 313,
+        "frame_ids": [
+          3226,
+          3227,
+          3228,
+          3229
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390335": {
+        "source": "2M",
+        "held_out_ordinal_start": 362,
+        "held_out_ordinal_end": 365,
+        "frame_ids": [
+          3278,
+          3279,
+          3280,
+          3281
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390336": {
+        "source": "2M",
+        "held_out_ordinal_start": 414,
+        "held_out_ordinal_end": 417,
+        "frame_ids": [
+          3330,
+          3331,
+          3332,
+          3333
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390337": {
+        "source": "2M",
+        "held_out_ordinal_start": 466,
+        "held_out_ordinal_end": 469,
+        "frame_ids": [
+          3382,
+          3383,
+          3384,
+          3385
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390338": {
+        "source": "2M",
+        "held_out_ordinal_start": 517,
+        "held_out_ordinal_end": 520,
+        "frame_ids": [
+          3433,
+          3434,
+          3435,
+          3436
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390339": {
+        "source": "2M",
+        "held_out_ordinal_start": 569,
+        "held_out_ordinal_end": 572,
+        "frame_ids": [
+          3485,
+          3486,
+          3487,
+          3488
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390340": {
+        "source": "2M",
+        "held_out_ordinal_start": 621,
+        "held_out_ordinal_end": 624,
+        "frame_ids": [
+          3537,
+          3538,
+          3539,
+          3540
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390341": {
+        "source": "2M",
+        "held_out_ordinal_start": 673,
+        "held_out_ordinal_end": 676,
+        "frame_ids": [
+          3589,
+          3590,
+          3591,
+          3592
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      },
+      "390342": {
+        "source": "2M",
+        "held_out_ordinal_start": 725,
+        "held_out_ordinal_end": 728,
+        "frame_ids": [
+          3641,
+          3642,
+          3643,
+          3644
+        ],
+        "pairs_count": 1024,
+        "sampling_mode": "deterministic_spread_four_consecutive_frames"
+      }
+    },
+    "pairs_per_frame": 256,
+    "pairs_per_block": 1024,
+    "sampling_mode": "deterministic_spread_four_consecutive_frames"
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": 90,
+      "l1": 45,
+      "l2": 45
+    },
+    "decoder_calls_started": {
+      "total": 90,
+      "l1": 45,
+      "l2": 45
+    },
+    "decoder_calls_completed": {
+      "total": 90,
+      "l1": 45,
+      "l2": 45
+    },
+    "structural_reconstruction_decoder_calls": 0,
+    "preflight_decoder_calls": 0
+  },
+  "leakage": {
+    "per_source": {
+      "1M": {
+        "m2": 184,
+        "l2_syndrome_bits": 920,
+        "leak_total": 1064,
+        "f_total": 1.2971453628082137
+      },
+      "1p5M": {
+        "m2": 190,
+        "l2_syndrome_bits": 950,
+        "leak_total": 1094,
+        "f_total": 1.2940931532992892
+      },
+      "2M": {
+        "m2": 192,
+        "l2_syndrome_bits": 960,
+        "leak_total": 1104,
+        "f_total": 1.294947481567344
+      }
+    },
+    "H1_16_1064_1094_1104": true,
+    "note": "H1-16 1064/1094/1104 (syndrome 920/950/960 +80+64 tag f_total; leakage already accounted; SHA-trunc64 L2-only)",
+    "leakage_already_accounted": true,
+    "tag_approx_note": "SHA-trunc64 random-hash-model approximate 2^-64, not information-theoretic; strict bound requires universal2+seed; L2-only",
+    "tag_scope": "l2_only"
+  },
+  "npz_policy": {
+    "forbidden_winner_npz_read": false,
+    "any_npz_output_written": false,
+    "v25_channel_counts_npz_read_only_allowed": true
+  },
+  "routing_trace": [
+    "rule_0_integrity_ok",
+    "rule_2_G1_G2_G3_fail -> V48_HELDOUT_FAIL"
+  ],
+  "terminal_state": "V48_HELDOUT_FAIL",
+  "terminal_reason": null,
+  "stopped_for_analysis": false,
+  "undetected_anomaly": false,
+  "needs_heldout_structure_branch": true,
+  "gate_evaluation": {
+    "calls": 45,
+    "g1_overall_exact_full_ge_35_of_45": {
+      "exact_full_total": 30,
+      "threshold": 35,
+      "pass": false
+    },
+    "g2_every_source_ge_10_of_15": {
+      "exact_full_by_source": {
+        "1M": 8,
+        "1p5M": 12,
+        "2M": 10
+      },
+      "threshold_per_source": 10,
+      "pass": false
+    },
+    "g3_undetected_zero": {
+      "undetected_count": 0,
+      "pass": true
+    },
+    "g3_wrong_zero": {
+      "wrong_count": 0,
+      "pass": true
+    },
+    "detected_verification_failure": 0,
+    "decoder_non_syndrome_failure": 15,
+    "undetected_accepted_wrong": 0,
+    "exact_full_total": 30,
+    "passed": false
+  },
+  "aggregates": {
+    "exact_full_total": 30,
+    "exact_l2_total": 30,
+    "exact_u1_total": 44,
+    "per_source": {
+      "1M": {
+        "calls": 15,
+        "exact_full": 8,
+        "exact_l2": 8,
+        "exact_u1": 15,
+        "detected": 0,
+        "decoder_non_syndrome": 7,
+        "undetected": 0,
+        "exact": 8
+      },
+      "1p5M": {
+        "calls": 15,
+        "exact_full": 12,
+        "exact_l2": 12,
+        "exact_u1": 15,
+        "detected": 0,
+        "decoder_non_syndrome": 3,
+        "undetected": 0,
+        "exact": 12
+      },
+      "2M": {
+        "calls": 15,
+        "exact_full": 10,
+        "exact_l2": 10,
+        "exact_u1": 14,
+        "detected": 0,
+        "decoder_non_syndrome": 5,
+        "undetected": 0,
+        "exact": 10
+      }
+    },
+    "detected_total": 0,
+    "decoder_non_syndrome_total": 15,
+    "undetected_total": 0,
+    "exact_total": 30,
+    "wrong_total_l2": 0,
+    "wrong_total_l1": 0,
+    "mean_bp_entropy": 0.0010586800601755163,
+    "mean_abs_diff": 0.0007082201392486446
+  },
+  "master_stop_rule": "\u552f\u4e00\u4e00\u6b21 90-invocation \u5355\u81c2 H1-16 held-out \u6cdb\u5316\u786e\u8ba4\uff08\u542b 45 L1 BP +45 L2\uff09fresh-block held-out (1683 frames / 430k pairs, 1M 400 / 1p5M 554 / 2M 729, \u6bcf block \u786e\u5b9a\u6027\u5206\u6563\u7a97\u53e3 start_j=floor(j*(H-4)/14) \u5404 4 \u5e27=1024 pairs, \u6bcf\u5e27 256 pairs, sampling_mode=deterministic_spread_four_consecutive_frames, \u7981\u6b62\u968f\u673a\u62bd\u53d6\u4e0e\u6700\u524d 60 \u5e27\u622a\u65ad, with V35 SHA-trunc64 L2-only engineering verification (compute_tag_64(empty,x2)[:16], tag_ok gate, tag_scope=l2_only, 4-way reclassified, G3'=undetected==0 \u5355\u81c2, \u5de5\u7a0b\u8fd1\u4f3c 2^-64, exact_full=exact_u1&&exact_l2 oracle, \u51bb\u7ed3\u552f\u4e00 45 \u5757 exact_full\u226535/45 (77.8%) & \u6bcf\u6e90\u226510/15 (66.7%) \u7b49\u6bd4\u4e8e 7/9)\uff1b\u5355\u81c2 H1-16 (16\u00d71024, 80b, rank16 QC-cyclic-projective) + Lane C \u5404 source ordinal-2 \u4ee3\u8868\u77e9\u9635 + max_iter=90,damping 1.0 \u51bb\u7ed3 early-stop \u4e0d\u518d\u8c03\u53c2\uff1bL1APP \u6309\u51bb\u7ed3 syndrome-derived APP\uff08p_i=P(U1|B) TRAIN-only\u3001C floor 1e-15\u3001s1=H1\u00b7u1^Alice\u3001BP_i=decode(H1,p_i,s1).bp_posterior_beliefs / APP approximation\u3001q_i=softmax BP_i\u3001P_i(U2)=\u03a3 q_i P(U2|B,u1)\u3001\u6cc4\u6f0f\u5355\u81c2 1064/1094/1104 f_total=leak/[N(H1+H2)] N=1024\uff0cprior TRAIN-only \u4e0d\u89e6 held-out\uff0c\u590d\u7528 V35 tag L2-only \u4e0d\u91cd\u5b9e\u73b0\uff0c\u4e0d\u505a hard/\u566a\u58f0/\u91cf\u5316/\u5931\u771f\u5f8b/joint \u8fed\u4ee3/\u65b0\u77e9\u9635/\u65b0 decoder \u53c2\u6570/\u53c2\u6570\u7f51\u683c\uff0c\u533a\u5206\u56db\u7c7b\u5355\u81c2\uff0cL1 wrong \u5355\u72ec\u62a5\u544a\uff0c\u4e0d\u8ffd\u6eaf V47\uff0c\u4e0d\u590d\u7528\u5386\u53f2 96 \u5757\uff0c\u5bf9\u7167\u4e3a TRAIN \u540c\u5019\u9009\uff0c\u4e0d\u542f\u52a8 V49\uff09\u540e\u4e0d\u518d\u66f4\u6539\u3002",
+  "statistics_note": "Descriptive only; sample is tiny but held-out independent (90 invocations = 45 unique held-out blocks x(1 L1 +1 L2); 45 L2 records single-arm). Exact-recovery proportions reported with n and raw counts; any interval is naive and uncorrected for clustering; no significance testing. Success primary is exact_full = exact_u1 && exact_l2; exact_u1/exact_l2 reported separately.",
+  "claim_boundary": [
+    "results support ONLY bounded conditional attribution on V25 TRAIN empirical-count development blocks with H1-16 held-out deterministic spread evaluation",
+    "held-out evaluation blocks from split_manifest hold interval 1683 frames / 430k pairs (1M 400 / 1p5M 554 / 2M 729) deterministic spread start_j=floor(j*(H-4)/14) each 4 frames=1024 pairs (not first 60, not random), prior P(U1|B)/P(U2|B,u1) TRAIN-only from channel_counts.npz not re-estimated on held-out",
+    "L2 on frozen Lane C ordinal-2 90/1.0 single point leak_total 1064/1094/1104 (920/950/960+80+64, f_total, engineering verification L2-only), reuse V35 compute_tag_64(empty,x2)[:16], no structure/threshold change, undetected\u22482^-64 only random-hash-model engineering approx (fixed public SHA-256 trunc; strict bound requires universal2+seed), single-arm fixed leakage",
+    "not real frame FER, no threshold/SKR/formal qualification/promotion; terminal is only directional held-out PASS/FAIL, no V49"
+  ],
+  "integrity_failures": [],
+  "performance_interpretation_presented": true
+}

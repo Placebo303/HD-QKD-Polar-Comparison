@@ -1,0 +1,20 @@
+{
+  "formal_run_manifest_sha256": "80653cb1501928d568b08024129e3f5df30d27a1c75a09d6c1b3578d6023bec9",
+  "promoted": false,
+  "promotion_gates": {
+    "p01": {
+      "promoted": false,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 32,
+      "verified_success": 0
+    },
+    "p02": {
+      "promoted": false,
+      "requested": 32,
+      "unclassified_internal_provenance_accounting_failures": 32,
+      "verified_success": 0
+    }
+  },
+  "run_id": "20260725_v1_ldpc_v2_synthetic",
+  "run_status": "completed"
+}

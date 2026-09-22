@@ -1,0 +1,11 @@
+{
+  "workstream": "W6-diagnostics",
+  "decoder_calls": 0,
+  "ce_joint": 7.5094403148357545,
+  "ce_l1": 4.286720430201375,
+  "ce_l2": 3.222719884634378,
+  "truth_mass_mean": 0.25444987775455336,
+  "pass": true,
+  "wall_s": 0.07937079994007945,
+  "rss_bytes": 63881216
+}

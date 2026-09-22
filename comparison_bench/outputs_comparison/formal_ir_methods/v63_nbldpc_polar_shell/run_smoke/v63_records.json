@@ -1,0 +1,164 @@
+[
+  {
+    "block_id": "v63_smoke_1M_0018",
+    "source": "1M",
+    "frame_ids": [
+      1618,
+      1619,
+      1620,
+      1621
+    ],
+    "held_out_ordinal_start": 18,
+    "held_out_ordinal_end": 21,
+    "stage_used": "delta8",
+    "leak_total": 1104,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 3
+  },
+  {
+    "block_id": "v63_smoke_1M_0245",
+    "source": "1M",
+    "frame_ids": [
+      1845,
+      1846,
+      1847,
+      1848
+    ],
+    "held_out_ordinal_start": 245,
+    "held_out_ordinal_end": 248,
+    "stage_used": "base",
+    "leak_total": 1064,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 2
+  },
+  {
+    "block_id": "v63_smoke_1M_0392",
+    "source": "1M",
+    "frame_ids": [
+      1992,
+      1993,
+      1994,
+      1995
+    ],
+    "held_out_ordinal_start": 392,
+    "held_out_ordinal_end": 395,
+    "stage_used": "base",
+    "leak_total": 1064,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 2
+  },
+  {
+    "block_id": "v63_smoke_1p5M_0004",
+    "source": "1p5M",
+    "frame_ids": [
+      2217,
+      2218,
+      2219,
+      2220
+    ],
+    "held_out_ordinal_start": 4,
+    "held_out_ordinal_end": 7,
+    "stage_used": "delta16",
+    "leak_total": 1174,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 4
+  },
+  {
+    "block_id": "v63_smoke_1p5M_0333",
+    "source": "1p5M",
+    "frame_ids": [
+      2546,
+      2547,
+      2548,
+      2549
+    ],
+    "held_out_ordinal_start": 333,
+    "held_out_ordinal_end": 336,
+    "stage_used": "delta16",
+    "leak_total": 1174,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 4
+  },
+  {
+    "block_id": "v63_smoke_1p5M_0546",
+    "source": "1p5M",
+    "frame_ids": [
+      2759,
+      2760,
+      2761,
+      2762
+    ],
+    "held_out_ordinal_start": 546,
+    "held_out_ordinal_end": 549,
+    "stage_used": "base",
+    "leak_total": 1094,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 2
+  },
+  {
+    "block_id": "v63_smoke_2M_0004",
+    "source": "2M",
+    "frame_ids": [
+      2920,
+      2921,
+      2922,
+      2923
+    ],
+    "held_out_ordinal_start": 4,
+    "held_out_ordinal_end": 7,
+    "stage_used": "delta8",
+    "leak_total": 1144,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 3
+  },
+  {
+    "block_id": "v63_smoke_2M_0403",
+    "source": "2M",
+    "frame_ids": [
+      3319,
+      3320,
+      3321,
+      3322
+    ],
+    "held_out_ordinal_start": 403,
+    "held_out_ordinal_end": 406,
+    "stage_used": "delta8",
+    "leak_total": 1144,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 3
+  },
+  {
+    "block_id": "v63_smoke_2M_0721",
+    "source": "2M",
+    "frame_ids": [
+      3637,
+      3638,
+      3639,
+      3640
+    ],
+    "held_out_ordinal_start": 721,
+    "held_out_ordinal_end": 724,
+    "stage_used": "base",
+    "leak_total": 1104,
+    "accepted": true,
+    "exact": true,
+    "undetected": false,
+    "decoder_calls": 2
+  }
+]

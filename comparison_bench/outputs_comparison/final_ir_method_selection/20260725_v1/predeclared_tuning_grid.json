@@ -1,0 +1,105 @@
+{
+  "grid": {
+    "cascade_lite": [
+      {
+        "block_size_schedule": [
+          8,
+          16,
+          32,
+          64
+        ],
+        "mapping": "gray",
+        "num_passes": 4,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      },
+      {
+        "block_size_schedule": [
+          8,
+          16,
+          32,
+          64
+        ],
+        "mapping": "gray",
+        "num_passes": 6,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      },
+      {
+        "block_size_schedule": [
+          16,
+          32,
+          64,
+          128
+        ],
+        "mapping": "gray",
+        "num_passes": 4,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      },
+      {
+        "block_size_schedule": [
+          16,
+          32,
+          64,
+          128
+        ],
+        "mapping": "gray",
+        "num_passes": 6,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      }
+    ],
+    "layered_ldpc_lite": [
+      {
+        "bitplane_rate_mode": "uniform",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "bsc_estimated",
+        "mapping": "gray",
+        "max_iter": 20,
+        "osd_order": 0,
+        "parity_fraction": 0.5
+      },
+      {
+        "bitplane_rate_mode": "uniform",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "bsc_estimated",
+        "mapping": "gray",
+        "max_iter": 50,
+        "osd_order": 0,
+        "parity_fraction": 0.5
+      },
+      {
+        "bitplane_rate_mode": "uniform",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "empirical_bitplane",
+        "mapping": "gray",
+        "max_iter": 50,
+        "osd_order": 0,
+        "parity_fraction": 0.67
+      },
+      {
+        "bitplane_rate_mode": "per_bitplane_raw_ber",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "empirical_bitplane",
+        "mapping": "gray",
+        "max_iter": 50,
+        "osd_order": 0,
+        "parity_fraction": 0.67
+      }
+    ]
+  },
+  "selection": "within candidate: verified successes descending, same-method total leak ascending, runtime ascending; no per-frame or per-point oracle"
+}

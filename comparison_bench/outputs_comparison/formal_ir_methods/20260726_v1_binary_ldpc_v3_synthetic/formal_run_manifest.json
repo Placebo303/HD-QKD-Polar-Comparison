@@ -1,0 +1,15 @@
+{
+  "artifacts": {
+    "formal_codebook_manifest.json": "ab583259a5434724f10816719615b83da51d39a5ff0338b016e5b26c79d16a59",
+    "formal_frame_outcomes.csv": "5f761a1cfdc864da87d567cb09094e04a2f6b83222c23281799fe5d08bd0e035",
+    "formal_transcript.jsonl": "602ef11d1e651573f17e9813a6b8cb54d5dec938f791e2754c1a2347522692cd",
+    "pre_run_plan.json": "a34b7cf04a0e691477ab996c84116540709cd5ab3368b009d76ca2dc31d08abd"
+  },
+  "decoder_reexecution": false,
+  "outcome_count": 64,
+  "plan_sha256": "a34b7cf04a0e691477ab996c84116540709cd5ab3368b009d76ca2dc31d08abd",
+  "run_id": "binary_ldpc_v3_phase6b_synthetic_v1",
+  "run_status": "completed",
+  "schema": "binary_ldpc_v3_phase6b_run_manifest_v1",
+  "stop_reason": ""
+}

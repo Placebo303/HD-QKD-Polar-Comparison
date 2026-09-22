@@ -1,0 +1,131 @@
+{
+  "schema": "v72p2d4_cal_gf32_model_rate_audit_v1",
+  "status": "READY",
+  "cycle": "V72P2D4-CAL-GF32-MODEL-RATE",
+  "session": "20260123_1M_600k_0dB",
+  "registry": "D:\\Code\\HD-QKD_Polar_Comparison\\workspace\\v72p2d3_real_registry_20260904.json",
+  "cal": [
+    702,
+    1725
+  ],
+  "rows": {
+    "n_cal_frames": 1024,
+    "n_cal_symbols": 262144,
+    "n_read_rows": 545280,
+    "n_retained_rows": 262144
+  },
+  "lambda": 1.0,
+  "cv_seed": 20260905,
+  "n_folds": 4,
+  "prior_shapes": {
+    "P1": [
+      1024,
+      32
+    ],
+    "P2": [
+      32,
+      1024,
+      32
+    ],
+    "counts": [
+      1024,
+      1024
+    ]
+  },
+  "resub": {
+    "ce_l1": 3.5959245714864068,
+    "ce_l2_oracle": 1.615743287327693,
+    "ce_joint": 5.211667858814099,
+    "n": 262144,
+    "kind": "cal_resubstitution_nll_descriptive"
+  },
+  "cv": {
+    "mean_ce_l1": 3.8974493104279024,
+    "mean_ce_l2_oracle": 3.8986733669797284,
+    "mean_ce_joint": 7.796122677407631,
+    "n_cal": 262144,
+    "n_folds": 4,
+    "seed": 20260905,
+    "folds": [
+      {
+        "fold": 0,
+        "n_train": 196608,
+        "n_heldout": 65536,
+        "ce_l1": 3.887743219300522,
+        "ce_l2_oracle": 3.89102705130934,
+        "ce_joint": 7.778770270609861
+      },
+      {
+        "fold": 1,
+        "n_train": 196608,
+        "n_heldout": 65536,
+        "ce_l1": 3.8895654847253205,
+        "ce_l2_oracle": 3.884577312414944,
+        "ce_joint": 7.774142797140264
+      },
+      {
+        "fold": 2,
+        "n_train": 196608,
+        "n_heldout": 65536,
+        "ce_l1": 3.892833767005585,
+        "ce_l2_oracle": 3.894223904805964,
+        "ce_joint": 7.787057671811549
+      },
+      {
+        "fold": 3,
+        "n_train": 196608,
+        "n_heldout": 65536,
+        "ce_l1": 3.9196547706801828,
+        "ce_l2_oracle": 3.924865199388665,
+        "ce_joint": 7.844519970068848
+      }
+    ]
+  },
+  "rate": {
+    "n": 1024,
+    "budget": {
+      "h1_bits": 80,
+      "l2_total_bits": 1000,
+      "total_bits": 1080,
+      "rate_bit_per_symbol": 1.0546875
+    },
+    "layers": {
+      "l1": {
+        "ce_bit_per_symbol": 3.5959245714864068,
+        "required_bits": 3682.2267612020805,
+        "available_bits": 80.0,
+        "margin_bits": -3602.2267612020805,
+        "ratio": 46.02783451502601
+      },
+      "l2_oracle": {
+        "ce_bit_per_symbol": 1.615743287327693,
+        "required_bits": 1654.5211262235575,
+        "available_bits": 1000.0,
+        "margin_bits": -654.5211262235575,
+        "ratio": 1.6545211262235575
+      },
+      "joint": {
+        "ce_bit_per_symbol": 5.211667858814099,
+        "required_bits": 5336.747887425638,
+        "available_bits": 1080.0,
+        "margin_bits": -4256.747887425638,
+        "ratio": 4.941433229097813
+      }
+    },
+    "status": "MODEL_BUDGET_MISMATCH",
+    "note": "descriptive only; not a lower bound; not a failure verdict; L1 mismatch never auto-creates a matrix"
+  },
+  "rate_status": "MODEL_BUDGET_MISMATCH",
+  "wall": {
+    "prep_s": 0.5320000000065193,
+    "g_s": 0.859000000054948,
+    "inv_s": 1.3910000000614673
+  },
+  "rss": {
+    "peak_bytes": 189894656
+  },
+  "decoder_calls": 0,
+  "published_bits": 0,
+  "formal": false,
+  "cal_only": true
+}

@@ -1,0 +1,12 @@
+{
+  "arm": "B5",
+  "stratum": "imported_operational_baseline",
+  "records": 300,
+  "per_source_counts": {
+    "1M": 100,
+    "1p5M": 100,
+    "2M": 100
+  },
+  "integrity_ok": true,
+  "decoder_invoked": false
+}

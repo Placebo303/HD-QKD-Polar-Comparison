@@ -1,0 +1,111 @@
+{
+  "cycle_id": "V40P0",
+  "change_id": "formal-ir-v40-decoder-cap-diagnostic",
+  "accepted_plan_sha": "36a3751e190ff06e0e88024b51b6f8713c13a4dc",
+  "lifecycle_state": "DEVELOPMENT_RESULT_CANDIDATE",
+  "execution_scope": "v40_decoder_only_max30_calls_exactly_once",
+  "fake_runner": false,
+  "provenance": {
+    "authorized_target_sha": "80d605489f1f65eefd091625134514e8a09902de",
+    "sha_binding": {
+      "HEAD": "80d605489f1f65eefd091625134514e8a09902de",
+      "origin/formal-ir-mainline": "80d605489f1f65eefd091625134514e8a09902de"
+    },
+    "structural_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v38_architecture_triage\\run_01\\v38_structural_prototypes.json",
+    "structural_records_strict_match": 10,
+    "v39_input_identity": {
+      "paired_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v39_lanec_robustness_laneb_control\\run_01\\v39_paired_comparison.json",
+      "summary_authority": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\formal_ir_methods\\v39_lanec_robustness_laneb_control\\run_01\\v39_summary.json",
+      "predecessor_cycle": "V39P0",
+      "predecessor_plan_sha": "8efb626ba0eaa6b031abd934ed583739ba70065b",
+      "predecessor_execution_sha": "90d2d834c136833000ad612adfd8e09bf815d5d2",
+      "predecessor_result_sha": "940bfc996a0bd87d60e958150c4f770ee35f16b8",
+      "predecessor_terminal_state": "V39_NO_ROBUST_ROUTE_SIGNAL"
+    }
+  },
+  "v25_counts_provenance": {
+    "path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\nonbinary_diagnostics\\nbldpc_v25_20260818\\run_04\\channel_counts.npz",
+    "loader": "comparison_bench.formal_ir.v35_algorithm_development.load_v25_channel_counts",
+    "role": "source-specific V25 TRAIN empirical counts (read-only)",
+    "exists": true
+  },
+  "accounting": {
+    "decoder_calls_planned": {
+      "total": 30,
+      "phase_a": 12,
+      "phase_b": 12,
+      "probe": 6
+    },
+    "decoder_calls_started": {
+      "total": 18,
+      "phase_a": 12,
+      "phase_b": 0,
+      "probe": 6
+    },
+    "decoder_calls_completed": {
+      "total": 18,
+      "phase_a": 12,
+      "phase_b": 0,
+      "probe": 6
+    },
+    "executed_phases": [
+      "phase_a",
+      "probe"
+    ],
+    "structural_reconstruction_decoder_calls": 0,
+    "preflight_decoder_calls": 0
+  },
+  "npz_policy": {
+    "forbidden_winner_npz_read": false,
+    "any_npz_output_written": false,
+    "v25_channel_counts_npz_read_only_allowed": true
+  },
+  "signals": {
+    "A_signal": "CAP_MATERIAL",
+    "B_signal": null
+  },
+  "improvements": {
+    "IMP_A": {
+      "label": "IMP_A",
+      "imp": 0.016304347826086918,
+      "matched_subset_size": 7,
+      "median_errors_final_subset": 181.0,
+      "median_v39_residual_subset": 184.0,
+      "pooled_v39_median_all12": 155.0
+    }
+  },
+  "rescue_and_wrong_counts": {
+    "phase_a": {
+      "wrong_codewords": 0,
+      "rescued_vs_v39": 5
+    },
+    "phase_b": {
+      "wrong_codewords": 0,
+      "new_exacts_vs_phase_a": 0
+    }
+  },
+  "probe_results": {
+    "exact_total": 5,
+    "exact_lane_c": 3,
+    "exact_lane_b": 2,
+    "wrong_lane_c": 0,
+    "wrong_lane_b": 0
+  },
+  "routing_trace": [
+    "rule_2:CAP_MATERIAL",
+    "rule_6:probe->V40_PROBE_CONFIRM_ALLOWED"
+  ],
+  "master_stop_rule": "\u4e0d\u540c\u65f6\u7ee7\u7eed\u4f18\u5316 B\u3001C\u3001decoder \u548c\u65b0\u7b97\u6cd5\uff1b\u5148\u7528 12 calls \u5224\u65ad decoder cap\uff1b\u6ca1\u6709\u5f3a\u4fe1\u53f7\u5c31\u628a\u989d\u5ea6\u6295\u5165 protograph/MET\u3002",
+  "statistics_note": "Descriptive only; sample is tiny and clustered (12 Phase-A/B calls on 3 unique blocks x 2 lanes; 6 probe calls on 3 new blocks x 2 lanes). Rescue proportions are reported with n and raw counts; Wilson intervals, where printed, are naive and uncorrected for block/lane clustering; no significance testing is performed.",
+  "claim_boundary": [
+    "bounded diagnostic statements about the iteration cap's contribution on empirical-count development samples with oracle-L1 conditioning only",
+    "success metric is exact_l2 only; syndrome_ok/wrong_codeword reported separately and wrong codewords are NEVER counted as exact recoveries",
+    "diagnostic rescues are NOT Lane B/C route successes and do not alter the V39 terminal state or any historical B/C conclusion",
+    "V40_PROBE_CONFIRM_ALLOWED authorizes nothing by itself; it only marks that ONE future fresh-block confirmation may be proposed in a NEW OpenSpec change",
+    "forbidden regardless of outcome: FER, asymptotic threshold, SKR, security, formal qualification, promotion, real-frame behavior, Lane C superiority, Lane B superiority, or any statement that V39 gates would now pass"
+  ],
+  "integrity_failures": [],
+  "terminal_state": "V40_PROBE_CONFIRM_ALLOWED",
+  "terminal_reason": null,
+  "performance_interpretation_presented": true
+}

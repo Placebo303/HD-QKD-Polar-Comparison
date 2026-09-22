@@ -1,0 +1,4 @@
+scripts/v72p2d7_gf32_schedule_discriminator.py --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d7_d_schedule_discriminator_64660d16-397d-4ef3-8454-3066d27c12c7
+terminal: D7_D_SCHEDULE_EFFECT_INCONCLUSIVE
+calls_completed: 256
+stored_wall_s: 65.94506893705693

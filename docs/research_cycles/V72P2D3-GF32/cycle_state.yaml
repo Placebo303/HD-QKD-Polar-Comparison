@@ -1,0 +1,76 @@
+cycle_id: V72P2D3-GF32
+state: PLAN_REVISE_REQUIRED
+execution_cycle: V72P2D3_GF32_R2_DECODER
+branch: formal-ir-v72p1-addendum-clean
+base_sha: e094f7e548380db4bfcbc1fe73472e670c32379a
+accepted_plan_sha: e0cf5c6772e26c8de561584941e2fe6eea62666e
+implementation_sha: e0cf5c6772e26c8de561584941e2fe6eea62666e
+implementation_review: PASS
+development_execution_authorized: false
+formal_execution_authorized: false
+real_execution_authorized: false
+decoder_executed: false
+decoder_execution_attempts: 0
+syndrome_published_bits: 0
+scientific_promotion: false
+execution_count_authorized: 1
+execution_count_completed: 1
+pre_execute_review: PASS
+pre_result_review: BLOCKED
+next_gate: R5_MATH_INTERFACE_AND_RATE_AUDIT
+# independent Pre-EXECUTE 14/14 PASS at HEAD 74af0450bc35eb9d6d50c6dcfd3b150bbb42156d (2026-09-04):
+# reviewed impl 12d66ce0ce44310984129217d9f563eab35c245a code-identical at HEAD; authorized one real invocation (real=true, formal=false, promotion=false); no decoder executed; production root still absent.
+# operator return exit2 fail-closed at HEAD 8f44e5ff: real chain needs injected registry/frames/matrices (parquet never opened); production root absent, zero files, no four-file fabrication; authorization consumed (completed=1/1, real=false, formal=false, promotion=false); no retry/rerun; Pre-RESULT PASS; terminal BLOCKED_FAIL_CLOSED.
+# R2 independent cycle (additive 2026-09-04; old execution_count_*=1/1 untouched):
+# attempts 0->1 only before first true kernel; completed only after terminal;
+# current submission is candidate, not bound to old SHA.
+r2_execution_cycle: V72P2D3_GF32_R2_DECODER
+r2_prior_failed_packet_invocations: 1
+r2_prior_failed_decoder_calls: 0
+r2_authorized: 1
+r2_attempts: 0
+r2_completed: 0
+# R2 auth 2026-09-04: global real_execution_authorized=true synced with r2_real_execution_authorized=true; runner reads global; formal=false, promotion=false.
+r2_real_execution_authorized: false
+r2_formal_execution_authorized: false
+r2_scientific_promotion: false
+# R2 production unreachable 2026-09-04: exit2 zero files, invocation1/prep0/decoder0; true kernel never entered, r2_attempts=0/r2_completed=0 retained, real=false/r2_real=false; pre_result BLOCKED; terminal BLOCKED_PROD_UNREACHABLE; no four-file fabrication, production root untouched.
+r3_execution_cycle: V72P2D3_GF32_R3_DECODER
+r3_implementation_sha: 1deb0fd8
+r3_prior_failed_packet_invocations: 0
+r3_prior_failed_decoder_calls: 0
+r3_authorized: 1
+r3_attempts: 0
+r3_completed: 0
+r3_real_execution_authorized: true
+r3_formal_execution_authorized: false
+r3_scientific_promotion: false
+# R3 guard fix 2026-09-04 (additive; R2 BLOCKED_PROD_UNREACHABLE untouched): prepare-only workspace-only; execute-real exact pre-registered root only; 51 passed (47+4); prepare-only READY decoder0; prod absent; no real execution, decoder never entered.
+# R3 auth 2026-09-04: Pre-EXECUTE PASS at HEAD afd0721f (HEAD==origin, r3 bound 1deb0fd8 code-identical, prod absent, 51 passed, READY, r3 pending); authorize one real invocation (global+r3 real=true, formal=false, promotion=false); r3_attempts=0.
+# R4 binding 2026-09-05 (additive; R2/R3 untouched): candidate only, no authorization, no execution.
+r4_execution_cycle: V72P2D3_GF32_R4_DECODER
+r4_implementation_sha: ed7277da
+r4_authorized: 1
+r4_attempts: 0
+r4_completed: 0
+r4_real_execution_authorized: false
+r4_formal_execution_authorized: false
+r4_scientific_promotion: false
+# R4 auth 2026-09-05: Pre-EXECUTE PASS at HEAD cabecc21 (HEAD==origin, r4 bound ed7277da code-identical, prod absent, 53 passed, READY, r4 pending); authorize one real invocation (global+r4 real=true, formal=false, promotion=false); r4_attempts=0.
+# R4 close 2026-09-05 (additive; R2/R3 untouched): BLOCKED_FINAL_WRITE_MISMATCH, entry-passed final-write refused, exit2; decoder0/data0/disclosure0, r4_attempts=0/r4_completed=0 retained, global real=false/r4_real=false, formal=false, promotion=false; pre_result FAIL; state PLAN_REVISE_REQUIRED, next R5_MATH_INTERFACE_AND_RATE_AUDIT; no retry, no conclusion.
+# R4 authorization is revoked for the current route. The historical r4_authorized=1
+# above records the old one-shot grant only; it is not permission for R5 or a retry.
+r4_authorization_revoked: true
+r4_revocation_reason: BLOCKED_FINAL_WRITE_MISMATCH
+r4_retry_allowed: false
+# Current route after R4 closure; no implementation or execution authorization.
+current_route: R5_MATH_INTERFACE_AND_RATE_AUDIT
+r5_plan_state: PLAN_REVISE_REQUIRED
+r5_implementation_authorized: false
+r5_real_execution_authorized: false
+r5_formal_execution_authorized: false
+r5_decoder_executed: false
+r5_decoder_attempts: 0
+r5_decoder_completed: 0
+r5_val_read: false
+r5_next_gate: INDEPENDENT_R5_PLAN_REVIEW

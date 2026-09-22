@@ -1,0 +1,103 @@
+{
+  "authorization_consumed": true,
+  "block_seeds": [
+    2026091300,
+    2026091301,
+    2026091302,
+    2026091303,
+    2026091304,
+    2026091305,
+    2026091306,
+    2026091307,
+    2026091308,
+    2026091309,
+    2026091310,
+    2026091311,
+    2026091312,
+    2026091313,
+    2026091314,
+    2026091315
+  ],
+  "call_order": "for f in [1.0, 1.2]: for seed in 2026091300..2026091315: L1_MARGINAL, L1_ORACLE_U2, L2_MARGINAL, L2_ORACLE_U1",
+  "change": "v72p2d7-gf32-bidirectional-oracle",
+  "command": "scripts/v72p2d7_gf32_bidirectional_oracle.py --model-f-root workspace/v72p2d5_model_f_input/20260907_r1 --out-root workspace/d7_c_bidirectional_oracle_94c0ea15-a786-4cb8-a991-6fec521cccae",
+  "conditions": [
+    "L1_MARGINAL",
+    "L1_ORACLE_U2",
+    "L2_MARGINAL",
+    "L2_ORACLE_U1"
+  ],
+  "contract": "R1+A1",
+  "damping_alpha": 1.0,
+  "decoder": "v35.decode_row_layered_fftqspa via d5.bind_historical_decoder()",
+  "decoder_floor": 1e-15,
+  "estimator": "v72p2d5_gf32_rate_mother.prepare_model_f_prior_candidate(counts_ab, p_b)",
+  "f_values": [
+    1.0,
+    1.2
+  ],
+  "graph_seeds": {
+    "L1": 2026090501,
+    "L2": 2026090502
+  },
+  "l1_rows": {
+    "1.0": 49,
+    "1.2": 59
+  },
+  "l2_rows": {
+    "1.0": 43,
+    "1.2": 52
+  },
+  "lambda_star": 137.3823795883264,
+  "max_calls": 128,
+  "max_iter": 90,
+  "model_f_files": [
+    [
+      "model_f_input.npz",
+      208467
+    ],
+    [
+      "model_f_input_summary.json",
+      752
+    ]
+  ],
+  "model_f_root": "workspace/v72p2d5_model_f_input/20260907_r1",
+  "mothers": {
+    "L1": "build_dv3_nested_support(64,64,49,2026090501)+assign_gf32_coefficients(sup,2026090501,None,64)",
+    "L2": "build_dv3_nested_support(64,64,43,2026090502)+assign_gf32_coefficients(sup,2026090502,None,64)"
+  },
+  "n": 64,
+  "out_root_name": "d7_c_bidirectional_oracle_94c0ea15-a786-4cb8-a991-6fec521cccae",
+  "outer_grace_s": 30.0,
+  "outer_watchdog_s": 1800.0,
+  "per_call_watchdog_s": 120.0,
+  "pid": 258565,
+  "reruns": 0,
+  "resumes": 0,
+  "retries": 0,
+  "rss_limit_bytes": 2147483648,
+  "six_files": [
+    "manifest.json",
+    "decoder_records.csv",
+    "paired_summary.csv",
+    "summary.json",
+    "report.md",
+    "command_log.txt"
+  ],
+  "start_utc": "2026-09-10T16:33:07Z",
+  "stored_wall_limit_s": 1500.0,
+  "terminal_priority": [
+    "D7_C_PRE_EXECUTION_BLOCKED",
+    "D7_C_WATCHDOG_TIMEOUT_VOID",
+    "D7_C_NONFINITE_OR_CRASH_BLOCKED",
+    "D7_C_RESOURCE_OVERRUN",
+    "D7_C_INCOMPLETE_CALL_MATRIX",
+    "D7_C_BIDIRECTIONAL_DEPENDENCE",
+    "D7_C_L1_DEPENDS_ON_U2",
+    "D7_C_L2_DEPENDS_ON_U1",
+    "D7_C_MARGINAL_REGION_EXISTS",
+    "D7_C_ORACLE_NO_USEFUL_RECOVERY",
+    "D7_C_MIXED_DIAGNOSTIC"
+  ],
+  "uuid": "94c0ea15-a786-4cb8-a991-6fec521cccae"
+}

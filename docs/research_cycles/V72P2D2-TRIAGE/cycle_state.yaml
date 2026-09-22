@@ -1,0 +1,30 @@
+cycle_id: V72P2D2-TRIAGE
+state: BLOCKED_PREP_FAILED
+branch: formal-ir-v72p1-addendum-clean
+accepted_plan_git_revision: 4592bdad357a02f8f08a880ca0036beaed3ee900
+implementation_revision: 580471cf
+# preflight: PASS on 580471cf (rerun 2026-09-04; projected_L_wall_s=431.34<=600, peak_rss=146980864<2GiB; memo in workspace/v72p2d2_opencode_preflight/cost_preflight.json)
+implementation_review: PASS
+synthetic_preflight: PASS
+pre_result_review: PASS
+development_execution_authorized: false
+development_execution_scope: one_invocation_fixed_VAL1726_1729_L_I_P_only
+real_execution_authorized: false
+real_execution_scope: one_invocation_fixed_VAL1726_1729_L_I_P_only
+execution_count_authorized: 1
+execution_count_completed: 1
+formal_execution_authorized: false
+decoder_executed: false
+result_created: true
+formal_protocol_qualification: false
+scientific_promotion: false
+output_directory: comparison_bench/outputs_comparison/v72p2d2_orthogonal_oneblock_20260904
+next_gate: BLOCKED_CLOSE_NO_RERUN
+# R1 recovery authorization (additive; D2 1/1 history above is frozen, untouched)
+r1_execution_count_authorized: 1
+r1_execution_count_completed: 1
+r1_real_execution_authorized: false
+r1_formal_execution_authorized: false
+r1_implementation_revision: a11cf239
+r1_pre_result_review: PASS
+r1_output_directory: comparison_bench/outputs_comparison/v72p2d2r1_orthogonal_oneblock_20260904

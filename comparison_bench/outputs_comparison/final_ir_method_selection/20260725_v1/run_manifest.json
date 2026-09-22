@@ -1,0 +1,158 @@
+{
+  "candidate_scope": [
+    "cascade_lite",
+    "layered_ldpc_lite"
+  ],
+  "completed_utc": "2026-07-25T09:34:00+00:00",
+  "data_lock_manifest": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\data_lock_manifest.json",
+  "data_lock_sha256": "28efc5d1654bfc241681a3a9e320aeded213f96f94e23273e33e4f4ea68acd95",
+  "environment": {
+    "numpy": "2.4.0",
+    "pandas": "2.3.3",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.12"
+  },
+  "excluded": {
+    "polar_existing": "historical context; not run",
+    "qldpc_reference": "reference_only; not run"
+  },
+  "grid": {
+    "cascade_lite": [
+      {
+        "block_size_schedule": [
+          8,
+          16,
+          32,
+          64
+        ],
+        "mapping": "gray",
+        "num_passes": 4,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      },
+      {
+        "block_size_schedule": [
+          8,
+          16,
+          32,
+          64
+        ],
+        "mapping": "gray",
+        "num_passes": 6,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      },
+      {
+        "block_size_schedule": [
+          16,
+          32,
+          64,
+          128
+        ],
+        "mapping": "gray",
+        "num_passes": 4,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      },
+      {
+        "block_size_schedule": [
+          16,
+          32,
+          64,
+          128
+        ],
+        "mapping": "gray",
+        "num_passes": 6,
+        "permutation_mode": "seeded_random",
+        "seed": 0,
+        "verify_mode": "crc32"
+      }
+    ],
+    "layered_ldpc_lite": [
+      {
+        "bitplane_rate_mode": "uniform",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "bsc_estimated",
+        "mapping": "gray",
+        "max_iter": 20,
+        "osd_order": 0,
+        "parity_fraction": 0.5
+      },
+      {
+        "bitplane_rate_mode": "uniform",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "bsc_estimated",
+        "mapping": "gray",
+        "max_iter": 50,
+        "osd_order": 0,
+        "parity_fraction": 0.5
+      },
+      {
+        "bitplane_rate_mode": "uniform",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "empirical_bitplane",
+        "mapping": "gray",
+        "max_iter": 50,
+        "osd_order": 0,
+        "parity_fraction": 0.67
+      },
+      {
+        "bitplane_rate_mode": "per_bitplane_raw_ber",
+        "bp_method": "minimum_sum",
+        "column_weight": 3,
+        "ldpc_seed": 20260428,
+        "llr_mode": "empirical_bitplane",
+        "mapping": "gray",
+        "max_iter": 50,
+        "osd_order": 0,
+        "parity_fraction": 0.67
+      }
+    ]
+  },
+  "limits": {
+    "confirmation_frames_per_candidate": 60,
+    "confirmation_tasks": 2,
+    "no_adaptive_extension": true,
+    "tuning_frames_per_config": 60,
+    "tuning_tasks": 8,
+    "wall_time_limit_s": 600.0
+  },
+  "outputs": {
+    "aggregate_summary.csv": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\aggregate_summary.csv",
+    "confirmation_frame_outcomes.csv": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\confirmation_frame_outcomes.csv",
+    "frozen_candidate_configs.json": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\frozen_candidate_configs.json",
+    "predeclared_tuning_grid.json": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\predeclared_tuning_grid.json",
+    "tuning_config_summary.csv": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\tuning_config_summary.csv",
+    "tuning_frame_outcomes.csv": "comparison_bench\\outputs_comparison\\final_ir_method_selection\\20260725_v1\\tuning_frame_outcomes.csv"
+  },
+  "preprocessing_mapping_verification": {
+    "input_columns": [
+      "alice_symbol",
+      "bob_symbol",
+      "dataset_id",
+      "dimension",
+      "frame_id",
+      "frame_len_symbols",
+      "pair_idx"
+    ],
+    "mapping": "gray for both executable candidates",
+    "preprocessing": "source frame table as stored; no symbol remapping during lock",
+    "success_classifier": "comparison_bench.metrics.success.classify_real_ir_success_row",
+    "verification": "independent per-frame verification; failures retained in attempted denominator"
+  },
+  "runtime_s": 3.187000000034459,
+  "schema_version": "final_ir_method_selection_phase3_v1",
+  "selection": "within candidate: verified successes descending, same-method total leak ascending, runtime ascending; no per-frame or per-point oracle",
+  "source_sha256_verified": true,
+  "started_utc": "2026-07-25T09:33:56+00:00",
+  "status": "completed_within_bound"
+}

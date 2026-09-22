@@ -1,0 +1,25 @@
+{
+  "schema": "v72p2d4_cal_gf32_model_rate_manifest_v1",
+  "cycle": "V72P2D4-CAL-GF32-MODEL-RATE",
+  "session": "20260123_1M_600k_0dB",
+  "cal": [
+    702,
+    1725
+  ],
+  "model_reuse": "v72p2d3_gf32_contrast stage priors/CE/CV/rate",
+  "mapping": "low=bits0..4/high=bits5..9/bit0=LSB/symbol=low+32*high",
+  "field": {
+    "q": 32,
+    "poly": 37
+  },
+  "budget": {
+    "h1_bits": 80,
+    "l2_total_bits": 1000,
+    "total_bits": 1080,
+    "rate_bit_per_symbol": 1.0546875
+  },
+  "rate_status": "MODEL_BUDGET_MISMATCH",
+  "cal_only": true,
+  "decoder_calls": 0,
+  "formal": false
+}

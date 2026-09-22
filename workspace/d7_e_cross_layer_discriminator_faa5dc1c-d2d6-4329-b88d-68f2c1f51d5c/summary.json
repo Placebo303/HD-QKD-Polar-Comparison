@@ -1,0 +1,45 @@
+{
+  "calls_attempted": 192,
+  "calls_completed": 192,
+  "calls_remaining": 0,
+  "crash_count": 0,
+  "mandatory_completed": 128,
+  "nonfinite_count": 0,
+  "peak_rss_bytes": 132390912,
+  "reruns": 0,
+  "resumes": 0,
+  "retries": 0,
+  "slots_scheduled": 192,
+  "stop_terminal": "",
+  "stored_wall_s": 64.95356635501957,
+  "strata": [
+    {
+      "direction": "L1_TO_L2",
+      "f": 1.0,
+      "stratum_idx": 1,
+      "stratum_label": "NO_TRANSFER_RECOVERY"
+    },
+    {
+      "direction": "L2_TO_L1",
+      "f": 1.0,
+      "stratum_idx": 2,
+      "stratum_label": "NO_TRANSFER_RECOVERY"
+    },
+    {
+      "direction": "L1_TO_L2",
+      "f": 1.2,
+      "stratum_idx": 3,
+      "stratum_label": "AMBIGUOUS_TRANSFER_EFFECT"
+    },
+    {
+      "direction": "L2_TO_L1",
+      "f": 1.2,
+      "stratum_idx": 4,
+      "stratum_label": "STRONG_TRANSFER_LIFT"
+    }
+  ],
+  "terminal": "D7_E_L2_TO_L1_TRANSFER_LIFT",
+  "transfer_blocked": 0,
+  "transfer_invoked": 64,
+  "watchdog_timeouts": 0
+}

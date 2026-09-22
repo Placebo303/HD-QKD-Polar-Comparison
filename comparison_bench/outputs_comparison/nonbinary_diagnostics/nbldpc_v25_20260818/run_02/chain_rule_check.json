@@ -1,0 +1,204 @@
+{
+  "schema": "nbldpc_v25_chain_rule_check_v1",
+  "per_source": {
+    "type2_1M_20260121_184040": {
+      "Hemp_bits": 0.8010378248976788,
+      "factorizations": {
+        "F01:L01_natural": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F01:L02_gray": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F02:L01_natural": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F02:L02_gray": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F03:L01_natural": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F03:L02_gray": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F04:L01_natural": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F04:L02_gray": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F05:L01_natural": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        },
+        "F05:L02_gray": {
+          "total_H_bits": 0.80103782,
+          "Hemp_bits": 0.8010378248976788,
+          "abs_err": 5e-09,
+          "closed": true
+        }
+      },
+      "basis": "train"
+    },
+    "type2_1p5M_20260121_183806": {
+      "Hemp_bits": 0.8255660516217248,
+      "factorizations": {
+        "F01:L01_natural": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F01:L02_gray": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F02:L01_natural": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F02:L02_gray": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F03:L01_natural": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F03:L02_gray": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F04:L01_natural": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F04:L02_gray": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F05:L01_natural": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F05:L02_gray": {
+          "total_H_bits": 0.82556605,
+          "Hemp_bits": 0.8255660516217248,
+          "abs_err": 2e-09,
+          "closed": true
+        }
+      },
+      "basis": "train"
+    },
+    "type2_2M_20260121_183657": {
+      "Hemp_bits": 0.832562721922195,
+      "factorizations": {
+        "F01:L01_natural": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F01:L02_gray": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F02:L01_natural": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F02:L02_gray": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F03:L01_natural": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F03:L02_gray": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F04:L01_natural": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F04:L02_gray": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F05:L01_natural": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        },
+        "F05:L02_gray": {
+          "total_H_bits": 0.83256272,
+          "Hemp_bits": 0.832562721922195,
+          "abs_err": 2e-09,
+          "closed": true
+        }
+      },
+      "basis": "train"
+    }
+  },
+  "all_closed": true
+}

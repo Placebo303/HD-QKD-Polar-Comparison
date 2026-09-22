@@ -1,0 +1,53 @@
+{
+  "schema": "v67_manifest_v1",
+  "lifecycle": "PLAN_CANDIDATE / DECODER_FREE / EXECUTE_NOT_AUTHORIZED",
+  "head": "3fb2fc6ee623aab45dd9951953aad9cc0271af61",
+  "data_sha": "84d62779",
+  "frozen_body": {
+    "n": 1024,
+    "q": 1024,
+    "GF": "GF32 poly37",
+    "H1": "16x1024 rank16 80b",
+    "U": "32*U1+U2 F03 5+5 natural not GE",
+    "U1": "s>>5",
+    "U2": "s&31",
+    "per_frame": 256,
+    "Lane_C_base": {
+      "1M": 184,
+      "1p5M": 190,
+      "2M": 192
+    },
+    "Lane_C_family": "Delta8 H_inc 8x1024 nested",
+    "H_inc": "Delta8 family",
+    "decoder": "90/1.0 poly37 early-stop disabled",
+    "verification": "full-tag canonical 32*U1+U2 tag 64",
+    "leak": "5*(m1+m2)+64",
+    "materialization": "legacy_v1 dimension 1024 bin200 nearest channels A1/B5 period 204800 threshold 40000 gate200",
+    "not_decomp_flag": true,
+    "not_next_flag": true,
+    "not_MET_protograph_SC": true
+  },
+  "guards": {
+    "R67-01": true,
+    "R67-02": true,
+    "R67-03": true,
+    "R67-04": true,
+    "R67-05": true,
+    "R67-06": true,
+    "R67-07": true,
+    "R67-08": true,
+    "R67-09": true,
+    "R67-10": true
+  },
+  "overall": "V67_FEASIBILITY_MAP_COMPLETE",
+  "counts_per_classification": {
+    "V67_EVIDENCE_INCOMPLETE": 0,
+    "V67_MODEL_NOT_STABLE": 3,
+    "V67_CURRENT_CANDIDATE_COMPATIBLE": 0,
+    "V67_RATE_ADAPTATION": 0,
+    "V67_NEAR_FULL_DISCLOSURE": 0
+  },
+  "candidate_session_list": [],
+  "used_test": false,
+  "no_run_01": true
+}

@@ -1,0 +1,65 @@
+2026-09-08T13:29:10 S1 loaded CAL rows=262144 val_touched=False
+2026-09-08T13:29:10 S1 reversibility PASS for all 252 partitions x 1024 symbols
+2026-09-08T13:29:11 S1 fold accounting PASS (TRAIN 196608 / TEST 65536 per fold)
+2026-09-08T13:29:21 S1 scored 63/252
+2026-09-08T13:29:31 S1 scored 126/252
+2026-09-08T13:29:41 S1 scored 189/252
+2026-09-08T13:29:51 S1 scored 252/252
+2026-09-08T13:29:51 S1 done 252 partitions wall_s=40.8 peak_rss=172781568 chain_max_err=8.88e-16
+2026-09-08T13:29:51 S1 control 0-1-2-3-4 ce_l1=3.910601 ce_l2=3.251747 ce_joint=7.162347 m1=61 m2=50 elig=True
+2026-09-08T13:29:51 S1 control 5-6-7-8-9 ce_l1=3.814742 ce_l2=3.347605 ce_joint=7.162347 m1=59 m2=52 elig=True
+2026-09-08T13:30:05 S2 frozen role=top3 rank=1 s1=5-6-7-8-9 ce=(3.814742,3.347605) joint=7.162347 m=(59,52) elig=True
+2026-09-08T13:30:05 S2 frozen role=top3 rank=2 s1=4-5-7-8-9 ce=(3.815857,3.346491) joint=7.162347 m=(59,52) elig=True
+2026-09-08T13:30:05 S2 frozen role=top3 rank=3 s1=4-6-7-8-9 ce=(3.816418,3.345930) joint=7.162347 m=(59,52) elig=True
+2026-09-08T13:30:05 S2 frozen role=control rank=242 s1=0-1-2-3-4 ce=(3.910601,3.251747) joint=7.162347 m=(61,50) elig=True
+2026-09-08T13:30:05 S2 mothers M1=61 M2=59 decoder_calls_so_far=0
+2026-09-08T13:30:39 S3 mothers L1(64,61,61) L2(64,59,59) square-rank-64 decoder=bind_historical_decoder
+2026-09-08T13:30:59 S3 partition 5-6-7-8-9 done calls_so_far=48
+2026-09-08T13:31:26 S3 partition 4-5-7-8-9 done calls_so_far=96
+2026-09-08T13:31:53 S3 partition 4-6-7-8-9 done calls_so_far=144
+2026-09-08T13:32:20 S3 partition 0-1-2-3-4 done calls_so_far=192
+2026-09-08T13:32:20 S3 done calls=192/600 wall_s=100.8/21600 peak_rss=124219392 unknown_rss=False
+2026-09-08T13:32:49 S4 n252_unique PASS
+2026-09-08T13:32:49 S4 chain_all PASS
+2026-09-08T13:32:49 S4 rows_arith PASS
+2026-09-08T13:32:49 S4 elig_arith PASS
+2026-09-08T13:32:49 S4 top3_match PASS
+2026-09-08T13:32:49 S4 controls_present PASS
+2026-09-08T13:32:49 S4 dedup PASS
+2026-09-08T13:32:49 S4 seeds_frozen PASS
+2026-09-08T13:32:49 S4 no_dup_cells PASS
+2026-09-08T13:32:49 S4 call_total PASS
+2026-09-08T13:32:49 S4 no_crash PASS
+2026-09-08T13:32:49 S4 no_nonfinite PASS
+2026-09-08T13:32:49 S4 flags_agree PASS
+2026-09-08T13:32:57 S4 n252_unique PASS
+2026-09-08T13:32:57 S4 chain_all PASS
+2026-09-08T13:32:57 S4 rows_arith PASS
+2026-09-08T13:32:57 S4 elig_arith PASS
+2026-09-08T13:32:57 S4 top3_match PASS
+2026-09-08T13:32:57 S4 controls_present PASS
+2026-09-08T13:32:57 S4 dedup PASS
+2026-09-08T13:32:57 S4 seeds_frozen PASS
+2026-09-08T13:32:57 S4 no_dup_cells PASS
+2026-09-08T13:32:57 S4 call_total PASS
+2026-09-08T13:32:57 S4 no_crash PASS
+2026-09-08T13:32:57 S4 no_nonfinite PASS
+2026-09-08T13:32:57 S4 flags_agree PASS
+2026-09-08T13:32:57 S4 watchdog PASS
+2026-09-08T13:33:05 S4 n252_unique PASS
+2026-09-08T13:33:05 S4 chain_all PASS
+2026-09-08T13:33:05 S4 rows_arith PASS
+2026-09-08T13:33:05 S4 elig_arith PASS
+2026-09-08T13:33:05 S4 top3_match PASS
+2026-09-08T13:33:05 S4 controls_present PASS
+2026-09-08T13:33:05 S4 dedup PASS
+2026-09-08T13:33:05 S4 seeds_frozen PASS
+2026-09-08T13:33:05 S4 no_dup_cells PASS
+2026-09-08T13:33:05 S4 call_total PASS
+2026-09-08T13:33:05 S4 no_crash PASS
+2026-09-08T13:33:05 S4 no_nonfinite PASS
+2026-09-08T13:33:05 S4 flags_agree PASS
+2026-09-08T13:33:05 S4 watchdog PASS
+2026-09-08T13:33:05 S4 rss_known PASS
+2026-09-08T13:33:05 S4 rank1=5-6-7-8-9 m=(59,52) app_ns=0/8 app_sq=0/8 terminal=DECOMPOSITION_NO_N64_RECOVERY
+2026-09-08T13:33:05 S4 summary terminal=DECOMPOSITION_NO_N64_RECOVERY all_checks=True

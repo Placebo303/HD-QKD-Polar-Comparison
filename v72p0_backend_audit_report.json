@@ -1,0 +1,23 @@
+{
+  "schema": "v72p0_backend_audit_v1",
+  "successor_v72_not_started": true,
+  "per_synthetic": {
+    "synthetic_case": {
+      "Q1": 0,
+      "Q2": 0,
+      "Q3": 0,
+      "Q4": 2,
+      "Q5": 0,
+      "Q6": 2,
+      "Q1_name": "PASS",
+      "Q2_name": "PASS",
+      "Q3_name": "PASS",
+      "Q4_name": "NOT_APPLICABLE",
+      "Q5_name": "PASS",
+      "Q6_name": "NOT_APPLICABLE",
+      "backend_classification": "ADAPTER"
+    }
+  },
+  "overall": "OVERALL_ADAPTER_OR_FAIL",
+  "used_2m": false
+}

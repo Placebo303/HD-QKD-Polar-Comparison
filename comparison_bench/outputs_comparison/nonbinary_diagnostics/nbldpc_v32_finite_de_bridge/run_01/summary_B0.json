@@ -1,0 +1,27 @@
+{
+  "arm": "B0",
+  "stratum": "noiseless_plumbing_control",
+  "arm_pass": true,
+  "per_source": {
+    "1M": {
+      "n": 2,
+      "successes": 2,
+      "threshold": 2,
+      "pass": true
+    },
+    "1p5M": {
+      "n": 2,
+      "successes": 2,
+      "threshold": 2,
+      "pass": true
+    },
+    "2M": {
+      "n": 2,
+      "successes": 2,
+      "threshold": 2,
+      "pass": true
+    }
+  },
+  "false_accept_total": 0,
+  "development_discriminator_only": true
+}

@@ -1,0 +1,37 @@
+{
+  "calls_attempted": 128,
+  "calls_completed": 128,
+  "calls_remaining": 0,
+  "crash_count": 0,
+  "nonfinite_count": 0,
+  "peak_rss_bytes": 105172992,
+  "reruns": 0,
+  "resumes": 0,
+  "retries": 0,
+  "stop_terminal": "",
+  "stored_wall_s": 32.63112180600365,
+  "strata": [
+    {
+      "f": 1.0,
+      "layer": "L1",
+      "stratum_label": "STRONG_ORACLE_LIFT"
+    },
+    {
+      "f": 1.0,
+      "layer": "L2",
+      "stratum_label": "NO_ORACLE_RECOVERY"
+    },
+    {
+      "f": 1.2,
+      "layer": "L1",
+      "stratum_label": "STRONG_ORACLE_LIFT"
+    },
+    {
+      "f": 1.2,
+      "layer": "L2",
+      "stratum_label": "STRONG_ORACLE_LIFT"
+    }
+  ],
+  "terminal": "D7_C_BIDIRECTIONAL_DEPENDENCE",
+  "watchdog_timeouts": 0
+}

@@ -1,0 +1,82 @@
+{
+  "block_symbols": 1024,
+  "cal_cv_ce_log2": 5.211667858814099,
+  "cal_frame_count": 1024,
+  "cal_frame_end": 1725,
+  "cal_frame_start": 702,
+  "cal_rows_read": 262144,
+  "cal_rows_retained": 262144,
+  "contains_matrix_values": false,
+  "contains_prior_values": false,
+  "contains_raw_rows": false,
+  "contains_symbol_values": false,
+  "contains_syndrome_values": false,
+  "cycle_id": "V72P2D3-GF32-R2",
+  "decoder_calls": 0,
+  "formal_output_created": false,
+  "formal_protocol_qualification": false,
+  "frame_pairs": 256,
+  "high_matrix_shapes": [
+    [
+      16,
+      1024
+    ]
+  ],
+  "high_prior_shape": [
+    1024,
+    32
+  ],
+  "high_syndrome_shapes": [
+    16
+  ],
+  "high_syndrome_weights": [
+    16
+  ],
+  "low_matrix_shapes": [
+    [
+      184,
+      1024
+    ],
+    [
+      192,
+      1024
+    ],
+    [
+      200,
+      1024
+    ]
+  ],
+  "low_prior_shape": [
+    1024,
+    32
+  ],
+  "low_syndrome_shapes": [
+    184,
+    192,
+    200
+  ],
+  "low_syndrome_weights": [
+    16,
+    16,
+    16
+  ],
+  "mode": "PREP_ONLY",
+  "peak_rss_bytes": 191340544,
+  "preparation_wall_s": 1.047000000020489,
+  "real_execution_authorized": false,
+  "registry_path": "workspace/v72p2d3_real_registry_20260904.json",
+  "scientific_promotion": false,
+  "selected_lambda": 1.0,
+  "session": "20260123_1M_600k_0dB",
+  "status": "READY_TO_EXECUTE",
+  "syndrome_published_bits": 0,
+  "val_frame_count": 4,
+  "val_frame_ids": [
+    1726,
+    1727,
+    1728,
+    1729
+  ],
+  "val_rows_read": 1024,
+  "val_rows_retained": 1024
+}

@@ -1,0 +1,247 @@
+{
+  "provenance": {
+    "head": "2051b2b5aae7320f934c41dc9f876888ff01cb71",
+    "origin_formal_ir_mainline": "822ba797f5367f8b8b5b7d295159c8eb29f80e95",
+    "implementation_sha": "2051b2b5aae7320f934c41dc9f876888ff01cb71",
+    "new_frames": [
+      0,
+      1,
+      2,
+      3,
+      11,
+      12,
+      13,
+      14
+    ],
+    "fit_new": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "val_new": [
+      11,
+      12,
+      13,
+      14
+    ],
+    "pre_registered_thresholds": {
+      "1M": {
+        "CE_current_U1": 13.25,
+        "CE_current_U2": 13.63,
+        "CE_V13ref_U1": 0.5,
+        "CE_V13ref_U2": 0.5,
+        "CE_thresh_U1": 1.5,
+        "CE_thresh_U2": 1.5
+      },
+      "1p5M": {
+        "CE_current_U1": 14.84,
+        "CE_current_U2": 14.96,
+        "CE_V13ref_U1": 0.6,
+        "CE_V13ref_U2": 0.6,
+        "CE_thresh_U1": 1.6,
+        "CE_thresh_U2": 1.6
+      },
+      "2M": {
+        "CE_current_U1": 16.68,
+        "CE_current_U2": 15.15,
+        "CE_V13ref_U1": 0.91,
+        "CE_V13ref_U2": 0.91,
+        "CE_thresh_U1": 1.91,
+        "CE_thresh_U2": 1.91
+      }
+    },
+    "lifecycle": "PLAN_CANDIDATE / VERIFICATION_ONLY / DECODE_FORBIDDEN",
+    "tag": "ENGINEERING_INVALID_FRAME_ID_SEMANTICS"
+  },
+  "per_source": {
+    "1M": {
+      "contract_equivalent": true,
+      "per_stage_contract": {
+        "raw_channel_timetags": {
+          "array_equal": true,
+          "note": "n_tt=4899732 | corr n_tt=4899732"
+        },
+        "absolute_bin_indices": {
+          "array_equal": true,
+          "note": "b0=3013420 b1=1886312 | corr b0=3013420 b1=1886312"
+        },
+        "physical_frame_match": {
+          "array_equal": true,
+          "note": "n_pairs=545303 | corr n_pairs=545303"
+        },
+        "pair_sequence": {
+          "array_equal": true,
+          "note": "n=545303 | corr n=545303"
+        },
+        "logical_frame_grouping": {
+          "array_equal": true,
+          "note": "fixed=[0, 1, 2, 3, 11, 12, 13, 14] | corr fixed=[0, 1, 2, 3, 11, 12, 13, 14]"
+        },
+        "symbol_1024": {
+          "array_equal": true,
+          "note": "same | corr same"
+        },
+        "U1U2": {
+          "array_equal": true,
+          "note": "sym>>5 &31 | corr sym>>5 &31"
+        }
+      },
+      "A_eq_rate": 0.3945,
+      "acc_U1": 0.4326,
+      "acc_U2": 0.4121,
+      "CE_U1": 14.598,
+      "CE_U2": 15.0418,
+      "CE_thresh_U1": 1.5,
+      "CE_thresh_U2": 1.5,
+      "distribution_compatible": false,
+      "timing_complete": true,
+      "routing_complete": true,
+      "pass_s": false,
+      "shunt_s": "DOMAIN_SHIFT_s",
+      "n_pairs_new": 2048,
+      "per_frame_256_ok": true,
+      "provenance": {
+        "ttbin_abs_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_1M_600k_3s_0dB_2026-01-23_174534.ttbin",
+        "sidecar_abs_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\v55_intake_20260828\\sidecars\\20260123_1M_600k_0dB\\sidecar_meta.json"
+      }
+    },
+    "1p5M": {
+      "contract_equivalent": true,
+      "per_stage_contract": {
+        "raw_channel_timetags": {
+          "array_equal": true,
+          "note": "n_tt=8142371 | corr n_tt=8142371"
+        },
+        "absolute_bin_indices": {
+          "array_equal": true,
+          "note": "b0=4527332 b1=3615039 | corr b0=4527332 b1=3615039"
+        },
+        "physical_frame_match": {
+          "array_equal": true,
+          "note": "n_pairs=1312028 | corr n_pairs=1312028"
+        },
+        "pair_sequence": {
+          "array_equal": true,
+          "note": "n=1312028 | corr n=1312028"
+        },
+        "logical_frame_grouping": {
+          "array_equal": true,
+          "note": "fixed=[0, 1, 2, 3, 11, 12, 13, 14] | corr fixed=[0, 1, 2, 3, 11, 12, 13, 14]"
+        },
+        "symbol_1024": {
+          "array_equal": true,
+          "note": "same | corr same"
+        },
+        "U1U2": {
+          "array_equal": true,
+          "note": "sym>>5 &31 | corr sym>>5 &31"
+        }
+      },
+      "A_eq_rate": 0.3799,
+      "acc_U1": 0.4248,
+      "acc_U2": 0.3994,
+      "CE_U1": 13.5897,
+      "CE_U2": 14.3702,
+      "CE_thresh_U1": 1.6,
+      "CE_thresh_U2": 1.6,
+      "distribution_compatible": false,
+      "timing_complete": true,
+      "routing_complete": true,
+      "pass_s": false,
+      "shunt_s": "DOMAIN_SHIFT_s",
+      "n_pairs_new": 2048,
+      "per_frame_256_ok": true,
+      "provenance": {
+        "ttbin_abs_path": "D:\\Data\\Raw Data\\2026.1.7\\Type2PPLN_1500K_3s_2026-01-07_174222.ttbin",
+        "sidecar_abs_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\v55_intake_20260828\\sidecars\\20260107_PPLN_1p5M\\sidecar_meta.json"
+      }
+    },
+    "2M": {
+      "contract_equivalent": true,
+      "per_stage_contract": {
+        "raw_channel_timetags": {
+          "array_equal": true,
+          "note": "n_tt=9306558 | corr n_tt=9306558"
+        },
+        "absolute_bin_indices": {
+          "array_equal": true,
+          "note": "b0=5737278 b1=3569280 | corr b0=5737278 b1=3569280"
+        },
+        "physical_frame_match": {
+          "array_equal": true,
+          "note": "n_pairs=1411434 | corr n_pairs=1411434"
+        },
+        "pair_sequence": {
+          "array_equal": true,
+          "note": "n=1411434 | corr n=1411434"
+        },
+        "logical_frame_grouping": {
+          "array_equal": true,
+          "note": "fixed=[0, 1, 2, 3, 11, 12, 13, 14] | corr fixed=[0, 1, 2, 3, 11, 12, 13, 14]"
+        },
+        "symbol_1024": {
+          "array_equal": true,
+          "note": "same | corr same"
+        },
+        "U1U2": {
+          "array_equal": true,
+          "note": "sym>>5 &31 | corr sym>>5 &31"
+        }
+      },
+      "A_eq_rate": 0.2744,
+      "acc_U1": 0.3096,
+      "acc_U2": 0.2949,
+      "CE_U1": 16.8741,
+      "CE_U2": 16.0954,
+      "CE_thresh_U1": 1.91,
+      "CE_thresh_U2": 1.91,
+      "distribution_compatible": false,
+      "timing_complete": true,
+      "routing_complete": true,
+      "pass_s": false,
+      "shunt_s": "DOMAIN_SHIFT_s",
+      "n_pairs_new": 2048,
+      "per_frame_256_ok": true,
+      "provenance": {
+        "ttbin_abs_path": "D:\\Data\\Raw Data\\2026.1.23\\Type2_2M_1.2M_3s_0dB_2026-01-23_175008.ttbin",
+        "sidecar_abs_path": "D:\\Code\\HD-QKD_Polar_Comparison\\comparison_bench\\outputs_comparison\\v55_intake_20260828\\sidecars\\20260123_2M_1p2M_0dB\\sidecar_meta.json"
+      }
+    }
+  },
+  "pre_registered_thresholds": {
+    "1M": {
+      "CE_current_U1": 13.25,
+      "CE_current_U2": 13.63,
+      "CE_V13ref_U1": 0.5,
+      "CE_V13ref_U2": 0.5,
+      "CE_thresh_U1": 1.5,
+      "CE_thresh_U2": 1.5
+    },
+    "1p5M": {
+      "CE_current_U1": 14.84,
+      "CE_current_U2": 14.96,
+      "CE_V13ref_U1": 0.6,
+      "CE_V13ref_U2": 0.6,
+      "CE_thresh_U1": 1.6,
+      "CE_thresh_U2": 1.6
+    },
+    "2M": {
+      "CE_current_U1": 16.68,
+      "CE_current_U2": 15.15,
+      "CE_V13ref_U1": 0.91,
+      "CE_V13ref_U2": 0.91,
+      "CE_thresh_U1": 1.91,
+      "CE_thresh_U2": 1.91
+    }
+  },
+  "overall": "V56_TRUE_SESSION_DOMAIN_SHIFT",
+  "zero_overlap": {
+    "new_vs_V55_90": true,
+    "new_vs_D4_fitval": true
+  },
+  "boundary": {
+    "V55_90_permanently_banned": true
+  },
+  "per_frame_256_guard": "each frame 256 pairs via start=frame_id*256 slicing after full pair sequence"
+}

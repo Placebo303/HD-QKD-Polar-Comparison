@@ -1,0 +1,38 @@
+{
+  "schema": "v72p2d4r2_cal_gf32_model_rate_manifest_v1",
+  "cycle": "V72P2D4R2-CAL-GF32-MODEL-RATE",
+  "session": "20260123_1M_600k_0dB",
+  "cal": [
+    702,
+    1725
+  ],
+  "outer_folds": [
+    "702..957",
+    "958..1213",
+    "1214..1469",
+    "1470..1725"
+  ],
+  "models": [
+    "U(uniform-5/5/10-reference)",
+    "G(train-marginal)",
+    "F(full,grid30-inner)",
+    "L(hierarchical,reuse-F-lam)",
+    "M3_EXIT_AMBIGUOUS",
+    "CIRCULANT_DEFERRED"
+  ],
+  "selected": "F",
+  "route": "C",
+  "mapping": "low=bits0..4/high=bits5..9/bit0=LSB/symbol=low+32*high",
+  "field": {
+    "q": 32,
+    "poly": 37
+  },
+  "budget_rows": {
+    "L1": 16,
+    "L2": 200,
+    "Total": 216
+  },
+  "cal_only": true,
+  "decoder_calls": 0,
+  "formal": false
+}

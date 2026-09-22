@@ -1,0 +1,287 @@
+# OpenSpec Design: formal-ir-v45-l1-app-soft-transfer
+
+**Lifecycle**: `PLAN_CANDIDATE / EXECUTE_NOT_AUTHORIZED` — **不实现、不运行 decoder，等待独立评审**。
+**Cycle**: `V45P0`
+**Predecessor**: V43P0 `formal-ir-v43-soft-marginal-diagnostic`（terminal `V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`，result SHA `4e2ed4db`；继承其 Lane C / 三矩阵 / 90/1.0 / 9 blocks 配对形态 / J6 SCOPED 路径 / Master Stop Rule 形态；本变更把对照从 oracle 改为 **V43 soft-marginal P(U2|B)**，延续五终态与 orthogonal 标志语义，重命名终态为 reviewer 指定命名）& V44 处置 `NO_NOVEL_MECHANISM` 为参照（plan SHA `c51a21c0`，恒等式 `q=P(U1|B) ⇒ P^{V44}=P^{V43}`）
+**H1 provenance**: `V31 H1 (m1=16, n=1024, GF32 poly37, QC-cyclic-projective, rank16)` — 由 `nonbinary_v31.build_matrix_packet(m1=16,{L2_m2},n=1024,family=QC-cyclic-projective)` 产生的 `matrices["L1"]`，`field=GF2mField.create(32)`，`q=32,m=5,poly37,basis/ratio_order` 固定，`max_support_occupancy≤31, projective_safe, full_row_rank` 已构造校验；候选 H1 已存在但尚未科学验收为本 soft-transfer 的 H1（图谱 §5 分支 A 候选说明），本设计将其冻结为 “复用 H1”，不新增矩阵设计
+**Decoder provenance**: 通用 `decode_row_layered_fftqspa(H, prior, syndrome).bp_posterior_beliefs` — 非 L2 专用，`(H,prior,syndrome)` 三参通用接口，返回每位置 32 状态 BP posterior beliefs / APP approximation（非精确 APP），冻结当前 syndrome early-stop 行为；本诊断 L1 与 L2 均复用该接口，不新增 decoder
+**HEAD**: `aa18c4af`（实现冻结时 `git rev-parse` 精确绑定）
+
+## 1. 科学问题（单一，明确 syndrome-derived 来源，对照为 V43 soft-marginal）
+
+在 Lane C 图结构与译码设置完全冻结下，**真实 syndrome-derived L1 APP 软转移** `q_i(u1)=softmax BP_i` 是否在相同门禁（G1'≥7/9 且 G2'≥2/源 且 G3' zero-wrong）下改善 **V43 soft-marginal `P(U2|B)=Σ p_i(u1)P(U2|B,u1)`**？以冻结门禁判定分流：BOTH pass 则保留信号；control-only 则 L1-APP 无价值或有害；treatment-only 则新增价值信号；both fail 则转 joint/protograph/MET。所有分流仅描述方向、不授权任何后继。Oracle 真 U1 仅作历史能力上界，不占本轮 paired arm。
+
+**机制来源明确性**：`q_i` 必携带超越 `P(U1|B)` 的 `M_{H1,s1→i}` 非平凡消息（`q_i ∝ p_i·M_{H1,s1→i} ≠ p_i`，图谱 §4.2 开放判据）；`p_i(u1)=P(U1|B_i)` 来自 V25 `C(a,b)` 公共先验，`s1=H1·u1^Alice` 来自真 Alice L1 符号计泄漏，`BP_i` 来自 L1 行分层 FFT-QSPA 校验-变量消息的 BP posterior / APP approximation，归一后 `q_i` 为每位置和=1（floor 1e-15 防零）；若 `M≡1` 则 `q_i=p_i` 退化为 V43（恒等式 §3.4），NO NOVEL MECHANISM。**真实 `q≠p`、L1 iterations/syndrome_ok/exact/wrong、APP entropy/confidence 均在授权执行期测量；`q≈p` 或近 uniform 为阴性科学结果，非 evidence invalid**。
+
+对照冻结：
+
+```
+Control (V43 soft-marginal, 零额外泄漏):   P_i^{control}(U2) = Σ_{u1} p_i(u1)·P(U2|B_i,u1)
+Treatment (L1 APP, 额外 80 bits):          P_i^{treat}(U2)   = Σ_{u1} q_i(u1)·P(U2|B_i,u1), q_i=softmax BP_i(H1,p_i,s1)
+```
+
+成功区分：主要诊断 `exact_l2`（L2-transfer 成功），同时报告完整 reconciliation `exact_full = exact_u1 && exact_u2`。L1 hard decision 不 exact 时软 beliefs 仍可能帮助 L2，不必立刻停止；该记录不得称为完整多级成功。
+
+## 2. 前代绑定与只读输入
+
+只读：
+
+- 结构权威 `comparison_bench/outputs_comparison/formal_ir_methods/v38_architecture_triage/run_01/v38_structural_prototypes.json`
+- V25 TRAIN counts 经 accepted `load_v25_channel_counts()` 唯一入口（公共先验，`p_i` 零额外通信；`s1` 计泄漏）
+- V31 H1 物料经 `nonbinary_v31.build_matrix_packet` QC-cyclic 路径确定性重建（J3 比对对象）
+- V40/V41/V42/V43 run_01 summary 仅作身份/溯源引用；V43 已 durable（terminal `V43_ORACLE_ONLY_SOFT_MARGINAL_BOTTLENECK`，result SHA `4e2ed4db`）为历史参照；V44 处置 `docs/formal-ir-mathematical-method-map-v25-v44.md §3.4 §7.1-7.2` 为参照；不 import v39/v40/v41/v42/v43/v44 模块
+
+## 3. 冻结样本集（9 个新块，预注册）
+
+延续 `390x` 源前缀递增约定，`390113-121/213-221/313-321` 已被 V43+V44 占用，本变更取其后三枚/源：
+
+| source | 新 block seeds |
+|---|---|
+| 1M | 390119, 390120, 390121 |
+| 1p5M | 390219, 390220, 390221 |
+| 2M | 390319, 390320, 390321 |
+
+FORBIDDEN 并集 = V36_A3(15: 360101-105/360201-205/360301-305) ∪ V39(15: 390101-105/390201-205/390301-305) ∪ V40 probe(3: 390106/390206/390306) ∪ V41 confirm(9: 390107-109/390207-209/390307-309) ∪ V42 diagnostic(9: 390110-112/390210-212/390310-312) ∪ V43 diagnostic(9: 390113-115/390213-215/390313-315) ∪ V44 diagnostic(9: 390116-118/390216-218/390316-318) = **69 seeds**。九枚新区为每源 x19-x21 连续递增，无内部重复，与全部七族零重叠（P3/J2 机械复验）。
+
+采样语义与既有协议一致：`sample_empirical_block(V25 TRAIN counts, block_seed, BLOCK_LENGTH=1024)` + `factorize_f03`；每块样本计算一次并被两臂共享（配对保证 §10）。
+
+## 4. 冻结 workload（27 decoder invocations，18 L2 records）
+
+**预算语义修正**：每块 `L1 BP 1 + Control L2 1 + Treatment L2 1 =3` invocations，共 `9×3=27` decoder invocations；L2 performance records 仍 18 条（C01-C18）。Summary 必须分别记录 `l1=9 / control_l2=9 / treatment_l2=9 / total=27`（planned/completed/started actuals）。
+
+L2 records 顺序冻结（D7）：源 1M/1p5M/2M，块按 seed 升序，`cond_control` 在 `cond_l1_app` 之前：
+
+| call | source | block_seed | condition | matrix_id (lane_c ordinal 2) | H1 |
+|---|---|---|---|---|---|
+| C01 | 1M | 390119 | cond_control | lane_c_1M_s383102 | V31-H1-QC-16×1024 |
+| C02 | 1M | 390119 | cond_l1_app | lane_c_1M_s383102 | V31-H1-QC-16×1024 |
+| C03 | 1M | 390120 | cond_control | lane_c_1M_s383102 | V31-H1-QC-16×1024 |
+| C04 | 1M | 390120 | cond_l1_app | lane_c_1M_s383102 | V31-H1-QC-16×1024 |
+| C05 | 1M | 390121 | cond_control | lane_c_1M_s383102 | V31-H1-QC-16×1024 |
+| C06 | 1M | 390121 | cond_l1_app | lane_c_1M_s383102 | V31-H1-QC-16×1024 |
+| C07 | 1p5M | 390219 | cond_control | lane_c_1p5M_s383202 | V31-H1-QC-16×1024 |
+| C08 | 1p5M | 390219 | cond_l1_app | lane_c_1p5M_s383202 | V31-H1-QC-16×1024 |
+| C09 | 1p5M | 390220 | cond_control | lane_c_1p5M_s383202 | V31-H1-QC-16×1024 |
+| C10 | 1p5M | 390220 | cond_l1_app | lane_c_1p5M_s383202 | V31-H1-QC-16×1024 |
+| C11 | 1p5M | 390221 | cond_control | lane_c_1p5M_s383202 | V31-H1-QC-16×1024 |
+| C12 | 1p5M | 390221 | cond_l1_app | lane_c_1p5M_s383202 | V31-H1-QC-16×1024 |
+| C13 | 2M | 390319 | cond_control | lane_c_2M_s383302 | V31-H1-QC-16×1024 |
+| C14 | 2M | 390319 | cond_l1_app | lane_c_2M_s383302 | V31-H1-QC-16×1024 |
+| C15 | 2M | 390320 | cond_control | lane_c_2M_s383302 | V31-H1-QC-16×1024 |
+| C16 | 2M | 390320 | cond_l1_app | lane_c_2M_s383302 | V31-H1-QC-16×1024 |
+| C17 | 2M | 390321 | cond_control | lane_c_2M_s383302 | V31-H1-QC-16×1024 |
+| C18 | 2M | 390321 | cond_l1_app | lane_c_2M_s383302 | V31-H1-QC-16×1024 |
+
+另有 9 次 L1 invocations（每块一次，记为 L1-01..L1-09，与上表块一一对应），总计 27。18 行去重得 **3 枚唯一 L2 矩阵**（lane_c × source，ordinal-2）+ **1 枚唯一 H1**（V31 QC-cyclic 16×1024）；成员/顺序漂移即 J12。H1 与 L2 矩阵分别重建比对（J3 双重建）。
+
+## 5. 代表矩阵（常量，复用 V42/V43/V44 冻结身份 + V31 H1）
+
+Lane C ordinal-2 / source，沿用 V42/V43 三枚冻结 id（以 committed v41 模块常量表校验）：
+
+- `lane_c_1M_s383102` (383102)
+- `lane_c_1p5M_s383202` (383202)
+- `lane_c_2M_s383302` (383302)
+
+H1：`V31-H1-QC-16×1024`（`m1=16, n=1024, family=QC-cyclic-projective, GF32 poly37, rank16, capacity_ok, projective_safe, full_row_rank`），经 `build_layer(16,1024,family=QC-cyclic-projective)` 确定性重建，与 V31 构造审计严格比对（J3）；H1 存在性不等于验收性（图谱 §5 分支 A 候选说明），本诊断将其作为 “复用 H1” 冻结，不新增设计。
+
+## 6. 译码合约（单点冻结；双条件组合路径；不新增 decoder）
+
+27 invocations 共享数值合约：
+
+| parameter | value |
+|---|---|
+| field | GF(32), poly 37 |
+| max_iter | 90 |
+| damping_alpha | 1.0 |
+| syndrome L2 | 来自真 `u2_alice` |
+| syndrome L1 | `s1 = H1 · u1^Alice`（GF32，计泄漏 80 bits） |
+| success (primary) | `exact_l2` vs 真 `u2_alice`（L2-transfer 成功） |
+| success (full) | `exact_full = exact_u1 && exact_l2`（完整 reconciliation，同时报告） |
+| decoder | 复用现有 `decode_row_layered_fftqspa(H, prior, syndrome)` 通用接口（行分层 FFT-QSPA），返回 `bp_posterior_beliefs`（BP posterior / APP approximation，非精确 APP），冻结 syndrome early-stop 行为 |
+| BP beliefs | `bp_posterior_beliefs` 每位置 32 长 log-beliefs，非精确 APP；记录 L1 的 `exact/syndrome_ok/wrong/iterations` |
+
+每块 L1 invocation：`p_i(u1)=P(U1|B_i)` → `s1` → `decode(H1, p_i, s1).bp_posterior_beliefs → q_i`，记录 L1 诊断（iterations, exact_u1, syndrome_ok_l1, wrong_l1, entropy/confidence）。
+
+每块两臂 L2 差异：
+
+- `cond_control`：`prior_L2 = Σ p_i(u1)·P(U2|B_i,u1) = P(U2|B_i)`（V43 soft-marginal，零额外泄漏）；
+- `cond_l1_app`：`prior_L2 = Σ q_i(u1)·P(U2|B_i,u1)`（§7 冻结定义，syndrome-derived）。
+
+**D15 组合路径**：`evaluate_single_block` 硬编码 oracle conditioning 且 `counts` 参数兼作采样与后验，复用会破配对。V45 模块沿 V42/V43 模式组合同一组 accepted 原语单薄环路（`sample_empirical_block` 每块一次 → `factorize_f03` → L1: `p_i(u1)` + `s1` → `decode(H1, p_i, s1).bp_posterior_beliefs → q_i` → L2 per-arm 先验 → `syndrome_of_gf32(H_L2, u2_alice)` → `decode_row_layered_fftqspa(H_L2, prior_L2, s2)`），复刻 v38 992-1030 仅改 conditioning 构造；数值均来自 accepted 模块；`decode_fn` 可注入，默认 accepted 解码器，测试注入 fake，生产 `fake_runner=False`（无 fake-runner CLI 选项）。`wrong_codeword = syndrome_ok and not exact` 按记录派生，永不计为 exact，偏离即 J9。L1 hard decision 不 exact 仍继续 L2 软转移，不停止；`exact_full` 另行报告。
+
+## 7. O1 — L1 APP 软转移机制（冻结，单一，syndrome-derived）
+
+Hard `u1_hat`、oracle 真 U1 直接条件、V44 Bob-only `q=P(U1|B)` 多 joint/soft 并行路径**均禁用**。L1 APP 软转移冻结定义（verbatim，后续不得更改）：
+
+```
+对每位置 b_i ∈ bob（长度 1024），计数矩阵 C = channel_counts (1024×1024, V25 TRAIN)：
+  p_i(u1) = Σ_{u2} C[u1·32+u2, b_i] / Σ_{u1',u2'} C[u1'·32+u2', b_i]   (分母 floor 1e-15, 每 i 和=1)
+  s1 = H1 · u1^Alice   (GF32, H1∈GF32^{16×1024}, u1^Alice∈GF32^{1024}, 公开计 80 bits)
+  BP_i = decode_row_layered_fftqspa(H1, p_i(u1), s1).bp_posterior_beliefs[i]  (32 长 log-beliefs, BP posterior / APP approximation, 冻结 early-stop)
+  q_i(u1) = softmax_{u1} BP_i(u1) = exp(BP_i(u1))/Σ_{u1'} exp(BP_i(u1'))   (每 i 和=1, floor 1e-15 防零)
+  P_i(U2=u2) = Σ_{u1=0..31} q_i(u1) · P(U2=u2 | B=b_i, U1=u1)
+           其中 P(U2|B,u1)= C[u1·32+u2, b_i]/Σ_{u2'} C[u1·32+u2', b_i]
+  计数器 C 为公共先验（p_i 零额外通信）；q_i 由 H1,s1 的校验消息 M_{H1,s1→i} 非平凡派生，M≡1 则退化为 V43 soft-marginal
+```
+
+**泄漏显式（修正单位，V31 m1=16 固定）**：`m1=16 → 80 bits`；`m2 ∈ {184,190,192} → L2 syndrome 920/950/960 bits`；`L2+tag = 920+64/950+64/960+64 = 984/1014/1024 bits`；`m_total=m1+m2 ∈ {200,206,208}`；Control `leak_total=5·m2+64=984/1014/1024`，Treatment `leak_total=5·m_total+64=1064/1094/1104`，`f_total=leak_total/[N·(H1+H2)]`，`N=1024`，`H_i` bits/symbol 来自 V31 frozen config `SOURCE_H`。Control 与 Treatment 非等泄漏比较，结论表述为“额外 80-bit L1 syndrome information 的 L2 transfer value”，decomposition 语义显式区分。禁止引入 Alice 真值入 `q_i` 以外（`u1_true` 仅用于 `s1` 与 `exact` 判定，不直接入 L2 先验）、事后权重/pilot/噪声/量化/joint 迭代/新矩阵/新 decoder 参数/失配信道律/C04 调参。`cond_l1_app` 是“ syndrome-derived L1 APP 软转移 ”，非 V44 无码先验；真实 `q≠p` 非平凡性仅执行期观测，`q≈p` 为阴性结果非 invalid。
+
+## 8. 每条件门禁（路由/归因保留，基于 exact_l2）
+
+对 X ∈ {cond_control, cond_l1_app}，各以其 9 条 L2 records 判定（primary `exact_l2`）：
+
+- G1'：X 的 overall exact_l2 ≥ 7/9
+- G2'：X 的每源 exact_l2 ≥ 2/3
+- G3'：X 的 wrong_codewords == 0
+
+X 通过当且仅当三条全满足；仅判定条件保留，不支持条件/ lane 间优劣排序。同时报告 `exact_full`（`exact_u1 && exact_l2`）作完整 reconciliation 参照，但不入 G1'/G2'/G3' 门禁。
+
+## 9. 终态机（总量互斥；EVIDENCE_INVALID 优先；新命名）
+
+五终态：`V45_EVIDENCE_INVALID`、`V45_BOTH_RETAINED`、`V45_L1APP_NO_VALUE_OR_HARM`、`V45_GO_STRUCTURE`、`V45_L1APP_ADDED_VALUE_SIGNAL`（按 `(control_pass, treatment_pass)` 平面穷尽互斥；oracle 不占维度）：
+
+```text
+0. 任意完整性/执行失败 -> V45_EVIDENCE_INVALID
+1. pass_control AND pass_treatment -> V45_BOTH_RETAINED
+     （Both retained：L1-APP 在相同门禁下保留信号）
+2. 仅 pass_control -> V45_L1APP_NO_VALUE_OR_HARM
+     (Control-only：L1-APP 无价值或有害，额外 80-bit 未改善 L2-transfer)
+3. 均不通过 -> V45_GO_STRUCTURE
+     (Both fail：转 joint/protograph/MET)
+4. 仅 pass_treatment -> V45_L1APP_ADDED_VALUE_SIGNAL
+     (Treatment-only：V45_L1APP_ADDED_VALUE_SIGNAL，仅检查，不作无条件优于 control 的泛化)
+```
+
+规则 1-4 穷尽互斥覆盖 `(pass_control, pass_treatment)` 平面，规则 0 优先；真值表测试枚举 integrity ok/failed × 四格并断言互斥必做（T5）。终态判定基于 `exact_l2`；`exact_full` 另行报告作完整 reconciliation 参照。
+
+Wrong 处理（逐臂局部，D4 教训）：记录、永不计为 exact、仅通过本臂 G3' 生效、并置 `stopped_for_analysis[condition]=true`；无全局 wrong 规则、无跨臂否决；任意 control 臂 wrong 立旗 `control_arm_wrong_codeword_anomaly=true`（原 oracle 旗更名）。
+
+所有终态下：不追加块、不补跑、不做第二轮诊断、不调阈值/机制；不自动启动后继。**orthogonal 标志**：`needs_1p5m_structure_branch` 当且仅当 `control exact on 1p5M < 2/3` 时立旗，独立于上述终态。
+
+移除旧 oracle-only 命名：`V45_BOTH_PASS / V45_ORACLE_ONLY_L1APP_BOTTLENECK / V45_ANOMALOUS_INVERSION` 已按上表重命名，旧名禁止出现于实现与 summary。
+
+## 10. O3 配对语义
+
+- 同 `block_seed` 的确定性样本 `(idx, alice, bob)` 每块算一次并传两臂（结构配对保证）；每块 L1 invocation 共享同一 `p_i/s1` 求 `q_i`。
+- 同 H_L2（该源 lane_c ordinal-2）、同设置 90/1.0、同域/多项式、同 L2 syndrome、同样本；两臂**唯一**差异为 L2 先验构造（V43 soft-marginal `p_i` vs syndrome-derived `q_i`）；H1/s1/L1 APP 仅 treatment 臂引入，control 臂不经 L1。
+- 跨条件残差差异（`errors_final/iterations/exact_l2/syndrome_ok/wrong_codeword`）是**诊断量本身**，永不作完整性失败。
+- `exact_full` 与 `exact_l2` 同时记录；`exact_u1` 来自 L1 hard decision（`argmax q_i`），`exact_u1==false` 不阻止 L2 软转移。
+
+完整性检查跨条件适用性：
+
+| 检查类 | 跨条件适用 |
+|---|---|
+| J2 registry / J3 重建(H1+L2)/ J4 counts / J5 sentinels | 适用（共享 preflight，两臂继承） |
+| workload & 配对完备：9 块各每条件一次、共 18 L2 records + 9 L1、顺序 C01-C18 | 适用（J6/J12） |
+| 预算：27 total / l1 9 / control 9 / treatment 9 共帽 | 适用（J10） |
+| 记录 schema、译码合约、NPZ 策略 | 适用（J8/J9/J11） |
+| 跨臂 outcome-field 比较（errors_final/iterations/exact_l2/syndrome_ok/wrong_codeword） | 不适用 — 差异即信号 |
+| `errors_initial` 一致性 | 臂内自洽 + 严格 per-pair 跨臂等值门（D14 沿用 V42/V43）：同块两臂 `errors_initial` 必须严格相等，先于该对解码检查；不等即 J6 → `V45_EVIDENCE_INVALID`（`errors_initial = sum(u2_alice != u2_bob)` 与先验构造无关，跨臂不等意味配对/求值器漂移）；字段 `pairing_errors_initial_equal` 仍作信息冗余记录 |
+
+每对在 summary 记录 `both_exact/control_only_exact/treatment_only_exact/neither_exact`（基于 `exact_l2`）及 `errors_final` delta（仅上下文），另报告 `exact_full` 对照。
+
+## 11. 科学 preflight、守卫序、证据分层
+
+守卫序冻结（沿用 V42/V43/V44 经验）：
+
+1. **拒绝类守卫最先、建目录前**：默认拒绝；必带 `--execution-authorized`；`git rev-parse HEAD` 与 `git rev-parse origin/formal-ir-mainline` 与 `--authorized-target-sha` 精确等值绑定；四文件 SCOPED tracked-dirty 检查（v45 模块、v45 CLI、v38_architecture_triage.py、v35_algorithm_development.py）；输出根已存在即拒（J7）；任一拒绝非零退出、零 calls、**不创建任何文件**。
+2. **科学 preflights（decoder-free、write-free，仅 fake beliefs 通路校验）**：seed-registry 校验（J2，七族并集 69，含 V44）；H1 (QC 16×1024) 与 3 枚 L2 唯一矩阵确定性重建并与 committed 结构权威严格比对含 permutations/capacity/projective/rank（J3 双重建）；三源 counts 形态/加载经 accepted loader（J4）；首块/源双条件绑定哨兵 390119/390219/390319 — **仅校验数据通路**：`bob_gt_31`、`captured_equals_bob`、`corrected_equals_direct`、`corrected_differs_u2bob_arraywise`、`corrected_differs_u2bob_maxabs>1e-6`、`argmax_divergence`（control 侧）+ `l1_app_public_inputs`（L1 先验仅 counts/bob，拒 Alice 依赖）、`s1_is_H1_times_u1_true`（spy 捕获送 L1 解码的 syndrome 等于 `H1·u1^Alice`）、`l1_prior_is_P_U1_given_B`（L1 prior 等于按 §7 从 `counts_true` 求和归一的 `p_i`）、`carrier_identity_l1app_fake`（spy 捕获实际送 L2 解码的先验等于按 §7 `Σ q_fake P(U2|B,u1)` 且 `q_fake` 来自注入 fake beliefs）、`l1app_normalization_ok_fake`（每位置 fake `q` 求和为 1，容差 1e-12）、`leakage_accounted`（summary 计 80+L2 leakage，区分 Control/Treatment）；**真实 `q≠p`、L1 iterations/syndrome/exact/wrong、APP entropy/confidence 不在 preflight gate**，仅执行期测量；`q≈p` 或近 uniform 为阴性结果非 invalid。
+3. **Preflight 失败** → 建增量根，写 `v45_invalid_notice.json` + 空 records + `v45_summary.json`（terminal `V45_EVIDENCE_INVALID`，planned 27 / l1 0 / control 0 / treatment 0 / total 0，无聚合）后零 decoder calls 停止。
+4. **建根**：仅在全部拒绝类守卫与科学 preflights 通过后、首个 decoder call 前。
+
+哨兵（每探测块，fake-beliefs 通路）：control 臂六项沿用 V41/V42/V43 形态（`bob_gt_31`、`captured_equals_bob`、`corrected_equals_direct`、`corrected_differs_u2bob_arraywise`、`corrected_differs_u2bob_maxabs>1e-6`、`argmax_divergence`）；treatment 臂七项改为 fake 路径：`l1_app_public_inputs`、`s1_is_H1_times_u1_true`、`l1_prior_is_P_U1_given_B`、`carrier_identity_l1app_fake`、`l1app_normalization_ok_fake`、`leakage_accounted`、`fake_path_verified`；探测失败仅 plan-review 可替换。**移除 `arms_differ` 真实非平凡 gate**；真实 `mean_abs_diff(q,p)` 仅执行期诊断上下文。
+
+完整性检查（J2-J5 科学 preflight 类与 J6/J8-J12 解码环类致 `V45_EVIDENCE_INVALID`；J1/J7 为 Tier 0 拒绝不建目录）：
+
+| id | 检查 |
+|---|---|
+| J1 | 授权/拒绝失败（默认拒绝、缺旗、SHA 非精确等值、SCOPED dirty 违规） |
+| J2 | seed-registry 违规（九枚内重复、与 69 并集重叠、非每源 3） |
+| J3 | 矩阵重建与权威不一致（含 H1 QC-16×1024 permutations/capacity/projective/rank 或 L2 permutations）或代表身份漂移 |
+| J4 | counts 形态/加载失败 |
+| J5 | 哨兵失败（control 六或 treatment fake 七，真实 APP 非平凡不在此） |
+| J6 | 配对违规：块-条件缺失/重复/总量非 18 L2 records（27 total invocations）；臂内 `errors_initial` 自洽失败；严格 per-pair 跨臂 `errors_initial` 等值门 |
+| J7 | 输出根已存在（fail-closed） |
+| J8 | NPZ 策略违规（任意 NPZ 写、非 accepted loader 的 V25 访问） |
+| J9 | 译码参数合约偏离（含 warm-start 键，含 early-stop 行为漂移） |
+| J10 | 记账违规（共享硬帽 27 total / l1 9 / control 9 / treatment 9，第 28 call 结构拒，planned/started/completed 不一致） |
+| J11 | 记录 schema 缺字段 |
+| J12 | workload 漂移（集合/顺序/配对 ≠ 冻结 C01-C18 + 9 L1） |
+
+中途 `BaseException`：在已建根内原样保留 raw partial records + notice + summary（带 started/completed actuals 区分 l1/control/treatment/total）后重抛；不做性能聚合/门禁评定。
+
+### 三层证据边界
+
+| tier | 触发 | 落盘 | 进程 |
+|---|---|---|---|
+| Tier 0 执行拒绝 | J1/J7 | 不创建任何文件 | 非零退出、零 calls |
+| Tier 1 科学 preflight 失败 | J2/J3/J4/J5 | 建增量根；invalid 三件套（planned 27 / l1 0 / control 0 / treatment 0 / total 0，无聚合） | 零 decoder calls，停止，不 rerun |
+| Tier 2 中途 BaseException | 解码环任意异常 | 根内原样 partial + notice + summary(actuals 分 l1/control/treatment/total) + 仅失败标记 | 重抛 |
+| 正常完成 | 记录完整、完整性 ok | 最小固定集：records json/csv + summary；无 NPZ | exit 0 |
+
+## 12. 记录、聚合、summary
+
+记录 schema（每 L2 call）：
+
+```
+call_id("C01".."C18"), condition("cond_control"|"cond_l1_app"), source,
+construction_seed, construction_seed_ordinal, block_seed, matrix_id, h1_matrix_id,
+max_iter, damping_alpha, errors_initial, errors_final, exact_l2, exact_u1, exact_full,
+syndrome_ok_l2, syndrome_ok_l1, wrong_codeword_l2, wrong_codeword_l1,
+iterations_l1, iterations_l2, bp_posterior_entropy, mean_abs_diff_q_p,
+status, runtime_s
+```
+
+其中 `exact_full = exact_u1 && exact_l2`，`bp_posterior_entropy` 与 `mean_abs_diff_q_p` 为执行期诊断上下文（永不 gate）。L1 invocation 另计入 budget 但不单列 L2 record；其 `iterations_l1/syndrome_ok_l1/exact_u1/wrong_l1` 随对应块两条 L2 records 冗余记录或单独 `l1_diagnostics` 数组。
+
+Summary 含：记账（planned 27 / l1 9 / control 9 / treatment 9 的 completed/started actuals，total 27，structural/preflight decoder_calls=0）；`l1_diagnostics_by_source`（执行期测量永不 gate：`mean_abs_diff(q,p)`、`APP entropy/confidence`、`H1_rank/capacity_ok/projective_ok`、`iterations_l1` 分布、`exact_u1/syndrome_ok_l1/wrong_l1`）；per-condition 聚合（`exact_l2_total`、`exact_full_total`、per-source、wrong）；per-source 聚合；per-block 配对结果 + errors_final delta（基于 exact_l2）+ exact_full 对照；两臂门禁明细（G1'/G2'/G3' 数值与 pass/fail，基于 exact_l2）在 terminal 判定**之后**；路由轨迹；`terminal_state`+`terminal_reason`（新命名）；`stopped_for_analysis` 每条件；`control_arm_wrong_codeword_anomaly`；`needs_1p5m_structure_branch`（当且仅当 `control exact on 1p5M < 2/3` 时为 true，orthogonal 标志）；master stop rule 原文；claim boundary（含非等泄漏说明）；statistics note；provenance（authorized target SHA、HEAD/origin 绑定、前代 plan/execution SHAs、结构权威身份、H1 物料身份 `V31-H1-QC-16×1024 rank16`、V25 counts 溯源、O1 机制 id `l1_app_soft_transfer_H1_syndrome_derived`、泄漏 `Control 984/1014/1024 vs Treatment 1064/1094/1104` + L2 syndrome 920/950/960 + f_total）。
+
+## 13. 统计与断言边界
+
+仅描述性；样本 tiny 且成簇（27 invocations = 9 唯一块 × (1 L1 + 2 L2)；18 L2 records 配对）；比例报告带 n 与 raw counts；任何打印区间 naive 且未校正簇聚；无显著性检验；主要成功仅 `exact_l2`，`exact_full` 另行报告。
+
+断言边界 verbatim 约定：结果仅支持 V25 TRAIN 经验 counts 开发块上的**有界条件归因** — control 臂为 V43 soft-marginal `P(U2|B)`（零额外泄漏），`cond_l1_app` 臂按 §7 以 V31 H1 (16×1024 QC-cyclic rank16) + 通用 FFT-QSPA `q_i=softmax BP posterior / APP approximation` 做真实 syndrome-derived 软转移、L2 在固定 Lane C 三矩阵 ordinal-2 上 90/1.0 单点、`Control 984/1014/1024 vs Treatment 1064/1094/1104 (L2 syndrome 920/950/960 + 80 + 64 tag) f_total` 计泄漏，无 hard/噪声/量化/失真律/C04 调参，不是 joint GF1024/耦合图/分支 C/D/E，不得泛化为真实条件；均非真帧 FER 证据，不推阈值/SKR/正式执行/资格/晋升。Control 与 Treatment 非等泄漏比较，结论仅为“额外 80-bit L1 syndrome information 的 L2 transfer value”。无论结果如何禁止：FER、渐近阈值、SKR、安全、正式资格/晋升、真帧行为、条件/lane 间优劣或比较排名、历史门禁“现已通过”陈述、对 `V45_L1APP_NO_VALUE_OR_HARM` 归因到具体上游编码或真实系统、对 `V45_L1APP_ADDED_VALUE_SIGNAL` 读作无条件优于 control 的泛化。路由终态仅方向性、自动不启动任何后继（不启动 V46）。
+
+## 14. 证据写出与增量输出根
+
+固定增量根（在解码前建，fail-closed 若已存在；科学 preflight 失败亦建仅放 invalid 三件套）：
+
+```
+comparison_bench/outputs_comparison/formal_ir_methods/v45_l1_app_soft_transfer/run_01/
+```
+
+文件（最小固定集）：
+
+- `v45_records.json` / `.csv`（每 L2 call 一行，共 18 行；L1 诊断随行或单独数组）
+- `v45_summary.json`（§12 内容，含 l1/control/treatment/total 记账）
+- `v45_invalid_notice.json`（仅完整性失败时）
+
+CSV/JSON 行对等；禁写任何 `.npz`；禁以非 accepted loader 读 NPZ；既有 `results/`、V38-V44 输出保持 byte-identical。
+
+## 15. 实现草图（后继轮次，当前未授权）
+
+- 新模块 `comparison_bench/src/comparison_bench/formal_ir/v45_l1_app_soft_transfer.py`：仅 import accepted `nonbinary_v31.build_layer/build_matrix_packet`/ `v38` 构造重建 helper / `v35` 原语；按 D15 组合双条件路径（含 L1 APP 链 `p_i→s1→BP_i→q_i→P_i(U2)`，BP posterior / APP approximation，early-stop 冻结）；不 import v39/v40/v41/v42/v43/v44；registry 以拷贝数据常量进入；runner/writer/SHA 绑定/SCOPED-dirty/preflight 复用 V39-V44 成熟模式；H1 重建单例缓存。
+- 新 CLI `scripts/execute_v45_l1_app_soft_transfer.py`：默认拒绝；必带 `--execution-authorized --authorized-target-sha <sha>`；HEAD 与 origin/formal-ir-mainline 精确等值绑定；四文件 SCOPED dirty；绑定 `fake_runner=False`；无 fake-runner CLI 选项；守卫失败非零退出、零 calls、不创建文件；budget 硬帽 27。
+- 仅 fake-runner 测试；测试中不做生产解码；L1 诊断仅执行期测量。
+
+## 16. 自由裁量决策 D1-D15（主线程复核清单）
+
+- **D1 形态**：单阶段配对诊断，仅 Lane C + 单一复用 H1，27 invocations（9 L1 + 18 L2）、无 baseline/分期/额外矩阵；**单一机制** `cond_l1_app`（syndrome-derived APP 软转移）对照 `cond_control`（V43 soft-marginal），不并行测试多种 joint/soft/iterative 方案，不上 joint GF1024。
+- **D2 seed registry**：九枚 x19-x21/源冻结；FORBIDDEN 并集 = V36_A3 ∪ V39 ∪ V40-probe ∪ V41-confirm ∪ V42-diagnostic ∪ V43-diagnostic ∪ V44-diagnostic =69；规划时零重叠已验，实现复验 J2。
+- **D3 代表矩阵**：三枚 lane_c ordinal-2 id 死写（§5）+ 一枚 H1 `V31-H1-QC-16×1024` 死写；严格重建比对而非 import 事实（J3 双重建，H1 含 capacity/projective/rank）。
+- **D4 wrong 作用域**：仅臂内（G3'+stopped_for_analysis+control 异常旗）；无全局 wrong，无跨臂否决。
+- **D5 门禁阈值**：沿用 V41/V43 形态逐臂（≥7/9，≥2/3/源，零 wrong），基于 `exact_l2`。
+- **D6 哨兵落点**：每源首块 390119/390219/390319，fake-beliefs 通路。
+- **D7 call 序**：源 1M/1p5M/2M、块升序、pair 内 control 先。
+- **D8 SCOPED-dirty 范围**：v45 模块+v45 CLI+v38 模块+v35 模块。
+- **D9 preflight 失败证据策略**：invalid 三件套零 L2 calls（total 0）；拒绝类不建目录（V40 教训）。
+- **D10 文件集**：最小固定集；永不写 NPZ。
+- **D11 终态命名**：五终态新命名 `V45_BOTH_RETAINED / V45_L1APP_NO_VALUE_OR_HARM / V45_GO_STRUCTURE / V45_L1APP_ADDED_VALUE_SIGNAL` + `V45_EVIDENCE_INVALID`，移除旧 oracle-only 命名。
+- **D12 后继语**：仅方向性（§1/§9），不授权；不启动 V46。
+- **D13 O1 机制**：L1 APP 软转移按 §7 冻结（`p_i→s1→BP_i→q_i→P_i(U2)` 单向，复用通用 FFT-QSPA BP posterior / APP approximation，泄漏区分 Control 984/1014/1024 vs Treatment 1064/1094/1104 + syndrome 920/950/960，early-stop 冻结，无 hard/噪声/量化/失真律/C04/joint GF1024）；真实非平凡性执行期测量；一经冻结不再更改。
+- **D14 errors_initial 策略**：沿用 V42/V43/V44 严格 per-pair 跨臂等值 J6 门，先于该对解码检查，不等→`V45_EVIDENCE_INVALID`；字段 `pairing_errors_initial_equal` 仍作冗余记录。
+- **D15 组合双条件路径**：替代复用 `evaluate_single_block`；单码路径、可注入 `decode_fn`；plan-review attention 项；L1 诊断与 L2-transfer / full 成功区分。
+
+## 17. V44 处置衔接与本诊断新颖性边界
+
+V44 `q=P(U1|B)` 已证严格退化为 V43 `P(U2|B)`（图谱 §3.4 恒等式 `P^{V44}=P^{V43}`），NO NOVEL MECHANISM；V45 以 `M_{H1,s1}` 非平凡消息为必要条件（图谱 §4 §7.2 开放判据 `q^{(t)}∝p·M^{(t)}_{H1,s1}≠p` 且 `>5%` 位置非均匀），H1/s1/decoder message 三者齐全才超越 V43；若 L1 解码 `M≡1`（均匀）则自动回落为 V43 等价类，诊断仍按门禁判为 `V45_L1APP_NO_VALUE_OR_HARM` 或阴性，不另作新机制宣称。哨兵 `carrier_identity_l1app_fake` 为 decoder-free 通路证明；真实 `mean_abs_diff(q,p)` 与 `APP entropy` 仅执行期诊断上下文，`q≈p` 为阴性结果非 invalid。

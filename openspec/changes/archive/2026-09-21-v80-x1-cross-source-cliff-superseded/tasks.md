@@ -1,0 +1,11 @@
+# V80-X1 Cross-Source Cliff — Tasks
+
+Planning-only change: no code/test edits in this task. T4–T6 need explicit grants before execution; 1M/1.5M bundle materialization blocks T4 entry.
+
+- [x] X1-T1 packet freeze — acceptance: `docs/research_cycles/V80-NBLDPC-JAN21/X1_CROSS_SOURCE_PACKET.md` written (§§1–8: 15-arm grids 1M {185,189,193,197,201} / 1.5M {191,195,199,203,207} / 2M {192,196,200,204,208}, per-source bundles, gates (a)/(b)/(c) with plain (c)-fails consequence, 27000 s ceiling, forbidden list incl. `.ttbin`, explicit user gate), every number traces to a frozen source or is marked [TO BE MEASURED]/[BLOCKING].
+- [x] X1-T2 operator prompt — acceptance: `docs/research_cycles/V80-NBLDPC-JAN21/X1_CROSS_SOURCE_PROMPT.md` written, copy-paste ready, authorizes nothing.
+- [x] X1-T3 P1 amendment — acceptance: `P1_PACKET.md` amendment log A-X1-20260921 + §9 written (§§1–8 intact, 2M arms NOT re-run; 1M arms m_base=193/total 201 with own-basis arithmetic; 1.5M arms m_base=199/total 207 marked INDETERMINATE-pending-X1; 1M-anchored generality with 2M-only-headline forbidden; 6-arm/21600 s ceilings), authorizes nothing.
+- [ ] X1-T4 channel-bundle entry (needs bundle materialization, no `.ttbin`) — acceptance: 1M/1.5M read-only bundles derived from A1-census histograms exist with source labels; executor refuses cross-source channel binding (fake-tested).
+- [ ] X1-T5 Pre-EXECUTE + grants (needs T4 + fresh explicit user grants per arm) — acceptance: Q0–Q6 recorded (branch, scope cleanliness, frozen contract, output-absence + rg proofs, focused tests incl. dry per-source bundle binding + dry-construct pins per m).
+- [ ] X1-T6 gated execution (needs grants from T5) — acceptance: 15 arms within wall/per-call/RSS caps; per-(source,m) FER, iters, wall/block, f_super/f_eff own-basis, undetected logs recorded; no forbidden action; single-window, no resume.
+- [ ] X1-T7 batch-end review — acceptance: one independent review over the append-only EXPLORATION_LOG.md (authorization boundary, machine gates, retained failures, preregistered repair if used, claim ceiling incl. no-generality-alone); per-source operating-point verdicts returned to main thread; no route/S3 decision made here.
