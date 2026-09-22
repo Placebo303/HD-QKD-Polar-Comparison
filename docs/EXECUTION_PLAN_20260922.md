@@ -184,7 +184,7 @@ P1 救援在 (A) 下可降为诊断子臂，避免双线烧预算。
 
 - 完成：**H0.1–H0.5**，**S0.3** 初稿，G0 裁决问题提交给用户。
 - 出口：X1 已发布（或用户明确拒推并记录）；`NOW.md` 存在；G0 ∈ {A,B,C,未裁决-阻塞}。
-- **计划+README已本地提交 `5d33d735`（未push）；decision-log/memory追加未提交。本文件不代为 commit/push；H0.1/H0.2 需用户一句显式授权（2026-09-22 已给：G0=B）。**
+- **截至本行编辑时，commit/SHA/是否 push 以 git 实测为准，执行前重测；本文件不代为 commit/push；G0=B 见 decision-log 2026-09-22 条；H0.1/H0.2 授权见 AGENT_PROJECT_MEMORY 对应条（decision-log 该条不授权 commit/push）。**
 
 ### 期 1 — 卫生与便宜科学（**Day 3–14**）
 
@@ -215,7 +215,7 @@ P1 救援在 (A) 下可降为诊断子臂，避免双线烧预算。
 | **H-gate** | 无未发布 X1 级成果；解释器契约一致；外源目录已隔离 | 停止新的长臂，先 H |
 | **S0.1-gate** | m=200 软边际 FER 实测存在 | 禁止按 10/240 外推冻结 P1 |
 | **P3-gate** | 真实帧记忆审计差异在预注册容差内 | 禁止把合成 FER 当真实 FER；先帧级条件化 |
-| **P5-gate** | 每源：`f_eff` 上界在余量内 + `undetected=0` 隔离 + prior/amortization 已披露 | 该源降级诊断性；不得合并源“凑认证” |
+| **P5-gate** | 任何对外认证句（当 G0=(A)）：每源 `f_eff` 上界在余量内 + `undetected=0` 隔离 + prior/amortization 已披露；G0=(B) 下为报告完整性门：`f_super`/`f_eff` 双数并列 + `undetected=0` 隔离 + prior/amortization 已披露 + 同数据二元 MLC/R3 对照齐备 | 该源降级诊断性；不得合并源“凑认证” |
 | **P6-gate** | 吞吐 ≥ 采集量级 **或** 缺口已量化写入对外表述 | 禁止“真实场景可用”空心句 |
 
 **授权边界（全文有效）：** 本文件不授权解码/DE/真实数据/commit/push/资格化。
