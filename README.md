@@ -21,15 +21,23 @@ This repository contains the current HD-QKD Polar comparison workspace, includin
 
 ## Current Status
 
-As of 2026-09-21, the active research mainline is V80 NB-LDPC on the Jan-21
-empirical 2M channel (S1 batch closed → S2 chain → O1/O1R):
+As of 2026-09-22, the active research mainline is V80 NB-LDPC (formal-IR line).
+**Start here:** [docs/NOW-style execution plan](docs/EXECUTION_PLAN_20260922.md)
+(hygiene + claim-target gate + phased schedule) and
+[docs/ROADMAP-20260921.md](docs/ROADMAP-20260921.md) (scientific macro-route).
 
-- O1R A208 is the first S2-level PASS on the empirical channel: pooled 0/480
-  exact across two construction instances (girth 8 & 6), n=1024, m=208.
-- Ceiling (no S3/qualification): genie-u1 upper bound, D_blind=0 with 4.31-bit
-  f headroom, synthetic single-code semantics.
-- Next gate: L1 construction (retire genie-u1 within m1+m2≤208) + blind-budget
-  accounting. Earlier V34–V36 states are superseded; see docs/decision-log.md.
+- Decodability is no longer the bottleneck (soft-marginal L2, F208 0/240 on each
+  of two construction instances; synthetic paired frames; no pooling).
+- Hard constraints are budget / certifiability / throughput: A208 f-headroom
+  4.31 b; X1 joint certifiability set is empty on key-eligible 200/276/364;
+  IR wall-clock ≈ 1.83 kb/s vs acquisition ≈ 6.7 kb/s.
+- X1 per-source route-gate m_min (grid resolution): 2M 204 / 1.5M 203 / 1M 197.
+- **G0 claim-target decision is OPEN** (literature-certifiable f_eff≤1.3 vs
+  measured efficiency + same-data binary-MLC/R3 comparison vs more acquisition).
+  Heavy P1 arms and P5 are blocked until G0 is chosen.
+- Uncommitted X1 artifacts and a dirty tree remain at the time of this note;
+  publish policy stays named-branch + PR only (see AGENTS.md §0/§10.2).
+  Earlier V34–V36 states are superseded; see docs/decision-log.md.
 
 The older Polar reporting line below remains frozen baseline context, not the
 active algorithm-development objective.
@@ -59,6 +67,7 @@ Route B-lite is a completed archived study. Its LLR-only gains were local and un
   - [ChatGPT review prompt](docs/prompts/chatgpt-research-review.md)
   - [OpenCode execution prompt](docs/prompts/opencode-research-execution.md)
 - active formal-IR state:
+  - [docs/EXECUTION_PLAN_20260922.md](docs/EXECUTION_PLAN_20260922.md) (schedule + hygiene + G0)
   - [AGENT_HANDOFF.md](AGENT_HANDOFF.md)
   - [docs/nbldpc-v36-empirical-graph-development.md](docs/nbldpc-v36-empirical-graph-development.md)
 
