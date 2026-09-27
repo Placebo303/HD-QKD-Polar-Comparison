@@ -1,0 +1,5 @@
+# Design
+
+Reuse M3-b's saved M3-a graph validator, source-2M synthetic bundle, `o1_blk:{seed}` sampler and m=200 cold Stage-1 decoder. Select exactly eight previously exact and eight previously nonexact M3-b Stage-1 block indices per graph, pinned in PACKET.md, for 32 calls total. The only scientific change is `max_iter=250` instead of 300; streak stays 3 and no prior/graph/seed/input changes are allowed. Preserve the existing `decode_block_marginal` default as 300 for every old caller; the M3D CLI explicitly passes 250 and labels it in every row/summary.
+
+Run two fixed graph instances separately, R1 then R2, under a fresh root. Compare against the accepted M3-b 300-iteration machine artifacts on the exact same selected synthetic seeds. The selected mix intentionally over-represents hard failures, so this is a targeted call-cost diagnostic, not a 240-frame FER or overall throughput estimate. No Stage 2 is run. Real M3C data were used to form the hypothesis, so any later test on the same 2M eval frames is development reuse, not independent held-out qualification.

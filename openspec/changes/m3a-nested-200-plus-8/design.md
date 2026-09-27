@@ -1,0 +1,7 @@
+# M3-a construction design
+
+Frozen n=1024, GF(32), base m=200, max m=208. Reuse `x1_arm_runner.construct_standalone(200, seed, 20)` for two base seeds 2026092001 and 2026092011. Extension seeds are 2026096801 and 2026096811 respectively; exact seed literals have no hit in existing `comparison_bench/`, `docs/research_cycles/`, or `openspec/changes/` before this change. There is no seed search or graph replacement.
+
+Each of eight new checks has degree 10, giving 80 added edges. Candidate variables follow one seeded RNG permutation per row. Select variables greedily with no variable reused by another new row and no two selected variables sharing any existing check neighbor; this rules out new four-cycles. If a row cannot collect 10 candidates, fail that arm without retuning. Sample each new edge's GF(32) label uniformly from 1..31 using the same extension RNG after row selection. Base 200 rows and their labels remain byte-for-byte identical. The resulting variable degrees are 2 or 3, rather than pretending the full 208-row graph has the original λ={2:1} profile.
+
+Structural gates: base constructor status ok, full rank 200, four_cycles 0, all variables degree 2; full matrix rank 208, four_cycles 0, 8 new rows each degree 10, all coefficients 1..31, base prefix unchanged, twice-identical extension per seed pair. Girth and wall/RSS are recorded. These are construction feasibility gates only. If a pin fails, report failure for that arm, retain evidence and do not adapt. No decoder, channel, data or bundle is loaded.

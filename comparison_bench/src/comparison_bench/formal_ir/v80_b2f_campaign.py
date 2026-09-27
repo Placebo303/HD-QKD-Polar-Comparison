@@ -447,14 +447,14 @@ def leak_basis(arm: str) -> dict[str, Any]:
 
 def decode_block_marginal(construction: dict[str, Any], seed: int,
                           bundle: dict[str, Any], n: int,
-                          m: int) -> dict[str, Any]:
+                          m: int, max_iter: int = MAX_ITER) -> dict[str, Any]:
     """One soft-marginal empirical-channel block (packet §2/X2): triple
     draw on the ``o1_blk:{seed}`` stream (frozen sampler, draw order
     UNCHANGED); Alice x=u2; Bob y=b&31; the FROZEN marginal formula
     (``marginal_prior_l2`` — exact Bayes marginalization, NOT genie,
     NOT argmax); XOR-centered prior into
     ``decode_error_domain_posterior`` (NEVER the scalar-p
-    ``decode_error_domain``); max_iter=300, streak default (3).
+    ``decode_error_domain``); max_iter defaults to 300, streak default (3).
     Returns the raw kernel verdict + exact-match flag
     (``exact_match is True`` gates block acceptance), the MEASURED
     report-only prior-entropy sum and u1 mismatch count. Fail-closed
@@ -466,6 +466,9 @@ def decode_block_marginal(construction: dict[str, Any], seed: int,
         refuse("block n must be a positive int")
     if isinstance(m, bool) or not isinstance(m, int) or m < 1:
         refuse("block m must be a positive int")
+    if (isinstance(max_iter, bool) or not isinstance(max_iter, int)
+            or max_iter < 1):
+        refuse("max_iter must be a positive int")
     if construction.get("n") != int(n) or construction.get("m") != int(m):
         refuse(f"construction (n, m) mismatch: got "
                f"({construction.get('n')}, {construction.get('m')}) "
@@ -484,7 +487,7 @@ def decode_block_marginal(construction: dict[str, Any], seed: int,
     h_prior = prior_entropy_bits(prior)  # MEASURED report-only
     s_x = fftqspa.syndrome_of(field, dense, x.tolist())
     result = v28.decode_error_domain_posterior(field, y.tolist(), dense,
-                                               s_x, prior, MAX_ITER)
+                                               s_x, prior, max_iter)
     x_hat = result.get("x_hat")
     return {
         "status": result.get("status"),
@@ -493,7 +496,7 @@ def decode_block_marginal(construction: dict[str, Any], seed: int,
         "exact_match": (bool(np.array_equal(np.asarray(x_hat), x))
                         if x_hat is not None else False),
         "seed": int(seed),
-        "max_iter": int(MAX_ITER),
+        "max_iter": int(max_iter),
         "u1_source": U1_SOURCE,
         "prior_entropy_bits": float(h_prior),
         "u1_mismatches": int(k),

@@ -4905,3 +4905,212 @@ outputs) in `docs/A1_ARITHMETIC_RECOMPUTE_20260921.md`. No frozen gate, threshol
 - 在 G-P1S1 授权下重跑：rejected — 授权已用完，需新 packet+新授权。
 
 **Consequences**: 可给实测效率曲线，禁止单点认证句；无 FER/SKR/route/qualification/publication claim；无 commit/push。
+
+### 2026-09-24: Direction reset — real-frame closed loop first; no long captures; paper = measurement + benchmark + same-data three-method comparison
+
+**Decision**: 用户在 `docs/RESEARCH_DIRECTION_REPORT_20260924.md` §10 上裁定三项：(1) M0 真实帧闭环提到最前（包 `docs/research_cycles/M0-REALFRAME/`，`G-M0-REALFRAME`，FROZEN NOT GRANTED）；P2 / P4 / TIMING 停放，P3 记忆审计的问题并入 M0；(2) 实验室采集以 3 s / 10 s 为单位，将来的实施也不会一次处理大量数据，不会有 ≥60 s 长采集；(3) 论文定位 = 真实数据实测 + 有限长基准 + NB-LDPC / 分层二元 LDPC / HD-Cascade 同数据对比，码设计出结果后再议是否升级主张。
+
+**Context**: 有限长正态近似（冻结合成信道，只读、零解码）给出 n=1024、ε=1% 时 f* ≈ 1.064（不含 tag）；X1 m_min 实测约 1.196（不含 tag）⇒ 码 / 译码差距约 0.13，有限长约 0.06，64-bit tag 约 0.075。只构造、零解码的核查：P1 的 m=200 基码（A208 前 200 行）变量节点度分布为 {2: 953, 1: 70, 0: 1}，解释了 Stage-1 的 35% / 57.5% 失败率与 undetected 为主；X1 独立构造 m=200 约 8%。V19 二元 MLC（f=4.169）不再作为同数据对照。
+
+**Alternatives considered**:
+- 继续 P3 → P4 → P5 串联 DECIDE 门后才碰真实帧：rejected — 真实 FER 直接回答 P3 的问题，且 REALPOINT 草案被与之无关的 TIMING 依赖挡住。
+- 以长采集解决 rule-of-three 认证：rejected — 用户确认无此数据；单点 f_eff ≤ 1.3 认证句永久退出主张。
+- P4（n=2048）作为主效率杠杆：rejected — 块长杠杆约 0.057，码杠杆约 0.13，且短块 / 低时延是实施约束。
+
+**Consequences**: 下一个可授权动作 = `G-M0-REALFRAME`（约 1750 次解码，三源并行约 1 h wall）；码设计首项 = 速率兼容嵌套（先造基码再加行）；每两周检查 `.md` / `.py` 改动比。本条不授权任何执行；无 commit/push。
+
+### 2026-09-24: Correction to the direction-reset entry — P2/P3 paused (not cancelled), finite-length split pending independent recompute, throughput calibers side by side
+
+**Decision**: 对上一条（同日 direction reset）追加四项更正，原条目不改：(1) P1 高失败的原因只写已核实的构造事实（A208 前 200 行 VN 度分布 {2: 953, 1: 70, 0: 1}），不留“码距问题”结论；“先造基码再加行、f 约再降 0.02”是估计，列为码设计第一项；(2) 有限长拆分（码 / 译码约 0.13、有限长约 0.06、tag 约 0.075）与 n=2048 “省约 0.057” 是主线程单方算术，须 `reviewer-go-free` 独立复算（`docs/research_cycles/M1-FINITE-LENGTH/RECOMPUTE_PROMPT.md`）后才能写“已分解”；P2 状态为**暂停**，不是取消（DE 阈值与有限长极限不是同一个量）；(3) 吞吐两种口径分列：旧 = 1.83 kb/s vs 他系统 6.7 kbit/s ≈ 3.7×（保留）；新 = 本源端 1.75 / 2.45 / 3.27 ×10⁵ 对/s vs 本 IR 单线程约 366 符号/s ≈ 480 / 670 / 900×；(4) M0 的附加列（全 10 位一致率、每超帧误差数）是观测，不是放行，不构成 P3 T-M1..M4 verdict；P3 暂停，其门不变。
+
+**Context**: 用户 2026-09-24 审阅 `docs/RESEARCH_DIRECTION_REPORT_20260924.md` 后指出上述四处表述越过了证据。
+
+**Alternatives considered**:
+- 保留“P2 由有限长估计取代 / P3 并入 M0”：rejected — 前者未经复算且测的是不同的量；后者会让观测列被当作门控放行。
+
+**Consequences**: 报告、`M0-REALFRAME/PREREG_AND_AUTH.md`、`M0_PROMPT.md` 已按此修订；上一条中“P3 记忆审计的问题并入 M0”“P2 停放”两处以本条为准。无执行；无 commit/push。
+
+### 2026-09-24: M0 real-frame loop — three sources COMPLETE, Pre-RESULT initial FAIL → rework → re-review PASS; D1 mechanical route = channel conditioning first; END transcription and F9(i) still open
+
+**Decision**: 落档 `G-M0-REALFRAME` 执行终态与评审链（流程状态记录，**非科学结论、非 P3 verdict、非 SKR/发表主张**）：三源并行执行均 COMPLETE；按冻结 §4 的 D1 机械判定为“更差 5 / 一致 1 / 更好 0”⇒ 在信任 M3 合成结果之前**先做信道条件化**；Pre-RESULT 初审 **FAIL**（B1 把三源计数合并为 103/1/910，违反 §3 禁止跨源/跨臂合并；B2 授权块空白）→ 返工删除合并数、补填授权 → 重审 **PASS**。
+
+**Context**: 执行 2026-09-24，分支 / HEAD 执行前后一致（`formal-ir-v72p1-addendum-clean` / `8e9c8526`）；解码 1750 次全部完成；预算全合规（逐源 wall 3409 / 3696 / 4672 s 均 < 5400 s 帽，批次 ≈4676 s < 3×5400 s，峰值 RSS 最大 0.73 GiB < 4 GiB，无单次解码 > 300 s，overruns 全 0，无重跑 / 续跑 / REFUSED / INCOMPLETE）；保护根零改动（`git diff -- src/` 0 B，`results/` 0 B，`outputs_comparison/` 554423395 B 执行前后相同）。undetected 合计 1（1p5M m=203），始终隔离、计为失败、永不并入 success；逐源逐臂分列口径与 `f_super` / `f_notag` / `f_eff` 公式以 `docs/research_cycles/M0-REALFRAME/PREREG_AND_AUTH.md` §3 与 `RESULT.md` 为权威，本条不复制逐臂数值。f_eff 最小实测 1.464047 ⇒ 全臂无 ≤1.3 点，沿用 2026-09-24 禁单点认证条，不产生任何 f≤1.3 句。
+
+**Alternatives considered**:
+- 把 D1“更差”扩写为合成信道失效的科学结论、或写成 P3 通过/不通过：rejected — D1 作用域只限“合成信道能否继续作开发代理”这一个流程决策；P3 T-M1..M4 门不变，F9 列为观测不构成放行。
+- 保留初审稿的跨源合并数或空白授权块直接固化结果：rejected — 违反 §3/§8，已返工并经重审 PASS。
+- 由 memory 代写 `INDEPENDENT_ACCEPTANCE.md` 或代抄 stdout END 行：rejected — 内容不在案不推测；END 抄录归发起执行的会话（另存 `stdout_END_*.txt` 属新增文件，须主线程另行授权）。
+
+**Consequences**: 后续在真实数据上信任合成代理前须先做信道条件化（逐超帧自适应先验 / 漂移处理），并用 F9(ii) 逐超帧误差序列定位原因；对外数字只能来自真实帧实测，合成 FER 在条件化完成前不得作可信开发代理、不得对外引用。**开放项**：① runner 三源 stdout 终态 END/JSON 行未落盘，待发起执行的会话逐字抄录进 `RESULT.md` §1；② F9(i)（`fails_full10` vs u2 失败数）的判读及是否触发 L1 披露 / 联合解码，留待独立 Pre-RESULT / 主线程裁决；③ `M0-REALFRAME/INDEPENDENT_ACCEPTANCE.md` 尚不在盘（重审 PASS 目前仅由本条承载），且 `PREREG_AND_AUTH.md` 状态注仍写“B1 返工待重审”，落盘口径待主线程确认。下步基线（**规划估计，非门、非承诺**）：HD-Cascade + 分层二元 LDPC 同数据对照约 1–3 周；码设计目标 f ≤ 1.15 约 2–5 周。P2 暂停（不取消）、P4 降级、TIMING 停放、P3 暂停且门不变 —— 维持同日既往条目，不在此重述。本条不授权任何执行；无 commit/push。
+
+#### F9(i) 裁定（2026-09-24 同日追加；Pre-RESULT C3 留主线程，用户已授权代裁非授权事项）
+
+- **证据**：6 臂 `fails_full10` 132 / 132 / 145 / 139 / 182 / 180，对应 u2 `fails` 20 / 13 / 22 / 10 / 22 / 16；
+  “u2 精确但 u1 错”按源合计 231 / 252 / 324（逐臂 `fails_full10 − fails` 之和；数值以 `docs/research_cycles/M0-REALFRAME/RESULT.md` §2.1–2.3 为权威）。
+- **裁定**：M0 为 u2-only 链，u1 按 argmax 全局恢复且未编码、未验证；H(U1|U2,B)=0 为近似，
+  真实帧存在残余 u1 不确定。三选：
+  ① 现在触发 L1 披露 / 联合解码进会计 —— 证据不足，否；
+  ② M0 数字继续用于对照，但必须标注“u2-only, u1 via argmax, u1 正确率未验证”；
+  ③ u1 列后续：M2 基线或 M3 码设计阶段做低成本 u1 条件熵 / 校验链验证，
+  任何 u1 纠错进恢复链 = 新包 + 重跑，M0 数字不得回溯改写。
+- **ARC**：
+  - 不现在触发：F9(i) 为观测列（PREREG §2 F9 / §6 禁止），现有证据只证明残余 u1 不确定存在，
+    不足以定量 L1 披露量；现在进会计属超证据主张，否。
+  - 标注义务：此后任何引用 M0 数字（对照、报告、后继包）必须带 u2-only 标注；去标注引用 = 违规引用。
+  - 后续验证前置：u1 条件熵 / 校验链验证立项于 M2 基线或 M3 码设计阶段；
+    验证通过前不得把 u1 纠错写进恢复链；一旦进入恢复链即新包 + 重跑 + 新授权，
+    M0 数字冻结、不得回溯改写。
+- 本小节不产生任何发表 / 资格化主张；不授权任何执行；无 commit/push。
+
+### 2026-09-24: M2 D2 三分支预注册阈值裁定（主线程裁定记录；流程预注册，非科学结论）
+
+**Decision**: 冻结 M2 真实同帧三方法比较的 D2 三分支预注册阈值（开发决策，不是发表主张）：
+(1) HD-Cascade 去 tag f 比 NB 低 > 0.05 ⇒ 如实报告，NB 改定位为“单向 1 条消息低时延”，给定信道时延下密钥吞吐对比；
+(2) 分层二元 ≥ NB（f 更优或持平）⇒ “高维必须用非二元码”叙事不成立，主线转向分层二元 + 信道建模；
+(3) 否则 ⇒ NB 主线进 M3（码设计）。
+`0.05` 为预注册数，改之 = 新包。
+
+**Context**: 来源为 2026-09-24 任务级 milestone plan（planner 输出，用户批准“按细化plan推进”）；
+文字与 `docs/RESEARCH_DIRECTION_REPORT_20260924.md` §6/M2 的 D2 规则一致。
+本条系流程预注册（决定后继主线方向的开发决策），非科学结论：它不是 P3 verdict，
+不放行任何 P3 门控动作，不产生 SKR / 发表主张，不授权任何执行。
+
+**Alternatives considered**:
+- 把 0.05 当科学结论或事后可调：rejected — 预注册数冻结，任何改动 = 新包 + 新授权。
+- D2 分支直接写成发表主张：rejected — D2 只决定后继主线方向，对外数字只能来自真实帧实测本身。
+
+**Consequences**: `docs/research_cycles/M2-REALCOMP/PREREG_AND_AUTH.md` §4 引用本节为 D2 权威来源；
+阈值、泄漏分解、`undetected` 隔离、逐源分列等语义仍以 PREREG §1 / §5 为准。
+本条不授权任何执行；无 commit/push。
+
+### 2026-09-25: M2-LAYEREDBIN-SYNTH T2 关闭 (CLOSEABLE 已签；T1/T3 已授权待执行)
+
+**Decision**: `G-M2-LAYEREDBIN-SYNTH` T2 以 CLOSEABLE 关闭：主线程 acceptance 与 R1 retro-acceptance 均由用户 2026-09-25 verbatim 授权“‘T2 已 CLOSEABLE 待签，T1/T3 未跑’，我都授权可以进行”签署（见 `docs/research_cycles/M2-LAYEREDBIN-SYNTH/BATCH_END_REVIEW.md` §3）。B4 数据定位为 retained-assumed 诊断，禁 promotion / 选点 / 真实结论三项；B1–B3 关闭；预算 repair 使用 0 次；T1/T3 已授权待执行。
+
+**Context**: T2 12 臂合成执行完毕（LOG Entry3/4）；修订史：R1（支撑映射 + rank 容忍）与 fallback assumed 修订（12 臂后端恒为 `numpy-minsum-fallback (assumed, 非ldpc.BpOsdDecoder)`，与真体 SPA 不可比/不可互换/不可合并）均经同句追认接受；B1（PACKET §7 FROZEN + R1 指针）、B2（claim 固定句逐字补入）、B3（`true binary SPA` 错标以各臂 `backend_used.sidecar.json` 为准纠正，旧三件未改）均关闭。
+
+**Alternatives considered**:
+- 由本批合成数做 promotion / operating-point 选点 / 真实 FER/效率/泄漏/SKR 结论：rejected — B4 retained-assumed 禁三项。
+- 改阈值 / 他包 / 执行输出：rejected — 本条为关闭落档，不改任何冻结阈值与既有执行输出。
+
+**Consequences**: T1/T3 已授权待执行（本条不代替其各自 Pre-EXECUTE）；无阈值变更；无 commit/push。
+
+### 2026-09-26: M2 真实同帧三方法比较 T3 COMPLETE + 独立 Pre-RESULT PASS + D2 第三分支 + M3 进场
+
+**Decision**: 落档 `G-M2-REALCOMP` 执行终态与独立 Pre-RESULT（流程状态记录，**非科学结论、非 P3 verdict、非 SKR/发表主张**）：三源 **T3 COMPLETE**（判据：各根 `rows.json` 内 `verdict=COMPLETE` + 行数 = decodes + `slice_match=True`；进程已退；END/exit 行未落盘缺口保留）；独立 Pre-RESULT **PASS with comments**（`docs/research_cycles/M2-REALCOMP/INDEPENDENT_ACCEPTANCE.md` §1 八项全 PASS，C1–C6 非阻塞）；D2 求值触发**第三分支**（HDC 去 tag f 未比 NB 低 > 0.05；分层二元未 ≥ NB）⇒ **NB 主线进 M3（码设计）**。主线程接受当前 BLANK（签字前不得视为接受、不得进 M3 执行）。
+
+**Context**: 执行者记录 `docs/research_cycles/M2-REALCOMP/RESULT.md`：三源输出根 `workspace/m2real_d4e5f6a7`（1M，13120 decodes）/ `workspace/m2real_b8c9d0e1`（1p5M，18368）/ `workspace/m2real_f2a3b4c5`（2M，24512），预算全合规（wall 1685.1/2399.3/3261.3 s 均 < 5400 s，RSS 0.465/0.591/0.730 GiB 均 < 4 GiB）；HDC 臂 FER 全 1.0（`sf_success` 全 0），LB 臂 FER 0.996–0.999（`sf_success` 亦全 0），NB 对照 FER 0.03–0.10 量级（M0 §§2.1–2.3 artifact 指针，F9(i) "u2-only, u1 via argmax, u1 正确率未验证"约束下引用）；`f_notag` 同 m 同值（同 m 同 H 基），故分支 (1)(2) 均不满足。数值权威唯一为 RESULT §1–§3 + 各根 `rows.json` / `block_accounting.csv`，本条不复制逐臂数值。
+
+**Alternatives considered**:
+- 把 D2 第三分支写成码路线失败/发表主张：rejected — D2 只决定后继主线方向；不是 P3 verdict，不放行 P3 门控，不产生 SKR/发表主张。
+- 补抄 END 行 / 猜写 `backend_used` 后端字符串后固化：rejected — 内容不在案不推测；END 抄录归发起执行的会话，backend 声明待主线程核对执行面 pin（两缺口均保留）。
+- 由本条直接进 M3 执行：rejected — 主线程接受 BLANK，M3 仍需新包 + 新授权。
+
+**Consequences**: M3（码设计）进场立项，后续需新包 + 新授权；M0 数字冻结、不得回溯改写；对外数字只能来自真实帧实测本身。本条为 docs-only 固化（仅本节 + `INDEPENDENT_ACCEPTANCE.md` 两文件）；无执行；无 commit/push。
+
+### 2026-09-26: M2 T3 比较结论暂停，主线程科学接受 WITHHELD（覆盖同日 D2 第三分支判断）
+
+**Decision**: 保留 M2 三源 T3 原始 `COMPLETE` 产物作为特定实现的执行证据；**不接受**现有三方法效率比较与 D2 第三分支。`INDEPENDENT_ACCEPTANCE.md` 初审的 `PASS with comments` 保留作历史记录，其会计 PASS 与 D2 求值已被新发现推翻。主线程接受继续空白，M3 不得以该 D2 分支获得执行放行。完整诊断与来源见 `docs/research_cycles/M2-REALCOMP/MAIN_ADJUDICATION_20260926.md`。
+
+**Evidence**: runner 的 `f_notag=5m/(1024H)` 与各方法实际 `leak_EC` 无关；1M/m197 从 `rows.json` 反算的实际去 tag 比率为 HDC 10.15137、LB 3.84156（诊断性重算），结果表却都列 1.20048829。tag 在产物中按 16 个 64 符号块逐块计 64 bit，而展示的 `f_super` 按 1024 符号超帧只计一次。64-block FER 还被代入 NB 超帧斜率 4.785675。D2 原文的 LB “f 更优或持平”与初审因 FER 很差而否决分支 (2) 的逻辑不一致。LB 真实后端未落盘，HDC 仍为 assumed-v1。两名 `luna_worker` 分别只读核查会计与后端，未运行解码器或读取 `.ttbin`。
+
+**Consequences**: 先冻结 tag 单位、实际披露 f 与 FER 单位的 OpenSpec 修订；只从既有产物重算诊断列，独立 Pre-RESULT 重审之后才可接受任何 D2 结论。若 LB 后端无法从现存执行证据确认，保留 unknown；新的真实解码必须另包、另根、另行 Pre-EXECUTE。M0 的真实代理失配与 u2-only 限制仍独立成立，允许据此规划不引用 M2 排名的合成/构造探索；本条不自动授权 M3 科学执行。
+
+### 2026-09-26: M1 有限长算术复算与 M2 披露重算收口（均不恢复 D2）
+
+**M1**: `docs/research_cycles/M1-FINITE-LENGTH/RECOMPUTE_VERDICT.md` 的独立 `luna_worker` 只读复算为 `PASS_WITH_FINDINGS`：报告 §4 表 4.1 与 2M 表 4.2 在 NPZ/冻结 H 锚点下复现；2M n=1024→2048 的有限长加 tag 节省精算 0.056314（“约 0.057”仅作粗估）。复算 prompt 所写 R1 修正 H 与所读 NPZ 直接 H 不同，引用差距必须写清 H 基；正态近似不是可达性证明。P2 仍暂停、不取消。
+
+**M2**: `G-M2-ACCT-REPLAY` 已按独立 DECIDE 包单次执行（退出 0，0.51 s，峰值 124128 KiB；三源 12 臂，旧根零改）。`ACCOUNTING_REPLAY_RESULT.md` 仅以原 T3 `leak_EC`/tag 字段重算实际披露比率，并把单 tag/超帧列显标反事实；独立 Pre-RESULT **PASS**，主线程**只接受存量披露算术**。原 `M2-REALCOMP` 科学接受继续 **WITHHELD**；D2 第三分支继续暂停。真实 LB 后端、HDC assumed-v1、FER/效率可比性与验证 tag 协议未因此解决，不能用重算表宣称方法族排名。
+
+### 2026-09-26: M3-a 嵌套 200+8 两组固定图构造可行（仅 EXPLORE 结构证据）
+
+**Decision**: `G-M3A-CONSTRUCT` 两臂在新根 `workspace/m3a_nested_200p8_20260926/` 完成；独立批末复核为 **WITH_FINDINGS，M3A-01..05 均 PASS**，主线程仅接受两组固定种子下的码图构造可行性。两臂基图/扩展图均 GF(32) 满秩 200/208、四环 0/0，基图 1024 个变量全为度 2，新增八行各度 10、80 个新变量全局不重复、原前缀与标签不变；girth 均为 6。每臂分别 11.56/11.61 s，峰值 155996/157868 KiB，零失败/repair，未调用译码器或真实数据。机器 JSON、资源记录、单一探索日志与审查结论见该根；冻结包为 `docs/research_cycles/M3A-NESTED-200P8/PACKET.md`。
+
+**Evidence limit**: 程序确实逐臂构造并比较两份结果，但每臂只保存一份边表及 `twice_identical=true`；独立审查不能在执行后直接查看第二份，故此项为非阻断 finding。构造通过不等于 FER、泄漏、效率或实际源改善；M2 D2 第三分支继续暂停，M3-a 只依据 M0/P1 的结构缺陷作为独立合成探索立项。后续译码对照须另立冻结 EXPLORE 包并重做门控；不据此声称码路线已胜出。
+
+### 2026-09-26: P1 救援公开量计数发现与 M3-b 后继包
+
+**Finding / review**: `P1_STAGE1` 的 Stage-2 对全部非 exact 帧**建模**新增 8 行公开量（40 bit），但 `expected_leak_for` 用 rescued 而非 attempted 算平均公开量。R1 attempted 84、rescued 83，历史 `E=1077.8333` 在冻结模型内少计一次；按触发事件计为 `E=1078` bits/frame、`f_exp=1.264450867`、`f_eff=1.284391180`；R2 138/138 无差别。独立 `luna_worker` 复核 **PASS_WITH_FINDINGS**，主线程仅接受此**合成模型内的算术更正**。触发集由模拟器 `exact_match` 给出，不是已观测通信记录。机械成功计数与原三门 FAIL 模式不变。详情与限定见 `docs/research_cycles/V80-NBLDPC-JAN21/P1_ACCOUNTING_ADDENDUM_20260926.md`；旧结果原件不改，不据此做新路线决定或实际公开量主张。
+
+**Next bounded step**: `openspec/changes/m3b-nested-paired-synth/` 与 `docs/research_cycles/M3B-NESTED-PAIRED/PACKET.md`/`PROMPT.md` 冻结两组新 M3-a 图与旧 P1 同 240 帧的合成对照，计公开量改为 attempted，旧图/旧输出只读。此为 `EXPLORE_HEAVY`，实现、Pre-EXECUTE、译码与独立批末审查尚未完成；不从新图结构门直接推 FER 效益，也不恢复 M2 D2。
+
+### 2026-09-26: M3-b 嵌套图配对合成诊断批末 PASS（不恢复 M2 D2）
+
+**Decision**: G-M3B-PAIRED 两个冻结 EXPLORE_HEAVY 臂在 workspace/m3b_nested_paired_20260926/ 顺序完成，独立 luna_worker 批末审查 **PASS**，主线程仅接受两张固定嵌套图、同 240 个合成帧、冻结 P1 译码器下的实例诊断。R1/R2 的 Stage-1 非 exact 为 10/240、15/240，对应冷启动 Stage-2 尝试/救援 10/10、15/15，最终失败及 undetected 均 0/240。旧 P1 配对同帧 Stage-1 非 exact 是 84/240、138/240；逐帧最终结果转移 R1 为旧失败→新成功 1、双方成功 239，R2 双方成功 240。两臂单独保留，未合并。
+
+**Accounting and limits**: 按尝试次数计的合成模型 E[leak] 分别为 1065.666667、1066.5 bits/frame，f_exp=f_eff 分别 1.249984361、1.250961827；非实际通信公开量账本。独立审查逐行核对 CSV/JSON、救援集合、undetected、图/种子/比较器与资源：两臂 exit 0、外部 wall 1771.51/2000.39 s、峰值 175940/176956 KiB，总 wall 3771.90 s，单次最长 71.197/72.230 s，均过预算。唯一非阻断发现是 PACKET 首页旧时态，已在审查后订正；原 root 越界阻断与修复留在 packet/log。证据详见单一 EXPLORATION_LOG.md、两臂机器 JSON/CSV/resource 与 docs/research_cycles/M3B-NESTED-PAIRED/PACKET.md。
+
+**Consequences**: 只说明两实例上新图大幅降低 Stage-1 非 exact 触发；240 帧零最终失败不能认证低 FER、一般图族优势或真实帧表现。M3-a full-rank/四环性质沿用其已接受构造证据。不得据此宣布路线胜出、选真实运行点、SKR/资格化/发表结论；M0 真实代理失配、M2 比较接受 WITHHELD 与 D2 暂停、P3/P4 门均不变。本批授权已用完，无追加 arm、重跑或自动 real-data 执行。
+
+### 2026-09-27: M3C 真实 2M u2 两臂诊断 STOP（未接受）
+
+**Decision**: `G-M3C-REAL-U2-2M` 在一次性 DECIDE 包内停止。R1 机器运行 `COMPLETE`：383/383 帧有最终结论，Stage-1 非 exact 39，Stage-2 尝试 39、救回 28，最终 u2 成功/失败 372/11；这是单臂执行证据，不提升为两臂结论。R2 达到 `INCOMPLETE-wall`：最终有结论 359/383，Stage-2 尝试 18、救回 10，24 帧最终结果未知；没有 383 帧 FER/Wilson 结果。独立 Luna 审查的 PASS 仅确认终止产物与不完整计数忠实留存，并非 Pre-RESULT 接受；M3C-05 未进入，两臂诊断不接受。
+
+**Consequences**: 两臂根和家族追加日志保留；本包不重跑、不续跑、不调参、不重建图，也不继续真实执行。不得据此作两图性能/路线结论、FER 接受、完整协议、实际披露量/f、SKR、P3/G0B 或发表数字主张。详见 `docs/research_cycles/M3C-REAL-U2-2M/STOP_RECORD.md`。
+
+
+### 2026-09-27: 兄弟仓 Polar 与 lab LDPC v5 跨仓对比 —— 同一份 Polar 代码、无单一赢家、兄弟仓 β 指标不可用于排名
+
+**Decision**: 完成一次只读跨仓审计（对象：Release 兄弟仓 + 第三个 checkout `qkd-reconciliation-lab`），产出 `docs/POLAR_VS_LDPC_CROSS_REPO_COMPARISON_20260927.md`。本仓与兄弟仓均未修改代码、未执行管线、未提交。审计只接受可在文件/JSON 中逐条核验的结论，得到 8 条裁决（V1–V8），其中三条是**证伪**既有说法：
+
+- **V1/V2 证伪「lab 的 Polar 是独立实现，可交叉验证兄弟仓 Polar」**。`diff -q` 确认 `polar_core.py`(430) / `msd_conditional.py`(555) / `rate_allocation.py`(536) / `leak_accounting.py`(355) / `channel_models.py`(244) / `de_frozen.py`(186) 与 `low_dim_opt/core/` **逐字节相同**；`ttbin_io.py` 仅差 18 行文档 + 6 行 Swabian SDK 路径（非算法）；`verification.py` 是 `src/reconciliation/verification.py` 的副本。**lab 的任何 Polar 数字都是本仓 Polar 算法换配置的结果，不得当作第二实现的复现或独立确认。**
+- **V5 证伪「LDPC v5 是最优方法」**。lab 自己的 43 点矩阵显示按带宽交叉：bw40/50 Polar 6/6 点领先（平均 β 差 +0.0535/+0.0411），bw200/300 LDPC 6/6、7/7 领先（−0.0397/−0.0320），bw80/100 实质打平。不存在全面胜出。
+- **V6 证伪「兄弟仓 `comparison_bench` 可用于此排名」**。`metrics/leakage.py:19` 的泄漏预算取 `n·H2(各平面边缘 BER 均值)`，既非实测 `I_AB` 也非 `H(A|B)`；MLC 高维信道各平面 BER 差数个量级，均值被近无噪平面主导，预算无物理意义。实测反证：lab 最优点（d1024/bw300，平面 BER 均值 0.00444）下，lab LDPC v5（0.0604 bit/输入比特）与 lab Polar（0.0910）在兄弟仓口径下**同为 0.0000**，而在 `1−leak/I_AB` 口径下为 0.9378 / 0.9061。兄弟仓已发布产物 `beta_eff_empirical` 全部为 0（4+320+480+416 行，无一非零），观测泄漏 0.53–1.03 bit/输入比特（方法披露量超过输入本身）。
+
+**Context**: 需要判断 Release 兄弟仓的 Polar 结果与 lab 的 Polar/LDPC 对比之间是什么关系，以及 lab 的对比结论能否支持本仓既有的「Polar f≤1.3 wall vs LDPC dc≤13」诊断（`docs/decoder-improvement-plan-20260816.md`）。审计还发现 lab 的 v3 runner 默认 `--list 1` 所依据的设计断言（「SC 与 SCL-8 在 FER≤1/24 工作点码率相同」）在噪声段是错的：lab 于 2026-09-27 在其自有 43 点矩阵上把 Polar 提到 SCL L=8（已验证 L=1 重跑与已发布 v3 JSON 逐位一致，故差异只归因于列表长度），bw40 平均 β 差由 +0.035 扩大到 +0.0535，交叉带从 bw≈60 右移到 bw≈80–100，bw≥200 的 LDPC 优势不变。43 点中 30 点变好、11 点精确不变、2 点变差，且这 2 点经查为**阶梯量化**（d=32 仅 5 平面，步长 `0.02×16384=328` bit，两配置逐平面 k 之和恰好差 328），非译码器退化。`|i_AB_polar − i_AB_ldpc|` 在 43 点为 `0.000e+00`，0 个平面全披露，FER 与 v3 一致。
+
+**Alternatives considered**:
+- *把 lab 的 Polar 数字当作本仓 Polar 的复现证据*：拒绝。代码逐字节相同，只是配置与数据不同，重复计数同一实现，违反本仓「泄漏数字仅在分解语义一致时可比较」的同源精神。
+- *引用 lab v4 的数字作为论文或路线依据*：拒绝。v3 经两轮独立评审（860 字段零差异重算），**换配置即失效**，v4 尚未评审。
+- *用兄弟仓 `beta_eff_empirical` 参与排名*：拒绝。见 V6；修复它会改动已文档化的 schema 语义，属兄弟仓行为变更，需其侧先走 OpenSpec。
+- *把 lab v4 的交叉点当作 Polar/LDPC 的最终分界*：拒绝。lab 的 Polar runner 仍弱于本仓生产配置（PW-only 序、阶梯在测试帧上打分即 design/test 循环、无 `--incremental`、无 `--pool-oos`），故该交叉点是 **Polar 侧的下界**，Polar 的真实优势只会更大、交叉带只会更靠右。
+
+**Consequences**: ① 本仓后续任何同数据 Polar/LDPC/Cascade 对比，分母必须用 `1 − leak/I_AB` 与 `leak / H(A|B)`，表头必须写明分母，且不得读取兄弟仓 `beta_eff_empirical`；② 需要 Polar 臂时按兄弟仓生产配置跑（`--scl-list 8 --ladder o1b2 --incremental --pool-oos`），不要用 lab runner 配置；③ lab 头条 LDPC 效率（β 0.87–0.91 / f 1.17–1.25）来自 10 dB **标定**数据（平面 BER 近乎均匀），真实数据上退化到 β 0.72 / f 2.92（d1024/bw300）、0.53（bw100），d≤32 无全帧成功点；lab 自述 0.769 是二元 LDPC 线真实数据工程上限 → **V80 baseline 规划不得把 lab 数字当作存在可达 Polar f≤1.3 工作点的证据**；④ lab 方向上支持该诊断的**次序**（干净端 LDPC 更近 Shannon 界），但在 lab 数据上**两线均未达到 f≤1.3**（最好为 Polar 1.396 @d32/bw40），且数据不同源、`f` 定义不同（本仓 `f=leak/H_full`，lab `f_EC=leak/H(A|B)` 实测）→ 只支持方向，不闭合目标；⑤ FER 必须带置信区间报告：n=24 下 0/24 的 95 % 单侧上界 0.138、1/24 为 [0.007, 0.202]，lab 的「LDPC 更可靠」**统计上未成立**，只能说两者都达标；⑥ 两线 β/f_EC 均不含 Eve 项，**都不是安全密钥率**，不得与本仓基于 `f` 的路线门直接并列。本条为文档性裁决，不改变任何行为、schema 或门控；V80/M2/M3 系列既有状态（含 M2 `M2-REALCOMP` 科学接受 WITHHELD、D2 第三分支暂停）一律不变。
+
+### 2026-09-27: M3D synthetic iteration-cap diagnostic R1 — batch FAIL (R2 not run)
+
+**Decision**: Record the `G-M3D-ITER250-SYNTH` R1 outcome as batch FAIL on the runtime gate; R2 was correctly NOT run under the frozen packet. The answer to the frozen question is negative — a 250-iteration cap does not deliver the required >=10% call-cost saving on the failure stratum, so the M3C wall-budget problem is NOT solved by lowering the iteration cap. No acceptance is recorded here; a single batch-end review is still required before any acceptance of this batch's evidence.
+
+**Evidence**: `G-M3D-ITER250-SYNTH` was granted by the user on 2026-09-27 (verbatim 「授权 G-M3D-ITER250-SYNTH 按 PRE_EXECUTE 执行」) after the frozen packet and Pre-EXECUTE passed; M3B/M3C grants were consumed and not reused. Pre-EXECUTE recheck recorded in `docs/research_cycles/M3D-ITER250-SYNTH/PRE_EXECUTE.md` §"Grant recorded and Pre-EXECUTE recheck — 2026-09-27" (A1-A7; 20 focused fake tests passed). R1 executed COMPLETE, 16/16 calls, `max_iter=250`, zero Stage-2 calls, wall 513.196 s against a 1200 s cap, peak RSS 0.164730 GiB, zero undetected, zero timeout rows. Machine authority: `workspace/m3d_iter250_synth_20260927/R1_17b6c2e9/M3D_RESULT.md` and `rows.json`. Selected nonexact-stratum summed decoder-call wall 475.648551 s against a 516.273375 s baseline, limit 464.646037 s (90% of baseline), ratio 0.9213 — the runtime gate FAILED. Identity, accuracy and resource gates passed. `arm_pass=False`. Selected exact-stratum wall rose from 29.048770 s to 34.687518 s (descriptive only, no threshold). Selected iterations 2334 -> 1984. `workspace/m3d_iter250_synth_20260927/R2_45ad8f31` is absent; R1's root and the single append-only `EXPLORATION_LOG.md` are retained. The frozen packet permits R2 only if R1 completes and individually passes all four gates.
+
+**Consequences**: No FER, overall throughput, real-data advantage, leakage/f, SKR or graph-family claim follows. Note for the record: the exact-stratum wall increased while total iterations decreased; with one run per cell and no repetition this is not established as a real regression, and it is not a gate — it is not written as a finding about the cap's effect on successful calls. A single batch-end review is still required before any acceptance of this batch's evidence, and no acceptance is recorded here. No commit/push.
+
+### 2026-09-27: M3D escalation review — consequence sentence retracted (batch FAIL itself stands)
+
+**Decision**: Record the independent batch-end + escalation review of `G-M3D-ITER250-SYNTH` filed at `docs/research_cycles/M3D-ITER250-SYNTH/BATCH_END_REVIEW.md` with verdict **PASS_WITH_FINDINGS**. Its BLOCKING finding B1 is aimed at the hypothesis-level consequence recorded in the preceding M3D entry of this log — not at the mechanical outcome, which stands exactly as recorded there (runtime gate missed on the single R1 run, batch FAIL/STOP, R2 correctly not run). The overreaching claims quoted below from the preceding entry are marked **SUPERSEDED**; the preceding entry itself is not edited, here or in the exploration log.
+
+**Evidence**: (i) B1 quotes the preceding entry's Decision sentence — "The answer to the frozen question is negative — a 250-iteration cap does not deliver the required >=10% call-cost saving on the failure stratum, so the M3C wall-budget problem is NOT solved by lowering the iteration cap." — and rules that a single unrepeated run cannot establish it. Marked **SUPERSEDED** in both parts: the general negative ("lowering the iteration cap does not deliver the required call-cost saving") and the M3C consequence ("the M3C wall-budget problem is NOT solved by lowering the iteration cap"). To the extent that M3C sentence implies the wall-budget burden falls back on throughput work, that implied "throughput becomes load-bearing" steer is **SUPERSEDED** as well; the preceding entry contains no other explicit throughput-steer sentence. (ii) Retraction basis, compact: demonstrated between-run offset of 7.2538 s on cap-independent work inside the same batch (5.6387 s across the eight identical-iteration exact cells, every cell positive, plus 1.6150 s on block 193 at an identical 110 iterations) against the 11.0025 s gate shortfall — a 2.13pp single-run margin against a cross-day baseline cannot separate "cap insufficient" from noise; and the batch measured Stage 1 on synthetic frames while the M3C overrun was in Stage 2 (M3C-R1: 39 Stage-1 nonexact → 39 Stage-2 attempts; M3C-R2 walled on Stage-2 frame 160). (iii) What stands: the runtime gate was missed on this single R1 run (ratio 0.921311409975293, 7.87% saving against 10% required), the batch is FAIL/STOP, R2 was correctly not run, and no selected synthetic call-cost signal is established. The absence of a positive signal is the finding; a hypothesis-level negative is not. (iv) Propagation sweep: no other entry in this log draws a throughput or M4 consequence from M3D — there is no such "Entry C"; the neighbouring M3C STOP, M2 and M0 entries do not touch M3D, and the 2026-09-27 cross-repo Polar comparison entry does not mention M3D. No other entry is modified.
+
+**Consequences**: The strongest allowed consequence, verbatim: "M3D-R1's single-run point estimate did not meet the preregistered 10% gate, so this batch provides no positive signal for the 250-cap; whether the cap could meet the gate on repeat, on the second graph, or on real frames is unresolved, and no M3C or throughput-work consequence follows from this batch alone." Any successor packet needs a new frozen question, budget and grant. M3C's STOP constraints (no accepted two-arm decision, no FER promotion) are unchanged. No commit/push.
+
+### 2026-09-27: M2-HDCASCADE-SYNTH batch-end review — verdict FAIL
+
+**Decision**: File the independent batch-end review at `docs/research_cycles/M2-HDCASCADE-SYNTH/BATCH_END_REVIEW.md` with verdict **FAIL** (E1-E7 PASS, E8 FAIL; blocking B1 and B2; non-blocking N1-N5). This batch is retained only as a boundary-clean execution record and a harness-defect exhibit. No promotion, no ranking, no efficiency/leakage/SKR use, no method-falsification claim, and nothing from it feeds the suspended D2. No further arms under that packet.
+
+**Evidence**: The 6 frozen synth arms ran in order within budget with zero NB decode calls and no repair, but every arm's headline numbers measure a stub gate, not HD-Cascade. All 6 corrected nothing (0 of 78 blocks): `comparison_bench/src/comparison_bench/methods/hd_cascade.py:224-229` returns `"accepted": True, "toeplitz_verified": False` unconditionally, and the unified gate at `:280-281` therefore makes every block `undetected` regardless of decode quality. B1 (production verification cannot return success) and B2 (log-only grant witness, for main to confirm) block; N1-N5 are non-blocking.
+
+**Consequences**: The minimum next step is either a new frozen correction packet or an honest retirement — see the following M2 accounting-correction entry for the decision actually taken. No commit/push.
+
+### 2026-09-27: M2 accounting correction — four user decisions D-1..D-4
+
+**Decision**: Record the four user decisions of 2026-09-27 on the M2 accounting correction: D-1 (tag verification unit) **DEFERRED**, non-blocking; D-2 (`f_eff` for HDC and LB) **DROPPED**; D-3 (D2 rule) **D2 RETIRED FOR M2**; D-4 (HD-Cascade column) **option (iii)** — HDC reported as a documented negative implementation result with both void labels attached to every HDC number, disclosure column labelled `exhausted assumed schedule on uncorrected blocks — not a method property`.
+
+**Evidence**: D-1: all tag totals continue to be carried distinctly and the one-tag column stays labelled counterfactual; D-1 only decides which column is the headline. It will be settled by a frozen protocol specification, not by reading code. D-2: if reintroduced it requires a new preregistered method-specific unit-consistent definition; the NB 1024-symbol superframe slope may never be silently reused. D-3: no valid input remains; routing proceeds via the M0/P1 measured gap; scoped to M2 only. D-4: option (ii) (wire a real verifier, fresh-root real-data rerun) was considered and rejected as a repair — it relabels `undetected` while changing no value of `exact_match`, `leak_EC` or FER. A citable HD-Cascade number requires a converging cascade and is a research sub-project outside the M2 accounting change. Authority for the definitions these decisions adopt: `openspec/changes/m2real-accounting-correction/` (spec items MAC-1..9, design §1..§12, statuses `void-stub-artifact` and `void-no-correction`).
+
+**Consequences**: The same-data comparison becomes a two-method table (NB-LDPC vs Layered-Binary) plus one documented negative implementation result. This is closer to the G0=(B) headline claim recorded in `docs/NOW.md` §2 (measured efficiency curve + same-data binary comparison) than the three-method table described in `docs/RESEARCH_DIRECTION_REPORT_20260924.md` §0/§5. Record this as a settled scope observation, not as a new claim. No commit/push.
+
+### 2026-09-27: M2 accounting correction T0–T4 complete — both baselines void, one-method + two negative results
+
+**Decision**: Accept the corrected accounting record (`docs/research_cycles/M2-REALCOMP/CORRECTION_RESULT.md`) **as stored disclosure arithmetic with honest labels** — that is the deliverable. The T3 verdict (PASS_WITH_FINDINGS, zero BLOCKING, NB-1..NB-9 accepted as non-blocking, no rework triggered) is accepted, and T4 main-thread acceptance is signed on the user grant 「可以接受这些」 (2026-09-27, given in the session where main reported the Layered-Binary real-frame exact counts and proposed D-5; that string is the entire verbatim grant for T4 and for D-5). Decide **D-5**: (i) Layered-Binary is reported as a documented negative implementation result with `void-no-correction` on its disclosure and every derived column, exactly parallel to the D-4(iii) treatment of HD-Cascade; (iii) IN PARALLEL, a read-only trace for contemporaneous backend provenance is authorised — no redecoding, no new execution, only a search of the three M2 roots and adjacent records for any surviving backend trace. Option (ii) (retain the disclosure as a bare diagnostic without the void label) was not chosen: it is the reading that invites the ranking the change exists to prevent. The original M2 comparison acceptance remains **WITHHELD** — this acceptance covers only the corrected accounting record.
+
+**Evidence**: T0 gate PASS with main's sign-off (`CORRECTION_PREREG_AND_AUTH.md` §9.1, 2026-09-27; grant 「1 → 3 → 2可以」 on file); T1 record written (12 arms kept separate in Tables C-1/C-2, both void labels on every HDC number, `f_eff` `not-defined`, D2 `retired-m2`, D-1 deferred, LB backend UNKNOWN); T2 AC-3 PASS — 12/12 identities bit-exact (`==`), including the genuine 1M arithmetic identity (LB `leak_EC` rose by exactly 64·205 = 13120 between m=197 and m=201: 659280 − 646160 = 13120, which is why 1M-lb-m201 `f_ec_actual` 3.919563800562031 equals 1M-lb-m197's one-tag value); T3 independent Pre-RESULT review PASS_WITH_FINDINGS with zero blocking. Post-T3 main recount of the `exact_match` column of each T3 root's `block_accounting.csv` for the `lb` family: 1M m=197 12/3280, m=201 7/3280; 1.5M m=203 5/4592, m=207 6/4592; 2M m=204 3/6128, m=208 3/6128 — **36 of 28,000 blocks, 0.13%**, block FER 0.9963–0.9995, therefore zero superframe successes. This is the same logical condition already applied to HD-Cascade under D-4(iii) (0/28,000): a disclosure figure measured on a run that corrected essentially nothing is the cost of a non-working configuration, not a method property. `void-stub-artifact` does NOT apply to Layered-Binary: LB rejected 3268 of 3280 blocks at 1M/m=197 and recorded 215 `undetected`, so its verification path functions — it is a weak decoder, not a hardcoded gate.
+
+**Consequences**: The endpoint deliverable is NOT a two-method same-data table (correcting the record's own §5/§11 expectation): it is one working method (NB-LDPC, real frames, measured) plus TWO documented negative implementation results (HD-Cascade 0/28,000; Layered-Binary 36/28,000), and no comparison column may be filled for either baseline. Explicit limits carried by this acceptance: no method ranking; no validated method efficiency; no `f_eff`/`f_eff_actual` for HDC or LB; no headline tag ratio (D-1 deferred); no single-point efficiency certification; no SKR, no qualification, no publication number; no NB actual-disclosure number from stored artifacts (M0 has no `leak_EC`/tag ledger); no inference of the real LB backend (UNKNOWN). The T3 reviewer's structural finding stands confirmed in the record: the displayed nominal columns never read `leak_EC` at all — `f_notag = 5m/(1024·H)` depends only on `(m, H)` — so cross-family equality of the displayed f was mechanically forced (at 1M/m=197 the recorded leak differs by 2.64x, 1,707,485 vs 646,160 bits, while both arms display 1.20048829) and the displayed f was structurally incapable of distinguishing the methods. The D1 tag-unit memo (`docs/research_cycles/V80-NBLDPC-JAN21/D1_TAG_UNIT_MEMO_20260927.md`) is analysis only, authorizes nothing, and changes no number in this record. No commit/push.
+
+### 2026-09-27: real M2 Layered-Binary backend provenance — NOT RECOVERABLE, structurally
+
+**Decision**: Record the D-5(iii) read-only trace outcome as **NOT RECOVERABLE**: the real M2 Layered-Binary backend identity cannot be established from this repository, for structural reasons. `backend_used = UNKNOWN` stands; D-5(i) (`void-no-correction` negative implementation result) is neither withdrawn nor softened — the negative outcome **is** the finding. Full record: `docs/research_cycles/M2-REALCOMP/BACKEND_TRACE_REPORT.md`. Documentation-only; no number in `CORRECTION_RESULT.md` or `CORRECTION_RECOMPUTE_CHECK.md` changes.
+
+**Evidence**: The decisive mechanism: `m2real_runner.py:878-880` calls `spa_decode_with_explicit_fallback(...)` without passing a `sidecar`; `m2lb_arm_runner.py:1514` and `:1525-1530` skip the sidecar write when `sidecar=None`; the word `sidecar` occurs **zero** times in `m2real_runner.py` — the backend is resolved and then discarded, so a re-run of the identical command would reproduce the identical gap ("never capturable", not "lost"). Selection was deterministic and env-determined, never an operator choice: `resolve_spa_decode_fn` (`m2lb_arm_runner.py:1482-1504`) is a pure function of `importlib.util.find_spec("ldpc")` (no RNG/env/config/flag; probe exception reads as absent at `:1497-1498`); `ldpc` present → `spa_decode_production`, otherwise the numpy fallback (`binary_spa_numpy.py:23`); no third path, no override. No output signature could distinguish the paths: (1) `backend_used` architecturally suppressed; (2) `iterations` required in the 13-key `OUTCOME_KEYS` (`:182-188`) but omitted from `layered_binary._OUTCOME_KEYS` (11 keys) and unrecorded anywhere (`grep -n iterations` empty in all three modules); (3) no exception asymmetry (true body refuses at `:461` only when `ldpc` is absent, which is exactly when the resolver never selects it; the fallback emits no warning/log); (4) no numeric artifact (shared leakage mapping, four status flags, double-gate semantics, `_P_ASSUMED = 0.02` at `:1468-1478`; real artifacts show `messages_actual = 3.14`, `leak_ec_bits = m` on all blocks incl. all 36 successes, identical to fallback-produced synthetic values). Negative evidence as evidence: three real roots × exactly three files, no dotfiles/subdirs; `rows.json` `{summary, rows}`, 17/34/37 keys with no backend field; `grep -i backend` 0 matches, SPA/min-sum/BP-OSD/LDPC-class grep 0 matches; `backend_used` in `workspace/` only in the 12 synthetic `m2lb_*/backend_used.sidecar.json`, never in real or `m2hdc_*` roots; no `decoder:` line in `M2REAL_RESULT_*.md`. The numerical outcome does not depend on backend identity (only the per-plane estimator differs), so the answer changes only the label — assumed-prior non-`ldpc` diagnostic vs genuine `BpOsdDecoder` measurement of a failing configuration — on 36/28,000 (investigation recount: 19 in 1M, 11 in 1.5M, 6 in 2M). Wider hole: the invocation itself is unrecorded — the frozen prompt template (`M2-REALCOMP-PROMPT.md:27,31,35`) omits `--with-production-fns` required by `main()` (`m2real_runner.py:912-914`), and the three `m2real_t3_*.log` files record that template being refused (rc=2) 40 minutes before the first real output; `grep -rn "with.production.fns"` finds nothing outside fake tests. Sibling-batch inconsistency (open, not a resolution; recorded in `docs/research_cycles/M2-LAYEREDBIN-SYNTH/BATCH_END_REVIEW.md` §4): the 12 synth sidecars are post-hoc hand-authored (mtime 23:28 vs `rows.json` 23:16–23:18; no code writes that filename), and the synth batch carries a live contradiction (`execute` default calls `spa_decode_production` directly at `:1084-1088`, which refuses without `ldpc` at `:461`, yet all 12 synth roots hold decoded blocks) — either `ldpc` was importable (sidecars wrong) or an off-repo driver injected a fallback `decode_fn`. Post-hoc probe and `wall_s` (0.078–0.093 s) are fenced as inadmissible/refused inference, not evidence.
+
+**Consequences**: Ranked future requirements, recorded as requirements only (not a plan, not scheduled, not designed): (1) pass a `sidecar` dict from `_production_lb_decode_fn` and flush it (capability exists, test-exercised, currently dead on the real path); (2) persist the backend string into `rows.json` `summary.arms[]` and `block_accounting.csv`; (3) capture an execution-time environment fingerprint (`find_spec("ldpc")` result, resolved backend literal, `__module__.__qualname__`); (4) persist `iterations` end-to-end (`layered_binary._OUTCOME_KEYS` → `frame_rows` → `_lb_block` → row dict); (5) write per-root sidecars from code, never by hand; (6) retain the stdout transcript incl. END/exit line; (7) retain a per-arm resource record; (8) record the exact command line/argv in the root. The synth finding reinforces retained-assumed / no-promotion and must not backfill the real `backend_used`. No commit/push.

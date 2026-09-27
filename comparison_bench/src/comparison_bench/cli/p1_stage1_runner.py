@@ -408,13 +408,17 @@ def construct_and_pin(arm: str, construct_fn: Callable,
     }
 
 
-def _check_root(root: str, arm: str) -> None:
+def _check_root(root: str, arm: str,
+                root_prefix: str = P1_ROOT_PREFIX) -> None:
     if not root:
-        refuse(f"root required (fresh additive {P1_ROOT_PREFIX}"
+        refuse(f"root required (fresh additive {root_prefix}"
                f"<arm>_<uuid8>)")
-    if not str(root).startswith(P1_ROOT_PREFIX):
-        refuse(f"root must be fresh additive {P1_ROOT_PREFIX}"
+    if not str(root).startswith(root_prefix):
+        refuse(f"root must be fresh additive {root_prefix}"
                f"<arm>_<uuid8> (got {root})")
+    if Path(str(root)).resolve().parent != Path(root_prefix).resolve():
+        refuse(f"resolved root must be a direct child of {root_prefix}"
+               f"(got {root})")
     name = Path(str(root)).name
     if not name.startswith(f"{arm}_"):
         refuse(f"root name must start with {arm}_ (arm/root mismatch: "
@@ -536,7 +540,8 @@ def execute(*, root: str, arm: str, construct_fn: Callable | None,
             decode_fn: Callable | None, rescue_decode_fn: Callable | None,
             rank_fn: Callable | None, clock: Callable | None = None,
             rss_fn: Callable | None = None,
-            writer: Callable | None = None) -> dict:
+            writer: Callable | None = None,
+            root_prefix: str = P1_ROOT_PREFIX) -> dict:
     """Run the frozen P1 Stage-1 rescue arm procedure (one arm/invocation).
 
     ALL FOUR of ``construct_fn`` / ``decode_fn`` / ``rescue_decode_fn`` /
@@ -551,7 +556,7 @@ def execute(*, root: str, arm: str, construct_fn: Callable | None,
     and return.
     """
     spec = parse_arm(arm)
-    _check_root(root, arm)
+    _check_root(root, arm, root_prefix=root_prefix)
     for name, fn in (("construct_fn", construct_fn),
                      ("decode_fn", decode_fn),
                      ("rescue_decode_fn", rescue_decode_fn),

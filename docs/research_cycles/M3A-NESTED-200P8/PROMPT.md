@@ -1,0 +1,3 @@
+# Operator prompt — G-M3A-CONSTRUCT
+
+Implement only OpenSpec `m3a-nested-200-plus-8` M3A-01..03 first. You own the new CLI module and fake test; preserve all other agents' work. Do not call PEG in tests or execute the full two-arm batch during implementation. Return the exact CLI invocation and focused test output so the main thread can complete `PACKET.md` Pre-EXECUTE. Once that gate is recorded, execute both frozen arms under the single granted batch, retain failures in one append-only log, and return machine artifacts for independent batch-end review. No raw data, bundle, decoder/DE, result-root overwrite, commit or push. Any scientific-input ambiguity or pin miss stops the relevant arm and returns to the main thread; no adaptive seed search.

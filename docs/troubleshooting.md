@@ -696,3 +696,40 @@ len(plan)==granted scope.
 **Fix**: 成功数以权威列 `failed`/`k` 为准，且须与 FER、`undetected` 联读；严禁按 `status`/`decoded` 聚合成功数。
 
 **Prevention**: 任何下游聚合/报表在取成功数前先确认使用 `failed`/`k` 列；证据见 `docs/research_cycles/V80-NBLDPC-JAN21/S0_1_BATCH_END_REVIEW.md` F1。
+
+### Pre-RESULT 结稿跨源合并计数 + 授权块留空（M0 B1/B2 初审 FAIL）
+
+**Observed** (2026-09-24): M0 (`G-M0-REALFRAME`) 独立 Pre-RESULT 初审两项 FAIL —
+B1: 草稿把三源计数合并为 `103/1/910`（fails / undetected / fails_full10 的跨源总和），
+违反 PREREG §3“逐源逐臂分列、禁止跨源/跨臂合并任何计数”；B2: §8 授权块空白。
+返工删除合并数、按源/臂分列并补填授权后，重审 PASS。
+
+**Root cause**: 汇总时顺手跨源求和，以及把授权块当“格式栏”留到最后填——
+两类违规都只靠人眼才会暴露，首轮审稿未按字符串级检查执行。
+
+**Fix**: 删除一切跨源合并数字，恢复逐源逐臂分列；授权块按“空 = 未授权”逐字填充；
+FAIL 记录保留在案（返工史进 decision-log），不覆盖初审结论。
+
+**Prevention**: 独立 Pre-RESULT 把两条列为 checklist 首项并做字符串级核查：
+① grep 授权块/签字块是否空白；② 扫描结果表中任何“三源合计/总计”式数字；
+§3 no-merge 与 §8 non-blank 未逐项确认前不得返回 PASS。
+
+### 后端错标教训：`numpy-minsum-fallback (assumed)` 禁标真体，后端以 sidecar 为准（M2-LAYEREDBIN-SYNTH T2）
+
+**Observed** (2026-09-24/25): 12 臂 RESULT md 把后端记为 `true binary SPA`，实际恒为 `numpy-minsum-fallback (assumed, 非ldpc.BpOsdDecoder)`。
+
+**Root cause**: 执行记录沿用了真体标签写法，未显式标注 assumed 先验 + 非 ldpc 后端。
+
+**Fix**: 以各臂 `backend_used.sidecar.json` 为准纠正（`BACKEND_CORRECTION.md` §1–§2）；旧三件未改（见 HASH_MANIFEST）；B4 转 retained-assumed 诊断，禁 promotion/选点/真实结论。
+
+**Prevention**: 执行记录须显式写 `assumed` + 后端以 sidecar 为准；assumed 后端禁标真体名称。
+
+### 展示 f 列完全不含披露项，结构上无法区分方法（M2 真实比较）
+
+**Observed** (2026-09-27): M2 真实比较结果表同 m 下 HDC 与 LB 的 `f_notag` 完全相等（1M/m=197 两臂同为 1.20048829），而两臂实测 `leak_EC` 差 2.64x（1,707,485 vs 646,160 bits；实际去 tag 比 10.15137 vs 3.84156）。
+
+**Root cause**: 展示列 `f_notag = 5m/(1024·H)` 与 `f_super = (5m+64)/(1024·H)` 的公式内不存在 `leak_EC`、tag 或任何族相关项——只取 `(m, H)`。同 m 同 H 基下跨族相等是机械强制的；该列在结构上无论实际发生什么都无法区分方法。初审 A-CMPE 披露 PASS 只查了列齐全，未查此一致性。
+
+**Fix**: 凡引用效率/披露数字，先核对公式是否含泄漏（EC）项；展示 f 与实测披露并存时，一律并列实测 `leak_EC` 派生比并标注口径，不得以展示 f 代替实际披露。
+
+**Prevention**: 独立 Pre-RESULT 把“f 公式含泄漏项？”列为披露会计首查：grep 公式定义，确认分子含 `leak_EC`/EC 实测项；凡闭式仅为 `(m, H)` 的名义列，一律标 `historical-nominal` 并禁排名。详见 `docs/research_cycles/M2-REALCOMP/`（`MAIN_ADJUDICATION_20260926.md` 发现 1、`CORRECTION_RESULT.md` §8、`CORRECTION_RECOMPUTE_CHECK.md` §E-1）。

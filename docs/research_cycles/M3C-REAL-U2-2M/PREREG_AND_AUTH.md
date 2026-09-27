@@ -1,0 +1,43 @@
+# G-M3C-REAL-U2-2M — real 2M nested-graph u2 canary
+
+**State:** STOP after R2 `INCOMPLETE-wall`; see `STOP_RECORD.md`. **Track:** DECIDE. This is one new real-data development diagnostic, not a P3/G0B verdict or publication result. The user's 2026-09-26 one-time authorization (“需要的授权我现在都一次性给你…你只需要往下推进即可”) covered this bounded packet and is exhausted; no rerun/resume is authorized. No M0 or M3-b grant is reused.
+
+## Question and frozen arms
+
+On the **same 2M VAL+HOLD real eval frames used by M0**, what are the u2 Stage-1 errors of each accepted M3-a nested 200+8 graph instance, and how many can a cold 208-row rescue repair under a posthoc ideal trigger? This tests real-frame behavior of two graph instances, not a deployable two-stage IR protocol. M0's m=204/208 rows use different rates and graphs and are provenance context only, not a frozen superiority comparator.
+
+| arm | saved graph, read-only | graph seeds | fresh output root |
+|---|---|---|---|
+| M3C-R1 | `workspace/m3a_nested_200p8_20260926/arm1.json` | base 2026092001, extension 2026096801 | `workspace/m3c_real_u2_20260926/R1_5af1c76e` |
+| M3C-R2 | `workspace/m3a_nested_200p8_20260926/arm2.json` | base 2026092011, extension 2026096811 | `workspace/m3c_real_u2_20260926/R2_4e8bc319` |
+
+Run R1 then R2. No pooling, seed search, graph rebuild, decoder retuning, rerun, or resume. Graph M3-a rank/4-cycle/twice-identical pins are attributed to M3-a's accepted structural evidence; this runner validates its saved identity, 200-row prefix, dimensions and edges and performs **zero new PEG constructions**.
+
+## Data, algorithm and truth labels
+
+- Source `2M` only. Reuse `m0_realframe_runner.load_real_series("2M")` with its exact base `X.ttbin` member, R1 alignment/pair/split assertions, 200 ps nearest-unique pairing, 200 ps bins, 1024 contiguous symbols, VAL+HOLD last 40% role. Pin `n_pairs_total=982182`, `n_pairs_eval=392721`, `eval_first_frame=8771980`, exactly **383** complete frames and **529** remainder symbols dropped, in the same order as M0; any source/split/count deviation STOP. Use `m0_realframe_runner.load_bundle("2M")` for the **same-source R1-TRAIN** prior; never fit on eval data. Source/prior paths, input sizes and UTC mtimes must be recorded at Pre-EXECUTE and in result. No other raw/private file or `.ttbin` is opened.
+- GF(32), x=`a&31`, y=`b&31`; M0/b2f `marginal_prior_l2` and `center_rows_prior`, `decode_error_domain_posterior` with max_iter=300, streak=3. Stage-1 cold on rows 0..199 for every frame. Stage-2 cold on rows 0..207 **only if** Stage-1 `u2` reconstruction differs from Alice's `a&31`. This trigger is an offline oracle using the answer; it cannot be presented as an actual tag/verification event. Complete-arm Stage-2 set equality is defined in the reporting contract below.
+- Stage success means **u2 exact match only**. A converged but wrong reconstruction is `undetected_stage1` or `undetected_stage2` and counts as failure, separately. A single decoder call >300 s causes terminal `INCOMPLETE-decode-cap`, with the overrun row retained and no retry/rescue/next frame. Report-only `full10_match`: M0 `recover_u1` argmax from same-source prior on the final exact-u2 candidate, compared with Alice `a>>5`; set it to null when final u2 is wrong. Do not call this full-symbol reconciliation or assume L1 is free. Final u2 success uses Stage-1 success, otherwise Stage-2 success.
+- Only when all 383 frames have a final u2 disposition, require the Stage-2 attempt set to equal the complete Stage-1 non-exact set, then report the 383-frame denominator, per-stage failed/undetected counts, attempted/rescued/final failures, 95% Wilson intervals, full10 mismatches among final-u2-success frames separately, per-frame raw/u2 symbol errors, wall/iterations, and graph/source/prior provenance. An incomplete arm reports `processed_n/383`, where `processed_n` counts only frames with a final disposition (an interrupted Stage-2 frame is excluded), retained stage rows and stop reason, with no accepted FER/Wilson point, complete-set equality assertion, or cross-arm decision. Do **not** compute/report f, beta, actual or modeled security leakage, tag disclosure, SKR, accepted-frame yield, qualification, method-family ranking or G0B/P3 verdict. Nominal syndrome sizes 1000/1040 bits may appear only as code dimensions, never as a communication ledger.
+
+## Budget, outputs, STOP
+
+One CPU; `OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=NUMBA_NUM_THREADS=1`. Per arm wall ≤5400 s, two-arm sequential batch ≤10800 s; per decoder call ≤300 s; peak RSS <4 GiB. The runner stops at an internal 5280 s deadline, reserving 120 s for imports, terminal artifacts and the external `timeout 5400` watchdog; this is a stricter operational stop inside the frozen 5400 s budget, not a changed scientific threshold. Fresh family and arm roots must be absent before execution. New per-arm JSON rows, compact CSV, truthful Markdown result, stdout/resource record and one append-only `execution.jsonl` under `workspace/m3c_real_u2_20260926/`. No writes to old M0/M3-a/M3-b roots, `src/`, `experiments/`, `tools/`, `results/` or `comparison_bench/outputs_comparison/`. Stop on graph/data/prior identity mismatch, frame count/order mismatch, tag/deployability wording error, output collision, budget breach, or implementation review FAIL. Retain failed attempts; no repair/retry under this DECIDE packet.
+
+## Pre-EXECUTE and Pre-RESULT
+
+Before any raw read or decoder call, main thread records: branch/HEAD, scoped changes and protected diff, focused fake tests with zero production calls, independent code review, M3-a/M0/R1/prior input presence and identities, exact commands, both root absences, resource caps, and the grant above. A **FAIL blocks execution**. R2 starts only after R1 `COMPLETE` and all machine gates PASS; otherwise retain R1 and STOP. After both arms, a separate `luna_worker` independently recomputes frame sets, stage/undetected/full10 semantics, denominators/intervals, resource gates and claim ceiling from artifacts before `RESULT.md` is solidified. Main thread alone accepts or withholds the diagnostic. P3, G0B and real protocol design remain separate.
+
+**Exact commands after implementation review and Pre-EXECUTE PASS** (repository root in WSL; capture stdout and `/usr/bin/time -v` separately):
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMBA_NUM_THREADS=1 timeout -k 10 5400 /usr/bin/time -v .venv/bin/python -m comparison_bench.src.comparison_bench.cli.m3c_real_u2 --arm M3C-R1 --root workspace/m3c_real_u2_20260926/R1_5af1c76e --execute-real --execution-authorized
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMBA_NUM_THREADS=1 timeout -k 10 5400 /usr/bin/time -v .venv/bin/python -m comparison_bench.src.comparison_bench.cli.m3c_real_u2 --arm M3C-R2 --root workspace/m3c_real_u2_20260926/R2_4e8bc319 --execute-real --execution-authorized
+```
+
+Implementation `M3C-01/02` has fake-only validation; independent implementation re-review and R1 Pre-EXECUTE passed and are recorded in `PRE_EXECUTE.md`. R2 remains conditional on R1's machine gates.
+
+**2026-09-26 pre-implementation re-freeze R1:** independent packet review found the original word “reduce” lacked a matched-rate comparator and incomplete-run interval semantics. Before any real read/decoder execution, the main thread narrowed the question to absolute two-instance u2 measurements, designated M0 m=204/208 as context only, restricted 383-frame FER/Wilson and Stage-2 set equality to COMPLETE arms, and pinned the existing M0 2M eval provenance above. No scientific measurement or output preceded this correction. Independent re-review remains required before Pre-EXECUTE.
+2026-09-26 independent packet re-review: original BLOCKER (undefined comparator) and MAJOR (incomplete denominator) were repaired by re-freeze R1; a later contract conflict on unconditional Stage-2 set equality was repaired before implementation/execution. Final read-only packet review PASS. This PASS is for scientific packet consistency only; M3C-01/02, independent implementation review and main Pre-EXECUTE remain pending.
+
+**2026-09-26 pre-execution implementation correction:** independent code review found that a hanging decoder and the external 5400 s watchdog could prevent a terminal row/log from being retained. Before any real input read, the implementation was corrected to interrupt each decoder call, append execution events, and use the 5280 s internal stop stated above. The scientific inputs, seeds, graph instances, data roles, truth labels and 5400 s maximum stay fixed. Independent implementation re-review and main Pre-EXECUTE are still required; this correction is not execution evidence.
