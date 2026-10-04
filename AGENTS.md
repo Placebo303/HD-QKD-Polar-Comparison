@@ -2,6 +2,13 @@
 
 These rules apply to all agents operating in this repository.
 
+## Project preferences (user steering, 2026-10-04)
+
+- Ponytail is disabled for this project. Do not enable it by default.
+- Delegated subagents use `luna_worker` unless the user or an applicable rule
+  explicitly requires a different named role. Main-thread requirements,
+  scientific acceptance and user-only execution authorization remain separate.
+
 ---
 
 ## 0. Repository Scope (READ FIRST — boundary rule)
