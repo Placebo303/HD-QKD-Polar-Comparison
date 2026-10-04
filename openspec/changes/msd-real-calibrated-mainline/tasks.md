@@ -13,7 +13,7 @@
 - [x] C1-C6 sparse accumulator-family structural candidate implemented, fixed structural tests and independent read-only review accepted; stage allocations and practical code gap remain open.
 - [x] D1-D4 default-disabled exact-prior stage branch, fake-only tests and independent read-only review accepted; no BP-equivalence, OOS or performance acceptance.
 - [x] E1-E5 default-disabled mixed-stage exact-zero conditioning, retained failed fixture attempt, corrected fake tests and independent read-only review accepted; standard-builder model scope only.
-- [ ] I1-I3 fixed full-alphabet/long-block structural integration tests and independent acceptance; no decoder experiment or stage allocation adoption.
+- [x] I1-I3 fixed full-alphabet/long-block structural integration tests and independent acceptance; no decoder experiment or stage allocation adoption.
 - [ ] Scoped implementation milestones and applicable future execution gates.
 
 Future real-frame budgets and scientific gates remain applicable; no old grant is reused.
