@@ -10,3 +10,6 @@ Disclose finite-length assumptions, N, tag once only, failure penalty and OOS li
 
 ### Requirement: Bounded independent evidence
 Freeze exact input/output paths and commands before calculation. Independently recompute every reported number; write source rows progressively. Decoder experiments require effect/MDE before their packets; prohibited GF32 microprobes SHALL NOT resume.
+
+### Requirement: Truth-free syndrome integration
+Implementation SHALL separate sender truth from receiver Bob/public-syndrome inputs, propagate actually recovered prefixes, and count every transmitted parity row in bits/block. Syndrome satisfaction SHALL NOT mean verified success. Receiver factories SHALL be explicit; implementation tests SHALL inject fake decoders and SHALL NOT construct or execute a production backend. Backend selection, graph design and empirical execution remain subject to their later gates.
