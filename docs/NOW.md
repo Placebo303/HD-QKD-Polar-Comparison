@@ -31,3 +31,7 @@ E1–E5 部分精确零误差变量条件化已通过固定 fake 测试与独立
 I1–I3 已完成并由独立只读审查接受其固定代数连接范围：完整1024字母表、长块CSR、两种先验处理和首级冲突停止。它不增加信道、FER、实用码率或性能证据。后继 J/K 的模型算术及接口核对见下，禁止据此推断生产解码收益。
 
 J1–J5 已完成 TRAIN 摘要下的连续正态错误预算分配及每个数字/显示表格的独立复算，整数取整/裁剪另列；[新表](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/ERROR_ALLOCATION_TABLE.md) 仅接受模型算术。K1–K3 已修正两处尾分位数的补数消减并通过固定测试/独立增量审查，没有重跑或改写旧 J 产物。历史预算来自 O1 synthetic genie-u1 单层结果，不能作为实测完整符号对照；下一步落实完整两层重构、实际 tag 验证、失败与 accepted-wrong 的同块口径以及样本/成本可行性。实用码隙和真实 f 增益仍未知，不据此声称超越真实基线。
+
+后继只读库存核对已记录在同一日志：v28 receiver 的完整 Bob/实际前缀编排可复用，现有 runner 的输出 digest 自核对不能代替独立 sender tag 验证。R1 历史角色按 acquisition frame index 划分，不能把维度参数当 reconciliation block 长度，也不能证明角色后来未使用。主线程计划同一家族的 MSD 短/长块完整符号对照，显式计 native tag 与部分保留；该方案尚不是 decoder packet。下一步可推进固定 fake 的 outcome 账本实现；当前完整配对库存、码率/degree、实际 cost 与执行预算仍待落实。
+
+L1–L5 原生块 outcome/期望良率账本已通过固定 fake 测试与独立只读审查，主线程仅接受数学口径：独立 sender reference、accepted-wrong 隔离、实际 tag/泄漏和逐块加权失败惩罚、同体量/熵分母配对。首次导入失败及唯一修正均保留。下一步冻结当前角色 metadata 库存范围及新的共同体量功效/成本口径；旧 P2_POWER 的同长度/共享 tag 数量不能直接用于短长块方案。未读取新的真实数据或执行解码。

@@ -19,3 +19,6 @@
 - [ ] Scoped implementation milestones and applicable future execution gates.
 
 Future real-frame budgets and scientific gates remain applicable; no old grant is reused.
+
+- [x] L1-L5 independent sender-reference outcome and native weighted-yield accounting; retained collection failure, import-only correction, fixed fake tests and read-only review accepted within accounting scope.
+- [ ] Freeze current-role metadata inventory scope and rederive common-volume native-tag power/cost before any decoder packet; old same-length/shared-tag power is not acceptance of the revised comparator.
