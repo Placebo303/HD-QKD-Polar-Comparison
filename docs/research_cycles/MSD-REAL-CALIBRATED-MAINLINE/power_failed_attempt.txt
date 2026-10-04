@@ -1,0 +1,48 @@
+First independent power comparison attempt (preserved from the tool output already returned; not rerun)
+
+Exact command:
+wsl.exe -e bash -lc 'cd /mnt/d/Code/HD-QKD_Polar_Comparison && timeout 120 .venv/bin/python docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/verify_power_independent.py'
+
+functions.exec result envelope:
+chunk_id=b21f70
+wall_time_seconds=0.2949
+exit_code=1
+
+Captured output field (kept in the JSON-escaped form returned by the tool; the initial WSL diagnostic contains NULs and replacement characters in that returned representation):
+"w\u0000s\u0000l\u0000:\u0000 \u0000�hKm0R \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006tM�n\f�FO*g\\��P0R \u0000W\u0000S\u0000L\u0000\u00020N\u0000A\u0000T\u0000 \u0000!j\u000f_\u000bN�v \u0000W\u0000S\u0000L\u0000 \u0000\rN/e\u0001c \u0000l\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006t\u00020\r\u0000\n\u0000Wrote docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P2_POWER_INDEPENDENT.json\nscience_numeric_fields=159 matching=159 labels_match=True"
+
+There was no Python exception or traceback in the captured output. Exit 1 was the verifier's comparison result, not a thrown error. The immediately inspected report's complete comparison object was:
+{
+  "float_absolute_tolerance": 1E-09,
+  "integer_comparison": "exact",
+  "scientific_numeric_field_count": 159,
+  "scientific_numeric_fields_matching": 159,
+  "all_scientific_numbers_match": false,
+  "all_status_and_label_checks_match": true,
+  "numeric_path_set_matches": false,
+  "structural_mismatches": [
+    "source_results[0].bsc_proxy_overcount_context_only.reference_H_A_given_B_bits_per_symbol: missing in P2_POWER",
+    "source_results[1].bsc_proxy_overcount_context_only.reference_H_A_given_B_bits_per_symbol: missing in P2_POWER",
+    "source_results[2].bsc_proxy_overcount_context_only.reference_H_A_given_B_bits_per_symbol: missing in P2_POWER"
+  ],
+  "numeric_path_mismatches": {
+    "missing_from_independent_recalculation": [],
+    "not_present_in_P2_POWER": [
+      "source_results[0].bsc_proxy_overcount_context_only.reference_H_A_given_B_bits_per_symbol",
+      "source_results[1].bsc_proxy_overcount_context_only.reference_H_A_given_B_bits_per_symbol",
+      "source_results[2].bsc_proxy_overcount_context_only.reference_H_A_given_B_bits_per_symbol"
+    ]
+  },
+  "numeric_mismatches": [],
+  "status_or_label_mismatches": [],
+  "source_acceptance_metadata_provenance_only": {
+    "records_compared": 12,
+    "scientific_scalar_fields_compared": 2868,
+    "float_absolute_tolerance": 1E-09,
+    "integer_comparison": "exact",
+    "use_as_power_gate": false
+  },
+  "p2_numeric_source_result_leaf_count": 159
+}
+
+Cause and repair (scope-only): the independent artifact had retained a P1-derived reference H(A|B) inside the BSC context, but this field is not present in P2_POWER. The first comparison therefore incorrectly treated the P1-only context field as a required P2 field. I excluded only that field from the P2 field-set comparison while retaining it in the independent output. No inputs, thresholds, or calculated power numbers changed. The later rerun passed; see P2_POWER_INDEPENDENT.json.

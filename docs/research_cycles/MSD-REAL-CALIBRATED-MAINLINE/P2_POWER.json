@@ -1,0 +1,363 @@
+{
+  "calculation_note": "metadata and source-row guard correction only; formulas, inputs, and scientific numbers unchanged",
+  "claim_ceiling": "pre-packet power arithmetic only; not a decoder experiment, observed power, or real-efficiency gain",
+  "effect_size_status": "delta_f=0.10 is a proposed minimum comparison effect, not a P1-measured gain; the P1 marginal-BSC proxy excess is context only",
+  "failure_and_bound_note": "Use the frozen paired-gap bound [-R,R] from L_EC in [0,N*H_A], nonnegative kept, and matched shared tag; sigma_upper=R. Recheck this bound if later arm-specific failure accounting changes the paired-f range.",
+  "p1_a5_acceptance_evidence": {
+    "float_absolute_tolerance": 1e-09,
+    "integer_comparison": "exact",
+    "records_compared": 12,
+    "scientific_scalar_fields_compared": 2868
+  },
+  "p1_independent_input": "workspace/msd_p1/a24c800020d943e48d590f803157a775/independent.json",
+  "paired_observation_unit": "one matched block pair: control and candidate use the same source, block length, and one shared 64-bit tag",
+  "sampling_assumption": "independent paired block differences for the planning formula; actual failure and discordance variance is unknown and is not estimated here; P1 aggregate histograms do not provide an available independent paired-block count",
+  "source_results": [
+    {
+      "H_A_bits_per_symbol": 9.997691909893774,
+      "H_A_given_B_bits_per_symbol": 0.7981344445358385,
+      "P1_scope": "R1 accepted aggregate TRAIN histogram; descriptive plug-in entropies",
+      "R_dimensionless": 12.526325581284757,
+      "bsc_proxy_overcount_context_only": {
+        "by_encoding_order": [
+          {
+            "encoding": "NATURAL",
+            "order": "MSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.2737470944033822
+          },
+          {
+            "encoding": "NATURAL",
+            "order": "LSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.2737470944033822
+          },
+          {
+            "encoding": "GRAY",
+            "order": "MSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.4967674430069102
+          },
+          {
+            "encoding": "GRAY",
+            "order": "LSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.4967674430069098
+          }
+        ],
+        "max_bits_per_symbol": 1.2737470944033822,
+        "meaning": "sum marginal h2(bit-error) minus H(A|B), bits/symbol",
+        "min_bits_per_symbol": 0.4967674430069098,
+        "not_a_measured_f_gain": true
+      },
+      "hoeffding_constants": {
+        "alpha": 0.05,
+        "mde_bound_formula": "R*sqrt(2/n)*(sqrt(log(2/alpha))+sqrt(log(1/(1-power))))",
+        "n_required_formula": "ceil((sqrt(2)*sum_sqrt_logs*R/delta_f)^2)",
+        "power": 0.8,
+        "sum_sqrt_logs": 3.1892818238193614
+      },
+      "method_plans": [
+        {
+          "interpretation": "normal planning using sigma_upper=R; not an observed-variance estimate",
+          "mde_at_rounded_paired_count_delta_f": 0.09999994137864433,
+          "mde_at_unrounded_n_required_delta_f": 0.09999994137864433,
+          "method": "normal_approximation",
+          "n_pairs_rounded_for_equal_seeds": 123156,
+          "n_required_independent_paired_block_pairs": 123156,
+          "pairs_per_seed": 41052,
+          "seed_count": 3,
+          "seed_count_is_not_the_effective_sample_count": true,
+          "status": "NORMAL_POWER_PLANNING",
+          "workload_by_block_length": [
+            {
+              "block_length_symbols_per_arm": 1024,
+              "paired_block_pairs": 123156,
+              "paired_symbol_positions": 126111744,
+              "symbol_positions_per_arm": 126111744,
+              "two_arm_symbol_positions": 252223488
+            },
+            {
+              "block_length_symbols_per_arm": 16384,
+              "paired_block_pairs": 123156,
+              "paired_symbol_positions": 2017787904,
+              "symbol_positions_per_arm": 2017787904,
+              "two_arm_symbol_positions": 4035575808
+            }
+          ]
+        },
+        {
+          "interpretation": "distribution-free sufficient bound; more conservative here than normal planning; not based on observed variance",
+          "mde_at_rounded_paired_count_delta_f": 0.09999956458339308,
+          "mde_at_unrounded_n_required_delta_f": 0.09999987786376482,
+          "method": "hoeffding_distribution_free_bound",
+          "n_pairs_rounded_for_equal_seeds": 319203,
+          "n_required_independent_paired_block_pairs": 319201,
+          "pairs_per_seed": 106401,
+          "seed_count": 3,
+          "seed_count_is_not_the_effective_sample_count": true,
+          "status": "BOUNDED_POWER_PLANNING",
+          "workload_by_block_length": [
+            {
+              "block_length_symbols_per_arm": 1024,
+              "paired_block_pairs": 319203,
+              "paired_symbol_positions": 326863872,
+              "symbol_positions_per_arm": 326863872,
+              "two_arm_symbol_positions": 653727744
+            },
+            {
+              "block_length_symbols_per_arm": 16384,
+              "paired_block_pairs": 319203,
+              "paired_symbol_positions": 5229821952,
+              "symbol_positions_per_arm": 5229821952,
+              "two_arm_symbol_positions": 10459643904
+            }
+          ]
+        }
+      ],
+      "normal_constants": {
+        "alpha_two_sided": 0.05,
+        "mde_formula": "(z_1-alpha/2 + z_power) * R / sqrt(n)",
+        "n_required_formula": "ceil(((z_1-alpha/2 + z_power)*R/delta_f)^2)",
+        "power": 0.8,
+        "z_1_minus_alpha_over_2": 1.9599639845400536,
+        "z_power": 0.8416212335729144,
+        "z_sum": 2.801585218112968
+      },
+      "paired_f_difference_bound": [
+        -12.526325581284757,
+        12.526325581284757
+      ],
+      "sigma_upper_f_units": 12.526325581284757,
+      "source": "T2-1M",
+      "target_delta_f": 0.1
+    },
+    {
+      "H_A_bits_per_symbol": 9.9982955017297,
+      "H_A_given_B_bits_per_symbol": 0.8249782281516378,
+      "P1_scope": "R1 accepted aggregate TRAIN histogram; descriptive plug-in entropies",
+      "R_dimensionless": 12.11946589685265,
+      "bsc_proxy_overcount_context_only": {
+        "by_encoding_order": [
+          {
+            "encoding": "NATURAL",
+            "order": "MSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.3373359393471782
+          },
+          {
+            "encoding": "NATURAL",
+            "order": "LSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.3373359393471778
+          },
+          {
+            "encoding": "GRAY",
+            "order": "MSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.5346783818919316
+          },
+          {
+            "encoding": "GRAY",
+            "order": "LSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.5346783818919316
+          }
+        ],
+        "max_bits_per_symbol": 1.3373359393471782,
+        "meaning": "sum marginal h2(bit-error) minus H(A|B), bits/symbol",
+        "min_bits_per_symbol": 0.5346783818919316,
+        "not_a_measured_f_gain": true
+      },
+      "hoeffding_constants": {
+        "alpha": 0.05,
+        "mde_bound_formula": "R*sqrt(2/n)*(sqrt(log(2/alpha))+sqrt(log(1/(1-power))))",
+        "n_required_formula": "ceil((sqrt(2)*sum_sqrt_logs*R/delta_f)^2)",
+        "power": 0.8,
+        "sum_sqrt_logs": 3.1892818238193614
+      },
+      "method_plans": [
+        {
+          "interpretation": "normal planning using sigma_upper=R; not an observed-variance estimate",
+          "mde_at_rounded_paired_count_delta_f": 0.09999934357989719,
+          "mde_at_unrounded_n_required_delta_f": 0.09999977728011547,
+          "method": "normal_approximation",
+          "n_pairs_rounded_for_equal_seeds": 115287,
+          "n_required_independent_paired_block_pairs": 115286,
+          "pairs_per_seed": 38429,
+          "seed_count": 3,
+          "seed_count_is_not_the_effective_sample_count": true,
+          "status": "NORMAL_POWER_PLANNING",
+          "workload_by_block_length": [
+            {
+              "block_length_symbols_per_arm": 1024,
+              "paired_block_pairs": 115287,
+              "paired_symbol_positions": 118053888,
+              "symbol_positions_per_arm": 118053888,
+              "two_arm_symbol_positions": 236107776
+            },
+            {
+              "block_length_symbols_per_arm": 16384,
+              "paired_block_pairs": 115287,
+              "paired_symbol_positions": 1888862208,
+              "symbol_positions_per_arm": 1888862208,
+              "two_arm_symbol_positions": 3777724416
+            }
+          ]
+        },
+        {
+          "interpretation": "distribution-free sufficient bound; more conservative here than normal planning; not based on observed variance",
+          "mde_at_rounded_paired_count_delta_f": 0.09999974667068426,
+          "mde_at_unrounded_n_required_delta_f": 0.099999914005011,
+          "method": "hoeffding_distribution_free_bound",
+          "n_pairs_rounded_for_equal_seeds": 298803,
+          "n_required_independent_paired_block_pairs": 298802,
+          "pairs_per_seed": 99601,
+          "seed_count": 3,
+          "seed_count_is_not_the_effective_sample_count": true,
+          "status": "BOUNDED_POWER_PLANNING",
+          "workload_by_block_length": [
+            {
+              "block_length_symbols_per_arm": 1024,
+              "paired_block_pairs": 298803,
+              "paired_symbol_positions": 305974272,
+              "symbol_positions_per_arm": 305974272,
+              "two_arm_symbol_positions": 611948544
+            },
+            {
+              "block_length_symbols_per_arm": 16384,
+              "paired_block_pairs": 298803,
+              "paired_symbol_positions": 4895588352,
+              "symbol_positions_per_arm": 4895588352,
+              "two_arm_symbol_positions": 9791176704
+            }
+          ]
+        }
+      ],
+      "normal_constants": {
+        "alpha_two_sided": 0.05,
+        "mde_formula": "(z_1-alpha/2 + z_power) * R / sqrt(n)",
+        "n_required_formula": "ceil(((z_1-alpha/2 + z_power)*R/delta_f)^2)",
+        "power": 0.8,
+        "z_1_minus_alpha_over_2": 1.9599639845400536,
+        "z_power": 0.8416212335729144,
+        "z_sum": 2.801585218112968
+      },
+      "paired_f_difference_bound": [
+        -12.11946589685265,
+        12.11946589685265
+      ],
+      "sigma_upper_f_units": 12.11946589685265,
+      "source": "T2-1.5M",
+      "target_delta_f": 0.1
+    },
+    {
+      "H_A_bits_per_symbol": 9.998740112976703,
+      "H_A_given_B_bits_per_symbol": 0.8314077735449494,
+      "P1_scope": "R1 accepted aggregate TRAIN histogram; descriptive plug-in entropies",
+      "R_dimensionless": 12.026276913847173,
+      "bsc_proxy_overcount_context_only": {
+        "by_encoding_order": [
+          {
+            "encoding": "NATURAL",
+            "order": "MSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.3365574633184414
+          },
+          {
+            "encoding": "NATURAL",
+            "order": "LSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.3365574633184414
+          },
+          {
+            "encoding": "GRAY",
+            "order": "MSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.5370278843259162
+          },
+          {
+            "encoding": "GRAY",
+            "order": "LSB_FIRST",
+            "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.5370278843259162
+          }
+        ],
+        "max_bits_per_symbol": 1.3365574633184414,
+        "meaning": "sum marginal h2(bit-error) minus H(A|B), bits/symbol",
+        "min_bits_per_symbol": 0.5370278843259162,
+        "not_a_measured_f_gain": true
+      },
+      "hoeffding_constants": {
+        "alpha": 0.05,
+        "mde_bound_formula": "R*sqrt(2/n)*(sqrt(log(2/alpha))+sqrt(log(1/(1-power))))",
+        "n_required_formula": "ceil((sqrt(2)*sum_sqrt_logs*R/delta_f)^2)",
+        "power": 0.8,
+        "sum_sqrt_logs": 3.1892818238193614
+      },
+      "method_plans": [
+        {
+          "interpretation": "normal planning using sigma_upper=R; not an observed-variance estimate",
+          "mde_at_rounded_paired_count_delta_f": 0.09999973420017369,
+          "mde_at_unrounded_n_required_delta_f": 0.09999973420017369,
+          "method": "normal_approximation",
+          "n_pairs_rounded_for_equal_seeds": 113520,
+          "n_required_independent_paired_block_pairs": 113520,
+          "pairs_per_seed": 37840,
+          "seed_count": 3,
+          "seed_count_is_not_the_effective_sample_count": true,
+          "status": "NORMAL_POWER_PLANNING",
+          "workload_by_block_length": [
+            {
+              "block_length_symbols_per_arm": 1024,
+              "paired_block_pairs": 113520,
+              "paired_symbol_positions": 116244480,
+              "symbol_positions_per_arm": 116244480,
+              "two_arm_symbol_positions": 232488960
+            },
+            {
+              "block_length_symbols_per_arm": 16384,
+              "paired_block_pairs": 113520,
+              "paired_symbol_positions": 1859911680,
+              "symbol_positions_per_arm": 1859911680,
+              "two_arm_symbol_positions": 3719823360
+            }
+          ]
+        },
+        {
+          "interpretation": "distribution-free sufficient bound; more conservative here than normal planning; not based on observed variance",
+          "mde_at_rounded_paired_count_delta_f": 0.0999998409869755,
+          "mde_at_unrounded_n_required_delta_f": 0.0999998409869755,
+          "method": "hoeffding_distribution_free_bound",
+          "n_pairs_rounded_for_equal_seeds": 294225,
+          "n_required_independent_paired_block_pairs": 294225,
+          "pairs_per_seed": 98075,
+          "seed_count": 3,
+          "seed_count_is_not_the_effective_sample_count": true,
+          "status": "BOUNDED_POWER_PLANNING",
+          "workload_by_block_length": [
+            {
+              "block_length_symbols_per_arm": 1024,
+              "paired_block_pairs": 294225,
+              "paired_symbol_positions": 301286400,
+              "symbol_positions_per_arm": 301286400,
+              "two_arm_symbol_positions": 602572800
+            },
+            {
+              "block_length_symbols_per_arm": 16384,
+              "paired_block_pairs": 294225,
+              "paired_symbol_positions": 4820582400,
+              "symbol_positions_per_arm": 4820582400,
+              "two_arm_symbol_positions": 9641164800
+            }
+          ]
+        }
+      ],
+      "normal_constants": {
+        "alpha_two_sided": 0.05,
+        "mde_formula": "(z_1-alpha/2 + z_power) * R / sqrt(n)",
+        "n_required_formula": "ceil(((z_1-alpha/2 + z_power)*R/delta_f)^2)",
+        "power": 0.8,
+        "z_1_minus_alpha_over_2": 1.9599639845400536,
+        "z_power": 0.8416212335729144,
+        "z_sum": 2.801585218112968
+      },
+      "paired_f_difference_bound": [
+        -12.026276913847173,
+        12.026276913847173
+      ],
+      "sigma_upper_f_units": 12.026276913847173,
+      "source": "T2-2M",
+      "target_delta_f": 0.1
+    }
+  ],
+  "status": "POWER_PLANNING"
+}

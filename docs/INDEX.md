@@ -7,6 +7,12 @@
 - [Agent rules](../AGENTS.md), [current project memory](../AGENT_PROJECT_MEMORY.md), and [decision log](decision-log.md).
 - [Current organization specification](../openspec/specs/repository-organization/spec.md), [PATH_MAP](archive/PATH_MAP.md), and [quarantine inventory](archive/QUARANTINE_MANIFEST.md).
 - Earlier roadmap/execution plans remain provenance and planning inputs; they do not override reboot R1–R9 or authorize P1–P4 scientific work.
+
+## Current staged work
+
+- [MSD mainline P1 result](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/RESULT.md), [table](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P1_TABLE.md), [packet](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/PREREG_AND_AUTH.md) and [single route log](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/EXPLORATION_LOG.md).
+- The 2026-10-05 user grant permits staged progression; source, power, review, real-frame budget and new push gates remain stage-specific.
+
 ## Current archive map
 
 - `docs/archive/historical_2026/` — historical documents grouped by era/topic.

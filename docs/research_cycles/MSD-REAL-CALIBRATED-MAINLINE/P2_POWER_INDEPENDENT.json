@@ -1,0 +1,1788 @@
+{
+  "record_kind": "INDEPENDENT_POWER_ARITHMETIC_COMPARISON",
+  "inputs": {
+    "P1_NUMBERS": "docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P1_NUMBERS.json",
+    "P2_POWER": "docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P2_POWER.json",
+    "power_script_read_for_frozen_contract_only": "docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/power_before_decoder.py",
+    "raw_counts_read": false,
+    "decoder_or_DE_called": false
+  },
+  "independent_method": {
+    "formula_note": "Recomputed from H_A and H(A|B) in P1_NUMBERS using scalar formulas and statistics.NormalDist; did not import or call power_before_decoder.py.",
+    "target_delta_f": 0.1,
+    "alpha_two_sided": 0.05,
+    "power": 0.8,
+    "seed_count": 3,
+    "block_lengths_symbols_per_arm": [
+      1024,
+      16384
+    ],
+    "normal_quantile_sum_definition": "z_(1-alpha/2) + z_power",
+    "normal_n_definition": "ceil((z_sum * (H_A/H(A|B)) / delta_f)^2)",
+    "hoeffding_log_sum_definition": "sqrt(log(2/alpha)) + sqrt(log(1/(1-power)))",
+    "hoeffding_tailbound_coefficient_definition": "sqrt(2) * hoeffding_log_sum",
+    "hoeffding_n_definition": "ceil((tailbound_coefficient * (H_A/H(A|B)) / delta_f)^2)"
+  },
+  "comparison": {
+    "float_absolute_tolerance": 1e-09,
+    "integer_comparison": "exact",
+    "scientific_numeric_field_count": 159,
+    "scientific_numeric_fields_matching": 159,
+    "all_scientific_numbers_match": true,
+    "all_status_and_label_checks_match": true,
+    "numeric_path_set_matches": true,
+    "P1_only_context_excluded_from_P2_comparison": "bsc_proxy_overcount_context_only.reference_H_A_given_B_bits_per_symbol",
+    "structural_mismatches": [],
+    "numeric_path_mismatches": {
+      "missing_from_independent_recalculation": [],
+      "not_present_in_P2_POWER": []
+    },
+    "numeric_mismatches": [],
+    "status_or_label_mismatches": [],
+    "source_acceptance_metadata_provenance_only": {
+      "records_compared": 12,
+      "scientific_scalar_fields_compared": 2868,
+      "float_absolute_tolerance": 1e-09,
+      "integer_comparison": "exact",
+      "use_as_power_gate": false
+    },
+    "p2_numeric_source_result_leaf_count": 159
+  },
+  "source_results": [
+    {
+      "source": "T2-1M",
+      "P1_source_metadata": {
+        "source": "T2-1M",
+        "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+        "source_role": "TRAIN",
+        "N_train": 315504
+      },
+      "independent_calculation": {
+        "source": "T2-1M",
+        "P1_scope": "R1 accepted aggregate TRAIN histogram; descriptive plug-in entropies",
+        "P1_source_metadata": {
+          "source": "T2-1M",
+          "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+          "source_role": "TRAIN",
+          "N_train": 315504
+        },
+        "H_A_bits_per_symbol": 9.997691909893772,
+        "H_A_given_B_bits_per_symbol": 0.798134444535838,
+        "R_dimensionless": 12.526325581284762,
+        "paired_f_difference_bound": [
+          -12.526325581284762,
+          12.526325581284762
+        ],
+        "sigma_upper_f_units": 12.526325581284762,
+        "target_delta_f": 0.1,
+        "bsc_proxy_overcount_context_only": {
+          "meaning": "sum marginal h2(bit-error) minus H(A|B), bits/symbol",
+          "not_a_measured_f_gain": true,
+          "by_encoding_order": [
+            {
+              "encoding": "NATURAL",
+              "order": "MSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.2737470944033824
+            },
+            {
+              "encoding": "NATURAL",
+              "order": "LSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.2737470944033824
+            },
+            {
+              "encoding": "GRAY",
+              "order": "MSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.49676744300690867
+            },
+            {
+              "encoding": "GRAY",
+              "order": "LSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.49676744300690845
+            }
+          ],
+          "min_bits_per_symbol": 0.49676744300690845,
+          "max_bits_per_symbol": 1.2737470944033824,
+          "reference_H_A_given_B_bits_per_symbol": 0.798134444535838
+        },
+        "normal_constants": {
+          "alpha_two_sided": 0.05,
+          "power": 0.8,
+          "z_1_minus_alpha_over_2": 1.9599639845400536,
+          "z_power": 0.8416212335729144,
+          "z_sum": 2.801585218112968,
+          "mde_formula": "(z_1-alpha/2 + z_power) * R / sqrt(n)",
+          "n_required_formula": "ceil(((z_1-alpha/2 + z_power)*R/delta_f)^2)"
+        },
+        "hoeffding_constants": {
+          "alpha": 0.05,
+          "power": 0.8,
+          "sum_sqrt_logs": 3.1892818238193614,
+          "tailbound_coefficient_sqrt2_times_sum_sqrt_logs": 4.510325609475341,
+          "mde_bound_formula": "R*sqrt(2/n)*(sqrt(log(2/alpha))+sqrt(log(1/(1-power))))",
+          "n_required_formula": "ceil((sqrt(2)*sum_sqrt_logs*R/delta_f)^2)"
+        },
+        "method_plans": [
+          {
+            "method": "normal_approximation",
+            "status": "NORMAL_POWER_PLANNING",
+            "interpretation": "normal planning using sigma_upper=R; not an observed-variance estimate",
+            "n_required_independent_paired_block_pairs": 123156,
+            "n_pairs_rounded_for_equal_seeds": 123156,
+            "pairs_per_seed": 41052,
+            "seed_count": 3,
+            "seed_count_is_not_the_effective_sample_count": true,
+            "mde_at_unrounded_n_required_delta_f": 0.09999994137864437,
+            "mde_at_rounded_paired_count_delta_f": 0.09999994137864437,
+            "workload_by_block_length": [
+              {
+                "block_length_symbols_per_arm": 1024,
+                "paired_symbol_positions": 126111744,
+                "symbol_positions_per_arm": 126111744,
+                "two_arm_symbol_positions": 252223488,
+                "paired_block_pairs": 123156
+              },
+              {
+                "block_length_symbols_per_arm": 16384,
+                "paired_symbol_positions": 2017787904,
+                "symbol_positions_per_arm": 2017787904,
+                "two_arm_symbol_positions": 4035575808,
+                "paired_block_pairs": 123156
+              }
+            ]
+          },
+          {
+            "method": "hoeffding_distribution_free_bound",
+            "status": "BOUNDED_POWER_PLANNING",
+            "interpretation": "distribution-free sufficient bound; more conservative here than normal planning; not based on observed variance",
+            "n_required_independent_paired_block_pairs": 319201,
+            "n_pairs_rounded_for_equal_seeds": 319203,
+            "pairs_per_seed": 106401,
+            "seed_count": 3,
+            "seed_count_is_not_the_effective_sample_count": true,
+            "mde_at_unrounded_n_required_delta_f": 0.09999987786376487,
+            "mde_at_rounded_paired_count_delta_f": 0.09999956458339312,
+            "workload_by_block_length": [
+              {
+                "block_length_symbols_per_arm": 1024,
+                "paired_symbol_positions": 326863872,
+                "symbol_positions_per_arm": 326863872,
+                "two_arm_symbol_positions": 653727744,
+                "paired_block_pairs": 319203
+              },
+              {
+                "block_length_symbols_per_arm": 16384,
+                "paired_symbol_positions": 5229821952,
+                "symbol_positions_per_arm": 5229821952,
+                "two_arm_symbol_positions": 10459643904,
+                "paired_block_pairs": 319203
+              }
+            ]
+          }
+        ]
+      },
+      "P2_numeric_comparisons": [
+        {
+          "path": "source_results[0].H_A_bits_per_symbol",
+          "expected_independent": 9.997691909893772,
+          "reported": 9.997691909893774,
+          "absolute_difference": 1.7763568394002505e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.798134444535838,
+          "reported": 0.7981344445358385,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].R_dimensionless",
+          "expected_independent": 12.526325581284762,
+          "reported": 12.526325581284757,
+          "absolute_difference": 5.329070518200751e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].paired_f_difference_bound[0]",
+          "expected_independent": -12.526325581284762,
+          "reported": -12.526325581284757,
+          "absolute_difference": 5.329070518200751e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].paired_f_difference_bound[1]",
+          "expected_independent": 12.526325581284762,
+          "reported": 12.526325581284757,
+          "absolute_difference": 5.329070518200751e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].sigma_upper_f_units",
+          "expected_independent": 12.526325581284762,
+          "reported": 12.526325581284757,
+          "absolute_difference": 5.329070518200751e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].target_delta_f",
+          "expected_independent": 0.1,
+          "reported": 0.1,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].bsc_proxy_overcount_context_only.by_encoding_order[0].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 1.2737470944033824,
+          "reported": 1.2737470944033822,
+          "absolute_difference": 2.220446049250313e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].bsc_proxy_overcount_context_only.by_encoding_order[1].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 1.2737470944033824,
+          "reported": 1.2737470944033822,
+          "absolute_difference": 2.220446049250313e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].bsc_proxy_overcount_context_only.by_encoding_order[2].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.49676744300690867,
+          "reported": 0.4967674430069102,
+          "absolute_difference": 1.5543122344752192e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].bsc_proxy_overcount_context_only.by_encoding_order[3].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.49676744300690845,
+          "reported": 0.4967674430069098,
+          "absolute_difference": 1.3322676295501878e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].bsc_proxy_overcount_context_only.min_bits_per_symbol",
+          "expected_independent": 0.49676744300690845,
+          "reported": 0.4967674430069098,
+          "absolute_difference": 1.3322676295501878e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].bsc_proxy_overcount_context_only.max_bits_per_symbol",
+          "expected_independent": 1.2737470944033824,
+          "reported": 1.2737470944033822,
+          "absolute_difference": 2.220446049250313e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].normal_constants.alpha_two_sided",
+          "expected_independent": 0.05,
+          "reported": 0.05,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].normal_constants.power",
+          "expected_independent": 0.8,
+          "reported": 0.8,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].normal_constants.z_1_minus_alpha_over_2",
+          "expected_independent": 1.9599639845400536,
+          "reported": 1.9599639845400536,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].normal_constants.z_power",
+          "expected_independent": 0.8416212335729144,
+          "reported": 0.8416212335729144,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].normal_constants.z_sum",
+          "expected_independent": 2.801585218112968,
+          "reported": 2.801585218112968,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].method_plans[0].n_required_independent_paired_block_pairs",
+          "expected_independent": 123156,
+          "reported": 123156,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].n_pairs_rounded_for_equal_seeds",
+          "expected_independent": 123156,
+          "reported": 123156,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].pairs_per_seed",
+          "expected_independent": 41052,
+          "reported": 41052,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].seed_count",
+          "expected_independent": 3,
+          "reported": 3,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].mde_at_unrounded_n_required_delta_f",
+          "expected_independent": 0.09999994137864437,
+          "reported": 0.09999994137864433,
+          "absolute_difference": 4.163336342344337e-17,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].method_plans[0].mde_at_rounded_paired_count_delta_f",
+          "expected_independent": 0.09999994137864437,
+          "reported": 0.09999994137864433,
+          "absolute_difference": 4.163336342344337e-17,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[0].block_length_symbols_per_arm",
+          "expected_independent": 1024,
+          "reported": 1024,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[0].paired_symbol_positions",
+          "expected_independent": 126111744,
+          "reported": 126111744,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[0].symbol_positions_per_arm",
+          "expected_independent": 126111744,
+          "reported": 126111744,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[0].two_arm_symbol_positions",
+          "expected_independent": 252223488,
+          "reported": 252223488,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[0].paired_block_pairs",
+          "expected_independent": 123156,
+          "reported": 123156,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[1].block_length_symbols_per_arm",
+          "expected_independent": 16384,
+          "reported": 16384,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[1].paired_symbol_positions",
+          "expected_independent": 2017787904,
+          "reported": 2017787904,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[1].symbol_positions_per_arm",
+          "expected_independent": 2017787904,
+          "reported": 2017787904,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[1].two_arm_symbol_positions",
+          "expected_independent": 4035575808,
+          "reported": 4035575808,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[0].workload_by_block_length[1].paired_block_pairs",
+          "expected_independent": 123156,
+          "reported": 123156,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].n_required_independent_paired_block_pairs",
+          "expected_independent": 319201,
+          "reported": 319201,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].n_pairs_rounded_for_equal_seeds",
+          "expected_independent": 319203,
+          "reported": 319203,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].pairs_per_seed",
+          "expected_independent": 106401,
+          "reported": 106401,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].seed_count",
+          "expected_independent": 3,
+          "reported": 3,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].mde_at_unrounded_n_required_delta_f",
+          "expected_independent": 0.09999987786376487,
+          "reported": 0.09999987786376482,
+          "absolute_difference": 4.163336342344337e-17,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].method_plans[1].mde_at_rounded_paired_count_delta_f",
+          "expected_independent": 0.09999956458339312,
+          "reported": 0.09999956458339308,
+          "absolute_difference": 4.163336342344337e-17,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[0].block_length_symbols_per_arm",
+          "expected_independent": 1024,
+          "reported": 1024,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[0].paired_symbol_positions",
+          "expected_independent": 326863872,
+          "reported": 326863872,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[0].symbol_positions_per_arm",
+          "expected_independent": 326863872,
+          "reported": 326863872,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[0].two_arm_symbol_positions",
+          "expected_independent": 653727744,
+          "reported": 653727744,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[0].paired_block_pairs",
+          "expected_independent": 319203,
+          "reported": 319203,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[1].block_length_symbols_per_arm",
+          "expected_independent": 16384,
+          "reported": 16384,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[1].paired_symbol_positions",
+          "expected_independent": 5229821952,
+          "reported": 5229821952,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[1].symbol_positions_per_arm",
+          "expected_independent": 5229821952,
+          "reported": 5229821952,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[1].two_arm_symbol_positions",
+          "expected_independent": 10459643904,
+          "reported": 10459643904,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].method_plans[1].workload_by_block_length[1].paired_block_pairs",
+          "expected_independent": 319203,
+          "reported": 319203,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[0].hoeffding_constants.alpha",
+          "expected_independent": 0.05,
+          "reported": 0.05,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].hoeffding_constants.power",
+          "expected_independent": 0.8,
+          "reported": 0.8,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[0].hoeffding_constants.sum_sqrt_logs",
+          "expected_independent": 3.1892818238193614,
+          "reported": 3.1892818238193614,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        }
+      ],
+      "P2_label_checks": [
+        {
+          "path": "source_results[0].bsc_proxy_overcount_context_only.not_a_measured_f_gain",
+          "expected": true,
+          "reported": true,
+          "match": true
+        },
+        {
+          "path": "source_results[0].method_plans.normal_approximation.status",
+          "expected": "NORMAL_POWER_PLANNING",
+          "reported": "NORMAL_POWER_PLANNING",
+          "match": true
+        },
+        {
+          "path": "source_results[0].method_plans.hoeffding_distribution_free_bound.status",
+          "expected": "BOUNDED_POWER_PLANNING",
+          "reported": "BOUNDED_POWER_PLANNING",
+          "match": true
+        }
+      ]
+    },
+    {
+      "source": "T2-1.5M",
+      "P1_source_metadata": {
+        "source": "T2-1.5M",
+        "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+        "source_role": "TRAIN",
+        "N_train": 441487
+      },
+      "independent_calculation": {
+        "source": "T2-1.5M",
+        "P1_scope": "R1 accepted aggregate TRAIN histogram; descriptive plug-in entropies",
+        "P1_source_metadata": {
+          "source": "T2-1.5M",
+          "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+          "source_role": "TRAIN",
+          "N_train": 441487
+        },
+        "H_A_bits_per_symbol": 9.998295501729698,
+        "H_A_given_B_bits_per_symbol": 0.8249782281516373,
+        "R_dimensionless": 12.119465896852656,
+        "paired_f_difference_bound": [
+          -12.119465896852656,
+          12.119465896852656
+        ],
+        "sigma_upper_f_units": 12.119465896852656,
+        "target_delta_f": 0.1,
+        "bsc_proxy_overcount_context_only": {
+          "meaning": "sum marginal h2(bit-error) minus H(A|B), bits/symbol",
+          "not_a_measured_f_gain": true,
+          "by_encoding_order": [
+            {
+              "encoding": "NATURAL",
+              "order": "MSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.3373359393471782
+            },
+            {
+              "encoding": "NATURAL",
+              "order": "LSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.3373359393471773
+            },
+            {
+              "encoding": "GRAY",
+              "order": "MSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.5346783818919321
+            },
+            {
+              "encoding": "GRAY",
+              "order": "LSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.5346783818919321
+            }
+          ],
+          "min_bits_per_symbol": 0.5346783818919321,
+          "max_bits_per_symbol": 1.3373359393471782,
+          "reference_H_A_given_B_bits_per_symbol": 0.8249782281516373
+        },
+        "normal_constants": {
+          "alpha_two_sided": 0.05,
+          "power": 0.8,
+          "z_1_minus_alpha_over_2": 1.9599639845400536,
+          "z_power": 0.8416212335729144,
+          "z_sum": 2.801585218112968,
+          "mde_formula": "(z_1-alpha/2 + z_power) * R / sqrt(n)",
+          "n_required_formula": "ceil(((z_1-alpha/2 + z_power)*R/delta_f)^2)"
+        },
+        "hoeffding_constants": {
+          "alpha": 0.05,
+          "power": 0.8,
+          "sum_sqrt_logs": 3.1892818238193614,
+          "tailbound_coefficient_sqrt2_times_sum_sqrt_logs": 4.510325609475341,
+          "mde_bound_formula": "R*sqrt(2/n)*(sqrt(log(2/alpha))+sqrt(log(1/(1-power))))",
+          "n_required_formula": "ceil((sqrt(2)*sum_sqrt_logs*R/delta_f)^2)"
+        },
+        "method_plans": [
+          {
+            "method": "normal_approximation",
+            "status": "NORMAL_POWER_PLANNING",
+            "interpretation": "normal planning using sigma_upper=R; not an observed-variance estimate",
+            "n_required_independent_paired_block_pairs": 115286,
+            "n_pairs_rounded_for_equal_seeds": 115287,
+            "pairs_per_seed": 38429,
+            "seed_count": 3,
+            "seed_count_is_not_the_effective_sample_count": true,
+            "mde_at_unrounded_n_required_delta_f": 0.09999977728011551,
+            "mde_at_rounded_paired_count_delta_f": 0.09999934357989723,
+            "workload_by_block_length": [
+              {
+                "block_length_symbols_per_arm": 1024,
+                "paired_symbol_positions": 118053888,
+                "symbol_positions_per_arm": 118053888,
+                "two_arm_symbol_positions": 236107776,
+                "paired_block_pairs": 115287
+              },
+              {
+                "block_length_symbols_per_arm": 16384,
+                "paired_symbol_positions": 1888862208,
+                "symbol_positions_per_arm": 1888862208,
+                "two_arm_symbol_positions": 3777724416,
+                "paired_block_pairs": 115287
+              }
+            ]
+          },
+          {
+            "method": "hoeffding_distribution_free_bound",
+            "status": "BOUNDED_POWER_PLANNING",
+            "interpretation": "distribution-free sufficient bound; more conservative here than normal planning; not based on observed variance",
+            "n_required_independent_paired_block_pairs": 298802,
+            "n_pairs_rounded_for_equal_seeds": 298803,
+            "pairs_per_seed": 99601,
+            "seed_count": 3,
+            "seed_count_is_not_the_effective_sample_count": true,
+            "mde_at_unrounded_n_required_delta_f": 0.09999991400501104,
+            "mde_at_rounded_paired_count_delta_f": 0.0999997466706843,
+            "workload_by_block_length": [
+              {
+                "block_length_symbols_per_arm": 1024,
+                "paired_symbol_positions": 305974272,
+                "symbol_positions_per_arm": 305974272,
+                "two_arm_symbol_positions": 611948544,
+                "paired_block_pairs": 298803
+              },
+              {
+                "block_length_symbols_per_arm": 16384,
+                "paired_symbol_positions": 4895588352,
+                "symbol_positions_per_arm": 4895588352,
+                "two_arm_symbol_positions": 9791176704,
+                "paired_block_pairs": 298803
+              }
+            ]
+          }
+        ]
+      },
+      "P2_numeric_comparisons": [
+        {
+          "path": "source_results[1].H_A_bits_per_symbol",
+          "expected_independent": 9.998295501729698,
+          "reported": 9.9982955017297,
+          "absolute_difference": 1.7763568394002505e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.8249782281516373,
+          "reported": 0.8249782281516378,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].R_dimensionless",
+          "expected_independent": 12.119465896852656,
+          "reported": 12.11946589685265,
+          "absolute_difference": 5.329070518200751e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].paired_f_difference_bound[0]",
+          "expected_independent": -12.119465896852656,
+          "reported": -12.11946589685265,
+          "absolute_difference": 5.329070518200751e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].paired_f_difference_bound[1]",
+          "expected_independent": 12.119465896852656,
+          "reported": 12.11946589685265,
+          "absolute_difference": 5.329070518200751e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].sigma_upper_f_units",
+          "expected_independent": 12.119465896852656,
+          "reported": 12.11946589685265,
+          "absolute_difference": 5.329070518200751e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].target_delta_f",
+          "expected_independent": 0.1,
+          "reported": 0.1,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].bsc_proxy_overcount_context_only.by_encoding_order[0].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 1.3373359393471782,
+          "reported": 1.3373359393471782,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].bsc_proxy_overcount_context_only.by_encoding_order[1].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 1.3373359393471773,
+          "reported": 1.3373359393471778,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].bsc_proxy_overcount_context_only.by_encoding_order[2].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.5346783818919321,
+          "reported": 0.5346783818919316,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].bsc_proxy_overcount_context_only.by_encoding_order[3].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.5346783818919321,
+          "reported": 0.5346783818919316,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].bsc_proxy_overcount_context_only.min_bits_per_symbol",
+          "expected_independent": 0.5346783818919321,
+          "reported": 0.5346783818919316,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].bsc_proxy_overcount_context_only.max_bits_per_symbol",
+          "expected_independent": 1.3373359393471782,
+          "reported": 1.3373359393471782,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].normal_constants.alpha_two_sided",
+          "expected_independent": 0.05,
+          "reported": 0.05,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].normal_constants.power",
+          "expected_independent": 0.8,
+          "reported": 0.8,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].normal_constants.z_1_minus_alpha_over_2",
+          "expected_independent": 1.9599639845400536,
+          "reported": 1.9599639845400536,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].normal_constants.z_power",
+          "expected_independent": 0.8416212335729144,
+          "reported": 0.8416212335729144,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].normal_constants.z_sum",
+          "expected_independent": 2.801585218112968,
+          "reported": 2.801585218112968,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].method_plans[0].n_required_independent_paired_block_pairs",
+          "expected_independent": 115286,
+          "reported": 115286,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].n_pairs_rounded_for_equal_seeds",
+          "expected_independent": 115287,
+          "reported": 115287,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].pairs_per_seed",
+          "expected_independent": 38429,
+          "reported": 38429,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].seed_count",
+          "expected_independent": 3,
+          "reported": 3,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].mde_at_unrounded_n_required_delta_f",
+          "expected_independent": 0.09999977728011551,
+          "reported": 0.09999977728011547,
+          "absolute_difference": 4.163336342344337e-17,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].method_plans[0].mde_at_rounded_paired_count_delta_f",
+          "expected_independent": 0.09999934357989723,
+          "reported": 0.09999934357989719,
+          "absolute_difference": 4.163336342344337e-17,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[0].block_length_symbols_per_arm",
+          "expected_independent": 1024,
+          "reported": 1024,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[0].paired_symbol_positions",
+          "expected_independent": 118053888,
+          "reported": 118053888,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[0].symbol_positions_per_arm",
+          "expected_independent": 118053888,
+          "reported": 118053888,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[0].two_arm_symbol_positions",
+          "expected_independent": 236107776,
+          "reported": 236107776,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[0].paired_block_pairs",
+          "expected_independent": 115287,
+          "reported": 115287,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[1].block_length_symbols_per_arm",
+          "expected_independent": 16384,
+          "reported": 16384,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[1].paired_symbol_positions",
+          "expected_independent": 1888862208,
+          "reported": 1888862208,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[1].symbol_positions_per_arm",
+          "expected_independent": 1888862208,
+          "reported": 1888862208,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[1].two_arm_symbol_positions",
+          "expected_independent": 3777724416,
+          "reported": 3777724416,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[0].workload_by_block_length[1].paired_block_pairs",
+          "expected_independent": 115287,
+          "reported": 115287,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].n_required_independent_paired_block_pairs",
+          "expected_independent": 298802,
+          "reported": 298802,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].n_pairs_rounded_for_equal_seeds",
+          "expected_independent": 298803,
+          "reported": 298803,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].pairs_per_seed",
+          "expected_independent": 99601,
+          "reported": 99601,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].seed_count",
+          "expected_independent": 3,
+          "reported": 3,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].mde_at_unrounded_n_required_delta_f",
+          "expected_independent": 0.09999991400501104,
+          "reported": 0.099999914005011,
+          "absolute_difference": 4.163336342344337e-17,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].method_plans[1].mde_at_rounded_paired_count_delta_f",
+          "expected_independent": 0.0999997466706843,
+          "reported": 0.09999974667068426,
+          "absolute_difference": 4.163336342344337e-17,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[0].block_length_symbols_per_arm",
+          "expected_independent": 1024,
+          "reported": 1024,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[0].paired_symbol_positions",
+          "expected_independent": 305974272,
+          "reported": 305974272,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[0].symbol_positions_per_arm",
+          "expected_independent": 305974272,
+          "reported": 305974272,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[0].two_arm_symbol_positions",
+          "expected_independent": 611948544,
+          "reported": 611948544,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[0].paired_block_pairs",
+          "expected_independent": 298803,
+          "reported": 298803,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[1].block_length_symbols_per_arm",
+          "expected_independent": 16384,
+          "reported": 16384,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[1].paired_symbol_positions",
+          "expected_independent": 4895588352,
+          "reported": 4895588352,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[1].symbol_positions_per_arm",
+          "expected_independent": 4895588352,
+          "reported": 4895588352,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[1].two_arm_symbol_positions",
+          "expected_independent": 9791176704,
+          "reported": 9791176704,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].method_plans[1].workload_by_block_length[1].paired_block_pairs",
+          "expected_independent": 298803,
+          "reported": 298803,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[1].hoeffding_constants.alpha",
+          "expected_independent": 0.05,
+          "reported": 0.05,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].hoeffding_constants.power",
+          "expected_independent": 0.8,
+          "reported": 0.8,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[1].hoeffding_constants.sum_sqrt_logs",
+          "expected_independent": 3.1892818238193614,
+          "reported": 3.1892818238193614,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        }
+      ],
+      "P2_label_checks": [
+        {
+          "path": "source_results[1].bsc_proxy_overcount_context_only.not_a_measured_f_gain",
+          "expected": true,
+          "reported": true,
+          "match": true
+        },
+        {
+          "path": "source_results[1].method_plans.normal_approximation.status",
+          "expected": "NORMAL_POWER_PLANNING",
+          "reported": "NORMAL_POWER_PLANNING",
+          "match": true
+        },
+        {
+          "path": "source_results[1].method_plans.hoeffding_distribution_free_bound.status",
+          "expected": "BOUNDED_POWER_PLANNING",
+          "reported": "BOUNDED_POWER_PLANNING",
+          "match": true
+        }
+      ]
+    },
+    {
+      "source": "T2-2M",
+      "P1_source_metadata": {
+        "source": "T2-2M",
+        "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+        "source_role": "TRAIN",
+        "N_train": 589461
+      },
+      "independent_calculation": {
+        "source": "T2-2M",
+        "P1_scope": "R1 accepted aggregate TRAIN histogram; descriptive plug-in entropies",
+        "P1_source_metadata": {
+          "source": "T2-2M",
+          "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+          "source_role": "TRAIN",
+          "N_train": 589461
+        },
+        "H_A_bits_per_symbol": 9.998740112976703,
+        "H_A_given_B_bits_per_symbol": 0.8314077735449484,
+        "R_dimensionless": 12.026276913847187,
+        "paired_f_difference_bound": [
+          -12.026276913847187,
+          12.026276913847187
+        ],
+        "sigma_upper_f_units": 12.026276913847187,
+        "target_delta_f": 0.1,
+        "bsc_proxy_overcount_context_only": {
+          "meaning": "sum marginal h2(bit-error) minus H(A|B), bits/symbol",
+          "not_a_measured_f_gain": true,
+          "by_encoding_order": [
+            {
+              "encoding": "NATURAL",
+              "order": "MSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.3365574633184418
+            },
+            {
+              "encoding": "NATURAL",
+              "order": "LSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 1.3365574633184418
+            },
+            {
+              "encoding": "GRAY",
+              "order": "MSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.537027884325919
+            },
+            {
+              "encoding": "GRAY",
+              "order": "LSB_FIRST",
+              "sum_h2_minus_H_A_given_B_bits_per_symbol": 0.5370278843259187
+            }
+          ],
+          "min_bits_per_symbol": 0.5370278843259187,
+          "max_bits_per_symbol": 1.3365574633184418,
+          "reference_H_A_given_B_bits_per_symbol": 0.8314077735449484
+        },
+        "normal_constants": {
+          "alpha_two_sided": 0.05,
+          "power": 0.8,
+          "z_1_minus_alpha_over_2": 1.9599639845400536,
+          "z_power": 0.8416212335729144,
+          "z_sum": 2.801585218112968,
+          "mde_formula": "(z_1-alpha/2 + z_power) * R / sqrt(n)",
+          "n_required_formula": "ceil(((z_1-alpha/2 + z_power)*R/delta_f)^2)"
+        },
+        "hoeffding_constants": {
+          "alpha": 0.05,
+          "power": 0.8,
+          "sum_sqrt_logs": 3.1892818238193614,
+          "tailbound_coefficient_sqrt2_times_sum_sqrt_logs": 4.510325609475341,
+          "mde_bound_formula": "R*sqrt(2/n)*(sqrt(log(2/alpha))+sqrt(log(1/(1-power))))",
+          "n_required_formula": "ceil((sqrt(2)*sum_sqrt_logs*R/delta_f)^2)"
+        },
+        "method_plans": [
+          {
+            "method": "normal_approximation",
+            "status": "NORMAL_POWER_PLANNING",
+            "interpretation": "normal planning using sigma_upper=R; not an observed-variance estimate",
+            "n_required_independent_paired_block_pairs": 113520,
+            "n_pairs_rounded_for_equal_seeds": 113520,
+            "pairs_per_seed": 37840,
+            "seed_count": 3,
+            "seed_count_is_not_the_effective_sample_count": true,
+            "mde_at_unrounded_n_required_delta_f": 0.09999973420017381,
+            "mde_at_rounded_paired_count_delta_f": 0.09999973420017381,
+            "workload_by_block_length": [
+              {
+                "block_length_symbols_per_arm": 1024,
+                "paired_symbol_positions": 116244480,
+                "symbol_positions_per_arm": 116244480,
+                "two_arm_symbol_positions": 232488960,
+                "paired_block_pairs": 113520
+              },
+              {
+                "block_length_symbols_per_arm": 16384,
+                "paired_symbol_positions": 1859911680,
+                "symbol_positions_per_arm": 1859911680,
+                "two_arm_symbol_positions": 3719823360,
+                "paired_block_pairs": 113520
+              }
+            ]
+          },
+          {
+            "method": "hoeffding_distribution_free_bound",
+            "status": "BOUNDED_POWER_PLANNING",
+            "interpretation": "distribution-free sufficient bound; more conservative here than normal planning; not based on observed variance",
+            "n_required_independent_paired_block_pairs": 294225,
+            "n_pairs_rounded_for_equal_seeds": 294225,
+            "pairs_per_seed": 98075,
+            "seed_count": 3,
+            "seed_count_is_not_the_effective_sample_count": true,
+            "mde_at_unrounded_n_required_delta_f": 0.0999998409869756,
+            "mde_at_rounded_paired_count_delta_f": 0.0999998409869756,
+            "workload_by_block_length": [
+              {
+                "block_length_symbols_per_arm": 1024,
+                "paired_symbol_positions": 301286400,
+                "symbol_positions_per_arm": 301286400,
+                "two_arm_symbol_positions": 602572800,
+                "paired_block_pairs": 294225
+              },
+              {
+                "block_length_symbols_per_arm": 16384,
+                "paired_symbol_positions": 4820582400,
+                "symbol_positions_per_arm": 4820582400,
+                "two_arm_symbol_positions": 9641164800,
+                "paired_block_pairs": 294225
+              }
+            ]
+          }
+        ]
+      },
+      "P2_numeric_comparisons": [
+        {
+          "path": "source_results[2].H_A_bits_per_symbol",
+          "expected_independent": 9.998740112976703,
+          "reported": 9.998740112976703,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.8314077735449484,
+          "reported": 0.8314077735449494,
+          "absolute_difference": 9.992007221626409e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].R_dimensionless",
+          "expected_independent": 12.026276913847187,
+          "reported": 12.026276913847173,
+          "absolute_difference": 1.4210854715202004e-14,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].paired_f_difference_bound[0]",
+          "expected_independent": -12.026276913847187,
+          "reported": -12.026276913847173,
+          "absolute_difference": 1.4210854715202004e-14,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].paired_f_difference_bound[1]",
+          "expected_independent": 12.026276913847187,
+          "reported": 12.026276913847173,
+          "absolute_difference": 1.4210854715202004e-14,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].sigma_upper_f_units",
+          "expected_independent": 12.026276913847187,
+          "reported": 12.026276913847173,
+          "absolute_difference": 1.4210854715202004e-14,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].target_delta_f",
+          "expected_independent": 0.1,
+          "reported": 0.1,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].bsc_proxy_overcount_context_only.by_encoding_order[0].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 1.3365574633184418,
+          "reported": 1.3365574633184414,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].bsc_proxy_overcount_context_only.by_encoding_order[1].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 1.3365574633184418,
+          "reported": 1.3365574633184414,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].bsc_proxy_overcount_context_only.by_encoding_order[2].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.537027884325919,
+          "reported": 0.5370278843259162,
+          "absolute_difference": 2.7755575615628914e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].bsc_proxy_overcount_context_only.by_encoding_order[3].sum_h2_minus_H_A_given_B_bits_per_symbol",
+          "expected_independent": 0.5370278843259187,
+          "reported": 0.5370278843259162,
+          "absolute_difference": 2.55351295663786e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].bsc_proxy_overcount_context_only.min_bits_per_symbol",
+          "expected_independent": 0.5370278843259187,
+          "reported": 0.5370278843259162,
+          "absolute_difference": 2.55351295663786e-15,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].bsc_proxy_overcount_context_only.max_bits_per_symbol",
+          "expected_independent": 1.3365574633184418,
+          "reported": 1.3365574633184414,
+          "absolute_difference": 4.440892098500626e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].normal_constants.alpha_two_sided",
+          "expected_independent": 0.05,
+          "reported": 0.05,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].normal_constants.power",
+          "expected_independent": 0.8,
+          "reported": 0.8,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].normal_constants.z_1_minus_alpha_over_2",
+          "expected_independent": 1.9599639845400536,
+          "reported": 1.9599639845400536,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].normal_constants.z_power",
+          "expected_independent": 0.8416212335729144,
+          "reported": 0.8416212335729144,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].normal_constants.z_sum",
+          "expected_independent": 2.801585218112968,
+          "reported": 2.801585218112968,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].method_plans[0].n_required_independent_paired_block_pairs",
+          "expected_independent": 113520,
+          "reported": 113520,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].n_pairs_rounded_for_equal_seeds",
+          "expected_independent": 113520,
+          "reported": 113520,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].pairs_per_seed",
+          "expected_independent": 37840,
+          "reported": 37840,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].seed_count",
+          "expected_independent": 3,
+          "reported": 3,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].mde_at_unrounded_n_required_delta_f",
+          "expected_independent": 0.09999973420017381,
+          "reported": 0.09999973420017369,
+          "absolute_difference": 1.249000902703301e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].method_plans[0].mde_at_rounded_paired_count_delta_f",
+          "expected_independent": 0.09999973420017381,
+          "reported": 0.09999973420017369,
+          "absolute_difference": 1.249000902703301e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[0].block_length_symbols_per_arm",
+          "expected_independent": 1024,
+          "reported": 1024,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[0].paired_symbol_positions",
+          "expected_independent": 116244480,
+          "reported": 116244480,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[0].symbol_positions_per_arm",
+          "expected_independent": 116244480,
+          "reported": 116244480,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[0].two_arm_symbol_positions",
+          "expected_independent": 232488960,
+          "reported": 232488960,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[0].paired_block_pairs",
+          "expected_independent": 113520,
+          "reported": 113520,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[1].block_length_symbols_per_arm",
+          "expected_independent": 16384,
+          "reported": 16384,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[1].paired_symbol_positions",
+          "expected_independent": 1859911680,
+          "reported": 1859911680,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[1].symbol_positions_per_arm",
+          "expected_independent": 1859911680,
+          "reported": 1859911680,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[1].two_arm_symbol_positions",
+          "expected_independent": 3719823360,
+          "reported": 3719823360,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[0].workload_by_block_length[1].paired_block_pairs",
+          "expected_independent": 113520,
+          "reported": 113520,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].n_required_independent_paired_block_pairs",
+          "expected_independent": 294225,
+          "reported": 294225,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].n_pairs_rounded_for_equal_seeds",
+          "expected_independent": 294225,
+          "reported": 294225,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].pairs_per_seed",
+          "expected_independent": 98075,
+          "reported": 98075,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].seed_count",
+          "expected_independent": 3,
+          "reported": 3,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].mde_at_unrounded_n_required_delta_f",
+          "expected_independent": 0.0999998409869756,
+          "reported": 0.0999998409869755,
+          "absolute_difference": 1.1102230246251565e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].method_plans[1].mde_at_rounded_paired_count_delta_f",
+          "expected_independent": 0.0999998409869756,
+          "reported": 0.0999998409869755,
+          "absolute_difference": 1.1102230246251565e-16,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[0].block_length_symbols_per_arm",
+          "expected_independent": 1024,
+          "reported": 1024,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[0].paired_symbol_positions",
+          "expected_independent": 301286400,
+          "reported": 301286400,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[0].symbol_positions_per_arm",
+          "expected_independent": 301286400,
+          "reported": 301286400,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[0].two_arm_symbol_positions",
+          "expected_independent": 602572800,
+          "reported": 602572800,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[0].paired_block_pairs",
+          "expected_independent": 294225,
+          "reported": 294225,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[1].block_length_symbols_per_arm",
+          "expected_independent": 16384,
+          "reported": 16384,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[1].paired_symbol_positions",
+          "expected_independent": 4820582400,
+          "reported": 4820582400,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[1].symbol_positions_per_arm",
+          "expected_independent": 4820582400,
+          "reported": 4820582400,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[1].two_arm_symbol_positions",
+          "expected_independent": 9641164800,
+          "reported": 9641164800,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].method_plans[1].workload_by_block_length[1].paired_block_pairs",
+          "expected_independent": 294225,
+          "reported": 294225,
+          "absolute_difference": 0,
+          "match": true,
+          "comparison": "exact_integer"
+        },
+        {
+          "path": "source_results[2].hoeffding_constants.alpha",
+          "expected_independent": 0.05,
+          "reported": 0.05,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].hoeffding_constants.power",
+          "expected_independent": 0.8,
+          "reported": 0.8,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        },
+        {
+          "path": "source_results[2].hoeffding_constants.sum_sqrt_logs",
+          "expected_independent": 3.1892818238193614,
+          "reported": 3.1892818238193614,
+          "absolute_difference": 0.0,
+          "match": true,
+          "comparison": "absolute_tolerance_1e-09"
+        }
+      ],
+      "P2_label_checks": [
+        {
+          "path": "source_results[2].bsc_proxy_overcount_context_only.not_a_measured_f_gain",
+          "expected": true,
+          "reported": true,
+          "match": true
+        },
+        {
+          "path": "source_results[2].method_plans.normal_approximation.status",
+          "expected": "NORMAL_POWER_PLANNING",
+          "reported": "NORMAL_POWER_PLANNING",
+          "match": true
+        },
+        {
+          "path": "source_results[2].method_plans.hoeffding_distribution_free_bound.status",
+          "expected": "BOUNDED_POWER_PLANNING",
+          "reported": "BOUNDED_POWER_PLANNING",
+          "match": true
+        }
+      ]
+    }
+  ],
+  "verification_ceiling": "Arithmetic cross-check only. No decoder experiment, observed power, real-efficiency gain, route acceptance, or authorization is produced."
+}

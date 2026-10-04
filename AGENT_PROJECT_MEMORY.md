@@ -40,6 +40,8 @@ This durable memory records stable repository structure, interfaces, data policy
 - R8: use scoped milestone commits, never git add -A, do not merge the sibling line, and push only after explicit user confirmation.
 - R9: state only measured results and their scope; avoid unrestricted negative claims.
 - No decoder, DE, real-data access, qualification, publication, push, deletion, or route-closing authority is inferred from this memory.
+- Saved P1 inputs are the accepted R1 TRAIN COO count artifacts at workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz, T2-1.5M_N_ab_train_sparse.npz and T2-2M_N_ab_train_sparse.npz. Rows are Alice, columns Bob, both natural time-bin indices. G-R1 acceptance covers materialized TRAIN/bundle design inputs, not decoder performance. The CQ roots retain summaries, insufficient to reconstruct these joint counts; R1 results cannot be described as CQ or fresh holdout results.
+- MSD P1 uses these existing aggregates without decoding. Its normal-approximation scenarios freeze assumed failure and tag cadence in docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/PREREG_AND_AUTH.md. Historical 1104 bits includes EC disclosure and verification at its original block length; long-block budget projections and expected-f failure penalties require separate explicit columns. No same-source practical code gap or propagation FER is established by P1.
 
 ## 5. Work lifecycle and Git
 
@@ -47,7 +49,7 @@ This durable memory records stable repository structure, interfaces, data policy
 - Keep one OpenSpec change and one log per research route; do not multiply probe paperwork.
 - Make scoped milestone commits only. Never stage everything with git add -A. Check live git status before each step. Do not merge the sibling line. Push only after the user explicitly confirms.
 - At batch closeout, state the recommended next step, expected efficiency benefit, and cost. Keep conclusions bounded to the tested scope.
-- The reboot S1–S8 plan is engineering-only. Its archival actions do not grant scientific acceptance or execution authority. Reboot D-1 (expected-yield f) and D-2 (stop the GF32 128-symbol single-knob line) are already decided. Future scientific work remains ungranted until organization is complete and the applicable D-3 execution authorization/budget is separately confirmed. D-4 push requires separate confirmation.
+- The reboot S1–S8 plan was engineering-only and is complete; its archival actions do not grant scientific acceptance. Reboot D-1 (expected-yield f) and D-2 (stop the GF32 128-symbol single-knob line) are decided. The user separately authorized sustained staged P1→P2/P3→P4 progression on 2026-10-05. Stage-specific input, MDE and review gates remain; specific D-3 real-frame budget must be confirmed before execution. The eight-commit organization push grant is spent; later D-4 pushes require separate confirmation.
 
 ## 6. Schema and Interface Contract
 - CSV columns that must not silently change:
@@ -105,4 +107,4 @@ Closed probe CLIs live under comparison_bench/src/comparison_bench/cli/probes_cl
 
 The approved archival lifecycle has four dispositions. Completed consolidates only its established reviewed scope; superseded-before-execution, executed-exploration-closed and retired-history-no-delta merge no delta. The fourth means currently not advanced with an individual source-supported reason, not permanent abandonment or scientific KILL; missing records remain unknown. Archived clauses require explicit successor adoption where applicable, with fresh scientific gates and separate user authorization. The current organization spec is openspec/specs/repository-organization/spec.md.
 
-The quarantine is preserved in workspace/_quarantine_20261004/ and indexed by docs/archive/QUARANTINE_MANIFEST.md; no disposal is authorized. Future P1–P4 scientific work and D-3 execution budget require their applicable separate user confirmation; D-4 push is ungranted. The recommended first scientific step remains reboot P1, not another GF32 microprobe.
+The quarantine is preserved in workspace/_quarantine_20261004/ and indexed by docs/archive/QUARANTINE_MANIFEST.md; no disposal is authorized. Current staged P1→P2/P3→P4 progression has the 2026-10-05 user grant. D-3 specific real-frame budget and any new D-4 push remain separately confirmable. Scientific scope and the stopped GF32 microprobe line remain binding.

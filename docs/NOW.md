@@ -1,4 +1,4 @@
-# NOW — 当前入口（2026-10-04）
+# NOW — 当前入口（2026-10-05）
 
 先完整阅读 [唯一交接权威](REBOOT_HANDOFF_20261004.md)、[AGENTS](../AGENTS.md) 和本页；现场重测分支、HEAD、git status。本页是导航摘要，不替代交接规则或执行授权。
 
@@ -12,8 +12,8 @@
 
 现行组织规则见 [repository-organization](../openspec/specs/repository-organization/spec.md)。历史 OpenSpec 原文件及处置记录在 openspec/changes/archive/，无 delta 处置的旧条款必须经后继明确采纳才可恢复为现行。
 
-本次仅授权整理和安全工程 smoke。没有执行解码、DE、真实数据读取、资格化或发表。后续 P1–P4 必须由用户另行确认后开始；真实帧 DECIDE 授权与墙钟预算 D-3、任何 push D-4 仍待用户决定。
+2026-10-05 用户授权按 P1→P2/P3→P4 持续推进。P1 已完成已有 R1 TRAIN 联合直方图的零译码条件熵/预算核对和独立复算，见 [结果](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/RESULT.md)。CQ 原根仅保存摘要，不能重建全量联合计数。未启动解码、DE、新 raw、资格化或发表；真实帧具体墙钟预算须在其 DECIDE 运行前落实。
 
-推荐下一科学步骤为交接 P1：联合直方图的条件熵/链式法则核对，为主线块长的 MSD 设计建立信息预算。预期收益是避免无条件逐面熵高估披露；本次未测量 f 改善。成本按交接为分钟级零译码计算，具体包和预算留待单独授权，不在整理期间运行。
+下一步优先自然二进制 LSB-first 长块条件软先验原型，保留主线短块为后续配对对照；[P1 表](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P1_TABLE.md) 仅为 TRAIN/正态近似假设场景，实用码隙和 OOS FER 未测。解码写包前的 [功效算术](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P2_POWER.json) 先独立复核；并行 P3 只实施数学等价的内核候选，尚未启用或测得加速。科学接受、具体成本和运行预算随阶段冻结。
 
-组织实施及验证记录见 [组织归档](../openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/archive.md)。普通 push 尚未执行。
+组织实施及验证记录见 [组织归档](../openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/archive.md)。整理的八个提交已普通 push，远端核对为 8f2f313a；后续 push 另需确认。

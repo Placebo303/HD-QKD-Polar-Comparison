@@ -1,0 +1,2133 @@
+{
+  "record_kind": "P1_NUMERIC_INDEX_DRAFT",
+  "reproduction_command": "timeout 120s env PYTHONDONTWRITEBYTECODE=1 .venv/bin/python docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/summarize_p1.py --input-root workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a --output-dir docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE --overwrite",
+  "input_root": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a",
+  "primary_json_inputs": [
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_GRAY_LSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_GRAY_MSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_NATURAL_LSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_NATURAL_MSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_GRAY_LSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_GRAY_MSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_NATURAL_LSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_NATURAL_MSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_GRAY_LSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_GRAY_MSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_NATURAL_LSB_FIRST.json",
+    "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_NATURAL_MSB_FIRST.json"
+  ],
+  "source_metadata": [
+    {
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504
+    },
+    {
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487
+    },
+    {
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461
+    }
+  ],
+  "analysis_rows": [
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_GRAY_LSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "GRAY",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "LSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.997691909893772,
+        "H_A_given_B_bits_per_symbol": 0.798134444535838,
+        "V_A_given_B_bits_squared_per_symbol": 0.5865313766508375,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 1.2949018875427465,
+        "sum_H_bit_given_B_bits_per_symbol": 0.7986686553768013,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.7981344445358377,
+        "chain_closure_error_bits_per_symbol": -3.3306690738754696e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.3988229510346824,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.44894742030874435,
+            "H_bit_given_B_bits_per_symbol": 0.39882295103468274,
+            "marginal_bit_error_probability": 0.11873700491911354,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5257194953147376
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.19953909463575503,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.26336457576437294,
+            "H_bit_given_B_bits_per_symbol": 0.19980948247880095,
+            "marginal_bit_error_probability": 0.059454079821491965,
+            "h2_marginal_bit_error_bits_per_symbol": 0.325273997411868
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.09982616175222836,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.14411440599838526,
+            "H_bit_given_B_bits_per_symbol": 0.09995948836165665,
+            "marginal_bit_error_probability": 0.029555885186875602,
+            "h2_marginal_bit_error_bits_per_symbol": 0.19215973129465536
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.049482733976874874,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.07373498286322135,
+            "H_bit_given_B_bits_per_symbol": 0.0495480711454225,
+            "marginal_bit_error_probability": 0.014652746082458541,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11025837468424458
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0257794560853106,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.03725260004999419,
+            "H_bit_given_B_bits_per_symbol": 0.02581012860018834,
+            "marginal_bit_error_probability": 0.007803387595719863,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06585072089272573
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.012728535077274221,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.019553561312352075,
+            "H_bit_given_B_bits_per_symbol": 0.012747985472861852,
+            "marginal_bit_error_probability": 0.003812946904001217,
+            "h2_marginal_bit_error_bits_per_symbol": 0.036126981474173626
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.006709365841006848,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0098932721167112,
+            "H_bit_given_B_bits_per_symbol": 0.006720345224053177,
+            "marginal_bit_error_probability": 0.0020348394949033927,
+            "h2_marginal_bit_error_bits_per_symbol": 0.02112589796562688
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.003132238361249988,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.004642247032421766,
+            "H_bit_given_B_bits_per_symbol": 0.003133110502002468,
+            "marginal_bit_error_probability": 0.0009255033216694559,
+            "h2_marginal_bit_error_bits_per_symbol": 0.010661336843791405
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0013774812997279214,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0022061762124581724,
+            "H_bit_given_B_bits_per_symbol": 0.001380666085405038,
+            "marginal_bit_error_probability": 0.0003835133627465896,
+            "h2_marginal_bit_error_bits_per_symbol": 0.004905463388621265
+          },
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0007364264717275058,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.001167598514093511,
+            "H_bit_given_B_bits_per_symbol": 0.0007364264717275058,
+            "marginal_bit_error_probability": 0.0002060195750291597,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0028198882723024215
+          }
+        ],
+        "order_name": "LSB_FIRST",
+        "bit_order_from_lsb": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_GRAY_MSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "GRAY",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "MSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.997691909893772,
+        "H_A_given_B_bits_per_symbol": 0.798134444535838,
+        "V_A_given_B_bits_squared_per_symbol": 0.5865313766508375,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 1.2949018875427467,
+        "sum_H_bit_given_B_bits_per_symbol": 0.7986686553768012,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.7981344445358379,
+        "chain_closure_error_bits_per_symbol": -1.1102230246251565e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0007364264717275058,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0011675985140935114,
+            "H_bit_given_B_bits_per_symbol": 0.0007364264717275058,
+            "marginal_bit_error_probability": 0.0002060195750291597,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0028198882723024215
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.001380666085405038,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0022182043441675474,
+            "H_bit_given_B_bits_per_symbol": 0.001380666085405038,
+            "marginal_bit_error_probability": 0.0003835133627465896,
+            "h2_marginal_bit_error_bits_per_symbol": 0.004905463388621265
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.003133110502002469,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0046460556220890925,
+            "H_bit_given_B_bits_per_symbol": 0.003133110502002468,
+            "marginal_bit_error_probability": 0.0009255033216694559,
+            "h2_marginal_bit_error_bits_per_symbol": 0.010661336843791405
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.006720345224053178,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.009970865692843648,
+            "H_bit_given_B_bits_per_symbol": 0.006720345224053177,
+            "marginal_bit_error_probability": 0.0020348394949033927,
+            "h2_marginal_bit_error_bits_per_symbol": 0.02112589796562688
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.012747985472861854,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.019784391891916567,
+            "H_bit_given_B_bits_per_symbol": 0.012747985472861852,
+            "marginal_bit_error_probability": 0.003812946904001217,
+            "h2_marginal_bit_error_bits_per_symbol": 0.036126981474173626
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.02581012860018834,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.03749451390865449,
+            "H_bit_given_B_bits_per_symbol": 0.02581012860018834,
+            "marginal_bit_error_probability": 0.007803387595719863,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06585072089272573
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.04954807114542249,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0743809211494352,
+            "H_bit_given_B_bits_per_symbol": 0.0495480711454225,
+            "marginal_bit_error_probability": 0.014652746082458541,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11025837468424458
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.09995948836165663,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.14552054129798048,
+            "H_bit_given_B_bits_per_symbol": 0.09995948836165665,
+            "marginal_bit_error_probability": 0.029555885186875602,
+            "h2_marginal_bit_error_bits_per_symbol": 0.19215973129465536
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.19980948247880098,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.26577558018724445,
+            "H_bit_given_B_bits_per_symbol": 0.19980948247880095,
+            "marginal_bit_error_probability": 0.059454079821491965,
+            "h2_marginal_bit_error_bits_per_symbol": 0.325273997411868
+          },
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.3982887401937194,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.4446282353541241,
+            "H_bit_given_B_bits_per_symbol": 0.39882295103468274,
+            "marginal_bit_error_probability": 0.11873700491911354,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5257194953147376
+          }
+        ],
+        "order_name": "MSB_FIRST",
+        "bit_order_from_lsb": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_NATURAL_LSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "NATURAL",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "LSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.997691909893774,
+        "H_A_given_B_bits_per_symbol": 0.7981344445358383,
+        "V_A_given_B_bits_squared_per_symbol": 0.5865313766508375,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 2.0718815389392207,
+        "sum_H_bit_given_B_bits_per_symbol": 1.5835037908002436,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.7981344445358379,
+        "chain_closure_error_bits_per_symbol": -3.3306690738754696e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.7882236646096741,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.5148802244070226,
+            "H_bit_given_B_bits_per_symbol": 0.7882236646096753,
+            "marginal_bit_error_probability": 0.23756592626400932,
+            "h2_marginal_bit_error_bits_per_symbol": 0.7909690146062258
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.009910779926163812,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.046261893386062826,
+            "H_bit_given_B_bits_per_symbol": 0.39984570434211814,
+            "marginal_bit_error_probability": 0.11882892134489578,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5259852412810891
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.2000362218633176,
+            "marginal_bit_error_probability": 0.059374841523403825,
+            "h2_marginal_bit_error_bits_per_symbol": 0.3249582586853028
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.10007673350166088,
+            "marginal_bit_error_probability": 0.029818956336528223,
+            "h2_marginal_bit_error_bits_per_symbol": 0.19348311877062102
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.05052866235623838,
+            "marginal_bit_error_probability": 0.015166210254069678,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11336279237392181
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.024718533756050043,
+            "marginal_bit_error_probability": 0.007362822658349815,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06275257278060502
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.011970548283188187,
+            "marginal_bit_error_probability": 0.003549875754348598,
+            "h2_marginal_bit_error_bits_per_symbol": 0.03400123203714953
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.005250203059135012,
+            "marginal_bit_error_probability": 0.001515036259445205,
+            "h2_marginal_bit_error_bits_per_symbol": 0.01637456277209452
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.002117092557132544,
+            "marginal_bit_error_probability": 0.0005895329377757492,
+            "h2_marginal_bit_error_bits_per_symbol": 0.007174857359908709
+          },
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.0007364264717275058,
+            "marginal_bit_error_probability": 0.0002060195750291597,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0028198882723024215
+          }
+        ],
+        "order_name": "LSB_FIRST",
+        "bit_order_from_lsb": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_NATURAL_MSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "NATURAL",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "MSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.997691909893774,
+        "H_A_given_B_bits_per_symbol": 0.7981344445358383,
+        "V_A_given_B_bits_squared_per_symbol": 0.5865313766508375,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 2.0718815389392207,
+        "sum_H_bit_given_B_bits_per_symbol": 1.5835037908002434,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.7981344445358378,
+        "chain_closure_error_bits_per_symbol": -4.440892098500626e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0007364264717275058,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.001167598514093511,
+            "H_bit_given_B_bits_per_symbol": 0.0007364264717275058,
+            "marginal_bit_error_probability": 0.0002060195750291597,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0028198882723024215
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.001380666085405038,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0022182043441675474,
+            "H_bit_given_B_bits_per_symbol": 0.002117092557132544,
+            "marginal_bit_error_probability": 0.0005895329377757492,
+            "h2_marginal_bit_error_bits_per_symbol": 0.007174857359908709
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.003133110502002469,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.004646055622089093,
+            "H_bit_given_B_bits_per_symbol": 0.005250203059135012,
+            "marginal_bit_error_probability": 0.001515036259445205,
+            "h2_marginal_bit_error_bits_per_symbol": 0.01637456277209452
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.006720345224053178,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.009970865692843648,
+            "H_bit_given_B_bits_per_symbol": 0.011970548283188187,
+            "marginal_bit_error_probability": 0.003549875754348598,
+            "h2_marginal_bit_error_bits_per_symbol": 0.03400123203714953
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.012747985472861854,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.01978439189191657,
+            "H_bit_given_B_bits_per_symbol": 0.024718533756050043,
+            "marginal_bit_error_probability": 0.007362822658349815,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06275257278060502
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.025810128600188338,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.03749451390865449,
+            "H_bit_given_B_bits_per_symbol": 0.05052866235623838,
+            "marginal_bit_error_probability": 0.015166210254069678,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11336279237392181
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.04954807114542249,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0743809211494352,
+            "H_bit_given_B_bits_per_symbol": 0.10007673350166088,
+            "marginal_bit_error_probability": 0.029818956336528223,
+            "h2_marginal_bit_error_bits_per_symbol": 0.19348311877062102
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.09995948836165663,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.14552054129798048,
+            "H_bit_given_B_bits_per_symbol": 0.2000362218633176,
+            "marginal_bit_error_probability": 0.059374841523403825,
+            "h2_marginal_bit_error_bits_per_symbol": 0.3249582586853028
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.19980948247880095,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.26577558018724445,
+            "H_bit_given_B_bits_per_symbol": 0.39984570434211814,
+            "marginal_bit_error_probability": 0.11882892134489578,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5259852412810891
+          },
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.39828874019371935,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.44462823535412405,
+            "H_bit_given_B_bits_per_symbol": 0.7882236646096753,
+            "marginal_bit_error_probability": 0.23756592626400932,
+            "h2_marginal_bit_error_bits_per_symbol": 0.7909690146062258
+          }
+        ],
+        "order_name": "MSB_FIRST",
+        "bit_order_from_lsb": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_GRAY_LSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "GRAY",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "LSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.998295501729698,
+        "H_A_given_B_bits_per_symbol": 0.8249782281516373,
+        "V_A_given_B_bits_squared_per_symbol": 0.5262812083653096,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 1.3596566100435694,
+        "sum_H_bit_given_B_bits_per_symbol": 0.8254783523219713,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.8249782281516382,
+        "chain_closure_error_bits_per_symbol": 8.881784197001252e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.4128230596235277,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.4320263975509022,
+            "H_bit_given_B_bits_per_symbol": 0.41282305962352783,
+            "marginal_bit_error_probability": 0.12703884825600753,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5492609250851563
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.20533089225295834,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.25681542311816913,
+            "H_bit_given_B_bits_per_symbol": 0.20558685701290516,
+            "marginal_bit_error_probability": 0.06320910921499388,
+            "h2_marginal_bit_error_bits_per_symbol": 0.34005431005612863
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.10389899719019996,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.13935571100600458,
+            "H_bit_given_B_bits_per_symbol": 0.10404045712904826,
+            "marginal_bit_error_probability": 0.03218894327579294,
+            "h2_marginal_bit_error_bits_per_symbol": 0.20525322734444926
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.05200268755841737,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.07199125980540513,
+            "H_bit_given_B_bits_per_symbol": 0.05204953565560918,
+            "marginal_bit_error_probability": 0.016156761127734225,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11928044436678446
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.025956433566455796,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.03723062999988329,
+            "H_bit_given_B_bits_per_symbol": 0.025981475888519196,
+            "marginal_bit_error_probability": 0.007950403975655003,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06687642022717999
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.012766235990220334,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0180752051897322,
+            "H_bit_given_B_bits_per_symbol": 0.012778377015519574,
+            "marginal_bit_error_probability": 0.003952551264250136,
+            "h2_marginal_bit_error_bits_per_symbol": 0.03724425904124167
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.006336818057544247,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.009838207200541887,
+            "H_bit_given_B_bits_per_symbol": 0.006347429570773735,
+            "marginal_bit_error_probability": 0.0019094559975718424,
+            "h2_marginal_bit_error_bits_per_symbol": 0.01999952639121332
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.003298803691496351,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.004577558785674396,
+            "H_bit_given_B_bits_per_symbol": 0.0033048173359830667,
+            "marginal_bit_error_probability": 0.0010441983569165116,
+            "h2_marginal_bit_error_bits_per_symbol": 0.011846774986105906
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0016964670112734341,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0025398591455901456,
+            "H_bit_given_B_bits_per_symbol": 0.0016974424297961557,
+            "marginal_bit_error_probability": 0.0005096412804907052,
+            "h2_marginal_bit_error_bits_per_symbol": 0.006309643223434256
+          },
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0008678332095446758,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0013172684558478251,
+            "H_bit_given_B_bits_per_symbol": 0.0008689006602891515,
+            "marginal_bit_error_probability": 0.00026501346585516676,
+            "h2_marginal_bit_error_bits_per_symbol": 0.003531079321875537
+          }
+        ],
+        "order_name": "LSB_FIRST",
+        "bit_order_from_lsb": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_GRAY_MSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "GRAY",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "MSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.998295501729698,
+        "H_A_given_B_bits_per_symbol": 0.8249782281516373,
+        "V_A_given_B_bits_squared_per_symbol": 0.5262812083653096,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 1.3596566100435694,
+        "sum_H_bit_given_B_bits_per_symbol": 0.8254783523219713,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.8249782281516382,
+        "chain_closure_error_bits_per_symbol": 8.881784197001252e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0008689006602890311,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0013352332228105867,
+            "H_bit_given_B_bits_per_symbol": 0.0008689006602891515,
+            "marginal_bit_error_probability": 0.00026501346585516676,
+            "h2_marginal_bit_error_bits_per_symbol": 0.003531079321875537
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0016974424297960377,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.002556605218094401,
+            "H_bit_given_B_bits_per_symbol": 0.0016974424297961557,
+            "marginal_bit_error_probability": 0.0005096412804907052,
+            "h2_marginal_bit_error_bits_per_symbol": 0.006309643223434256
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0033048173359828967,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.004619419787212587,
+            "H_bit_given_B_bits_per_symbol": 0.0033048173359830667,
+            "marginal_bit_error_probability": 0.0010441983569165116,
+            "h2_marginal_bit_error_bits_per_symbol": 0.011846774986105906
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0063474295707736175,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.009989452366286358,
+            "H_bit_given_B_bits_per_symbol": 0.006347429570773735,
+            "marginal_bit_error_probability": 0.0019094559975718424,
+            "h2_marginal_bit_error_bits_per_symbol": 0.01999952639121332
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.012778377015519397,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0181798978191305,
+            "H_bit_given_B_bits_per_symbol": 0.012778377015519574,
+            "marginal_bit_error_probability": 0.003952551264250136,
+            "h2_marginal_bit_error_bits_per_symbol": 0.03724425904124167
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.025981475888519096,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.03751587450061111,
+            "H_bit_given_B_bits_per_symbol": 0.025981475888519196,
+            "marginal_bit_error_probability": 0.007950403975655003,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06687642022717999
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.052049535655609075,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.07251604565072878,
+            "H_bit_given_B_bits_per_symbol": 0.05204953565560918,
+            "marginal_bit_error_probability": 0.016156761127734225,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11928044436678446
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.10404045712904818,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.14063622729680852,
+            "H_bit_given_B_bits_per_symbol": 0.10404045712904826,
+            "marginal_bit_error_probability": 0.03218894327579294,
+            "h2_marginal_bit_error_bits_per_symbol": 0.20525322734444926
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.20558685701290516,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.2591533089447151,
+            "H_bit_given_B_bits_per_symbol": 0.20558685701290516,
+            "marginal_bit_error_probability": 0.06320910921499388,
+            "h2_marginal_bit_error_bits_per_symbol": 0.34005431005612863
+          },
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.41232293545319576,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.42781702971098534,
+            "H_bit_given_B_bits_per_symbol": 0.41282305962352783,
+            "marginal_bit_error_probability": 0.12703884825600753,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5492609250851563
+          }
+        ],
+        "order_name": "MSB_FIRST",
+        "bit_order_from_lsb": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_NATURAL_LSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "NATURAL",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "LSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.998295501729698,
+        "H_A_given_B_bits_per_symbol": 0.8249782281516383,
+        "V_A_given_B_bits_squared_per_symbol": 0.5262812083653096,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 2.1623141674988156,
+        "sum_H_bit_given_B_bits_per_symbol": 1.6361708200306972,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.8249782281516382,
+        "chain_closure_error_bits_per_symbol": -1.1102230246251565e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.8159187090037037,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.45904619649458733,
+            "H_bit_given_B_bits_per_symbol": 0.8159187090037032,
+            "marginal_bit_error_probability": 0.25422492621526793,
+            "h2_marginal_bit_error_bits_per_symbol": 0.8179060571688036
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.009059519147934523,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.046476606345125265,
+            "H_bit_given_B_bits_per_symbol": 0.4126552926984418,
+            "marginal_bit_error_probability": 0.1271860779592604,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5496701780744978
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.20706843568553732,
+            "marginal_bit_error_probability": 0.06397696874426653,
+            "h2_marginal_bit_error_bits_per_symbol": 0.3430337613842702
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.10302797855648928,
+            "marginal_bit_error_probability": 0.03178802546847359,
+            "h2_marginal_bit_error_bits_per_symbol": 0.20328094863527119
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.05097844290088023,
+            "marginal_bit_error_probability": 0.015631264340739366,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11615251718273664
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.024996967012361117,
+            "marginal_bit_error_probability": 0.007680860365084363,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06499280275219999
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.01221858999684172,
+            "marginal_bit_error_probability": 0.0037283091008342263,
+            "h2_marginal_bit_error_bits_per_symbol": 0.03544602298447263
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.005871160426068112,
+            "marginal_bit_error_probability": 0.0018188531032623837,
+            "h2_marginal_bit_error_bits_per_symbol": 0.019178237164781384
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.0025663430900852357,
+            "marginal_bit_error_probability": 0.0007746547463458721,
+            "h2_marginal_bit_error_bits_per_symbol": 0.009122562829907208
+          },
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.000868900660289171,
+            "marginal_bit_error_probability": 0.00026501346585516676,
+            "h2_marginal_bit_error_bits_per_symbol": 0.003531079321875537
+          }
+        ],
+        "order_name": "LSB_FIRST",
+        "bit_order_from_lsb": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_NATURAL_MSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "NATURAL",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "MSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.998295501729698,
+        "H_A_given_B_bits_per_symbol": 0.8249782281516383,
+        "V_A_given_B_bits_squared_per_symbol": 0.5262812083653096,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 2.1623141674988164,
+        "sum_H_bit_given_B_bits_per_symbol": 1.6361708200306972,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.8249782281516382,
+        "chain_closure_error_bits_per_symbol": -1.1102230246251565e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0008689006602890308,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0013352332228105863,
+            "H_bit_given_B_bits_per_symbol": 0.000868900660289171,
+            "marginal_bit_error_probability": 0.00026501346585516676,
+            "h2_marginal_bit_error_bits_per_symbol": 0.003531079321875537
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0016974424297960377,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.002556605218094401,
+            "H_bit_given_B_bits_per_symbol": 0.0025663430900852357,
+            "marginal_bit_error_probability": 0.0007746547463458721,
+            "h2_marginal_bit_error_bits_per_symbol": 0.009122562829907208
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0033048173359828967,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.004619419787212587,
+            "H_bit_given_B_bits_per_symbol": 0.005871160426068112,
+            "marginal_bit_error_probability": 0.0018188531032623837,
+            "h2_marginal_bit_error_bits_per_symbol": 0.019178237164781384
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0063474295707736175,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.009989452366286358,
+            "H_bit_given_B_bits_per_symbol": 0.01221858999684172,
+            "marginal_bit_error_probability": 0.0037283091008342263,
+            "h2_marginal_bit_error_bits_per_symbol": 0.03544602298447263
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.012778377015519397,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.018179897819130496,
+            "H_bit_given_B_bits_per_symbol": 0.024996967012361117,
+            "marginal_bit_error_probability": 0.007680860365084363,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06499280275219999
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.025981475888519096,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.03751587450061111,
+            "H_bit_given_B_bits_per_symbol": 0.05097844290088023,
+            "marginal_bit_error_probability": 0.015631264340739366,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11615251718273664
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.05204953565560907,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.07251604565072878,
+            "H_bit_given_B_bits_per_symbol": 0.10302797855648928,
+            "marginal_bit_error_probability": 0.03178802546847359,
+            "h2_marginal_bit_error_bits_per_symbol": 0.20328094863527119
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.10404045712904819,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.14063622729680852,
+            "H_bit_given_B_bits_per_symbol": 0.20706843568553732,
+            "marginal_bit_error_probability": 0.06397696874426653,
+            "h2_marginal_bit_error_bits_per_symbol": 0.3430337613842702
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.20558685701290516,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.2591533089447151,
+            "H_bit_given_B_bits_per_symbol": 0.4126552926984418,
+            "marginal_bit_error_probability": 0.1271860779592604,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5496701780744978
+          },
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.41232293545319576,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.4278170297109853,
+            "H_bit_given_B_bits_per_symbol": 0.8159187090037032,
+            "marginal_bit_error_probability": 0.25422492621526793,
+            "h2_marginal_bit_error_bits_per_symbol": 0.8179060571688036
+          }
+        ],
+        "order_name": "MSB_FIRST",
+        "bit_order_from_lsb": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_GRAY_LSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "GRAY",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "LSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.998740112976703,
+        "H_A_given_B_bits_per_symbol": 0.8314077735449484,
+        "V_A_given_B_bits_squared_per_symbol": 0.5316139427343373,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 1.3684356578708672,
+        "sum_H_bit_given_B_bits_per_symbol": 0.8319847748103006,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.8314077735449494,
+        "chain_closure_error_bits_per_symbol": 9.992007221626409e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.41759593694818714,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.4400122435510806,
+            "H_bit_given_B_bits_per_symbol": 0.4175959369481878,
+            "marginal_bit_error_probability": 0.12892795282469915,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5544907442913429
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.20704991112162,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.2577745239513129,
+            "H_bit_given_B_bits_per_symbol": 0.20733462758576424,
+            "marginal_bit_error_probability": 0.06411450460675092,
+            "h2_marginal_bit_error_bits_per_symbol": 0.34356592392712537
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.1034129953284912,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.13952007559943258,
+            "H_bit_given_B_bits_per_symbol": 0.10355347398854797,
+            "marginal_bit_error_probability": 0.031993634863035886,
+            "h2_marginal_bit_error_bits_per_symbol": 0.20429336079852164
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.05236068608775941,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.07348178439845329,
+            "H_bit_given_B_bits_per_symbol": 0.05243516552910733,
+            "marginal_bit_error_probability": 0.01619954500806669,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11953399356512948
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.02599805830149694,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.03737768120502336,
+            "H_bit_given_B_bits_per_symbol": 0.026035278755540986,
+            "marginal_bit_error_probability": 0.008053119714451,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0675906937612867
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.012996603489158697,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.018538439245654344,
+            "H_bit_given_B_bits_per_symbol": 0.013012026253511891,
+            "marginal_bit_error_probability": 0.004044372740520578,
+            "h2_marginal_bit_error_bits_per_symbol": 0.03797521222975059
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.006565897904487264,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.009789225787554152,
+            "H_bit_given_B_bits_per_symbol": 0.0065799951683702665,
+            "marginal_bit_error_probability": 0.0020289722305631757,
+            "h2_marginal_bit_error_bits_per_symbol": 0.021073444523744603
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0032207152475958126,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.004652834005101111,
+            "H_bit_given_B_bits_per_symbol": 0.003228611364089975,
+            "marginal_bit_error_probability": 0.0009992179296000924,
+            "h2_marginal_bit_error_bits_per_symbol": 0.011399964479656426
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0014275553185778371,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0021526268512760153,
+            "H_bit_given_B_bits_per_symbol": 0.0014288081048551005,
+            "marginal_bit_error_probability": 0.00041393747847609936,
+            "h2_marginal_bit_error_bits_per_symbol": 0.005249015289626733
+          },
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0007794137975750967,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0010705591186581892,
+            "H_bit_given_B_bits_per_symbol": 0.0007808511123249735,
+            "marginal_bit_error_probability": 0.00024259450582820577,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0032633050046828927
+          }
+        ],
+        "order_name": "LSB_FIRST",
+        "bit_order_from_lsb": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_GRAY_MSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "GRAY",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "MSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.998740112976703,
+        "H_A_given_B_bits_per_symbol": 0.8314077735449484,
+        "V_A_given_B_bits_squared_per_symbol": 0.5316139427343373,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 1.3684356578708674,
+        "sum_H_bit_given_B_bits_per_symbol": 0.8319847748103006,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.8314077735449493,
+        "chain_closure_error_bits_per_symbol": 8.881784197001252e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0007808511123247985,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0010750291762902425,
+            "H_bit_given_B_bits_per_symbol": 0.0007808511123249735,
+            "marginal_bit_error_probability": 0.00024259450582820577,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0032633050046828927
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.001428808104854919,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0021570154724447075,
+            "H_bit_given_B_bits_per_symbol": 0.0014288081048551005,
+            "marginal_bit_error_probability": 0.00041393747847609936,
+            "h2_marginal_bit_error_bits_per_symbol": 0.005249015289626733
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0032286113640897945,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.004705504162978288,
+            "H_bit_given_B_bits_per_symbol": 0.003228611364089975,
+            "marginal_bit_error_probability": 0.0009992179296000924,
+            "h2_marginal_bit_error_bits_per_symbol": 0.011399964479656426
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.006579995168370071,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.009938810379646734,
+            "H_bit_given_B_bits_per_symbol": 0.0065799951683702665,
+            "marginal_bit_error_probability": 0.0020289722305631757,
+            "h2_marginal_bit_error_bits_per_symbol": 0.021073444523744603
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.013012026253511721,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.018682455773837266,
+            "H_bit_given_B_bits_per_symbol": 0.013012026253511891,
+            "marginal_bit_error_probability": 0.004044372740520578,
+            "h2_marginal_bit_error_bits_per_symbol": 0.03797521222975059
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.02603527875554084,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.037766334147460806,
+            "H_bit_given_B_bits_per_symbol": 0.026035278755540986,
+            "marginal_bit_error_probability": 0.008053119714451,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0675906937612867
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.05243516552910718,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.07416718575891998,
+            "H_bit_given_B_bits_per_symbol": 0.05243516552910733,
+            "marginal_bit_error_probability": 0.01619954500806669,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11953399356512948
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.1035534739885478,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.14079348337387787,
+            "H_bit_given_B_bits_per_symbol": 0.10355347398854797,
+            "marginal_bit_error_probability": 0.031993634863035886,
+            "h2_marginal_bit_error_bits_per_symbol": 0.20429336079852164
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.2073346275857642,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.26039083499455895,
+            "H_bit_given_B_bits_per_symbol": 0.20733462758576424,
+            "marginal_bit_error_probability": 0.06411450460675092,
+            "h2_marginal_bit_error_bits_per_symbol": 0.34356592392712537
+          },
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.417018935682838,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.4346683987636951,
+            "H_bit_given_B_bits_per_symbol": 0.4175959369481878,
+            "marginal_bit_error_probability": 0.12892795282469915,
+            "h2_marginal_bit_error_bits_per_symbol": 0.5544907442913429
+          }
+        ],
+        "order_name": "MSB_FIRST",
+        "bit_order_from_lsb": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_NATURAL_LSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "NATURAL",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "LSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.998740112976703,
+        "H_A_given_B_bits_per_symbol": 0.8314077735449491,
+        "V_A_given_B_bits_squared_per_symbol": 0.5316139427343373,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 2.167965236863391,
+        "sum_H_bit_given_B_bits_per_symbol": 1.6421435128547182,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.8314077735449493,
+        "chain_closure_error_bits_per_symbol": 2.220446049250313e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.8206568190062031,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.44911062659360224,
+            "H_bit_given_B_bits_per_symbol": 0.8206568190062024,
+            "marginal_bit_error_probability": 0.2570178519019918,
+            "h2_marginal_bit_error_bits_per_symbol": 0.8222128445785237
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.010750954538746225,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.05818463152918829,
+            "H_bit_given_B_bits_per_symbol": 0.41438883786211184,
+            "marginal_bit_error_probability": 0.12808989907729265,
+            "h2_marginal_bit_error_bits_per_symbol": 0.552176358452584
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.20705421027634702,
+            "marginal_bit_error_probability": 0.06397539447054174,
+            "h2_marginal_bit_error_bits_per_symbol": 0.3430276674675809
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.10350073628779938,
+            "marginal_bit_error_probability": 0.03198175960750584,
+            "h2_marginal_bit_error_bits_per_symbol": 0.20423494123481917
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.05106557075869223,
+            "marginal_bit_error_probability": 0.015782214599439147,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11705363560378397
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.025030292003151412,
+            "marginal_bit_error_probability": 0.007729094884988151,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06533087063490621
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.01201826574963964,
+            "marginal_bit_error_probability": 0.003684722144467573,
+            "h2_marginal_bit_error_bits_per_symbol": 0.035094260045373415
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.005438270581269581,
+            "marginal_bit_error_probability": 0.0016557499139043975,
+            "h2_marginal_bit_error_bits_per_symbol": 0.017683077121686784
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.002209659217179825,
+            "marginal_bit_error_probability": 0.0006565319843043051,
+            "h2_marginal_bit_error_bits_per_symbol": 0.007888276719449767
+          },
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0,
+            "H_bit_given_B_bits_per_symbol": 0.0007808511123249001,
+            "marginal_bit_error_probability": 0.00024259450582820577,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0032633050046828927
+          }
+        ],
+        "order_name": "LSB_FIRST",
+        "bit_order_from_lsb": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_NATURAL_MSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "NATURAL",
+      "encoding_definition": "NATURAL uses x; GRAY uses g(x)=x^(x>>1), applying the same bijection to Alice rows and Bob columns.",
+      "order": "MSB_FIRST",
+      "analysis": {
+        "H_A_bits_per_symbol": 9.998740112976703,
+        "H_A_given_B_bits_per_symbol": 0.8314077735449491,
+        "V_A_given_B_bits_squared_per_symbol": 0.5316139427343373,
+        "sum_h2_marginal_bit_error_bits_per_symbol": 2.167965236863391,
+        "sum_H_bit_given_B_bits_per_symbol": 1.6421435128547182,
+        "sum_chain_H_bit_given_B_prefix_bits_per_symbol": 0.8314077735449493,
+        "chain_closure_error_bits_per_symbol": 2.220446049250313e-16,
+        "planes": [
+          {
+            "alice_bit_index_from_lsb": 9,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0007808511123247985,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0010750291762902423,
+            "H_bit_given_B_bits_per_symbol": 0.0007808511123249001,
+            "marginal_bit_error_probability": 0.00024259450582820577,
+            "h2_marginal_bit_error_bits_per_symbol": 0.0032633050046828927
+          },
+          {
+            "alice_bit_index_from_lsb": 8,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.001428808104854919,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0021570154724447066,
+            "H_bit_given_B_bits_per_symbol": 0.002209659217179825,
+            "marginal_bit_error_probability": 0.0006565319843043051,
+            "h2_marginal_bit_error_bits_per_symbol": 0.007888276719449767
+          },
+          {
+            "alice_bit_index_from_lsb": 7,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.0032286113640897945,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.004705504162978288,
+            "H_bit_given_B_bits_per_symbol": 0.005438270581269581,
+            "marginal_bit_error_probability": 0.0016557499139043975,
+            "h2_marginal_bit_error_bits_per_symbol": 0.017683077121686784
+          },
+          {
+            "alice_bit_index_from_lsb": 6,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.006579995168370071,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.009938810379646734,
+            "H_bit_given_B_bits_per_symbol": 0.01201826574963964,
+            "marginal_bit_error_probability": 0.003684722144467573,
+            "h2_marginal_bit_error_bits_per_symbol": 0.035094260045373415
+          },
+          {
+            "alice_bit_index_from_lsb": 5,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.013012026253511721,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.018682455773837266,
+            "H_bit_given_B_bits_per_symbol": 0.025030292003151412,
+            "marginal_bit_error_probability": 0.007729094884988151,
+            "h2_marginal_bit_error_bits_per_symbol": 0.06533087063490621
+          },
+          {
+            "alice_bit_index_from_lsb": 4,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.02603527875554084,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.0377663341474608,
+            "H_bit_given_B_bits_per_symbol": 0.05106557075869223,
+            "marginal_bit_error_probability": 0.015782214599439147,
+            "h2_marginal_bit_error_bits_per_symbol": 0.11705363560378397
+          },
+          {
+            "alice_bit_index_from_lsb": 3,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.05243516552910719,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.07416718575891998,
+            "H_bit_given_B_bits_per_symbol": 0.10350073628779938,
+            "marginal_bit_error_probability": 0.03198175960750584,
+            "h2_marginal_bit_error_bits_per_symbol": 0.20423494123481917
+          },
+          {
+            "alice_bit_index_from_lsb": 2,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.1035534739885478,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.1407934833738779,
+            "H_bit_given_B_bits_per_symbol": 0.20705421027634702,
+            "marginal_bit_error_probability": 0.06397539447054174,
+            "h2_marginal_bit_error_bits_per_symbol": 0.3430276674675809
+          },
+          {
+            "alice_bit_index_from_lsb": 1,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.2073346275857642,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.260390834994559,
+            "H_bit_given_B_bits_per_symbol": 0.41438883786211184,
+            "marginal_bit_error_probability": 0.12808989907729265,
+            "h2_marginal_bit_error_bits_per_symbol": 0.552176358452584
+          },
+          {
+            "alice_bit_index_from_lsb": 0,
+            "H_bit_given_B_prefix_bits_per_symbol": 0.417018935682838,
+            "V_bit_given_B_prefix_bits_squared_per_symbol": 0.4346683987636951,
+            "H_bit_given_B_bits_per_symbol": 0.8206568190062024,
+            "marginal_bit_error_probability": 0.2570178519019918,
+            "h2_marginal_bit_error_bits_per_symbol": 0.8222128445785237
+          }
+        ],
+        "order_name": "MSB_FIRST",
+        "bit_order_from_lsb": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_GRAY_LSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "GRAY",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1061,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.76636515731224,
+      "Y_expected_bits": 9020.87015057391,
+      "expected_f_numerator_bits": 1216.7663651573123,
+      "f_expected_dimensionless": 1.4887822616964914,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -21.0,
+      "budget_slack_expected_numerator_bits": -112.7663651573123,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_GRAY_LSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "GRAY",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14038,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1497.6418425169957,
+      "Y_expected_bits": 148202.54240918258,
+      "expected_f_numerator_bits": 15599.641842516996,
+      "f_expected_dimensionless": 1.1929400915102468,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2602.0,
+      "budget_slack_expected_numerator_bits": 1104.358157483004,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_GRAY_MSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "GRAY",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1061,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.76636515731224,
+      "Y_expected_bits": 9020.87015057391,
+      "expected_f_numerator_bits": 1216.7663651573123,
+      "f_expected_dimensionless": 1.4887822616964914,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -21.0,
+      "budget_slack_expected_numerator_bits": -112.7663651573123,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_GRAY_MSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "GRAY",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14039,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1497.6318425169957,
+      "Y_expected_bits": 148201.55240918256,
+      "expected_f_numerator_bits": 15600.631842516996,
+      "f_expected_dimensionless": 1.1930157990619021,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2601.0,
+      "budget_slack_expected_numerator_bits": 1103.3681574830043,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_NATURAL_LSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "NATURAL",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 911,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 93.26636515731225,
+      "Y_expected_bits": 9169.370150573912,
+      "expected_f_numerator_bits": 1068.2663651573123,
+      "f_expected_dimensionless": 1.3070841377239848,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": 129.0,
+      "budget_slack_expected_numerator_bits": 35.73363484268771,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_NATURAL_LSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "NATURAL",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 13447,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1503.551842516996,
+      "Y_expected_bits": 148787.6324091826,
+      "expected_f_numerator_bits": 15014.551842516996,
+      "f_expected_dimensionless": 1.148196928482017,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 3193.0,
+      "budget_slack_expected_numerator_bits": 1689.4481574830043,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_NATURAL_MSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "NATURAL",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1061,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.76636515731225,
+      "Y_expected_bits": 9020.870150573912,
+      "expected_f_numerator_bits": 1216.7663651573123,
+      "f_expected_dimensionless": 1.488782261696491,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -21.0,
+      "budget_slack_expected_numerator_bits": -112.7663651573123,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1M_NATURAL_MSB_FIRST.json",
+      "source": "T2-1M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 315504,
+      "encoding": "NATURAL",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14039,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1497.631842516996,
+      "Y_expected_bits": 148201.5524091826,
+      "expected_f_numerator_bits": 15600.631842516996,
+      "f_expected_dimensionless": 1.1930157990619017,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2601.0,
+      "budget_slack_expected_numerator_bits": 1103.3681574830043,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_GRAY_LSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "GRAY",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1086,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.52254593771211,
+      "Y_expected_bits": 8996.732047833499,
+      "expected_f_numerator_bits": 1241.522545937712,
+      "f_expected_dimensionless": 1.4696440704668439,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -46.0,
+      "budget_slack_expected_numerator_bits": -137.52254593771204,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_GRAY_LSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "GRAY",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14465,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1493.4707350033939,
+      "Y_expected_bits": 147789.602765336,
+      "expected_f_numerator_bits": 16022.470735003393,
+      "f_expected_dimensionless": 1.1854058343006753,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2175.0,
+      "budget_slack_expected_numerator_bits": 681.5292649966068,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_GRAY_MSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "GRAY",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1085,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.53254593771211,
+      "Y_expected_bits": 8997.722047833498,
+      "expected_f_numerator_bits": 1240.532545937712,
+      "f_expected_dimensionless": 1.4684721645401067,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -45.0,
+      "budget_slack_expected_numerator_bits": -136.53254593771203,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_GRAY_MSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "GRAY",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14467,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1493.450735003394,
+      "Y_expected_bits": 147787.62276533598,
+      "expected_f_numerator_bits": 16024.450735003395,
+      "f_expected_dimensionless": 1.1855523225415174,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2173.0,
+      "budget_slack_expected_numerator_bits": 679.5492649966054,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_NATURAL_LSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "NATURAL",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 934,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 93.04254593771212,
+      "Y_expected_bits": 9147.212047833498,
+      "expected_f_numerator_bits": 1091.042545937712,
+      "f_expected_dimensionless": 1.2915143696027984,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": 106.0,
+      "budget_slack_expected_numerator_bits": 12.95745406228798,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_NATURAL_LSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "NATURAL",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 13871,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1499.4107350033937,
+      "Y_expected_bits": 148377.662765336,
+      "expected_f_numerator_bits": 15434.410735003394,
+      "f_expected_dimensionless": 1.1418988267705579,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2769.0,
+      "budget_slack_expected_numerator_bits": 1269.5892649966063,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_NATURAL_MSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "NATURAL",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1085,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.53254593771211,
+      "Y_expected_bits": 8997.722047833498,
+      "expected_f_numerator_bits": 1240.532545937712,
+      "f_expected_dimensionless": 1.4684721645401049,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -45.0,
+      "budget_slack_expected_numerator_bits": -136.53254593771203,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-1.5M_NATURAL_MSB_FIRST.json",
+      "source": "T2-1.5M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-1.5M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 441487,
+      "encoding": "NATURAL",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14467,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1493.450735003394,
+      "Y_expected_bits": 147787.62276533598,
+      "expected_f_numerator_bits": 16024.450735003395,
+      "f_expected_dimensionless": 1.185552322541516,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2173.0,
+      "budget_slack_expected_numerator_bits": 679.5492649966054,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_GRAY_LSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "GRAY",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1094,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.44709875688145,
+      "Y_expected_bits": 8989.262776931262,
+      "expected_f_numerator_bits": 1249.4470987568814,
+      "f_expected_dimensionless": 1.4675869305109417,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -54.0,
+      "budget_slack_expected_numerator_bits": -145.44709875688136,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_GRAY_LSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "GRAY",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14573,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1492.463580110103,
+      "Y_expected_bits": 147689.8944309002,
+      "expected_f_numerator_bits": 16129.463580110103,
+      "f_expected_dimensionless": 1.1840932466185095,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2067.0,
+      "budget_slack_expected_numerator_bits": 574.5364198898969,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_GRAY_MSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "GRAY",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1094,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.44709875688145,
+      "Y_expected_bits": 8989.262776931262,
+      "expected_f_numerator_bits": 1249.4470987568814,
+      "f_expected_dimensionless": 1.4675869305109417,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -54.0,
+      "budget_slack_expected_numerator_bits": -145.44709875688136,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_GRAY_MSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "GRAY",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14575,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1492.443580110103,
+      "Y_expected_bits": 147687.91443090021,
+      "expected_f_numerator_bits": 16131.443580110103,
+      "f_expected_dimensionless": 1.184238602018375,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2065.0,
+      "budget_slack_expected_numerator_bits": 572.5564198898974,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_NATURAL_LSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "NATURAL",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 942,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 92.96709875688144,
+      "Y_expected_bits": 9139.742776931264,
+      "expected_f_numerator_bits": 1098.9670987568813,
+      "f_expected_dimensionless": 1.2908347642743625,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": 98.0,
+      "budget_slack_expected_numerator_bits": 5.032901243118658,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_NATURAL_LSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "NATURAL",
+      "order": "LSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 13983,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1498.3635801101032,
+      "Y_expected_bits": 148273.9944309002,
+      "expected_f_numerator_bits": 15545.363580110103,
+      "f_expected_dimensionless": 1.1412134036581545,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2657.0,
+      "budget_slack_expected_numerator_bits": 1158.6364198898973,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_NATURAL_MSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "NATURAL",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 1024,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 1094,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 91.44709875688145,
+      "Y_expected_bits": 8989.262776931262,
+      "expected_f_numerator_bits": 1249.4470987568814,
+      "f_expected_dimensionless": 1.4675869305109406,
+      "budget_bits": 1104.0,
+      "budget_slack_after_L_and_tag_bits": -54.0,
+      "budget_slack_expected_numerator_bits": -145.44709875688136,
+      "within_budget": false,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 1104.0,
+        "ec_bits_assumed": 1040.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    },
+    {
+      "primary_json_path": "workspace/msd_p1/e76e3e7aa8bb453a885a5fca0c69333a/T2-2M_NATURAL_MSB_FIRST.json",
+      "source": "T2-2M",
+      "input_path": "workspace/r1_histogram_5e2a91c4/T2-2M_N_ab_train_sparse.npz",
+      "source_role": "TRAIN",
+      "N_train": 589461,
+      "encoding": "NATURAL",
+      "order": "MSB_FIRST",
+      "scenario_kind": "NORMAL_APPROX_SCENARIO",
+      "N_symbols": 16384,
+      "joint_failure_assumption": 0.01,
+      "per_plane_failure_probability": 0.001,
+      "L_EC_bits": 14575,
+      "tag_bits": 64.0,
+      "expected_failure_penalty_bits": 1492.443580110103,
+      "Y_expected_bits": 147687.91443090021,
+      "expected_f_numerator_bits": 16131.443580110103,
+      "f_expected_dimensionless": 1.1842386020183742,
+      "budget_bits": 16704.0,
+      "budget_slack_after_L_and_tag_bits": 2065.0,
+      "budget_slack_expected_numerator_bits": 572.5564198898974,
+      "within_budget": true,
+      "budget_projection": {
+        "formula": "1040*N_symbols/1024 + 64 shared tag bits",
+        "bits": 16704.0,
+        "ec_bits_assumed": 16640.0,
+        "shared_tag_bits": 64,
+        "status": "planning projection; not an observed long-block baseline"
+      }
+    }
+  ],
+  "same_source_practical_code_gap": "UNKNOWN",
+  "scope_note": "Mechanical summary of primary JSON only. No scientific acceptance, route decision, or practical decoder conclusion is encoded here."
+}
