@@ -203,3 +203,11 @@ Only `git mv` was used for the tracked source paths below. Historical document b
 | `docs/research_cycles/PROXY-RECALIBRATION/` | `docs/research_cycles/_closed/joint_pricing_stage0_u1_proxy/PROXY-RECALIBRATION/` |
 | `docs/research_cycles/PROXY-RECAL-R2/` | `docs/research_cycles/_closed/joint_pricing_stage0_u1_proxy/PROXY-RECAL-R2/` |
 | `docs/research_cycles/U1-CEILING-PROBE/` | `docs/research_cycles/_closed/joint_pricing_stage0_u1_proxy/U1-CEILING-PROBE/` |
+
+## S5 current ledgers (2026-10-04)
+
+| Previous current path | Preserved historical copy | Current replacement / note |
+|---|---|---|
+| `AGENT_PROJECT_MEMORY.md` | `docs/archive/AGENT_PROJECT_MEMORY-to-20261004.md` | Reopened concise current memory at `AGENT_PROJECT_MEMORY.md`; §6 schema/interface contract retained verbatim. |
+| `docs/decision-log.md` | `docs/archive/decision-log-to-20261004.md` | Reopened current summary at `docs/decision-log.md`; each summary row links to the archived source line(s). |
+| — | `docs/archive/AGENT_PROJECT_MEMORY_TRIAGE_20261004.md` | S5 memory-triage disposition. |

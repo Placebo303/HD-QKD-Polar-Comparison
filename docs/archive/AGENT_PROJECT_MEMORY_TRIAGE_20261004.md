@@ -1,0 +1,5 @@
+# Memory triage — S5 (2026-10-04)
+
+The current project memory was reopened from the archived 2026-10-04 ledger. It retains stable repository structure, source and data boundaries, runtime/path conventions, user-decided project constraints, and the full §6 schema/interface contract verbatim. The authoritative reboot handoff remains `docs/REBOOT_HANDOFF_20261004.md`; current user and agent preferences are linked to `AGENTS.md`.
+
+Per-run metrics, seeds, sample counts, timing/RSS, and unfinished mechanism hypotheses stay in their cycle records or the preserved old decision ledger. Machine-specific workspace/cache inventories, raw-data Windows paths as execution defaults, stale creation inventories, and unverified historical workflow claims were omitted or demoted to provenance. The current decision summary distinguishes Reboot D-1/D-2 from historical M0/M2 D1/D2 labels, records D-1/D-2 as decided, and leaves only applicable D-3 execution authorization/budget and D-4 push confirmation pending.
