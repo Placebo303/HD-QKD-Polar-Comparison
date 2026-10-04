@@ -1,0 +1,14 @@
+# Completed repository organization
+
+Disposition: completed, limited to S1–S8 repository organization and its engineering validation. Authority: docs/REBOOT_HANDOFF_20261004.md and user approvals dated 2026-10-04. S7 predecessor: 737066a1256bd9fcb25ea3c8c65f3ee44bae7d3f.
+
+Original historical material was preserved through Git moves. The current organization delta is adopted in openspec/specs/repository-organization/spec.md. S6 disposition/title ledgers, S7 manifest and append-only smoke log, and tasks.md record the implemented scope. The fourth disposition says currently not advanced with a source-supported individual reason; it is not permanent rejection or scientific KILL.
+
+Verification is restricted to source/import/discovery, fake runner plumbing, path/scope and document checks. No decoder, DE, real data, qualification, publication, deletion or push occurred. Import and collection are not numerical equivalence or scientific acceptance. Preserved repair attempts remain in the log.
+
+Memory triage: compact project memory retains the complete schema contract and structural/runtime/boundary rules; independent Luna draft review reported exact schema retention. S7 completed paths and engineering ceiling are now adopted. External Codex memory was not edited. Historical NOW is preserved verbatim; only the five S4-generated SUMMARY navigation references point to the archived snapshot. PATH_MAP resolves original historical references without rewriting their bodies.
+
+Recommended next work, after separate user authorization: handoff P1 conditional-entropy/chain-rule check using the existing joint histogram, before MSD design. Expected benefit is avoiding unconditional per-plane entropy overcount; no f improvement has been measured by organization. Cost is the handoff's minute-scale zero-decoder estimate, not an execution grant. Real-frame authorization/budget, P1–P4 start, any push, quarantine disposal and exogenous change handling remain user decisions.
+Final S8 verification: current NOW/INDEX/generated SUMMARY links resolve; NOW has 19 lines, independently counted by Python and PowerShell. Historical NOW and all original organization-change bodies except the current task checkbox file are unchanged after relocation. Scoped diff/whitespace and protected-root checks passed before staging; original documents remain historical. Actual Git commits supply the final completion record; push remains pending user confirmation.
+
+Staged closeout check note: the full staged whitespace check reported docs/archive/NOW-to-20261004.md:264, new blank line at EOF. That blank line belongs to the original NOW snapshot, whose unchanged body was already verified. Preserve it under the user's verbatim-history rule; do not trim it. The focused staged whitespace check excludes only that preserved historical file and checks all other S8 changes. No commit was made before this scoped check passed.

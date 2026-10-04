@@ -1294,3 +1294,23 @@ The prior pending filing snapshot is resolved by the reboot organization's S6_AR
 | `python -m comparison_bench.src.comparison_bench.cli.m3d_iter250_synth` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.m3d_iter250_synth` |
 | `python -m comparison_bench.src.comparison_bench.cli.cq_channel_survey_armA` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.cq_channel_survey_armA` |
 | `python -m comparison_bench.src.comparison_bench.cli.cq_channel_survey_armB` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.cq_channel_survey_armB` |
+
+## S8 current-entry and organization closure (2026-10-04)
+
+| Old path | New path |
+|---|---|
+| `docs/NOW.md` | `docs/archive/NOW-to-20261004.md` |
+| `openspec/changes/reboot-repository-organization-20261004/archive.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/archive.md` |
+| `openspec/changes/reboot-repository-organization-20261004/design.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/design.md` |
+| `openspec/changes/reboot-repository-organization-20261004/proposal.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/proposal.md` |
+| `openspec/changes/reboot-repository-organization-20261004/S6_ARCHIVE_LOG.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S6_ARCHIVE_LOG.md` |
+| `openspec/changes/reboot-repository-organization-20261004/S6_BLOCKER.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S6_BLOCKER.md` |
+| `openspec/changes/reboot-repository-organization-20261004/S6_DELTA_MERGE.tsv` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S6_DELTA_MERGE.tsv` |
+| `openspec/changes/reboot-repository-organization-20261004/S6_DISPOSITION_EXTENSION_PROPOSAL.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S6_DISPOSITION_EXTENSION_PROPOSAL.md` |
+| `openspec/changes/reboot-repository-organization-20261004/S6_DISPOSITION_TABLE.tsv` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S6_DISPOSITION_TABLE.tsv` |
+| `openspec/changes/reboot-repository-organization-20261004/S6_STAGE_B_RESULT.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S6_STAGE_B_RESULT.md` |
+| `openspec/changes/reboot-repository-organization-20261004/S7_FILES.tsv` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S7_FILES.tsv` |
+| `openspec/changes/reboot-repository-organization-20261004/S7_LOG.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S7_LOG.md` |
+| `openspec/changes/reboot-repository-organization-20261004/S7_MAIN_FREEZE.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S7_MAIN_FREEZE.md` |
+| `openspec/changes/reboot-repository-organization-20261004/tasks.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/tasks.md` |
+| `openspec/changes/reboot-repository-organization-20261004/specs/repository-organization/spec.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/specs/repository-organization/spec.md` |

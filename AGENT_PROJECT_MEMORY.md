@@ -12,7 +12,7 @@ This durable memory records stable repository structure, interfaces, data policy
 ## 2. Current repository layout
 
 - Root active files include AGENTS.md, AGENT_PROJECT_MEMORY.md, README.md, LICENSE, requirements.txt, pytest.ini, wsl-env.sh, .gitignore, and .gitattributes.
-- Active areas include src/, experiments/, tools/, results/, comparison_bench/, docs/, analysis/, openspec/, archive/, and workspace/. The root archive/ holds history. Consult docs/archive/PATH_MAP.md for S3–S4 moves; add later path changes there.
+- Active areas include src/, experiments/, tools/, results/, comparison_bench/, docs/, analysis/, openspec/, archive/, and workspace/. The root archive/ holds history. Consult docs/archive/PATH_MAP.md for S3–S8 moves.
 - comparison_bench/ contains configs, docs, src, tests, and outputs_comparison. Existing output roots remain read-only unless a separate explicit request authorizes a specific additive write.
 - OpenSpec requirements and changes live under openspec/. For this reboot, docs/REBOOT_HANDOFF_20261004.md remains the unique handoff authority; NOW.md and INDEX.md are navigational summaries.
 - workspace/ is local scratch and contains ignored machine artifacts. Use a fresh task/UUID subdirectory for new temporary artifacts. Do not clean, move, or delete the existing workspace tree unless specifically authorized.
@@ -98,3 +98,11 @@ This durable memory records stable repository structure, interfaces, data policy
 
 - Current path and process decisions are in docs/decision-log.md; older entries remain available in its S5 archive copy. The current decision summary uses REBOOT-D-1 / REBOOT-D-2 prefixes to distinguish those decisions from historical M0/M2 D1/D2 and accounting D-1/D-2 labels.
 - Archived summaries and machine artifacts retain historical evidence. This compact memory does not transcribe their per-run metrics or unfinished hypotheses.
+
+## Reboot organization completion context
+
+Closed probe CLIs live under comparison_bench/src/comparison_bench/cli/probes_closed/, with their corresponding tests under comparison_bench/tests/probes_closed/. Short `comparison_bench.cli` and root `comparison_bench.src.comparison_bench.cli` lanes retain their existing import semantics; consult PATH_MAP for module changes. The small runner_support.py shares root/JSON/log/resource plumbing between the two census callers. Organization import/collection and fake plumbing checks do not establish numerical equivalence, FER, f or scientific acceptance. Execution restrictions remain binding even where archived code retains historical execute flags.
+
+The approved archival lifecycle has four dispositions. Completed consolidates only its established reviewed scope; superseded-before-execution, executed-exploration-closed and retired-history-no-delta merge no delta. The fourth means currently not advanced with an individual source-supported reason, not permanent abandonment or scientific KILL; missing records remain unknown. Archived clauses require explicit successor adoption where applicable, with fresh scientific gates and separate user authorization. The current organization spec is openspec/specs/repository-organization/spec.md.
+
+The quarantine is preserved in workspace/_quarantine_20261004/ and indexed by docs/archive/QUARANTINE_MANIFEST.md; no disposal is authorized. Future P1–P4 scientific work and D-3 execution budget require their applicable separate user confirmation; D-4 push is ungranted. The recommended first scientific step remains reboot P1, not another GF32 microprobe.

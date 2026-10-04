@@ -2,11 +2,11 @@
 
 ## Start here
 
-- [NOW](NOW.md) — current status and evidence ceiling.
-- [Reboot handoff](REBOOT_HANDOFF_20261004.md) — authoritative S1–S8 cleanup plan and user decisions.
-- [Roadmap](ROADMAP-20260921.md) and [V80 baseline](V80_BASELINE_20260921.md) — current scientific authority.
-- [Execution plan](EXECUTION_PLAN_20260922.md), [research-cycle SOP](research-cycle-sop.md), [decision log](decision-log.md), and [troubleshooting](troubleshooting.md).
-
+- [Reboot handoff](REBOOT_HANDOFF_20261004.md) — the sole handoff authority; fully read it and AGENTS.md before work.
+- [NOW](NOW.md) — one-screen navigation and current authorization boundary.
+- [Agent rules](../AGENTS.md), [current project memory](../AGENT_PROJECT_MEMORY.md), and [decision log](decision-log.md).
+- [Current organization specification](../openspec/specs/repository-organization/spec.md), [PATH_MAP](archive/PATH_MAP.md), and [quarantine inventory](archive/QUARANTINE_MANIFEST.md).
+- Earlier roadmap/execution plans remain provenance and planning inputs; they do not override reboot R1–R9 or authorize P1–P4 scientific work.
 ## Current archive map
 
 - `docs/archive/historical_2026/` — historical documents grouped by era/topic.
@@ -108,3 +108,13 @@ The following cycle directories remain in their original locations. Their status
 - `V72P3S1-SHIFT` — 待核
 - `V80-NBLDPC-JAN21` — 待核
 - `WORKFLOW-TWO-TIER-R1` — 待核
+
+## Current source organization
+
+Closed probe CLI modules and corresponding tests are under `comparison_bench/src/comparison_bench/cli/probes_closed/` and `comparison_bench/tests/probes_closed/`. Module paths are listed in PATH_MAP. The two census callers share `runner_support.py`; import/collection and fake plumbing checks establish only engineering scope. Historical code and execute flags confer no fresh scientific grant.
+
+OpenSpec archive records state one of four evidenced dispositions. `retired-history-no-delta` means currently not advanced for the stated individual reason; it is not permanent abandonment or a scientific KILL. The final disposition/title ledgers and logs are retained in the reboot organization archive; the live organization spec governs current filing.
+
+Prior NOW status is preserved in [the historical snapshot](archive/NOW-to-20261004.md). Closed-cycle SUMMARY references resolve there, while original historical document bodies remain unchanged. Historical paths not rewritten in those bodies are resolved through PATH_MAP.
+
+[Completed organization record](../openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/archive.md) retains the disposition/title ledgers, smoke logs and task closure. Filing supplies no scientific grant.
