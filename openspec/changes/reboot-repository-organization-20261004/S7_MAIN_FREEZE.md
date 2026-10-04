@@ -1,0 +1,21 @@
+# S7 main-thread scope freeze (effective only after S6 commit is named)
+
+Authority: docs/REBOOT_HANDOFF_20261004.md §5 S7 and the directly approved organization task; implementation-only path/helper change, no research track or scientific execution. This work improves maintainability and prevents repeated runner paperwork; no measured real-data efficiency improvement is claimed by organization.
+
+Ownership: designated luna_worker owns mechanical changes in comparison_bench/src, comparison_bench/tests, PATH_MAP append, and S7_LOG.md plus S7_FILES.tsv in the organization change. Main thread owns requirements/OpenSpec/task checks, acceptance and commits. Other agents share this checkout; preserve their work. No decoder/DE/real data/old numerical artifacts/qualification/publication/push/deletion are authorized.
+
+Frozen source/target/lanes/order: S7_FINAL_FILES.tsv and S7_EXECUTION_PLAN.md in this directory. All 46 CLI and 50 test moves use git mv. Five new files are the two package markers, stdlib runner_support.py, import-smoke template and fake helper test. Seven KEEP/DEFER runners remain in place. Only exact current Python callers of moved modules may be mechanically rewritten; no historical document body edits. Before editing, read source. Shared extraction is limited to the two census callers' root/JSON/log/RSS/wall plumbing with their observable semantics preserved. No generic framework, SHA/checksum, transaction, retries or compatibility layer.
+
+Acceptance IDs:
+- S7-A1: Fresh git status/branch at step start; S6 commit recorded; complete frozen manifest persisted in the organization change; allowed source targets preflighted and protected roots unchanged.
+- S7-A2: Each CLI moved individually, exact caller references and necessary __file__ anchors adjusted without algorithm/default/schema/metric changes. Statically exclude import-time experiment/data side effects before immediate import pytest. Re-smoke earlier affected callers after later dependency rewrites. Record module-path mappings.
+- S7-A3: Every CLI move has an immediate successful .venv pytest -p no:cacheprovider smoke with a fresh workspace/reboot_s7_smoke/UUID/pytest, 120-second cap and exact command/exit/wall. Short and root lanes stay separate. First smoke is the timed <=2 min smoke. No scientific function is called.
+- S7-A4: Each test moved in dependency order, helper imports updated when dependencies move, appropriate path anchors preserved. Immediately collect only that moved file in its lane with fresh UUID/cap/log; execute none of its existing scientific test bodies. Final lane-wide collection and all-module imports pass.
+- S7-A5: Small shared runner is used by both census callers; meaningful fake-only root/JSON/log/clock/RSS checks pass, including differing RSS-unavailable, wall > and RSS >= boundaries. Existing scientific or decoder fake tests are not executed. No numerical-equivalence claim arises from these checks.
+- S7-A6: One append-only S7 log records first timing smoke, every move/command/result and retained repair attempts, current module paths and exact known verification ceiling. PATH_MAP lists all 96 moves; original historical documents/protected outputs remain unchanged. Scope diff review shows no deletion and no unauthorized test or production output.
+
+Stop on any failed smoke or unsafe top-level action, preserve complete error/command and attempt, repair the scoped engineering cause before any next move. Do not change scientific inputs, contracts, algorithms or authorization to resolve a failure. Do not commit/push or mark own acceptance. Return only all frozen IDs complete with actual evidence, or a concrete blocker containing failed command, full error, remedies and the one main-thread decision needed. Main acceptance remains separate.
+
+Effective S6 predecessor: ffb6c6a065da23ab98f351ecbb32e24dd0f46b87; main-thread authorization now permits only S7-A1–A6 implementation and engineering smoke.
+
+Main engineering inventory correction: T041 has no file-derived path anchor, so its erroneous 0->1 field is removed after source inspection; its relative helper import stays in scope. Original inventory retained in workspace; failure and remedy in S7_LOG. No scientific contract change.

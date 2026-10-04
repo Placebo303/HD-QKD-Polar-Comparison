@@ -6,7 +6,7 @@
 - [x] S4 Layer docs and closed cycles; indexed summaries and workspace root references.
 - [x] S5 Archive and reopen decision log/project memory; memory triage and exact schema retention.
 - [x] S6 Land approved archive-disposition amendment, disposition table and evidence-based archives.
-- [ ] S7 Relocate closed probe code/tests and factor common runner; smoke after moves, stop on failure.
+- [x] S7 Relocate closed probe code/tests and factor common runner; smoke after moves, stop on failure.
 - [ ] S8 Current INDEX/NOW, scoped verification, final inventory and user-only push decision.
 
 Checked items indicate organization work only, not scientific acceptance.

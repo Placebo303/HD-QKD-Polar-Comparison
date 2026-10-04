@@ -1142,3 +1142,155 @@ Tracked originals moved with git mv; original bodies are preserved. New archive.
 ## S6 completion resolution
 
 The prior pending filing snapshot is resolved by the reboot organization's S6_ARCHIVE_LOG.md, S6_DISPOSITION_TABLE.tsv and S6_DELTA_MERGE.tsv. All original moves are exact R100; completed scopes follow the final title ledger; no-delta histories confer no current clauses or new scientific acceptance.
+
+## S7 closed-probe code moves (2026-10-04)
+
+| Old path | New path |
+|---|---|
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_batched_fwht_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_batched_fwht_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_construction_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_construction_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_cycle_census.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_cycle_census.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_cycle_source_overlap.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_cycle_source_overlap.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_damping_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_damping_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_degree_admitted_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_degree_admitted_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_degree_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_degree_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_edge_label_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_edge_label_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_edge_state_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_edge_state_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_endpoint_ablation_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_endpoint_ablation_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_full_efficiency.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_full_efficiency.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_global_census.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_global_census.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_itercap_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_itercap_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_kernel_hotspots.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_kernel_hotspots.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_label_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_label_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_label_replica_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_label_replica_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_mechanism_pair.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_mechanism_pair.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_mrb_reachability_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_mrb_reachability_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_mrb_reaggregate.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_mrb_reaggregate.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_mrb_rescue_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_mrb_rescue_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_mrb_top6_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_mrb_top6_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_residual_sweep_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_residual_sweep_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_roworder_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_roworder_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_search_depth_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_search_depth_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_shape_fine_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_shape_fine_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_shape_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_shape_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_softprior_cost_profile.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_softprior_cost_profile.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_softprior_replica.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_softprior_replica.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_softprior_rescue.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_softprior_rescue.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_source_label_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_source_label_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/nbldpc_gf32_source_map.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/nbldpc_gf32_source_map.py` |
+| `comparison_bench/src/comparison_bench/cli/accounting_identities.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/accounting_identities.py` |
+| `comparison_bench/src/comparison_bench/cli/joint_pricing.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/joint_pricing.py` |
+| `comparison_bench/src/comparison_bench/cli/perplane_stage0.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/perplane_stage0.py` |
+| `comparison_bench/src/comparison_bench/cli/proxy_nonstat_sampler.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/proxy_nonstat_sampler.py` |
+| `comparison_bench/src/comparison_bench/cli/proxy_recal_sampler.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/proxy_recal_sampler.py` |
+| `comparison_bench/src/comparison_bench/cli/proxy_recal_sampler_seg.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/proxy_recal_sampler_seg.py` |
+| `comparison_bench/src/comparison_bench/cli/u1_ceiling_probe.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/u1_ceiling_probe.py` |
+| `comparison_bench/src/comparison_bench/cli/m0_realframe_runner.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/m0_realframe_runner.py` |
+| `comparison_bench/src/comparison_bench/cli/m2real_runner.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/m2real_runner.py` |
+| `comparison_bench/src/comparison_bench/cli/m3a_nested_construct.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/m3a_nested_construct.py` |
+| `comparison_bench/src/comparison_bench/cli/m3b_paired_synth.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/m3b_paired_synth.py` |
+| `comparison_bench/src/comparison_bench/cli/m3c_real_u2.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/m3c_real_u2.py` |
+| `comparison_bench/src/comparison_bench/cli/m3d_iter250_synth.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/m3d_iter250_synth.py` |
+| `comparison_bench/src/comparison_bench/cli/cq_channel_survey_armA.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/cq_channel_survey_armA.py` |
+| `comparison_bench/src/comparison_bench/cli/cq_channel_survey_armB.py` | `comparison_bench/src/comparison_bench/cli/probes_closed/cq_channel_survey_armB.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_kernel_hotspots.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_kernel_hotspots.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_mechanism_pair.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_mechanism_pair.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_softprior_rescue.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_softprior_rescue.py` |
+| `comparison_bench/tests/test_accounting_identities_fake.py` | `comparison_bench/tests/probes_closed/test_accounting_identities_fake.py` |
+| `comparison_bench/tests/test_chan_quality_survey_fake.py` | `comparison_bench/tests/probes_closed/test_chan_quality_survey_fake.py` |
+| `comparison_bench/tests/test_joint_pricing_fake.py` | `comparison_bench/tests/probes_closed/test_joint_pricing_fake.py` |
+| `comparison_bench/tests/test_m0_realframe_fake.py` | `comparison_bench/tests/probes_closed/test_m0_realframe_fake.py` |
+| `comparison_bench/tests/test_m2real_hdc_fake.py` | `comparison_bench/tests/probes_closed/test_m2real_hdc_fake.py` |
+| `comparison_bench/tests/test_m2real_lb_fake.py` | `comparison_bench/tests/probes_closed/test_m2real_lb_fake.py` |
+| `comparison_bench/tests/test_m3a_nested_construct_fake.py` | `comparison_bench/tests/probes_closed/test_m3a_nested_construct_fake.py` |
+| `comparison_bench/tests/test_m3b_paired_synth_fake.py` | `comparison_bench/tests/probes_closed/test_m3b_paired_synth_fake.py` |
+| `comparison_bench/tests/test_m3c_real_u2_fake.py` | `comparison_bench/tests/probes_closed/test_m3c_real_u2_fake.py` |
+| `comparison_bench/tests/test_m3d_iter250_synth_fake.py` | `comparison_bench/tests/probes_closed/test_m3d_iter250_synth_fake.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_batched_fwht_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_batched_fwht_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_construction_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_construction_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_cycle_census.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_cycle_census.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_cycle_source_overlap.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_cycle_source_overlap.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_damping_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_damping_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_degree_admitted_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_degree_admitted_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_degree_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_degree_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_edge_label_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_edge_label_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_edge_state_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_edge_state_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_endpoint_ablation_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_endpoint_ablation_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_full_efficiency.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_full_efficiency.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_global_census.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_global_census.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_itercap_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_itercap_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_joint_check2.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_joint_check2.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_joint_top2.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_joint_top2.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_joint_top3.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_joint_top3.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_label_alignment.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_label_alignment.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_label_replica_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_label_replica_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_mrb_reachability_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_mrb_reachability_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_mrb_reaggregate.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_mrb_reaggregate.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_mrb_rescue_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_mrb_rescue_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_mrb_top6_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_mrb_top6_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_residual_sweep_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_residual_sweep_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_roworder_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_roworder_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_search_depth_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_search_depth_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_shape_fine_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_shape_fine_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_shape_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_shape_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_softprior_cost_profile.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_softprior_cost_profile.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_softprior_replica.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_softprior_replica.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_source_label_probe.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_source_label_probe.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_source_map.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_source_map.py` |
+| `comparison_bench/tests/test_nbldpc_gf32_top3_runtime.py` | `comparison_bench/tests/probes_closed/test_nbldpc_gf32_top3_runtime.py` |
+| `comparison_bench/tests/test_perplane_stage0_fake.py` | `comparison_bench/tests/probes_closed/test_perplane_stage0_fake.py` |
+| `comparison_bench/tests/test_proxy_nonstat_faithfulness_fake.py` | `comparison_bench/tests/probes_closed/test_proxy_nonstat_faithfulness_fake.py` |
+| `comparison_bench/tests/test_proxy_recal_fake.py` | `comparison_bench/tests/probes_closed/test_proxy_recal_fake.py` |
+| `comparison_bench/tests/test_proxy_recal_seg_fake.py` | `comparison_bench/tests/probes_closed/test_proxy_recal_seg_fake.py` |
+| `comparison_bench/tests/test_u1_ceiling_fake.py` | `comparison_bench/tests/probes_closed/test_u1_ceiling_fake.py` |
+
+## S7 python -m module paths
+
+| Previous module | Current module |
+|---|---|
+| `python -m comparison_bench.cli.nbldpc_gf32_batched_fwht_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_batched_fwht_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_construction_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_construction_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_cycle_census` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_cycle_census` |
+| `python -m comparison_bench.cli.nbldpc_gf32_cycle_source_overlap` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_cycle_source_overlap` |
+| `python -m comparison_bench.cli.nbldpc_gf32_damping_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_damping_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_degree_admitted_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_degree_admitted_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_degree_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_degree_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_edge_label_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_edge_label_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_edge_state_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_edge_state_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_endpoint_ablation_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_endpoint_ablation_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_full_efficiency` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_full_efficiency` |
+| `python -m comparison_bench.cli.nbldpc_gf32_global_census` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_global_census` |
+| `python -m comparison_bench.cli.nbldpc_gf32_itercap_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_itercap_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_kernel_hotspots` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_kernel_hotspots` |
+| `python -m comparison_bench.cli.nbldpc_gf32_label_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_label_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_label_replica_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_label_replica_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_mechanism_pair` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_mechanism_pair` |
+| `python -m comparison_bench.cli.nbldpc_gf32_mrb_reachability_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_mrb_reachability_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_mrb_reaggregate` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_mrb_reaggregate` |
+| `python -m comparison_bench.cli.nbldpc_gf32_mrb_rescue_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_mrb_rescue_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_mrb_top6_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_mrb_top6_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_residual_sweep_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_residual_sweep_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_roworder_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_roworder_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_search_depth_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_search_depth_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_shape_fine_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_shape_fine_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_shape_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_shape_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_softprior_cost_profile` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_softprior_cost_profile` |
+| `python -m comparison_bench.cli.nbldpc_gf32_softprior_replica` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_softprior_replica` |
+| `python -m comparison_bench.cli.nbldpc_gf32_softprior_rescue` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_softprior_rescue` |
+| `python -m comparison_bench.cli.nbldpc_gf32_source_label_probe` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_source_label_probe` |
+| `python -m comparison_bench.cli.nbldpc_gf32_source_map` | `python -m comparison_bench.cli.probes_closed.nbldpc_gf32_source_map` |
+| `python -m comparison_bench.src.comparison_bench.cli.accounting_identities` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.accounting_identities` |
+| `python -m comparison_bench.src.comparison_bench.cli.joint_pricing` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.joint_pricing` |
+| `python -m comparison_bench.src.comparison_bench.cli.perplane_stage0` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.perplane_stage0` |
+| `python -m comparison_bench.src.comparison_bench.cli.proxy_nonstat_sampler` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.proxy_nonstat_sampler` |
+| `python -m comparison_bench.src.comparison_bench.cli.proxy_recal_sampler` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.proxy_recal_sampler` |
+| `python -m comparison_bench.src.comparison_bench.cli.proxy_recal_sampler_seg` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.proxy_recal_sampler_seg` |
+| `python -m comparison_bench.src.comparison_bench.cli.u1_ceiling_probe` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.u1_ceiling_probe` |
+| `python -m comparison_bench.src.comparison_bench.cli.m0_realframe_runner` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.m0_realframe_runner` |
+| `python -m comparison_bench.src.comparison_bench.cli.m2real_runner` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.m2real_runner` |
+| `python -m comparison_bench.src.comparison_bench.cli.m3a_nested_construct` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.m3a_nested_construct` |
+| `python -m comparison_bench.src.comparison_bench.cli.m3b_paired_synth` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.m3b_paired_synth` |
+| `python -m comparison_bench.src.comparison_bench.cli.m3c_real_u2` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.m3c_real_u2` |
+| `python -m comparison_bench.src.comparison_bench.cli.m3d_iter250_synth` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.m3d_iter250_synth` |
+| `python -m comparison_bench.src.comparison_bench.cli.cq_channel_survey_armA` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.cq_channel_survey_armA` |
+| `python -m comparison_bench.src.comparison_bench.cli.cq_channel_survey_armB` | `python -m comparison_bench.src.comparison_bench.cli.probes_closed.cq_channel_survey_armB` |

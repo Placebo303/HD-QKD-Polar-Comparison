@@ -58,3 +58,14 @@ A historical change whose available records do not establish another approved di
 #### Scenario: The historical work is reconsidered later
 - **WHEN** a later scientific task proposes to advance the archived work
 - **THEN** its successor explicitly adopts any retained clause and establishes its own applicable scientific evidence, review and user authorization; archival placement neither forbids reconsideration nor supplies those gates.
+
+### Requirement: Closed probe source relocation and shared plumbing
+The S7 frozen manifest SHALL govern mechanical relocation of closed CLI and corresponding test files with git mv. Current callers and directory anchors SHALL resolve the new paths without changing algorithms, defaults, units, data roles, schemas or scientific gates. Every move SHALL be immediately followed by a successful bounded .venv pytest smoke using cache disabled and a fresh task/UUID temporary directory; failure SHALL stop subsequent moves until its scoped cause is repaired. Historical scientific test bodies SHALL not execute during organization; collection/import smoke establishes only that limited engineering scope.
+
+#### Scenario: A closed CLI or test moves
+- **WHEN** one frozen CLI/test is moved
+- **THEN** its module/file path is recorded in PATH_MAP and its lane-specific import or collection smoke is logged before the next move.
+
+#### Scenario: Census callers share repeated plumbing
+- **WHEN** common root validation, JSON/log and RSS/wall mechanics are extracted
+- **THEN** a small stdlib helper is used by both census callers, preserving their converter, formatting, missing-RSS, clamping and threshold differences; fake-only checks cover these mechanics without decoder, DE, real data or historical result execution.
