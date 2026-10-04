@@ -19,3 +19,6 @@ The receiver MAY expose a default-disabled branch that bypasses the backend only
 
 ### Requirement: Explicit mixed-stage conditioning
 A separately default-disabled mechanism MAY condition exact-zero error variables and structurally zero equations before an explicit backend call. It SHALL preserve every positive probability, equation/column order and original transmitted-row accounting, scatter active errors to the original width, and check the original syndrome. A removed equation with nonzero right-hand side SHALL fail without a backend call. Empty remaining systems SHALL retain MAP choices without claiming certainty or verified acceptance. Caller inputs, default behavior and original result schemas SHALL remain unchanged.
+
+### Requirement: Scoped continuous error-allocation diagnostic
+An additive saved-summary diagnostic MAY compare uniform and variance-dependent normal-backoff allocation under the same total failure and tag assumptions. It SHALL state the continuous/unclipped objective, separately report rounded/clipped leakage and full expected-yield ledger, preserve TRAIN/input acceptance provenance, and independently recompute its numerical conclusions. Zero variance SHALL NOT imply zero real failure or OOS certainty. It SHALL NOT change historical P1 results, assert discrete/practical optimality, select real stage codes or grant decoder execution.

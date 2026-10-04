@@ -14,6 +14,8 @@
 - [x] D1-D4 default-disabled exact-prior stage branch, fake-only tests and independent read-only review accepted; no BP-equivalence, OOS or performance acceptance.
 - [x] E1-E5 default-disabled mixed-stage exact-zero conditioning, retained failed fixture attempt, corrected fake tests and independent read-only review accepted; standard-builder model scope only.
 - [x] I1-I3 fixed full-alphabet/long-block structural integration tests and independent acceptance; no decoder experiment or stage allocation adoption.
+- [x] J1-J5 saved-summary continuous normal allocation, progressive bounded calculation and independent every-number/display review accepted within TRAIN/model scope; original artifacts retain PRE-K provenance.
+- [x] K1-K3 implementation-only direct-tail interface correction, fixed tests and incremental independent review; no second J batch execution.
 - [ ] Scoped implementation milestones and applicable future execution gates.
 
 Future real-frame budgets and scientific gates remain applicable; no old grant is reused.

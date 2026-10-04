@@ -18,14 +18,16 @@
 
 2026-10-05 用户授权按 P1→P2/P3→P4 持续推进。P1 已完成已有 R1 TRAIN 联合直方图的零译码条件熵/预算核对和独立复算，见 [结果](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/RESULT.md)。CQ 原根仅保存摘要，不能重建全量联合计数。未启动解码、DE、新 raw、资格化或发表；真实帧具体墙钟预算须在其 DECIDE 运行前落实。
 
-P2 条件软先验、syndrome 接口与稀疏 accumulator 结构候选已通过数学测试和独立限定审查；生产 backend 尚未构造或执行。下一步冻结自然二进制 LSB-first 条件处理与逐层分配，保留主线短块为后续配对对照；现有长块结构候选尚无实用码隙/性能接受。[P1 表](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P1_TABLE.md) 仅为 TRAIN/正态近似假设场景，实用码隙和 OOS FER 未测。解码写包前的 [功效算术](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P2_POWER.json) 已独立复算，但实际样本与成本仍待落实；并行 P3 内核候选尚未启用或测得加速。科学接受、具体成本和运行预算随阶段冻结，证据见同一路线 [日志](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/EXPLORATION_LOG.md)。
+P2 条件软先验、syndrome 接口与稀疏 accumulator 结构候选已通过数学测试和独立限定审查；生产 backend 尚未构造或执行。自然二进制 LSB-first 条件处理及正态模型分配已完成限定核对，实用逐层码率仍未接受，主线短块的完整符号配对对照口径尚待落实；现有长块结构候选尚无实用码隙/性能接受。[P1 表](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P1_TABLE.md) 仅为 TRAIN/正态近似假设场景，实用码隙和 OOS FER 未测。解码写包前的 [功效算术](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P2_POWER.json) 已独立复算，但实际样本与成本仍待落实；并行 P3 内核候选尚未启用或测得加速。科学接受、具体成本和运行预算随阶段冻结，证据见同一路线 [日志](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/EXPLORATION_LOG.md)。
 
-D1–D4 整层精确零误差先验旁路已通过固定 fake 测试和独立只读审查，主线程仅接受该模型/接口行为。它默认关闭，仍校验 syndrome 并计全部已发送行；不增加 OOS、verified success 或效率证据。06:30 重置卡 helper 的只读核对和提前拒绝已通过，指定卡尚未消费；兑换结果须看当时日志。
+D1–D4 整层精确零误差先验旁路已通过固定 fake 测试和独立只读审查，主线程仅接受该模型/接口行为。它默认关闭，仍校验 syndrome 并计全部已发送行；不增加 OOS、verified success 或效率证据。此前卡 helper 的准备已被用户手动重置及取消自动兑换的指令取代，不得执行。
 
 组织实施及验证记录见 [组织归档](../openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/archive.md)。整理的八个提交已普通 push，远端核对为 8f2f313a；后续 push 另需确认。
 
 额度续推（2026-10-05）：用户已手动重置并明确取消自动兑换。Windows 一次性卡任务 Codex-ResetCard-20261005-0630-4973b0ac 已现场停用为 Disabled，consume_0630_attempt.log 不存在；本对话没有发出消费请求。06:32:10 对话任务已改为仅续推研究，不执行任何卡 helper/consume。不得再次启用该卡任务、换卡或购买。现场额度查询确认 ordinaryUsageAllowed=true，原指定到期卡已不在可用列表。I1–I3 测试文件在额度中断前已写入但未运行，由同一 Luna 从实际文件状态恢复。
 
-E1–E5 部分精确零误差变量条件化已通过固定 fake 测试与独立只读审查，主线程仅接受标准 prior builder 下的模型/接口范围。失败测试尝试与只改期望的修正均留在单日志。I1–I3 全字母表/长块结构连接测试已冻结并进行中；生产 backend、实验及逐层实用码率仍未接受。
+E1–E5 部分精确零误差变量条件化已通过固定 fake 测试与独立只读审查，主线程仅接受标准 prior builder 下的模型/接口范围。失败测试尝试与只改期望的修正均留在单日志。后继 I1–I3 也已完成；生产 backend、实验及逐层实用码率仍未接受。
 
-I1–I3 已完成并由独立只读审查接受其固定代数连接范围：完整1024字母表、长块CSR、两种先验处理和首级冲突停止。它不增加信道、FER、实用码率或性能证据。下一步为已接受TRAIN摘要上的理论错误预算分配核对，禁止据此推断生产解码收益。
+I1–I3 已完成并由独立只读审查接受其固定代数连接范围：完整1024字母表、长块CSR、两种先验处理和首级冲突停止。它不增加信道、FER、实用码率或性能证据。后继 J/K 的模型算术及接口核对见下，禁止据此推断生产解码收益。
+
+J1–J5 已完成 TRAIN 摘要下的连续正态错误预算分配及每个数字/显示表格的独立复算，整数取整/裁剪另列；[新表](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/ERROR_ALLOCATION_TABLE.md) 仅接受模型算术。K1–K3 已修正两处尾分位数的补数消减并通过固定测试/独立增量审查，没有重跑或改写旧 J 产物。历史预算来自 O1 synthetic genie-u1 单层结果，不能作为实测完整符号对照；下一步落实完整两层重构、实际 tag 验证、失败与 accepted-wrong 的同块口径以及样本/成本可行性。实用码隙和真实 f 增益仍未知，不据此声称超越真实基线。

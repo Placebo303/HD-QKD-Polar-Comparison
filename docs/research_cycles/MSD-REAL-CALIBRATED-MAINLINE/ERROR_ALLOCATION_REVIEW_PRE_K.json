@@ -1,0 +1,153 @@
+{
+  "record_kind": "INDEPENDENT_J5_COMPARISON_REPORT",
+  "status": "PASS_FOR_FROZEN_EPSILON_0_01_SCENARIOS_WITH_GENERAL_API_DOMAIN_FINDING",
+  "report_scope": "Independent arithmetic review only; no route acceptance or decoder authorization.",
+  "authorities": {
+    "contract": "docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P2_IMPLEMENTATION_CONTRACT.md#J1-J5",
+    "design": "openspec/changes/msd-real-calibrated-mainline/design.md",
+    "delta_spec": "openspec/changes/msd-real-calibrated-mainline/specs/msd-information-budget/spec.md",
+    "P1_result": "docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/RESULT.md",
+    "P1_log": "docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/EXPLORATION_LOG.md",
+    "scalar_input": "docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P1_NUMBERS.json",
+    "P1_numeric_index_self_label": "DRAFT; RESULT/log acceptance scope used"
+  },
+  "artifacts": {
+    "independent_script_root": "workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd",
+    "independent_script": "workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/verify.py",
+    "independent_full_json": "workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/independent_expected.json",
+    "independent_smoke_json": "workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/independent_smoke.json",
+    "smoke_log": "workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/smoke.log",
+    "full_log": "workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/full.log",
+    "correction_note": "workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/correction_note.txt",
+    "retained_initial_label_draft": "workspace/msd_error_allocation_independent/7ccc3a69-f672-4c32-9752-1cb9cd6b370c/independent_expected.json",
+    "retained_wrapper_path_failure": "workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/full_command_path_failure.log",
+    "primary_full_root": "workspace/msd_error_allocation/880ec493-b622-42f9-ad80-6e910c848b38"
+  },
+  "commands": {
+    "smoke": "wsl.exe -e bash -lc 'cd /mnt/d/Code/HD-QKD_Polar_Comparison && timeout 120 .venv/bin/python workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/verify.py --mode smoke'",
+    "full": "wsl.exe -e bash -lc 'cd /mnt/d/Code/HD-QKD_Polar_Comparison && timeout 120 .venv/bin/python workspace/msd_error_allocation_independent/c632df7e-0552-4c85-8e33-5b3268993bdd/verify.py --mode full'",
+    "smoke_exit_code": 0,
+    "full_exit_code": 0,
+    "wrapper_typo_attempt_exit_code": 1,
+    "wrapper_typo_scope": "Redirection UUID typo; shell failed before Python started; no scenario calculation ran."
+  },
+  "computation": {
+    "independent_method": "SciPy ndtr/ndtri and brentq in log(lambda); no import/call of primary allocation routine.",
+    "scenario_count": 24,
+    "max_abs_log_KKT_residual": 3.8813396940895473E-13,
+    "max_abs_epsilon_deficit": 1.1622647289044608E-16,
+    "epsilon_deficit_limit": 1E-14,
+    "exact_uniform_L_matches_saved_P1_count": 24,
+    "zero_variance_exact_zero_budget_stages": 48,
+    "positive_variance_near_integer_stages_within_1e_9": 0,
+    "minimum_positive_variance_stage_distance_to_integer_bits": 0.0034389561750742814,
+    "positive_epsilon_count": 192,
+    "minimum_positive_allocated_epsilon": 0.00011320786388638809,
+    "maximum_allocated_epsilon": 0.007935981958685879,
+    "all_one_minus_epsilon_less_than_one": true,
+    "all_normal_quantiles_finite": true
+  },
+  "primary_comparison": {
+    "comparison_method": "Scenario-keyed numeric comparison of independent JSON against all 24 primary scenario JSON files; stage arrays aligned in declared P1 bit order and checked by actual alice_bit_index_from_lsb.",
+    "float_fields_checked": 3552,
+    "integer_fields_checked_exact": 2160,
+    "metadata_boolean_text_fields_checked_exact": 336,
+    "maximum_absolute_float_difference": 1.81898940354586E-12,
+    "float_tolerance": 1E-09,
+    "mismatches": 0
+  },
+  "summary_markdown": {
+    "path": "workspace/msd_error_allocation/880ec493-b622-42f9-ad80-6e910c848b38/summary.md",
+    "rows_checked": 24,
+    "integer_display_cells_checked_exact": 96,
+    "float_display_cells_checked_at_declared_precision": 48,
+    "source_encoding_order_key_cells_checked": 72,
+    "maximum_continuous_L_display_rounding_difference_bits": 4.96584107168019E-10,
+    "maximum_f_display_rounding_difference": 4.9588805284273E-14,
+    "mismatches": 0
+  },
+  "natural_lsb_long_block": [
+    {
+      "source": "T2-1M",
+      "N_symbols": 16384,
+      "uniform_L_EC_bits": 13447,
+      "allocated_continuous_L_EC_bits": 13377.11921850199,
+      "allocated_clipped_L_EC_bits": 13378,
+      "uniform_f_expected_dimensionless": 1.148196928482017,
+      "allocated_f_expected_dimensionless": 1.1429731074178076,
+      "uniform_minus_allocated_f": 0.0052238210642094884,
+      "allocated_expected_budget_slack_bits": 1757.7581574830037
+    },
+    {
+      "source": "T2-1.5M",
+      "N_symbols": 16384,
+      "uniform_L_EC_bits": 13871,
+      "allocated_continuous_L_EC_bits": 13804.741945499696,
+      "allocated_clipped_L_EC_bits": 13806,
+      "uniform_f_expected_dimensionless": 1.1418988267705579,
+      "allocated_f_expected_dimensionless": 1.1371379589431883,
+      "uniform_minus_allocated_f": 0.004760867827369619,
+      "allocated_expected_budget_slack_bits": 1333.9392649966067
+    },
+    {
+      "source": "T2-2M",
+      "N_symbols": 16384,
+      "uniform_L_EC_bits": 13983,
+      "allocated_continuous_L_EC_bits": 13917.096452711347,
+      "allocated_clipped_L_EC_bits": 13918,
+      "uniform_f_expected_dimensionless": 1.1412134036581545,
+      "allocated_f_expected_dimensionless": 1.1364893531625222,
+      "uniform_minus_allocated_f": 0.004724050495632293,
+      "allocated_expected_budget_slack_bits": 1222.9864198898977
+    }
+  ],
+  "frozen_scope_claim_ceiling": "Saved R1 TRAIN scalar summaries, normal approximation and stated planning projection only; no empirical FER, OOS guarantee, practical code gap, measured f improvement, route closure, qualification, or decoder grant.",
+  "static_review": {
+    "files": [
+      "comparison_bench/src/comparison_bench/formal_ir/msd_error_allocation.py",
+      "comparison_bench/tests/test_msd_error_allocation.py",
+      "docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/analyze_error_allocation.py"
+    ],
+    "observed": "Pure normal-tail objective; explicit zero/single/all-zero conventions; ceil and clip separated; normal ledger charges tag once and includes failure penalty; CLI reads P1_NUMBERS.json only and writes fresh UUID roots; tests use deterministic mathematical fixtures; output preserves UNKNOWN practical code gap and planning-only claim ceiling.",
+    "operator_reported_validation": "21 focused tests passed; frozen smoke passed; full 24-scenario runner exit 0. This reviewer did not rerun operator tests."
+  },
+  "api_domain_finding": {
+    "severity": "Separate implementation-only numeric-domain correction needed; does not affect frozen 0.01 P1 batch.",
+    "current_validation": "Finite 0 < epsilon < 0.5 is accepted, but positive-variance quantiles use NormalDist.inv_cdf(1-epsilon) in both the single-positive allocator branch and stage-budget routine.",
+    "failure_condition": "For binary64 epsilon <= 2^-54 (about 5.551115123125783e-17), 1-epsilon can round to 1.0, outside NormalDist.inv_cdf domain.",
+    "frozen_batch_evidence": {
+      "allocated_positive_epsilon_min": 0.00011320786388638809,
+      "allocated_epsilon_max": 0.007935981958685879,
+      "complements_below_one": true,
+      "quantiles_finite": true,
+      "current_batch_affected": false
+    },
+    "followup_boundary": "Use separate K1-K3 implementation-only correction and fixed tiny-epsilon fixture; do not rerun the J runner or alter accepted inputs."
+  },
+  "pending_main_action": "Main to adjudicate/record the frozen-batch result and run the already frozen K1-K3 correction review. Memory triage: stable pointer to epsilon-domain boundary plus normal-model claim ceiling; no per-test/allocation metrics needed.",
+  "post_batch_K_review": {
+    "status": "INDEPENDENT_READ_ONLY_REVIEW_PASS_K1_K3",
+    "reviewed_after_J_only": "K1-K2 source/test delta; no J runner or pytest rerun by reviewer.",
+    "mathematical_equivalence": "Both NormalDist upper-tail calls now use -inv_cdf(epsilon), using Phi_inverse(1-epsilon)=-Phi_inverse(epsilon) for 0<epsilon<1.",
+    "changed_primary_expressions": [
+      "single-positive allocator",
+      "positive-variance normal_stage_budgets"
+    ],
+    "scientific_state_unchanged": [
+      "KKT allocation/root",
+      "epsilon constraints",
+      "stage entropy/variance",
+      "ceil/clip",
+      "yield ledger",
+      "P1 input/scenarios"
+    ],
+    "operator_test_evidence": {
+      "path": "workspace/msd_tail_quantile/2718273b-a70f-46cb-97ac-ecc2c3f415cf/attempt_01.log",
+      "command_result": "23 passed, 1 existing config warning, 2.51 seconds, exit 0",
+      "fixtures": "epsilon=1e-20 and nextafter(0.5,0), both allocator and stage interface, independent erfc tail round trips"
+    },
+    "previous_J_rounding_recheck": "Reused existing independent full output: minimum positive-variance distance to integer=0.00343895617507428 bits; no positive-V stage within 1e-9; exact-zero budgets only occur where H=V=0. No J result was re-run or relabeled.",
+    "old_J_artifacts": "Remain pre-K outputs; their provenance is not changed."
+  },
+  "memory_triage_recommendation": "Stable pointer only: continuous normal-planning allocation on accepted P1 TRAIN scalar summaries; practical code gap and OOS behavior remain UNKNOWN. Do not store per-test or per-allocation numeric rows."
+}
