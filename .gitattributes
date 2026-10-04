@@ -3,10 +3,10 @@
 *.md text eol=lf
 *.json text eol=lf
 *.csv text eol=lf
-# Protected evidence and baseline are outside the reboot normalization scope.
-/src/** -text
-/experiments/** -text
-/tools/** -text
-/results/** -text
-/comparison_bench/outputs_comparison/** -text
-/workspace/** -text
+# Keep protected paths on their pre-reboot Git conversion rules; do not renormalize them.
+/src/** !text !eol
+/experiments/** !text !eol
+/tools/** !text !eol
+/results/** !text !eol
+/comparison_bench/outputs_comparison/** !text !eol
+/workspace/** !text !eol

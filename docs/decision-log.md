@@ -24,3 +24,7 @@ Ponytail is disabled for this project; delegated agents use luna_worker unless t
 ## Subsequent append-only decisions
 
 Append new durable decisions below the summary. Preserve old evidence in the archived ledger; cite its line numbers when needed. Do not rewrite historical entries or infer new acceptance from filing.
+
+### 2026-10-04 — REBOOT-S6 fourth archival disposition approved
+
+The user approved `retired-history-no-delta` and explicitly required: “只是目前不推进这些，并附上原因”. Each affected historical change is currently not advanced, with a source-supported individual reason; this is not permanent abandonment or a scientific KILL. Preserve original files and known/unknown lifecycle states, merge no delta and confer no retrospective scientific acceptance or execution authorization. V70R1 and V41 show why the vocabulary is needed: execution is evidenced while an independently reviewed technical/result scope has not been established from available records. Missing records are not proof that review never happened. The approved implementation is in `openspec/changes/reboot-repository-organization-20261004/` and its disposition table. Original S1–S8 boundaries remain; future scientific work and push need their separate user authorization.
