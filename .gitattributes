@@ -1,0 +1,12 @@
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+# Protected evidence and baseline are outside the reboot normalization scope.
+/src/** -text
+/experiments/** -text
+/tools/** -text
+/results/** -text
+/comparison_bench/outputs_comparison/** -text
+/workspace/** -text
