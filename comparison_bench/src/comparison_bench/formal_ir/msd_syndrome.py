@@ -174,6 +174,7 @@ def receive_syndromes(
     decoder_factory: Callable[..., object],
     *,
     skip_fully_deterministic: bool = False,
+    condition_exact_variables: bool = False,
 ) -> SyndromeReceiverResult:
     """Decode stages from Bob/public inputs using only recovered prefixes.
 
@@ -181,11 +182,17 @@ def receive_syndromes(
     ``max_iter`` first, for example with ``functools.partial``. This receiver
     has no default decoder factory and no Alice-truth argument. The optional
     exact-prior path skips backend calls only when an entire queried stage has
-    zero error probability; it still performs that stage's syndrome check.
+    zero error probability; it still performs that stage's syndrome check. The
+    separate conditioning path removes exact-zero error variables and
+    structurally zero equations from a copied sparse system, then checks the
+    original syndrome after scattering active errors back.
     """
     if not isinstance(skip_fully_deterministic, (bool, np.bool_)):
         raise ValueError("skip_fully_deterministic must be bool")
+    if not isinstance(condition_exact_variables, (bool, np.bool_)):
+        raise ValueError("condition_exact_variables must be bool")
     skip_exact = bool(skip_fully_deterministic)
+    condition_exact = bool(condition_exact_variables)
     if not isinstance(model, ConditionalPriorModel):
         raise ValueError("model must be a ConditionalPriorModel")
     if not callable(decoder_factory):
@@ -223,7 +230,32 @@ def receive_syndromes(
         error_channel = np.minimum(query.p_one, 1.0 - query.p_one)
         delta = np.bitwise_xor(syndromes[stage], _syndrome(matrix, base))
 
-        if skip_exact and np.all(error_channel == 0.0):
+        if condition_exact:
+            active_columns = np.flatnonzero(error_channel > 0.0)
+            reduced_matrix = matrix[:, active_columns].tocsr(copy=True)
+            reduced_matrix.eliminate_zeros()
+            active_rows = np.asarray(reduced_matrix.getnnz(axis=1)).reshape(-1) > 0
+            conflict_on_removed_row = np.any((~active_rows) & (delta != 0))
+
+            if conflict_on_removed_row or active_columns.size == 0 or not np.any(active_rows):
+                # Fixed variables have zero error. A nonzero right-hand side
+                # on a removed equation will fail the unchanged full-H check.
+                error = np.zeros(bob.size, dtype=np.uint8)
+            else:
+                decoder = decoder_factory(
+                    parity_check_matrix=reduced_matrix[active_rows, :].tocsr(),
+                    error_channel=error_channel[active_columns].copy(),
+                )
+                decode = getattr(decoder, "decode", None)
+                if not callable(decode):
+                    raise ValueError("decoder_factory must return an object with decode()")
+                active_error = _decoder_error_vector(
+                    decode(delta[active_rows].copy()),
+                    block_width=active_columns.size,
+                )
+                error = np.zeros(bob.size, dtype=np.uint8)
+                error[active_columns] = active_error
+        elif skip_exact and np.all(error_channel == 0.0):
             error = np.zeros(bob.size, dtype=np.uint8)
         else:
             decoder = decoder_factory(

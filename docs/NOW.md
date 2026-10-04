@@ -23,3 +23,7 @@ P2 条件软先验、syndrome 接口与稀疏 accumulator 结构候选已通过�
 D1–D4 整层精确零误差先验旁路已通过固定 fake 测试和独立只读审查，主线程仅接受该模型/接口行为。它默认关闭，仍校验 syndrome 并计全部已发送行；不增加 OOS、verified success 或效率证据。06:30 重置卡 helper 的只读核对和提前拒绝已通过，指定卡尚未消费；兑换结果须看当时日志。
 
 组织实施及验证记录见 [组织归档](../openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/archive.md)。整理的八个提交已普通 push，远端核对为 8f2f313a；后续 push 另需确认。
+
+额度耗尽回退（2026-10-05）：06:30 指定卡兑换已注册 Windows 一次性任务 Codex-ResetCard-20261005-0630-4973b0ac，现场 NextRunTime 为 2026-10-05 06:30:00+08:00，Interactive/Limited、不保存密码、隐藏 PowerShell7、执行时限2分钟。动作是 workspace/reset_card_20261005/run_0630_reset.ps1，固定幂等 UUID 9988e116-e03b-4f52-9f94-825e3076e6ed，记录 consume_0630_attempt.log；它不需要模型生成。06:32:10 对话任务只核对该日志并续推，不另发消费请求。注册时日志不存在、尚未兑换。必须保持机器开机及当前用户登录；实际服务器资格/网络成功仍须当时结果确认，超时不能推断未消费。
+
+E1–E5 部分精确零误差变量条件化已通过固定 fake 测试与独立只读审查，主线程仅接受标准 prior builder 下的模型/接口范围。失败测试尝试与只改期望的修正均留在单日志。I1–I3 全字母表/长块结构连接测试已冻结并进行中；生产 backend、实验及逐层实用码率仍未接受。

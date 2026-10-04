@@ -16,3 +16,6 @@ Implementation SHALL separate sender truth from receiver Bob/public-syndrome inp
 
 ### Requirement: Explicit exact-prior mechanism
 The receiver MAY expose a default-disabled branch that bypasses the backend only when every queried error probability equals zero exactly. It SHALL retain the same public-syndrome check, failure stop, recovered-prefix propagation and upfront transmitted-row accounting. Any positive probability, including unsupported-cell fallback, SHALL retain the ordinary explicit-factory path. A deterministic model conflict SHALL stop rather than invent a correction. TRAIN determinism SHALL NOT imply OOS correctness, zero disclosure, verified acceptance or measured efficiency.
+
+### Requirement: Explicit mixed-stage conditioning
+A separately default-disabled mechanism MAY condition exact-zero error variables and structurally zero equations before an explicit backend call. It SHALL preserve every positive probability, equation/column order and original transmitted-row accounting, scatter active errors to the original width, and check the original syndrome. A removed equation with nonzero right-hand side SHALL fail without a backend call. Empty remaining systems SHALL retain MAP choices without claiming certainty or verified acceptance. Caller inputs, default behavior and original result schemas SHALL remain unchanged.
