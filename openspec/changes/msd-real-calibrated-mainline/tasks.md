@@ -10,6 +10,7 @@
 - [x] Implement and independently review conditional-prior prototype without decoder execution.
 - [x] Implement and independently review sender/syndrome/decoded-prefix receiver interface with fake-only focused tests (M6-M9).
 - [ ] Freeze a suitable long-block sparse construction and per-stage allocations; do not adopt short dense candidates or zero TRAIN entropy as OOS guarantees.
+- [x] C1-C6 sparse accumulator-family structural candidate implemented, fixed structural tests and independent read-only review accepted; stage allocations and practical code gap remain open.
 - [ ] Scoped implementation milestones and applicable future execution gates.
 
 Future real-frame budgets and scientific gates remain applicable; no old grant is reused.
