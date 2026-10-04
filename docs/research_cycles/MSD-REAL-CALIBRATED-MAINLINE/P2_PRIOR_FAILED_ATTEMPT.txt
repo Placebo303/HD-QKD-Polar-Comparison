@@ -1,0 +1,117 @@
+P2 prior tests: retained command and failure evidence
+====================================================
+
+This note transcribes the existing tool outputs from the implementation task.
+The initial failure was not replayed. Its cause was a reversed expected sign in
+the test assertion for log(P0/P1) at p_one=0; the assertion was corrected. A
+later local vectorization of Bob-symbol validation was followed by one focused
+rerun, recorded below. No decoder, DE, raw data, real counts, or benchmark was
+run.
+
+Attempt 1: initial focused test (failed)
+----------------------------------------
+
+Exact PowerShell command as issued:
+
+```powershell
+$uuid = [guid]::NewGuid().ToString(); $taskRoot = [IO.Path]::GetFullPath((Join-Path (Get-Location) 'workspace/msd_prior')); $target = [IO.Path]::GetFullPath((Join-Path $taskRoot $uuid)); if (-not $target.StartsWith($taskRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw "pytest temp path escaped task root: $target" }; if (Test-Path -LiteralPath $target) { throw "pytest temp path already exists: $target" }; New-Item -ItemType Directory -Path $taskRoot -Force | Out-Null; git status --short -- comparison_bench/src/comparison_bench/formal_ir/msd_conditional_prior.py comparison_bench/tests/test_msd_conditional_prior.py; wsl --cd /mnt/d/Code/HD-QKD_Polar_Comparison --exec timeout 120 .venv/bin/python -m pytest -p no:cacheprovider -o addopts= --basetemp "workspace/msd_prior/$uuid" comparison_bench/tests/test_msd_conditional_prior.py; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+```
+
+The command generated a GUID into `$uuid` but did not print it. The captured
+stdout therefore only preserves the path pattern
+`workspace/msd_prior/$uuid`; no attempt-specific UUID can be recovered from
+that output. The subsequent metadata listing of `workspace/msd_prior/` was
+empty. No separate pytest log file was created or captured; output was returned
+directly by the tool. The WSL launcher preamble was garbled by host encoding;
+the pytest output itself was captured as follows:
+
+```text
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0
+rootdir: /mnt/d/Code/HD-QKD_Polar_Comparison
+configfile: pytest.ini
+collected 12 items
+
+comparison_bench/tests/test_msd_conditional_prior.py ...F........        [100%]
+
+=================================== FAILURES ===================================
+________ test_soft_error_adapter_preserves_map_tie_error_and_finite_llr ________
+
+    def test_soft_error_adapter_preserves_map_tie_error_and_finite_llr() -> None:
+        query = prior.PriorQuery(
+            p_one=np.array([0.0, 0.25, 0.5, 0.75, 1.0]),
+            unsupported=np.array([False, False, True, False, False]),
+        )
+        adapted = prior.adapt_soft_error_prior(query, llr_floor=1e-6)
+
+        assert np.array_equal(adapted.base_bits, [0, 0, 0, 1, 1])
+        assert np.array_equal(adapted.p_error, [0.0, 0.25, 0.5, 0.25, 0.0])
+>       assert adapted.llr_natural_log[0] == pytest.approx(math.log(1e-6))
+E       assert np.float64(13.815510557964274) == -13.815510557964274 ± 1.4e-05
+E         
+E         comparison failed
+E         Obtained: 13.815510557964274
+E         Expected: -13.815510557964274 ± 1.4e-05
+
+comparison_bench/tests/test_msd_conditional_prior.py:108: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1464
+  /mnt/d/Code/HD-QKD_Polar_Comparison/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1464: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+  
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED comparison_bench/tests/test_msd_conditional_prior.py::test_soft_error_adapter_preserves_map_tie_error_and_finite_llr
+=================== 1 failed, 11 passed, 1 warning in 3.62s ===================
+```
+
+Tool result: exit code 1; wall time 5.1 s. The focused correction was to expect
+`-log(1e-6)` for p_one=0 and `log(1e-6)` for p_one=1, consistent with
+`log(P0/P1)`.
+
+Attempt 2: corrected LLR-sign assertion (passed before vectorization)
+---------------------------------------------------------------------
+
+The exact PowerShell command was the same as Attempt 1, executed separately
+with a newly generated `$uuid`. Its resolved GUID was not echoed. The command
+used the recorded `--basetemp workspace/msd_prior/$uuid` pattern. Its captured
+pytest summary was 12 passed, 1 warning in 2.44 s; tool exit code was 0. Both
+original GUID values are not recoverable from the captured output.
+
+Post-vectorization focused rerun
+--------------------------------
+
+Exact PowerShell command as issued:
+
+```powershell
+$uuid = [guid]::NewGuid().ToString(); $taskRoot = [IO.Path]::GetFullPath((Join-Path (Get-Location) 'workspace/msd_prior')); $target = [IO.Path]::GetFullPath((Join-Path $taskRoot $uuid)); if (-not $target.StartsWith($taskRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw "pytest temp path escaped task root: $target" }; if (Test-Path -LiteralPath $target) { throw "pytest temp path already exists: $target" }; New-Item -ItemType Directory -Path $taskRoot -Force | Out-Null; Write-Output "PYTEST_UUID=$uuid"; git status --short -- comparison_bench/src/comparison_bench/formal_ir/msd_conditional_prior.py comparison_bench/tests/test_msd_conditional_prior.py; wsl --cd /mnt/d/Code/HD-QKD_Polar_Comparison --exec timeout 120 .venv/bin/python -m pytest -p no:cacheprovider -o addopts= --basetemp "workspace/msd_prior/$uuid" comparison_bench/tests/test_msd_conditional_prior.py; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+```
+
+Observed UUID and requested basetemp path:
+`c4e71e2a-b295-4a21-a705-d40e787d485f`;
+`workspace/msd_prior/c4e71e2a-b295-4a21-a705-d40e787d485f`.
+
+Captured pytest output:
+
+```text
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0
+rootdir: /mnt/d/Code/HD-QKD_Polar_Comparison
+configfile: pytest.ini
+collected 12 items
+
+comparison_bench/tests/test_msd_conditional_prior.py ............        [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1464
+  /mnt/d/Code/HD-QKD_Polar_Comparison/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1464: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+  
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 12 passed, 1 warning in 2.42s =========================
+```
+
+Tool result: exit code 0; wall time 3.8 s. No test log file was written; this
+transcript is the retained evidence.

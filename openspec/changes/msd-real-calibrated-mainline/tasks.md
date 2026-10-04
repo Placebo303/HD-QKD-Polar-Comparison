@@ -7,7 +7,7 @@
 - [x] Main P1 arithmetic acceptance, recommendation and repository memory triage.
 - [x] Calculate and independently recompute proposed P2 target-effect/MDE before writing a decoder packet.
 - [ ] Establish actual model/design/OOS roles, power-sufficient pairing availability and cost; no decoder packet or execution yet.
-- [ ] Implement and independently review conditional-prior prototype without decoder execution.
+- [x] Implement and independently review conditional-prior prototype without decoder execution.
 - [ ] Scoped implementation milestones and applicable future execution gates.
 
 Future real-frame budgets and scientific gates remain applicable; no old grant is reused.

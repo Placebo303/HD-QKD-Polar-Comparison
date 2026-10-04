@@ -101,6 +101,7 @@ This durable memory records stable repository structure, interfaces, data policy
 - Current path and process decisions are in docs/decision-log.md; older entries remain available in its S5 archive copy. The current decision summary uses REBOOT-D-1 / REBOOT-D-2 prefixes to distinguish those decisions from historical M0/M2 D1/D2 and accounting D-1/D-2 labels.
 - Archived summaries and machine artifacts retain historical evidence. This compact memory does not transcribe their per-run metrics or unfinished hypotheses.
 - nonbinary_v10_fftqspa.py::check_update_all_log is an unconnected arithmetic candidate; the reference function and decoder default remain unchanged. Full-decoder equivalence and measured performance remain future gates. Its current scope is recorded under NBLDPC-MAINLINE-ENABLING.
+- msd_conditional_prior.py builds ordered bit priors from joint counts, querying complete natural Bob symbols and decoded prefixes without Alice truth. Unsupported combinations return 0.5 with an explicit flag. Accepted scope is prior/soft-error mathematics only; decoder integration and performance remain separate. See MSD-REAL-CALIBRATED-MAINLINE/P2_IMPLEMENTATION_CONTRACT.md.
 
 ## Reboot organization completion context
 
