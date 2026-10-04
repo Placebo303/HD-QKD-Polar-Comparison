@@ -1,0 +1,3 @@
+# Minimal selector delta
+
+Reuse shared baseline/rank1, existing entropy/posterior/score/cap/actualvector machinery. Filter active variables to the maximum INTEGER number of adjacent violated checks, counted by nonzero H edges, then use the accepted entropy selector; second excludes first and recomputes the remaining maximum. Zero-count variables excluded, no capped/exact2 bucket. Compare independent control/candidate joint choices. Share only identical ordered variable pairs; otherwise counterbalance the two fourcallsets by global frame parity. Logical cost includes sharedcalls; physical cap2880, unchanged1200s wall. No core decoder or generalized framework. Scoped CLI plus new fake tests only.

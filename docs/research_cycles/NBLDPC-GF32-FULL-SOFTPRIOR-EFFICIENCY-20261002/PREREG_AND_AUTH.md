@@ -1,0 +1,41 @@
+# EXPLORE — complete saved six-branch recovery/efficiency validation
+
+UUID `dcaa868f-b094-4551-8458-0511003a4405`; fresh root workspace/gf32_full_eff_dcaa868f; intended formal-ir-v72p1-addendum-clean. EXPLORE_HEAVY is only a cost annotation. Literal current user: **可以继续吧，不过主要推进任务还是nbldpc的纠错能力与效率**; explicit continuing preauthorization in NBLDPC-CONTINUOUS-EXPLORE-20261001.md and preceding **可以的，还是往下持续推进，我预授权** support this separately frozen complete192-frame successor. One attempt, no repair/rerun/resume. No real/private/raw data/new frames/n256/N2048/qualification/publication/security/route/DECIDE/promotion/Git/external scope.
+
+## E1 Single source, whole frozen pipeline
+
+Read only accepted replica workspace/gf32_softprior_replica_cbe151fe/{manifest.json,summary.json,diagnostics.npz}, UUIDcbe151fe-25f7-4990-8895-858091467e2b / namespace gf32-softprior-replica-v1 / parentcontract NBLDPC-GF32-SOFT-PRIOR-REPLICA-20261001/PREREG_AND_AUTH.md; source a9352bc1-ae56-443b-ae93-9dcfa85d4229/gf32-degree-admitted-v1/admitted_source. Accepted batched prototype7d45396d has fixed-case numerical matching only; this tests complete coverage, not a fresh replication/mechanism discovery.
+
+Require192 pairs, six source CONTROL/DV2 H52×128,492 source calls:192 baseline,50 failed baseline pairs,300 soft_prior branches. For each failed baseline six branches indices0..5 and guesses[0,1,3,7,15,31]. Preserve all same call/pair/raw-vector/H/prior/syndrome maps. Validate saved selected-variable CHECK_UPDATED provenance via accepted selector; do not reselect differently. No frame/Bob/truth/syndrome/graph/label draws or source writes.
+
+## E2 Inputs, source and paired numerical gates
+
+Reconstruct every source call: baseline original_prior, all300 soft_prior calls original_prior.copy with stored selected row zeroed and stored guess set1. No restriction to source-selected rescues. Reuse hotspot source/map helpers and rescue select_uncertain_variable/effective_prior/select_soft_prior_branch semantics; no framework/decoder changes. Both paths cold max_iter90/alpha1/warmNone/fieldNone; reference unchanged default helper, candidate explicitly batched helper. Old+new call pair in ascending call ID; even IDs reference then candidate, odd IDs reverse. Exactly984 maximum BP calls,88560 iterations cap, one pair per source call, no extra warmup or profiler.
+
+Each returned vector matches saved raw_x_hat exactly, source iterations and call_decoder_status exactly, independently computed H*x_hat matches saved validity against given syndrome; available reported flag agrees. All final beliefs finite/same shape;50 failed baseline calls per path CHECK_UPDATED beliefs against source atol1e-12/rtol0. Every old/new pair vector/iteration/status/report/syndrome equal and final_beliefs allclose1e-12/rtol0; save max absolute difference. Mismatch STOP immediately with returned observations retained, incomplete/null full comparison; no repair.
+
+## E3 Candidate choice, truth separation and costs
+
+Recompute each path's192 final candidates using actual returned vectors and own syndrome: valid baseline pass-through; otherwise among six valid branch vectors max ORIGINAL effective-prior sum-log score, within1e-12 ties lowest original branch index; no valid branch baseline fallback. Compare branch scores with source branch_score records, source selected call anchor and between paths. Original flooring/normalization1e-15 unchanged. Truth cannot enter branch choice. Evaluate exact=truth AND own syndrome afterwards; selected syndrome-valid-wrong separate from exact and syndrome failures; separately count unselected/raw branch wrong.
+
+Gate complete pipeline anchors C142/K156 for both paths,192 selected pointers per path equal source, no numerical/score mismatch. This is implementation fidelity on the same approved synthetic data, not a new efficacy/FER/route screen. Per-graph/paired outcomes separately, never pool across parents or rank external methods.
+
+Actual costs per path: control=192 baseline calls; six-branch candidate=baseline192+branches300, baseline shared once. Report actual reference/candidate outer call-wall and decoder runtime, calls/iterations/RSS, per-graph and per-role costs. Full-path paired timing sums/ratio descriptive for these192 reused frames, first-call/cache/order effects visible; no steady-state/pipeline throughput/universal speedup claim. Fixed public method syndrome260bits/frame once,49,920bits per METHOD192 frames, internal branch0, tag0; physical local replay creates0 new public disclosures. Do not add repeated/counterpart disclosures. Verification NOT_IMPLEMENTED/undetected NOT_MEASURED explicitly serialize; no f_eff/SKR/security inference.
+
+## E4 Budget, artifacts and ownership
+
+Cap600s through source/load/compute/first-pass artifacts after production binding/import,1GiB Linux ru_maxrss KiB×1024,10MiB output. Check after every call/pair and writes; log single-call overshoot if any. STOP/cap partial retains rows/arrays with null COMPLETE totals, no retry. First-pass checkpoint/size versus execution-terminal final stat before review append distinguished, no recursive finalization claim.
+
+Minimal manifest.json,summary.json,call_records.csv(984 complete rows),frame_records.csv(192 complete rows),outputs.npz,EXPLORATION_LOG.md. Persist actual returned x_hat uint8[Nreturned,128] with aligned source call/pair/path IDs for independent vector checking; record belief comparison/maxdiff/provenance, do not duplicate full beliefs. Manifest source/root/scoped code/default/variant identity/settings/budgets/authorization; status FULL_SOFTPRIOR_IMPLEMENTATION_MATCH only all984 source/492 paired/192 per-path choices pass. No default promotion.
+
+Operator kernel_accel_design owns only new cli/nbldpc_gf32_full_efficiency.py; full_eff_tests owns only new tests/test_nbldpc_gf32_full_efficiency.py. Existing helpers/core/oldCLIs/results read-only. Reuse nearest accepted source/paired semantics. Required source_reader/reference_decoder/candidate_decoder injections; production binding only --execute. Not alone, preserve unrelated dirty changes. Main scientific scope/acceptance, census_review independent read-only review.
+
+## E5 Focused matrix and one-shot acceptance
+
+E5a import/compile/T0dry0 source/decoder/writes, immediate intended branch/scoped files/official root absent. E5b complete fake192/492→984 with all six branches, baseline pass/fallback, true source maps/one-hot allbranches/cold args/even-odd order/raw-vector persistence; source/paired predicates and original-prior score/tie selection independent of truth, selected/raw wrong separation, baseline counted once. E5c identity/missingbranch/pointer/vector/belief/score/selectedanchor mismatch STOP with retained rows/null complete totals; wall/RSS/filecaps and existing-root refusal, Linux units. No actual BP/source arrays in tests; existing helper/seam math accepted, no broad regression.
+
+After E5 focused fake/T0drycompile/scoped branch/output checks, operator may execute exact command ONCE under this frozen user grant, own process ID, freeze code after launch, no self-accept/retry. Independent batch-end review checks source/call maps, persisted returned vectors/syndromes/truth, score/choice and cost/resource semantics; belief arrays not persisted, their actual comparisons rely on CLI predicates/maxdiff and that boundary stated. Main accepts only independent PASS, then RESULT/INDEPENDENT_ACCEPTANCE/project-memory triage. Any new correction mechanism has its own packet/root/review; user requested2–3 parallel mechanisms, not mixing hypothesis changes into this validation.
+
+`wsl -d Ubuntu --cd /mnt/d/Code/HD-QKD_Polar_Comparison env PYTHONPATH=comparison_bench/src .venv/bin/python -m comparison_bench.cli.nbldpc_gf32_full_efficiency --execute --out-root workspace/gf32_full_eff_dcaa868f`
+
+2026-10-02 closeout:conditional one-shot grant consumed, exit0/session4843/PID49250;14fake tests andT0dry/scoped gates passed. Independent reviewer administratively substituted `mechanism_freeze_review` for `census_review`, PASS with denominator reporting limitation preserved in RESULT. Main accepts FULL_SOFTPRIOR_IMPLEMENTATION_MATCH only, no rerun or promotion. Separate mechanism packets do not extend this run.

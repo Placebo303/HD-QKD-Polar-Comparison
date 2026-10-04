@@ -1,0 +1,9 @@
+# Independent actual batch-end review / main acceptance
+
+Track EXPLORE; UUIDc608cfb6-3593-4364-b4be-a6f65878b372, rootworkspace/gf32_joint_check2_c608cfb6 (dirty formal-ir-v72p1-addendum-clean). Operatorcheck2_operator; independentread-onlyreviewercheck2_review, separate from implementation/operator. Main retains scientific/scope acceptance.
+
+Reviewer actualS1–S5 PASS_WITH_FINDING. From savedarrays directly recomputed644GF32/poly37syndromes/exact/selectedrawwrong,44selectors fromoriginalCHECK_UPDATEDbeliefs andnonzeroHviolations (entropymaxdiff0),31triggers/sharedIDs/parity/top2/secondexclusion, originalP_effsumlogvalidbranchscores/EPSbranchidxblindchoices,6Hmatrices againstacceptedsource,192freshseedalignment and18excludedplans/3792unique/zerooverlap. Recomputed148/164/163,paired163/0/1/28,graph[-1,0,0,0,0,0],physical644/logical580each,iterations44456/38778/38850. Soleloss graph3901/stream0/frame14 correctly preserves candidatefallback rather than borrowing controlsuccess. No BP/sampling/test rerun or writes during independent review.
+
+Resources269.2717s/RSS158142464B/terminalfiles3694081B within1200s/1GiB/20MiB. Finding: summary/logruntime3693608B versus terminal3694081B,+473B; qualify by timepoint and retain originalartifacts. Readiness finding: one-active-variable fallback code present, newtestnotdirect; non-blocking. Neither affects frozenclassification or authorization.
+
+Main accepts finite **INCREMENT_NOT_ESTABLISHED**, no selectorpromotion/generalroutekill/defaultchange/security/qualification/realdata/Git/newexecution. Selected/rawvalidwrong0 does not imply measured undetected; verificationNOT_IMPLEMENTED/undetectedNOT_MEASURED. Posthoc cost-profile triage is separate planning evidence, not actualacceleration. Result/memory closeout records this negative outcome unchanged.

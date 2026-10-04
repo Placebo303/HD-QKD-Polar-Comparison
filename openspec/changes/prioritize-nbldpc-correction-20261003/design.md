@@ -1,0 +1,3 @@
+# Apply the user priority to successor selection
+
+Choose the next hypothesis from saved full-six failures and prior accepted mechanism history. Prefer mechanisms intended to recover additional exact frames without additional public disclosure; distinguish iteration cost from leakage and information-reconciliation efficiency. Numerical-preserving engineering may remain as an available implementation option, but neither kernel work nor pruning displaces correction research. True state continuation, graph/posterior repair and other hypotheses remain unexecuted until separately frozen. Preserve EXPLORE/DECIDE, independent review, preauthorization and no-Git/source boundaries; no N2048-B reopening or n256 permission inferred.

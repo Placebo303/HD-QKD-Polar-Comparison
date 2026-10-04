@@ -1,0 +1,4 @@
+- [ ] P1 Freeze independentpacket/prompt/UUID/root/seeds/construction/thresholds/caps and scope under continuingauthority.
+- [ ] P2 Implement scopedminimalrunner with explicitfake tests and independentreadiness.
+- [ ] P3 Mainuniquedispatch,batch-endreview,finitecorrection-and-disclosure acceptance.
+- [ ] P4 Accepted-only repomemorytriage;no Git/default/DECIDEpromotion.

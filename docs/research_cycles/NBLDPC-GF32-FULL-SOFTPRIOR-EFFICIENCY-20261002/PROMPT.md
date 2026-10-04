@@ -1,0 +1,3 @@
+# Operator — EXPLORE
+
+Implement explore-gf32-full-softprior-efficiency/tasks.md under E1–E5 authority. Own only new complete-source CLI, test owner full_eff_tests; not alone preserveothers. All existing helpers/source/core read-only. Required fake source/two-decoder injection, source492 calls plus actual old/new vectors/final192 score selections; no new sampling/kernel or science changes. After focused checks and output absence, exact984-call maximum one-shot under600s/1GiB/10MiB conditional grant. Own process, no retry/selfaccept/default promotion. Independent census_review batch end, mainacceptance. ReturnE IDs/artifacts/timings/raw versus selectedwrong or concreteblocker.

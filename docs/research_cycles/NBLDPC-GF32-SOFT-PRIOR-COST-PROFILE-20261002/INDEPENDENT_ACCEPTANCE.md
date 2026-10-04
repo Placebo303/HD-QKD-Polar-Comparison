@@ -1,0 +1,13 @@
+# Independent batch-end review and main acceptance
+
+EXPLORE UUID `90dcb594-6672-4395-a161-348e7ce74e6c`, root `workspace/gf32_softprior_cost_90dcb594/`. Operator census_scope, fake-test owner census_tests, independent read-only reviewer census_review; main thread owns scientific acceptance. Reviewer used accepted parent manifest/summary/diagnostics and new CSV, without decoder or sampler execution.
+
+R5 numerical review: all1536 rows independently recomputed for full32-symbol softmax/restricted ranking, score/ties, selected raw vectors, truth AND own-syndrome exact, valid-wrong/failure, paired/per-graph outcomes and all-k logical call/iteration/runtime/wall sums. Each parent k6 reproduces192/192 accepted candidate pointers. Source UUIDa9352bc1-ae56-443b-ae93-9dcfa85d4229, contract NBLDPC-GF32-DEGREE-ADMITTED-20261001, namespace gf32-degree-admitted-v1 and admitted_source agree. Parents are separate; no additional scientific inputs or physical BP calls.
+
+Recomputed candidate exact k1/2/3/6: rescue158/159/163/167 against155; replica145/148/149/156 against142. Observed selected valid-wrong0 in every row; k6 gains12/14. Counterfactual costs agree with RESULT and original parent calls, not measured pruned-run performance. Seven explicit-fake tests and T0/dry/compile/output absence passed. The exact authorized one-shot command exited0; no rerun or post-execution code changes.
+
+Non-blocking finding: reported artifact_bytes474,049B is first-pass counting; execution-terminal four-file sum474,262B before review/closeout log appends is213B larger after metadata/log finalization. Reviewer directly confirmed that execution-terminal sum remained below5MiB; later review/closeout log appends are not included in that measured sum. Raw records retained, distinction documented; this is not an assertion of a finalization-time resource gate. Checkpoint0.098881s/RSS35,180,544B and zero decoder/sampler/search/build calls satisfy the other frozen limits, no STOP.
+
+Main accepts **POSTHOC_COUNTERFACTUAL_PROFILE_COMPLETE with the resource-accounting finding**. No promotion or route selection, new holdout, pooling, FER/f_eff/SKR, real-data, n256/N2048, qualification/publication/security or throughput claim. Existing parent classifications unchanged. Acceleration section is planning only; any implementation/measurement needs its own frozen scope under the continuing bounded grant. No Git actions.
+
+Final documentation milestone independently PASS by census_review: RESULT/acceptance/packet/log/tasks/project-memory/decision-log agree, execution-terminal size qualifier retained. Project-memory triage completed append-only at AGENT_PROJECT_MEMORY.md4596 and docs/decision-log.md5508. OpenSpec T1–T4 complete; no archive or new execution.

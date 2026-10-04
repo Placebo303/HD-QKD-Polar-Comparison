@@ -1,0 +1,17 @@
+# Main closeout — STOP, no mechanism comparison
+
+Track EXPLORE; UUID 3a9f426e-9d25-4799-88df-555b5b827a2e; dirty-tree root workspace/gf32_edge_state_3a9f426e/. Main accepts only the independently checked execution/STOP record and implementation diagnosis. The full-six correction hypothesis remains untested by this batch. No comparative performance, qualification, security, route or default claim.
+
+Exactly one frozen command executed, synchronous exit1, outer command wall about2.376s; no session/cell/PID returned and no live decoder remains. No repair, rerun, resume, threshold change or artifact overwrite. Pair0: graph2026093901/stream0/frame0/seed878794322. Two physical calls/reference0 and auxiliary1; each11 iterations, same decision/status/own syndrome, both matching that frame's synthetic truth. Final beliefs fail atol1e-12/rtol0:346/4096 elements exceed tolerance, max1.1668100853512442e-05 at(92,29), mean absolute3.0616603257640693e-09. Machine STOP reason pair0:zero_state_reference_mismatch.
+
+Sampled1, completed0/192; no selector or branch. All batch-level B/C/T/delta/paired/per-graph/wrong comparison totals null. Physical calls2/iterations22; each logical method baseline1call/11iterations, auxiliary1call/11iterations separately. Partial shared syndrome disclosure260bits and260 per logical method; branch/tag0. Verification NOT_IMPLEMENTED, undetected NOT_MEASURED. Checkpoint wall0.205635s, RSS104603648B. Checkpoint bytes94771; final six files95169(+398 terminal metadata bytes), both within20MiB. Six artifacts retained unchanged.
+
+Independent actual-array review confirmed accepted source H/source identities/constructor maps, frozen192-seed plan and20 exclusions/4176 unique seeds/zero overlap, actual GF32/poly37 outcomes, equality differences, stopping/null totals/accounting/resources/retention. See INDEPENDENT_ACCEPTANCE.md.
+
+## Implementation diagnosis, not a mechanism failure
+
+Independent read-only forensic inspection found input asymmetry: capture_reference_state first cleaned the raw prior and delegated that cleaned array to v35; v35 cleaned it again. The auxiliary edge-state loop cleaned the raw prior once. This violates the frozen identical-prior path; passing tiny tests did not establish it for the actual graph/source.
+
+Original recipe retained here before any successor edit: `prior = clean_prior(priors, ...)`; reference delegate receives `prior`; reference decoder again floors and normalizes. Correct successor must delegate the original `priors` array and use a separately cleaned copy only for state.log_prior. Existing row/check/update expressions were inspected and had the same operation order. Pure saved-array arithmetic found the second cleaning changes prior by at most1.11e-16/log-prior2.84e-14; saved normalized posteriors differ by at most3.94e-15 and the largest raw log difference is in a tail symbol near1.01e-28 probability. These observations do not prove that input asymmetry alone caused the entire raw-belief difference. Frozen tolerance is not relaxed.
+
+Disposition: execution STOP/partial preservation accepted; same-input numerical implementation is not accepted. Old attempt consumed; no full-six efficacy result and no scientific route denial. A separately frozen corrected successor with fresh seeds may proceed under continuing bounded synthetic authorization after readiness; it must not overwrite or retry this root.

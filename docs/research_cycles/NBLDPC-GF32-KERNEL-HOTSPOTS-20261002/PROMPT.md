@@ -1,0 +1,3 @@
+# Operator prompt — EXPLORE
+
+Apply openspec/changes/explore-gf32-kernel-hotspots/tasks.md under PREREG_AND_AUTH.md, H1–H5 authority and literal user preauthorization. Own only new CLI; not alone, preserve other changes. Tests owned census_tests, independent review census_review. No old kernel/source/output modifications. Implement smallest stdlib profiling replay; send API promptly to test owner. Execute only after H4 focused fake checks and root absence, exactly one prescribed command. Return full H IDs, command/process ownership and terminal artifacts or concrete blocker. Do not self-accept, optimize, retry, change cases/caps or silently create frames.

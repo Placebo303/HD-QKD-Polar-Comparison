@@ -733,3 +733,43 @@ FAIL 记录保留在案（返工史进 decision-log），不覆盖初审结论�
 **Fix**: 凡引用效率/披露数字，先核对公式是否含泄漏（EC）项；展示 f 与实测披露并存时，一律并列实测 `leak_EC` 派生比并标注口径，不得以展示 f 代替实际披露。
 
 **Prevention**: 独立 Pre-RESULT 把“f 公式含泄漏项？”列为披露会计首查：grep 公式定义，确认分子含 `leak_EC`/EC 实测项；凡闭式仅为 `(m, H)` 的名义列，一律标 `historical-nominal` 并禁排名。详见 `docs/research_cycles/M2-REALCOMP/`（`MAIN_ADJUDICATION_20260926.md` 发现 1、`CORRECTION_RESULT.md` §8、`CORRECTION_RECOMPUTE_CHECK.md` §E-1）。
+
+### tag 形状错标：joint `M + 64` 把 tag 双计、每格超额虚胖恰 64 bit（C-1/C-2/C-3 机检修复；Stage 0 无错）
+
+**Observed** (2026-09-28): `JOINT-PRICING` 把 `M(f) = ceil(1024·f·H)` 标为 “leak”，并以 `T_single = M + 64`（vs 1104）/ `T_recorded = M + 1024`（vs 2064）比预算——joint ceil 本身已是含 tag 的 TOTAL，`M + 64` 每格超额恰多算 64 bit。修正后名义总量 1100 vs 1104（余 4 bit）、`+20%` 回退总量 1319 vs 1104（超 215 bit）；原 §5.2 executed KILL 撤回为 executed-but-miscounted 证据保留，修正数落入 §5.3(a) **MARGINAL** 带。Stage 0 **未犯此错**：十块形状为十个逐面纯 parity `m_k` 加一次共享 tag（1875 / 超 771；回退 2233 / 超 1129 均 verified-standing）。
+
+**Root cause**: 错标烘进冻结 spec 散文（“Joint leak `M(f) = ceil(1024·f·H)`”），两个脚本忠实实现；joint fake test 断言的是**错门的自我一致**（`test_joint_pricing_fake.py:42-43` `totals_single(1040) == 1104`；`:54-56` excess `== m − 1040`，且 exercised 在真值 m = 1100、1319 上）；跨阶段核对确认两阶段共用一个标签却计算不同类别——诚实总量 vs 误计总量。**没有任何检查把 total 构造锚定到 A1–A2 权威定义**（`m0_realframe_runner.py:101-106`、`S2_ACCOUNTING_MAP_20260920.md:16`）。
+
+**Fix**: 单一权威定义落 `docs/research_cycles/PERPLANE-BINARY-LDPC/STAGE0_PACKET.md` §16.1（恒等式 I-TOTAL / I-LEAK / I-BUDGET / I-GATE / I-SHAPE：单块形状 ceil 即总量；十块形状 `Σ m_k + 64`，tag 恰好一次）；joint 包按 append-only 追加 §17（§§1–16 原样保留），撤回 executed KILL、保留修正数；JOINT-PRICING-R2 按 §16.3 机检接线重估，裁决 MARGINAL（§5.3(a)；独立批末审查 PASS with comments，案卷 `workspace/jp_46c7ab3c/BATCH_END_REVIEW.md`）。
+
+**Prevention**: 定价/算术阶段必须把预算比较量暴露为纯函数，fake test 用**真实函数 + 手常数**断言包内声明的形状恒等式：§16.3 的 **C-1**（total/leak/预算恒等式）、**C-2**（陷阱断言：单块阶段 `Q == ceil(f·N·H) + TAG` 即 FAIL——本可在 joint 执行前抓住）、**C-3**（十块：`FRAME_TOTAL − Σ PLANE_PARITY == 64`，漏加与双加都翻车）；仅比较器式断言（如 `within_budget(1100)`）必要但不充分；Pre-EXECUTE 跑 F-1…F-4 禁用模式 grep 并由评审对每个命中书面处置。权威引用：`STAGE0_PACKET.md` §16.1/§16.3 与 `JOINT-PRICING/PREREG_AND_AUTH.md` §17。
+
+### Scaling `I(f)` 包字面勘误：§3.1 写 disclosed set 笔误，执行按信息集 N−L 最优 Z（2026-09-29）
+
+**Observed**: Scaling-bound 包 §3.1 把 `I(f)` 字面写成 disclosed set，与包内执行语义不一致。
+
+**Root cause**: 冻结 spec 散文一字笔误；执行实际采用信息集读法（N−L 最优 Z），文字未同步勘误。
+
+**Fix**: 后继包复用此界前必须先勘误该字面，执行口径以信息集读法为准；禁对“一字之差”自行解释沿用。
+
+**Prevention**: 复用含公式散文的包前，先对关键符号定义做字面-执行一致性核对；发现字面与执行分歧时先勘误再复用。
+
+### Residual N-R1 cross-baseline：`g_hi` 与 `g_equiv` 分母/H/设门全不同、不可通约（2026-09-29）
+
+**Observed**: `g_hi = 0.10236`（跨 N 界，H-1，FER*=1e-3，分母≈1.27）与 `g_equiv = 0.02547`（N 内从名义锚回退至 64-bit 线，H-5，无 FER 门，分母 1.3）被置于同一标尺比较。
+
+**Root cause**: 两数分母、H 源、设门问题均不同，属 cross-baseline；量级不可通约为增益。D-2 §4 原措辞「不同量纲」欠准。
+
+**Fix**: 唯一许可推断是 `SCALING-BOUND-EXCLUDES`（仅对跨 N 增益门）不转移至薄边际问题；任一方向均不许可可行/增益/方法推断；D-2 措辞更正为「不同基线/不同问题；量纲齐次成立但增益不可通约」。
+
+**Prevention**: 引用任何增益比值前，先并列分母、H 源、FER 门三元组；三元组任一不同即标 cross-baseline 并禁同标尺比较。
+
+### TABLE 缺陷 N1：`f_star` 回显 `f_scan`、`g_synth` 列空，两列永久禁读（2026-09-29）
+
+**Observed**: Gain-sweep TABLE 的 `f_star` 列回显 `f_scan` 输入、`g_synth` 列空，读数不可信。
+
+**Root cause**: 表格生成列映射缺陷，输出列未填入真实计算值；§5 repair 额度已在 `KeyError: 't_pred'` 处消耗。
+
+**Fix**: 该两列永久禁读，一律由 `f_scan`/`fer_emp` 重算；干净 TABLE 需新窄包新授权；禁二次修复。
+
+**Prevention**: 落盘任何派生列前，先抽查列值非回显输入、非空；repair 额度消耗点留档，后续同包缺陷只记录不二次修复。

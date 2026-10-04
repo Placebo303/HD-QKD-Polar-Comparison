@@ -1,0 +1,3 @@
+# One research-only state loop
+
+Capture alpha-one baseline C2V through the existing v35 check callback. Implement only the existing GF32 row-layered loop with explicit messages and beliefs. Zero-message mode must reproduce the reference; same-prior continuation preserves both state components; changed-prior initialization recomputes beliefs from the cleaned new prior and old edge messages. This is stale-message initialization, not an exact continuation under a changed model. Reuse accepted sampler, selectors, scores and artifact conventions. Isolate new state loop and paired CLI; no general checkpoint framework or default decoder changes.

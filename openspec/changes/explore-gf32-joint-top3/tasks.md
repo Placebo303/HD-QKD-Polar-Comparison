@@ -1,0 +1,4 @@
+- [x] T1 Implement new profile and within-batch derived J2, preserve predecessor behavior.
+- [x] T2 Focused fake A1–A6 readiness and independent read-only review; P4 partial-null discrepancy repaired pre-dispatch, focused9PASS after repair / combined36PASS before isolated repair.
+- [x] T3 One complete192 attempt; independent actual-array PASS; main finite154/170/173/171,+3/+2,CONTROL_RANGE_UNINFORMATIVE acceptance, no promotion.
+- [x] T4 Repo-memory triage complete; no Git publication or automatic promotion.

@@ -1,0 +1,15 @@
+# EXPLORE result — complete, control-range-uninformative
+
+UUID `4cd4756b-989e-47fa-b751-5f9b45d02fee`, root `workspace/gf32_rank2_4cd4756b/`, sourceUUIDa9352bc1-ae56-443b-ae93-9dcfa85d4229. One frozen192-frame execution, exit0/session54081/PID50476. Independent `mechanism_freeze_review` PASS_WITH_FINDINGS; main accepts the finite descriptive result with the frozen-rule classification **CONTROL_RANGE_UNINFORMATIVE**. Baseline exact154 exceeds upper153. This does not close or deny any NB-LDPC route.
+
+Baseline/control/candidate exact-and-own-syndrome154/165/167, increment+2. Paired both/candidate-only/control-only/neither165/2/0/25; graph deltas0,+1,0,+1,0,0. Selected valid-wrong0/0, selected failures27/25. Raw rank1 branches include1 valid-wrong, rank2 branches0; the wrong branch was not selected. No claim of undetected-error certification.
+
+Physical582calls=192baseline+228rank1+162rank2; logical control/candidate420/582. Rank2 attempted27frames. Baseline/rank1/rank2 iterations4,501/19,686/14,426; call-wall approximately26.79/117.46/86.25s. Thus162additional calls and about86.25additional recorded call seconds produced2extra exact choices in this batch, a limited increment with material cost. No cross-batch ranking or throughput inference.
+
+Checkpoint230.968946723s, RSS151,674,880B, no resource/STOP events. Reported output tally2,896,202B; independently measured execution-terminal size2,896,621B(+419) before review append, below20MiB. Public method syndrome260bits/frame once=49,920bits/method, physically shared across counterfactual methods, branch0/tag0; verificationNOT_IMPLEMENTED/undetectedNOT_MEASURED.
+
+Classifier defect: production `_classification` tested rescued-control165 rather than frozen BASELINE154. Both are outside range here, so authoritative frozen-rule label stays the same. The defect only generated the terminal descriptive label; source draws, decoder inputs, branch triggers/choices and costs are unaffected. Original machine labels/arrays remain retained. A prospective source fix/static counterexample test is required before further use, with no rerun of this consumed grant.
+
+Independent actual-array review checked all582 returned syndromes/exact/report flags, sourceH/seeds/exclusions,38baseline failures' active entropy/rank1/rank2 selection, original-prior branch scores/choices/pointers and192frame/graph/cost/disclosure records. Fourteen focused fake tests andcompile/T0/dry/scoped gates passed before production. No generalFER/f_eff/SKR, security, real-data/n256/N2048, significance, qualification, promotion, publication or route claim; no commit/push/merge/archive.
+
+Post-execution source correction2026-10-02:main accepts prospective classifier fix after independent test-owner17/17PASS(6.45s), compile/T0/dry. Currentsource derives baseline_exact from actualbaseline call flags, uses that field for unchangedrange, keeps itnull forpartial. The production version described above usedcontrol_exact; oldroot/rawlabels are not rewritten, and no scientific execution was repeated. This implementation-only correction grants no future run.

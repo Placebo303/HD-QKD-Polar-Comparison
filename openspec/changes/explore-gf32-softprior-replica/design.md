@@ -1,0 +1,3 @@
+# Narrow reuse
+
+Preserve original runner defaults and source/truth-blind algorithm. Explicit execution identity/namespace/root/additional-exclusion parameters permit the fixed replica entrypoint to call the same numerical kernel; do not mutate global constants or duplicate the kernel. Prior13-plan union2832 plus original softprior192 ->3024 excluded seeds, new192 disjoint. All source roles unchanged; production bindings only --execute. Same five artifacts/resource caps/partial records/one-shot constraints. New CLI may print only summary to avoid repeating H in terminal; machine artifact schema unchanged. Fake-only predecessor and replica focused tests, independent R1/R3/R4/main acceptance.

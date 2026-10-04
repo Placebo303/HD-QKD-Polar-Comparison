@@ -1,0 +1,15 @@
+# EXPLORE main acceptance — finite CONTROL_RANGE_UNINFORMATIVE
+
+UUID e75d9191-e250-4aec-bf63-00fea8faacbe, dirty-tree root workspace/gf32_joint_top3_e75d9191, formal-ir-v72p1-addendum-clean/HEAD23183c73. One authorized attempt, session86440/LinuxPID7999,exit0,COMPLETE192/192. Independent warm_r2_review actual-array review PASS precedes main acceptance. No repair/resume/rerun/tuning/Git/default promotion.
+
+Same-batch baseline/C/J3/derivedJ2 exact-and-own-syndrome154/170/173/171. Primary J3-C +3, paired170both/3J3only/0Conly/19neither. Secondary J3-J2 +2, paired171both/2J3only/0J2only/19neither; added-five wins/losses2/0. J2 reuses nine-arm outputs at indices0,1,3,4, not independent execution or timing. Graph C/J3/J2 counts27/28/27,28/29/29,28/28/28,27/28/27,29/29/29,31/31/31 for3901–3906. Positive primary graphs3/6. Selected/raw valid-wrong all0; selected own-syndrome failuresC22/J319/J221.
+
+Frozen CONTROL_RANGE_UNINFORMATIVE: baseline154 exceeds[39,153]. Do not adjust this consumed batch's threshold or rerun. Primary +3 also falls below+6 and3/6 positive below4/6. Main accepts the arithmetic/finite observation only, not mechanism-screen success, statistical significance, general FER/f_eff/SKR/security/qualification/route/publication. Internal rescue branch/tag disclosure0,shared and each logical view49920bits; verification NOT_IMPLEMENTED,undetected NOT_MEASURED.
+
+F38/G22:physical618=192baseline+228single+198joint,iterations41629. Logical C420calls24046iterations,J3618/41629,J2508/31887. Added five combinations cost110calls9742iterations for2extraexact; entire joint stage198calls17583iterations for3extraexact. These are aggregate observations, not predictive costs or independently measured J2 throughput. Wall252.828947132s,RSS154824704B,checkpointoutput3049066B,finalsix3049493B(+427B difference; no attribution solely to the terminal log),all within1200s/2688calls/241920iterations/1GiB/20MiB. No partial/stop/violations.
+
+## Planning-only taxonomy and next priority
+
+Independent readonly warm_tests recomputed22joint-trigger frames:truth pair covered11/22;3matching actual branches exact-and-own-valid,8matching branches own-invalid. All19J3 failures comprise8covered-but-invalid and11uncovered. Primary/secondary baseline hard errors17/16 of22,bothwrong12;remaining19:17/14,bothwrong12. Truth used only posthoc, not selector or future frame selection.
+
+Count-first pair rule is already tested in jointcheck2 with a negative counterexample; do not repeat it. A new shared-violated-check secondary selector changes18/22 second columns but shows no improvement in this crude hard-error count; it has no decoder evidence. Main instead prepares a distinct residual-ranked row-layered message-propagation hypothesis: eight covered truth pairs that remain invalid motivate studying propagation rather than only broader guessing. This is planning, not causal diagnosis or a success forecast. No new batch authority beyond the continuing bounded synthetic scope; successor must freeze its own contract and fresh seeds. No cross-batch pooled ranking.

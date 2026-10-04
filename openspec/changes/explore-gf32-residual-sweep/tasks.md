@@ -1,0 +1,4 @@
+- [x] T1 Implement two isolated research files, preserving core and predecessor profiles.
+- [x] T2 Focused16PASS/T0dryPASS; independentreadinessPASS after E4 postwrite resource gap correction; originalfailure retained.
+- [x] T3 One COMPLETE canary+192paired attempt;independentactualPASS/main147vs146,delta−1/INCREMENT_NOT_ESTABLISHED finiteacceptance.
+- [x] T4 Accepted-only repo-memory triage complete; no Git/default promotion.

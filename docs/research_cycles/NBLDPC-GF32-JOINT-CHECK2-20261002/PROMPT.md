@@ -1,0 +1,3 @@
+# Prepared EXPLORE operator prompt, no dispatch
+
+Read S1–S5 and OpenSpec explore-gf32-joint-check2. Await named file ownership. Extend the accepted research CLI minimally with the explicit selector-only paired profile, preserving old paths; new focused fake test file owned separately. Same graph/prior/decoder/top2/fourbranches; changed only candidate violated-check-count-first variable choice. Identical ordered variable pairs share four actual calls, different pairs run bothsets. Candidate never borrows a valid control joint output. No production until independent readiness/main dispatch; one attempt/caps/no-rerun. Return complete frozen IDs or exact concrete blocker. No selfaccept/Git.

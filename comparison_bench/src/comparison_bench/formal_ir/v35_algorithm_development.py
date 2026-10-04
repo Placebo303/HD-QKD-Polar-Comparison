@@ -786,6 +786,8 @@ def decode_row_layered_fftqspa(
     damping_alpha: float = 1.0,
     warm_beliefs: Optional[np.ndarray] = None,
     field: Optional[GF2mField] = None,
+    *,
+    check_update_fn: Optional[Callable[..., list[np.ndarray]]] = None,
 ) -> DecoderResult:
     """Stage A1 Row-Layered / Damped Row-Layered FFT-QSPA Decoder.
 
@@ -829,6 +831,7 @@ def decode_row_layered_fftqspa(
     ]
 
     alpha = float(damping_alpha)
+    check_update = _check_update_log_batch if check_update_fn is None else check_update_fn
     best_x = np.argmax(beliefs, axis=1).astype(np.uint8)
 
     # Check initial syndrome
@@ -861,7 +864,7 @@ def decode_row_layered_fftqspa(
             in_msgs = [beliefs[c] - check_to_var[r][pos] for pos, c in enumerate(cols)]
 
             # 2. Check update via FWHT
-            out_msgs = _check_update_log_batch(in_msgs, coeffs, int(syn[r]), field, tables)
+            out_msgs = check_update(in_msgs, coeffs, int(syn[r]), field, tables)
 
             # 3. Damping & immediate belief update
             for pos, c in enumerate(cols):

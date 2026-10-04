@@ -1,0 +1,3 @@
+# Prepared operator prompt — EXPLORE, no dispatch
+
+Read J1–J5 and OpenSpec explore-gf32-joint-top2. Await named file ownership before implementation; production is NOT_DISPATCHED. Reuse accepted source/entropy/top-guess/score helpers; explicit four-branch joint policy, not full36 guesses, lambda scan or new graph. Fix future baseline classifier first under predecessor T5, no old rerun/overwrite. Required fake source/sampler/decoder dependencies, minimal scoped tests, retained partial caps and actual vectors. Return readiness evidence or concrete blocker; no selfaccept/Git. Main owns hypothesis/thresholds/acceptance.

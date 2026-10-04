@@ -1,0 +1,3 @@
+# Frozen one-shot operator
+
+Read PREREG_AND_AUTH.md and accepted parent RESULT/INDEPENDENT_ACCEPTANCE plus source producer schema. Track EXPLORE, POSTHOC only. Implement sole new CLI; test owner sole new test. You are not alone, preserve others. No old code/source/result/Git edits. Use required source_reader injection and explicit fakes; T0/dry zero actual reads/writes. After frozen focused tests pass and official root absent, main has conditionally authorized exactly one frozen command, no rerun/repair/resume. No decoder or sampler anywhere. Return command/session/terminal, results pending independent acceptance, or exact blocker. Never pool parents/claim fresh data, measured pruned runtime/throughput, or self-accept.

@@ -1,0 +1,3 @@
+# Minimal replay
+
+One new injectable-reader CLI and focused fake tests; no original-kernel edits. Join failed pair→baseline belief/selected variable and actual branch maps. Rank allowed guesses by all32-softmax probability with frozen ties; select within topk by original score, independent of truth. k6 reproduces accepted parent output. Shared baseline plus all retained attempts enter logical costs; THIS execution uses zero BP/samples. Four compact artifacts retain parent UUID/call/vector pointers. Two parents separate; posthoc, not fresh measured pruned-run performance.120s/1GiB/5MiB and one conditional main-authorized attempt after focused fakes/T0/dry; independent batch-end/main acceptance.

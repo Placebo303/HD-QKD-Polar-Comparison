@@ -1,0 +1,3 @@
+# Prepared operator prompt — EXPLORE
+
+Read P1–P5 and OpenSpec explore-gf32-top3-runtime. Implement only the namedCLI profile; newtestownedseparately. Same baseline/entropyvariable/rawprior/colddecoder, independent real6vsreal3 branchsets, distinctcallIDs/parityorder, canonicalscoreties/posterior executionranks. Candidate runsall3, no firstvalidstop. Real armtimers includecandidate ranking/scorechoice/localrecords; baseline/commonselector separate, no endtoendFPS claim. P3 targets samebatch75%gainretention/70%accountedmethodtime/wrongnotincrease; do not tune. Return completePIDs/readinessevidence or exactblocker; productionrequiresmaindispatch. Oneattempt/caps/noGit/no selfaccept.

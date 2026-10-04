@@ -1,0 +1,9 @@
+# Independent batch-end review and main acceptance — EXPLORE
+
+2026-10-02. Operator `kernel_accel_design`; independent reviewer `mechanism_freeze_review` (administrative substitute for originally named census_review), no production participation, edits, BP/sampler rerun or duplicate fake-test run. Reviewer PASS, no numerical blocker; main accepts only `FULL_SOFTPRIOR_IMPLEMENTATION_MATCH`, scope below.
+
+E1/E2:984 actual persisted vectors source-equal, call/pair/path/graph/status/iterations/report maps0 mismatch; independent GF32/poly37 syndrome flags match. E3:28 valid-branch scores independently recomputed from ORIGINAL floor1e-15/normalized prior, no score differences; all192 blind selected pointers match source/both paths, exact156, selected/rawwrong0, baseline142, paired142/14/0/36, graph deltas +3,+3,+2,+3,+1,+2. Disclosure49,920bits/method, replay0new, verificationNOT_IMPLEMENTED/undetectedNOT_MEASURED.
+
+E4:984calls/62,786iterations, checkpoint321.634s/RSS106,561,536B/firstpass275904B/terminal275906B within600s/1GiB/10MiB, no cap/STOP. Independent own-path full/baseline ratios reference5.749162 andbatched5.743885; paired full-path ratio.692134. Non-blocking reporting limitation: raw summary3.979191 is batched full/reference baseline, not algorithm overhead or paired full-path speed ratio; RESULT preserves the exact denominators, raw artifacts unchanged.
+
+E5:100 failed-baseline belief/source comparisons and984 paired belief predicates/maxdiff records pass, recorded maxdiff0. Belief arrays not persisted, so these are reviewed runtime comparison records, not independent direct belief-array reconstruction. Fourteen fake tests/compile/T0/dry/scoped checks are operator/test-owner evidence, not repeated here. Main limits acceptance to this synthetic saved-source implementation/timing replay, no new correction/FER/security/throughput/route/default promotion.

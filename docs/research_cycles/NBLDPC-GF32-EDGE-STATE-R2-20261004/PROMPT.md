@@ -1,0 +1,3 @@
+# Corrected successor operator prompt
+
+Read AGENTS.md, AGENT_PROJECT_MEMORY.md, R2 PREREG_AND_AUTH D1–D4 and binding v1 P1–P5, plus v1 STOP RESULT. Implement only D1–D4 in your named owned files. You are not alone; preserve other edits. No tolerance/algorithm/source/threshold/budget changes. The saved first-frame fixture is explicitly test-only, read-only input, no sampler/branch/batch/root writes or efficacy claim. Return complete focused evidence or a concrete blocker; no self-acceptance. Scientific execution requires later main dispatch of the exact R2 command. Independent review and memory triage remain mandatory; no Git actions.

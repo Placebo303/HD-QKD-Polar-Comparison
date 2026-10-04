@@ -1,0 +1,17 @@
+# EXPLORE — accepted finite synthetic joint-top2 result
+
+UUID `d112d5ce-9b97-431a-81ff-9a7abdd9eff5`, dirty-tree additive root `workspace/gf32_joint_top2_d112d5ce`; source UUID `a9352bc1-ae56-443b-ae93-9dcfa85d4229`. Main acceptance 2026-10-02 follows independent actual-array J1–J5 review PASS_WITH_FINDING. One attempt, no repair/rerun. Exact command is in PREREG_AND_AUTH.md; session 62970, Linux PID 53774, exit0, COMPLETE192/192. No commit/push/merge/default or route promotion.
+
+Baseline/control/candidate exact: **146/160/164**. Paired both/candidate-only/control-only/neither: **160/4/0/28**. Candidate-minus-control +4; graph deltas +2,+2,0,0,0,0. Graph control/candidate counts: 2026093901 24/26; 3902 26/28; 3903 25/25; 3904 28/28; 3905 27/27; 3906 30/30.
+
+Frozen diagnostic **INCREMENT_NOT_ESTABLISHED**: baseline146 lies inside[39,153], but +4<+6 and only2/6 positive graphs<4/6. A small observed incremental recovery is present; the preregistered increment screen is not met. This does not deny NB-LDPC or close a route. No statistical significance, general FER/f_eff/SKR, security, real-data or N2048 inference; no pooling/ranking across earlier batches.
+
+Physical calls596=192baseline+276rank1+128joint (F46,G32). Logical control468calls/29186iterations; candidate596calls/40419iterations. Extra128calls/11233iterations for4extraexact (aggregate32calls and2808.25iterations per additional exact; not a predictive per-frame cost). Checkpoint wall245.319068583s; Linux peak RSS154374144B. No resource/authorization/data/integrity violation reported or found by independent review. Shared disclosure260bits/frame once=49920bits; internal rescue branch leakage increment0, tag0. Selected own-syndrome-valid-wrong0/0; raw valid-wrong0 all roles. Verification NOT_IMPLEMENTED, undetected NOT_MEASURED; zero selected wrong is not zero-undetected certification.
+
+Runtime recorded output_bytes3235077B; final six artifacts3235500B, +423B from terminal log write, both below20MiB. Preserve original summary/manifest/NPZ/CSV unchanged. Subsequent acceptance log append is later documentation, not the execution-terminal size.
+
+Posthoc planning-only read of28remaining syndrome-fail frames: truth-pair covered by frozen four branches7/28; all7 corresponding actual calls remained syndrome-invalid (14/10/15/18/20/19/14 violated checks). A hypothetical top3×top3 covers10/28, only3more; new branches were not executed. On observedG32, expanding4→9 would add160calls; worst3072calls/276480iterations. These are coverage/cost calculations, not recovery predictions.
+
+Original baseline hard decisions at each selected variable are truth-correct10/28; bothcorrect3, exactlyonecorrect14, bothwrong11. Each selected column has two adjacent checks; 1violated in7frames and2violated in21. Planning-only alternative prioritizing two violated neighboring checks before the original entropy rule changes rank1 in7/28; selected baseline hard-wrong21/28 versus original18/28. More error localization is a possible selector hypothesis, not evidence of decoder improvement. Main does not adopt the operator's stronger qualitative conclusion that this shows no advantage: neither benefit nor failure of this unexecuted selector has been measured. Truth is posthoc only.
+
+Main accepts this batch at its finite synthetic ceiling. Next research priority is a separately frozen selector comparison rather than automatic nine-branch expansion. No next batch dispatched by this acceptance; old N2048-B decisions remain closed.

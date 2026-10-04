@@ -1,0 +1,3 @@
+# Operator prompt — EXPLORE
+
+Implement explore-gf32-batched-fwht/tasks.md under frozen F1–F5 authority. Own only permitted optional v35 row seam/new batched helper/new paired CLI. Keep reference helper/default numerics, source/cases and all science fixed; not alone, preserve other edits. Send minimal injection API to test owner promptly. No full-decoder clone/global monkeypatch/JIT/framework. Only after focused fake/helper/T0drycompile/root checks may the exact72-call maximum one-shot execute under the user grant. Return all F IDs, scoped diff, command/session and actual terminal or concrete blocker; no self-acceptance/tuning/retry/default promotion. Independent review census_review.
