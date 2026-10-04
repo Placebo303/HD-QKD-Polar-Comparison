@@ -233,6 +233,238 @@ def test_receiver_stops_after_first_failed_syndrome_check() -> None:
     assert result.transmitted_row_count_bits_per_block == 2
 
 
+@pytest.mark.parametrize("encoding", ["NATURAL", "GRAY"])
+@pytest.mark.parametrize("order", ["LSB_FIRST", "MSB_FIRST"])
+def test_exact_prior_bypass_for_all_encodings_and_orders(encoding, order) -> None:
+    model = prior.build_conditional_prior_model(
+        np.eye(4, dtype=np.float64), encoding=encoding, order=order
+    )
+    alice = np.arange(4, dtype=np.uint8)
+    matrices = tuple(
+        sparse.identity(4, format="csr", dtype=np.uint8)
+        for _ in model.stages
+    )
+    disclosure = msd.disclose_syndromes(alice, model, matrices)
+    factory_calls = []
+
+    def forbidden_factory(**kwargs):
+        factory_calls.append(kwargs)
+        raise AssertionError("fully deterministic stage called the decoder factory")
+
+    result = msd.receive_syndromes(
+        model,
+        alice,
+        matrices,
+        disclosure.public_syndromes,
+        forbidden_factory,
+        skip_fully_deterministic=np.bool_(True),
+    )
+
+    assert factory_calls == []
+    assert np.array_equal(result.reconstructed_natural_symbols, alice)
+    assert result.attempted_stage_syndrome_passed == (True, True)
+    assert result.unsupported_counts_by_attempted_stage == (0, 0)
+    assert result.transmitted_row_count_bits_per_block == 8
+
+
+def test_mixed_ambiguous_then_deterministic_stage_uses_recovered_prefix() -> None:
+    counts = np.zeros((4, 4), dtype=np.float64)
+    counts[0, 0] = 1.0
+    counts[3, 0] = 1.0
+    model = prior.build_conditional_prior_model(
+        counts, encoding="NATURAL", order="LSB_FIRST"
+    )
+    alice = np.array([0, 0], dtype=np.uint8)
+    bob = np.array([0, 0], dtype=np.uint8)
+    matrix = sparse.csr_matrix([[1, 1]], dtype=np.uint8)
+    matrices = (matrix, matrix)
+    disclosure = msd.disclose_syndromes(alice, model, matrices)
+    calls, deltas = [], []
+
+    def one_call_factory(*, parity_check_matrix, error_channel):
+        calls.append(np.asarray(error_channel).copy())
+        if len(calls) > 1:
+            raise AssertionError("deterministic second stage called the factory")
+
+        class FakeDecoder:
+            def decode(self, delta):
+                deltas.append(np.asarray(delta).copy())
+                return np.array([1, 1], dtype=np.uint8)
+
+        return FakeDecoder()
+
+    result = msd.receive_syndromes(
+        model,
+        bob,
+        matrices,
+        disclosure.public_syndromes,
+        one_call_factory,
+        skip_fully_deterministic=True,
+    )
+
+    assert len(calls) == 1
+    assert calls[0] == pytest.approx([0.5, 0.5])
+    assert np.array_equal(deltas[0], [0])
+    assert np.array_equal(result.recovered_stage_bits[0], [1, 1])
+    # The recovered prefix 1 makes the next natural high bit exactly 1;
+    # using Alice's truth prefix 0 would make that next bit 0.
+    assert np.array_equal(result.recovered_stage_bits[1], [1, 1])
+    assert np.array_equal(result.reconstructed_natural_symbols, [3, 3])
+    assert result.attempted_stage_syndrome_passed == (True, True)
+    assert result.transmitted_row_count_bits_per_block == 2
+
+
+def test_exact_prior_syndrome_conflict_stops_without_factory_or_row_discount() -> None:
+    model = prior.build_conditional_prior_model(
+        np.eye(4, dtype=np.float64), encoding="NATURAL", order="LSB_FIRST"
+    )
+    bob = np.array([0], dtype=np.uint8)
+    matrices = (
+        sparse.csr_matrix([[1]], dtype=np.uint8),
+        sparse.csr_matrix([[1]], dtype=np.uint8),
+    )
+    calls = []
+
+    def forbidden_factory(**kwargs):
+        calls.append(kwargs)
+        raise AssertionError("exact-prior conflict must stop without a decoder")
+
+    result = msd.receive_syndromes(
+        model,
+        bob,
+        matrices,
+        ([1], [0]),
+        forbidden_factory,
+        skip_fully_deterministic=True,
+    )
+
+    assert calls == []
+    assert result.attempted_stage_syndrome_passed == (False,)
+    assert np.array_equal(result.recovered_stage_bits[0], [0])
+    assert result.reconstructed_natural_symbols is None
+    assert result.transmitted_row_count_bits_per_block == 2
+
+
+def test_exact_prior_mixed_zero_and_positive_vector_keeps_factory_path() -> None:
+    counts = np.array([[1.0, 1.0], [0.0, 1.0]])
+    model = prior.build_conditional_prior_model(
+        counts, encoding="NATURAL", order="LSB_FIRST"
+    )
+    alice = np.array([0, 0], dtype=np.uint8)
+    bob = np.array([0, 1], dtype=np.uint8)
+    zero_row = sparse.csr_matrix([[0, 0]], dtype=np.uint8)
+    disclosure = msd.disclose_syndromes(alice, model, (zero_row,))
+    calls, deltas = [], []
+    factory = _fake_factory([np.zeros(2, dtype=np.uint8)], calls, deltas)
+
+    result = msd.receive_syndromes(
+        model,
+        bob,
+        (zero_row,),
+        disclosure.public_syndromes,
+        factory,
+        skip_fully_deterministic=True,
+    )
+
+    assert len(calls) == 1
+    assert calls[0]["error_channel"] == pytest.approx([0.0, 0.5])
+    assert np.array_equal(deltas[0], [0])
+    assert result.attempted_stage_syndrome_passed == (True,)
+    assert result.transmitted_row_count_bits_per_block == 1
+
+
+def test_exact_prior_unsupported_half_probability_keeps_factory_path() -> None:
+    counts = np.zeros((2, 2), dtype=np.float64)
+    counts[0, 0] = 1.0
+    model = prior.build_conditional_prior_model(
+        counts, encoding="NATURAL", order="LSB_FIRST"
+    )
+    alice = np.array([0], dtype=np.uint8)
+    bob = np.array([1], dtype=np.uint8)
+    matrix = sparse.csr_matrix([[1]], dtype=np.uint8)
+    disclosure = msd.disclose_syndromes(alice, model, (matrix,))
+    calls, deltas = [], []
+    factory = _fake_factory([np.zeros(1, dtype=np.uint8)], calls, deltas)
+
+    result = msd.receive_syndromes(
+        model,
+        bob,
+        (matrix,),
+        disclosure.public_syndromes,
+        factory,
+        skip_fully_deterministic=True,
+    )
+
+    assert len(calls) == 1
+    assert calls[0]["error_channel"] == pytest.approx([0.5])
+    assert result.unsupported_counts_by_attempted_stage == (1,)
+    assert result.attempted_stage_syndrome_passed == (True,)
+    assert result.transmitted_row_count_bits_per_block == 1
+
+
+@pytest.mark.parametrize(
+    "flag_kwargs",
+    [
+        {},
+        {"skip_fully_deterministic": False},
+        {"skip_fully_deterministic": np.bool_(False)},
+    ],
+)
+def test_default_and_false_flag_keep_legacy_factory_calls(flag_kwargs) -> None:
+    model = prior.build_conditional_prior_model(
+        np.eye(4, dtype=np.float64), encoding="NATURAL", order="LSB_FIRST"
+    )
+    alice = np.arange(4, dtype=np.uint8)
+    matrices = tuple(
+        sparse.identity(4, format="csr", dtype=np.uint8)
+        for _ in model.stages
+    )
+    disclosure = msd.disclose_syndromes(alice, model, matrices)
+    calls, deltas = [], []
+    factory = _fake_factory(
+        [np.zeros(4, dtype=np.uint8), np.zeros(4, dtype=np.uint8)], calls, deltas
+    )
+    result = msd.receive_syndromes(
+        model, alice, matrices, disclosure.public_syndromes, factory, **flag_kwargs
+    )
+
+    assert len(calls) == 2
+    assert [call["error_channel"].tolist() for call in calls] == [
+        [0.0] * 4,
+        [0.0] * 4,
+    ]
+    assert result.attempted_stage_syndrome_passed == (True, True)
+    assert result.transmitted_row_count_bits_per_block == 8
+    assert inspect.signature(msd.receive_syndromes).parameters[
+        "skip_fully_deterministic"
+    ].default is False
+
+
+@pytest.mark.parametrize("invalid_flag", [0, 1, None, "true", np.int64(1)])
+def test_invalid_exact_prior_flag_is_rejected_before_factory(invalid_flag) -> None:
+    model = prior.build_conditional_prior_model(
+        np.eye(4, dtype=np.float64), encoding="NATURAL", order="LSB_FIRST"
+    )
+    bob = np.array([0], dtype=np.uint8)
+    matrix = sparse.csr_matrix([[1]], dtype=np.uint8)
+    calls = []
+
+    def factory(**kwargs):
+        calls.append(kwargs)
+        raise AssertionError("invalid flag must fail before the decoder factory")
+
+    with pytest.raises(ValueError, match="skip_fully_deterministic must be bool"):
+        msd.receive_syndromes(
+            model,
+            bob,
+            (matrix, matrix),
+            ([0], [0]),
+            factory,
+            skip_fully_deterministic=invalid_flag,
+        )
+    assert calls == []
+
+
 def test_sender_rejects_invalid_alice_stage_and_matrix_inputs() -> None:
     model = _model()
     valid = (

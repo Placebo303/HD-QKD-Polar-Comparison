@@ -172,13 +172,20 @@ def receive_syndromes(
     parity_check_matrices: object,
     public_syndromes: object,
     decoder_factory: Callable[..., object],
+    *,
+    skip_fully_deterministic: bool = False,
 ) -> SyndromeReceiverResult:
     """Decode stages from Bob/public inputs using only recovered prefixes.
 
     Callers selecting :func:`make_bp_decoder` must bind its required
     ``max_iter`` first, for example with ``functools.partial``. This receiver
-    has no default decoder factory and no Alice-truth argument.
+    has no default decoder factory and no Alice-truth argument. The optional
+    exact-prior path skips backend calls only when an entire queried stage has
+    zero error probability; it still performs that stage's syndrome check.
     """
+    if not isinstance(skip_fully_deterministic, (bool, np.bool_)):
+        raise ValueError("skip_fully_deterministic must be bool")
+    skip_exact = bool(skip_fully_deterministic)
     if not isinstance(model, ConditionalPriorModel):
         raise ValueError("model must be a ConditionalPriorModel")
     if not callable(decoder_factory):
@@ -216,14 +223,17 @@ def receive_syndromes(
         error_channel = np.minimum(query.p_one, 1.0 - query.p_one)
         delta = np.bitwise_xor(syndromes[stage], _syndrome(matrix, base))
 
-        decoder = decoder_factory(
-            parity_check_matrix=matrix,
-            error_channel=error_channel.copy(),
-        )
-        decode = getattr(decoder, "decode", None)
-        if not callable(decode):
-            raise ValueError("decoder_factory must return an object with decode()")
-        error = _decoder_error_vector(decode(delta), block_width=bob.size)
+        if skip_exact and np.all(error_channel == 0.0):
+            error = np.zeros(bob.size, dtype=np.uint8)
+        else:
+            decoder = decoder_factory(
+                parity_check_matrix=matrix,
+                error_channel=error_channel.copy(),
+            )
+            decode = getattr(decoder, "decode", None)
+            if not callable(decode):
+                raise ValueError("decoder_factory must return an object with decode()")
+            error = _decoder_error_vector(decode(delta), block_width=bob.size)
         recovered_stage = np.bitwise_xor(base, error)
         recovered.append(recovered_stage)
         passed = bool(np.array_equal(_syndrome(matrix, recovered_stage), syndromes[stage]))
