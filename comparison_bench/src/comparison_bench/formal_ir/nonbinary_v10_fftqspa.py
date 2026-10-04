@@ -248,6 +248,55 @@ def check_update_log(log_messages: Sequence[Any], coefficients: Sequence[int],
     return np.log(np.maximum(normalized, 1e-15))
 
 
+def check_update_all_log(log_messages: Sequence[Any], coefficients: Sequence[int],
+                         syndrome: int, field: GF2mField) -> list[np.ndarray]:
+    """Return every check-to-variable message, reusing input transforms.
+
+    The coefficient permutation, exponentiation, normalization and WHT for
+    each incoming message are computed once.  Each target keeps the same
+    ordered product, inverse WHT, syndrome shift and output normalization as
+    :func:`check_update_log`; this is an opt-in arithmetic candidate and is
+    not wired into the decoder.
+    """
+    if not isinstance(field, GF2mField):
+        raise ValueError("field must be a pinned GF2mField")
+    q = field.q
+    dc = len(log_messages)
+    if dc < 2:
+        raise ValueError("check update requires at least two messages")
+    syndrome = field.mul(1, syndrome)  # validates the syndrome symbol
+    if len(coefficients) != dc:
+        raise ValueError("coefficients must match the message count")
+    mul_table, add_table = _tables(field)
+    scaled: list[np.ndarray] = []
+    checked_coefficients: list[int] = []
+    for index, (message, coefficient) in enumerate(zip(log_messages, coefficients)):
+        log_vector = np.asarray(message, dtype=np.float64)
+        if log_vector.shape != (q,):
+            raise ValueError(f"log_message[{index}] must be a length-{q} vector")
+        if not np.all(np.isfinite(log_vector)):
+            raise ValueError(f"log_message[{index}] must be finite")
+        coefficient = _validate_coefficient(field, coefficient)
+        log_scaled = _scale_log_by_coefficient(field, log_vector, coefficient)
+        prob = _normalize_qvec_fc(np.exp(log_scaled), f"scaled message[{index}]")
+        scaled.append(prob)
+        checked_coefficients.append(coefficient)
+
+    spectra = fwht_batched(np.stack(scaled))  # (dc, q), reused for all targets
+    outgoing_messages: list[np.ndarray] = []
+    for target, coefficient in enumerate(checked_coefficients):
+        others = [index for index in range(dc) if index != target]
+        product = np.prod(spectra[others], axis=0)
+        conv = fwht_batched(product) / q
+        outgoing = np.empty(q, dtype=np.float64)
+        shifted_positions = add_table[syndrome, mul_table[coefficient, :]]
+        for index, symbol in enumerate(shifted_positions):
+            outgoing[index] = conv[symbol]
+        normalized = _normalize_qvec_fc(outgoing, "check update")
+        outgoing_messages.append(np.log(np.maximum(normalized, 1e-15)))
+    return outgoing_messages
+
+
 # --------------------------------------------------------------------------- #
 # syndrome helpers
 # --------------------------------------------------------------------------- #

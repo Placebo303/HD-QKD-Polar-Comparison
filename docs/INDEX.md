@@ -11,6 +11,7 @@
 ## Current staged work
 
 - [MSD mainline P1 result](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/RESULT.md), [table](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P1_TABLE.md), [packet](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/PREREG_AND_AUTH.md) and [single route log](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/EXPLORATION_LOG.md).
+- [NB-LDPC enabling contract](research_cycles/NBLDPC-MAINLINE-ENABLING/ENGINEERING_CONTRACT.md) and [single route log](research_cycles/NBLDPC-MAINLINE-ENABLING/EXPLORATION_LOG.md) — reviewed helper candidate without decoder activation or performance acceptance.
 - The 2026-10-05 user grant permits staged progression; source, power, review, real-frame budget and new push gates remain stage-specific.
 
 ## Current archive map
