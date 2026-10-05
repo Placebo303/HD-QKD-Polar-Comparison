@@ -1,6 +1,13 @@
-# Common-volume short/long comparison scope (DRAFT, documentation only)
+# Common-volume short/long comparison scope (PARKED-UNTIL-M4, documentation only)
 
-Status: **DRAFT** — frozen for review in the same change
+> **Status 2026-10-05 (ROADMAP_20261005_MSD §3.1): PARKED-UNTIL-M4.**
+> 按路线文档 §2 P-2/§3.1 与用户裁决 U-1：解码器不存在之前不做真实数据比较设计。
+> 本文件（含 G-ENV 门、E1-P 附录、角色 metadata 引用）**保留原文、不再推进**，
+> 不作为任何 decoder packet 的阻塞门；M4 冻结设计后再按当时合成结果决定是否重启。
+> 角色 metadata 已接受产物（M_ROLE_METADATA.json 及独立核对）是证据留存，不是新工作项。
+> 之前的状态行保留如下（历史）：
+>
+> Status: **DRAFT** — frozen for review in the same change
 (`openspec/changes/msd-real-calibrated-mainline`) and the single MSD log
 (`EXPLORATION_LOG.md`). Not accepted, not a decoder packet, not an execution
 authorization. Main thread owns route choice and acceptance; a read-only
