@@ -12,7 +12,9 @@
     M2 包：同目录 `M2_PACKET.md`；结果根：`workspace/m2_synthetic/m2_20261005/`；批末独立审查 PASS（EXPLORE）。
   - M4 同口径对比已齐（批末审查 PASS）：MSD-16384 f≈1.23 长块无对手；
     NB-marginal-1024 f≈1.26–1.39（u2-layer口径）短块占优；Polar 外部引用 ~1.36–1.51 不可比。
-  - U-1 已裁决：MSD + NB-LDPC 并行；M5 真实帧已授权执行中（见 M5_PREEXECUTE.md）。
+  - U-1 已裁决：MSD + NB-LDPC 并行；M5 真实帧已固化 run_01（Pre-RESULT 三轮后PASS）：
+    NB-marginal 真实一致（6/6臂，f 1.59–1.94）；MSD冻结真实不一致（52/52，plane-1隔离）。
+    M6 论文包已组装并通过审查（G0=(B)）。M 系列完成；push 未动（等确认）。
 - parked-until-M4：`COMMON_VOLUME_SCOPE.md`（G-ENV/角色 metadata 同文件冻结，不推进、不阻塞 decoder）。
 - 门：真帧/新 raw/发表/push 均须用户明确确认；push 只普通非强制。
 - 索引：`docs/INDEX.md`；旧路径：`docs/archive/PATH_MAP.md`；隔离清单：`docs/archive/QUARANTINE_MANIFEST.md`。

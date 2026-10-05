@@ -295,3 +295,11 @@ f_expected_upper95_recomputed (observed-Wilson based; matches RESULT 2.3811 /
 2.3857 / 1.8710 / 2.1622 / 1.9966 / 1.9675 exactly; band-based quantity kept
 separately as f_at_band_upper_recomputed). RESULT.md written within ceiling
 (no diagnostic counts, no tail/arbitration/KILL). Re-review requested.
+
+M6 paper package assembled (G0=(B), U-3 decided): M6_PAPER_PACKAGE.md restates
+reviewed numbers only (measured f curves + same-data comparison + negatives/
+corrections + security accounting; no single-point certification sentence).
+Batch-end assembly review PASS (workflow m6-paper-review: all spot-checks
+match sources to rounding; ceilings travel; no new numbers/claims). M series
+complete through M6 (M1/M1'a/M1'b/M2/M3/M4/M5/M6); push untouched (local git
+only per user instruction).
