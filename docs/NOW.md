@@ -1,6 +1,9 @@
 # NOW — 一屏导航（2026-10-05）
 
 - 必读：`AGENTS.md` → `docs/REBOOT_HANDOFF_20261004.md`（R1–R9）→ `docs/ROADMAP_20261005_MSD.md`（路线）。
+- **2026-10-06 审查（优先于下方状态行）**：`docs/ROADMAP_20261006_REVIEW.md`——NB 真实「可部署」不成立
+  （u1 层未纠正，完整符号成功仅 74/205、148/287、203/383）；合成代理为 genie 先验；新增 R10–R13；
+  下一步 S-0→S-4，DIMBW parked-until-G-1。prompt：`docs/prompts/ROADMAP_20261006_REVIEW_PROMPT.md`。
 - 现场为准：`git branch --show-current`（预期 `formal-ir-v72p1-addendum-clean`）+ `git status` + HEAD。
 - 主度量：带期望良率的 f（R3）；零失败认证句禁用。
 - 主线 MSD，NB-LDPC 为 M4 对照臂；发表口径 G0=(B)（用户裁决见路线 §2.1）。
