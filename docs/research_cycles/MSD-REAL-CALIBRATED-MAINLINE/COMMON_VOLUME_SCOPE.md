@@ -6,10 +6,11 @@ Status: **DRAFT** — frozen for review in the same change
 authorization. Main thread owns route choice and acceptance; a read-only
 subagent review precedes any acceptance.
 
-This document asserts **no new number**: no power result, no FER, no f, no code
-rate or degree, no decoder cost, no sample-availability count. Every quantity
-below is either already accepted elsewhere in this change or is explicitly
-marked `UNKNOWN`.
+This document asserts **no new number**: no power result, no FER, no new `f`, no
+code rate or degree, no decoder cost, no sample-availability count. Every quantity
+below is either already accepted elsewhere in this change, arithmetic derived
+from already accepted numbers, or explicitly marked `UNKNOWN`. Appendix A
+reproduces accepted P1 arithmetic and adds no new `f`.
 
 Authority inherited (already accepted, not repeated here): `design.md` (comparator
 planning, native ledger aggregation, common-volume bound), the L1–L5 section of
@@ -92,7 +93,9 @@ packet, main thread must freeze one of:
 
 `G-ENV` is `UNKNOWN` and blocks the packet. Choosing E1 without evidence that
 equal conditioning contexts exist would be an unfrozen assumption, not a
-resolution.
+resolution. Appendix A records resolution candidate E1-P, which is the only
+resolution settleable from already accepted artifacts; it is a main-thread freeze
+candidate, not an accepted closure of this gate.
 
 ## 5. Grouping rule (boundary-preserving)
 
@@ -189,12 +192,14 @@ scope here and require a separately frozen, explicitly authorized packet.
 Actual tag protocol and serialization; per-stage practical rates/degrees;
 independent complete-volume pair count; current data roles and provenance;
 exact exposed index set and unused subsets; session/acquisition boundary
-granularity; whether the two arms' conditional-entropy denominators coincide;
-measured decoder cost and the real-frame wall-clock budget.
+granularity; whether the two arms' conditional-entropy denominators coincide (Appendix A
+records a freeze candidate, not an accepted closure); measured decoder cost and
+the real-frame wall-clock budget.
 
 ## 10. Stop conditions
 
-Stop and do not write a decoder packet if any holds: `G-ENV` unresolved; tag
+Stop and do not write a decoder packet if any holds: `G-ENV` unresolved (see
+Section 4 and Appendix A); tag
 protocol not classified; independent pair count not demonstrable; required MDE
 exceeds the target effect under a declared variance source; real-frame
 wall-clock budget not approved. Small decoder pilots, GF32 micro-probes, random
@@ -218,8 +223,82 @@ scoped local commit. No push.
 
 ## 13. Open decisions for main thread
 
-- `G-ENV` resolution: E1, E2 or E3 (Section 4).
+- `G-ENV` resolution: E1, E2 or E3 (Section 4). Candidate E1-P is recorded in
+  Appendix A and is the only resolution settleable from already accepted
+  artifacts. E2 requires new algebra for a denominator-independent estimand; E3
+  requires the per-block conditioning structure that accepted artifacts do not
+  contain.
 - Variance source for the pair-count derivation: conservative worst case or a
   model-calibrated estimate labelled as model evidence (Section 7).
 - Whether to freeze the grouping-key specification as the next deliverable
   before any data read.
+
+## Appendix A — `G-ENV` resolution candidate E1-P (main-thread freeze candidate)
+
+**Status: main-thread freeze candidate, independently reviewed, not accepted, not
+executed.** It resolves only the *definitional* denominator equality that the
+accepted common-volume bound presupposes. It supplies no sample count, variance,
+protocol, rate/degree, cost, FER or f result.
+
+**E1-P rule.** The conditional entropy entering the denominator is the already
+accepted P1 *position-wise* chain entropy: the Alice LSB-first bit chain
+conditioned on the Bob symbol at the same symbol position. The accepted P1
+artifact records `H_A_given_B_bits_per_symbol` equal to
+`sum_chain_H_bit_given_B_prefix_bits_per_symbol`, with the accepted chain-closure
+residual at 1e-16 magnitude. Nothing in the accepted inputs re-conditions on the
+rest of a block, so both native lengths consume the *same* per-symbol
+bits/symbol value.
+
+**Consequence.** For a complete-volume pair, with `h` that per-symbol value,
+`B_long = 16384 * h` and `B_short = 16 * 1024 * h = 16384 * h`, and `A` matches
+when the same `H_A` is supplied to both arms. The equal-`A`/equal-`B` premise of
+the accepted bound therefore holds *under this convention*, and `G-ENV` does not
+block on a definitional ground. This does not by itself establish that a real
+comparison is executable.
+
+**Robustness.** Every accepted P1 position-wise variant — the primary chain
+value, the no-prefix `sum_H_bit_given_B`, and `H_A_given_B` — is a function of
+the same position-wise joint counts and is independent of `N`. The
+equal-denominator conclusion therefore does not depend on which accepted variant
+is used.
+
+**Direction of the conditioning choice.** The conditioning set is narrower than
+"Bob conditions on his whole block". A narrower conditioning set gives a larger
+denominator `B`. That has two opposite effects and both must be stated: a larger
+common `B` shrinks the paired gap `|D|`, which is conservative for detecting a
+difference; but it also yields a smaller `f` for both arms, so a richer real
+conditioning set would *raise* `f`. Position-wise `f` is therefore **not** a safe
+upper bound on practical `f` — in the efficiency direction it is optimistic.
+Whether the real protocol offers richer side information is `UNKNOWN`, and nothing
+here resolves that.
+
+**Verification record (accepted numbers only, no new data).** Recomputed in the
+main thread from the committed `P1_TABLE.md` components — rounded `L_EC`,
+`tag = 64`, rounded failure penalty, per-source `H(A|B)` at the table's printed
+precision — for the six natural-encoding LSB_FIRST rows:
+
+| Source | N_symbols | numerator (bits) | `B = N*h` per block (bits) | f recomputed | f in table |
+|---|---:|---:|---:|---:|---:|
+| T2-1M | 1024 | 1068.27 | 817.2897 | 1.307089 | 1.3071 |
+| T2-1M | 16384 | 15014.55 | 13076.6347 | 1.148197 | 1.1482 |
+| T2-1.5M | 1024 | 1091.04 | 844.7777 | 1.291511 | 1.2915 |
+| T2-1.5M | 16384 | 15434.41 | 13516.4433 | 1.141899 | 1.1419 |
+| T2-2M | 1024 | 1098.97 | 851.3616 | 1.290838 | 1.2908 |
+| T2-2M | 16384 | 15545.36 | 13621.7850 | 1.141213 | 1.1412 |
+
+Residuals are at most 4e-5, consistent with the table's rounding. For all three
+sources the pair denominator difference `B_short_arm - B_long_arm` is exactly 0.
+The recomputation used plain arithmetic over committed text; no repository
+interpreter, no test, no frame/raw/index read and no new experiment was involved,
+and the full-precision accepted artifact values were not re-derived.
+
+**Still unresolved after E1-P.** Richness of the real protocol's conditioning
+set; actual tag protocol and therefore the bound branch; grouping key; current
+data roles and provenance; independent complete-volume pair count; the
+required-pair derivation and its declared variance source; practical
+rates/degrees; measured decoder cost and the real-frame wall-clock budget. All
+remain `UNKNOWN` and gating, and E1-P authorizes no data read, timing, decoder
+packet, pilot or push. The equal-denominator result is an arithmetic identity
+(`16 * 1024 = 16384`) under a declared conditioning convention; it is a
+declaration of the convention already used by P1, not a discovery about what a
+real 16384-symbol block could condition on.
