@@ -2,6 +2,8 @@
 
 先完整阅读 [唯一交接权威](REBOOT_HANDOFF_20261004.md)、[AGENTS](../AGENTS.md) 和本页；现场重测分支、HEAD、git status。本页是导航摘要，不替代交接规则或执行授权。
 
+**2026-10-05 路线更新**：下一步排序以 [ROADMAP_20261005_MSD](ROADMAP_20261005_MSD.md) 为准——先做 M1（标定合成信道上的 MSD 解码闭环）+ M3（逐位一致加速）；共同体量/G-ENV/角色 metadata 线 parked-until-M4。下方旧段落中的「下一步」已被取代。粘贴用 prompt：[prompts/ROADMAP_20261005_MSD_PROMPT.md](prompts/ROADMAP_20261005_MSD_PROMPT.md)。
+
 - 当前工作：S1–S8 仓库整理已完成；工程验证与实际提交记录见组织归档。
 - 项目关闭 Ponytail，委派使用 subagent；本仓是 formal IR/LDPC 研究主线，姊妹 Polar 仓库只读，不合并。
 - 主度量已裁决为带期望良率的 f；严格遵守交接 R1–R9。口径及泄漏/tag/失败惩罚、单位和独立复算要求见 §2 R3/R5、§4 D-1。
