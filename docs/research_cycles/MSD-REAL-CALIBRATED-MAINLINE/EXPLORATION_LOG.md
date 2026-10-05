@@ -303,3 +303,55 @@ Batch-end assembly review PASS (workflow m6-paper-review: all spot-checks
 match sources to rounding; ceilings travel; no new numbers/claims). M series
 complete through M6 (M1/M1'a/M1'b/M2/M3/M4/M5/M6); push untouched (local git
 only per user instruction).
+
+S-1 proxy v1 pilot (plug-in-parametric channel, T2-1M): MSD 100/100 fail both
+tiers (plane-1 100/84, valid-wrong 0); NB full-symbol 60/60 fail, u2 FER 0.0,
+u1 7.6/block. G-0 scorecard: plane-1 collapse REPRODUCED strongly; valid-wrong,
+NB-u2-2.8-5.4%, u1~1/block NOT reproduced. Root cause: i.i.d. plug-in sampling
+destroys real joint concentration (synthetic u1 7.5 vs real 0.9).
+Proxy v2 (same cost, higher fidelity): bootstrap resampling over the channel
+half's empirical pair list (joint preserved exactly; R10 intact: pairs from
+channel half, prior table from the other half); NB switched to M0-style
+real-pair decode (was self-sampling). v2 smoke: MSD 4/4 fail both tiers;
+NB u1 0.75-1.0/block MATCHING M5-real 0.9 scale (vs 7.6 v1). Full v2 pilot
+launched (MSD B=100 x2 tiers; NB B=60 x2 tiers x2 arms).
+
+F-S1-1 clearing measurement (diag_fS11_stage_exact.py, frozen M5 path + rescue
++ per-stage truth on the 12 M5-real T2-1M blocks, re-analysis of existing M5
+inputs): plane-0 base-pass 8/12; all 4 base-fails rescued to EXACT (K400 round
+works); final plane-0 exact 12/12, open 0, stage-valid-wrong 0; later stages
+fail 12/12. So: review's "4/12 valid-wrong" is REFUTED with measurement (the 4
+were open failures subsequently rescued exact); amendment's "0/12 agreed zero"
+stands CONFIRMED but now on measured grounds. Stronger consequence: prefixes
+are exactly right on all 12 blocks, yet plane-1 (true prefix, ~23 errors,
+m_1=600) still fails 12/12 real vs 0/300 synthetic — isolates the zero-channel-
+contradiction mechanism (prior overconfidence at sparse cells, synthetic-blind
+by construction). F-S1-2 closed: s1_u2fer.json pins u2 FER from JSONL exact_u2
+(T1 3/60=0.05, 5/60=0.083; T2 7/60=0.117, 8/60=0.133). Non-blocking adopted:
+Tier 1 = primary decision arm, Tier 2 stress-only (T2's 16/100 plane-0 opens vs
+real 0/12 are amplification artifacts); S-2 documents write "mean u1
+mismatches/block" (0.93/1.28) vs "residual-block rate" (33-36/60) explicitly.
+
+G-0 verdict (v2 pilot, T2-1M): plane-1 collapse REPRODUCED (100/100 both tiers
+vs genie 0/300); NB u2 FER T1 5.0%/8.3% (target band 2.8-5.4%: R1 in-band, R2
+marginally above), T2 11.7%/13.3% (amplified by design); u1 residual 0.93/1.28
+per block (band 0.5-1.5 REPRODUCED; v1 plug-in gave 7.6). valid-wrong 0/200.
+CORRECTION to review F-2 premise: re-examination shows M5-real valid-wrong is
+0/12, not 4/12 — the 4 non-exact blocks are plane-0 OPEN syndrome failures
+(n_rescue=4 corroborates; D2-corrected plane-0 exact 8/12 accounts for all 12).
+The 4/12 figure conflated rescue-triggering open failures with valid-wrong
+(likely carried over from N=1024 smoke undetected=2/6, a short-block
+phenomenon). Proxy (0/200) and real (0/12) AGREE at N=16384. G-0 target
+"valid-wrong>=1" is therefore RETRACTED as premise-misread; amended G-0 =
+plane-1 collapse + NB-u2 band + u1 scale (all met) with valid-wrong monitored
+(zero both sides). G-0: PASS on amended terms. Proxy stays T2-1M-only for S-2
+pilot; three-source expansion after S-2 works. No new real frames read for
+targets (M5 block JSONLs only).
+
+F-S1-2 provenance record (second-review remediation): NB rows occupy
+blocks_s1.jsonl lines 101–220 (T1: R1 101–160, R2 161–220) and 321–440
+(T2: R1 321–380, R2 381–440); lines 101/102/321 verified carrying exact_u2 +
+u1_mismatches (+exact_full, undetected, rescued, m_rows). Full-file
+aggregation per arm exact_u2=false: T1-R1 3, T1-R2 5, T2-R1 7, T2-R2 8 —
+exactly s1_u2fer.json (3/60, 5/60, 7/60, 8/60). MSD rows (1–100 T1, 221–320
+T2) carry valid_wrong_stages + plane1_failed.
