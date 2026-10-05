@@ -104,6 +104,15 @@ EXPLORE 阶段的 p_fail 用合成验证帧估计；DECIDE 阶段的 p_fail 用�
 
 ---
 
+## 2.1 用户裁决（2026-10-05，用户原话「都按照推荐来」）
+- **U-1**：MSD 为主线；NB-LDPC GF32 超帧保留为 M4 同口径对照臂，不再单独开新探针。
+  M4 若合成对比显示 NB-LDPC 明显更优，由主线程如实报告并重新提请用户，不得自行改线。
+- **U-2**：M5 真实帧验证**原则同意**。具体命令、墙钟预算（按 M3 实测成本 × 块数 × 1.5）和输出根，
+  仍须在 M5 的 Pre-EXECUTE 中报给用户、获得明确确认后才能执行（AGENTS.md §3 不变）。
+- **U-3**：发表口径采用 G0=(B)：实测效率曲线（带期望良率的 f）+ 同数据方法对照 + 负结果与更正记录；
+  不写单点 `f_eff ≤ 1.3` 认证句。
+- **push**：本路线提交按普通非强制 push 推到 `origin/formal-ir-v72p1-addendum-clean`；此后的 push 仍需逐次确认。
+
 ## 3. 下一个 session 的立即动作（按序）
 1. 把 COMMON_VOLUME_SCOPE / G-ENV / 角色 metadata 这条线标为 **parked-until-M4**。保留文档，不删、不再推进。
 2. 写 **M1** 的 EXPLORE packet + prompt：信道抽样、码构造、条件先验、逐面译码、计时 smoke、MDE、成本上限、单日志。
