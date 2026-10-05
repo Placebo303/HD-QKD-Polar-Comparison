@@ -39,3 +39,5 @@ L1–L5 原生块 outcome/期望良率账本已通过固定 fake 测试与独立
 M 元数据盘点已在用户四文件限定授权、独立执行前审查及结果核对后完成限定接受：[记录](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/M_ROLE_METADATA.json)、[独立核对](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/M_ROLE_METADATA_REVIEW.json)。首次数值未提取的失败候选及主线程裁决的一次修正均保留在单日志。历史 split 计数不是独立完整符号配对组数，历史 R1 处理秒数不是 MSD 解码成本；未匹配字段仍为 UNKNOWN。
 
 历史 M0/M2 已记录从 R1 VAL/HOLD 池取输入评估，M3C 也有诊断暴露；M2 科学接受被撤回不恢复数据的未使用状态。主线程将该池视为既有开发/回放输入，除非明确证明某个子集未暴露；不能把整个池称为新鲜 OOS。具体暴露索引、剩余未使用子集及当前独立组数仍未知。下一步补齐边界保持的分组与角色范围、实际 tag 协议及共同体量功效/成本；本次授权未扩展到帧/raw/解码、DE 或真实帧预算。
+
+共同体量短/长比较范围已起草并通过独立只读审查（零 blocking、四条精度修订已应用）：[COMMON_VOLUME_SCOPE](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/COMMON_VOLUME_SCOPE.md) 冻结一个完整符号体量配对的定义（1 个 native N=16384 长块对 16 个连续 N=1024 短块）、沿用已接受 L 账本的 native tag/部分保留计费、边界保持分组规则、既有开发/回放池与 fresh OOS 的区分标准，以及固定 tag 偏移与 outcome-dependent tag 两条共同体量界分支。新增阻塞门 G-ENV：等体量并不自动保证两臂条件熵分母相等，需主线程冻结 E1/E2/E3 之一；该范围文档不闭合 tasks.md 的功效/成本重推项，也不授权任何数据读取、timing、decoder packet、pilot 或 push。
