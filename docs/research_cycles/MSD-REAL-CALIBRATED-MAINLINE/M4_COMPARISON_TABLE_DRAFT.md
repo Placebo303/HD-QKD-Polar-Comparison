@@ -19,3 +19,7 @@
 
 Polar 行：同公式重算（`polar_recompute.json`），非同数据/信道，**不可横比**，仅作期望校准。
 R1/R2 臂内差在 Wilson 噪声内（C4），不排名。
+
+> **Supersession note (2026-10-06, review F-1, original text above unchanged):**
+> 「NB-marginal-1024 短块占优」**撤回**——系 u2-layer 口径与 MSD 完整符号口径的
+> 不可比比较（违反 R5）。NB 行仅保留为 u2 层诊断值；完整符号对比待 S-3/S-4。

@@ -39,6 +39,10 @@ Thumbs.db
 .env
 *.local
 
+# Windows ACL diagnosis reports (skill-generated, machine-local rollback data;
+# never committed; see 2026-10-06 review F-5).
+/.acl_reports/
+
 # H0.3 exogenous-source isolation (docs/engineering, no track gate).
 # These four roots are NOT part of this formal-IR line and must never enter
 # a commit on this branch. See docs/H0_3_ISOLATION.md.

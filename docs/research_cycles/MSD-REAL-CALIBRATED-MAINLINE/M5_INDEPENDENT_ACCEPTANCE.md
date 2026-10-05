@@ -10,3 +10,8 @@
 - 证据链：M5_PREEXECUTE.md（授权+检查单）→ m5_*_summary.json（冻结行）→
   m5_verdicts.json（band verdict + f 全输入重算）→ M5_RESULT.md → 本接受记录。
   独立审查结论与主线程接受一致，无分歧保留。
+
+> **Supersession note (2026-10-06, review F-1, original text above unchanged):**
+> 本接受记录所接受的"NB-marginal 真实传递一致"仅限 u2 层；完整符号口径下
+> NB 真实失败率约 47–64%，"可部署"含义已撤回。三轮 Pre-RESULT 未核对成功字段的
+> 层覆盖（R13 新增此必查项）。接受范围以本说明为准。

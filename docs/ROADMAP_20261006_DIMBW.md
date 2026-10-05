@@ -87,3 +87,8 @@ m4 summary s_per_block列）；bundle/先验/熵表分钟级（各runner实测�
 - 总预算：Phase A–D机器时约170 h（含复跑余量×1.5，见§3推导），人工审查7轮+脚手架。
   执行授权：Phase A–D各自执行前按 DECIDE/EXPLORE 相应规则另行申请授权，
   本文档不构成任何执行授权；push 仍逐次确认。
+
+> **Status (2026-10-06, review F-3): PARKED-UNTIL-G-1.** 28 格点矩阵暂停，直到 S-5 的
+> G-1 通过（单格点真实完整符号可用结果）。Phase A 的 f≤1.6 传递门亦判过松，
+> 以 G-1 条件（完整符号真实 f ≤ 1.40 且与代理预测一致，valid-wrong 为 0）为准。
+> 原文保留，不再推进。见 `docs/ROADMAP_20261006_REVIEW.md` §3 S-6。

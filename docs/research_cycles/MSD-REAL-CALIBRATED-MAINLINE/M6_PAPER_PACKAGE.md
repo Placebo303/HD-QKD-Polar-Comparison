@@ -49,3 +49,7 @@
 - 代码：`msd_m1_synthetic/m1primea_repetition/m1primeb_mixed/msd_peg_code/`
   `msd_m2_incremental/msd_m4_nbldpc/msd_m4_nb_marginal/msd_m5_realframe/`
   `binary_spa_numba` + 8 个聚焦测试文件（15+2+6+3+2+2+2+4 通过）。
+
+> **Supersession note (2026-10-06, review F-3, original text above unchanged):**
+> 本包标注为「组装草稿，含已撤回行」：真实曲线 NB 行（1.59–1.94）为 u2-layer 口径，
+> 不得引用为完整符号效率；M6 在 G-1 之后重组。详见 `docs/ROADMAP_20261006_REVIEW.md` §3 S-6。
