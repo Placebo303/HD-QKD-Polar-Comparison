@@ -221,7 +221,16 @@ F2.3 authorization/amendment record (review-required): the v28-empirical -> sing
 
 M4 closeout (F5.3): comparison table M4_COMPARISON_TABLE_DRAFT.md finalized with NB rows: MSD-16384 M2 f 1.2285-1.2310 unopposed long-block; NB-marginal-1024 f 1.2592-1.3942 (u2-layer-conditional per F4.2 rule) dominant over MSD-1024 f~5.9-7.1; NB-v28-1024 f=10.57 retained negative; Polar external 1.5065/1.3622 non-comparable.
 
-U-1 DECIDED (2026-10-05, user): MSD + NB-LDPC 并行 — both lines enter M5 real-frame validation (M5 cost doubles; NB real ~35 min). NB-marginal stays as short-block control/fallback, no new probes. M4 batch-end review PASS (workflow m4-batch-review, ceiling C1-C8 binding). Killed runs' discarded CPU (23 + 27 buffered single-process blocks, uncommitted) + re-seeding notes stand in mid-batch lines. M4 batch-end review PASS (workflow m4-batch-review, ceiling C1-C8 binding). U-1 question put to user with main-thread recommendation (below in handoff reply, not in log). M5 Pre-EXECUTE draft + real-frame MDE (12/17/22 blocks; 0-fail FER uppers 0.221/0.162/0.127; pairwise SE~0.2 — consistency-only ceiling) prepared as M5_PREEXECUTE_DRAFT.md (awaits explicit user confirmation; nothing executed).
+U-1 DECIDED (2026-10-05, user): MSD + NB-LDPC 并行 — both lines enter M5 real-frame validation (M5 cost doubles; NB real ~35 min). NB-marginal stays as short-block control/fallback, no new probes. M4 batch-end review PASS (workflow m4-batch-review, ceiling C1-C8 binding).
+
+M5 first attempt FAILED pre-decode (job pwsh-195, exit 1): R1 stores WSL-style
+`/mnt/d/...` ttbin paths; FileReader could not open (zero bytes read, zero
+pairs, no decode). Single preregistered engineering repair: M5-side
+load_real_series_win mirrors m0's frozen orchestration line-for-line (same
+imported constants/calls/assertions) plus an asserted /mnt/x -> X:\
+translation (refuses unless the translated file exists); empty output root
+removed (rmdir, documented) to restore Pre-EXECUTE absence. 4/4 focused tests
+pass (incl. translation + refusal). Rerunning under the same authorization. Killed runs' discarded CPU (23 + 27 buffered single-process blocks, uncommitted) + re-seeding notes stand in mid-batch lines. M4 batch-end review PASS (workflow m4-batch-review, ceiling C1-C8 binding). U-1 question put to user with main-thread recommendation (below in handoff reply, not in log). M5 Pre-EXECUTE draft + real-frame MDE (12/17/22 blocks; 0-fail FER uppers 0.221/0.162/0.127; pairwise SE~0.2 — consistency-only ceiling) prepared as M5_PREEXECUTE_DRAFT.md (awaits explicit user confirmation; nothing executed).
 
 STOP-RULE applied (frozen M4 packet): measured block cost ~116 s (not smoke's ~20 s;
 8 KB buffer hid progress); 3-source projection ~10 h > cap. Killed pwsh-143 (23 blocks'
@@ -237,3 +246,52 @@ sample stream differs from killed run by documented re-seeding, same
 distribution); per-block numerics identical; smoke path untouched serial.
 Worker path validated in-process (48.6 s honest fail). Relaunched pooled
 --full T2-1M (job pwsh-158).
+
+M5 rerun COMPLETE (job pwsh-198, exit 0, ~1 h, within 5400 s cap): MSD real
+12/12 + 17/17 + 23/23 block failures (FER=1.0, und 0, f~12); NB-marginal real
+8–16 fails over 205–383 superframes (FER 0.028–0.054, und 0, f 1.59–1.94).
+Superframes actual 205/287/383 (all VAL+HOLD used; remainder 13/15/15 dropped
+by 16-grouping rule); n_pairs_eval tails (+405–529, ~0.2%) are sub-1024
+remainders excluded by the floor rule. Output root
+workspace/m5_realframe/m5_20261006/ (date-stamp instantiation of frozen
+m5_<uuid> — F-F2 declared). M5 execution authorization of record: user reply
+"批准执行" under the sustained M-series grant; Pre-EXECUTE checklist in
+M5_PREEXECUTE.md (F-F1 closed by this entry).
+
+M5 diagnostics (authorized input, statistics only): D1 real BER matches TRAIN
+both planes all sources (0.239/0.0014, 0.254/0.0011, 0.254/0.0014) — no drift.
+D2 first attempt used wrong matrices (m_0=2000, admitted in-file; O-F3 closed
+by this line); corrected D2: plane-0 exact 8/12 on T2-1M real blocks (prefixes
+intact, no poisoning); plane-1 errors Poisson-like (mean 22.9, var 19.9).
+Zero-channel-contradiction measurement (workspace-only diag, counts stay OUT
+of RESULT per ceiling): 10–26 real plane-1 errors/block sit on TRAIN
+p_error=0 cells with unsupported=0 — sparse-cell overconfidence invisible to
+plug-in sampling by construction. Binomial consistency (script-generated):
+NB six arms p 0.141/0.141/0.835/0.702/0.346/0.448 CONSISTENT; MSD three
+sources p~0 INCONSISTENT.
+
+F-E amendment (review-required): frozen planning counts 200/276/364 were stale
+estimates; freeze amended to actuals 205/287/383 → 12/17/23 blocks (cause:
+planning staleness; all superframes processed identically, no selection).
+M5 f/verdict closure (F-A/F-B): m5_band_verdicts.py writes NEW companion
+m5_verdicts.json (frozen summaries untouched): per-row H_A/H_AB/tag/
+kept-penalty, exact f recompute True on all 9 rows, band verdicts + exact
+binomial p-values. First Pre-RESULT review FAILed on records only (F-E/F-B/
+F-F1/F-A + ceilings C1–C8); rework = this entry + companion (no decode rerun).
+
+Second-round rework closure (no rerun): (1) 51-vs-52 budget note: frozen plan
+assumed 51 MSD blocks (12/17/22); actuals are 52 (12/17/23) — decode wall grew
+~2% (one extra T2-2M block, ~0.2 s MSD; NB unaffected at superframe granularity);
+total M5 wall stayed ~1 h, far inside the 5400 s cap — no budget impact. (2) Exact
+M5 launch command (rerun): `D:\software\Anaconda3\envs\qkd_env\python.exe -m
+comparison_bench.src.comparison_bench.formal_ir.msd_m5_realframe --full
+--output-root workspace/m5_realframe/m5_20261006` (job pwsh-198, exit 0; first
+attempt pwsh-195 failed pre-decode on WSL ttbin path, zero bytes read). (3) O-F3
+corrected value: D2 reran with the TRUE TRAIN h_plane giving M5 m_0=14915
+(T2-1M: ceil(16384*0.78822+2000)); plane-0 exact 8/12. (4) RESULT fixes:
+T2-1.5M/R2 p 0.702->0.701 (companion 0.70147), L46 22->23 blocks, T2-1M row
+labelled 2-arm merge; f-upper95 provenance closed by new companion field
+f_expected_upper95_recomputed (observed-Wilson based; matches RESULT 2.3811 /
+2.3857 / 1.8710 / 2.1622 / 1.9966 / 1.9675 exactly; band-based quantity kept
+separately as f_at_band_upper_recomputed). RESULT.md written within ceiling
+(no diagnostic counts, no tail/arbitration/KILL). Re-review requested.
