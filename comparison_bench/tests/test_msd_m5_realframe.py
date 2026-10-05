@@ -3,6 +3,7 @@
 import numpy as np
 
 from comparison_bench.src.comparison_bench.formal_ir.msd_m5_realframe import (
+    _win_ttbin_path,
     decode_block_msd,
     group_blocks,
 )
@@ -53,6 +54,17 @@ def test_decode_block_msd_synthetic_n1024():
     assert set(r) == {"exact_ok", "undetected", "rescued", "extra", "stages_passed"}
     assert len(r["stages_passed"]) >= 1
     assert r["extra"] == (100 if r["rescued"] else 0)
+
+
+def test_win_ttbin_path_translation_and_refusal():
+    got = _win_ttbin_path("/mnt/d/Code/HD-QKD_Polar_Comparison/AGENTS.md")
+    assert got == "D:\\Code\\HD-QKD_Polar_Comparison\\AGENTS.md"
+    try:
+        _win_ttbin_path("/mnt/d/Data/NoSuchDir/NoFile.ttbin")
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("expected refusal on missing file")
 
 
 def test_consistency_band_arithmetic():

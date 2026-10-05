@@ -64,6 +64,82 @@ from comparison_bench.src.comparison_bench.cli.probes_closed import (  # noqa: E
 )
 
 SRC = {"1M": "T2-1M", "1p5M": "T2-1.5M", "2M": "T2-2M"}
+
+
+def _win_ttbin_path(stored: str) -> str:
+    """Translate a WSL-style /mnt/x/... path to a Windows path (asserted).
+
+    This session's WSL is broken; the bytes are identical (same file, only
+    the prefix spelling differs). Refuses unless the translated file exists.
+    """
+    p = stored.replace("/", "\\")
+    if p.startswith("\\mnt\\"):
+        parts = p.split("\\")
+        # \mnt\d\ rest -> D:\ rest
+        drive = parts[2].upper() + ":"
+        p = drive + "\\" + "\\".join(parts[3:])
+    if not Path(p).is_file():
+        raise SystemExit(f"translated ttbin missing: {p} (from {stored})")
+    return p
+
+
+def load_real_series_win(source: str, r1_root: str = "workspace/r1_histogram_5e2a91c4") -> dict:
+    """Mirror of m0.load_real_series with Windows path translation only.
+
+    Same frozen calls (install_timetagger_alias, read_ttbin_events,
+    derive_alignment/require_alignment_passed, _pair_nearest_unique,
+    _frame_global), same constants imported from m0 (no literal drift), same
+    R1 offset/count/split assertions, same VAL+HOLD eval region.
+    """
+    from comparison_bench.src.comparison_bench.io import align_wrapper as aw
+    from comparison_bench.src.comparison_bench.io.ttbin_compat import install_timetagger_alias
+
+    install_timetagger_alias()
+    from src.qkd_io.ttbin_pipeline import _frame_global, _pair_nearest_unique, read_ttbin_events
+
+    ds = m0.SOURCES[source]["dataset"]
+    r1 = json.loads(Path(r1_root, f"{ds}.json").read_text(encoding="utf-8"))
+    split = json.loads(Path(r1_root, "split_manifest.json").read_text(encoding="utf-8"))[ds]
+    base = _win_ttbin_path(r1["ttbin_member_used"])
+    t0 = time.monotonic()
+    events = read_ttbin_events(base)
+    read_s = time.monotonic() - t0
+    align = aw.derive_alignment(events=events, ch_a=m0.CH_A, ch_b=m0.CH_B)
+    offset = aw.require_alignment_passed(align)
+    if int(offset) != int(r1["offset_ps"]):
+        raise SystemExit(f"{ds}: derived offset {offset} != R1 offset {r1['offset_ps']}")
+    t = np.asarray(events.time_ps, dtype=np.int64)
+    valid = (np.asarray(events.event_type, dtype=np.int64) == 0) \
+        if events.event_type is not None else np.ones(t.shape, dtype=bool)
+    ch = np.asarray(events.channel, dtype=np.int64)
+    t_a, t_b = t[valid & (ch == m0.CH_A)], t[valid & (ch == m0.CH_B)]
+    tmin = int(t.min())
+    del events
+    pa, pb = _pair_nearest_unique(t_a=t_a, t_b=t_b, window_ps=m0.COIN_WINDOW_PS,
+                                  offset_ps=offset)
+    fa, sa = _frame_global(t_ps=pa, bin_width_ps=m0.BIN_WIDTH_PS,
+                           frame_bins=m0.FRAME_BINS, t0_ps=tmin)
+    fb, sb = _frame_global(t_ps=pb, bin_width_ps=m0.BIN_WIDTH_PS,
+                           frame_bins=m0.FRAME_BINS, t0_ps=tmin)
+    keep = (fa >= 0) & (fb >= 0) & (fa == fb) & (sa >= 0) & (sb >= 0)
+    frame, sa, sb = fa[keep], sa[keep], sb[keep]
+    if int(frame.size) != int(r1["n_pairs_N"]):
+        raise SystemExit(f"{ds}: pair count {frame.size} != R1 {r1['n_pairs_N']}")
+    order = np.argsort(frame, kind="stable")
+    frame, a, b = frame[order], sa[order].astype(np.int64), sb[order].astype(np.int64)
+    uframes = np.unique(frame)
+    n_tr = int(uframes.size * 0.6)
+    n_va = int(uframes.size * 0.2)
+    got = [int(uframes[0]), int(uframes[n_tr - 1]), int(uframes[n_tr]), int(uframes[-1])]
+    want = [split["train_frames"][0], split["train_frames"][1],
+            split["val_frames"][0], split["hold_frames"][1]]
+    if got != want or n_va != split["split_val_frames"]:
+        raise SystemExit(f"{ds}: split boundaries {got} != R1 {want}")
+    ev = frame >= uframes[n_tr]
+    return {"a": a[ev], "b": b[ev], "dataset": ds, "ttbin": base,
+            "offset_ps": int(offset), "n_pairs_total": int(frame.size),
+            "n_pairs_eval": int(ev.sum()), "eval_first_frame": int(uframes[n_tr]),
+            "read_wall_s": read_s}
 C0_MSD = 2000
 K_MSD = 400
 N_MSD = 16384
@@ -238,7 +314,7 @@ def main() -> None:
     nb_rows: list[dict] = []
     for label in ("1M", "1p5M", "2M"):
         source = SRC[label]
-        series = m0.load_real_series(label)
+        series = load_real_series_win(label)
         supers = m0.superframes(series["a"], series["b"])
         blocks, dropped = group_blocks(supers)
         table = load_train_table(source)
