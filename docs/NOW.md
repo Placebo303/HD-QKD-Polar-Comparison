@@ -3,14 +3,14 @@
 先完整阅读 [唯一交接权威](REBOOT_HANDOFF_20261004.md)、[AGENTS](../AGENTS.md) 和本页；现场重测分支、HEAD、git status。本页是导航摘要，不替代交接规则或执行授权。
 
 - 当前工作：S1–S8 仓库整理已完成；工程验证与实际提交记录见组织归档。
-- 项目关闭 Ponytail，委派使用 luna_worker；本仓是 formal IR/LDPC 研究主线，姊妹 Polar 仓库只读，不合并。
+- 项目关闭 Ponytail，委派使用 subagent；本仓是 formal IR/LDPC 研究主线，姊妹 Polar 仓库只读，不合并。
 - 主度量已裁决为带期望良率的 f；严格遵守交接 R1–R9。口径及泄漏/tag/失败惩罚、单位和独立复算要求见 §2 R3/R5、§4 D-1。
 - GF32 128 符号单旋钮探针线已正式停止。其他按第四处置归档的历史项只是目前不推进；每项原因、已知状态和缺失记录见各 archive.md。这不表示永久放弃或科学 KILL。
 - 历史结论仍限于原始已测范围。移动、归档、import/collection smoke 都不增加科学接受或授权。
 
 阅读 [INDEX](INDEX.md) 查现行入口；[PATH_MAP](archive/PATH_MAP.md) 查旧/新路径；[隔离清单](archive/QUARANTINE_MANIFEST.md) 查保留待决定的未跟踪杂项。
 
-当前 session 状态、实现边界、失败留存及可粘贴启动提示词见 [2026-10-05 续接交接](SESSION_HANDOFF_20261005_MSD_P2.md)；它是导航补充，不替代唯一 reboot 交接权威。
+当前 session 状态、实现边界、失败留存及可粘贴启动提示词见 [2026-10-05 M 接受后续接交接](SESSION_HANDOFF_20261005_MSD_M_ACCEPTED.md)；它是导航补充，不替代唯一 reboot 交接权威。旧 P2 交接保留为早期检查点，其 HEAD 与下一步已过时。
 
 续推检查点（2026-10-05）：本对话曾设置 03:50:10 额度恢复后续跑、04:10–06:10 每20分钟续推。用户随后已自行重置并取消自动兑换，卡辅助任务已停用；06:32:10 任务仅继续研究。MSD 的 C1–C6 sparse accumulator 候选及 D/E 精确先验机制已通过各自固定测试与独立限定审查，I1–I3 连接测试从额度中断处恢复；尚未接受逐层码率或生产解码。后继先读单日志最新记录，不能只按旧 session 交接快照重做。workspace 中保留的卡 helper 不再授权执行。
 
@@ -24,7 +24,7 @@ D1–D4 整层精确零误差先验旁路已通过固定 fake 测试和独立只
 
 组织实施及验证记录见 [组织归档](../openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/archive.md)。整理的八个提交已普通 push，远端核对为 8f2f313a；后续 push 另需确认。
 
-额度续推（2026-10-05）：用户已手动重置并明确取消自动兑换。Windows 一次性卡任务 Codex-ResetCard-20261005-0630-4973b0ac 已现场停用为 Disabled，consume_0630_attempt.log 不存在；本对话没有发出消费请求。06:32:10 对话任务已改为仅续推研究，不执行任何卡 helper/consume。不得再次启用该卡任务、换卡或购买。现场额度查询确认 ordinaryUsageAllowed=true，原指定到期卡已不在可用列表。I1–I3 测试文件在额度中断前已写入但未运行，由同一 Luna 从实际文件状态恢复。
+额度续推（2026-10-05）：用户已手动重置并明确取消自动兑换。Windows 一次性卡任务 Codex-ResetCard-20261005-0630-4973b0ac 已现场停用为 Disabled，consume_0630_attempt.log 不存在；本对话没有发出消费请求。06:32:10 对话任务已改为仅续推研究，不执行任何卡 helper/consume。不得再次启用该卡任务、换卡或购买。现场额度查询确认 ordinaryUsageAllowed=true，原指定到期卡已不在可用列表。I1–I3 测试文件在额度中断前已写入但未运行，由同一 subagent 从实际文件状态恢复。
 
 E1–E5 部分精确零误差变量条件化已通过固定 fake 测试与独立只读审查，主线程仅接受标准 prior builder 下的模型/接口范围。失败测试尝试与只改期望的修正均留在单日志。后继 I1–I3 也已完成；生产 backend、实验及逐层实用码率仍未接受。
 
