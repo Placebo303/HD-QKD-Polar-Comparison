@@ -33,27 +33,37 @@ def main() -> None:
     mismatches: list[str] = []
     operating: list[dict] = []
     for r in rows:
-        n, lec = int(r["N"]), int(r["L_EC"])
+        n, lec = int(r["N"]), int(r["L_EC"]) if "L_EC" in r else None
+        # M2 rows carry expected disclosure E_L (+ optional L_base/n_rescue audit)
+        if "E_L" in r:
+            e_l = float(r["E_L"])
+            exp_extra = float(r["k_rescue"]) * int(r["n_rescue"]) / int(r["blocks"])
+            if abs(e_l - (float(r["L_base"]) + exp_extra)) > 1e-6:
+                mismatches.append(f"{r['source']}/{n}/{r.get('gap', r.get('c0_base'))}: E_L audit")
+            lec = e_l
+        else:
+            lec = float(r["L_EC"])
+        label = f"{r['source']}/{n}/{r.get('gap', r.get('c0_base'))}"
         fer = float(r["failures"]) / int(r["blocks"])
         if abs(fer - float(r["FER_exact"])) > 1e-12:
-            mismatches.append(f"{r['source']}/{n}/{r['gap']}: FER_exact")
+            mismatches.append(f"{label}: FER_exact")
         wu = wilson_upper_ind(int(r["failures"]), int(r["blocks"]))
         if abs(wu - float(r["FER_wilson_upper95"])) > 1e-9:
-            mismatches.append(f"{r['source']}/{n}/{r['gap']}: wilson")
+            mismatches.append(f"{label}: wilson")
         denom = n * float(r["H_AB"])
         kept = n * float(r["H_A"]) - lec
         f_p = (lec + 64 + kept * fer) / denom
         f_u = (lec + 64 + kept * wu) / denom
         if abs(f_p - float(r["f_expected"])) > 1e-9:
-            mismatches.append(f"{r['source']}/{n}/{r['gap']}: f_expected")
+            mismatches.append(f"{label}: f_expected")
         if abs(f_u - float(r["f_expected_upper95"])) > 1e-9:
-            mismatches.append(f"{r['source']}/{n}/{r['gap']}: f_upper")
+            mismatches.append(f"{label}: f_upper")
         checked += 1
         operating.append(
             {
                 "source": r["source"],
                 "N": n,
-                "gap": r["gap"],
+                "gap": r.get("gap", f"c0:{r.get('c0_base')}/K:{r.get('k_rescue')}"),
                 "backend": r["backend"],
                 "f_expected": f_p,
                 "f_expected_upper95": f_u,
