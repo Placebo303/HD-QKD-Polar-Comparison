@@ -1,0 +1,115 @@
+{
+  "status": "PASS_EXACT_REPORTED_SCALARS",
+  "primary_run_exit": 0,
+  "primary_log_exit_evidence": [
+    "EXIT=0"
+  ],
+  "numeric_scalar_comparisons": 13,
+  "mismatches": 0,
+  "source_files_read": [
+    "telemetry.json",
+    "split_manifest.json"
+  ],
+  "markdown_scalar_claims": 0,
+  "markdown_extraction_status": "empty matched fields; unsupported coverage remains UNKNOWN",
+  "source_ids_match": true,
+  "role_labels_match": true,
+  "historical_interpretation": {
+    "duration": "seconds from historical R1 processing telemetry, not decoder cost",
+    "split_counts": "historical acquisition frame counts keyed by split_*_frames; not independent complete-symbol group counts",
+    "current_role_purity_or_group_mapping": "UNKNOWN"
+  },
+  "comparisons": [
+    {
+      "field": "trio_wall_s",
+      "value": 531.0871458909824,
+      "reported_unit": "s",
+      "unit_interpretation": "historical telemetry key explicitly names seconds",
+      "exact_match": true
+    },
+    {
+      "field": "per_dataset_wall_s.T2-1M",
+      "value": 115.69715922200703,
+      "reported_unit": "s",
+      "unit_interpretation": "historical telemetry key explicitly names seconds",
+      "exact_match": true
+    },
+    {
+      "field": "T2-1M.split_train_frames",
+      "value": 311432,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    },
+    {
+      "field": "T2-1M.split_val_frames",
+      "value": 103810,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    },
+    {
+      "field": "T2-1M.split_hold_frames",
+      "value": 103812,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    },
+    {
+      "field": "per_dataset_wall_s.T2-1.5M",
+      "value": 169.10647595798946,
+      "reported_unit": "s",
+      "unit_interpretation": "historical telemetry key explicitly names seconds",
+      "exact_match": true
+    },
+    {
+      "field": "T2-1.5M.split_train_frames",
+      "value": 433287,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    },
+    {
+      "field": "T2-1.5M.split_val_frames",
+      "value": 144429,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    },
+    {
+      "field": "T2-1.5M.split_hold_frames",
+      "value": 144429,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    },
+    {
+      "field": "per_dataset_wall_s.T2-2M",
+      "value": 246.26944021901,
+      "reported_unit": "s",
+      "unit_interpretation": "historical telemetry key explicitly names seconds",
+      "exact_match": true
+    },
+    {
+      "field": "T2-2M.split_train_frames",
+      "value": 574609,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    },
+    {
+      "field": "T2-2M.split_val_frames",
+      "value": 191536,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    },
+    {
+      "field": "T2-2M.split_hold_frames",
+      "value": 191537,
+      "reported_unit": "unknown",
+      "unit_interpretation": "historical count stored under a *_frames key; not an independent-group count",
+      "exact_match": true
+    }
+  ]
+}

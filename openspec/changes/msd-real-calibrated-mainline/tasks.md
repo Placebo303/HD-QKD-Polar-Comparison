@@ -22,3 +22,4 @@ Future real-frame budgets and scientific gates remain applicable; no old grant i
 
 - [x] L1-L5 independent sender-reference outcome and native weighted-yield accounting; retained collection failure, import-only correction, fixed fake tests and read-only review accepted within accounting scope.
 - [ ] Freeze current-role metadata inventory scope and rederive common-volume native-tag power/cost before any decoder packet; old same-length/shared-tag power is not acceptance of the revised comparator.
+- [x] M limited metadata inventory: authorized four-file read, retained incomplete extraction, one explicitly adjudicated correction and independent verification of reported scalars. Historical VAL/HOLD exposure recorded; exact current grouping, unused subset, actual protocol and revised power/cost remain open.

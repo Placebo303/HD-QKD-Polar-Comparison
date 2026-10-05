@@ -1,0 +1,114 @@
+{
+  "documents": [
+    {
+      "name": "PRE_EXECUTE.md",
+      "kind": "markdown",
+      "fields": [],
+      "unsupported_fields": "UNKNOWN unless explicitly matched"
+    },
+    {
+      "name": "R1_RESULT.md",
+      "kind": "markdown",
+      "fields": [],
+      "unsupported_fields": "UNKNOWN unless explicitly matched"
+    },
+    {
+      "name": "telemetry.json",
+      "kind": "json",
+      "fields": [
+        {
+          "field": "trio_wall_s",
+          "value": 531.0871458909824,
+          "unit": "s",
+          "interpretation": "historical R1 processing duration; not decoder cost"
+        },
+        {
+          "field": "per_dataset_wall_s.T2-1M",
+          "value": 115.69715922200703,
+          "unit": "s",
+          "interpretation": "historical R1 per-dataset processing duration; not decoder cost"
+        },
+        {
+          "field": "per_dataset_wall_s.T2-1.5M",
+          "value": 169.10647595798946,
+          "unit": "s",
+          "interpretation": "historical R1 per-dataset processing duration; not decoder cost"
+        },
+        {
+          "field": "per_dataset_wall_s.T2-2M",
+          "value": 246.26944021901,
+          "unit": "s",
+          "interpretation": "historical R1 per-dataset processing duration; not decoder cost"
+        }
+      ]
+    },
+    {
+      "name": "split_manifest.json",
+      "kind": "json",
+      "fields": [
+        {
+          "field": "T2-1M.split_train_frames",
+          "value": 311432,
+          "unit": "unknown"
+        },
+        {
+          "field": "T2-1M.split_val_frames",
+          "value": 103810,
+          "unit": "unknown"
+        },
+        {
+          "field": "T2-1M.split_hold_frames",
+          "value": 103812,
+          "unit": "unknown"
+        },
+        {
+          "field": "T2-1.5M.split_train_frames",
+          "value": 433287,
+          "unit": "unknown"
+        },
+        {
+          "field": "T2-1.5M.split_val_frames",
+          "value": 144429,
+          "unit": "unknown"
+        },
+        {
+          "field": "T2-1.5M.split_hold_frames",
+          "value": 144429,
+          "unit": "unknown"
+        },
+        {
+          "field": "T2-2M.split_train_frames",
+          "value": 574609,
+          "unit": "unknown"
+        },
+        {
+          "field": "T2-2M.split_val_frames",
+          "value": 191536,
+          "unit": "unknown"
+        },
+        {
+          "field": "T2-2M.split_hold_frames",
+          "value": 191537,
+          "unit": "unknown"
+        }
+      ]
+    }
+  ],
+  "source_ids_or_labels": [
+    "T2-1.5M",
+    "T2-1M",
+    "T2-2M"
+  ],
+  "explicit_role_labels": [
+    "hold",
+    "train",
+    "val"
+  ],
+  "limits": [
+    "Field paths are preserved; units stay unknown unless named as seconds above.",
+    "Path-like values are omitted; no referenced paths are followed.",
+    "Frame-index arrays are not enumerated; no independent groups are inferred.",
+    "RSS, budget and status values are not extracted.",
+    "Unused status and source/role/frame grouping remain UNKNOWN absent explicit evidence."
+  ]
+}
