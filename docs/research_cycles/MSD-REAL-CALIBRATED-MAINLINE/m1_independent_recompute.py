@@ -62,6 +62,7 @@ def main() -> None:
         operating.append(
             {
                 "source": r["source"],
+                "arm": r.get("arm"),
                 "N": n,
                 "gap": r.get("gap", f"c0:{r.get('c0_base')}/K:{r.get('k_rescue')}"),
                 "backend": r["backend"],
@@ -70,6 +71,8 @@ def main() -> None:
                 "failures": int(r["failures"]),
                 "blocks": int(r["blocks"]),
                 "undetected": int(r["undetected"]),
+                "u1_mm_total": r.get("u1_mm_total"),
+                "n_rescue": r.get("n_rescue"),
             }
         )
     verdict = "PASS" if not mismatches else "FAIL"
