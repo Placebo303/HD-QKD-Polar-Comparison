@@ -188,17 +188,20 @@ def _real_init(source: str):
     table = load_train_table(source)
     _R["model"] = _bcp(table, encoding="NATURAL", order="LSB_FIRST")
     _R["bundle"] = _s2c.bind_empirical_bundle(derive_bundle(table))
-    pinned = _p1.construct_and_pin("P1S1-R1", _p1.PRODUCTION_CONSTRUCT["P1S1-R1"],
-                                   _p1.production_rank_fn)
+    # S-3''' optimum m=224 (fresh A208-family construction + gates), NOT the
+    # frozen A208 (m=200/208). Rescue = nested rows[224,232).
+    from comparison_bench.src.comparison_bench.formal_ir.msd_s3triple_u2grid import (  # noqa: E402
+        build_point as _build224,
+    )
+    info = _build224(224, 20263835)
+    _R["construction"] = info
     field = _GF.create(32)
     _R["field"] = field
     _R["dense"] = {}
-    for key, m in (("base", 184), ("full", 208)):
-        trips = [(int(r), int(c), int(v)) for r, c, v in pinned["full"]["triples"]
+    for key, m in (("base", 224), ("full", 232)):
+        trips = [(int(r), int(c), int(v)) for r, c, v in info["triples"]
                  if int(r) < m]
         _R["dense"][key] = _peg.sparse_to_dense(trips, N, m, field)
-    _R["groups"] = split_groups(N, G_U1)
-    _R["mat_u1"] = spc_matrix(_R["groups"], N)
     _R["groups"] = split_groups(N, G_U1)
     _R["mat_u1"] = spc_matrix(_R["groups"], N)
     _R["_qq"], _R["_v28"], _R["_b2f"], _R["_s2c"] = _qq, _v28, _b2f, _s2c
@@ -230,7 +233,7 @@ def _real_one(args) -> dict:
                                if xh is not None else None),
                      "reconstruction_ok": bool(res.get("reconstruction_ok", False))})
     u2ok = bool(outs[0]["exact_match"]) or (len(outs) > 1 and bool(outs[1]["exact_match"]))
-    l_u2 = 184 if len(outs) == 1 else 208
+    l_u2 = 5 * (224 if len(outs) == 1 else 232)
     if not u2ok:
         return {"block": blk, "u2_ok": False, "exact_full": False,
                 "undetected": False, "L_u2": l_u2, "L_u1": 0, "u1_extra": 0}

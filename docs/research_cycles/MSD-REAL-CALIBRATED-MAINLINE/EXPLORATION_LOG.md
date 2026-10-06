@@ -424,3 +424,22 @@ dict-contract tested on synthetic arrays, no real reads) for S-5; S-5
 Pre-EXECUTE drafted (R1 originals, re-test label, frozen command/budget/root,
 G-1 tension honestly stated: proxy predicts ~1.9, gate likely missed; value =
 first real full-symbol NB number) for user confirmation — NOT executed.
+
+CORRECTIONS (2026-10-06, user review, append-only):
+C1. S-3'' optimum mis-selected: composed m=184 f=1.972 is WORSE than the measured
+m=200 row f=1.9417. Optimum reverts to m=200 measured until S-3''' re-measures.
+Lesson (E4 pattern): select optima from measured rows, not composed projections.
+C2. m≤208 cap REMOVED: leftover of the discarded f≤1.3-certification A208 gate.
+Rescue accounting = actual appended rows (no (208−m)×5 formula). S-3''' grid
+u2 m ∈ {200,208,216,224,232,240} needs construction beyond frozen A208.
+C3. "Polar row" RELABELED: the S-4 sibling-tables row is "sibling diff_pmf
+prior + 本仓译码链", NOT a Polar control. Same-data Polar control is still
+MISSING — registered honestly, not claimed.
+Self-correction on process (user: why the same kind of mistake again): second
+E4-shaped error this session (unconditional u1 codes; composed optimum over
+measured row; G-1 feasibility verdict before conditional budgets). Common root:
+optimizing for narrative closure instead of computing the conditional quantity
+first. Standing rule added: freeze budgets/rankings from measured rows and
+conditional quantities; feasibility verdicts only after both. Better-plan
+latitude noted: propose a better plan when one exists instead of grinding a
+poor frozen one (user instruction).
