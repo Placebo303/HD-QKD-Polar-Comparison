@@ -3,7 +3,8 @@
 - 必读：`AGENTS.md` → `docs/REBOOT_HANDOFF_20261004.md`（R1–R9）→
   `docs/ROADMAP_20261006_REVIEW.md`（本轮审查与路线，新增 R10–R13，优先于一切旧状态行）。
 - 现状一句话：**没有任何方法在真实数据上完成完整符号协调**（NB u2 口径撤回后）。
-- 当前执行：S-0 更正记录 → S-1 失配代理+G-0 → S-2 稳健先验 ∥ S-3 NB加u1层 ∥ S-4 Polar对照 → S-5 pend。
+- 当前执行：S-0 完成提交；S-1 代理 G-0 通过（修正后）；S-2 关闭为实测阴性（无稳健先验达标）；
+  S-3 全符号 NB f=4.02（代理）；S-4 sibling 行落地（同效限结果一致）。S-5 待 Pre-EXECUTE。
 - 主度量：带期望良率的 f，**完整符号口径**（R11）；零失败认证句禁用。
 - parked：`COMMON_VOLUME_SCOPE.md`（G-ENV/角色）；`ROADMAP_20261006_DIMBW.md`（等 G-1）；
   `M6_PAPER_PACKAGE.md`（组装草稿，含撤回行）。
