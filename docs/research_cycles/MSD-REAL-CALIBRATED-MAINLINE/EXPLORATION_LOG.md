@@ -566,6 +566,32 @@ Applicability: 0dB PASSES all four criteria (unused/same-family/SER-order/
 mass 266k ≈ R1 TRAIN scale) → clean OOS arm READY (test use; training use
 needs route decision). 4dB marginal (115k). 10dB test-only (31k thin).
 Joint counts saved per file (prior-mass-use assessment material).
+
+P-batch review amendments (F1–F9, wording/citation only, no rerun):
+F1 restated (binding): full-m1_600 4/300 and full-m1_1200 4/300 with f=1.3816/
+1.4269 are UNDECIDED (single-digit; Wilson uppers 1.6126/1.6569 omitted before,
+now attached); "margin no help" WITHDRAWN as a general conclusion (kept only
+as the evidenced same-block fact below).
+F2 scoped: P-a decode rows are exact_full full-symbol with und 0 and vw 0
+(artifacts carry undetected:0 + valid_wrong_total:0 per row).
+F3 evidenced: failing blocks identical across m1_600/m1_1200 ([51,80,110,294],
+blocks_pa.jsonl; same streams) — "same 4 blocks" stands with provenance.
+F4 cited: deployment-disjoint contrast = workspace/s1_proxy/s1_20261006/
+s2_t3.json T3-unfloored arm (full-TRAIN prior vs HOLD channel, 60/60 fail);
+R10-overlap caveat stands either way.
+F5 completed: LL eval n=157204 (half_a pairs), eps=1e-9 (measurement floor,
+stated); "coverage > density" softened to observed (full row per_plane[2:]
+collapses to 0.0 vs ~0.001 elsewhere — structural, mechanism open).
+F6 attached: P-b diagnostics re-executed as script
+docs/.../MSD-REAL-CALIBRATED-MAINLINE/pb_diagnostics.py -> workspace/pb_diag.json
+(bucket KL 5e-5..9e-5, cross-diff 1M~1.23-1.31 / pair 0.0, offsets R1 record).
+F7 moved: "und 0/vw 0 both grids" belongs to P-c (JSON-confirmed); P-d has no
+decode attempted — und/vw N/A (category error to state 0 there).
+F8 command recorded (executed P-d):
+D:\\software\\Anaconda3\\envs\\qkd_env\\python.exe -m comparison_bench.src.comparison_bench.formal_ir.msd_pd_u4char --output-root workspace/pd_u4/pd_20261006
+(fresh-root enforced in code by SystemExit-if-exists; budget 1800 s, actual ~4 min).
+F9 reconciled: msd_pa_losscurve.py docstring "3 configs" is stale — executed 4
+(q14/half/full-m1_600 + full-m1_1200); module scope = LL curve + decode mapping.
 und 0/vw 0 both. Density hypothesis REFUTED as stated (not d=1024-specific;
 mismatch defeats MSD across grids). Limitation: no per-plane breakdown logged
 (failure stage unidentified); unit bug found+fixed (float64 1.0-1e-300 clip
