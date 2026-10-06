@@ -3,9 +3,9 @@
 - 必读：`AGENTS.md` → `docs/REBOOT_HANDOFF_20261004.md`（R1–R9）→
   `docs/ROADMAP_20261006_REVIEW.md`（本轮审查与路线，新增 R10–R13，优先于一切旧状态行）。
 - 现状一句话：**没有任何方法在真实数据上完成完整符号协调**（NB u2 口径撤回后）。
-- 当前执行：T 审查后续 P 批已关闭——P-a LL 未饱和（full 质量 4/300 判未定，R10 重叠警告）；
-  P-b 无位置依赖、1M 差分不同（1.23 nats）、1.5M/2M 相同；P-c 变粗全败（密度假设否决）；
-  P-d U-4 表征完成（0dB 臂就绪：266k 对，SER 0.248）。T-5 条件仍不满足。等你确认 push 与下一步。
+- 当前执行：D 批已关闭——D-1 通过（7/300 有限长），D-2 差分胜出 + H1 修好，
+  D-3 公平代理 NB 修正差分 0/100、MSD 全败、P-c 全败；池根治（补 __init__）。
+  D-4 Pre-EXECUTE 待确认（0dB 干净 OOS，G-1a）。等你确认 push/D-4 与下一步。
 - 主度量：带期望良率的 f，**完整符号口径**（R11）；零失败认证句禁用。
 - parked：`COMMON_VOLUME_SCOPE.md`（G-ENV/角色）；`ROADMAP_20261006_DIMBW.md`（等 G-1）；
   `M6_PAPER_PACKAGE.md`（组装草稿，含撤回行）。
