@@ -405,6 +405,21 @@ bootstrap-proxy scope (proxy channel is a sparse histogram that may favor
 zero-cell pins over smoother alternatives); MSD stays parked, no KILL.
 G-1 attainability is UNKNOWN pending S-3′/S-3″ measurement, not "unmeetable".
 
+S-5 EXECUTED (conditionally authorized; both conditions verified in
+S5_PREEXECUTE.md): NB full-symbol chain (S-3''' optimum m=224 fresh build
+fc=0/rank=224 + u1 SPC-10/K16) on real VAL/HOLD 205/287/383 superframes, ~10 min
+pooled wall (far inside 5400 s). Results: T2-1M 7/205 f=1.915 (up 2.299);
+T2-1.5M 8/287 f=1.787 (up 2.067); T2-2M 6/383 f=1.647 (up 1.839); und 0 all;
+E_L≈1192-1197. Consistency vs proxy prediction (FER 3-7%, f~1.9): 1M
+CONSISTENT, 1.5M BORDERLINE-favorable, 2M OUT-on-point/BORDERLINE-by-interval
+(favorable direction). G-1: point gate MISS x3, valid-wrong MET x3 → G-1 NOT
+passed (recorded split, no blending). First real full-symbol NB numbers ever.
+Pre-RESULT PASS (R13 u1+u2 coverage verified; E_L/f recomputed; caveats:
+rok_u2 rescue-path narrowing code note, T2-2M prediction-miss note).
+RESULT + acceptance solidified. S-5 closeout: S-3''' optimum validated as the
+executed config; G-1 threshold tension (f≤1.40 vs measured ~1.6-1.9) referred
+to route (not re-decided here).
+
 S-3′ chained-u1 result (Tier1, B=100): u1 disclosure mean 47.5 b (5×SPC-10,
 ZERO rescue blocks — conditional budget H(U1|B,U2)≈5 b measured first, ≤75
 target met with margin); full-symbol 5/100 fail, und 0, E_L=1064.3, f=1.9417.
