@@ -680,3 +680,33 @@ D-3 verdict: fair ground restores NB (corrected-diff 0/100 vs plug-in 23/100)
 but NOT MSD (all fail; smoothing worsens wrong-convergence). Decoder asymmetry
 recorded: GF32-QSPA exploits smoothed priors; binary-BP needs sharp correct
 pins. Density still refuted on fair ground (P-c both grids fail).
+
+D-batch review amendments F1–F7 (wording/citation + evidence retention):
+F1 fixed: d1_summary.json verdict patched to PASS with note (finite-length
+~2% both stages + NB 0/300; auto-FAIL withdrawn).
+F2 fixed: D-1 probe re-executed WITH artifact
+workspace/d1_geniediff/d1_20261006/d1_probe.jsonl (B=100 exact priors, 2/100,
+first-fail {0:1, 1:1}); cited as UNDECIDED-supporting only (1+1 events cannot
+prove mechanism; overall PASS rests on artifacted 293/300 + NB 0/300 + und/vw 0).
+All D-batch fails/f are exact_full full-symbol (MSD chain 10 planes / NB u2exact;
+P-a MSD exact_ok; undetected isolated, 0 except stated rows).
+F3 fixed: revised G-0 re-executed WITH artifacts in
+workspace/d3_physproxy/d3_20261006c/ (d3_summary.json g0 section: PASS,
+plane1_pass 98/100, und 0; G-0 block rows in blocks_d3.jsonl cfg g0-plugin).
+F4 fixed: MSD block records retained in c-root blocks_d3.jsonl (2400 lines:
+g0 100 + MSD 900 + NB 200 + P-c 1200; cfg-keyed heterogeneous schema: MSD/P-c
+use exact_ok, NB uses exact_u2, all carry undetected). Original b-root summary
+numbers replicated EXACTLY in rerun (plugin/floor/diff und 0/35/226; NB 23/0;
+P-c f 17.16/14.06/24.92/18.58) — b-root superseded by c-root (fully evidenced).
+Data-loss root cause logged: unconditional jl.unlink() deleted G-0/MSD rows in
+--nb-pc-only mode; replaced by refuse-to-overwrite (fresh-root rule).
+F5 recorded: NB ran B=100 serial per prior (deviation from B>=300: Windows spawn
+pool broken in this repo layout — namespace-package re-import; evidence: spawn
+tracebacks in job logs; D-1 pool success was pre-existing frozen code path).
+NB 0/100 carries Wilson upper95 0.037 (d3_summary.json); cited as restoration
+within that ceiling, not as secured zero.
+F6 schema documented (see F4 parenthetical).
+F7 fields completed here: D-3 MSD und/vw per arm (0/0, 35/278, 226/1774, B=300
+each, exact_full); NB und 0 both arms (B=100 each, u2-exact); P-c und/vw 0 all
+four cells (B=300 each, exact_full); G-0 und 0 (B=100); D-1 und/vw 0 (B=300),
+probe 2/100 UNDECIDED-grade.
