@@ -348,6 +348,23 @@ plane-1 collapse + NB-u2 band + u1 scale (all met) with valid-wrong monitored
 pilot; three-source expansion after S-2 works. No new real frames read for
 targets (M5 block JSONLs only).
 
+S-2 closeout (validation NEGATIVE, mechanism measured): CV winner floored
+plug-in 1e-4 (held-out LL -0.66 vs lap -1.01; diff-pmf worse). Tier1 validation
+(B=100 unless noted): floored fail ~90 + und ~30 + vw ~150-240 (wrong-
+convergence: DANGEROUS direction); selective-zero floor 52-53/60 + und 20-26;
+diff-pmf/Laplacian/gauss/add-alpha all 100/100 open; rate margin flat
+(plane-0 C0 3000/4000 AND plane-1 m1 1200/2400/4800 all ~45-60/60 fail);
+contradiction-aware rescue 60/60 fail; disclose-ALL-zero-cells (15.6k bits,
+absurd cost) 4/20 fail; conflict-peeling 10/30 exact at mean 3.3k disclosed
+bits. Genie control 0/60 (code fine). T3 cross-time confirms: unfloored
+reproduces M5 (60/60 p1fail), NB T3 full-FER 41/60 (0.68) matches M5-real 0.64
+scale. Lessons: (1) CV-LL does not predict decode (floor best-LL/worst-decode);
+(2) zero-cell pins are load-bearing — removing them (floor) causes wrong
+convergence, disclosing them costs ~15k; (3) mismatch defeats plane-1 BP at any
+tested margin. S-2 target (f<=1.30 + vw=0) NOT MET — no robust prior promoted.
+Recommendation: conflict-peeling as partial mitigator (measured 33% at ~3.3k),
+plane-1 mismatch-tolerant redesign, or larger training mass (untested).
+
 F-S1-2 provenance record (second-review remediation): NB rows occupy
 blocks_s1.jsonl lines 101–220 (T1: R1 101–160, R2 161–220) and 321–440
 (T2: R1 321–380, R2 381–440); lines 101/102/321 verified carrying exact_u2 +
@@ -355,3 +372,21 @@ u1_mismatches (+exact_full, undetected, rescued, m_rows). Full-file
 aggregation per arm exact_u2=false: T1-R1 3, T1-R2 5, T2-R1 7, T2-R2 8 —
 exactly s1_u2fer.json (3/60, 5/60, 7/60, 8/60). MSD rows (1–100 T1, 221–320
 T2) carry valid_wrong_stages + plane1_failed.
+
+S-4 closeout (re-review remediation): (1) gate wording corrected — enforced gate
+is 0.90 ≤ agr ≤ 1.0; OBSERVED agreement 19967/20480 ≈ 0.97495 (marginally BELOW
+the 0.975 nominal label; log no longer claims 0.975 as the gate). (2) 同效
+conclusion (written here): S-2 diff-pmf arms fail OPEN 100/100 while S-4
+sibling-tables chain fails with heavy wrong-convergence (742 valid-wrong,
+6–8 planes/block, undetected 0 only because full never reached) — OUTCOME
+agreement (both fail under Tier1 mismatch) with explicit MODE difference; NO
+code/prior agreement claimed (different prior paths by construction). (3)
+Ceilings recorded with the row: at FER=1, f=12.53 is the arithmetic identity
+(N·H_A+64)/denom — the match with M5-real T2-1M f=12.53 is FORCED, not
+cross-validation; valid_wrong_total=742 is a wrong-convergence danger signal
+in the floored-prior family and must travel with the row, never summarized as
+"0 undetected hence safe". S-2 downgrade record: genie 0/60 and all
+non-artifacted mechanism numbers (margin ladders, rescue/disclose/peeling,
+selective-zero labels, Tier1 attribution, NB-u1 S-2 comparison) travel as
+REPORTED, never measured; packet-required NB-u1 S-2 rows unevidenced; no
+robust prior cited from S-2 beyond the review ceiling.

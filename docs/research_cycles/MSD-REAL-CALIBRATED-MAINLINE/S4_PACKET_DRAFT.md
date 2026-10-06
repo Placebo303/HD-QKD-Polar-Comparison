@@ -5,7 +5,9 @@
 
 ## 设计
 用隔壁 `low_dim_opt.simulation.msd_eval`（按其README配置，不改代码）在S-1代理的
-(1024,200) Tier表上跑；输出与MSD、NB同口径（完整符号，R11）的一行。
+T2-1M Tier表（N=16384，half_a bootstrap信道 + half_b先验，R10）上跑；
+（草案原文"(1024,200)"为笔误，实际执行为N=16384 Tier1；以此为准。）
+输出与MSD、NB同口径（完整符号，R11）的一行。
 若其代码不支持d=1024：记录确切原因（import错误/维度断言/数据接口），改用其模块
 （msd_conditional/scl核心）拼最小runner（≤100行，只做已验证调用）。
 
