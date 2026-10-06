@@ -241,7 +241,7 @@ def main() -> None:
     out["L_base_shared"] = int(sum(_ml)) if _ml != [0] else -1
     jl = root / "blocks_d3.jsonl"
     if jl.exists():
-        jl.unlink()
+        raise SystemExit(f"refusing to overwrite {jl} (append-only evidence; use a fresh root)")
     bp = functools.partial(make_bp_decoder, max_iter=200)
 
     def run_msd(prior, n_blocks, seed, tag, matrices, factories, l_base):
