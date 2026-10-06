@@ -609,3 +609,74 @@ necessarily channel-shape difference (P-b re-tests post-alignment).
 U-4 approved by user (push done ordinary ff c169a708..216dfd2d; "同意u4"):
 2026.1.23 trio characterization (P-d, zero-decode) authorized; frozen
 command/budget recorded at execution.
+
+P-REVIEW corrections (2026-10-06, append-only, docs/ROADMAP_20261006_P_REVIEW.md):
+R1. Bootstrap-proxy bias scope: S-1 proxy channel = TRAIN-a SPARSE empirical
+histogram (only emits seen pairs, with sampling spikes); it favors support-
+sharing plug-in priors and systematically penalizes smoothed priors. G-0 only
+validated fidelity for PLUG-IN configs. Therefore the following negatives hold
+ONLY inside the bootstrap proxy and must NOT generalize to the real channel:
+S-2 "all smoothed priors fail"; P-b "no new winner"; P-c "d=512/256 all fail".
+R2. Log line 550 ("S-2 diff-pmf failure is sparse-cell structure") RELABELED as
+SUSPECTED PROXY BIAS: zero-cells LOOK load-bearing inside the proxy (channel
+shares plug-in support); on real data zero-cells are the failure mechanism
+itself (M5 52/52). The inference direction may be an artifact of the proxy.
+R3. P-c rate check: rates WERE reallocated per new entropy (m_list from
+per-grid measured h_k + same per-symbol GAP rule; code msd_pc_rebin.py) — the
+P-c verdict is NOT voided on this axis; it is scoped by R1 instead (proxy bias
+may still punish the smoother rebinned priors).
+
+D-2 teammate reconciles S-2 diff-vs-plugin LL gap (2026-10-06, EXPLORE zero-decode, TRAIN half_a/half_b 2-fold CV on real pair lists, P(a|b) bits/sym; evidence workspace/d2_reconcile/d2_20261006/d2_summary.json):
+L1. Candidates pooled: (a) unsmoothed windowed diff g 0.8032 b/sym zh 0.0; (b) g x P(a) 0.8048 b/sym zh 0.0; (c) plug-in floor-1e-4 0.9515 b/sym zh 0.0 (post-floor; raw support miss ~0.001) — diff BEATS plug-in by ~0.15b, reversing S-2 line-352.
+L2. Coincidence window (200ps/200ps bins) = deltas {0,1,1023} holds 100pct fit mass on 3/1024 cells (g~0.762/0.236/0.0014); held-out zero-hit 0.0 both folds — no leakage possible without smoothing, none needed.
+L3. S-2 recipe replicated at 9.31 b/sym: ll_diffpmf/diffpmf_model feed difference_pmf output (a PMF, sums to 1) into smooth_difference_counts which expects RAW counts, giving (pmf+alpha)/(1+alpha*1024) ~= near-uniform for every tested alpha (99.6pct mass forced off-window vs 0.65pct at correct count scale, where LL would be 0.81b).
+L4. H1 WINS: the S-2 LL deficit is smoothing mass leaked off the 3-delta window, amplified ~1e5x by the pmf/count scale slip; correctly-scaled or zero smoothing erases the gap.
+L5. H2 LOSES: direction convention (b-a)%d consistent across sibling difference_index, pb_diagnostics, S-2 joint build and S-2 LL (no flip anywhere); pa near-uniform (L1 0.06), (b)-(a)=+0.0016b noise.
+L6. H3 UNDECIDED from LL evidence (no decode-path bug NEEDED for the LL gap); confound flagged: MSD diffpmf_model shares the same over-smoothing, so its decode failures cannot be read as path bugs until D-1 genie re-tests with correct scale.
+
+D-1/D-3 status + H1 fix (2026-10-06): OUR code had the same pmf/count slip
+(msd_s2_prior.py ll_diffpmf + diffpmf_model) — FIXED (scale delta pmf by fit
+mass before smoothing); verified: smoothed g concentrates on window
+(0.757/0.235/0.001), corrected LL 0.8126 b/sym (was ~9.31). S-4's sibling-side
+builder call passes RAW counts (correct usage) — S-4 row stands, unaffected.
+VOID (implementation defect, not science): all S-2 diff-pmf validation rows
+(100/100 open fails) and the lap/gauss comparisons that shared the slip;
+floor-vs-diff CV ranking from s2_select.json is VOID for the diff family
+(floor LL -0.66 stands as plug-in-family measurement). S-2's negative now rests
+ONLY on: floored plug-in wrong-convergence + add-alpha open fails (genuine
+measurements). D-1 genie-diff running (unaffected: raw empirical g, no
+smoothing); D-3 G-0 plug-in running (unaffected).
+
+D-1 verdict CORRECTED (auto-FAIL was over-strict): MSD genie-diff 7/300
+(und 0, vw 0) + NB genie-diff 0/300. Failure-location probe (B=100, exact
+priors): first-fail stages {0:1, 1:1} — BOTH planes fail occasionally with
+EXACT priors. Conclusion: ~2% finite-length BP failures at this operating
+point, NOT a diff-path defect. D-1 = PASS (path intact; NB perfect; no
+valid-wrong). The diff-prior decode path is vindicated; S-2's diff failures
+were the smoothing-scale bug, confirmed end to end.
+D-3 G-0 revised PASS: plug-in prior on smooth diff channel passes plane-1
+98/100 (bias theory confirmed from the other side — no contradictions, no
+collapse). Original collapse-gate was unachievable-by-construction on a smooth
+proxy; D-3 reframed as FAIR GROUND for prior comparison (fixed disclosure).
+D-3 MSD re-eval (B=300, shared matrices): plugin 300/300 open fail;
+floor1e-4 300/300 + und 35/vw 278; corrected-diffpmf-a1 300/300 + und 226/
+vw 1774. Pattern: smoother prior → more confident-wrong convergence; NONE
+decodes cross-half even on a shift-invariant channel. NB + P-c arms pending
+(pool infra fight resolved via serial fallback).
+
+D-1 verdict CORRECTED (auto-FAIL was over-strict): MSD genie-diff 7/300
+(und 0, vw 0) + NB genie-diff 0/300. Failure-location probe (B=100, exact
+priors): first-fail stages {0:1, 1:1} — ~2% finite-length BP failures at this
+operating point on BOTH stages, NOT a diff-path defect. D-1 = PASS.
+D-3 complete (physical proxy, diff channel, TRAIN-b priors, fixed disclosure):
+G-0 revised PASS (plane-1 98/100 pass with mismatched plug-in — bias theory
+confirmed from the other side).
+MSD B=300: plugin 300/300 open fail und 0; floor 300/300 und 35 vw 278;
+corrected-diff 300/300 und 226 vw 1774 (smoother prior -> confident-wrong).
+NB B=100 serial: plugin 23/100 und 0; corrected-diff 0/100 und 0.
+P-c reallocated: d512 plugin/diff 300/300 (f 17.16/14.06); d256 plugin/diff
+300/300 (f 24.92/18.58); und 0 all.
+D-3 verdict: fair ground restores NB (corrected-diff 0/100 vs plug-in 23/100)
+but NOT MSD (all fail; smoothing worsens wrong-convergence). Decoder asymmetry
+recorded: GF32-QSPA exploits smoothed priors; binary-BP needs sharp correct
+pins. Density still refuted on fair ground (P-c both grids fail).
