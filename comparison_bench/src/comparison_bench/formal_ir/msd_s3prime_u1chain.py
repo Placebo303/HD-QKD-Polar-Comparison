@@ -242,7 +242,7 @@ def _real_one(args) -> dict:
     low5 = [((u2hat >> i) & 1).astype(np.uint8) for i in range(5)]
     high_rec = []
     u1_ok, u1_extra, u1_syn_ok = True, 0, True
-    rok_u2 = bool(outs[0].get("reconstruction_ok", False))
+    rok_u2 = bool(outs[-1].get("reconstruction_ok", False))
     for bit in range(5, 10):
         prev = np.stack(low5 + high_rec, axis=0)
         q = model.query(bit, bob, prev)

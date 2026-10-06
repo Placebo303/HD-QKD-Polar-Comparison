@@ -467,3 +467,13 @@ first. Standing rule added: freeze budgets/rankings from measured rows and
 conditional quantities; feasibility verdicts only after both. Better-plan
 latitude noted: propose a better plan when one exists instead of grinding a
 poor frozen one (user instruction).
+
+T-0 closeout: (1) rok_u2 single-line fix (outs[0]->outs[-1] in _real_one;
+regression covered by existing wiring test + S-5 review note; nu=0 both runs,
+no numerical impact). (2) U-4 read-only inventory done (U4_INVENTORY.md):
+metadata + repo-grep only, zero event reads, zero decodes. Frozen criteria
+first. Result: clean-OOS candidates = 2026.1.23 Type2_1M 0/4/10dB ttbin trio
+(same family, unused); 2026.1.5 ttbin group config-unknown backup; heralded_g2
+and xlsx/opju excluded (wrong physics/no events); 2026.1.12/13/20 excluded
+(partially used). SER/rate comparability UNKNOWN pending characterization
+(separate Pre-EXECUTE, not this batch).
