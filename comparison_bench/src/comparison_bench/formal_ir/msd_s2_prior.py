@@ -43,7 +43,7 @@ def ll_diffpmf(fit: np.ndarray, held_a: np.ndarray, held_b: np.ndarray,
     sys.path.insert(0, "D:/Code/HD-QKD_Polar_Release")
     from low_dim_opt.core import msd_conditional as mc
     g = np.asarray(mc.smooth_difference_counts(
-        mc.difference_pmf(fit, Q), Q, alpha), dtype=np.float64)
+        mc.difference_pmf(fit, Q) * fit.sum(), Q, alpha), dtype=np.float64)
     d = (held_b - held_a) % Q
     p = (1 - beta) * g[d] + beta / Q
     return float(np.log(np.maximum(p, 1e-300)).sum() / held_a.size)
@@ -345,7 +345,7 @@ def diffpmf_model(fit_table: np.ndarray, alpha: float):
     )
     tot = fit_table.sum()
     g = np.asarray(mc.smooth_difference_counts(
-        mc.difference_pmf(fit_table, 1024), 1024, alpha), dtype=np.float64)
+        mc.difference_pmf(fit_table, 1024) * tot, 1024, alpha), dtype=np.float64)
     pa = fit_table.sum(axis=1) / tot
     aks = np.arange(1024)
     joint = pa[:, None] * g[(aks[None, :] - aks[:, None]) % 1024]
