@@ -477,3 +477,37 @@ first. Result: clean-OOS candidates = 2026.1.23 Type2_1M 0/4/10dB ttbin trio
 and xlsx/opju excluded (wrong physics/no events); 2026.1.12/13/20 excluded
 (partially used). SER/rate comparability UNKNOWN pending characterization
 (separate Pre-EXECUTE, not this batch).
+
+T-1 curve landed (fixed m=224 chain, Tier1 channel, B=60): prior mass
+39k->79k->158k->315k pairs gives fails 3,3,2,0 and f 2.092/2.092/1.908/1.538.
+Clean monotone: 8x mass saves ~0.55 f. Undetected 0 throughout. T-1 answers its
+question affirmatively (more mass helps a lot) and supports T-2/T-3 value.
+T-2 zero-decode screen: 3-way merge REFUSED (T2-1M cross-LL -76..-115 nats,
+offset -50 vs +50 the likely cause); 1.5M+2M pair viable by LL (drop ~0.06
+nats). T-2 closed: no 3-way merge; pair deferred (needs own proxy).
+T-3 full launched (batched accumulation, 3 arms x 200 blocks).
+
+T-3 done: phases fail IDENTICALLY across arms (1,0,1,1,1,0,0,3 per phase for
+0.25/0.5/1.0 — same bootstrap blocks via shared seeds). Accumulation 64k→237k
+shows NO measurable gain over static full prior (158k, same phase pattern);
+block-hardness dominates, prior-independent at these masses. TRAIN-sacrifice
+answer comes from T-1 instead (39k→315k: 3,3,2,0 fails). Accumulation harmless
+(zero leakage by construction) but benefit unproven at this scale — T-3 closes
+neutral-to-negative. SKR side: no extra disclosure from merging; sacrifice
+relief unmeasured.
+T-4 full launched (3 step-grids tune B=60 + best confirm B=100, disjoint seeds).
+
+T-4 done with a base-confound caveat: tune (8,8) f=11.68 (55 fail) / (8,16)
+f=8.94 (40 fail) / (16,16) f=5.86 (23 fail); confirm (16,16) stream-B f=7.57
+(54/100). Round_hists recorded (rescue usage grows with step size).
+CAVEAT (material, self-found): T-4's base r0 = nested rows[0,224) of a fresh
+256-row PEG, NOT S-3'''s fresh-224 matrix — nested prefixes are not optimized
+subcodes (base fails ~55/60 here vs 3/100 there). So absolute f is NOT
+comparable to S-3'''; the step RANKING ((16,16) best on both streams) stands
+as schedule-design evidence within this family only. Rescue-rate direction
+confirmed (bigger steps rescue more). No rerun: diminishing returns grinding a
+confounded comparison; future rescue work must use fresh-per-rung matrices
+(P1 cold-full-redecode mirror). Undetected 0 throughout (all streams).
+
+T-4 first attempt FAILED pre-decode (tier_tables vs tier_pairs filename slip);
+single engineering fix, science unchanged; rerunning.
