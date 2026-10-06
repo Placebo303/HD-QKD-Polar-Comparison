@@ -137,6 +137,8 @@ def build_all(root: Path) -> dict:
         np.savez_compressed(root / f"{source}_tier_pairs.npz",
                             a_half_a=a[ma].astype(np.int64),
                             b_half_a=b[ma].astype(np.int64),
+                            a_half_b=a[~ma].astype(np.int64),
+                            b_half_b=b[~ma].astype(np.int64),
                             a_full=a.astype(np.int64),
                             b_full=b.astype(np.int64))
         manifest[source] = {"n_a": int(ma.sum()), "n_b": int(mb.sum()),
@@ -151,6 +153,7 @@ def load_tier_pairs(root: Path, source: str, which: str) -> tuple[np.ndarray, np
     """Bootstrap pair arrays (empirical joint preserved exactly)."""
     z = np.load(root / f"{source}_tier_pairs.npz")
     key = {"half_a": ("a_half_a", "b_half_a"),
+           "half_b": ("a_half_b", "b_half_b"),
            "full": ("a_full", "b_full")}[which]
     return (np.asarray(z[key[0]], dtype=np.int64),
             np.asarray(z[key[1]], dtype=np.int64))
