@@ -420,6 +420,15 @@ RESULT + acceptance solidified. S-5 closeout: S-3''' optimum validated as the
 executed config; G-1 threshold tension (f≤1.40 vs measured ~1.6-1.9) referred
 to route (not re-decided here).
 
+S-3''' review FAIL (records only): runner s3t_summary.json carried wrong-unit
+E_L/f (rows not bits; f<1 impossible values) beside the correct recompute.
+Fixed without rerun: main() now charges 5*mean(L_u2); s3t_summary.json
+OVERWRITTEN bits-correct (wrong-unit copy quarantined as .bak-wrong-units in
+same root); rows now carry base_rank (=m, gated at build by exit-on-mismatch)
++ seed (=20263611+m) + provenance pointer. Optimum m=224 stands but is
+noise-fragile (3% margin, single-block flip; uppers overlap) — recorded, and
+S-5 inherits that fragility note.
+
 S-3′ chained-u1 result (Tier1, B=100): u1 disclosure mean 47.5 b (5×SPC-10,
 ZERO rescue blocks — conditional budget H(U1|B,U2)≈5 b measured first, ≤75
 target met with margin); full-symbol 5/100 fail, und 0, E_L=1064.3, f=1.9417.

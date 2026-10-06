@@ -231,7 +231,7 @@ def main() -> None:
         nb = len(recs)
         nf = sum(0 if r["exact_full"] else 1 for r in recs)
         nu = sum(1 for r in recs if r["undetected"])
-        e_u2 = sum(r["L_u2"] for r in recs) / nb
+        e_u2 = sum(5 * r["L_u2"] for r in recs) / nb  # L_u2 stored in ROWS
         e_u1 = sum((r["L_u1"] + r.get("u1_extra", 0)) if r.get("u2_ok") else 0
                    for r in recs) / nb
         e_l = e_u2 + e_u1
@@ -240,6 +240,7 @@ def main() -> None:
         kept = N * scalars["H_A"] - e_l
         f_p = (e_l + TAG_BITS + kept * fer) / denom
         rows.append({"m_base": m_base, "four_cycles": info["four_cycles"],
+                     "base_rank": info["base_rank"], "seed": info["seed"],
                      "blocks": nb, "failures": nf, "undetected": nu,
                      "E_u2": e_u2, "E_u1": e_u1, "E_L": e_l, "FER_exact": fer,
                      "FER_wilson_upper95": wilson_upper(nf, nb),
