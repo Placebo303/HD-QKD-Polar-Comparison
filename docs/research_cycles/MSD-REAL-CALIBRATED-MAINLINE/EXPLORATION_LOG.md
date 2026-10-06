@@ -511,3 +511,26 @@ confounded comparison; future rescue work must use fresh-per-rung matrices
 
 T-4 first attempt FAILED pre-decode (tier_tables vs tier_pairs filename slip);
 single engineering fix, science unchanged; rerunning.
+
+T-batch review amendments (F1–F6, wording/citation only, no rerun):
+F1 corrected: step ranking (16,16) best on TUNE stream A only (fails 23 vs 40
+vs 55; f 5.86 vs 8.94 vs 11.68); confirm stream B tested best-config only
+(54/100, f=7.57 — no B-side ranking). All T-batch fails/f counts are
+exact_full full-symbol (R13: u2-exact AND all-planes-exact; undetected isolated
+at 0 everywhere in T batch).
+F2 closed: T-2 screen re-executed as script
+docs/.../MSD-REAL-CALIBRATED-MAINLINE/t2_mergescreen.py -> workspace/t2_merge.json
+(same seeds, numbers reproduced exactly: 1M cross -76..-115, pair drop ~0.06).
+F3 recorded: tune ran B=60 vs packet B=100/config (disclosed); confirm ran
+B=100 as frozen.
+F4 corrected: T-1 static-mass curve is MOTIVATION for accumulation value, NOT
+the answer to T-3's sacrifice question; accumulation-funded sacrifice relief
+remains UNMEASURED (T-3 phases identical across arms).
+F5 downgraded: rok_u2 fix covered by S-5 Pre-RESULT note + nu=0 both runs;
+no dedicated test path exists (TBD) — fix itself verified in code at
+msd_s3prime_u1chain.py:245 (outs[-1]).
+O1 fixed: stale control-merge comment corrected to match the implemented
+`exact_full and frac < 1.0` no-merge gate.
+T-5 condition verdict: NOT MET (T-1 mass already consumed by S-5 full TRAIN;
+T-2 refused; T-3 neutral (identical phases); T-4 steps confounded + S-5
+single-rescue stands). No S-5 Pre-EXECUTE drafted.

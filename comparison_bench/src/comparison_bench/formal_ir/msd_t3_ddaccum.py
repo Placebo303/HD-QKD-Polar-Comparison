@@ -215,9 +215,8 @@ def main() -> None:
             print(f"frac={frac} phase={ph} fail {nf}/{BATCH} prior_n={int(counts.sum())}",
                   flush=True)
         wall = time.perf_counter() - t0
-        # arm-level f over all blocks (control arm 1.0 accumulates too? No:
-        # control (frac 1.0) still merges (harmless); comparison is init-mass effect.
-        # Per packet: control = full mass no-accum. Implement: skip merge when frac==1.0
+        # Control (frac 1.0) runs identical phases WITHOUT merging (packet §control;
+        # merge gate is `exact_full and frac < 1.0` in the phase loop above).
         summary.append({"init_frac": frac, "init_pairs": n_init,
                         "final_pairs": int(counts.sum()), "phases": phases,
                         "wall_s": wall})
