@@ -390,3 +390,37 @@ non-artifacted mechanism numbers (margin ladders, rescue/disclose/peeling,
 selective-zero labels, Tier1 attribution, NB-u1 S-2 comparison) travel as
 REPORTED, never measured; packet-required NB-u1 S-2 rows unevidenced; no
 robust prior cited from S-2 beyond the review ceiling.
+
+CORRECTION (2026-10-06, append-only, E4/R4 repeat admitted): the "NB-full
+disclosure floor ≈3.0 f" claim is VOID. It priced u1 coverage with Bob-only
+unconditional codes (rep/SPC ≈1419 b) while H(U1|B,U2)≈0.024 b/symbol (≈25 b
+per superframe) — the correct conditional budget was in the S-3 prompt and I
+ignored it. Same error shape as E4 (judging feasibility from a known-suboptimal
+construction instead of the conditional quantity) and the N=16384 gap
+confusion: reaching for narrative closure ("G-1达不到") before computing the
+right quantity. Rule going forward: freeze budgets from the conditional
+information quantity FIRST, then measure code gap against it; no feasibility
+verdict from an unconditional construction. S-2 negative is hereby LIMITED to
+bootstrap-proxy scope (proxy channel is a sparse histogram that may favor
+zero-cell pins over smoother alternatives); MSD stays parked, no KILL.
+G-1 attainability is UNKNOWN pending S-3′/S-3″ measurement, not "unmeetable".
+
+S-3′ chained-u1 result (Tier1, B=100): u1 disclosure mean 47.5 b (5×SPC-10,
+ZERO rescue blocks — conditional budget H(U1|B,U2)≈5 b measured first, ≤75
+target met with margin); full-symbol 5/100 fail, und 0, E_L=1064.3, f=1.9417.
+u1|u2-exact: 0 fails/95 blocks, disclosure exactly 50.0 (no rescue needed).
+S-3″ u2 curve by full-symbol f (same u1 inputs, approximation stated):
+m=184 f=1.972 (E_L=1090, u2FER 5%, rescue 100/100 — base saving never
+materializes at full rescue rate; corrected from 1.879 which undercounted
+rescue as flat +40); m=192 f=2.524 (E_L=1083.6, u2 undetected=1 carried);
+m=200 f=2.062. Optimum m=184 by 0.09 over m=200 (FER-driven, not disclosure).
+H-label fixed: measured conditional H(U1|B,U2,true-prefix)≈0.0049 b/sym
+(~5 b/block); the draft's 0.024 b/sym was H(U1|B) unconditioned — different
+quantity, both far below the 75 b target. Proxy-predicted real: Tier1
+overestimates u2 FER ~2× vs M5-real → real full-symbol expectation by analogy
+FER 3–7%, f ~1.9–2.6 point (NOT a measurement; composition script
+s3pp_compose.py generates s3pp_composition.json from u2curve + u1 inputs). --real mode implemented (pooled x12,
+dict-contract tested on synthetic arrays, no real reads) for S-5; S-5
+Pre-EXECUTE drafted (R1 originals, re-test label, frozen command/budget/root,
+G-1 tension honestly stated: proxy predicts ~1.9, gate likely missed; value =
+first real full-symbol NB number) for user confirmation — NOT executed.
