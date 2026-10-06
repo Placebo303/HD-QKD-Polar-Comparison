@@ -534,3 +534,52 @@ O1 fixed: stale control-merge comment corrected to match the implemented
 T-5 condition verdict: NOT MET (T-1 mass already consumed by S-5 full TRAIN;
 T-2 refused; T-3 neutral (identical phases); T-4 steps confounded + S-5
 single-rescue stands). No S-5 Pre-EXECUTE drafted.
+
+P-a LL curve (zero-decode, half_a real pairs, eps-floor stated + zero-hit rates):
+mass 19.8k->39.6k->79k->158k->315k pairs: LL 0.954/0.862/0.848/0.838/0.798
+b/sym; zerof 3.2e-4/1.3e-4/1.2e-4/1.0e-4/0.0. NOT saturated (still falling at
+full; 158k->full drops 0.040 = coverage effect > density effect).
+P-a decode mapping (Tier1 channel, B=300, plane-0 C0-rule, plane-1 m varies):
+q14-m1_600 300/300 fail; half-m1_600 300/300 fail; full-m1_600 4/300 fail
+f=1.3816; full-m1_1200 same 4 blocks f=1.4269 (margin no help). R10-OVERLAP
+CAVEAT (binding): full-TRAIN prior was fit on data INCLUDING the channel
+population (half_a subset TRAIN) — in-sample-adjacent, NOT deployment-faithful;
+deployment analog T3 (train-vs-hold disjoint) fails 60/60. So "full mass
+decodes" does NOT transfer; it bounds within-population behavior only.
+P-b diagnostics: NO position dependence (bucket KL ~1e-4 nats — shift-invariance
+HOLDS, so S-2 diff-pmf failure is sparse-cell structure, not shift-variance);
+offsets sub-bin (200 ps bins vs ±50 ps — no integer alignment possible);
+cross-source diff KL: 1M vs others ~1.23-1.31 nats, 1.5M vs 2M 0.0000.
+Merge retest: 3-way refused on DIFF grounds (stronger than T-2 offset
+suspicion); 1.5M+2M pair viable (KL 0.0) with proxy validation still deferred.
+No new prior to validate (diff family already negatively validated in S-2;
+bucketing gains nothing given KL~0).
+P-c rebin transfer: d=512 60/60 fail (L=26680), d=256 60/60 fail (L=21310),
+
+P-d U-4 characterization EXECUTED (user-approved, zero-decode, budget 1800 s,
+actual ~4 min): 2026.1.23 trio via frozen M5-style pair+frame chain.
+0dB: 266638 pairs, SER 0.2477, offset -50 ps, support 2326, H 0.813;
+4dB: 115390 pairs, SER 0.2384, offset -50, support 2167, H 0.792;
+10dB: 30907 pairs, SER 0.2302, offset -50, support 2080, H 0.757.
+All same offset as T2-1M (-50, not +50); SER same order as R1 (0.238).
+Applicability: 0dB PASSES all four criteria (unused/same-family/SER-order/
+mass 266k ≈ R1 TRAIN scale) → clean OOS arm READY (test use; training use
+needs route decision). 4dB marginal (115k). 10dB test-only (31k thin).
+Joint counts saved per file (prior-mass-use assessment material).
+und 0/vw 0 both. Density hypothesis REFUTED as stated (not d=1024-specific;
+mismatch defeats MSD across grids). Limitation: no per-plane breakdown logged
+(failure stage unidentified); unit bug found+fixed (float64 1.0-1e-300 clip
+no-op -> 1e-12 floor).
+
+T-REVIEW corrections (2026-10-06, append-only, docs/ROADMAP_20261006_T_REVIEW.md):
+R1. T-1 "8x mass saves ~0.55 f" DOWNGRADED to UNDECIDED: at B=60 the 3/3/2/0
+failures make 3-vs-0 worth ~0.18 f each; exact p(3/60 vs 0/60) ≈ 0.12, n.s.
+R2. T-3 "no accumulation gain" DOWNGRADED to UNDECIDED: same underpowered
+counts (1,0,1,1,1,0,0,3 identical phases); contradicts T-1's reading; both
+unusable as route basis. High-powered continuous metric required (P-a).
+R3. T-2 merge refusal changed to "REJECTED-BEFORE-ALIGNMENT, pending
+re-verification": T2-1M ±50 offset vs others is an alignment issue, not
+necessarily channel-shape difference (P-b re-tests post-alignment).
+U-4 approved by user (push done ordinary ff c169a708..216dfd2d; "同意u4"):
+2026.1.23 trio characterization (P-d, zero-decode) authorized; frozen
+command/budget recorded at execution.
