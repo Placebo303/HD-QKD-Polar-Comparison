@@ -109,7 +109,7 @@ def main() -> None:
                 cond = jt / jt.sum(axis=0, keepdims=True)
                 hab = float(-np.nansum((jt / tot) * np.log2(np.where(cond > 0, cond, 1.0))))
             top = sorted([(int(v), round(float(c / n), 6)) for v, c in zip(vals, cnts)],
-                         key=lambda kv: -kv[1])[:6]
+                         key=lambda kv: -kv[1])  # FULL support (<=9), not top-6
             wide = bool((np.abs(np.minimum(ee, d - ee)) > 1).any())
             rows.append({"source": src, "bw_ps": bw, "d": d, "pairs": n,
                          "events": n_ev, "offset_ps": int(offset),
