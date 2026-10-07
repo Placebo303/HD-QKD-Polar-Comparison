@@ -30,6 +30,6 @@ D:\software\Anaconda3\envs\qkd_env\python.exe -m comparison_bench.src.comparison
 
 ## 检查单（执行前）
 - [x] 用户明确授权 F-1（含 4dB 主测 + 0dB 附测 + 门规则）
-- [ ] 执行代码扩展（--f1）+ 接线测试（合成数组）
-- [ ] 输出根验空；分支/树干净（执行前提交冻结代码）
+- [x] 执行代码扩展（--f1）+ 接线测试（合成数组）
+- [x] 输出根验空（workspace/f1_oos/f1_20261007/ 不存在）；分支/树干净（已提交冻结）
 - [ ] 跑后独立 Pre-RESULT（R13：u1+u2 覆盖）
