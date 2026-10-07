@@ -710,3 +710,19 @@ F7 fields completed here: D-3 MSD und/vw per arm (0/0, 35/278, 226/1774, B=300
 each, exact_full); NB und 0 both arms (B=100 each, u2-exact); P-c und/vw 0 all
 four cells (B=300 each, exact_full); G-0 und 0 (B=100); D-1 und/vw 0 (B=300),
 probe 2/100 UNDECIDED-grade.
+
+D-5 factorial closes the MSD contradiction (EXPLORE proxy, fixed disclosure):
+genie-a-nosmooth(raw empirical) 100/100; genie-a-alpha1(diff-reconstructed)
+4/100; cross-b-nosmooth 100/100; cross-b-alpha1 10/100; pc-d256-genie 100/100
+(all und 0). DRIVER = dense diff RECONSTRUCTION (100->4-10), not smoothing
+(D-1 unsmoothed-reconstruction already 7/300) and not population (4 vs 10).
+Raw empirical joints fail via zero-cell contradictions on ANY channel.
+"Sharp pins" hypothesis REJECTED as stated; correct mechanism: BP needs
+contradiction-free (dense-support) priors, fails on zero-cell pins regardless
+of sharpness. P-c d256 fails even genie (rate/code issue at coarse grids,
+mechanism open) — density refutation strengthened.
+D-4 EXECUTED (authorized; wall 272 s): 0dB 260 blocks x2 arms. diff 0/260
+und 0 f=1.537 (upper 1.70); plugin 4/260 und 0 f=1.711. G-1a: main PASS by
+0.013 (fragile: +1 fail flips; upper misses), control MISS. G-1 recorded miss
+both. Pre-RESULT PASS (R13; recomputed; fragility declared). RESULT +
+acceptance solidified. First clean-OOS real full-symbol NB numbers.
