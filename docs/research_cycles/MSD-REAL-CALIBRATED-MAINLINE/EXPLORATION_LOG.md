@@ -967,3 +967,13 @@ Z-batch review: FAIL (docs-level F1-F5) -> all fixed (Z-1/Z-3 freeze §12 with
 no discrepancies; lit range stripped; NOW+README current; Z-2/Z-3 standalone
 acceptances filed; UNDECIDED/pooled/ceiling recorded) -> re-review PASS.
 Z batch CLOSED. Ready for user push review (Z-6).
+
+Post-close corrections (2026-10-08, append-only):
+C1. NOW.md 现状行修正：1.376 系 NB 链（F-1）4dB G-1 点结果，非两级二元；
+两级二元 4dB 一致性为 f≈1.14（G-3/G-6）。此前混写已更正。
+C2. Z-1 低 p 空洞声明：p=0.05/0.10 现规则不可测（证据保留）；p=0.12 的 1.429
+系统一 gap 0.12 在低 p 下偏高（绝对 gap 主导），规则未对低 p 优化，记为开放
+工作；曲面低端（d=512 以下）维持 UNMEASURED/解析锚定，不外推。
+C3. Z-2 审查 PASS 记录补登：Pre-RESULT 首轮 FAIL（文档级 8 项）→ 修正 →
+第二轮复审（4 残留项）→ 修正 → 第三轮确认 PASS（固化 Z-2）。此前日志只写到
+"amendments in progress"，现补结论：Z-2 数字可进论文（描述性统计口径）。
