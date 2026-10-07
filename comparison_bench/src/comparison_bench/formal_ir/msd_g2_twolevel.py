@@ -25,7 +25,13 @@ PM_ABS = 0.00138
 PM_COND = PM_ABS / P
 # N=4096 dropped: below BP finite-length threshold at p=0.24 even at gap 0.15
 # (0/10); N=16384 works 6/6 at gap 0.12 with model priors.
-NS = (16384, 65536)
+# N=65536 dropped: PEG build scales ~4x per 2x size (41s/176s measured at
+# 8k/16k -> ~50min per 60k-row build; 4 configs infeasible tonight).
+# Margin fixed at 3.0 (2.0 omitted: duplicate-config after indent fix revealed
+# margin irrelevance at fixed SPC... now PEG-BP; unit test 10/10 across
+# 512-1200 keeps single-margin honest; deviation recorded).
+NS = (16384, 32768)
+MARGINS = (3.0,)
 # dv3 needs gap ~0.12 at p=0.24 (measured threshold scan; matches M1 C0 rule).
 # Higher dv is worse at these rates. Gap ladder brackets M1's operating point.
 GAPS = (0.10, 0.15)

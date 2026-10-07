@@ -818,3 +818,17 @@ MSD plateau recheck (附带): level-B sign decode (~400 bits) fails ~0.3% where
 MSD plane-1 fails 11-100% at m1=600-2400 on the same information — MSD plane-1
 path defect SUPPORTED (prior-exactness confound noted; isolating experiment
 with structural pins recorded as next step). N=65536 configs still building.
+
+G-2 full grid landed (8 configs x 300, credible synthetic, margin loop fixed):
+N=16384: gap0.10 m2.0 43 fail f=2.78 / m3.0 3 fail f=1.281; gap0.15 m2.0 41
+fail f=2.76 / m3.0 1 fail f=1.268. N=32768: gap0.10 m2.0 41 fail f=2.705 /
+m3.0 2 fail f=1.240; gap0.15 m2.0 39 fail f=2.684 / m3.0 0 fail f=1.227.
+Margin 2.0 vs 3.0 is decisive (14% vs 0-1% FER); gap secondary. Best:
+N=32768/gap0.15/margin3.0, 0/300 und 0, f=1.227 (upper ~1.37). f-vs-N improves
+(1.27 -> 1.23). Beats NB F-1 1.376 by 0.15.
+MSD plateau recheck CLOSED: level-B exact structural path fails 0-3/300 while
+MSD plane-1 fails 32-34/300 (E-1, same info, estimated priors) and 100% (S-1,
+plug-in). Defect location: MSD plane-1's query/prior path (infinite-LLR pins
+from plug-in zeros vs exact structural pins), NOT the syndrome/BP core
+(level-A BP works; D-1 genie works). R14 margins: A actual/ideal ~1.15x;
+B ~3x (PEG dense-check price; SPC path blocked by tie problem).

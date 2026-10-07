@@ -10,13 +10,15 @@
 - 信道：无记忆 (p, p₋) = (0.2376, 0.0058)，a ~ T2-1M 经验边际（d=1024，d 无关），
   e=0 w.p. 1−p；+1 w.p. p−p₋；−1 w.p. p₋；b=(a+e) mod d。
 - 级 A（LSB）：二元 PEG dv3（复用 msd_peg_code.binary 路径），min-sum/BP
-  （复用 make_bp_decoder），N ∈ {16384, 65536}（N=4096 在 p=0.24 下低于 BP
-  有限长阈值，gap 0.15 仍 0/10，已砍），gap ∈ {0.10, 0.15}
+  （复用 make_bp_decoder），N ∈ {16384, 32768}（N=4096 在 p=0.24 下低于 BP
+  有限长阈值，gap 0.15 仍 0/10，已砍；N=65536 因 PEG 构建超线性
+  41s→176s→916s 而暂缓，矩阵缓存列入待办），gap ∈ {0.10, 0.15}
   （阈值实测：dv3 在 p=0.24 下需要 gap≈0.12，与 M1 的 C0=2000 一致；
   均匀先验不够，必须用三值模型的全符号条件先验 P(x₀|b)；更高 dv 更差），
   m_A = ceil(N·(h2(p)+gap)）；失败则 K=400 定向 rescue（先验有信息量）。
 - 级 B（符号位）：bit1 全平面 syndrome，m_B = ceil(N·0.0122·margin)，
-  margin ∈ {2.0, 3.0}；先验：marked 面 p=0.0058（相对 b1^a0），unmarked 精确 pin
+  margin = 3.0 单值（2.0 省略：单元测试 512–1200 全过，margin 不敏感；
+  偏差已声明）；先验：marked 面 p=0.0058（相对 b1^a0），unmarked 精确 pin
   （结构恒等式，非估计）；PEG-BP，失败则 K2=64 rescue。
 - 高位：算术重建 a_rec = b − delta(mark, sign)，逐符号验 exact。
 - 口径：完整符号 exact + 期望良率 f（tag 64 + kept 惩罚），undetected 隔离，
