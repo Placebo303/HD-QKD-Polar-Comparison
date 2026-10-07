@@ -256,7 +256,7 @@ def run_real_main(args) -> None:
                                         initializer=_worker_init,
                                         initargs=(payload,)) as ex:
                 recs = list(ex.map(_decode_one,
-                                   [(i, 0, n, m_a, 0,
+                                   [(i, 0, n, m_a, m_b,
                                      (a_all[i * n:(i + 1) * n].tolist(),
                                       b_all[i * n:(i + 1) * n].tolist()))
                                     for i in range(n_blocks)]))
@@ -293,6 +293,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true")
     ap.add_argument("--real", action="store_true")
+    ap.add_argument("--ns", default=None)
+    ap.add_argument("--gaps", default=None)
+    ap.add_argument("--margins", default=None)
     ap.add_argument("--output-root", required=True)
     args = ap.parse_args()
     if args.real:
@@ -324,11 +327,14 @@ def main() -> None:
     if jl.exists():
         raise SystemExit(f"refusing to overwrite {jl}")
     rows = []
-    for n in NS:
-        for gap in GAPS:
+    ns = [int(x) for x in args.ns.split(",")] if args.ns else list(NS)
+    gaps = [float(x) for x in args.gaps.split(",")] if args.gaps else list(GAPS)
+    margins = [float(x) for x in args.margins.split(",")] if args.margins else list(MARGINS)
+    for n in ns:
+        for gap in gaps:
             m_a = min(n - 1, max(1, int(math.ceil(n * (hA + gap)))))
             HA = build_peg_code(n=n, m=m_a, variable_degree=3).parity_check_matrix
-            for margin in MARGINS:
+            for margin in margins:
                 m_b = min(n - 1, max(1, int(math.ceil(n * hB * margin))))
                 HB = build_peg_code(n=n, m=m_b, variable_degree=3).parity_check_matrix
                 payload = pickle.dumps((HA, HB, pa))

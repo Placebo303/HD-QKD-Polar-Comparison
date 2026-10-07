@@ -840,3 +840,41 @@ G-3 AUTHORIZED (DECIDE): two-level chain at best config + N=16384 control,
 4dB/10dB clean + 0dB retest, single run. G-4 parallel (EXPLORE): a/b/c/d with
 synthetic f<=1.15 target. Paper skeleton may start; numbers wait for G-3/G-4.
 No push.
+
+G-4b pivot (documented): quantized-min-sum DE self-check FAILED ((3,6) converges
+at p=0.12 vs known ~0.084 — systematically optimistic; kept as attempt in
+g4b_de.py). Switched to RA-structured low-rate ensemble (P1 q-per-column +
+dual-diagonal accumulator, seeded; BP-decodable via existing path) vs regular
+dv3 at equal rate — verifiable construction instead of unverified optimizer.
+
+G-4d teammate (2026-10-07, EXPLORE synthetic-only, sibling read-only):
+VIABLE — sibling `low_dim_opt/core/polar_core.scl_decode_batch` (+`bsc_llr`, `de_order_from_population`) runs directly on BSC(0.2376) SW syndrome form, no H/V front-end.
+N=1024/B=20, seed 20261007: DE-order SCL8 20/20 exact at disclose 0.863 (PW 18/20; K=180 SCL8 11/20); full table + API in `workspace/g4d_polar/g4d_report.md`.
+Caveat: first pass used known-inferior `de_reliability_order` (0/20) — core defect excluded, order fixed per sibling troubleshooting.
+No f claimed: input accounting matches (same N, |F| disclosure) but no full G-protocol run, no real LSB role, no failure accounting.
+
+G-4b RA verdict (2026-10-07): RA-q5 at gap 0.10 reaches 20/20 (N=4096 pilot)
+and 2/300 level-A-only (N=16384, E_L=14603, f=1.198) where regular dv3 needs
+gap 0.12-0.15 for the same FER. Saves ~0.05 gap (~800 bits @N=16384, ~0.06 f).
+Full-chain RA f ≈ 1.24 (with level B). DE optimizer stays parked (failed
+self-check); RA is the verified low-rate alternative. Evidence:
+workspace/g4b_ra/g4b_20261007/.
+
+G-4a verdict NEGATIVE: tune rounds {3:200} — all blocks need max disclosure
+(m=15418); low-gap starts (13452/14271) never succeed. Incremental saves
+nothing (threshold too sharp); fixed max-disclosure optimal. Confirm B=300:
+0 fails, E_L_A=15418, f_levelA_only=1.184. Evidence: workspace/g4a_inc/.
+G-4c margin curve (N=16384/gap0.15, corrected base1): margin 2.0 41/300
+f=2.76; margin 2.5 3/300 f=1.335; margin 3.0 1/300 f=1.268 (prior grid).
+Diminishing returns; 2.5 viable middle.
+G-4d teammate: VIABLE (sibling scl_decode_batch syndrome mode; N=1024
+BSC(0.2376) DE-order SCL8 20/20 at disclosure 0.863; report filed).
+
+G-3 CLOSED (2026-10-08): rerun with fixed L_B in fresh root
+(workspace/g3_real/g3_20261007b/): 35/35 exact, und 0, E_L block-recomputed
+(32039/16020), f=1.2275/1.23. Pre-RESULT re-review PASS. RESULT + acceptance
+solidified. Old root (L_B=0) superseded, not deleted.
+G-4 status: a NEGATIVE (incremental useless, threshold sharp); b RA verified
+(gap 0.10 viable, ~0.06 f saving; full-chain ~1.24); c margin curve closed
+(2.0:14% fail, 2.5:1% f=1.335, 3.0:0.3% f=1.268); d VIABLE (teammate).
+G batch ready to close pending single batch-end review.
