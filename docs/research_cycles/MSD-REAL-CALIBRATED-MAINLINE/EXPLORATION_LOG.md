@@ -726,3 +726,29 @@ und 0 f=1.537 (upper 1.70); plugin 4/260 und 0 f=1.711. G-1a: main PASS by
 0.013 (fragile: +1 fail flips; upper misses), control MISS. G-1 recorded miss
 both. Pre-RESULT PASS (R13; recomputed; fragility declared). RESULT +
 acceptance solidified. First clean-OOS real full-symbol NB numbers.
+
+E-1 MSD retune (corrected-diff cross-half, N=16384, B=300, R14 logged):
+m1=600: 34/300 und 0 vw 0 f=2.516; m1=1200: 32/300 f=2.481; m1=2400: 32/300
+f=2.563. Optimum m1=1200 by 0.035 (noise); margin flat (32-34 fails).
+und-226 VERIFICATION CLOSED: certain-fixed code gives und 0 across 900 blocks
+— D-3's und-226 row ran PRE-FIX (near-uniform) code; relabeled as such (the
+c-root "replication" inherited the same stale path; both superseded).
+MSD Pre-EXECUTE condition: best proxy f 2.48 vs required ≤1.44 (NB 1.537 minus
+0.10) — NOT MET by 1.04. No MSD real-consistency Pre-EXECUTE drafted.
+E-2 NB margin: A208 m200/208 + u1 working point, B=300 confirmatory 0/300
+(pooled, pool fixed): f point 1.379, upper 1.521 ≤ 1.55 ✓. Nominal cost
+(FER=0) 1.379; margin to 1.55 buys ~1.6% FER allowance. u1 composed (S-3' 0/95
++ D-4 0/260 @50.0, stated).
+E-3 d256 diagnosis: rate allocation arithmetically adequate (m covers measured
+h + gap); double-gap test still 30/30 fail (genie) → NOT a rate problem;
+structural coarse-grid issue, mechanism open; low priority, no further work.
+
+D-batch accepted with 2 corrections (2026-10-07, append-only):
+C1. D-4 wording unified: "点估计满足 G-1a (f=1.537 ≤ 1.55)，上界 1.70 未满足
+(0/260, FER 上界约 1.4%)" — never "G-1a 通过" alone.
+C2. MSD status corrected: "MSD 仍全败" CONTRADICTS D-5 (diff-reconstructed
+prior: genie 4/100, cross-half 10/100 at fixed disclosure, unretuned). Correct
+status: "稠密先验在公平代理上可译出，码率尚未重调". D-3's "MSD corrected-diff
+und 226" row under verification: it may have run PRE-FIX (near-uniform) code —
+relabel pending E-1 pilot with certain-fixed code (if und≈75% replicates, the
+226 stands as corrected behavior; if und≈0-10%, the 226 was buggy behavior).
