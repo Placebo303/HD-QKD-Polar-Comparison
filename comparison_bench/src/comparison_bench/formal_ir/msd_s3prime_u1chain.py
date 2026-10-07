@@ -202,6 +202,7 @@ def _real_init(source: str):
         trips = [(int(r), int(c), int(v)) for r, c, v in info["triples"]
                  if int(r) < m]
         _R["dense"][key] = _peg.sparse_to_dense(trips, N, m, field)
+    _R["u2_rows"] = (224, 232)
     _R["groups"] = split_groups(N, G_U1)
     _R["mat_u1"] = spc_matrix(_R["groups"], N)
     _R["_qq"], _R["_v28"], _R["_b2f"], _R["_s2c"] = _qq, _v28, _b2f, _s2c
@@ -233,7 +234,8 @@ def _real_one(args) -> dict:
                                if xh is not None else None),
                      "reconstruction_ok": bool(res.get("reconstruction_ok", False))})
     u2ok = bool(outs[0]["exact_match"]) or (len(outs) > 1 and bool(outs[1]["exact_match"]))
-    l_u2 = 5 * (224 if len(outs) == 1 else 232)
+    _rb, _rf = _R.get("u2_rows", (224, 232))
+    l_u2 = 5 * (_rb if len(outs) == 1 else _rf)
     if not u2ok:
         return {"block": blk, "u2_ok": False, "exact_full": False,
                 "undetected": False, "L_u2": l_u2, "L_u1": 0, "u1_extra": 0}
@@ -308,6 +310,7 @@ def _oos_init(payload):
     for key, m in (("base", 224), ("full", 232)):
         trips = [(int(r), int(c), int(v)) for r, c, v in triples if int(r) < m]
         _R["dense"][key] = _peg.sparse_to_dense(trips, N, m, field)
+    _R["u2_rows"] = (224, 232)
     _R["groups"] = split_groups(N, G_U1)
     _R["mat_u1"] = spc_matrix(_R["groups"], N)
     _R["_qq"], _R["_v28"], _R["_b2f"], _R["_s2c"] = _qq, _v28, _b2f, _s2c
@@ -413,14 +416,181 @@ def run_oos_main(args) -> None:
     print(json.dumps(nb_rows, indent=2))
 
 
+def _f1_init(payload):
+    """F-1 worker init: T2-1M table (plug-in or diff pseudo) + frozen A208."""
+    import pickle
+    from comparison_bench.src.comparison_bench.formal_ir.msd_m4_nb_marginal import (  # noqa: E402
+        derive_bundle,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        v80_s2c_campaign as _s2c,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        nonbinary_v10_peg as _peg,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.nonbinary_field import (  # noqa: E402
+        GF2mField as _GF,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        nonbinary_v10_fftqspa as _qq,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        nonbinary_v28 as _v28,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        v80_b2f_campaign as _b2f,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_conditional_prior import (  # noqa: E402
+        build_conditional_prior_model as _bcp,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_m1primea_repetition import (  # noqa: E402
+        spc_matrix as _spc,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_m1primea_repetition import (  # noqa: E402
+        split_groups as _sg,
+    )
+    from comparison_bench.src.comparison_bench.cli import (  # noqa: E402
+        p1_stage1_runner as _p1,
+    )
+    table, triples = pickle.loads(payload)
+    _R["model"] = _bcp(table, encoding="NATURAL", order="LSB_FIRST")
+    _R["bundle"] = _s2c.bind_empirical_bundle(derive_bundle(table))
+    field = _GF.create(32)
+    _R["field"] = field
+    _R["dense"] = {}
+    for key, m in (("base", 200), ("full", 208)):
+        sub = [(int(r), int(c), int(v)) for r, c, v in triples if int(r) < m]
+        _R["dense"][key] = _peg.sparse_to_dense(sub, N, m, field)
+    _R["u2_rows"] = (200, 208)
+    _R["groups"] = _sg(N, G_U1)
+    _R["mat_u1"] = _spc(_R["groups"], N)
+    _R["_qq"], _R["_v28"], _R["_b2f"], _R["_s2c"] = _qq, _v28, _b2f, _s2c
+
+
+def run_f1_main(args) -> None:
+    """F-1 execution (authorized Pre-EXECUTE only): NB full chain at E-2 point
+    (frozen A208 + diff/plug-in bundles, u1 S-3' design). Main: 4dB clean OOS;
+    plus: 0dB retest labeled as such."""
+    import concurrent.futures as cf
+    import pickle
+    from comparison_bench.src.comparison_bench.io import align_wrapper as aw
+    from comparison_bench.src.comparison_bench.io.ttbin_compat import (
+        install_timetagger_alias,
+    )
+    from comparison_bench.src.comparison_bench.cli.probes_closed import (  # noqa: E402
+        m0_realframe_runner as _m0,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_m1_synthetic import (  # noqa: E402
+        load_train_table as _ltt,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_s2_prior import (  # noqa: E402
+        diffpmf_model as _dpm,
+    )
+    from comparison_bench.src.comparison_bench.cli import (  # noqa: E402
+        p1_stage1_runner as _p1,
+    )
+
+    root = Path(args.output_root)
+    if root.exists():
+        raise SystemExit(f"output root not fresh: {root}")
+    root.mkdir(parents=True, exist_ok=True)
+    scalars = read_p1_scalars()["T2-1M"]
+    install_timetagger_alias()
+    from src.qkd_io.ttbin_pipeline import (  # noqa: E402
+        _frame_global,
+        _pair_nearest_unique,
+        read_ttbin_events,
+    )
+
+    def load_oos(path):
+        events = read_ttbin_events(path)
+        t = np.asarray(events.time_ps, dtype=np.int64)
+        valid = (np.asarray(events.event_type, dtype=np.int64) == 0) \
+            if events.event_type is not None else np.ones(t.shape, dtype=bool)
+        ch = np.asarray(events.channel, dtype=np.int64)
+        t_a, t_b = t[valid & (ch == _m0.CH_A)], t[valid & (ch == _m0.CH_B)]
+        tmin = int(t.min())
+        offset = aw.require_alignment_passed(
+            aw.derive_alignment(events=events, ch_a=_m0.CH_A, ch_b=_m0.CH_B))
+        del events
+        pa, pb = _pair_nearest_unique(t_a=t_a, t_b=t_b,
+                                      window_ps=_m0.COIN_WINDOW_PS,
+                                      offset_ps=int(offset))
+        fa, sa = _frame_global(t_ps=pa, bin_width_ps=200, frame_bins=1024,
+                               t0_ps=tmin)
+        fb, sb = _frame_global(t_ps=pb, bin_width_ps=200, frame_bins=1024,
+                               t0_ps=tmin)
+        keep = (fa >= 0) & (fb >= 0) & (fa == fb) & (sa >= 0) & (sb >= 0)
+        a_all = sa[keep].astype(np.int64)
+        b_all = sb[keep].astype(np.int64)
+        n_sup = (len(a_all) // N) * N
+        return a_all[:n_sup], b_all[:n_sup], int(offset)
+
+    series = {
+        "4dB": "D:/Data/Raw Data/2026.1.23/Type2_1M_600k_3s_4dB_2026-01-23_174758.1.ttbin",
+        "0dB": "D:/Data/Raw Data/2026.1.23/Type2_1M_600k_3s_0dB_2026-01-23_174534.1.ttbin",
+    }
+    table = np.asarray(_ltt("T2-1M"), dtype=np.float64)
+    _, pseudo = _dpm(table, 1.0)
+    pinned = _p1.construct_and_pin("P1S1-R1", _p1.PRODUCTION_CONSTRUCT["P1S1-R1"],
+                                   _p1.production_rank_fn)
+    triples = pinned["full"]["triples"]
+    jl = root / "blocks_f1.jsonl"
+    nb_rows = []
+    for seg, path in series.items():
+        a_all, b_all, off = load_oos(path)
+        n_blocks = len(a_all) // N
+        print(f"{seg}: {n_blocks} superframes offset {off}", flush=True)
+        for arm, ptab in (("diff", pseudo), ("plugin", table)):
+            payload = pickle.dumps((np.asarray(ptab), triples))
+            t0 = time.perf_counter()
+            with cf.ProcessPoolExecutor(max_workers=12,
+                                        initializer=_f1_init,
+                                        initargs=(payload,)) as ex:
+                recs = list(ex.map(_real_one,
+                                   [(a_all[i * N:(i + 1) * N].tolist(),
+                                     b_all[i * N:(i + 1) * N].tolist(), i)
+                                    for i in range(n_blocks)]))
+            wall = time.perf_counter() - t0
+            with jl.open("a", encoding="utf-8", buffering=1) as fh:
+                for r in recs:
+                    fh.write(json.dumps({"seg": seg, "arm": arm, **r}) + "\n")
+            nb = len(recs)
+            nf = sum(0 if r["exact_full"] else 1 for r in recs)
+            nu = sum(1 for r in recs if r["undetected"])
+            e_u2 = sum(r["L_u2"] for r in recs) / nb
+            e_u1 = sum((50 + r.get("u1_extra", 0)) if r.get("u2_ok") else 0
+                       for r in recs) / nb
+            e_l = e_u2 + e_u1
+            fer = nf / nb
+            denom = N * scalars["H_AB"]
+            kept = N * scalars["H_A"] - e_l
+            f_p = (e_l + TAG_BITS + kept * fer) / denom
+            nb_rows.append({"seg": seg, "arm": arm, "N": N,
+                            "backend": "nb-u1chain-f1", "blocks": nb,
+                            "offset_ps": int(off), "failures": nf,
+                            "undetected": nu, "E_u2": e_u2, "E_u1": e_u1,
+                            "E_L": e_l, "FER_exact": fer,
+                            "FER_wilson_upper95": wilson_upper(nf, nb),
+                            "f_expected": f_p, "wall_s": wall})
+            print(seg, arm, f"fail {nf}/{nb} und {nu} f={f_p:.3f}", flush=True)
+    (root / "f1_summary.json").write_text(json.dumps(nb_rows, indent=2),
+                                          encoding="utf-8")
+    print(json.dumps(nb_rows, indent=2))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true")
     ap.add_argument("--real", action="store_true")
     ap.add_argument("--oos", action="store_true")
+    ap.add_argument("--f1", action="store_true")
     ap.add_argument("--proxy-root", required=False, default=None)
     ap.add_argument("--output-root", required=True)
     args = ap.parse_args()
+    if args.f1:
+        run_f1_main(args)
+        return
     if args.oos:
         run_oos_main(args)
         return

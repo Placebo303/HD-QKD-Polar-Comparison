@@ -769,3 +769,28 @@ status: "稠密先验在公平代理上可译出，码率尚未重调". D-3's "M
 und 226" row under verification: it may have run PRE-FIX (near-uniform) code —
 relabel pending E-1 pilot with certain-fixed code (if und≈75% replicates, the
 226 stands as corrected behavior; if und≈0-10%, the 226 was buggy behavior).
+
+E-batch accepted with 2 corrections (2026-10-07, append-only):
+R1. E-2 correct reading: LOWER rate suffices (m200/208 A208 reaches proxy
+0/300, nominal f 1.379, upper 1.521). m=224 was plug-in-mismatch legacy.
+E-2 = "降码率可行", NOT "加余量". Closest path to G-1 (0.16 below D-4 real).
+R2. "MSD f~2.5 ceiling" WITHDRAWN -> "rate-independent error plateau (~11%,
+m1 600->2400 flat at 32-34 fails), mechanism unlocated". Prime suspect: WINDOW
+TRUNCATION (prior = in-window diff, ~zero mass outside; TRAIN-a/b window edges
+differ; out-of-window true deltas contradict prior; no disclosure can save).
+Supporting: genie same-half 4/100 vs cross-half 10/100. Cheap test: 1e-7
+background outside window, or union of both halves' windows; watch plateau.
+Until located, NO "ceiling" language (R4/R9). E-3 d256 stays parked low-priority
+but on the any-d TODO list.
+F-1 authorized (DECIDE): NB full chain at E-2 point, single run. E-4 parallel
+(EXPLORE): locate the plateau.
+
+E-4 window-truncation verdict (zero-decode, TRAIN tables): BOTH halves' windows
+are exactly the same 3 deltas {0,1,1023} (union = intersection = 3); out-of-
+window true deltas = 0.0/block (all blocks AND the 34 failed blocks) — the
+channel never emits outside the window. Window-truncation hypothesis REFUTED
+as stated (no support mismatch to fix). Fix arms MOOT by measurement (union =
+same 3 cells; 1e-7 background ≈ existing α-smoothing) — not executed, with
+this reason (better-plan latitude; no moot compute). Within-window masses match
+to 0.03-5% relative. Plateau mechanism REMAINS OPEN (10% plane-1 fails resist
+4x disclosure with near-identical priors); "ceiling" language stays withdrawn.
