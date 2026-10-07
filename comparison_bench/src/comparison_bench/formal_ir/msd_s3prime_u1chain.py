@@ -272,13 +272,158 @@ def _real_one(args) -> dict:
             "L_u1": 5 * m_u1, "u1_extra": u1_extra}
 
 
+def _oos_init(payload):
+    """D-4 worker init: T2-1M table (plug-in or diff pseudo) + shared m224 dense."""
+    import pickle
+    from comparison_bench.src.comparison_bench.formal_ir.msd_m4_nb_marginal import (  # noqa: E402
+        derive_bundle,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        v80_s2c_campaign as _s2c,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        nonbinary_v10_peg as _peg,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.nonbinary_field import (  # noqa: E402
+        GF2mField as _GF,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        nonbinary_v10_fftqspa as _qq,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        nonbinary_v28 as _v28,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir import (  # noqa: E402
+        v80_b2f_campaign as _b2f,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_conditional_prior import (  # noqa: E402
+        build_conditional_prior_model as _bcp,
+    )
+    table, triples = pickle.loads(payload)
+    _R["model"] = _bcp(table, encoding="NATURAL", order="LSB_FIRST")
+    _R["bundle"] = _s2c.bind_empirical_bundle(derive_bundle(table))
+    field = _GF.create(32)
+    _R["field"] = field
+    _R["dense"] = {}
+    for key, m in (("base", 224), ("full", 232)):
+        trips = [(int(r), int(c), int(v)) for r, c, v in triples if int(r) < m]
+        _R["dense"][key] = _peg.sparse_to_dense(trips, N, m, field)
+    _R["groups"] = split_groups(N, G_U1)
+    _R["mat_u1"] = spc_matrix(_R["groups"], N)
+    _R["_qq"], _R["_v28"], _R["_b2f"], _R["_s2c"] = _qq, _v28, _b2f, _s2c
+
+
+def run_oos_main(args) -> None:
+    """D-4 execution (authorized Pre-EXECUTE only): NB full chain on 0dB OOS
+    superframes, two prior arms (corrected-diff + plug-in, T2-1M TRAIN only)."""
+    import concurrent.futures as cf
+    import pickle
+    from comparison_bench.src.comparison_bench.io import align_wrapper as aw
+    from comparison_bench.src.comparison_bench.io.ttbin_compat import (
+        install_timetagger_alias,
+    )
+    from comparison_bench.src.comparison_bench.cli.probes_closed import (  # noqa: E402
+        m0_realframe_runner as _m0,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_m1_synthetic import (  # noqa: E402
+        load_train_table as _ltt,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_s2_prior import (  # noqa: E402
+        diffpmf_model as _dpm,
+    )
+    from comparison_bench.src.comparison_bench.formal_ir.msd_s3triple_u2grid import (  # noqa: E402
+        build_point as _bp,
+    )
+
+    root = Path(args.output_root)
+    if root.exists():
+        raise SystemExit(f"output root not fresh: {root}")
+    root.mkdir(parents=True, exist_ok=True)
+    scalars = read_p1_scalars()["T2-1M"]
+    # 0dB pairs via frozen M5-style chain (test read, authorized D-4)
+    install_timetagger_alias()
+    from src.qkd_io.ttbin_pipeline import (  # noqa: E402
+        _frame_global,
+        _pair_nearest_unique,
+        read_ttbin_events,
+    )
+    base = "D:/Data/Raw Data/2026.1.23/Type2_1M_600k_3s_0dB_2026-01-23_174534.1.ttbin"
+    events = read_ttbin_events(base)
+    t = np.asarray(events.time_ps, dtype=np.int64)
+    valid = (np.asarray(events.event_type, dtype=np.int64) == 0) \
+        if events.event_type is not None else np.ones(t.shape, dtype=bool)
+    ch = np.asarray(events.channel, dtype=np.int64)
+    t_a, t_b = t[valid & (ch == _m0.CH_A)], t[valid & (ch == _m0.CH_B)]
+    tmin = int(t.min())
+    offset = aw.require_alignment_passed(
+        aw.derive_alignment(events=events, ch_a=_m0.CH_A, ch_b=_m0.CH_B))
+    del events
+    pa, pb = _pair_nearest_unique(t_a=t_a, t_b=t_b,
+                                  window_ps=_m0.COIN_WINDOW_PS,
+                                  offset_ps=int(offset))
+    fa, sa = _frame_global(t_ps=pa, bin_width_ps=200, frame_bins=1024, t0_ps=tmin)
+    fb, sb = _frame_global(t_ps=pb, bin_width_ps=200, frame_bins=1024, t0_ps=tmin)
+    keep = (fa >= 0) & (fb >= 0) & (fa == fb) & (sa >= 0) & (sb >= 0)
+    a_all = sa[keep].astype(np.int64)
+    b_all = sb[keep].astype(np.int64)
+    n_sup = (len(a_all) // N) * N
+    a_all, b_all = a_all[:n_sup], b_all[:n_sup]
+    n_blocks = n_sup // N
+    print(f"0dB superframes: {n_blocks}", flush=True)
+    # shared construction + per-arm tables (T2-1M ONLY, frozen choice)
+    table = np.asarray(_ltt("T2-1M"), dtype=np.float64)
+    _, pseudo = _dpm(table, 1.0)
+    info = _bp(224, 20263835)
+    jl = root / "blocks_d4.jsonl"
+    nb_rows = []
+    for arm, ptab in (("diff", pseudo), ("plugin", table)):
+        payload = pickle.dumps((np.asarray(ptab), info["triples"]))
+        t0 = time.perf_counter()
+        with cf.ProcessPoolExecutor(max_workers=12,
+                                    initializer=_oos_init,
+                                    initargs=(payload,)) as ex:
+            recs = list(ex.map(_real_one,
+                               [(a_all[i * N:(i + 1) * N].tolist(),
+                                 b_all[i * N:(i + 1) * N].tolist(), i)
+                                for i in range(n_blocks)]))
+        wall = time.perf_counter() - t0
+        with jl.open("a", encoding="utf-8", buffering=1) as fh:
+            for r in recs:
+                fh.write(json.dumps({"arm": arm, **r}) + "\n")
+        nb = len(recs)
+        nf = sum(0 if r["exact_full"] else 1 for r in recs)
+        nu = sum(1 for r in recs if r["undetected"])
+        e_u2 = sum(r["L_u2"] for r in recs) / nb
+        e_u1 = sum((50 + r.get("u1_extra", 0)) if r.get("u2_ok") else 0
+                   for r in recs) / nb
+        e_l = e_u2 + e_u1
+        fer = nf / nb
+        denom = N * scalars["H_AB"]
+        kept = N * scalars["H_A"] - e_l
+        f_p = (e_l + TAG_BITS + kept * fer) / denom
+        nb_rows.append({"arm": arm, "source": "0dB-OOS", "N": N,
+                        "backend": "nb-u1chain-oos", "blocks": nb,
+                        "failures": nf, "undetected": nu, "E_u2": e_u2,
+                        "E_u1": e_u1, "E_L": e_l, "FER_exact": fer,
+                        "FER_wilson_upper95": wilson_upper(nf, nb),
+                        "f_expected": f_p, "wall_s": wall})
+        print(arm, f"fail {nf}/{nb} und {nu} f={f_p:.3f}", flush=True)
+    (root / "d4_summary.json").write_text(json.dumps(nb_rows, indent=2),
+                                          encoding="utf-8")
+    print(json.dumps(nb_rows, indent=2))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true")
     ap.add_argument("--real", action="store_true")
+    ap.add_argument("--oos", action="store_true")
     ap.add_argument("--proxy-root", required=False, default=None)
     ap.add_argument("--output-root", required=True)
     args = ap.parse_args()
+    if args.oos:
+        run_oos_main(args)
+        return
     if args.real:
         run_real_main(args)
         return
