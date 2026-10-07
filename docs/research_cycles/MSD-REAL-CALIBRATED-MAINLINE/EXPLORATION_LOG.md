@@ -877,4 +877,21 @@ solidified. Old root (L_B=0) superseded, not deleted.
 G-4 status: a NEGATIVE (incremental useless, threshold sharp); b RA verified
 (gap 0.10 viable, ~0.06 f saving; full-chain ~1.24); c margin curve closed
 (2.0:14% fail, 2.5:1% f=1.335, 3.0:0.3% f=1.268); d VIABLE (teammate).
-G batch ready to close pending single batch-end review.
+G-batch review PASS (close G batch). G-3 solidified (35/35 real, f=1.23).
+G-4 (a 否定，b RA 可行，c margin 曲线，d Polar 可行).
+
+G-5 bake-off landed (24 configs x 300, credible synthetic): N=32768/m3.0:
+RA-q5-gap0.08 0/300 f=1.140 (OPTIMUM); polar-SCL8-0.88 0/300 f=1.151;
+RA-q5-gap0.10 0/300 f=1.165; RA-q5-gap0.12 0/300 f=1.190;
+PEG-dv3-gap0.15 0/300 f=1.227. N=16384 best RA-gap0.08/m3.0 1/300 f=1.180.
+Margin 2.0 vs 3.0 decisive again (14% vs 0-1%). Polar SCL ~20x slower/block.
+Polar column FILLED as same-data control (f=1.151, N=32768).
+G-6 condition: 1.227-1.140=0.087 >= 0.03 → RUN (RA-gap0.08/m3.0 + N=16384
+control, 4dB/10dB clean + 0dB retest).
+
+G-batch review PASS (close G batch). G-3 solidified (35/35 real, f=1.23).
+G-5 N=16384 grid landed (12 configs x 300, credible synthetic): best
+RA-q5-gap0.08/m3.0 1/300 f=1.180; polar-SCL8-0.88/m3.0 1/300 f=1.191;
+RA-q5-gap0.12/m3.0 1/300 f=1.230; PEG-dv3-gap0.15/m3.0 1/300 f=1.268.
+Margin 2.0 vs 3.0 decisive again (14% vs 0-1%). Polar SCL ~20x slower
+per block than LDPC BP (wall recorded). N=32768 grid running.
