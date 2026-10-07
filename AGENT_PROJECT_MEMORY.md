@@ -117,3 +117,10 @@ The quarantine is preserved in workspace/_quarantine_20261004/ and indexed by do
 
 - msd_outcome_accounting.py separates independent sender reference and candidate tags, accepted-wrong from verified yield, and actual native disclosure/tag with per-block kept-weighted failure penalties. Pairing checks complete-symbol volume and entropy denominators; caller owns source/role and actual tag protocol. Accepted scope is fixed fake-only accounting mathematics, not a data/protocol/FER or efficiency result. See the same MSD P2 contract/log. The older P2 power artifact assumes same native length/shared tags; revised short/long comparison requires its own range and cost derivation.
 - User cancelled automatic reset-card redemption after resetting manually. Do not run card helpers, consume APIs, buy/exchange cards or re-enable the card task. See docs/NOW.md and docs/SESSION_HANDOFF_20261005_MSD_M_ACCEPTED.md for the operative boundary; past task-state checks are historical, not a current service snapshot.
+
+## Closeout memory (2026-10-08, Z batch)
+- Route result: ternary error {0,±1} (R15) -> two-level binary IR (RA-q5-gap0.08/m3.0 best: synthetic f=1.140, real 35/35 consistency; Polar SCL-8 control 1.151; NB GF(32) control 1.376 real clean-OOS; MSD negative with prior-path defect located).
+- Frozen numbers: PAPER_NUMBERS.md (H-2 independent recompute; tie quoted 0.011 approx; evidence-type columns).
+- Surface: Z-1 adaptive f(p) (gap 0.12 + margin 3.0; PEG if R>0.25 else RA-q5) x Z-2 30-cell reframe stats; Z-3 reps (512,400) 23/23 real.
+- Standing rules: append-only log; no push without asking; single-digit counts UNDECIDED; full-symbol R13; R14 ideals per level; R15 structure-first.
+- Env: qkd_env python, ldpc 2.4.1; spawn pool needs comparison_bench/__init__.py + src/__init__.py present; dense-check wall (PEG-BP fails dc>~150, use subvector/SPC or bigger m); RA builder must enforce binary (distinct rows per column); uniform BSC priors below dv3 threshold (use model P(x0|b)); N=4096 below finite-length threshold at p=0.24.

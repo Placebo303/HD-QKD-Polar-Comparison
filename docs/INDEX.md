@@ -8,6 +8,12 @@
 - [Current organization specification](../openspec/specs/repository-organization/spec.md), [PATH_MAP](archive/PATH_MAP.md), and [quarantine inventory](archive/QUARANTINE_MANIFEST.md).
 - Earlier roadmap/execution plans remain provenance and planning inputs; they do not override reboot R1–R9 or authorize P1–P4 scientific work.
 
+## Closeout (2026-10-08)
+
+- [Closeout plan](CLOSEOUT_PLAN_20261008.md) + [prompt](prompts/CLOSEOUT_PLAN_20261008_PROMPT.md).
+- [Paper draft](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/PAPER_DRAFT.md) + [frozen numbers](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/PAPER_NUMBERS.md).
+- [Final handoff](FINAL_HANDOFF_20261008.md).
+
 ## Current staged work
 
 - [MSD mainline P1 result](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/RESULT.md), [table](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/P1_TABLE.md), [packet](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/PREREG_AND_AUTH.md) and [single route log](research_cycles/MSD-REAL-CALIBRATED-MAINLINE/EXPLORATION_LOG.md).

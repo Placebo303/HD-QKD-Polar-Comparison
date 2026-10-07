@@ -954,3 +954,11 @@ pointer present; (3) full distributions in b-root summary (9/5/3 all rows);
 undersampling caveat stated; (5) G-1 tolerance ±0.002 stated (0.229 vs
 0.23021); (6) flag definition consistent data+doc; (7) purity holds (counts
 only); (8) binding claim ceiling added to Pre-EXECUTE.
+
+Z-3 CLOSED: surface assembled (12 mapped / 18 UNMEASURED with per-class rules;
+SKR side metric frozen formula); 2 rep points (512,400)x{4dB 0/7 f=1.269,
+0dB 0/16 f=1.259}, und 0. Pre-RESULT PASS (R13; recomputed).
+Z-4 paper draft written (PAPER_DRAFT.md; [TODO-LIT] placeholders, no lit claims).
+Z-5 warehouse done: OpenSpec change archived completed (delta merged);
+parked lines final states; NOW/INDEX updated; FINAL_HANDOFF written; memory
+triage appended (AGENT_PROJECT_MEMORY.md closeout section).

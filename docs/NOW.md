@@ -9,7 +9,8 @@
 - 当前执行：H 批已关闭——论文骨架 + 数字冻结（独立复算）+ H-3（10k 拐点，
   净增益 ~2.4–2.5x）+ H-4 f(p) 主干。等 push/论文/重分帧决定。
 - 主度量：带期望良率的 f，**完整符号口径**（R11）；零失败认证句禁用。
-- parked：`COMMON_VOLUME_SCOPE.md`（G-ENV/角色）；`ROADMAP_20261006_DIMBW.md`（等 G-1）；
-  `M6_PAPER_PACKAGE.md`（组装草稿，含撤回行）。
+- parked（最终状态，2026-10-08）：`COMMON_VOLUME_SCOPE.md`（被两级方案取代）；
+  `ROADMAP_20261006_DIMBW.md`（被 Z-3 曲面取代）；`M6_PAPER_PACKAGE.md`（被论文取代）；
+  msd-real-calibrated-mainline OpenSpec（已归档 completed）。
 - 门：真帧/新 raw/发表/push 均须用户明确确认（S-5 Pre-EXECUTE）；push 只普通非强制。
 - 现场为准：`git branch --show-current` + `git status` + HEAD（不引用快照数字）。
