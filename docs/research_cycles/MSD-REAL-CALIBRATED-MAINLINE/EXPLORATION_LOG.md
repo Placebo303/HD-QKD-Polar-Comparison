@@ -895,3 +895,13 @@ RA-q5-gap0.08/m3.0 1/300 f=1.180; polar-SCL8-0.88/m3.0 1/300 f=1.191;
 RA-q5-gap0.12/m3.0 1/300 f=1.230; PEG-dv3-gap0.15/m3.0 1/300 f=1.268.
 Margin 2.0 vs 3.0 decisive again (14% vs 0-1%). Polar SCL ~20x slower
 per block than LDPC BP (wall recorded). N=32768 grid running.
+
+G-5 landed (24 configs x 300): N=32768/m3.0 RA-q5-gap0.08 0/300 f=1.140
+(OPTIMUM, beats 1.227 by 0.087 → G-6 condition met); polar-SCL8-0.88 0/300
+f=1.151 (same-data Polar control column FILLED); RA-q5-gap0.10 0/300 f=1.165;
+PEG-dv3 0/300 f=1.227. N=16384 best RA-gap0.08/m3.0 1/300 f=1.180. Margin
+2.0 vs 3.0 decisive (14% vs 0-1%).
+G-6 EXECUTED (conditionally authorized): RA optimum + N=16384 control on
+4dB/10dB/0dB — 35/35 exact, und 0, E_L matches proxy exactly (29745/14873),
+f=1.140/1.142 (zero-failure nominal). Pre-RESULT PASS (R13; recomputed).
+RESULT + acceptance solidified. Consistency demo only (no FER estimation).
