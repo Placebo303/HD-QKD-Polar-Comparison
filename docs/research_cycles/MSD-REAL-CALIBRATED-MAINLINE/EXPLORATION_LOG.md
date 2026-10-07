@@ -782,8 +782,16 @@ Supporting: genie same-half 4/100 vs cross-half 10/100. Cheap test: 1e-7
 background outside window, or union of both halves' windows; watch plateau.
 Until located, NO "ceiling" language (R4/R9). E-3 d256 stays parked low-priority
 but on the any-d TODO list.
-F-1 authorized (DECIDE): NB full chain at E-2 point, single run. E-4 parallel
+F1 authorized (DECIDE): NB full chain at E-2 point, single run. E-4 parallel
 (EXPLORE): locate the plateau.
+
+F-1 EXECUTED (authorized; wall ~1030 s): 4dB 112 + 0dB 260 superframes x2 arms.
+4dB-diff 0/112 und 0 f=1.376 (E_L=1060.7); 4dB-plugin 2/112 f=1.584;
+0dB-diff 1/260 und 0 f=1.421; 0dB-plugin 15/260 f=2.032.
+G-1 point: 4dB-diff PASS (first clean-OOS point pass); others MISS (0dB-diff
+by 0.021). G-1a point+upper separately; 112-block width pre-declared.
+Pre-RESULT PASS (R13; L_u2=A208 rows verified; recomputed). RESULT +
+acceptance solidified.
 
 E-4 window-truncation verdict (zero-decode, TRAIN tables): BOTH halves' windows
 are exactly the same 3 deltas {0,1,1023} (union = intersection = 3); out-of-
