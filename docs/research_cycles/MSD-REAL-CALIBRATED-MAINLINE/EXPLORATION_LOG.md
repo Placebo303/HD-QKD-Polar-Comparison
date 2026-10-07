@@ -962,3 +962,8 @@ Z-4 paper draft written (PAPER_DRAFT.md; [TODO-LIT] placeholders, no lit claims)
 Z-5 warehouse done: OpenSpec change archived completed (delta merged);
 parked lines final states; NOW/INDEX updated; FINAL_HANDOFF written; memory
 triage appended (AGENT_PROJECT_MEMORY.md closeout section).
+
+Z-batch review: FAIL (docs-level F1-F5) -> all fixed (Z-1/Z-3 freeze §12 with
+no discrepancies; lit range stripped; NOW+README current; Z-2/Z-3 standalone
+acceptances filed; UNDECIDED/pooled/ceiling recorded) -> re-review PASS.
+Z batch CLOSED. Ready for user push review (Z-6).
