@@ -832,3 +832,11 @@ plug-in). Defect location: MSD plane-1's query/prior path (infinite-LLR pins
 from plug-in zeros vs exact structural pins), NOT the syndrome/BP core
 (level-A BP works; D-1 genie works). R14 margins: A actual/ideal ~1.15x;
 B ~3x (PEG dense-check price; SPC path blocked by tie problem).
+
+G-batch accepted (2026-10-07): G-1/G-2 stand; best N=32768 f=1.227 (0/300)
+beats NB 1.376 by 0.15. Headroom noted (gap 0.15 ~19% over; no incremental;
+B margin 3x conservative; Polar column now fillable on LSB-BSC).
+G-3 AUTHORIZED (DECIDE): two-level chain at best config + N=16384 control,
+4dB/10dB clean + 0dB retest, single run. G-4 parallel (EXPLORE): a/b/c/d with
+synthetic f<=1.15 target. Paper skeleton may start; numbers wait for G-3/G-4.
+No push.
