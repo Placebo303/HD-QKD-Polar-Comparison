@@ -3,9 +3,9 @@
 - 必读：`AGENTS.md` → `docs/REBOOT_HANDOFF_20261004.md`（R1–R9）→
   `docs/ROADMAP_20261006_REVIEW.md`（本轮审查与路线，新增 R10–R13，优先于一切旧状态行）。
 - 现状一句话：**没有任何方法在真实数据上完成完整符号协调**（NB u2 口径撤回后）。
-- 当前执行：D 批＋D-4/D-5 关闭——D-4 干净 OOS 主臂 f=1.537（G-1a 以 0.013 通过，
-  脆弱）；D-5 澄清 MSD 矛盾（ dense 重建是关键，sharp-pin 假设否决）。
-  等你确认 push 与下一步。
+- 当前执行：E 批已关闭——E-1（m1 阶梯 f≈2.5，tie；und-226 系 pre-fix，MSD 条件未满足）、
+  E-2（B=300 零失败，upper 1.521≤1.55，跨总体组合已声明）、E-3（双倍 gap 照败，
+  非码率问题）。MSD 真实检验不启动。等你确认 push 与下一步。
 - 主度量：带期望良率的 f，**完整符号口径**（R11）；零失败认证句禁用。
 - parked：`COMMON_VOLUME_SCOPE.md`（G-ENV/角色）；`ROADMAP_20261006_DIMBW.md`（等 G-1）；
   `M6_PAPER_PACKAGE.md`（组装草稿，含撤回行）。
