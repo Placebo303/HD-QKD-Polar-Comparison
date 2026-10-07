@@ -802,3 +802,19 @@ same 3 cells; 1e-7 background ≈ existing α-smoothing) — not executed, with
 this reason (better-plan latitude; no moot compute). Within-window masses match
 to 0.03-5% relative. Plateau mechanism REMAINS OPEN (10% plane-1 fails resist
 4x disclosure with near-identical priors); "ceiling" language stays withdrawn.
+
+G-1 ternary confirmed (docs/.../G1_TERNARY.md, zero-decode): all six tables
+support exactly {0,±1}, rest 0; 1.5M/2M sign-flipped (h2-symmetric, same cost);
+lag-1 0.0004 (n=315504, T2-1M ordered); per-pair decomposition exact
+(LSB-iff; a1=b1^a0^sgn on 11886 marked). G-2 packet frozen (R14 ideals stated).
+G-2 interim (N=16384, credible synthetic, B=300): gap 0.10 fail 3/300,
+gap 0.15 fail 1/300, und 0; corrected f ≈1.27 both — BELOW NB 1.376.
+Failure split: level A 2, level B 2. Debug trail (all fixed): uniform priors
+below dv3 threshold; model P(x0|b) priors required; N=4096 below finite-length
+threshold (dropped); level-B base1 pin bug (pinned WRONG half the unmarked);
+PM absolute-vs-conditional 4x bug; f-denominator N bug; margin-loop indent bug
+(only margin 3.0 executed so far).
+MSD plateau recheck (附带): level-B sign decode (~400 bits) fails ~0.3% where
+MSD plane-1 fails 11-100% at m1=600-2400 on the same information — MSD plane-1
+path defect SUPPORTED (prior-exactness confound noted; isolating experiment
+with structural pins recorded as next step). N=65536 configs still building.
