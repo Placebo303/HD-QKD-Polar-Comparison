@@ -905,3 +905,26 @@ G-6 EXECUTED (conditionally authorized): RA optimum + N=16384 control on
 4dB/10dB/0dB — 35/35 exact, und 0, E_L matches proxy exactly (29745/14873),
 f=1.140/1.142 (zero-failure nominal). Pre-RESULT PASS (R13; recomputed).
 RESULT + acceptance solidified. Consistency demo only (no FER estimation).
+
+G-5/G-6 accepted with 3 wording requirements (2026-10-08, append-only):
+W1. RA 1.140 vs Polar 1.151 = "约 0.01 内持平" (Polar single disclosure point,
+not tuned; no RA-wins language).
+W2. Real 1.14 is zero-failure nominal; 35 blocks prove consistency only; FER
+tail + upper (~1.37) come from G-1-validated synthetic. Never present 1.23/1.14
+as real-measured efficiency alone.
+W3. Comparison table split by evidence type: NB 1.376 = real clean-OOS
+measured; two-level 1.140 = "synthetic + real consistency".
+
+H-2 freeze done (independent subagent, DECIDE): PAPER_NUMBERS.md written, all
+numbers recomputed from artifacts (exact or rounding-level). Two wording
+findings: D1 tie gap 0.01124 > 0.01 (quote 0.011, phrase approximate); D2
+T2-1.5M H rounding 1e-4 (keep logged). Paper must use these phrasings.
+H-3 estimation cost: knee at ~10k pairs (f-loss 0.0002, negligible); below
+~3k the rare sign unestimable (f-loss 0.06-0.57). Net kept multiplier ~2.5x
+vs old 60% sacrifice. Evidence: workspace/h3_estcost/h3_20261007/.
+H-4 f(p) backbone (fixed RA-gap0.08/m3.0, N=16384, B=300): p=0.15 f=6.37
+(104 fail); 0.20 f=2.02 (21 fail); 0.24 f=1.21 (2 fail); 0.28 f=1.16
+(1 fail, und 1); 0.33 f=1.16 (1 fail, und 1). Undetected appears at p>=0.28
+(recorded). H_AB per-p honest denominators. Evidence:
+workspace/h4_fpcurve/h4_20261007/. Reframing reads need user confirmation
+(H4_REFRAME_PREEXECUTE_DRAFT.md).
