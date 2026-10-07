@@ -1,7 +1,5 @@
-"""H-4 synthetic f(p) backbone (EXPLORE): fixed RA-q5-gap0.08/margin3.0,
-N=16384, B=300 per p in {0.15,0.20,0.24,0.28,0.33} on parametric ternary
-(p, p-=0.0058) channels. Interpolation backbone for the f(d,bw) surface
-(p(d,bw) itself needs reframing reads -> separate Pre-EXECUTE).
+"""Z-1 rate-adaptive f(p) curve (EXPLORE): uniform rule gap 0.12 + margin 3.0
+(RA-q5 level A) per p. Replaces voided H-4 fixed-rate curve.
 """
 
 from __future__ import annotations
@@ -17,7 +15,12 @@ from scipy import sparse
 
 N = 16384
 PM_ABS = 0.00138
-PS = (0.15, 0.20, 0.24, 0.28, 0.33)
+# Z-1 rule: gap 0.12 + margin 3.0 universal; ENSEMBLE branches on rate
+# (pilot evidence): R>0.25 -> PEG-dv3 (RA-q5 threshold collapses at high rate:
+# 293/300 + 33 und at p=0.05); R<=0.25 -> RA-q5 (verified low-rate winner).
+# Matches M1 C0 gap; documents the rate-dependent ensemble choice.
+GAP = 0.12
+PS = (0.05, 0.10, 0.15, 0.20, 0.24, 0.28, 0.33)
 B = 300
 K = 400
 SEED = 20267600
@@ -167,10 +170,11 @@ def _decode_one(args) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true")
+    ap.add_argument("--ps", default=None)
     ap.add_argument("--output-root", required=True)
     args = ap.parse_args()
     if not args.full:
-        raise SystemExit("H-4 backbone runs only with --full")
+        raise SystemExit("Z-1 runs only with --full")
     import concurrent.futures as cf
     import pickle
     from comparison_bench.src.comparison_bench.formal_ir.msd_m1_synthetic import (  # noqa: E402
@@ -191,10 +195,20 @@ def main() -> None:
     if jl.exists():
         raise SystemExit(f"refusing to overwrite {jl}")
     rows = []
-    for p in PS:
+    pss = [float(x) for x in args.ps.split(",")] if args.ps else list(PS)
+    for p in pss:
         pm_cond = 0.0058
-        m_a = min(N - 1, max(1, int(math.ceil(N * (h2(p) + 0.08)))))
-        HA = ra_matrix(N, m_a, 5, 0)
+        m_a = min(N - 1, max(1, int(math.ceil(N * (h2(p) + GAP)))))
+        rate = 1.0 - m_a / N
+        if rate > 0.25:
+            from comparison_bench.src.comparison_bench.formal_ir.msd_peg_code import (  # noqa: E402
+                build_peg_code as _bpeg,
+            )
+            HA = _bpeg(n=N, m=m_a, variable_degree=3).parity_check_matrix
+            ens = "PEG-dv3"
+        else:
+            HA = ra_matrix(N, m_a, 5, 0)
+            ens = "RA-q5"
         m_b = min(N - 1, max(1, int(math.ceil(N * p * h2(pm_cond) * 3.0))))
         HB = build_peg_code(n=N, m=m_b, variable_degree=3).parity_check_matrix
         payload = pickle.dumps((HA, HB, pa, {"p": p, "pm": pm_cond}))
@@ -206,7 +220,7 @@ def main() -> None:
         wall = time.perf_counter() - t0
         with jl.open("a", encoding="utf-8", buffering=1) as fh:
             for r in recs:
-                fh.write(json.dumps({"p": p, **r}) + "\n")
+                fh.write(json.dumps({"p": p, "ensemble": ens, **r}) + "\n")
         nb = len(recs)
         nf = sum(0 if r["exact_full"] else 1 for r in recs)
         nu = sum(1 for r in recs if r["undetected"])
@@ -220,11 +234,11 @@ def main() -> None:
         denom = N * hab
         kept = N * ha - e_l
         f_p = (e_l + TAG_BITS + kept * fer) / denom
-        rows.append({"p": p, "pm_cond": pm_cond, "N": N, "m_A": m_a, "m_B": m_b,
+        rows.append({"p": p, "ensemble": ens, "pm_cond": pm_cond, "N": N, "m_A": m_a, "m_B": m_b,
                      "blocks": nb, "failures": nf, "undetected": nu, "E_L": e_l,
                      "FER_exact": fer, "FER_wilson_upper95": wilson_upper(nf, nb),
                      "f_expected": f_p, "H_AB_channel": hab, "wall_s": wall})
-        print(f"p={p}: fail {nf}/{nb} f={f_p:.3f}", flush=True)
+        print(f"p={p} {ens}: fail {nf}/{nb} f={f_p:.3f}", flush=True)
     (root / "h4_backbone.json").write_text(json.dumps(rows, indent=2),
                                            encoding="utf-8")
     print(json.dumps(rows, indent=2))

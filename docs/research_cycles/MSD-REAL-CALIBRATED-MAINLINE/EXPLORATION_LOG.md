@@ -938,3 +938,19 @@ D-4 0dB pair → F-1 4dB 1.376); u2-only figures banned.
 F3 fixed: skeleton §5 net section carries both denominators (per-deployment
 ~1% → 2.476x; TRAIN-pool ~3.2% → 2.42x; range ~2.4–2.5x).
 F4 fixed: h3_summary.json net_gain now states both denominators explicitly.
+
+Z-1 curve landed (uniform rule gap 0.12 + margin 3.0; ensemble branches on
+rate: R>0.25 PEG-dv3, else RA-q5; N=16384, B=300): p=0.12 PEG 3/300 f=1.429;
+p=0.15 RA 0/300 f=1.226; p=0.20 RA 1/300 f=1.239; p=0.24 RA 2/300 f=1.259;
+p=0.28 RA 1/300 (und 1) f=1.210; p=0.33 RA 1/300 (und 1) f=1.164.
+p=0.05/0.10 unmeasurable with this rule (RA threshold collapse + PEG level-B
+dense-check wall + gap dominance; evidence retained in voided run).
+Z-2 rerun with full distributions (z2_20261008b, supersedes a-root).
+Z-2 Pre-RESULT: FAIL (docs-level findings 1-8); amendments in progress.
+Z-2 amendments closed per-finding: (1) 6 explicit paths + window 200 ps pinned
+in Pre-EXECUTE; (2) d=32 sentence fixed, rule stated once, authorization
+pointer present; (3) full distributions in b-root summary (9/5/3 all rows);
+(4) formulas published, wide-window decomp scoped to ternary rows, d=4096
+undersampling caveat stated; (5) G-1 tolerance ±0.002 stated (0.229 vs
+0.23021); (6) flag definition consistent data+doc; (7) purity holds (counts
+only); (8) binding claim ceiling added to Pre-EXECUTE.
