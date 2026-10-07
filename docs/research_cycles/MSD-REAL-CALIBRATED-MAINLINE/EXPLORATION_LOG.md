@@ -928,3 +928,13 @@ H-4 f(p) backbone (fixed RA-gap0.08/m3.0, N=16384, B=300): p=0.15 f=6.37
 (recorded). H_AB per-p honest denominators. Evidence:
 workspace/h4_fpcurve/h4_20261007/. Reframing reads need user confirmation
 (H4_REFRAME_PREEXECUTE_DRAFT.md).
+
+H-batch review amendments F1–F4 (wording/citation + evidence):
+F1 fixed: skeleton tie now quotes exact 0.011 (≈0.01 approximate).
+F2 fixed: D-4 rows added to PAPER_NUMBERS.md §11 (diff f=1.5366/upper 1.698,
+plugin f=1.7113, n=260, real-retest, recompute exact); skeleton §4 NB ladder
+replaced with frozen full-symbol values (S-3 4.02 proxy → S-5 real trio →
+D-4 0dB pair → F-1 4dB 1.376); u2-only figures banned.
+F3 fixed: skeleton §5 net section carries both denominators (per-deployment
+~1% → 2.476x; TRAIN-pool ~3.2% → 2.42x; range ~2.4–2.5x).
+F4 fixed: h3_summary.json net_gain now states both denominators explicitly.

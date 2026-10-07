@@ -294,3 +294,17 @@
   (incl. `2.2987/2.0672/1.8392` footnote), `M5_RESULT.md`, `P1_TABLE.md`,
   `PAPER_SKELETON.md` §待填数字清单 — all consistent with the frozen values
   above except D1's wording caveat.
+
+## 11. D-4 rows — 0dB NB full chain (added for skeleton §4 citations)
+
+- Artifact: `workspace/d4_oos/d4_20261007/d4_summary.json` (keys `arm`,
+  `blocks`, `failures`, `undetected`, `E_u2`, `E_u1`, `E_L`, `FER_exact`,
+  `f_expected`).
+- diff (main): `f = 1.5365985868817063`, `FER = 0/260`, `und = 0`,
+  `E_L = 1191.8461538461538`, `n = 260`; recompute exact;
+  `Wilson(0,260) = 0.014560251302296528`; **`f_up = 1.698`**.
+- plugin (control): `f = 1.7112872165050408`, `FER = 4/260`, `und = 0`,
+  `E_L = 1195.5076923076924`, `n = 260`; recompute exact;
+  `Wilson(4,260) = 0.03888295440166833`.
+- Evidence type: **real-retest** (0dB used before by D-4 design; priors all R1).
+- Discrepancy vs logged: **None**.
