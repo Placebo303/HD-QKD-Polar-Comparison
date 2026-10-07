@@ -21,10 +21,11 @@ This repository contains the current HD-QKD Polar comparison workspace, includin
 
 ## Current Status
 
-As of 2026-09-22, the active research mainline is V80 NB-LDPC (formal-IR line).
-**Start here:** [docs/NOW-style execution plan](docs/EXECUTION_PLAN_20260922.md)
-(hygiene + claim-target gate + phased schedule) and
-[docs/ROADMAP-20260921.md](docs/ROADMAP-20260921.md) (scientific macro-route).
+As of 2026-10-08 (closeout): the two-level binary IR route is the best-known
+method on real HD-QKD data (synthetic f=1.140 RA-LDPC / 1.151 Polar control;
+real 70/70 consistency incl. new (d,bw) points; NB GF(32) control 1.376).
+**Start here:** [docs/NOW.md](docs/NOW.md), [final handoff](docs/FINAL_HANDOFF_20261008.md),
+[paper draft](docs/research_cycles/MSD-REAL-CALIBRATED-MAINLINE/PAPER_DRAFT.md).
 
 - Decodability is no longer the bottleneck (soft-marginal L2, F208 0/240 on each
   of two construction instances; synthetic paired frames; no pooling).

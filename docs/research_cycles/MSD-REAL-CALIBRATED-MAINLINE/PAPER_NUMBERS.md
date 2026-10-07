@@ -308,3 +308,67 @@
   `Wilson(4,260) = 0.03888295440166833`.
 - Evidence type: **real-retest** (0dB used before by D-4 design; priors all R1).
 - Discrepancy vs logged: **None**.
+
+## 12. Z-1/Z-3 rows — FPC-UVE backbone + surface map
+
+- Artifacts: `workspace/z1_fpcuve/z1_20261008/h4_backbone.json` (keys `p`,
+  `pm_cond`, `N`, `m_A`, `m_B`, `blocks`, `failures`, `undetected`, `E_L`,
+  `FER_exact`, `FER_wilson_upper95`, `f_expected`, `H_AB_channel`, `wall_s`)
+  and `workspace/z1_fpcuve/z1c_20261008/h4_backbone.json` (same keys plus
+  `ensemble`: PEG-dv3, single p=0.12 row).
+- **Denominator distinction (record explicitly)**: Z-1 `f` uses `H_A =
+  9.9976919099` (task scalar) with `H_AB =` the row's own `H_AB_channel`
+  (the channel's own H at that `p`) — NOT the frozen P1 `H_AB =
+  0.7981344445`. `N = 16384`, TAG = 64, same formula as the header
+  (`f = (E_L + 64 + (N·H_A − E_L)·FER) / (N·H_AB)`).
+
+| row | n | E_L | FER | und | f logged | f recomputed | Wilson (logged/recomp) | f_up recomputed |
+|---|---|---|---|---|---|---|---|---|
+| p=0.15 | 300 | 12338.0 | 0/300 | 0 | 1.225732425661626 | exact (Δ 0.00e+00) | 0.012643429997735661 exact | 1.4150011289312467 |
+| p=0.20 | 300 | 14301.213333333333 | 1/300 | 0 | 1.2389786945825318 | exact (Δ 0.00e+00) | 0.018637164554943353 exact | 1.4296939673225413 |
+| p=0.24 | 300 | 15600.426666666666 | 2/300 | 0 | 1.2588595932213718 | exact (Δ 0.00e+00) | 0.023978074231461442 exact | 1.4528075433077916 |
+| p=0.28 | 300 | 16690.213333333333 | 1/300 | 1 | 1.210004735807357 | exact (Δ 0.00e+00) | 0.018637164554943353 exact | 1.3679775899053799 |
+| p=0.33 | 300 | 17218.213333333333 | 1/300 | 1 | 1.163907044008621 | exact (Δ 0.00e+00) | 0.018637164554943353 exact | 1.3108325915721062 |
+| p=0.12 (z1c) | 300 | 10944.64 | 3/300 | 0 | 1.4288768009781507 | exact (Δ 0.00e+00) | 0.028984004635062833 exact | 1.7596028522035381 |
+
+- Void rows read as-is (NOT frozen as efficiency — code-limited, recorded
+  only): p=0.05 (`293/300` fails, `und = 33`, `f = 33.83781870136986`,
+  recompute exact) and p=0.10 (`210/300` fails, `und = 54`,
+  `f = 15.152636644161715`, recompute exact). Their `f` values are
+  failure-dominated (`FER ≈ 0.98/0.70`), not usable reconciliation
+  efficiencies.
+- Z-3 rep rows — artifact `workspace/z3_surface/z3_20261008/z3_summary.json`
+  (keys `seg`, `d`, `bw_ps`, `N`, `p_frozen`, `H_A_seg`, `H_AB_seg`, `blocks`,
+  `failures`, `undetected`, `E_L`, `FER_exact`, `FER_wilson_upper95`,
+  `f_expected`, `backend`, `wall_s`); `f` recomputed with each row's own
+  `H_A_seg`/`H_AB_seg`:
+
+| seg | n | E_L (= L_A+L_B) | FER | und | f logged | f recomputed | Wilson (logged/recomp) | f_up recomputed |
+|---|---|---|---|---|---|---|---|---|
+| 4dB (d=512, p_frozen=0.1196) | 7 | 10924.0 = 10621+303 | 0/7 | 0 | 1.2694573100037858 | exact (Δ 0.00e+00) | 0.35433884297520657 exact | 6.8564827446230829 |
+| 0dB (d=512, p_frozen=0.1237) | 16 | 11125.0 = 10812+313 | 0/16 | 0 | 1.2586110639167896 | exact (Δ 0.00e+00) | 0.19361341827271994 exact | 4.2272849235852110 |
+
+- `E_L` identity cross-check (`workspace/z3_surface/z3_20261008/blocks_z3.jsonl`,
+  keys `seg`, `d`, `bw`, `block`, `a_ok`, `exact_full`, `undetected`, `L_A`,
+  `L_B`, `extra`): 7/7 4dB records identical (`L_A = 10621`, `L_B = 303`,
+  sum `10924.0` ✓); 16/16 0dB records identical (`L_A = 10812`,
+  `L_B = 313`, sum `11125.0` ✓); 0 fails, 0 und in all 23 records.
+  (Tiny-`n` nominal-zero disclaimer as in §3: Wilson uppers `0.354/0.194` must
+  NOT be used as FER estimates.)
+- Z-3 mapping spot-check — artifact
+  `workspace/z3_surface/z3_20261008/z3_surface.json` (keys `source`, `bw_ps`,
+  `d`, `p`, `H_AB`, `R_pair_s`, `f_mapped`, `SKR_bps`, `status`): 30 entries
+  total = **12 mapped + 18 UNMEASURED** ✓ (6× `mapped from Z-1 p=0.24`, 6×
+  `mapped from Z-1 p=0.12`, 18× `UNMEASURED (extrapolation or
+  wide-support regime)`). Every mapped row's `|p − q|` to its nearest Z-1 `q`
+  is within 0.03 (max `0.01571`, T2-2M bw=200 p=0.255711 vs q=0.24; min
+  `0.00037`, 4dB bw=400 p=0.119629 vs q=0.12) ✓. `f_mapped` exact-equals the
+  frozen Z-1 `f` (`1.2588595932213718` = p=0.24 row; `1.4288768009781507` =
+  p=0.12 row) ✓. The per-entry `H_AB` column is descriptive segment entropy,
+  NOT the `f` denominator (mapped `f` reuses the Z-1 frozen value verbatim).
+- Evidence type: **synthetic** (Z-1 backbone: 300 blocks/row; Z-3 rep rows:
+  `z3-rep` backend, 7/16 blocks; Z-3 map: nearest-`q` projection, no new
+  measurement).
+- Discrepancy vs logged: **None** — all 6 Z-1 `f` recomputes exact
+  (Δ 0.00e+00), both Z-3 rep `f` recomputes exact, Wilson exact in all 8
+  checked (k, n) pairs. **No D3 entry** (§10 register untouched).
