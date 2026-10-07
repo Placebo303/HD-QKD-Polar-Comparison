@@ -743,6 +743,23 @@ E-3 d256 diagnosis: rate allocation arithmetically adequate (m covers measured
 h + gap); double-gap test still 30/30 fail (genie) → NOT a rate problem;
 structural coarse-grid issue, mechanism open; low priority, no further work.
 
+E-batch review amendments F1–F3 (evidence + wording):
+F1 closed: e1_summary.json patched with f formula (E_L+64+kept·FER)/(N·H_AB),
+P1 T2-1M H_A/H_AB, N, TAG (recompute matches stored to 4dp); m1200 vs m600
+declared STATISTICAL TIE (Δ0.035, 2/300 discordants); uncharged fails explained
+(all 34 fails are plane-1; 32 carry plane-0 rescue, 2 passed plane-0 cleanly).
+MSD Pre-EXECUTE condition stands NOT MET either way (~1.0 short).
+F2 closed: e2_summary.json patched with source (T2-1M diff channel), N=1024,
+H_A/H_AB/TAG, frozen-A208 matrix description, f formula; populations stated
+(u2 diff-channel measured; u1 composed from Tier1-proxy + real-0dB); gate
+labeled CROSS-POPULATION composition explicitly.
+F3 closed: E-3 re-executed as script
+comparison_bench/src/comparison_bench/formal_ir/msd_e3_coarsegrid.py ->
+workspace/e3_coarsegrid/e3_20261007/ (e3_summary.json with h8/m arithmetic +
+120 block records, und 0; gap x1/x2 both 60/60 fail). "NOT a rate problem"
+now artifacted (doubling disclosure changes nothing); mechanism still open,
+low priority, no further work.
+
 D-batch accepted with 2 corrections (2026-10-07, append-only):
 C1. D-4 wording unified: "点估计满足 G-1a (f=1.537 ≤ 1.55)，上界 1.70 未满足
 (0/260, FER 上界约 1.4%)" — never "G-1a 通过" alone.
