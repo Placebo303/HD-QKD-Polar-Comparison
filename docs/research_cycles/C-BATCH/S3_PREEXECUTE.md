@@ -63,13 +63,26 @@ D:\software\Anaconda3\envs\qkd_env\python.exe -m comparison_bench.src.comparison
 
 ## 6. 检查单（执行前，主线程在确认后逐项打勾）
 
-- [ ] 用户已确认本 Pre-EXECUTE（含 §4 预算封顶与 §2 数据范围）
-- [ ] S-2 2×2 表已落盘（H 界输入；调参先验用 S-2 前缀律）
-- [ ] 新增 runner + 测试通过（T0/T1），`--smoke` 通过且输出根 fresh
-- [ ] 冻结基线零 diff；输出根验空；分支正确
-- [ ] 跑后独立 Pre-RESULT（S3_ACCEPTANCE.md，独立线程）+ 批末审查
+- [x] 用户已确认本 Pre-EXECUTE（含 §4 预算封顶与 §2 数据范围）——2026-10-09"可以开始s3"
+- [x] S-2 2×2 表已落盘（H 界输入；调参先验用 S-2 前缀律）
+- [x] 新增 runner + 测试通过（T0/T1），`--smoke` 通过且输出根 fresh
+- [x] 冻结基线零 diff；输出根验空；分支正确
+- [x] 跑后独立 Pre-RESULT（S3_ACCEPTANCE.md，独立线程）—— **PASS**
 
 ## 7. 请用户确认的事项（本批返回条件中的那一个决定）
 
 - 是否按本包执行 S-3（三段命令、§4 预算封顶 4 h、§2 数据范围）。
   确认后主线程执行，跑后做独立 Pre-RESULT 并报告泄漏/FER/净密钥/McNemar。
+
+## 8. 补遗 A（2026-10-09，用户授权"重任务用更快语言和更多核"后追加）
+
+- 译码器由 `ldpc.BpOsdDecoder`（product-sum，serial，50 iter）换成
+  本仓 numba syndrome min-sum 核（`methods/binary_spa_numba.py`，M3 验证
+  45.9×，`DEC_MAX_ITER=100`），两臂同设置、冻结（`msd_s3_softdecode.decode`）。
+  A6 的 ldpc 结果仍为验证结论，不受影响（S-3 是独立测量）。
+- 块级多进程并行（有序 map，deterministic；`NPROC_OF_N={4096:16, 8192:8,
+  16384:4}`，dense 消息内存 bound，机器 32 GB、实测余量 15 GB，充足）。
+- Smoke 重测：442 s → 161 s（文件读取成主导；hard 7.3 s/块全败慢径、
+  soft 0.78 s/块）。§4 预算封顶 4 h 不变（更松）。
+- 本补遗只换等价执行引擎（同 syndrome、同 LLR、同冻结码），不改 §1–§2 的
+  科学冻结（码率梯子、N 候选、数据范围、配对口径、K2 rescue）。
