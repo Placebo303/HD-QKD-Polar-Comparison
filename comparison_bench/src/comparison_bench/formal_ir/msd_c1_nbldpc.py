@@ -177,6 +177,23 @@ def _as_prior(prior_g: object, q: int) -> np.ndarray:
     return g / total
 
 
+def _as_prior_matrix(prior: object, n: int, q: int) -> np.ndarray:
+    """Per-symbol priors, shape (n, q) rows normalized (S-5b(ii) soft GF(q)).
+
+    The legacy global prior (shape (q,)) keeps working verbatim through
+    :func:`_as_prior`; this is an ADDITIVE branch (no change to that path).
+    """
+    g = np.asarray(prior, dtype=float)
+    if g.shape != (n, q):
+        raise ValueError(f"per-symbol prior must have shape ({n}, {q})")
+    if np.any(~np.isfinite(g)) or np.any(g < 0.0):
+        raise ValueError("per-symbol prior must be finite and nonnegative")
+    tot = g.sum(axis=1, keepdims=True)
+    if np.any(tot <= 0.0):
+        raise ValueError("per-symbol prior rows must have positive mass")
+    return g / tot
+
+
 def disclose(code: GFqLDPCCode, a_symbols: object) -> tuple[np.ndarray, int]:
     """Disclose the syndrome of ``a_symbols`` under ``code``.
 
@@ -246,25 +263,36 @@ def decode(
     prior_g: object,
     max_iter: int = _DEFAULT_MAX_ITER,
 ) -> np.ndarray | None:
-    """Decode ``b = a + e`` given ``syndrome = H·a`` and error prior ``prior_g``.
+    """Decode ``b = a + e`` given ``syndrome = H·a`` and error prior.
+
+    ``prior_g`` is either the legacy GLOBAL error prior (shape (q,), meaning
+    P(symbol error = e) shared by all positions) or a PER-SYMBOL prior matrix
+    (shape (n, q), rows = P(a = x) for variable i; S-5b(ii) soft GF(q)).
 
     Log-domain sum-product (QSPA). Returns the recovered word when its
     syndrome matches exactly, else ``None`` after ``max_iter`` rounds.
     """
     b = _as_symbol_vector(b_symbols, code.n, code.q, "b_symbols")
     s = _as_symbol_vector(syndrome, code.m, code.q, "syndrome")
-    g = _as_prior(prior_g, code.q)
+    g = np.asarray(prior_g, dtype=float)
     max_iter = _explicit_integer(max_iter, "max_iter")
     if max_iter < 0:
         raise ValueError("max_iter must be nonnegative")
     q = code.q
-    log_g = np.log(np.maximum(g, _LOG_FLOOR))
-    # Channel log-prior per variable: P(a = x | b) ∝ g[(b - x) mod q].
-    channel = np.zeros((code.n, q))
-    for i in range(code.n):
-        for x in range(q):
-            channel[i, x] = log_g[(int(b[i]) - x) % q]
-        channel[i] -= channel[i].max()
+    if g.shape == (q,):
+        g = _as_prior(g, q)
+        log_g = np.log(np.maximum(g, _LOG_FLOOR))
+        # Channel log-prior per variable: P(a = x | b) ∝ g[(b - x) mod q].
+        channel = np.zeros((code.n, q))
+        for i in range(code.n):
+            for x in range(q):
+                channel[i, x] = log_g[(int(b[i]) - x) % q]
+            channel[i] -= channel[i].max()
+    elif g.shape == (code.n, q):
+        channel = np.log(np.maximum(_as_prior_matrix(g, code.n, q), _LOG_FLOOR))
+        channel -= channel.max(axis=1, keepdims=True)
+    else:
+        raise ValueError(f"prior_g must have shape ({q},) or ({code.n}, {q})")
 
     def hard_decision(posterior: np.ndarray) -> np.ndarray:
         return np.argmax(posterior, axis=1).astype(np.int64)

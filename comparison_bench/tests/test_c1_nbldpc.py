@@ -109,3 +109,21 @@ def test_decode_validates_inputs() -> None:
         decode(code, good, syndrome, [0.5, 0.5], 5)
     with pytest.raises(ValueError):
         decode(code, good, syndrome, [0.9, 0.05, 0.05], -1)
+
+
+def test_per_symbol_prior_matches_tiled_global() -> None:
+    """Additive S-5b(ii) branch: an (n,q) matrix of identical rows must behave
+    exactly like the legacy global prior (same path, same outcome)."""
+    code = construct(32, 16, 5, seed=11)
+    rng = np.random.default_rng(7)
+    a = rng.integers(0, 5, size=32)
+    syndrome, _ = disclose(code, a)
+    b = np.zeros(32, dtype=int)
+    g = [0.9, 0.03, 0.02, 0.02, 0.03]
+    r1 = decode(code, b, syndrome, g, 20)
+    r2 = decode(code, b, syndrome, np.tile(np.asarray(g) / np.sum(g), (32, 1)), 20)
+    assert (r1 is None) == (r2 is None)
+    if r1 is not None:
+        assert np.array_equal(r1, r2)
+    with pytest.raises(ValueError):
+        decode(code, b, syndrome, np.zeros((32, 4)), 5)
