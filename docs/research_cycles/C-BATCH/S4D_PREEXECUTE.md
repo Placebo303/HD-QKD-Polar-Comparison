@@ -54,7 +54,7 @@ D:\software\Anaconda3\envs\qkd_env\python.exe -m comparison_bench.src.comparison
 
 - 段 0（合成）：≤ 3600 s。段 1：≤ 300 s。
   段 2 封顶 **4 h**（S-3 实测 1644 s 同量级；精细条件译码同成本类）。
-- 输出根 fresh 纪律（脚本内写死；tune类补充只许加法新文件）。
+- 输出根 fresh 纪律（脚本内写死；调参类补充只许加法新文件）。
 
 ## 5. 报告（冻结口径）
 
@@ -66,11 +66,11 @@ D:\software\Anaconda3\envs\qkd_env\python.exe -m comparison_bench.src.comparison
 
 ## 6. 检查单（执行前，主线程在确认后逐项打勾）
 
-- [ ] 用户已确认本 Pre-EXECUTE（含 §4 预算封顶、§2 矩阵、段 0 条件门语义）
-- [ ] 段 0 门结论已出（过门→双臂；FAIL→明文臂单行，编码臂记合成阴性）
-- [ ] 新增 runner + 测试通过（T0/T1），`--smoke` 通过且输出根 fresh
-- [ ] 冻结基线零 diff；输出根验空；分支正确
-- [ ] 跑后独立 Pre-RESULT（S4D_ACCEPTANCE.md，独立线程）
+- [x] 用户已确认本 Pre-EXECUTE（含 §4 预算封顶、§2 矩阵、段 0 条件门语义）——2026-10-09
+- [x] 段 0 门结论已出（PASS condB=0.0000 → 双臂；`s4d_gate.json`）
+- [x] 新增 runner + 测试通过（T0/T1），`--smoke` 通过且输出根 fresh
+- [x] 冻结基线零 diff；输出根验空；分支正确
+- [x] 跑后独立 Pre-RESULT（S4D_ACCEPTANCE.md：初审 R-b FAIL→返工→聚焦复审 PASS）
 
 ## 7. 请用户确认的事项（本批返回条件中的那一个决定）
 

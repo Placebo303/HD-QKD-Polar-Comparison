@@ -156,16 +156,27 @@ def _block_once(H_A, H_B, H_R, blk: dict, p_bar: float, sig: float, mu: float,
     exact = False
     if okA:
         b0 = blk["b0"]
-        marked = (xa != b0)
+        # POST-LANDING FIX 2 (S-4d root cause, primary): marked (e!=0) is (xa==1)
+        # since xa IS the difference x=a0^b0 — NOT (xa!=b0), which inflates the
+        # set ~8x on real data (identical iff b0=0, hence invisible on synthetic)
+        # and hands level-B an underdetermined system: the S-3 100% mechanism
+        # (compounding the prior-sign fix above). Landed S/F/U stand (see S4D_RESULT).
+        marked = (xa == 1)
         mk = int(marked.sum())
         y = blk["a1"][marked]
         lb = mB  # level-B syndrome always transmitted
+        # POST-LANDING FIX (S-4d root cause): xa is the difference x=a0^b0,
+        # not a0. Recover a0hat=xa^b0 for prior signs AND reconstruction.
+        # S-3 full ran with xa-as-a0 (50%-flipped priors on real data, invisible
+        # on synthetic b0=0). S-3's landed S/F/U stand: okB failed before exact
+        # was reached, and okA never used a0. See S4D_RESULT.
+        a0hat = (xa ^ b0).astype(np.uint8)
         yhat = np.empty((0,), dtype=np.uint8)
         if mk == 0:
             okB = True  # nothing to reconcile at level-B
         else:
             synB = np.asarray((H_B[:, marked] @ y) % 2, dtype=np.uint8).ravel()
-            chB = np.where((blk["b1"][marked] ^ xa[marked]) == 1, -llr(p_minus), llr(p_minus))
+            chB = np.where((blk["b1"][marked] ^ a0hat[marked]) == 1, -llr(p_minus), llr(p_minus))
             Hsub = H_B[:, marked]
             yhat = decode(Hsub, synB, [float(c) for c in chB])
             okB = bool(np.array_equal(yhat, y))
@@ -182,7 +193,7 @@ def _block_once(H_A, H_B, H_R, blk: dict, p_bar: float, sig: float, mu: float,
             a1hat[marked] = yhat
             # reconstruct: a = b-e; sgn=(e==-1): sgn=0 (e=+1) -> b-1, sgn=1 -> b+1
             ahat = blk["b"].copy()
-            sgn = (yhat ^ blk["b1"][marked] ^ xa[marked]).astype(bool)
+            sgn = (yhat ^ blk["b1"][marked] ^ a0hat[marked]).astype(bool)
             ahat[marked] = np.where(sgn, (blk["b"][marked] + 1) % D,
                                     (blk["b"][marked] - 1) % D)
             exact = bool(np.array_equal(ahat, blk["a"]))
