@@ -77,3 +77,15 @@
 ## 2026-10-09 02:16:56+0800 OP-M2 --full 汇总
 - --full 落盘：cells=1 main=1 wall=7640s
 - events=[]
+
+## 2026-10-09 10:58:15+0800 OP-M2 --full 汇总
+- --full 落盘：cells=2 main=2 wall=554s
+- events=[]
+
+## 2026-10-09 11:06:15+0800 OP-M2 --full 汇总
+- --full 落盘：cells=2 main=2 wall=480s
+- events=[]
+
+## 2026-10-09 11:14:18+0800 OP-M2 --full 汇总
+- --full 落盘：cells=2 main=2 wall=482s
+- events=[]
