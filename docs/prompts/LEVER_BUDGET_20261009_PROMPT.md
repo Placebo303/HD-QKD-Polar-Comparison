@@ -1,5 +1,7 @@
 # 粘贴用 prompt — 端到端密钥杠杆敏感度（EXPLORE，2026-10-09）
 
+> **SUPERSEDED-BEFORE-EXECUTION（2026-10-09）——不要粘贴。** 原因见任务包顶部。
+
 > 把分隔线之间的内容原样粘贴给执行 session。任务包：
 > `docs/research_cycles/LEVER-BUDGET-20261009/PREREG_AND_AUTH.md`。
 
