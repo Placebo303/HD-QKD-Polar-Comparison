@@ -59,10 +59,10 @@ D:\software\Anaconda3\envs\qkd_env\python.exe -m comparison_bench.src.comparison
 
 ## 6. 检查单（执行前，主线程在确认后逐项打勾）
 
-- [ ] 用户已确认本 Pre-EXECUTE（含 §4 预算封顶与 §2 矩阵）
-- [ ] `--smoke` 模式已补且通过；输出根 fresh
-- [ ] 冻结基线零 diff；分支正确
-- [ ] 跑后独立 Pre-RESULT（S5C_ACCEPTANCE.md，独立线程）
+- [x] 用户已确认本 Pre-EXECUTE（含 §4 预算封顶与 §2 矩阵）——2026-10-09"可以执行"
+- [x] `--smoke` 模式已补且通过（T_med=1.26 s/块→预算 1204 s）；输出根 fresh
+- [x] 冻结基线零 diff；分支正确
+- [x] 跑后独立 Pre-RESULT（S5C_ACCEPTANCE.md：初审 R-b/R-c FAIL→返工→聚焦复审 PASS）
 
 ## 7. 请用户确认的事项（本批返回条件中的那一个决定）
 

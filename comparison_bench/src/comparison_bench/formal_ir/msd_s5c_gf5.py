@@ -67,17 +67,57 @@ def self_test() -> None:
     print("s5c self-test OK (GF5 roundtrip + bits)")
 
 
+def do_smoke(root: Path) -> dict:
+    """R7 smoke: T2-1M 4 blocks, frozen config (N/frac/seed/law as full)."""
+    import json as _j
+    from comparison_bench.src.comparison_bench.formal_ir import (
+        msd_c1_nbldpc as A3,
+    )
+    s2 = _j.load(open("workspace/s_softmap/s2_20261009/s2_summary.json",
+                      encoding="utf-8"))
+    fit = s2["sources"]["T2-1M"]["prefix_fit"]
+    law = DoubleGauss(float(fit["sig"]), 100.0, float(fit["w"]))
+    code = A3.construct(N, M, 5, seed=CODE_SEED)
+    blks = real_blocks("T2-1M", N, {"sig": 1.0, "mu": 0.0, "w": 0.0})[:4]
+    T = []
+    for blk in blks:
+        aa, bb = blk["a"], blk["b"]
+        ee = (bb.astype(np.int64) - aa.astype(np.int64)) % D
+        s = (np.where(ee <= D // 2, ee, ee - D) % 5).astype(np.int64)
+        prior = priors_of(blk["v"], law, N)
+        syn, _bits = A3.disclose(code, s)
+        t0 = time.perf_counter()
+        shat = A3.decode(code, np.zeros(N, dtype=np.int64), syn, prior, 100)
+        T.append(time.perf_counter() - t0)
+    out = {"n": len(blks), "T_med": round(float(np.median(T)), 2),
+           "T_tot": round(float(sum(T)), 1),
+           "budget_full_s": round(float(np.median(T)) * 639 * 1.5, 0)}
+    (root / "s5c_smoke.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
+    print(f"smoke: T_med={out['T_med']}s budget_full={out['budget_full_s']}s", flush=True)
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--full", action="store_true")
+    ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--output-root", required=False, default=None)
     args = ap.parse_args()
     if args.self_test:
         self_test()
         return
+    if args.smoke:
+        if not args.output_root:
+            raise SystemExit("--smoke requires --output-root")
+        root = Path(args.output_root)
+        if root.exists():
+            raise SystemExit(f"output root not fresh: {root}")
+        root.mkdir(parents=True, exist_ok=True)
+        do_smoke(root)
+        return
     if not args.full:
-        raise SystemExit("S-5c runs only with --full (after user confirmation)")
+        raise SystemExit("S-5c runs only with --full/--smoke (after user confirmation)")
     if not args.output_root:
         raise SystemExit("--full requires --output-root")
     root = Path(args.output_root)
@@ -154,6 +194,12 @@ def main() -> None:
         jlf.flush()
     # paired McNemar vs landed S-4d hard/plain FULL success (s3 rows carry
     # okA/okB/exact per block; same framing+N+order => same blocks).
+    # POST-LANDING FIX (no rerun): the triple-AND below pairs against the S-3
+    # BUG-version endpoint (okB==exact==False everywhere in s3 rows), inflating
+    # to whole-block counts. The declared endpoint is GF5-exact vs S-4d-hard-okA
+    # (conservative asymmetry); its table lives in s5c_mcnemar.json (supplement,
+    # computed from landed rows, no rerun). This block is kept verbatim as the
+    # landed record of what s5c_cells.json contains.
     for src in ("T2-1M", "T2-1.5M", "T2-2M", "0dB", "4dB"):
         mine = [json.loads(l) for l in open(root / "s5c_blocks.jsonl", encoding="utf-8")
                 if json.loads(l)["cell"] == src]
