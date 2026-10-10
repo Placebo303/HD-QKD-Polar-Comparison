@@ -1,5 +1,11 @@
 # HD-QKD Polar Comparison
 
+> **Status (2026-10-10): this repository is frozen as the research and development record.**
+> Paper code, data processing and final numbers now live in `D:\Code\qkd-reconciliation-lab`
+> (see `docs/LAB_HANDOFF_POINTER_20261010.md` and `docs/NOW.md`). Main result carried over:
+> GF(5) single-stage soft-timing reconciliation on real data, 639/639, 0.44 bit/pair leakage
+> (re-test on previously used captures).
+
 ## Project First Principle
 
 This is a performance-first research-code repository. Its strict first

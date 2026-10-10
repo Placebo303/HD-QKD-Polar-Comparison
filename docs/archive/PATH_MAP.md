@@ -1314,3 +1314,27 @@ The prior pending filing snapshot is resolved by the reboot organization's S6_AR
 | `openspec/changes/reboot-repository-organization-20261004/S7_MAIN_FREEZE.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/S7_MAIN_FREEZE.md` |
 | `openspec/changes/reboot-repository-organization-20261004/tasks.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/tasks.md` |
 | `openspec/changes/reboot-repository-organization-20261004/specs/repository-organization/spec.md` | `openspec/changes/archive/2026-10-04-reboot-repository-organization-20261004-completed/specs/repository-organization/spec.md` |
+
+## OpenSpec closeout archive (2026-10-10)
+
+| Old path | New path |
+|---|---|
+| `openspec/changes/explore-gf32-incremental-syndrome/design.md` | `openspec/changes/archive/2026-10-10-explore-gf32-incremental-syndrome-superseded/design.md` |
+| `openspec/changes/explore-gf32-incremental-syndrome/proposal.md` | `openspec/changes/archive/2026-10-10-explore-gf32-incremental-syndrome-superseded/proposal.md` |
+| `openspec/changes/explore-gf32-incremental-syndrome/tasks.md` | `openspec/changes/archive/2026-10-10-explore-gf32-incremental-syndrome-superseded/tasks.md` |
+| `openspec/changes/formal-ir-v72p2d5-gf32-rate-mother-plan/PLAN_FREEZE.md` | `openspec/changes/archive/2026-10-10-formal-ir-v72p2d5-gf32-rate-mother-plan-history-no-delta/PLAN_FREEZE.md` |
+| `openspec/changes/formal-ir-v72p2d5-gf32-rate-mother-plan/design.md` | `openspec/changes/archive/2026-10-10-formal-ir-v72p2d5-gf32-rate-mother-plan-history-no-delta/design.md` |
+| `openspec/changes/formal-ir-v72p2d5-gf32-rate-mother-plan/proposal.md` | `openspec/changes/archive/2026-10-10-formal-ir-v72p2d5-gf32-rate-mother-plan-history-no-delta/proposal.md` |
+| `openspec/changes/formal-ir-v72p2d5-gf32-rate-mother-plan/specs/spec.md` | `openspec/changes/archive/2026-10-10-formal-ir-v72p2d5-gf32-rate-mother-plan-history-no-delta/specs/spec.md` |
+| `openspec/changes/formal-ir-v72p2d5-gf32-rate-mother-plan/tasks.md` | `openspec/changes/archive/2026-10-10-formal-ir-v72p2d5-gf32-rate-mother-plan-history-no-delta/tasks.md` |
+| `openspec/changes/nbldpc-mainline-enabling/proposal.md` | `openspec/changes/archive/2026-10-10-nbldpc-mainline-enabling-history-no-delta/proposal.md` |
+| `openspec/changes/nbldpc-mainline-enabling/specs/check-node-reuse/spec.md` | `openspec/changes/archive/2026-10-10-nbldpc-mainline-enabling-history-no-delta/specs/check-node-reuse/spec.md` |
+| `openspec/changes/nbldpc-mainline-enabling/tasks.md` | `openspec/changes/archive/2026-10-10-nbldpc-mainline-enabling-history-no-delta/tasks.md` |
+| `openspec/changes/v80-nbldpc-jan21/design.md` | `openspec/changes/archive/2026-10-10-v80-nbldpc-jan21-history-no-delta/design.md` |
+| `openspec/changes/v80-nbldpc-jan21/proposal.md` | `openspec/changes/archive/2026-10-10-v80-nbldpc-jan21-history-no-delta/proposal.md` |
+| `openspec/changes/v80-nbldpc-jan21/specs/v80-nbldpc-jan21/spec.md` | `openspec/changes/archive/2026-10-10-v80-nbldpc-jan21-history-no-delta/specs/v80-nbldpc-jan21/spec.md` |
+| `openspec/changes/v80-nbldpc-jan21/tasks.md` | `openspec/changes/archive/2026-10-10-v80-nbldpc-jan21-history-no-delta/tasks.md` |
+| `openspec/changes/v80-prior-cost-accounting/design.md` | `openspec/changes/archive/2026-10-10-v80-prior-cost-accounting-history-no-delta/design.md` |
+| `openspec/changes/v80-prior-cost-accounting/proposal.md` | `openspec/changes/archive/2026-10-10-v80-prior-cost-accounting-history-no-delta/proposal.md` |
+| `openspec/changes/v80-prior-cost-accounting/specs/v80-prior-cost-accounting/spec.md` | `openspec/changes/archive/2026-10-10-v80-prior-cost-accounting-history-no-delta/specs/v80-prior-cost-accounting/spec.md` |
+| `openspec/changes/v80-prior-cost-accounting/tasks.md` | `openspec/changes/archive/2026-10-10-v80-prior-cost-accounting-history-no-delta/tasks.md` |
